@@ -18,6 +18,11 @@
  * You should have received a copy of the GNU General Public License along with this program;
  * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
+
+// refer to http://www.bouncycastle.org/docs/docs1.5on/index.html for substitutes for deprecated references
+
+
 package org.texai.x509;
 
 import java.io.BufferedReader;
