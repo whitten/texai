@@ -31,6 +31,7 @@
 
   <modules>
     <module>Utilities</module>
+    <module>X509Security</module>
   </modules>
 
   <build>
