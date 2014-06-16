@@ -46,8 +46,7 @@ public final class EnvironmentUtils {
    * @return whether this is the correct Java version to run the Texai application
    */
   public static boolean isCorrectJavaVersion() {
-    return System.getProperty("java.specification.version").equals("1.6")
-            || System.getProperty("java.specification.version").equals("1.7");
+    return System.getProperty("java.specification.version").equals("1.8");
   }
 
   /** Returns whether the operating system is a version of Windows.
