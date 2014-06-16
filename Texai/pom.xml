@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.texai</groupId>
+  <artifactId>Texai</artifactId>
+  <packaging>pom</packaging>
+  <version>1.0</version>
+
+  <name>Texai</name>
+
+  <description>A cognitive architecture for artificial general intelligence</description>
+
+  <organization>
+    <name>Texai</name>
+    <url>http://texai.org</url>
+  </organization>
+
+  <developers>
+    <developer>
+      <id>stephenreed</id>
+      <name>Stephen L. Reed</name>
+      <email>stephenreed@texai.org</email>
+      <roles>
+        <role>Principal Developer</role>
+      </roles>
+      <organization>Texai</organization>
+      <timezone>-6</timezone>
+    </developer>
+  </developers>
+
+  <modules>
+    <module>Utilities</module>
+  </modules>
+
+  <build>
+    <!-- required only for uploaded maven-generated web site
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-ftp</artifactId>
+        <version>1.0-beta-6</version>
+      </extension>
+    </extensions>
+    -->
+
+    <pluginManagement>
+      <plugins>
+        <!-- required only for the code-coverage reports
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>cobertura-maven-plugin</artifactId>
+          <version>2.3</version>
+        </plugin>
+        -->
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-pmd-plugin</artifactId>
+          <version>2.4</version>
+        </plugin>
+
+        <plugin>
+          <groupId>ch.elca.el4j.maven.plugins</groupId>
+          <artifactId>maven-depgraph-plugin</artifactId>
+          <version>1.9</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
+          <showDeprecation>true</showDeprecation>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.7</version>
+        <configuration>
+          <source>1.7</source>
+          <encoding>utf8</encoding>
+          <quiet>false</quiet>
+          <links>
+            <link>http://java.sun.com/javase/8/docs/api/</link>
+          </links>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.17</version>
+        <configuration>
+          <!-- run each unit test in a forked JVM to avoid inconsistences due to static class state -->
+          <forkMode>always</forkMode>
+          <!-- <argLine>-Dorg.texai.tempRepositories=${env.REPOSITORIES_TMPFS} -Djava.security.policy==file:///${basedir}/../Security/security/texai.policy -Djava.security.debug=all</argLine> -->
+
+          <argLine>-ea -Dorg.texai.tempRepositories=${env.REPOSITORIES_TMPFS} -Djava.security.policy==file:///${basedir}/../Security/security/texai.policy -Djava.security.debug=access,failure</argLine>
+
+          <!--   <argLine>-ea -Djava.security.debug=all</argLine>  -->
+        </configuration>
+      </plugin>
+
+      <!--
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
+      </plugin>
+      -->
+
+      <plugin>
+        <groupId>ch.elca.el4j.maven.plugins</groupId>
+        <artifactId>maven-depgraph-plugin</artifactId>
+        <configuration>
+          <drawScope>false</drawScope>
+          <groupFilter>(\Aorg\.texai)|(\Acom\.nextapp)</groupFilter>
+          <outDir>target/site/images</outDir>
+          <dotFile>${project.artifactId}.dot</dotFile>
+          <outFile>${project.artifactId}.png</outFile>
+          <filterEmptyArtifacts>true</filterEmptyArtifacts>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.15</version>
+      <!-- exclude unused Sun jars which otherwise have to be manually downloaded into the local Maven repository -->
+      <exclusions>
+        <exclusion>
+          <groupId>javax.mail</groupId>
+          <artifactId>mail</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>javax.jms</groupId>
+          <artifactId>jms</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.sun.jdmk</groupId>
+          <artifactId>jmxtools</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.sun.jmx</groupId>
+          <artifactId>jmxri</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
+      <version>3.2.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>1.4</version>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-pool</groupId>
+      <artifactId>commons-pool</artifactId>
+      <version>1.5.3</version>
+    </dependency>
+
+    <dependency>
+      <groupId>joda-time</groupId>
+      <artifactId>joda-time</artifactId>
+      <version>1.6</version>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.7</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>log4j-over-slf4j</artifactId>
+      <version>1.5.6</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.5.6</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.5.6</version>
+    </dependency>
+  </dependencies>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>findbugs-maven-plugin</artifactId>
+        <version>2.5.5-SNAPSHOT</version>
+        <configuration>
+          <findbugsXmlOutput>true</findbugsXmlOutput>
+          <!-- Optional directory to put findbugs xml report -->
+          <findbugsXmlOutputDirectory>target/site</findbugsXmlOutputDirectory>
+          <excludeFilterFile>http://texai.org/files/findbugs-exclude-filter.xml</excludeFilterFile>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>3.1</version>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>pmd</report>
+              <!-- <report>cpd</report> -->
+            </reports>
+          </reportSet>
+        </reportSets>
+        <configuration>
+          <targetJdk>1.8</targetJdk>
+          <minimumTokens>1000</minimumTokens>
+          <excludes>
+            <exclude>com/lmax/disruptor/**/*.java</exclude>
+            <exclude>de/uniba/wiai/lspi/**/*.java</exclude>
+            <exclude>edu/smu/tspell/wordnet/**/*.java</exclude>
+            <exclude>net/sbbi/**/*.java</exclude>
+            <exclude>nextapp/**/*.java</exclude>
+            <exclude>org/cliffc.high_scale_lib/**/*.java</exclude>
+            <exclude>org/texai/actr/parser/**/*.java</exclude>
+            <exclude>org/texai/bl/generated/*.java</exclude>
+            <exclude>org/texai/bl/parser/**/*.java</exclude>
+            <exclude>org/texai/dialog/ahcs/node/ui/ConsoleUI.java</exclude>
+            <exclude>org/texai/fcg/ruleParser/**/*.java</exclude>
+            <exclude>org/texai/fcg/statementParser/**/*.java</exclude>
+            <exclude>org/texai/inference/ruleParser/**/*.java</exclude>
+            <exclude>org/texai/inference/sparqlParser/**/*.java</exclude>
+            <exclude>org/texai/kb/persistence/parser/*.java</exclude>
+            <exclude>org/texai/turtleStatementParser/*.java</exclude>
+            <exclude>org/texai/vncviewer/**/*.java</exclude>
+          </excludes>
+          <rulesets>
+            <ruleset>http://texai.org/files/texai-pmd-ruleset.xml</ruleset>
+          </rulesets>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>2.12.1</version>
+        <configuration>
+          <configLocation>http://texai.org/files/texai_checks.xml</configLocation>
+          <suppressionsLocation>http://texai.org/files/checkstyle-suppressions.xml</suppressionsLocation>
+          <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
+          <excludes>org/texai/vncviewer/**/*,com/lmax/disruptor/**/*,org/cliffc/high_scale_lib/**/*,de/uniba/wiai/lspi/**/*,edu/smu/tspell/wordnet/**/*,net/sbbi/**/*,nextapp/**/*,org/texai/actr/parser/**/*,org/texai/bl/parser/**/*,org/texai/fcg/ruleParser/**/*,org/texai/fcg/statementParser/**/*,org/texai/inference/ruleParser/**/*,org/texai/inference/sparqlParser/**/*</excludes>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.9.1</version>
+        <configuration>
+          <aggregate>true</aggregate>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jxr-plugin</artifactId>
+        <version>2.3</version>
+        <configuration>
+          <aggregate>true</aggregate>
+          <linkJavadoc>true</linkJavadoc>
+        </configuration>
+      </plugin>
+
+      <!-- code coverage plugin
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
+      </plugin>
+      -->
+    </plugins>
+  </reporting>
+
+  <distributionManagement>
+    <site>
+      <id>bluehost</id>
+      <url>scp://texai.org/home/texaiorg/public_html/maven</url>
+      <!-- <url>ftp://ftp.texai.org/public_html/maven/</url> -->
+    </site>
+
+    <repository>
+      <id>releases</id>
+      <name>releases</name>
+      <url>http://localhost:8081/nexus/content/repositories/releases</url>
+    </repository>
+  </distributionManagement>
+</project>
