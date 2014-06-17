@@ -1,0 +1,6 @@
+{cyc:HomoSapiens, 
+cyc:LegalAgent, 
+cyc:NarrativeRole, 
+cyc:Sentient, 
+cyc:SocialBeing, 
+texai:org.texai.kb.restriction.domainEntity.MaxCardinalityRestriction_16263f45-1aa0-4115-a729-95fa1513b0eb, texai:org.texai.kb.restriction.domainEntity.MinCardinalityRestriction_543f9163-504d-4790-831f-a5ba790ce423}

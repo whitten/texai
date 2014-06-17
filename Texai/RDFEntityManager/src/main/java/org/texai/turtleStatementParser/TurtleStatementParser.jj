@@ -1,0 +1,483 @@
+/*
+ * TurtleStatementParser.jj
+ *
+ * Created on June 10, 2008, 12:36 PM
+ *
+ * Description: Provides lexicon and grammar for the turtle RDF statement format,
+ * from which javacc generates a parser.
+ *
+ * Copyright (C) 2008 Stephen L. Reed.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms
+ * of the GNU General Public License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+options {
+  LOOKAHEAD = 1;
+  CHOICE_AMBIGUITY_CHECK = 2;
+  OTHER_AMBIGUITY_CHECK = 1;
+  STATIC = false;
+  DEBUG_PARSER = false;
+  DEBUG_LOOKAHEAD = false;
+  DEBUG_TOKEN_MANAGER = false;
+  ERROR_REPORTING = true;
+  JAVA_UNICODE_ESCAPE = false;
+  UNICODE_INPUT = false;
+  IGNORE_CASE = false;
+  USER_TOKEN_MANAGER = false;
+  USER_CHAR_STREAM = false;
+  BUILD_PARSER = true;
+  BUILD_TOKEN_MANAGER = true;
+  SANITY_CHECK = true;
+  FORCE_LA_CHECK = true;
+}
+
+PARSER_BEGIN(TurtleStatementParser)
+package org.texai.turtleStatementParser;
+
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import org.apache.log4j.Logger;
+import org.openrdf.model.Literal;
+import org.openrdf.model.Resource;
+import org.openrdf.model.Statement;
+import org.openrdf.model.URI;
+import org.openrdf.model.Value;
+import org.openrdf.model.impl.BNodeImpl;
+import org.openrdf.model.impl.ContextStatementImpl;
+import org.openrdf.model.impl.LiteralImpl;
+import org.openrdf.model.impl.NumericLiteralImpl;
+import org.openrdf.model.impl.StatementImpl;
+import org.openrdf.model.impl.URIImpl;
+import org.texai.kb.Constants;
+import org.texai.turtleStatementParser.misc.ParsedTurtleStatementHandler;
+import org.texai.util.TexaiException;
+
+/**  Provides lexicon and grammar for the turtle RDF statement format. */
+@SuppressWarnings("unchecked")
+public class TurtleStatementParser {
+  /** the log4j logger */
+  private static final Logger LOGGER = Logger.getLogger(TurtleStatementParser.class.getName());
+  /** the parsed turtle statement handler */
+  private static ParsedTurtleStatementHandler parsedTurtleStatementHandler;
+
+  /** the URI namespace dictionary, prefix --> namespace */
+  private final HashMap<String, String> namespaceDictionary = new HashMap<String, String>();
+
+  /** Returns a statement parser for the given string.
+   * @param string the given string
+   * @return a statement parser for the given string
+   */
+  public static TurtleStatementParser makeTurtleStatementParser(final String string) {
+    final TurtleStatementParser turtleStatementParser =
+      new TurtleStatementParser(new BufferedInputStream(new ByteArrayInputStream(string.getBytes())));
+    turtleStatementParser.initialize();
+    return turtleStatementParser;
+  }
+
+  /** Returns a statement parser for the given input stream and the given statement handler.
+   * @param inputStream the given input stream
+   * @param parsedTurtleStatementHandler the given statement handler
+   * @return a statement parser for the given input stream and the given statement handler
+   */
+  public static TurtleStatementParser makeTurtleStatementParser(
+    final BufferedInputStream inputStream,
+    final ParsedTurtleStatementHandler parsedTurtleStatementHandler) {
+    //Preconditions
+    assert inputStream != null : "inputStream must not be null";
+    assert parsedTurtleStatementHandler != null : "parsedTurtleStatementHandler must not be null";
+
+    final TurtleStatementParser turtleStatementParser = new TurtleStatementParser(inputStream);
+    turtleStatementParser.parsedTurtleStatementHandler = parsedTurtleStatementHandler;
+    turtleStatementParser.initialize();
+    return turtleStatementParser;
+  }
+
+  /** Initializes the statement parser. */
+  public void initialize() {
+    namespaceDictionary.put("rdf", Constants.RDF_NAMESPACE);
+    namespaceDictionary.put("rdfs", Constants.RDFS_NAMESPACE);
+    namespaceDictionary.put("owl", Constants.OWL_NAMESPACE);
+    namespaceDictionary.put("xsd", Constants.XSD_NAMESPACE);
+    namespaceDictionary.put("cyc", Constants.CYC_NAMESPACE);
+    namespaceDictionary.put("texai", Constants.TEXAI_NAMESPACE);
+  }
+
+  /** Gets the statements.
+   *
+   * @return the statements
+   */
+  public List<Statement> getStatements() {
+    try {
+      return Statements();
+    } catch (ParseException ex) {
+      if (!ex.getMessage().startsWith("Encountered \"<EOF>\"")) {
+        throw new TexaiException(ex);
+      }
+      return new ArrayList<Statement>();
+    }
+  }
+
+  /** Sets the parsed turtle statement handler.
+   *
+   * @param parsedTurtleStatementHandler the parsed turtle statement handler
+   */
+  public void setParsedTurtleStatementHandler(final ParsedTurtleStatementHandler parsedTurtleStatementHandler) {
+    this.parsedTurtleStatementHandler = parsedTurtleStatementHandler;
+  }
+}
+
+PARSER_END(TurtleStatementParser)
+
+/* WHITE SPACE */
+
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+| "\f"
+|  <";" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
+|  <"#|" (~["|"])* "|#">}
+
+/* SEPARATORS */
+
+TOKEN :
+{
+  < LPAREN: "(" >
+| < RPAREN: ")" >
+| < LBRACE: "{" >
+| < RBRACE: "}" >
+| < LBRACKET: "[" >
+| < RBRACKET: "]" >
+| < SEMICOLON: ";" >
+| < COMMA: "," >
+| < COLON: ":" >
+| < QUESTION: "\u003f" >
+| < DASH: "-" >
+}
+
+/* LITERALS */
+
+TOKEN :
+{
+  < IN: "in">
+| < INT_SCHEMA: "^^<http://www.w3.org/2001/XMLSchema#int>">
+| < LONG_SCHEMA: "^^<http://www.w3.org/2001/XMLSchema#long>">
+| < DOUBLE_SCHEMA: "^^<http://www.w3.org/2001/XMLSchema#double>">
+| < INTEGER_LITERAL:
+        (<DASH>)?
+        <DECIMAL_LITERAL> (["l","L"])?
+      | <HEX_LITERAL> (["l","L"])?
+      | <OCTAL_LITERAL> (["l","L"])?
+  >
+|
+  < #DECIMAL_LITERAL: ["1"-"9"] (["0"-"9"])* >
+|
+  < #HEX_LITERAL: "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+ >
+|
+  < #OCTAL_LITERAL: "0" (["0"-"7"])* >
+|
+  < FLOATING_POINT_LITERAL:
+        (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)? (["f","F","d","D"])?
+      | "." (["0"-"9"])+ (<EXPONENT>)? (["f","F","d","D"])?
+      | (["0"-"9"])+ <EXPONENT> (["f","F","d","D"])?
+      | (["0"-"9"])+ (<EXPONENT>)? ["f","F","d","D"]
+  >
+|
+  < #EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+ >
+|
+  < CHARACTER_LITERAL:
+      "'"
+      (   (~["'","\\","\n","\r"])
+        | ("\\"
+            ( ["n","t","b","r","f","\\","'","\""]
+            | ["0"-"7"] ( ["0"-"7"] )?
+            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+            )
+          )
+      )
+      "'"
+  >
+|
+  < STRING_LITERAL:
+      "\""
+      (   (~["\"","\\","\n","\r"])
+        | ("\\"
+            ( ["n","t","b","r","f","\\","'","\""]
+            | ["0"-"7"] ( ["0"-"7"] )?
+            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+            )
+          )
+      )*
+      "\"" (<DOUBLE_SCHEMA> | <LONG_SCHEMA> | <INT_SCHEMA>)*
+  >
+}
+
+TOKEN :
+{
+  < DOT: "." >
+}
+
+/* IDENTIFIERS */
+
+TOKEN :
+{
+  < LETTER_OR_QUESTION_MARK: <LETTER> | "?" >
+|
+  < IDENTIFIER: <LETTER_OR_QUESTION_MARK> (<LETTER>|<DIGIT>|<DASH>|<DOT>)* >
+|
+  < #LETTER:
+      [
+       "\u0024",
+       "\u0041"-"\u005a",
+       "\u005f",
+       "\u0061"-"\u007a",
+       "\u00c0"-"\u00d6",
+       "\u00d8"-"\u00f6",
+       "\u00f8"-"\u00ff",
+       "\u0100"-"\u1fff",
+       "\u3040"-"\u318f",
+       "\u3300"-"\u337f",
+       "\u3400"-"\u3d2d",
+       "\u4e00"-"\u9fff",
+       "\uf900"-"\ufaff"
+      ]
+  >
+|
+  < #DIGIT:
+      [
+       "\u0030"-"\u0039",
+       "\u0660"-"\u0669",
+       "\u06f0"-"\u06f9",
+       "\u0966"-"\u096f",
+       "\u09e6"-"\u09ef",
+       "\u0a66"-"\u0a6f",
+       "\u0ae6"-"\u0aef",
+       "\u0b66"-"\u0b6f",
+       "\u0be7"-"\u0bef",
+       "\u0c66"-"\u0c6f",
+       "\u0ce6"-"\u0cef",
+       "\u0d66"-"\u0d6f",
+       "\u0e50"-"\u0e59",
+       "\u0ed0"-"\u0ed9",
+       "\u1040"-"\u1049"
+      ]
+  >
+}
+
+/* VARIABLE */
+TOKEN :
+{
+  < VARIABLE: <QUESTION> <IDENTIFIER> >
+}
+
+/* QNAME */
+TOKEN :
+{
+  < QNAME: <IDENTIFIER> <COLON> <IDENTIFIER> >
+}
+
+/* URI (valid URI characters only - not URI syntax) */
+TOKEN :
+{
+  < URI_GENERAL_DELIMITER: [":", "/", "?", "#", "[", "]", "@"] >
+|
+  < URI_SUB_DELIMITER: ["!", "$", "&", "'", "(", ")", "*", "+", ",", ";", "="] >
+|
+  < URI_RESERVED_CHAR: <URI_GENERAL_DELIMITER> | <URI_SUB_DELIMITER> >
+|
+  < URI_UNRESERVED_CHAR: <LETTER> | <DIGIT> | "-" | "." | "_" | "~" >
+|
+  < LANGLE: "<" >
+|
+  < RANGLE: ">" >
+|
+  < URI: <LANGLE> <LETTER> (<URI_RESERVED_CHAR> | <URI_UNRESERVED_CHAR>)* <RANGLE> >
+}
+
+/* GRAMMAR PRODUCTIONS */
+
+List<Statement> Statements():
+{
+  List<Statement> statements = new ArrayList<Statement>();
+  Statement statement;
+}
+{
+  (
+    statement=Statement()
+    {
+      if (parsedTurtleStatementHandler == null) {
+        statements.add(statement);
+      } else {
+        parsedTurtleStatementHandler.handleStatement(statement);
+      }
+    }
+  )*
+  {
+    return statements;
+  }
+}
+
+Statement Statement():
+{
+  Resource subject;
+  Resource predicate;
+  Value object;
+  Resource context = null;
+}
+{
+  subject=Resource()
+  (predicate=URI() | predicate=QName() )
+  object=Value()
+  [ <IN> context=Resource() ]
+  <DOT>
+  {
+    if (context == null) {
+      return new StatementImpl(subject, (URI) predicate, object);
+    } else {
+      return new ContextStatementImpl(subject, (URI) predicate, object, context);
+    }
+  }
+}
+
+Value Value():
+{
+  Value value;
+}
+{
+  (value=Resource() | value=Literal())
+  {
+    return value;
+  }
+}
+
+Resource Resource():
+{
+  Resource resource;
+}
+{
+  (resource=URI() | resource=QName())
+  {
+    return resource;
+  }
+}
+
+Resource QName():
+{}
+{
+  <QNAME>
+  {
+    String uriString = token.image;
+    int index = uriString.indexOf(":");
+    if (index > -1) {
+      final String prefix = uriString.substring(0, index);
+      final String localName =uriString.substring(index + 1);
+      if (prefix.equals("_")) {
+        return new BNodeImpl(localName);
+      }
+      final String namespace = namespaceDictionary.get(prefix);
+      if (namespace == null) {
+        throw new TexaiException("missing namespace for URI " + uriString +
+            "\nprefix: " + prefix + " namespace: " + namespace + " namespaceDictionary: " + namespaceDictionary);
+      } else {
+        return new URIImpl(namespace + localName);
+      }
+     } else {
+       throw new TexaiException("malformed URI " + token.image);
+     }
+  }
+}
+
+
+URI URI():
+{}
+{
+  (<IDENTIFIER> | <URI> | <VARIABLE>)
+  {
+    if (token.image.startsWith("<") && token.image.endsWith(">")) {
+      String uriString = token.image.substring(1, token.image.length() - 1);
+      int index = uriString.indexOf(":");
+      if (index > -1) {
+        final String prefix = uriString.substring(0, index);
+        final String localName =uriString.substring(index + 1);
+        final String namespace = namespaceDictionary.get(prefix);
+        if (namespace == null) {
+          throw new TexaiException("missing namespace for URI " + uriString +
+              "\nnamespace: " + namespace + " namespaceDictionary: " + namespaceDictionary);
+        } else {
+          return new URIImpl(namespace + localName);
+        }
+       } else {
+         throw new TexaiException("malformed URI " + token.image);
+       }
+    } else {
+        return new URIImpl(Constants.TEXAI_NAMESPACE + token.image);
+    }
+  }
+}
+
+Literal Literal():
+{
+  Literal literal;
+}
+{
+  literal=IntegerLiteral()
+| literal=FloatingPointLiteral()
+| literal=StringLiteral()
+  {
+    return literal;
+  }
+}
+
+Literal IntegerLiteral():
+{}
+{
+  <INTEGER_LITERAL>
+  {
+    final long longValue = Long.parseLong(token.image);
+    if (longValue >= Integer.MIN_VALUE && longValue <= Integer.MAX_VALUE) {
+      return new NumericLiteralImpl((int) longValue);
+    } else {
+      return new NumericLiteralImpl(longValue);
+    }
+  }
+}
+
+Literal FloatingPointLiteral():
+{}
+{
+  <FLOATING_POINT_LITERAL>
+  {
+    return new NumericLiteralImpl(Double.parseDouble(token.image));
+  }
+}
+
+Literal StringLiteral():
+{}
+{
+  <STRING_LITERAL>
+  {
+    final int index = token.image.indexOf("^^<");
+    if (index == -1) {
+      return new LiteralImpl(token.image.substring(1, token.image.length() - 1));
+    } else {
+      final URI datatype = new URIImpl(token.image.substring(index + 3, token.image.length() - 1));
+      return new LiteralImpl(token.image.substring(1, index - 1), datatype);
+    }
+  }
+}
+
+

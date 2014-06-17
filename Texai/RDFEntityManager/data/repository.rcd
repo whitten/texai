@@ -1,0 +1,22 @@
+(
+ (Benchmark
+  (indices: "spoc,posc,opsc")
+  (className: org.texai.kb.persistence.benchmark.RDFTestEntity))
+
+ (OpenCyc
+  (indices: "spoc,posc,opsc,cosp"))
+
+ (RepositoryContentDescriptions
+  (indices: "spoc,posc")
+  (className: org.texai.kb.persistence.domainEntity.RepositoryContentDescription)
+  (className: org.texai.kb.persistence.domainEntity.RepositoryContentDescriptionInfo))
+
+ (Test
+  (indices: "spoc,posc")
+  (className: org.texai.kb.persistence.sample.Agent)
+  (className: org.texai.kb.persistence.sample.Friend)
+  (className: org.texai.kb.persistence.sample.Person)
+  (className: org.texai.kb.persistence.RDFTestEntity))
+
+ )
+
