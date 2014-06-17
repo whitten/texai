@@ -51,7 +51,7 @@ public final class StringUtils {
    * @param objects the given collection of objects
    * @return a sorted list of the strings
    */
-  public static List<String> toSortedStrings(final Collection objects) {
+  public static List<String> toSortedStrings(final Collection<? extends Object> objects) {
     //Preconditions
     assert objects != null : "objects must not be null";
 
@@ -550,7 +550,6 @@ public final class StringUtils {
     while (index >= 0) {
       if (Character.isDigit(string.charAt(index))) {
         index--;
-        continue;
       } else {
         break;
       }
