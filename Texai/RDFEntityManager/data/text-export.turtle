@@ -2,9 +2,9 @@ texai:org.texai.kb.persistence.RDFTestEntity rdf:type cyc:TransportationDeviceTy
 texai:org.texai.kb.persistence.RDFTestEntity rdf:type cyc:SpatiallyDisjointObjectType in cyc:UniversalVocabularyMt .
 texai:org.texai.kb.persistence.RDFTestEntity rdfs:subClassOf cyc:Scooter in cyc:UniversalVocabularyMt .
 texai:org.texai.kb.persistence.RDFTestEntity rdfs:subClassOf cyc:Device-UserPowered in cyc:UniversalVocabularyMt .
-texai:org.texai.kb.persistence.RDFTestEntity_61dcc95f-426f-4114-9375-3eeaa3e349e2 rdf:type texai:org.texai.kb.persistence.RDFTestEntity in cyc:UniversalVocabularyMt .
-texai:org.texai.kb.persistence.RDFTestEntity_61dcc95f-426f-4114-9375-3eeaa3e349e2 cyc:numberOfCrew "0"^^<http://www.w3.org/2001/XMLSchema#int> in texai:TestContext .
-texai:org.texai.kb.persistence.RDFTestEntity_61dcc95f-426f-4114-9375-3eeaa3e349e2 cyc:prettyString-Canonical "test entity 1" in texai:TestContext .
+texai:org.texai.kb.persistence.RDFTestEntity_acedc43c-6be7-41a4-8b21-d794b0e75c27 rdf:type texai:org.texai.kb.persistence.RDFTestEntity in cyc:UniversalVocabularyMt .
+texai:org.texai.kb.persistence.RDFTestEntity_acedc43c-6be7-41a4-8b21-d794b0e75c27 cyc:numberOfCrew "0"^^<http://www.w3.org/2001/XMLSchema#int> in texai:TestContext .
+texai:org.texai.kb.persistence.RDFTestEntity_acedc43c-6be7-41a4-8b21-d794b0e75c27 cyc:prettyString-Canonical "test entity 1" in texai:TestContext .
 texai:testUUIDField rdf:type owl:ObjectProperty .
 texai:testUUIDField rdfs:subPropertyOf cyc:conceptuallyRelated .
 texai:testUUIDField rdfs:domain texai:org.texai.kb.persistence.RDFTestEntity .
@@ -25,13 +25,13 @@ texai:testLongField rdf:type owl:DatatypeProperty .
 texai:testLongField rdfs:subPropertyOf cyc:conceptuallyRelated .
 texai:testLongField rdfs:domain texai:org.texai.kb.persistence.RDFTestEntity .
 texai:testLongField rdfs:range xsd:long .
-texai:org.texai.kb.persistence.RDFTestEntity_61dcc95f-426f-4114-9375-3eeaa3e349e2 texai:testLongField "0"^^<http://www.w3.org/2001/XMLSchema#long> in texai:TestContext .
+texai:org.texai.kb.persistence.RDFTestEntity_acedc43c-6be7-41a4-8b21-d794b0e75c27 texai:testLongField "0"^^<http://www.w3.org/2001/XMLSchema#long> in texai:TestContext .
 texai:testPositiveBigIntegerField rdf:type owl:DatatypeProperty .
 texai:testPositiveBigIntegerField rdfs:subPropertyOf cyc:conceptuallyRelated .
 texai:testPositiveBigIntegerField rdfs:domain texai:org.texai.kb.persistence.RDFTestEntity .
 texai:testPositiveBigIntegerField rdfs:range xsd:integer .
-texai:org.texai.kb.persistence.RDFTestEntity_61dcc95f-426f-4114-9375-3eeaa3e349e2 rdf:type texai:TestFalseClass in texai:TestContext .
-texai:org.texai.kb.persistence.RDFTestEntity_61dcc95f-426f-4114-9375-3eeaa3e349e2 rdf:type texai:org.texai.kb.persistence.RDFTestEntity_isSomethingElse_False in texai:TestContext .
+texai:org.texai.kb.persistence.RDFTestEntity_acedc43c-6be7-41a4-8b21-d794b0e75c27 rdf:type texai:TestFalseClass in texai:TestContext .
+texai:org.texai.kb.persistence.RDFTestEntity_acedc43c-6be7-41a4-8b21-d794b0e75c27 rdf:type texai:org.texai.kb.persistence.RDFTestEntity_isSomethingElse_False in texai:TestContext .
 texai:testBigIntegerField rdf:type owl:DatatypeProperty .
 texai:testBigIntegerField rdfs:subPropertyOf cyc:conceptuallyRelated .
 texai:testBigIntegerField rdfs:domain texai:org.texai.kb.persistence.RDFTestEntity .
@@ -52,12 +52,12 @@ texai:testUnsignedLongField rdf:type owl:DatatypeProperty .
 texai:testUnsignedLongField rdfs:subPropertyOf cyc:conceptuallyRelated .
 texai:testUnsignedLongField rdfs:domain texai:org.texai.kb.persistence.RDFTestEntity .
 texai:testUnsignedLongField rdfs:range xsd:long .
-texai:org.texai.kb.persistence.RDFTestEntity_61dcc95f-426f-4114-9375-3eeaa3e349e2 texai:testUnsignedLongField "0"^^<http://www.w3.org/2001/XMLSchema#long> in texai:TestContext .
+texai:org.texai.kb.persistence.RDFTestEntity_acedc43c-6be7-41a4-8b21-d794b0e75c27 texai:testUnsignedLongField "0"^^<http://www.w3.org/2001/XMLSchema#long> in texai:TestContext .
 texai:org.texai.kb.persistence.RDFTestEntity_ByteField rdf:type owl:DatatypeProperty .
 texai:org.texai.kb.persistence.RDFTestEntity_ByteField rdfs:subPropertyOf cyc:conceptuallyRelated .
 texai:org.texai.kb.persistence.RDFTestEntity_ByteField rdfs:domain texai:org.texai.kb.persistence.RDFTestEntity .
 texai:org.texai.kb.persistence.RDFTestEntity_ByteField rdfs:range xsd:byte .
-texai:org.texai.kb.persistence.RDFTestEntity_61dcc95f-426f-4114-9375-3eeaa3e349e2 texai:org.texai.kb.persistence.RDFTestEntity_ByteField "0"^^<http://www.w3.org/2001/XMLSchema#byte> in texai:TestContext .
+texai:org.texai.kb.persistence.RDFTestEntity_acedc43c-6be7-41a4-8b21-d794b0e75c27 texai:org.texai.kb.persistence.RDFTestEntity_ByteField "0"^^<http://www.w3.org/2001/XMLSchema#byte> in texai:TestContext .
 texai:testDateTimeField rdf:type owl:ObjectProperty .
 texai:testDateTimeField rdfs:subPropertyOf cyc:conceptuallyRelated .
 texai:testDateTimeField rdfs:domain texai:org.texai.kb.persistence.RDFTestEntity .
@@ -70,7 +70,7 @@ texai:testIntField rdf:type owl:DatatypeProperty .
 texai:testIntField rdfs:subPropertyOf cyc:conceptuallyRelated .
 texai:testIntField rdfs:domain texai:org.texai.kb.persistence.RDFTestEntity .
 texai:testIntField rdfs:range xsd:int .
-texai:org.texai.kb.persistence.RDFTestEntity_61dcc95f-426f-4114-9375-3eeaa3e349e2 texai:testIntField "0"^^<http://www.w3.org/2001/XMLSchema#int> in texai:TestContext .
+texai:org.texai.kb.persistence.RDFTestEntity_acedc43c-6be7-41a4-8b21-d794b0e75c27 texai:testIntField "0"^^<http://www.w3.org/2001/XMLSchema#int> in texai:TestContext .
 texai:testBigDecimalField rdf:type owl:DatatypeProperty .
 texai:testBigDecimalField rdfs:subPropertyOf cyc:conceptuallyRelated .
 texai:testBigDecimalField rdfs:domain texai:org.texai.kb.persistence.RDFTestEntity .
@@ -83,32 +83,32 @@ texai:testFloatField rdf:type owl:DatatypeProperty .
 texai:testFloatField rdfs:subPropertyOf cyc:conceptuallyRelated .
 texai:testFloatField rdfs:domain texai:org.texai.kb.persistence.RDFTestEntity .
 texai:testFloatField rdfs:range xsd:float .
-texai:org.texai.kb.persistence.RDFTestEntity_61dcc95f-426f-4114-9375-3eeaa3e349e2 texai:testFloatField "0.0"^^<http://www.w3.org/2001/XMLSchema#float> in texai:TestContext .
+texai:org.texai.kb.persistence.RDFTestEntity_acedc43c-6be7-41a4-8b21-d794b0e75c27 texai:testFloatField "0.0"^^<http://www.w3.org/2001/XMLSchema#float> in texai:TestContext .
 texai:testUnsignedByteField rdf:type owl:DatatypeProperty .
 texai:testUnsignedByteField rdfs:subPropertyOf cyc:conceptuallyRelated .
 texai:testUnsignedByteField rdfs:domain texai:org.texai.kb.persistence.RDFTestEntity .
 texai:testUnsignedByteField rdfs:range xsd:byte .
-texai:org.texai.kb.persistence.RDFTestEntity_61dcc95f-426f-4114-9375-3eeaa3e349e2 texai:testUnsignedByteField "0"^^<http://www.w3.org/2001/XMLSchema#byte> in texai:TestContext .
+texai:org.texai.kb.persistence.RDFTestEntity_acedc43c-6be7-41a4-8b21-d794b0e75c27 texai:testUnsignedByteField "0"^^<http://www.w3.org/2001/XMLSchema#byte> in texai:TestContext .
 texai:testUnsignedIntField rdf:type owl:DatatypeProperty .
 texai:testUnsignedIntField rdfs:subPropertyOf cyc:conceptuallyRelated .
 texai:testUnsignedIntField rdfs:domain texai:org.texai.kb.persistence.RDFTestEntity .
 texai:testUnsignedIntField rdfs:range xsd:int .
-texai:org.texai.kb.persistence.RDFTestEntity_61dcc95f-426f-4114-9375-3eeaa3e349e2 texai:testUnsignedIntField "0"^^<http://www.w3.org/2001/XMLSchema#int> in texai:TestContext .
+texai:org.texai.kb.persistence.RDFTestEntity_acedc43c-6be7-41a4-8b21-d794b0e75c27 texai:testUnsignedIntField "0"^^<http://www.w3.org/2001/XMLSchema#int> in texai:TestContext .
 texai:testDoubleField rdf:type owl:DatatypeProperty .
 texai:testDoubleField rdfs:subPropertyOf cyc:conceptuallyRelated .
 texai:testDoubleField rdfs:domain texai:org.texai.kb.persistence.RDFTestEntity .
 texai:testDoubleField rdfs:range xsd:double .
-texai:org.texai.kb.persistence.RDFTestEntity_61dcc95f-426f-4114-9375-3eeaa3e349e2 texai:testDoubleField "0.0"^^<http://www.w3.org/2001/XMLSchema#double> in texai:TestContext .
-texai:org.texai.kb.persistence.RDFTestEntity_b2b590e0-84a7-4aaf-b1d4-836fca8dc7f9 rdf:type texai:org.texai.kb.persistence.RDFTestEntity in cyc:UniversalVocabularyMt .
-texai:org.texai.kb.persistence.RDFTestEntity_b2b590e0-84a7-4aaf-b1d4-836fca8dc7f9 cyc:numberOfCrew "0"^^<http://www.w3.org/2001/XMLSchema#int> in texai:TestContext .
-texai:org.texai.kb.persistence.RDFTestEntity_b2b590e0-84a7-4aaf-b1d4-836fca8dc7f9 cyc:prettyString-Canonical "test entity 2" in texai:TestContext .
-texai:org.texai.kb.persistence.RDFTestEntity_b2b590e0-84a7-4aaf-b1d4-836fca8dc7f9 texai:testLongField "0"^^<http://www.w3.org/2001/XMLSchema#long> in texai:TestContext .
-texai:org.texai.kb.persistence.RDFTestEntity_b2b590e0-84a7-4aaf-b1d4-836fca8dc7f9 rdf:type texai:TestFalseClass in texai:TestContext .
-texai:org.texai.kb.persistence.RDFTestEntity_b2b590e0-84a7-4aaf-b1d4-836fca8dc7f9 rdf:type texai:org.texai.kb.persistence.RDFTestEntity_isSomethingElse_False in texai:TestContext .
-texai:org.texai.kb.persistence.RDFTestEntity_b2b590e0-84a7-4aaf-b1d4-836fca8dc7f9 texai:testUnsignedLongField "0"^^<http://www.w3.org/2001/XMLSchema#long> in texai:TestContext .
-texai:org.texai.kb.persistence.RDFTestEntity_b2b590e0-84a7-4aaf-b1d4-836fca8dc7f9 texai:org.texai.kb.persistence.RDFTestEntity_ByteField "0"^^<http://www.w3.org/2001/XMLSchema#byte> in texai:TestContext .
-texai:org.texai.kb.persistence.RDFTestEntity_b2b590e0-84a7-4aaf-b1d4-836fca8dc7f9 texai:testIntField "0"^^<http://www.w3.org/2001/XMLSchema#int> in texai:TestContext .
-texai:org.texai.kb.persistence.RDFTestEntity_b2b590e0-84a7-4aaf-b1d4-836fca8dc7f9 texai:testFloatField "0.0"^^<http://www.w3.org/2001/XMLSchema#float> in texai:TestContext .
-texai:org.texai.kb.persistence.RDFTestEntity_b2b590e0-84a7-4aaf-b1d4-836fca8dc7f9 texai:testUnsignedByteField "0"^^<http://www.w3.org/2001/XMLSchema#byte> in texai:TestContext .
-texai:org.texai.kb.persistence.RDFTestEntity_b2b590e0-84a7-4aaf-b1d4-836fca8dc7f9 texai:testUnsignedIntField "0"^^<http://www.w3.org/2001/XMLSchema#int> in texai:TestContext .
-texai:org.texai.kb.persistence.RDFTestEntity_b2b590e0-84a7-4aaf-b1d4-836fca8dc7f9 texai:testDoubleField "0.0"^^<http://www.w3.org/2001/XMLSchema#double> in texai:TestContext .
+texai:org.texai.kb.persistence.RDFTestEntity_acedc43c-6be7-41a4-8b21-d794b0e75c27 texai:testDoubleField "0.0"^^<http://www.w3.org/2001/XMLSchema#double> in texai:TestContext .
+texai:org.texai.kb.persistence.RDFTestEntity_05a22861-1c33-490b-ab83-c6ffb3a18be3 rdf:type texai:org.texai.kb.persistence.RDFTestEntity in cyc:UniversalVocabularyMt .
+texai:org.texai.kb.persistence.RDFTestEntity_05a22861-1c33-490b-ab83-c6ffb3a18be3 cyc:numberOfCrew "0"^^<http://www.w3.org/2001/XMLSchema#int> in texai:TestContext .
+texai:org.texai.kb.persistence.RDFTestEntity_05a22861-1c33-490b-ab83-c6ffb3a18be3 cyc:prettyString-Canonical "test entity 2" in texai:TestContext .
+texai:org.texai.kb.persistence.RDFTestEntity_05a22861-1c33-490b-ab83-c6ffb3a18be3 texai:testLongField "0"^^<http://www.w3.org/2001/XMLSchema#long> in texai:TestContext .
+texai:org.texai.kb.persistence.RDFTestEntity_05a22861-1c33-490b-ab83-c6ffb3a18be3 rdf:type texai:TestFalseClass in texai:TestContext .
+texai:org.texai.kb.persistence.RDFTestEntity_05a22861-1c33-490b-ab83-c6ffb3a18be3 rdf:type texai:org.texai.kb.persistence.RDFTestEntity_isSomethingElse_False in texai:TestContext .
+texai:org.texai.kb.persistence.RDFTestEntity_05a22861-1c33-490b-ab83-c6ffb3a18be3 texai:testUnsignedLongField "0"^^<http://www.w3.org/2001/XMLSchema#long> in texai:TestContext .
+texai:org.texai.kb.persistence.RDFTestEntity_05a22861-1c33-490b-ab83-c6ffb3a18be3 texai:org.texai.kb.persistence.RDFTestEntity_ByteField "0"^^<http://www.w3.org/2001/XMLSchema#byte> in texai:TestContext .
+texai:org.texai.kb.persistence.RDFTestEntity_05a22861-1c33-490b-ab83-c6ffb3a18be3 texai:testIntField "0"^^<http://www.w3.org/2001/XMLSchema#int> in texai:TestContext .
+texai:org.texai.kb.persistence.RDFTestEntity_05a22861-1c33-490b-ab83-c6ffb3a18be3 texai:testFloatField "0.0"^^<http://www.w3.org/2001/XMLSchema#float> in texai:TestContext .
+texai:org.texai.kb.persistence.RDFTestEntity_05a22861-1c33-490b-ab83-c6ffb3a18be3 texai:testUnsignedByteField "0"^^<http://www.w3.org/2001/XMLSchema#byte> in texai:TestContext .
+texai:org.texai.kb.persistence.RDFTestEntity_05a22861-1c33-490b-ab83-c6ffb3a18be3 texai:testUnsignedIntField "0"^^<http://www.w3.org/2001/XMLSchema#int> in texai:TestContext .
+texai:org.texai.kb.persistence.RDFTestEntity_05a22861-1c33-490b-ab83-c6ffb3a18be3 texai:testDoubleField "0.0"^^<http://www.w3.org/2001/XMLSchema#double> in texai:TestContext .

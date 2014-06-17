@@ -4,6 +4,9 @@
  */
 package org.texai.kb.object;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -17,6 +20,8 @@ import org.texai.kb.journal.JournalWriter;
 import org.texai.kb.persistence.DistributedRepositoryManager;
 import org.texai.kb.persistence.KBAccess;
 import org.texai.kb.persistence.RDFEntityManager;
+import org.texai.kb.persistence.RDFUtility;
+import org.texai.kb.persistence.RDFUtility.ResourceComparator;
 
 /**
  *
@@ -77,9 +82,15 @@ public class ClassKBObjectTest extends TestCase {
     LOGGER.info("\n" + kbObject.toString());
     assertTrue(kbObject instanceof ClassKBObject);
     final ClassKBObject classKBObject = (ClassKBObject) kbObject;
-    assertEquals("[http://sw.cyc.com/2006/07/27/cyc/SpecializationsOfPhysicalDevice-Device-Topic, http://sw.cyc.com/2006/07/27/cyc/SaffronSituationTypeConstant, http://sw.cyc.com/2006/07/27/cyc/ArtifactTypeByFunction, http://sw.cyc.com/2006/07/27/cyc/ExistingObjectType, http://sw.cyc.com/2006/07/27/cyc/FirstOrderCollection, http://sw.cyc.com/2006/07/27/cyc/Transportation-Topic, http://sw.cyc.com/2006/07/27/cyc/SpatiallyDisjointObjectType, http://sw.cyc.com/2006/07/27/cyc/CDETagTranslationConstant]", classKBObject.getTypes().toString());
-    assertEquals("[http://sw.cyc.com/2006/07/27/cyc/Conveyance, http://sw.cyc.com/2006/07/27/cyc/Artifact-NonAgentive, http://sw.cyc.com/2006/07/27/cyc/PhysicalDevice]", classKBObject.getSuperClasses().toString());
-    assertEquals("[http://sw.cyc.com/2006/07/27/cyc/AlarmDevice, http://sw.cyc.com/2006/07/27/cyc/TravelAccessory, http://sw.cyc.com/2006/07/27/cyc/NavigationDevice, http://sw.cyc.com/2006/07/27/cyc/ComputationalSystem, http://sw.cyc.com/2006/07/27/cyc/TextualMaterial, http://sw.cyc.com/2006/07/27/cyc/RecordingOfWaveIBT, http://sw.cyc.com/2006/07/27/cyc/Wire, http://sw.cyc.com/2006/07/27/cyc/SmallArm-Weapon, http://sw.cyc.com/2006/07/27/cyc/MeasuringDevice, http://sw.cyc.com/2006/07/27/cyc/StationeryProduct, http://sw.cyc.com/2006/07/27/cyc/Decoration, http://sw.cyc.com/2006/07/27/cyc/PlumbingFixture, http://sw.cyc.com/2006/07/27/cyc/InformationRecordingDevice, http://sw.cyc.com/2006/07/27/cyc/Clothing-Generic, http://sw.cyc.com/2006/07/27/cyc/PathArtifactSystem, http://sw.cyc.com/2006/07/27/cyc/ControlDevice, http://sw.cyc.com/2006/07/27/cyc/GeographicalThing, http://sw.cyc.com/2006/07/27/cyc/NonPoweredDevice, http://sw.cyc.com/2006/07/27/cyc/NaturalTangibleStuff]", classKBObject.getDisjointWiths().toString());
+    List<URI> result = new ArrayList<>(classKBObject.getTypes());
+    Collections.sort(result, new ResourceComparator());
+    assertEquals("{cyc:ArtifactTypeByFunction, cyc:CDETagTranslationConstant, cyc:ExistingObjectType, cyc:FirstOrderCollection, cyc:SaffronSituationTypeConstant, cyc:SpatiallyDisjointObjectType, cyc:SpecializationsOfPhysicalDevice-Device-Topic, cyc:Transportation-Topic}", RDFUtility.formatResources(result));
+    result = new ArrayList<>(classKBObject.getSuperClasses());
+    Collections.sort(result, new ResourceComparator());
+    assertEquals("{cyc:Artifact-NonAgentive, cyc:Conveyance, cyc:PhysicalDevice}", RDFUtility.formatResources(result));
+    result = new ArrayList<>(classKBObject.getDisjointWiths());
+    Collections.sort(result, new ResourceComparator());
+    assertEquals("{cyc:AlarmDevice, cyc:Clothing-Generic, cyc:ComputationalSystem, cyc:ControlDevice, cyc:Decoration, cyc:GeographicalThing, cyc:InformationRecordingDevice, cyc:MeasuringDevice, cyc:NaturalTangibleStuff, cyc:NavigationDevice, cyc:NonPoweredDevice, cyc:PathArtifactSystem, cyc:PlumbingFixture, cyc:RecordingOfWaveIBT, cyc:SmallArm-Weapon, cyc:StationeryProduct, cyc:TextualMaterial, cyc:TravelAccessory, cyc:Wire}", RDFUtility.formatResources(result));
     JournalWriter.close();
     rdfEntityManager.close();
   }
