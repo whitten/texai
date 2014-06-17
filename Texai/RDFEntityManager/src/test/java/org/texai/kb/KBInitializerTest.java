@@ -73,21 +73,4 @@ public class KBInitializerTest {
     rdfEntityManager.close();
   }
 
-  /**
-   * Test of process method, of class KBInitializer.
-   */
-  @Test
-  public void testProcess2() {
-    LOGGER.info("process2");
-    DistributedRepositoryManager.addRepositoryPath(
-            "AmericanEnglishWordSenseDisambiguationProbabilities",
-            System.getenv("REPOSITORIES_TMPFS") + "/AmericanEnglishWordSenseDisambiguationProbabilities");
-    final RDFEntityManager rdfEntityManager = new RDFEntityManager();
-    final KBInitializer kbInitializer = new KBInitializer(rdfEntityManager);
-    kbInitializer.setStatementFilePath("data/parsing-test.turtle");
-    kbInitializer.setRepositoryName("AmericanEnglishWordSenseDisambiguationProbabilities");
-    kbInitializer.process();
-    rdfEntityManager.close();
-  }
-
 }
