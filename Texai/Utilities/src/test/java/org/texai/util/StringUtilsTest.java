@@ -1,14 +1,14 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.texai.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertEquals;
 import junit.framework.TestCase;
 import org.apache.log4j.Logger;
@@ -35,6 +35,24 @@ public class StringUtilsTest extends TestCase {
     assertEquals("[1.0, 2.0, 3.1]", StringUtils.floatArrayToString(floatArray));
     float[] floatArray2 = {};
     assertEquals("[]", StringUtils.floatArrayToString(floatArray2));
+  }
+
+  /**
+   * Test of toSortedStrings method, of class StringUtils.
+   */
+  public void testToSortedStrings() {
+    LOGGER.info("toSortedStrings");
+    final Collection<Object> objects = new HashSet<>();
+    objects.add("1");
+    objects.add("2");
+    objects.add(3);
+    objects.add(4);
+    objects.add('5');
+    objects.add(new ArrayList<>());
+    assertEquals("[1, 2, 3, 4, 5, []]", StringUtils.toSortedStrings(objects).toString());
+
+    objects.clear();
+    assertEquals("[]", StringUtils.toSortedStrings(objects).toString());
   }
 
   /**

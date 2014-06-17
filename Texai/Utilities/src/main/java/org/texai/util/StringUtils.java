@@ -26,6 +26,8 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import org.apache.log4j.Logger;
 
@@ -42,6 +44,23 @@ public final class StringUtils {
 
   /** Creates a new instance of StringUtils. */
   private StringUtils() {
+  }
+
+  /** Returns a sorted list of the strings corresponding to the given collection of objects.
+   *
+   * @param objects the given collection of objects
+   * @return a sorted list of the strings
+   */
+  public static List<String> toSortedStrings(final Collection<Object> objects) {
+    //Preconditions
+    assert objects != null : "objects must not be null";
+
+    final List<String> strings = new ArrayList<>();
+    for (final Object obj : objects) {
+      strings.add(obj.toString());
+    }
+    Collections.sort(strings);
+    return strings;
   }
 
   /** Returns a string representation of the given float array.
@@ -92,7 +111,7 @@ public final class StringUtils {
     if (string == null
             || string.isEmpty()
             || !Character.isJavaIdentifierStart(string.charAt(0))
-            || string.indexOf("..") > -1) {
+            || string.contains("..")) {
       return false;
     }
     for (int i = 1; i < string.length(); i++) {
@@ -144,7 +163,7 @@ public final class StringUtils {
    * @return the words and HTML tags that compose the string
    */
   public static List<String> splitHTMLTags(final String string) {
-    if (string.indexOf("<") == -1) {
+    if (!string.contains("<")) {
       return splitOnSpace(string);
     }
     String tempString = string;
