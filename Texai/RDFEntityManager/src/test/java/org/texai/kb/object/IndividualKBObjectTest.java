@@ -4,6 +4,9 @@
  */
 package org.texai.kb.object;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -17,6 +20,8 @@ import org.texai.kb.journal.JournalWriter;
 import org.texai.kb.persistence.DistributedRepositoryManager;
 import org.texai.kb.persistence.KBAccess;
 import org.texai.kb.persistence.RDFEntityManager;
+import org.texai.kb.persistence.RDFUtility;
+import org.texai.kb.persistence.RDFUtility.ResourceComparator;
 
 /**
  *
@@ -73,7 +78,9 @@ public static Test suite() {
     final IndividualKBObject individualKBObject = (IndividualKBObject) kbObject;
     LOGGER.info("\n" + individualKBObject.toString());
     assertEquals("cyc:CityOfAustinTX cyc:prettyString-Canonical \"Austin\" .\ncyc:CityOfAustinTX rdf:type cyc:City .\ncyc:CityOfAustinTX rdf:type cyc:Individual .\ncyc:CityOfAustinTX rdf:type cyc:StateCapital .\ncyc:CityOfAustinTX rdf:type cyc:USCity .\n", individualKBObject.toString());
-    assertEquals("[http://sw.cyc.com/2006/07/27/cyc/USCity, http://sw.cyc.com/2006/07/27/cyc/StateCapital, http://sw.cyc.com/2006/07/27/cyc/Individual, http://sw.cyc.com/2006/07/27/cyc/City]", individualKBObject.getTypes().toString());
+    List<URI> result = new ArrayList<>(individualKBObject.getTypes());
+    Collections.sort(result, new ResourceComparator());
+    assertEquals("{cyc:City, cyc:Individual, cyc:StateCapital, cyc:USCity}", RDFUtility.formatResources(result));
     JournalWriter.close();
     rdfEntityManager.close();
   }
