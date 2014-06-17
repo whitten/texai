@@ -51,7 +51,7 @@ public final class StringUtils {
    * @param objects the given collection of objects
    * @return a sorted list of the strings
    */
-  public static List<String> toSortedStrings(final Collection<Object> objects) {
+  public static List<String> toSortedStrings(final Collection objects) {
     //Preconditions
     assert objects != null : "objects must not be null";
 

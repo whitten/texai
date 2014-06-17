@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 import org.openrdf.model.Statement;
 import org.texai.kb.persistence.RDFUtility;
 import org.texai.turtleStatementParser.misc.ParsedTurtleStatementHandler;
+import org.texai.util.StringUtils;
 
 /**
  *
@@ -50,7 +51,8 @@ public class TurtleStatementParserTest extends TestCase {
       fail(ex.getMessage());
     }
     assertNotNull(statements);
-    assertEquals("[(http://texai.org/texai/ListAccessor4, http://texai.org/texai/listAccessor_Index, \"1\"^^<http://www.w3.org/2001/XMLSchema#int>)]", statements.toString());
+    assertFalse(statements.isEmpty());
+    assertEquals("[(http://texai.org/texai/ListAccessor4, http://texai.org/texai/listAccessor_Index, \"1\"^^<http://www.w3.org/2001/XMLSchema#int>)]", StringUtils.toSortedStrings(statements).toString());
 
     string =
             "_:Learning rdf:type cyc:Learning .";

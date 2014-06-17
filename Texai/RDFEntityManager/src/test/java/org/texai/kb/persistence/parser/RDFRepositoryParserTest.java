@@ -7,6 +7,7 @@ package org.texai.kb.persistence.parser;
 import java.util.Set;
 import junit.framework.TestCase;
 import org.texai.kb.persistence.domainEntity.RepositoryContentDescription;
+import org.texai.util.StringUtils;
 
 /**
  *
@@ -48,7 +49,7 @@ public class RDFRepositoryParserTest extends TestCase {
     RepositoryContentDescriptionParser result = RepositoryContentDescriptionParser.makeRepositoryContentDescriptionParser(string);
     try {
       final Set<RepositoryContentDescription> rdfRepositories = result.parseInput();
-      assertEquals("[[AmericanEnglishConstructionAndLexicalCategoryRules], [AmericanEnglishGrammarUnitTestSpecifications]]", rdfRepositories.toString());
+      assertEquals("[[AmericanEnglishConstructionAndLexicalCategoryRules], [AmericanEnglishGrammarUnitTestSpecifications]]", StringUtils.toSortedStrings(rdfRepositories).toString());
       assertEquals(
               "((AmericanEnglishConstructionAndLexicalCategoryRules\n" +
               "  (indices: \"spoc,posc,opsc\")\n" +

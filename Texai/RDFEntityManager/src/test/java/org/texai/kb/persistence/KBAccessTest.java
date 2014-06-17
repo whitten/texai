@@ -45,6 +45,7 @@ import org.texai.kb.restriction.domainEntity.HasValueRestriction;
 import org.texai.kb.restriction.domainEntity.MaxCardinalityRestriction;
 import org.texai.kb.restriction.domainEntity.MinCardinalityRestriction;
 import org.texai.kb.restriction.domainEntity.SomeValuesFromRestriction;
+import org.texai.util.StringUtils;
 
 /**
  *
@@ -169,7 +170,7 @@ public class KBAccessTest {
     URI predicate = new URIImpl(Constants.CYC_NAMESPACE + "performedBy");
     final KBAccess instance = new KBAccess(rdfEntityManager);
     Set<AbstractRestriction> result = instance.getRestrictionsByPredicate(OPEN_CYC, predicate);
-    assertEquals("[[Restriction on cyc:performedBy, someVauesFrom cyc:MaleHuman], [Restriction on cyc:performedBy, allVauesFrom cyc:Agent-Generic]]", result.toString());
+    assertEquals("[[Restriction on cyc:performedBy, allVauesFrom cyc:Agent-Generic], [Restriction on cyc:performedBy, someVauesFrom cyc:MaleHuman]]", StringUtils.toSortedStrings(result).toString());
   }
 
   /**
@@ -182,12 +183,12 @@ public class KBAccessTest {
     URI predicate = new URIImpl(Constants.CYC_NAMESPACE + "performedBy");
     final KBAccess instance = new KBAccess(rdfEntityManager);
     Set<AbstractRestriction> result = instance.getRestrictions(OPEN_CYC, subject, predicate);
-    assertEquals("[[Restriction on cyc:performedBy, allVauesFrom cyc:Agent-Generic]]", result.toString());
+    assertEquals("[[Restriction on cyc:performedBy, allVauesFrom cyc:Agent-Generic]]", StringUtils.toSortedStrings(result).toString());
     result = instance.getRestrictions(
             OPEN_CYC,
             new URIImpl(Constants.CYC_NAMESPACE + "Snowboarding"),
             predicate);
-    assertEquals("[[Restriction on cyc:performedBy, someVauesFrom cyc:MaleHuman], [Restriction on cyc:performedBy, allVauesFrom cyc:Agent-Generic]]", result.toString());
+    assertEquals("[[Restriction on cyc:performedBy, allVauesFrom cyc:Agent-Generic], [Restriction on cyc:performedBy, someVauesFrom cyc:MaleHuman]]", result.toString());
     result = instance.getRestrictions(
             OPEN_CYC,
             new URIImpl(Constants.CYC_NAMESPACE + "DeckOfCards"),
@@ -241,8 +242,8 @@ public class KBAccessTest {
             new URIImpl(Constants.CYC_NAMESPACE + "DriveInTheater"));
     rdfEntityManager.persist(someValuesFromRestriction, OPEN_CYC);
     instance.addRestriction(OPEN_CYC, someValuesFromRestriction, subject);
-    assertEquals("[[Restriction on cyc:nearbyTheaters, someVauesFrom cyc:DriveInTheater], [Restriction on cyc:nearbyTheaters, allVauesFrom cyc:MovieTheaterSpace]]", instance.getRestrictions(OPEN_CYC, subject, predicate).toString());
-    assertEquals("[[Restriction on cyc:nearbyTheaters, someVauesFrom cyc:DriveInTheater], [Restriction on cyc:nearbyTheaters, allVauesFrom cyc:MovieTheaterSpace]]", instance.getRestrictionsByPredicate(OPEN_CYC, predicate).toString());
+    assertEquals("[[Restriction on cyc:nearbyTheaters, allVauesFrom cyc:MovieTheaterSpace], [Restriction on cyc:nearbyTheaters, someVauesFrom cyc:DriveInTheater]]", StringUtils.toSortedStrings(instance.getRestrictions(OPEN_CYC, subject, predicate)).toString());
+    assertEquals("[[Restriction on cyc:nearbyTheaters, allVauesFrom cyc:MovieTheaterSpace], [Restriction on cyc:nearbyTheaters, someVauesFrom cyc:DriveInTheater]]", StringUtils.toSortedStrings(instance.getRestrictionsByPredicate(OPEN_CYC, predicate)).toString());
 
     // add has-value restriction
     final AbstractRestriction hasValueRestriction = new HasValueRestriction(
@@ -250,13 +251,13 @@ public class KBAccessTest {
             new URIImpl(Constants.CYC_NAMESPACE + "DobieTheater"));
     rdfEntityManager.persist(hasValueRestriction, OPEN_CYC);
     instance.addRestriction(OPEN_CYC, hasValueRestriction, subject);
-    assertEquals("[[Restriction on cyc:nearbyTheaters, hasValue cyc:DobieTheater], [Restriction on cyc:nearbyTheaters, someVauesFrom cyc:DriveInTheater], [Restriction on cyc:nearbyTheaters, allVauesFrom cyc:MovieTheaterSpace]]", instance.getRestrictions(OPEN_CYC, subject, predicate).toString());
-    assertEquals("[[Restriction on cyc:nearbyTheaters, hasValue cyc:DobieTheater], [Restriction on cyc:nearbyTheaters, someVauesFrom cyc:DriveInTheater], [Restriction on cyc:nearbyTheaters, allVauesFrom cyc:MovieTheaterSpace]]", instance.getRestrictionsByPredicate(OPEN_CYC, predicate).toString());
+    assertEquals("[[Restriction on cyc:nearbyTheaters, allVauesFrom cyc:MovieTheaterSpace], [Restriction on cyc:nearbyTheaters, hasValue cyc:DobieTheater], [Restriction on cyc:nearbyTheaters, someVauesFrom cyc:DriveInTheater]]", StringUtils.toSortedStrings(instance.getRestrictions(OPEN_CYC, subject, predicate)).toString());
+    assertEquals("[[Restriction on cyc:nearbyTheaters, allVauesFrom cyc:MovieTheaterSpace], [Restriction on cyc:nearbyTheaters, hasValue cyc:DobieTheater], [Restriction on cyc:nearbyTheaters, someVauesFrom cyc:DriveInTheater]]", StringUtils.toSortedStrings(instance.getRestrictionsByPredicate(OPEN_CYC, predicate)).toString());
 
     // delete the has-value restriction
     instance.removeRestriction(OPEN_CYC, hasValueRestriction, subject);
-    assertEquals("[[Restriction on cyc:nearbyTheaters, someVauesFrom cyc:DriveInTheater], [Restriction on cyc:nearbyTheaters, allVauesFrom cyc:MovieTheaterSpace]]", instance.getRestrictions(OPEN_CYC, subject, predicate).toString());
-    assertEquals("[[Restriction on cyc:nearbyTheaters, someVauesFrom cyc:DriveInTheater], [Restriction on cyc:nearbyTheaters, allVauesFrom cyc:MovieTheaterSpace]]", instance.getRestrictionsByPredicate(OPEN_CYC, predicate).toString());
+    assertEquals("[[Restriction on cyc:nearbyTheaters, allVauesFrom cyc:MovieTheaterSpace], [Restriction on cyc:nearbyTheaters, someVauesFrom cyc:DriveInTheater]]", StringUtils.toSortedStrings(instance.getRestrictions(OPEN_CYC, subject, predicate)).toString());
+    assertEquals("[[Restriction on cyc:nearbyTheaters, allVauesFrom cyc:MovieTheaterSpace], [Restriction on cyc:nearbyTheaters, someVauesFrom cyc:DriveInTheater]]", instance.getRestrictionsByPredicate(OPEN_CYC, predicate).toString());
 
     // delete the some-values-from restriction
     instance.removeRestriction(OPEN_CYC, someValuesFromRestriction, subject);

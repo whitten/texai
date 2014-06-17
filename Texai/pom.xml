@@ -30,6 +30,7 @@
   </developers>
 
   <modules>
+    <module>RDFEntityManager</module>
     <module>Utilities</module>
     <module>X509Security</module>
   </modules>
@@ -100,8 +101,9 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>2.17</version>
         <configuration>
-          <!-- run each unit test in a forked JVM to avoid inconsistences due to static class state -->
-          <forkMode>always</forkMode>
+          <!-- run each unit test in a separate forked JVM to avoid inconsistences due to static class state -->
+          <forkCount>1</forkCount>
+          <reuseForks>false</reuseForks>
           <!-- <argLine>-Dorg.texai.tempRepositories=${env.REPOSITORIES_TMPFS} -Djava.security.policy==file:///${basedir}/../Security/security/texai.policy -Djava.security.debug=all</argLine> -->
 
           <argLine>-ea -Dorg.texai.tempRepositories=${env.REPOSITORIES_TMPFS} -Djava.security.policy==file:///${basedir}/../Security/security/texai.policy -Djava.security.debug=access,failure</argLine>

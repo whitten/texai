@@ -1,0 +1,334 @@
+((AmericanEnglishConstructionAndLexicalCategoryRules
+  (indices: "spoc,posc,opsc")
+  (className: org.texai.fcg.domainEntity.ConstructionRule)
+  (className: org.texai.fcg.domainEntity.ConstructionRuleIndexEntry)
+  (className: org.texai.fcg.domainEntity.GrammarRuleInfo)
+  (className: org.texai.fcg.domainEntity.LexicalCategoryRule)
+  (className: org.texai.fcg.domainEntity.LexicalCategoryRuleGenerationIndexEntry)
+  (className: org.texai.fcg.domainEntity.LexicalCategoryRuleParsingIndexEntry))
+
+ (AmericanEnglishConstructions
+  (indices: "spoc,posc,opsc")
+  (className: org.texai.fcg.composer.domainEntity.EnglishConstructionComposer)
+  (className: org.texai.fcg.composer.domainEntity.EnglishObliqueReferringExpressionComposer)
+  (className: org.texai.fcg.composer.domainEntity.EnglishObjectReferringExpressionComposer)
+  (className: org.texai.fcg.construction.domainEntity.EnglishConstruction))
+
+ (AmericanEnglishGrammarUnitTestSpecifications
+  (indices: "spoc,posc")
+  (className: org.texai.fcg.domainEntity.GrammarRuleUnitTestSpecification))
+
+ (AmericanEnglishLexicalStemRules
+  (indices: "spoc,posc,opsc")
+  (className: org.texai.fcg.domainEntity.PersistentLexicalStemRule)
+  (className: org.texai.fcg.domainEntity.PersistentReferent)
+  (className: org.texai.fcg.domainEntity.LexicalStemRuleGenerationIndexEntry)
+  (className: org.texai.fcg.domainEntity.LexicalStemRuleParsingIndexEntry))
+
+ (AmericanEnglishMorphologicalRules
+  (indices: "spoc,posc,opsc")
+  (className: org.texai.fcg.domainEntity.PersistentMorphologicalRule)
+  (className: org.texai.fcg.domainEntity.MorphologicalRuleGenerationIndexEntry)
+  (className: org.texai.fcg.domainEntity.MorphologicalRuleParsingIndexEntry))
+
+ (AmericanEnglishWordFrames
+  (indices: "spoc,posc,opsc,cosp")
+  (className: org.texai.lexicon.domainEntity.EnglishLexiconInfo)
+  (className: org.texai.lexicon.domainEntity.EnglishNounInfo)
+  (className: org.texai.lexicon.domainEntity.EnglishPrepositionInfo)
+  (className: org.texai.lexicon.domainEntity.EnglishVerbInfo))
+
+ (AmericanEnglishPersistentWordUnitRules
+  (indices: "spoc,posc,opsc,cosp")
+  (className: org.texai.fcg.domainEntity.PersistentWordUnitRules))
+
+ (AmericanEnglishWordSenseDisambiguationProbabilities
+  (indices: "spoc,opsc")
+  (className: org.texai.bayesianWSD.domainEntity.WordCount)
+  (className: org.texai.bayesianWSD.domainEntity.WordSenseProbability)
+  (className: org.texai.bayesianWSD.domainEntity.WordSenseDisambiguationProbability))
+
+ (BehaviorLanguageCapabilities
+  (indices: "spoc,posc")
+  (className: org.texai.bl.capability.domainEntity.AtomicFormula)
+  (className: org.texai.bl.capability.domainEntity.Capability)
+  (className: org.texai.bl.capability.domainEntity.CompoundFormula)
+  (className: org.texai.bl.capability.domainEntity.Task))
+
+ (BehaviorLanguageJavaCompositions
+  (indices: "spoc,posc")
+  (className: org.texai.skill.domainEntity.SkillInvokingQueryContainer)
+
+  (className: org.texai.skill.bl.composition.domainEntity.BLConversationalSkill)
+  (className: org.texai.skill.bl.composition.domainEntity.BLDefaultConversationalSkill)
+  (className: org.texai.skill.bl.composition.domainEntity.BLService)
+  (className: org.texai.skill.bl.composition.domainEntity.BLServiceTestSuite)
+
+  (className: org.texai.jc.annotation.domainEntity.BLAfterClassAnnotation)
+  (className: org.texai.jc.annotation.domainEntity.BLBeforeClassAnnotation)
+  (className: org.texai.jc.annotation.domainEntity.BLNotThreadSafeAnnotation)
+  (className: org.texai.jc.annotation.domainEntity.BLOverrideAnnotation)
+  (className: org.texai.jc.annotation.domainEntity.BLTestAnnotation)
+  (className: org.texai.jc.annotation.domainEntity.BLThreadSafeAnnotation)
+
+  (className: org.texai.jc.blockSection.domainEntity.BLDefaultBlockSection)
+  (className: org.texai.jc.blockSection.domainEntity.BLMethodPreconditionsBlockSection)
+  (className: org.texai.jc.blockSection.domainEntity.BLOneOfManyChoicesBlockSection)
+
+  (className: org.texai.jc.clazz.domainEntity.BLDefaultClass)
+
+  (className: org.texai.jc.domainEntity.BLCompilationUnit)
+  (className: org.texai.jc.domainEntity.BLCompilationUnitAndTestSuite)
+  (className: org.texai.jc.domainEntity.BLConstructor)
+  (className: org.texai.jc.domainEntity.BLInterface)
+  (className: org.texai.jc.domainEntity.BLMethodClassAndInstanceVariablePreconditions)
+  (className: org.texai.jc.domainEntity.BLMethodParameterPreconditions)
+  (className: org.texai.jc.domainEntity.BLRootComposition)
+
+  (className: org.texai.jc.exception.domainEntity.BLDefaultException)
+  (className: org.texai.jc.exception.domainEntity.BLException)
+  (className: org.texai.jc.exception.domainEntity.BLTexaiException)
+
+  (className: org.texai.jc.expression.domainEntity.BLArrayOperatorExpression)
+  (className: org.texai.jc.expression.domainEntity.BLBooleanLiteral)
+  (className: org.texai.jc.expression.domainEntity.BLCastOperatorExpression)
+  (className: org.texai.jc.expression.domainEntity.BLClassLiteral)
+  (className: org.texai.jc.expression.domainEntity.BLClassVariable)
+  (className: org.texai.jc.expression.domainEntity.BLDoubleLiteral)
+  (className: org.texai.jc.expression.domainEntity.BLExceptionVariable)
+  (className: org.texai.jc.expression.domainEntity.BLFieldReferenceExpression)
+  (className: org.texai.jc.expression.domainEntity.BLFloatLiteral)
+  (className: org.texai.jc.expression.domainEntity.BLForEachVariable)
+  (className: org.texai.jc.expression.domainEntity.BLInfixOperatorExpression)
+  (className: org.texai.jc.expression.domainEntity.BLInstanceVariable)
+  (className: org.texai.jc.expression.domainEntity.BLIntegerLiteral)
+  (className: org.texai.jc.expression.domainEntity.BLLongLIteral)
+  (className: org.texai.jc.expression.domainEntity.BLMethodInvocationExpression)
+  (className: org.texai.jc.expression.domainEntity.BLMethodVariable)
+  (className: org.texai.jc.expression.domainEntity.BLNewOperatorExpression)
+  (className: org.texai.jc.expression.domainEntity.BLNullLiteral)
+  (className: org.texai.jc.expression.domainEntity.BLParameter)
+  (className: org.texai.jc.expression.domainEntity.BLParameterDeclaration)
+  (className: org.texai.jc.expression.domainEntity.BLParenthesesOperatorExpression)
+  (className: org.texai.jc.expression.domainEntity.BLPostfixOperatorExpression)
+  (className: org.texai.jc.expression.domainEntity.BLPrefixOperatorExpression)
+  (className: org.texai.jc.expression.domainEntity.BLReferenceVariable)
+  (className: org.texai.jc.expression.domainEntity.BLStringLiteral)
+  (className: org.texai.jc.expression.domainEntity.BLThisLiteral)
+  (className: org.texai.jc.expression.domainEntity.BLTypeArgument)
+  (className: org.texai.jc.expression.domainEntity.)
+
+  (className: org.texai.jc.method.domainEntity.BLDefaultMethod)
+
+  (className: org.texai.jc.methodsSection.domainEntity.BLDefaultMethodsSection)
+  (className: org.texai.jc.methodsSection.domainEntity.BLJUnitHarnessMethodsSection)
+  (className: org.texai.jc.methodsSection.domainEntity.BLJUnitTestMethodsSection)
+  (className: org.texai.jc.methodsSection.domainEntity.BLMessageHandlingMethodsSection)
+
+  (className: org.texai.jc.sourceCodeListing.domainEntity.JavaSourceCodeLine)
+  (className: org.texai.jc.sourceCodeListing.domainEntity.JavaSourceCodeListing)
+
+  (className: org.texai.jc.statement.domainEntity.BLAssertStatement)
+  (className: org.texai.jc.statement.domainEntity.BLAssignmentStatement)
+  (className: org.texai.jc.statement.domainEntity.BLBlankStatement)
+  (className: org.texai.jc.statement.domainEntity.BLBlockStatement)
+  (className: org.texai.jc.statement.domainEntity.BLBreakStatement)
+  (className: org.texai.jc.statement.domainEntity.BLCatchClause)
+  (className: org.texai.jc.statement.domainEntity.BLClassVariableDeclarationStatement)
+  (className: org.texai.jc.statement.domainEntity.BLCommentStatement)
+  (className: org.texai.jc.statement.domainEntity.BLConditionalBlockStatement)
+  (className: org.texai.jc.statement.domainEntity.BLContinueStatement)
+  (className: org.texai.jc.statement.domainEntity.BLExpressionStatement)
+  (className: org.texai.jc.statement.domainEntity.BLForEachStatement)
+  (className: org.texai.jc.statement.domainEntity.BLIfElseStatement)
+  (className: org.texai.jc.statement.domainEntity.BLInstanceVariableDeclarationStatement)
+  (className: org.texai.jc.statement.domainEntity.BLMethodVariableDeclarationStatement)
+  (className: org.texai.jc.statement.domainEntity.BLReturnStatement)
+  (className: org.texai.jc.statement.domainEntity.BLThrowStatement)
+  (className: org.texai.jc.statement.domainEntity.BLTryCatchStatement)
+  (className: org.texai.jc.statement.domainEntity.BLWhileStatement)
+
+  (className: org.texai.jc.variablesSection.domainEntity.BLDefaultVariablesSection)
+  (className: org.texai.jc.variablesSection.domainEntity.BLLoggerDeclaration))
+
+ (Benchmark
+  (indices: "spoc,posc,opsc")
+  (className: org.texai.kb.persistence.benchmark.RDFTestEntity))
+
+ (BitcoinMarketMaker
+  (indices: "spoc,posc,opsc")
+  (className: org.texai.bitcoin.marketMaker.domainEntity.AlgorithmOpenOrder)
+  (className: org.texai.bitcoin.marketMaker.domainEntity.OpenOrder)
+  (className: org.texai.bitcoin.marketMaker.domainEntity.PriceAmountPair)
+  (className: org.texai.bitcoin.marketMaker.domainEntity.TickerInfo)
+  (className: org.texai.bitcoin.marketMaker.domainEntity.Trade))
+
+ (CMUPronouncingDictionary
+  (indices: "spoc,posc")
+  (className: org.texai.cmudict.domainEntity.CMUDictionaryEnglishWordForm)
+  (className: org.texai.cmudict.domainEntity.ARPABETPronunciation)
+  (className: org.texai.cmudict.domainEntity.ARPABETPhoneme))
+
+ (ConceptuallyRelatedTerms
+  (indices: "spoc,posc")
+  (className: org.texai.dialog.domainEntity.ConceptuallyRelatedTermsDirectedLink)
+  (className: org.texai.dialog.domainEntity.ConceptuallyRelatedTermsUndirectedLink)
+  (className: org.texai.dialog.domainEntity.ConceptuallyUnrelatedTermsUndirectedLink))
+
+ (DialogWordStemUsage
+  (indices: "spoc,posc")
+  (className: org.texai.dialog.domainEntity.DialogWordStemUsage))
+
+ (EnglishTrainingUtterances
+  (indices: "spoc,posc")
+  (className: org.texai.exactEnglish.training.domainEntity.TrainingCorpus)
+  (className: org.texai.exactEnglish.training.domainEntity.TrainingDocument)
+  (className: org.texai.exactEnglish.training.domainEntity.TrainingParagraph)
+  (className: org.texai.exactEnglish.training.domainEntity.TrainingUtterance)
+  (className: org.texai.exactEnglish.training.domainEntity.TrainingWord))
+
+ (InferenceRules
+  (indices: "spoc,posc")
+  (className: org.texai.inference.composition.domainEntity.StatementComposer)
+  (className: org.texai.inference.domainEntity.Rule)
+  (className: org.texai.inference.domainEntity.Statement)
+  (className: org.texai.inference.sparql.composition.domainEntity.AndOperatorComposer)
+  (className: org.texai.inference.sparql.composition.domainEntity.BaseDeclarationComposer)
+  (className: org.texai.inference.sparql.composition.domainEntity.ConstraintComposer)
+  (className: org.texai.inference.sparql.composition.domainEntity.NotOperatorComposer)
+  (className: org.texai.inference.sparql.composition.domainEntity.PrefixDeclarationComposer)
+  (className: org.texai.inference.sparql.composition.domainEntity.QueryContainerComposer)
+  (className: org.texai.inference.sparql.composition.domainEntity.SameTermOperatorComposer)
+  (className: org.texai.inference.sparql.composition.domainEntity.SelectComposer)
+  (className: org.texai.inference.sparql.composition.domainEntity.SelectQueryComposer)
+  (className: org.texai.inference.sparql.composition.domainEntity.WhereClauseComposer)
+  (className: org.texai.inference.sparql.domainEntity.AndOperator)
+  (className: org.texai.inference.sparql.domainEntity.BaseDeclaration)
+  (className: org.texai.inference.sparql.domainEntity.Constraint)
+  (className: org.texai.inference.sparql.domainEntity.NotOperator)
+  (className: org.texai.inference.sparql.domainEntity.PrefixDeclaration)
+  (className: org.texai.inference.sparql.domainEntity.QueryContainer)
+  (className: org.texai.inference.sparql.domainEntity.SameTermOperator)
+  (className: org.texai.inference.sparql.domainEntity.Select)
+  (className: org.texai.inference.sparql.domainEntity.SelectQuery)
+  (className: org.texai.inference.sparql.domainEntity.Variable)
+  (className: org.texai.inference.sparql.domainEntity.WhereClause))
+
+ (Launcher
+  (indices: "spoc,posc")
+  (className: org.texai.texaiLauncher.domainEntity.NodeRuntimeInfo)
+  (className: org.texai.texaiLauncher.domainEntity.TexaiLauncherInfo))
+
+ (Metaphors
+  (indices: "spoc,posc")
+  (className: org.texai.metaphor.domainEntity.MetaphorObjectReference))
+
+ (Nodes
+  (indices: "spoc,posc")
+  (className: org.texai.ahcsSupport.domainEntity.ConversationStateInfo)
+  (className: org.texai.ahcsSupport.domainEntity.NodeRuntimeConfiguration)
+  (className: org.texai.ahcsSupport.domainEntity.Node)
+  (className: org.texai.ahcsSupport.domainEntity.Role)
+  (className: org.texai.ahcsSupport.domainEntity.SkillInstance)
+  (className: org.texai.ahcsSupport.domainEntity.StateValueBinding))
+
+ (NodeRoleTypes
+  (indices: "spoc,posc")
+  (className: org.texai.ahcsSupport.domainEntity.NodeType)
+  (className: org.texai.ahcsSupport.domainEntity.RoleType)
+  (className: org.texai.ahcsSupport.domainEntity.SkillClass))
+
+ (OpenCyc
+  (indices: "spoc,posc,opsc,cosp"))
+
+ (RepositoryContentDescriptions
+  (indices: "spoc,posc")
+  (className: org.texai.kb.persistence.domainEntity.RepositoryContentDescription)
+  (className: org.texai.kb.persistence.domainEntity.RepositoryContentDescriptionInfo))
+
+ (RegisteredUsers
+  (indices: "spoc,posc")
+  (className: org.texai.dialog.user.domainEntity.TexaiRegisteredUser))
+
+ (ScriptedBehaviorLanguage
+  (indices: "spoc,posc")
+  (className: org.texai.sbl.composition.domainEntity.PersistentBindingSetComposer)
+  (className: org.texai.sbl.composition.domainEntity.SBLProcedureDeclarationComposer)
+  (className: org.texai.sbl.domainEntity.PersistentBinding)
+  (className: org.texai.sbl.domainEntity.PersistentBindingSet)
+  (className: org.texai.sbl.domainEntity.PersistentTupleQueryResult)
+  (className: org.texai.sbl.domainEntity.SBLProcedureDeclaration)
+  (className: org.texai.sbl.operation.composition.domainEntity.BlockSBLOperationComposer)
+  (className: org.texai.sbl.operation.composition.domainEntity.ConditionalSBLOperationComposer)
+  (className: org.texai.sbl.operation.composition.domainEntity.InformationalSBLOperationComposer)
+  (className: org.texai.sbl.operation.composition.domainEntity.IteratedSBLOperationComposer)
+  (className: org.texai.sbl.operation.composition.domainEntity.QuestionSBLOperationComposer)
+  (className: org.texai.sbl.operation.composition.domainEntity.TaskSBLOperationComposer)
+  (className: org.texai.sbl.operation.domainEntity.BlockSBLOperation)
+  (className: org.texai.sbl.operation.domainEntity.ConditionalSBLOperation)
+  (className: org.texai.sbl.operation.domainEntity.InformationalSBLOperation)
+  (className: org.texai.sbl.operation.domainEntity.IteratedSBLOperation)
+  (className: org.texai.sbl.operation.domainEntity.TaskSBLOperation)
+  (className: org.texai.sbl.operation.domainEntity.QuestionSBLOperation))
+
+ (SituationModels
+  (indices: "spoc,posc,opsc")
+  (className: org.texai.situationModel.domainEntity.ContextualizedSituationConstituentInfo)
+  (className: org.texai.situationModel.domainEntity.SituationModel)
+  (className: org.texai.situationModel.domainEntity.RoleInfo))
+
+ (Test
+  (indices: "spoc,posc")
+  (className: org.texai.kb.persistence.sample.Agent)
+  (className: org.texai.kb.persistence.sample.Friend)
+  (className: org.texai.kb.persistence.sample.Person)
+  (className: org.texai.kb.persistence.RDFTestEntity))
+
+ (TinyACT-R
+  (indices: "spoc,posc")
+  (className: org.texai.actr.domainEntity.Action)
+  (className: org.texai.actr.domainEntity.Chunk)
+  (className: org.texai.actr.domainEntity.ChunkType)
+  (className: org.texai.actr.domainEntity.Condition)
+  (className: org.texai.actr.domainEntity.Model)
+  (className: org.texai.actr.domainEntity.OutputAction)
+  (className: org.texai.actr.domainEntity.Production))
+
+ (TexaiEnglishLexicon
+  (indices: "spoc,posc,opsc,cosp")
+  (className: org.texai.lexicon.domainEntity.TexaiEnglishSynset)
+  (className: org.texai.lexicon.domainEntity.TexaiEnglishWord)
+  (className: org.texai.lexicon.domainEntity.TexaiEnglishWordForm)
+  (className: org.texai.lexicon.domainEntity.TexaiEnglishWordSense)
+  (className: org.texai.lexicon.domainEntity.TexaiSamplePhrase))
+
+ (VerbComplementSituationModels
+  (indices: "spoc,posc,opsc")
+  (className: org.texai.situationModel.domainEntity.VerbComplementSituationConstituentInfo)
+  (className: org.texai.situationModel.domainEntity.VerbComplementSituationModel)
+  (className: org.texai.situationModel.domainEntity.VerbComplementRoleInfo))
+
+ (Wiktionary
+  (indices: "spoc,posc")
+  (className: org.texai.wiktionary.domainEntity.WiktionaryEnglishWord)
+  (className: org.texai.wiktionary.domainEntity.WiktionaryEnglishWordForm)
+  (className: org.texai.wiktionary.domainEntity.WiktionaryEnglishWordSense)
+  (className: org.texai.wiktionary.domainEntity.WiktionarySamplePhrase))
+
+ (WordNet30
+  (indices: "spoc,posc")
+  (className: org.texai.wordnet.domain.entity.WordNetCategory)
+  (className: org.texai.wordnet.domain.entity.WordNetEnglishWord)
+  (className: org.texai.wordnet.domain.entity.WordNetEnglishWordMorph)
+  (className: org.texai.wordnet.domain.entity.WordNetSamplePhraseItem)
+  (className: org.texai.wordnet.domain.entity.WordNetSentencePattern)
+  (className: org.texai.wordnet.domain.entity.WordNetSynset)
+  (className: org.texai.wordnet.domain.entity.WordNetWordSense))
+
+ (WorkFlow
+  (indices: "spoc,posc")
+  (className: org.texai.workflow.domainEntity.WorkList)
+  (className: org.texai.dialog.workflow.domainEntity.GlossWord)
+  (className: org.texai.dialog.workflow.domainEntity.GlossWordMissingWordForm))
+ )
+

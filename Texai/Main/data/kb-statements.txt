@@ -1,0 +1,438 @@
+// classes
+texai:AbsenceOfActivitySituation rdf:type cyc:TemporalStuffType .
+texai:AbsenceOfActivitySituation rdfs:subClassOf cyc:Situation .
+
+texai:AccordanceSituation rdf:type cyc:TemporalStuffType .
+texai:AccordanceSituation rdfs:subClassOf cyc:Situation .
+
+texai:Addressee rdf:type cyc:TemporalStuffType .
+texai:Addressee rdf:type cyc:ObjectType .
+texai:Addressee rdfs:subClassOf cyc:IntelligentAgent .
+
+texai:Affirming-CommunicationAct rdf:type cyc:FirstOrderCollection .
+texai:Affirming-CommunicationAct rdf:type cyc:EventOrRoleConcept .
+texai:Affirming-CommunicationAct rdfs:subClassOf cyc:CommunicationAct-Single .
+
+texai:AgentWhoUsesSomething rdf:type cyc:TemporalStuffType .
+texai:AgentWhoUsesSomething rdf:type cyc:ObjectType .
+texai:AgentWhoUsesSomething rdfs:subClassOf cyc:IntelligentAgent .
+
+texai:AnswerToWhatQuery rdf:type cyc:FirstOrderCollection .
+texai:AnswerToWhatQuery rdfs:subClassOf cyc:AbstractInformationStructure .
+
+texai:ApproximateSubClassSituation rdf:type cyc:TemporalStuffType .
+texai:ApproximateSubClassSituation rdfs:subClassOf cyc:Situation .
+
+texai:BypassingSomething rdf:type cyc:TemporalStuffType .
+texai:BypassingSomething rdfs:subClassOf cyc:Situation .
+
+texai:ChatLog rdfs:subClassOf cyc:Log-Document .
+
+owl:Class rdfs:subClassOf owl:Thing .
+
+texai:CompletedEvent rdf:type cyc:Event .
+texai:CompletedEvent rdfs:subClassOf cyc:Situation .
+
+cyc:Console-Device rdf:type cyc:ExistingObjectType .
+cyc:Console-Device rdf:type cyc:ArtifactTypeByGenericCategory .
+cyc:Console-Device rdf:type cyc:SpatiallyDisjointObjectType .
+cyc:Console-Device rdfs:subClassOf cyc:PhysicalDevice .
+cyc:Console-Device rdfs:subClassOf cyc:PartiallyTangible .
+
+texai:ContrastingSituationPair rdf:type cyc:FirstOrderCollection .
+texai:ContrastingSituationPair rdfs:subClassOf cyc:Group .
+
+texai:CountableThing rdf:type rdfs:Class .
+texai:CountableThing rdfs:subClassOf rdfs:Class .
+
+texai:DefaultSituation rdf:type cyc:TemporalStuffType .
+texai:DefaultSituation rdfs:subClassOf cyc:Situation .
+
+texai:Denotation rdf:type rdfs:Class .
+texai:Denotation rdfs:subClassOf owl:Thing .
+
+texai:DenotedTerm rdf:type rdfs:Class .
+texai:DenotedTerm rdfs:subClassOf owl:Thing .
+
+texai:DictionaryDefinition rdf:type cyc:LinguisticObjectType .
+texai:DictionaryDefinition rdfs:subClassOf cyc:LinguisticObject .
+
+texai:EnglishUnitOfMeasure rdf:type cyc:FirstOrderCollection .
+texai:EnglishUnitOfMeasure rdfs:subClassOf texai:UnitOfMeasure .
+
+texai:EventSeason rdf:type cyc:AnnualTemporalObjectType .
+texai:EventSeason rdfs:subClassOf texai:Event .
+
+texai:Example_RepresentativeForm rdf:type rdfs:Class .
+texai:Example_RepresentativeForm rdfs:subClassOf rdfs:Class .
+
+texai:FalseSituation rdf:type cyc:TemporalStuffType .
+texai:FalseSituation rdfs:subClassOf cyc:Situation .
+
+texai:FCGClauseObject rdf:type rdfs:Class .
+texai:FCGClauseObject rdfs:subClassOf rdfs:Class .
+
+texai:FCGClauseSubject rdf:type rdfs:Class .
+texai:FCGClauseSubject rdfs:subClassOf rdfs:Class .
+
+texai:FirstPerson rdf:type cyc:LinguisticObjectType .
+texai:FirstPerson rdfs:subClassOf cyc:LinguisticObject .
+
+texai:ImplicationSituation rdf:type cyc:TemporalStuffType .
+texai:ImplicationSituation rdfs:subClassOf cyc:Situation .
+
+texai:IndefiniteThingInThisDiscourse rdf:type rdfs:Class .
+texai:IndefiniteThingInThisDiscourse rdfs:subClassOf rdfs:Class .
+
+texai:InherentNaturalPurposeOfSomething rdf:type rdfs:Class .
+texai:InherentNaturalPurposeOfSomething rdfs:subClassOf rdfs:Class .
+
+texai:KnowingSomething rdf:type cyc:TemporalStuffType .
+texai:KnowingSomething rdfs:subClassOf cyc:Situation .
+
+texai:Learner rdf:type cyc:FirstOrderCollection .
+texai:Learner rdfs:subClassOf cyc:IntelligentAgent .
+
+texai:LexiconEntry rdf:type cyc:LinguisticObjectType .
+texai:LexiconEntry rdfs:subClassOf cyc:LinguisticObject .
+
+texai:LinguisticRule rdf:type cyc:LinguisticObjectType .
+texai:LinguisticRule rdfs:subClassOf cyc:LinguisticObject .
+
+texai:ListHeadingDeclarativeSituationReferringExpression rdf:type cyc:LinguisticObjectType .
+texai:ListHeadingDeclarativeSituationReferringExpression rdfs:subClassOf cyc:LinguisticObject .
+
+texai:MajorityGroupOfAClass rdf:type cyc:FirstOrderCollection .
+texai:MajorityGroupOfAClass rdfs:subClassOf cyc:Group .
+
+texai:MarkAsDifferentSituation rdf:type cyc:FirstOrderCollection .
+texai:MarkAsDifferentSituation rdf:type cyc:EventOrRoleConcept .
+texai:MarkAsDifferentSituation rdfs:subClassOf cyc:PurposefulAction .
+
+texai:MediumDisplayingSituation rdf:type cyc:TemporalStuffType .
+texai:MediumDisplayingSituation rdfs:subClassOf cyc:Situation .
+
+texai:MetaphorObjectReference rdf:type cyc:LinguisticObjectType .
+texai:MetaphorObjectReference rdfs:subClassOf cyc:LinguisticObject .
+
+texai:Mile rdf:type cyc:FirstOrderCollection .
+texai:Mile rdfs:subClassOf cyc:Distance .
+
+texai:NamedThing rdf:type cyc:TemporalStuffType .
+texai:NamedThing rdfs:subClassOf cyc:Situation .
+
+texai:NASCARSeason rdf:type cyc:AnnualTemporalObjectType .
+texai:NASCARSeason rdfs:subClassOf texai:EventSeason .
+
+texai:Negating-CommunicationAct rdf:type cyc:FirstOrderCollection .
+texai:Negating-CommunicationAct rdf:type cyc:EventOrRoleConcept .
+texai:Negating-CommunicationAct rdfs:subClassOf cyc:CommunicationAct-Single .
+
+texai:ObjectInAdditionToContext rdf:type rdfs:Class .
+texai:ObjectInAdditionToContext rdfs:subClassOf rdfs:Class .
+
+texai:OngoingSituation rdf:type cyc:TemporalStuffType .
+texai:OngoingSituation rdfs:subClassOf cyc:Situation .
+
+texai:OnPhysicalSituation rdf:type cyc:TemporalStuffType .
+texai:OnPhysicalSituation rdfs:subClassOf cyc:Situation .
+
+texai:OpportunitySituation rdf:type cyc:TemporalStuffType .
+texai:OpportunitySituation rdfs:subClassOf cyc:Situation .
+
+texai:org.texai.dialog.user.domainEntity.TexaiRegisteredUser rdf:type cyc:TemporalStuffType .
+texai:org.texai.dialog.user.domainEntity.TexaiRegisteredUser rdf:type cyc:ObjectType .
+texai:org.texai.dialog.user.domainEntity.TexaiRegisteredUser rdfs:subClassOf cyc:IntelligentAgent .
+
+texai:org.texai.fcg.domainEntity.LexicalStemRule rdf:type cyc:LinguisticObjectType .
+texai:org.texai.fcg.domainEntity.LexicalStemRule rdfs:subClassOf cyc:LinguisticObject .
+
+texai:org.texai.fcg.domainEntity.MorphologicalRule rdf:type cyc:LinguisticObjectType .
+texai:org.texai.fcg.domainEntity.MorphologicalRule rdfs:subClassOf cyc:LinguisticObject .
+
+texai:org.texai.lexicon.domainEntity.TexaiEnglishWord rdf:type cyc:LinguisticObjectType .
+texai:org.texai.lexicon.domainEntity.TexaiEnglishWord rdfs:subClassOf cyc:LinguisticObject .
+
+texai:PastTenseVerb rdf:type cyc:LinguisticObjectType .
+texai:PastTenseVerb rdfs:subClassOf cyc:LinguisticObject .
+
+texai:PluralExpression rdf:type cyc:LinguisticObjectType .
+texai:PluralExpression rdfs:subClassOf cyc:LinguisticObject .
+
+texai:PossessionSituation rdf:type cyc:TemporalStuffType .
+texai:PossessionSituation rdfs:subClassOf cyc:Situation .
+
+texai:Point_GamingUnitOfMeasure rdf:type cyc:FirstOrderCollection .
+texai:Point_GamingUnitOfMeasure rdfs:subClassOf texai:UnitOfMeasure .
+
+texai:PresentTenseVerb rdf:type cyc:LinguisticObjectType .
+texai:PresentTenseVerb rdfs:subClassOf cyc:LinguisticObject .
+
+texai:PreviouslyIntroducedPossessedThingInThisDiscourse rdf:type rdfs:Class .
+texai:PreviouslyIntroducedPossessedThingInThisDiscourse rdfs:subClassOf cyc:Possession .
+
+texai:PreviouslyIntroducedPossessorThingInThisDiscourse rdf:type cyc:TemporalStuffType .
+texai:PreviouslyIntroducedPossessorThingInThisDiscourse rdf:type cyc:ObjectType .
+texai:PreviouslyIntroducedPossessorThingInThisDiscourse rdfs:subClassOf cyc:Agent-Generic .
+
+texai:PreviouslyIntroducedThingInThisDiscourse rdf:type rdfs:Class .
+texai:PreviouslyIntroducedThingInThisDiscourse rdfs:subClassOf rdfs:Class .
+
+texai:PromptingSomeone rdf:type cyc:FirstOrderCollection .
+texai:PromptingSomeone rdf:type cyc:EventOrRoleConcept .
+texai:PromptingSomeone rdfs:subClassOf cyc:CommunicationAct-Single .
+
+texai:PurposefulAction-Auxiliary rdf:type cyc:FirstOrderCollection .
+texai:PurposefulAction-Auxiliary rdfs:subClassOf cyc:PurposefulAction .
+
+texai:RegardingSituation rdf:type cyc:TemporalStuffType .
+texai:RegardingSituation rdfs:subClassOf cyc:Situation .
+
+texai:RelativelyFartherAwayThing rdf:type rdfs:Class .
+texai:RelativelyFartherAwayThing rdfs:subClassOf rdfs:Class .
+
+texai:RelativeRelationshipSituation rdf:type cyc:TemporalStuffType .
+texai:RelativeRelationshipSituation rdfs:subClassOf cyc:Situation .
+
+texai:SecondPerson rdf:type cyc:LinguisticObjectType .
+texai:SecondPerson rdfs:subClassOf cyc:LinguisticObject .
+
+texai:SkippingSomething rdf:type cyc:TemporalStuffType .
+texai:SkippingSomething rdfs:subClassOf cyc:Situation .
+
+texai:SomeoneCalmUnderStress rdf:type cyc:FirstOrderCollection .
+texai:SomeoneCalmUnderStress rdfs:subClassOf texai:SomeoneHavingGoodCharacter .
+
+texai:SomeoneHavingGoodCharacter rdf:type cyc:FirstOrderCollection .
+texai:SomeoneHavingGoodCharacter rdfs:subClassOf cyc:Person .
+
+texai:SourcedFromSituation rdf:type cyc:TemporalStuffType .
+texai:SourcedFromSituation rdfs:subClassOf cyc:Situation .
+
+cyc:Student rdfs:subClassOf texai:Learner .
+
+texai:SubClassSituation rdf:type cyc:TemporalStuffType .
+texai:SubClassSituation rdfs:subClassOf cyc:Situation .
+
+texai:ThingColocatedSpatiallyAndTemporallyWithTheSpeaker rdf:type rdfs:Class .
+texai:ThingColocatedSpatiallyAndTemporallyWithTheSpeaker rdfs:subClassOf rdfs:Class .
+
+texai:ThingLikelyToBeTheCase rdf:type rdfs:Class .
+texai:ThingLikelyToBeTheCase rdfs:subClassOf rdfs:Class .
+
+texai:ThingWhichIsFirstInASeries rdf:type rdfs:Class .
+texai:ThingWhichIsFirstInASeries rdfs:subClassOf ThingWhichIsInASeries .
+
+texai:ThingWhichIsInASeries rdf:type rdfs:Class .
+texai:ThingWhichIsInASeries rdfs:subClassOf rdfs:Class .
+
+texai:ThingWhichIsLastInASeries rdf:type rdfs:Class .
+texai:ThingWhichIsLastInASeries rdfs:subClassOf ThingWhichIsInASeries .
+
+texai:ThingWhichIsNextInASeries rdf:type rdfs:Class .
+texai:ThingWhichIsNextInASeries rdfs:subClassOf ThingWhichIsInASeries .
+
+texai:ThirdPerson rdf:type cyc:LinguisticObjectType .
+texai:ThirdPerson rdfs:subClassOf cyc:LinguisticObject .
+
+texai:VerboseWording rdf:type cyc:TemporalStuffType .
+texai:VerboseWording rdfs:subClassOf cyc:Situation .
+
+
+// individuals
+texai:Addressee rdf:type cyc:IntelligentAgent .
+
+texai:Buster rdf:type cyc:DomesticCat .
+texai:Buster rdf:type cyc:IntelligentAgent .
+texai:Buster rdf:type cyc:MaleAnimal .
+
+texai:JimmyJohnson_RaceCarDriver_Born1975 rdf:type cyc:RaceCarDriver .
+texai:JimmyJohnson_RaceCarDriver_Born1975 rdf:type cyc:AdultMaleHuman .
+
+texai:Speaker rdf:type cyc:IntelligentAgent .
+
+// predicates
+texai:accordanceAuthorityObject rdf:type rdf:Property .
+texai:accordanceAuthorityObject rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:accordanceCompliantObject rdf:type rdf:Property .
+texai:accordanceCompliantObject rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:assignmentPostCondition rdf:type rdf:Property .
+texai:assignmentPostCondition rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:benefactor rdf:type rdf:Property .
+texai:benefactor rdfs:subPropertyOf cyc:performedBy .
+
+texai:beneficialInstrument rdf:type rdf:Property .
+texai:beneficialInstrument rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:benefittingObject rdf:type rdf:Property .
+texai:benefittingObject rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:benefittingSituation rdf:type rdf:Property .
+texai:benefittingSituation rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:comprehender rdf:type rdf:Property .
+texai:comprehender rdfs:subPropertyOf cyc:performedBy .
+
+texai:contrastingSituationPair_Situation rdf:type rdf:Property .
+
+texai:contrastingSituationPair_ContrarySituation rdf:type rdf:Property .
+
+texai:distinguishingAttribute rdf:type rdf:Property .
+texai:distinguishingAttribute rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:fcgDiscourseRole rdf:type rdf:Property .
+texai:fcgDiscourseRole rdfs:subPropertyOf cyc:conceptuallyRelated .
+
+texai:fcgRuleName rdf:type rdf:Property .
+texai:fcgRuleName rdfs:subPropertyOf cyc:conceptuallyRelated .
+
+texai:fcgStatus rdf:type rdf:Property .
+texai:fcgStatus rdfs:subPropertyOf cyc:conceptuallyRelated .
+
+texai:implicationAntecedant rdf:type rdf:Property .
+texai:implicationAntecedant rdfs:subPropertyOf cyc:conceptuallyRelated .
+
+texai:implicationConsequent rdf:type rdf:Property .
+texai:implicationConsequent rdfs:subPropertyOf cyc:conceptuallyRelated .
+
+texai:indexOf rdf:type rdf:Property .
+
+texai:knower rdf:type rdf:Property .
+texai:knower rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:matchesModelSituation rdf:type rdf:Property .
+
+texai:mediumDisplayingSituation_Medium rdf:type rdf:Property .
+texai:mediumDisplayingSituation_Medium rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:metaphorTenor rdf:type rdf:Property .
+texai:metaphorTenor rdfs:subPropertyOf cyc:conceptuallyRelated .
+
+texai:metaphorVehicle rdf:type rdf:Property .
+texai:metaphorVehicle rdfs:subPropertyOf cyc:conceptuallyRelated .
+
+texai:moreGeneralClass rdf:type rdf:Property .
+texai:moreGeneralClass rdfs:subPropertyOf cyc:broaderTerm .
+
+texai:notResolvedTo rdf:type rdf:Property .
+texai:notResolvedTo rdfs:subPropertyOf cyc:conceptuallyRelated .
+
+texai:onPhysical_Object rdf:type rdf:Property .
+texai:onPhysical_Object rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:onPhysical_Subject rdf:type rdf:Property .
+texai:onPhysical_Subject rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:org.texai.dialog.user.domainEntity.TexaiRegisteredUser_FirstName rdf:type rdf:Property .
+texai:org.texai.dialog.user.domainEntity.TexaiRegisteredUser_FirstName rdfs:subPropertyOf cyc:conceptuallyRelated .
+
+texai:pertainsToAttribute rdf:type rdf:Property .
+texai:pertainsToAttribute rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:pertainsToObject rdf:type rdf:Property .
+texai:pertainsToObject rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:possessedThing rdf:type rdf:Property .
+texai:possessedThing rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:possessor rdf:type rdf:Property .
+texai:possessor rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:promptedAgent rdf:type rdf:Property .
+texai:promptedAgent rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:promptedSituation rdf:type rdf:Property .
+texai:promptedSituation rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:prompter rdf:type rdf:Property .
+texai:prompter rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:quitter rdf:type rdf:Property .
+texai:quitter rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:regardingSituation_Object rdf:type rdf:Property .
+texai:regardingSituation_Object rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:regardingSituation_Subject rdf:type rdf:Property .
+texai:regardingSituation_Subject rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:relativeRelationship_Object rdf:type rdf:Property .
+texai:relativeRelationship_Object rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:relativeRelationship_Subject rdf:type rdf:Property .
+texai:relativeRelationship_Subject rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:resolvedTo rdf:type rdf:Property .
+texai:resolvedTo rdfs:subPropertyOf owl:sameAs .
+
+texai:subjectLearned rdf:type rdf:Property .
+texai:subjectLearned rdfs:subPropertyOf cyc:situationConstituents .
+
+cyc:situationConstituents rdfs:subPropertyOf cyc:conceptuallyRelated .
+
+texai:situationHappenedBeforeDate rdf:type rdf:Property .
+texai:situationHappenedBeforeDate rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:situationHappeningOnDate rdf:type rdf:Property .
+texai:situationHappeningOnDate rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:situationWillHappenAfterDate rdf:type rdf:Property .
+texai:situationWillHappenAfterDate rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:situationQueryVariable rdf:type rdf:Property .
+texai:situationQueryVariable rdfs:subPropertyOf cyc:conceptuallyRelated .
+
+texai:skippedThing rdf:type rdf:Property .
+texai:skippedThing rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:skipper rdf:type rdf:Property .
+texai:skipper rdfs:subPropertyOf cyc:performedBy .
+
+texai:sourcedFromSituation_Object rdf:type rdf:Property .
+texai:sourcedFromSituation_Object rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:student rdf:type rdf:Property .
+texai:student rdfs:subPropertyOf cyc:performedBy .
+
+texai:teacherOfSubject rdf:type rdf:Property .
+texai:teacherOfSubject rdfs:subPropertyOf cyc:situationConstituents .
+
+cyc:thingComprehended rdf:type rdf:Property .
+cyc:thingComprehended rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:thingDisplayed rdf:type rdf:Property .
+texai:thingDisplayed rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:thingDistinguished rdf:type rdf:Property .
+texai:thingDistinguished rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:thingKnown rdf:type rdf:Property .
+texai:thingKnown rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:thingLearnedFrom rdf:type rdf:Property .
+texai:thingLearnedFrom rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:typeOrSubClassOf rdf:type rdf:Property .
+texai:typeOrSubClassOf rdfs:subPropertyOf cyc:broaderTerm .
+
+texai:usingAnObject_Agent rdf:type rdf:Property .
+texai:usingAnObject_Agent rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:usingAnObject_Object rdf:type rdf:Property .
+texai:usingAnObject_Object rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:whereDisplayed rdf:type rdf:Property .
+texai:whereDisplayed rdfs:subPropertyOf cyc:situationConstituents .
+
+texai:whoseRelative rdf:type rdf:Property .
+texai:whoseRelative rdfs:subPropertyOf cyc:conceptuallyRelated .
+
+texai:withRegardTo rdf:type rdf:Property .
+texai:withRegardTo rdfs:subPropertyOf cyc:situationConstituents .
+
+rdf:type rdf:type rdf:Property .
+
+owl:sameAs rdf:type rdf:Property .
