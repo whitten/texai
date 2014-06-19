@@ -91,6 +91,19 @@ public class RDFEntityLoaderTest {
     DatatypeConverter.setDatatypeConverter(new DatatypeConverterImpl());
     rdfEntityManager = new RDFEntityManager();
     repositoryConnection = rdfEntityManager.getConnectionToNamedRepository(TEST_REPOSITORY_NAME);
+    DistributedRepositoryManager.addTestRepositoryPath(
+            TEST_REPOSITORY_NAME,
+            true); // isRepositoryDirectoryCleaned
+
+    try {
+      RDFEntityLoaderTest.class.getClassLoader().setDefaultAssertionStatus(true);
+      LOGGER.info("repositoryConnection " + repositoryConnection);
+      repositoryConnection.clear();
+    } catch (RepositoryException e) {
+      e.printStackTrace();
+      fail(e.getMessage());
+    }
+
   }
 
   @AfterClass
@@ -118,19 +131,6 @@ public class RDFEntityLoaderTest {
   public void testSesameQueriesUsingContext() {
     LOGGER.info("test Sesame queries using context");
 
-    DistributedRepositoryManager.addTestRepositoryPath(
-            TEST_REPOSITORY_NAME,
-            true); // isRepositoryDirectoryCleaned
-
-    try {
-      getClass().getClassLoader().setDefaultAssertionStatus(true);
-      LOGGER.info("repositoryConnection " + repositoryConnection);
-      repositoryConnection.clear();
-    } catch (RepositoryException e) {
-      e.printStackTrace();
-      fail(e.getMessage());
-    }
-
     // create some statements
     URI subject1 = new URIImpl("http://texai.org/texai/subject1");
     URI predicate1 = new URIImpl("http://texai.org/texai/predicate1");
@@ -138,6 +138,7 @@ public class RDFEntityLoaderTest {
     URI context1 = new URIImpl("http://texai.org/texai/context1");
     URI context2 = new URIImpl("http://texai.org/texai/context2");
     try {
+      repositoryConnection.clear();
       // verify adding and quering of statements using context
       repositoryConnection.add(subject1, predicate1, object1);
       assertTrue(repositoryConnection.hasStatement(subject1, predicate1, object1, false));
