@@ -1,4 +1,3 @@
-// classes
 texai:AbsenceOfActivitySituation rdf:type cyc:TemporalStuffType .
 texai:AbsenceOfActivitySituation rdfs:subClassOf cyc:Situation .
 
