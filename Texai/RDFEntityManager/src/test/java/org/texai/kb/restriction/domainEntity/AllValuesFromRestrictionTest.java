@@ -45,9 +45,9 @@ public class AllValuesFromRestrictionTest {
   /** the logger */
   private static final Logger LOGGER = Logger.getLogger(AllValuesFromRestrictionTest.class);
   /** the RDF entity manager */
-  private static RDFEntityManager rdfEntityManager = new RDFEntityManager();
-  /** the OpenCyc repository name */
-  private static final String OPEN_CYC = "OpenCyc";
+  private static final RDFEntityManager rdfEntityManager = new RDFEntityManager();
+  /** the name of the test repository */
+  private static final String TEST = "Test";
 
   public AllValuesFromRestrictionTest() {
   }
@@ -56,10 +56,9 @@ public class AllValuesFromRestrictionTest {
   public static void setUpClass() throws Exception {
     CacheInitializer.initializeCaches();
     JournalWriter.deleteJournalFiles();
-    DistributedRepositoryManager.addRepositoryPath(
-            "ConceptuallyRelatedTerms",
-            System.getenv("REPOSITORIES_TMPFS") + "/Test");
-    DistributedRepositoryManager.clearNamedRepository("Test");
+    DistributedRepositoryManager.addTestRepositoryPath(
+            TEST,
+            true); // isRepositoryDirectoryCleaned
   }
 
   @AfterClass
@@ -126,12 +125,11 @@ public class AllValuesFromRestrictionTest {
     final URI onProperty = new URIImpl(Constants.CYC_NAMESPACE + "performedBy");
     final URI allValuesClass = new URIImpl(Constants.CYC_NAMESPACE + "Person");
     AllValuesFromRestriction instance = new AllValuesFromRestriction(onProperty, allValuesClass);
-    assertEquals(false, instance.equals("abc"));
     final URI allValuesClass2 = new URIImpl(Constants.CYC_NAMESPACE + "DomesticCat");
     AllValuesFromRestriction instance2 = new AllValuesFromRestriction(onProperty, allValuesClass2);
-    assertEquals(false, instance.equals(instance2));
+    assertFalse(instance.equals(instance2));
     AllValuesFromRestriction instance3 = new AllValuesFromRestriction(onProperty, allValuesClass);
-    assertEquals(true, instance.equals(instance3));
+    assertTrue(instance.equals(instance3));
   }
 
   /**
@@ -158,14 +156,14 @@ public class AllValuesFromRestrictionTest {
     AllValuesFromRestriction instance = new AllValuesFromRestriction(onProperty, allValuesClass);
     assertTrue(RDFEntityManager.isSerializable(instance));
     assertNull(instance.getId());
-    rdfEntityManager.persist(instance, "Test");
+    rdfEntityManager.persist(instance, TEST);
     final URI id = instance.getId();
     assertNotNull(id);
-    final AllValuesFromRestriction loadedInstance = rdfEntityManager.find(AllValuesFromRestriction.class, id, "Test");
+    final AllValuesFromRestriction loadedInstance = rdfEntityManager.find(AllValuesFromRestriction.class, id, TEST);
     assertNotNull(loadedInstance);
     assertEquals(instance, loadedInstance);
-    rdfEntityManager.remove(instance, "Test");
-    assertNull(rdfEntityManager.find(AllValuesFromRestriction.class, id, "Test"));
+    rdfEntityManager.remove(instance, TEST);
+    assertNull(rdfEntityManager.find(AllValuesFromRestriction.class, id, TEST));
   }
 
 

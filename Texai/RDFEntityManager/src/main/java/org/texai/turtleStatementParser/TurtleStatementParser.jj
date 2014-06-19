@@ -66,11 +66,11 @@ import org.texai.util.TexaiException;
 
 /**  Provides lexicon and grammar for the turtle RDF statement format. */
 @SuppressWarnings("unchecked")
-public class TurtleStatementParser {
+class TurtleStatementParser {
   /** the log4j logger */
   private static final Logger LOGGER = Logger.getLogger(TurtleStatementParser.class.getName());
   /** the parsed turtle statement handler */
-  private static ParsedTurtleStatementHandler parsedTurtleStatementHandler;
+  private ParsedTurtleStatementHandler parsedTurtleStatementHandler;
 
   /** the URI namespace dictionary, prefix --> namespace */
   private final HashMap<String, String> namespaceDictionary = new HashMap<String, String>();

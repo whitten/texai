@@ -21,10 +21,8 @@
 package org.texai.kb;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import net.jcip.annotations.NotThreadSafe;
 import net.sf.ehcache.CacheManager;
@@ -81,16 +79,11 @@ public final class KBInitializer implements ParsedTurtleStatementHandler {
     rdfEntityManager = null;
   }
 
-  /** Initializes the OpenCyc knowledge base. */
+  /** Initializes the OpenCyc knowledge base by default unless this instance was constructed
+   * with a given repository connection.
+   */
   public void process() {
     LOGGER.info("Turtle-format RDF input file path: " + statementFilePath);
-    BufferedReader bufferedReader;
-    try {
-      bufferedReader = new BufferedReader(new FileReader(statementFilePath));
-    } catch (FileNotFoundException ex) {
-      throw new TexaiException(ex);
-    }
-
     if (rdfEntityManager != null) {
       LOGGER.info("repository name:                   " + repositoryName);
       repositoryConnection = rdfEntityManager.getConnectionToNamedRepository(repositoryName);
@@ -109,6 +102,7 @@ public final class KBInitializer implements ParsedTurtleStatementHandler {
     // process the input file
     final BufferedInputStream inputStream;
     try {
+      assert (new File(statementFilePath).exists()) : statementFilePath + " not found";
       inputStream = new BufferedInputStream(new FileInputStream(statementFilePath));
       final TurtleStatementParser turtleStatementParser = TurtleStatementParser.makeTurtleStatementParser(
               inputStream,

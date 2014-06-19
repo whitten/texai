@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import junit.framework.TestCase;
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.openrdf.model.impl.ContextStatementImpl;
 import org.openrdf.model.impl.URIImpl;
@@ -29,7 +28,7 @@ public class JournalReaderTest extends TestCase {
   /** the log4j logger */
   private static final Logger LOGGER = Logger.getLogger(JournalReaderTest.class);
   /** the test repository name */
-  private static String TEST_REPOSITORY_NAME = "Test";
+  private static final String TEST_REPOSITORY_NAME = "Test";
   /** the directory containing the test repository */
   private static File testRepositoryDirectory;
 
@@ -54,29 +53,7 @@ public class JournalReaderTest extends TestCase {
     System.out.println("read");
     CacheInitializer.initializeCaches();
 
-    String testRepositoryPath = System.getenv("REPOSITORIES_TMPFS");
-    if (testRepositoryPath == null || testRepositoryPath.isEmpty()) {
-      testRepositoryPath = System.getProperty("user.dir") + "repositories";
-    } else if (testRepositoryPath.endsWith("/")) {
-      testRepositoryPath = testRepositoryPath.substring(0, testRepositoryPath.length() - 1);
-    }
-    assertFalse(testRepositoryPath.isEmpty());
-
-    testRepositoryDirectory = new File(testRepositoryPath);
-    try {
-      if (testRepositoryDirectory.exists()) {
-        FileUtils.cleanDirectory(testRepositoryDirectory);
-      } else {
-        FileUtils.deleteDirectory(testRepositoryDirectory);
-      }
-    } catch (final IOException ex) {
-      fail(ex.getMessage());
-    }
-    assertNotNull(testRepositoryDirectory);
-    DistributedRepositoryManager.addRepositoryPath(
-            TEST_REPOSITORY_NAME,
-            testRepositoryPath + "/" + TEST_REPOSITORY_NAME);
-
+    DistributedRepositoryManager.addTestRepositoryPath(TEST_REPOSITORY_NAME, true);
     DistributedRepositoryManager.deleteNamedRepository(TEST_REPOSITORY_NAME);
     DistributedRepositoryManager.clearNamedRepository(TEST_REPOSITORY_NAME);
     final File directory = new File("./journals/" + TEST_REPOSITORY_NAME);
@@ -97,7 +74,7 @@ public class JournalReaderTest extends TestCase {
         }
       }
     }
-    List<JournalRequest> journalRequests = new ArrayList<JournalRequest>();
+    List<JournalRequest> journalRequests = new ArrayList<>();
     journalRequests.add(new JournalRequest(
             TEST_REPOSITORY_NAME,
             Constants.ADD_OPERATION,
@@ -114,7 +91,7 @@ public class JournalReaderTest extends TestCase {
     JournalReader instance = new JournalReader();
     instance.read(journalFilePath);
     try {
-      final RepositoryConnection repositoryConnection = 
+      final RepositoryConnection repositoryConnection =
               DistributedRepositoryManager.getInstance().getRepositoryConnectionForRepositoryName(TEST_REPOSITORY_NAME);
       assertEquals(1, repositoryConnection.size());
       repositoryConnection.close();

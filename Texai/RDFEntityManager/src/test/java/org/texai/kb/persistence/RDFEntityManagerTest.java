@@ -21,7 +21,6 @@
 package org.texai.kb.persistence;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -32,18 +31,22 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import net.sf.ehcache.CacheManager;
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.junit.After;
+import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
-import org.openrdf.repository.RepositoryConnection;
 import org.texai.kb.CacheInitializer;
 import org.texai.kb.Constants;
 
@@ -51,119 +54,54 @@ import org.texai.kb.Constants;
  *
  * @author reed
  */
-public class RDFEntityManagerTest extends TestCase {
+public class RDFEntityManagerTest {
 
   /** the log4j logger */
   private static final Logger LOGGER = Logger.getLogger(RDFEntityManagerTest.class);
   /** the test repository name */
-  private static String TEST_REPOSITORY_NAME = "Test";
-  /** the directory containing the test repository */
-  private static File testRepositoryDirectory;
-  /** the one time setup indicator */
-  private static boolean isFirst = true;
-  /** the repository connection */
-  static RepositoryConnection repositoryConnection;
+  private static final String TEST_REPOSITORY_NAME = "Test";
 
   /**
    * Creates a new instance of RDFEntityManagerTest.
-   * @param testName the test name
    */
-  public RDFEntityManagerTest(String testName) {
-    super(testName);
+  public RDFEntityManagerTest() {
   }
 
-  /** Returns a method-ordered test suite.
-   *
-   * @return a method-ordered test suite
-   */
-  public static Test suite() {
-    final TestSuite suite = new TestSuite();
-    suite.addTest(new RDFEntityManagerTest("testGetters"));
-    suite.addTest(new RDFEntityManagerTest("testGetDefaultContext"));
-    suite.addTest(new RDFEntityManagerTest("testFind"));
-    suite.addTest(new RDFEntityManagerTest("testFindByGivenPropertyAndValue"));
-    suite.addTest(new RDFEntityManagerTest("testRDFEntityIterator"));
-    suite.addTest(new RDFEntityManagerTest("testRemove"));
-    suite.addTest(new RDFEntityManagerTest("testSetIdFor"));
-    suite.addTest(new RDFEntityManagerTest("testCreateId"));
-    suite.addTest(new RDFEntityManagerTest("testExport"));
-    suite.addTest(new RDFEntityManagerTest("testOneTimeTearDown"));
-    return suite;
-  }
+  @BeforeClass
+  public static void setUpClass() throws Exception {
+    LOGGER.info("oneTimeSetup");
+    CacheInitializer.resetCaches();
+    CacheInitializer.initializeCaches();
 
-  /** Sets up the unit test
-   *
-   * @throws java.lang.Exception
-   */
-  @Override
-  protected void setUp() throws Exception {
-    if (isFirst) {
-      isFirst = false;
-      LOGGER.info("oneTimeSetup");
-      CacheInitializer.resetCaches();
+    DistributedRepositoryManager.addTestRepositoryPath(
+            TEST_REPOSITORY_NAME,
+            true); // isRepositoryDirectoryCleaned
+
+    try {
+      RDFEntityManagerTest.class.getClassLoader().setDefaultAssertionStatus(true);
       CacheInitializer.initializeCaches();
-
-      // remove the repository contents repository to clean up after a previous corrupted test
-      String repositoryContentsRepositoryPath = System.getenv("REPOSITORIES");
-      final File repositoryContentsDirectory = new File(repositoryContentsRepositoryPath + "/RepositoryContentDescriptions");
-      if (repositoryContentsDirectory.exists()) {
-        LOGGER.info("deleting existing repository contents repository directory");
-        FileUtils.deleteDirectory(repositoryContentsDirectory);
-      } else {
-        LOGGER.info("did not delete repository contents repository directory " + repositoryContentsDirectory.getAbsolutePath());
-      }
-
-      String testRepositoryPath = System.getenv("REPOSITORIES_TMPFS");
-      if (testRepositoryPath == null || testRepositoryPath.isEmpty()) {
-        testRepositoryPath = System.getProperty("user.dir") + "/repositories";
-      } else if (testRepositoryPath.endsWith("/")) {
-        testRepositoryPath = testRepositoryPath.substring(0, testRepositoryPath.length() - 1);
-      }
-      assertFalse(testRepositoryPath.isEmpty());
-
-      testRepositoryDirectory = new File(testRepositoryPath);
-      try {
-        if (testRepositoryDirectory.exists()) {
-          FileUtils.cleanDirectory(testRepositoryDirectory);
-        } else {
-          FileUtils.deleteDirectory(testRepositoryDirectory);
-        }
-      } catch (final IOException ex) {
-        fail(ex.getMessage());
-      }
-      assertNotNull(testRepositoryDirectory);
-      DistributedRepositoryManager.addRepositoryPath(
-              TEST_REPOSITORY_NAME,
-              testRepositoryPath + "/" + TEST_REPOSITORY_NAME);
-
-      // remove the test repository to clean up after a previous corrupted test
-      final File repositoryDirectory = new File(testRepositoryPath + "/" + TEST_REPOSITORY_NAME);
-      if (repositoryDirectory.exists()) {
-        LOGGER.info("deleting existing " + TEST_REPOSITORY_NAME + " repository directory");
-        FileUtils.deleteDirectory(repositoryDirectory);
-      } else {
-        LOGGER.info("did not delete repository directory " + repositoryDirectory.getAbsolutePath());
-      }
-
-      try {
-        getClass().getClassLoader().setDefaultAssertionStatus(true);
-        CacheInitializer.initializeCaches();
-      } catch (Exception e) {
-        e.printStackTrace();
-        fail(e.getMessage());
-      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      fail(e.getMessage());
     }
   }
 
-  /** Tears down the unit test
-   *
-   * @throws java.lang.Exception
-   */
-  @Override
-  protected void tearDown() throws Exception {
+  @AfterClass
+  public static void tearDownClass() throws Exception {
+    DistributedRepositoryManager.shutDown();
+    CacheManager.getInstance().shutdown();
+  }
+
+  @Before
+  public void setUp() {
+  }
+
+  @After
+  public void tearDown() {
   }
 
   /** Tests the get methods. */
+  @Test
   public void testGetters() {
     LOGGER.info("testGetters");
     RDFEntityManager rdfEntityManager = new RDFEntityManager();
@@ -175,6 +113,7 @@ public class RDFEntityManagerTest extends TestCase {
   /**
    * Test of getDefaultContext(final Class rdfEntityClass) method, of class org.texai.kb.persistence.RDFEntityManager.
    */
+  @Test
   public void testGetDefaultContext() {
     LOGGER.info("getDefaultContext");
     RDFEntityManager rdfEntityManager = new RDFEntityManager();
@@ -185,6 +124,7 @@ public class RDFEntityManagerTest extends TestCase {
   /**
    * Test of find(final Class clazz, final URI instanceURI) method, of class org.texai.kb.persistence.RDFEntityManager.
    */
+  @Test
   public void testFind() {
     LOGGER.info("find");
 
@@ -211,8 +151,9 @@ public class RDFEntityManagerTest extends TestCase {
     myPeers = new ArrayList<>(1);
     myPeers.add(rdfTestEntity1);
     rdfTestEntity2.setMyPeers(myPeers);
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     List<Double> myPeersStrengths = new ArrayList<>();
-    myPeersStrengths.add(Double.valueOf(0.5d));
+    myPeersStrengths.add(0.5d);
     rdfTestEntity2.setName("TestDomainEntity 2");
     rdfTestEntity2.setNumberOfCrew(1);
     final String[] comments2 = {"comment 1", "comment 2"};
@@ -271,7 +212,7 @@ public class RDFEntityManagerTest extends TestCase {
     assertEquals(rdfTestEntity1.getByteField(), rdfTestEntity1_Loaded.getByteField());
     assertEquals(rdfTestEntity1.getIntField(), rdfTestEntity1_Loaded.getIntField());
     assertEquals(rdfTestEntity1.getLongField(), rdfTestEntity1_Loaded.getLongField());
-    assertEquals(rdfTestEntity1.getFloatField(), rdfTestEntity1_Loaded.getFloatField());
+    assertTrue(rdfTestEntity1.getFloatField() == rdfTestEntity1_Loaded.getFloatField());
     assertEquals(rdfTestEntity1.getBigIntegerField(), rdfTestEntity1_Loaded.getBigIntegerField());
     assertEquals(rdfTestEntity1.getBigDecimalField(), rdfTestEntity1_Loaded.getBigDecimalField());
     assertEquals(rdfTestEntity1.getDateField(), rdfTestEntity1_Loaded.getDateField());
@@ -279,16 +220,6 @@ public class RDFEntityManagerTest extends TestCase {
     assertTrue(Math.abs(rdfTestEntity1.getDoubleField() - rdfTestEntity1_Loaded.getDoubleField()) < 0.0000001);
     rdfEntityManager.close();
 
-    LOGGER.info("  find OK");
-  }
-
-  /**
-   * Test of find(
-   *      final URI property,
-   *      final Value value,
-   *      final Class rdfEntityClass) method, of class org.texai.kb.persistence.RDFEntityLoader.
-   */
-  public void testFindByGivenPropertyAndValue() {
     LOGGER.info("find by given property and value");
     RDFEntityManager instance = new RDFEntityManager();
     URI predicate = new URIImpl("http://sw.cyc.com/2006/07/27/cyc/prettyString-Canonical");
@@ -306,20 +237,15 @@ public class RDFEntityManagerTest extends TestCase {
             RDFTestEntity.class);
     assertNotNull(resultList);
     assertEquals(1, resultList.size());
-    RDFTestEntity result = resultList.get(0);
-    assertEquals("TestDomainEntity 1", result.getName());
+    result = resultList.get(0);
+    assertEquals("TestDomainEntity 1", ((RDFTestEntity) result).getName());
     instance.close();
     LOGGER.info("  find by given property and value OK");
-  }
 
-  /**
-   * Test of rdfEntityIterator method, of class org.texai.kb.ejb.session.RDFEntityLoader.
-   */
-  public void testRDFEntityIterator() {
     LOGGER.info("rdfEntityIterator");
 
     // load a persisted entity
-    RDFEntityManager instance = new RDFEntityManager();
+    instance = new RDFEntityManager();
     Iterator<RDFTestEntity> iterator = instance.rdfEntityIterator(
             RDFTestEntity.class, null);
     assertNotNull(iterator);
@@ -333,16 +259,11 @@ public class RDFEntityManagerTest extends TestCase {
     assertEquals(2, count);
     instance.close();
     LOGGER.info("  rdfEntityIterator OK");
-  }
 
-  /**
-   * Test of remove method, of class org.texai.kb.persistence.RDFEntityPersister.
-   */
-  public void testRemove() {
     LOGGER.info("remove");
 
-    RDFEntityManager instance = new RDFEntityManager();
-    Iterator<RDFTestEntity> iterator = instance.rdfEntityIterator(
+    instance = new RDFEntityManager();
+    iterator = instance.rdfEntityIterator(
             RDFTestEntity.class, null);
     assertNotNull(iterator);
     assert iterator.hasNext();
@@ -351,57 +272,35 @@ public class RDFEntityManagerTest extends TestCase {
     RDFTestEntity rdfTestEntity = (RDFTestEntity) obj;
     instance.remove(rdfTestEntity);
     assertNotNull(rdfTestEntity.getId());
-    URI uri1 = rdfTestEntity.getId();
+    uri1 = rdfTestEntity.getId();
     assertNull(instance.find(
             RDFTestEntity.class,
             uri1));
     instance.close();
     LOGGER.info("  remove OK");
-  }
 
-  /**
-   * Test of setIdFor method, of class org.texai.kb.persistence.RDFEntityPersister.
-   */
-  public void testSetIdFor() {
     LOGGER.info("setIdFor");
 
-    RDFEntityManager instance = new RDFEntityManager();
-    final RDFTestEntity rdfTestEntity = new RDFTestEntity();
+
+    instance = new RDFEntityManager();
+    rdfTestEntity = new RDFTestEntity();
     rdfTestEntity.setName("my name");
     instance.setIdFor(rdfTestEntity);
-    final URI id = rdfTestEntity.getId();
+    URI id = rdfTestEntity.getId();
     LOGGER.info("setIdFor id:" + id);
     instance.persist(rdfTestEntity);
     assertEquals(id, rdfTestEntity.getId());
-    final RDFTestEntity loadedTestEntity = instance.find(RDFTestEntity.class, id);
+    RDFTestEntity loadedTestEntity = instance.find(RDFTestEntity.class, id);
     assertEquals(rdfTestEntity, loadedTestEntity);
     instance.close();
     LOGGER.info("  setIdFor OK");
-  }
 
-  /**
-   * Test of setIdFor method, of class org.texai.kb.persistence.RDFEntityPersister.
-   */
-  public void testSetIdFor2() {
-    LOGGER.info("setIdFor");
-
-    RDFEntityManager instance = new RDFEntityManager();
-    final RDFTestEntity rdfTestEntity = new RDFTestEntity();
-    rdfTestEntity.setName("my name");
-    final URI id = new URIImpl(Constants.TEXAI_NAMESPACE + "my-id");
-    instance.setIdFor(rdfTestEntity, id);
-    LOGGER.info("setIdFor id:" + id);
-    instance.persist(rdfTestEntity);
-    assertEquals(id, rdfTestEntity.getId());
-    final RDFTestEntity loadedTestEntity = instance.find(RDFTestEntity.class, id);
-    assertEquals(rdfTestEntity, loadedTestEntity);
-    instance.close();
-    LOGGER.info("  setIdFor OK");
   }
 
   /**
    * Test of createId method, of class org.texai.kb.persistence.RDFEntityPersister.
    */
+  @Test
   public void testCreateId() {
     LOGGER.info("createId");
 
@@ -413,6 +312,7 @@ public class RDFEntityManagerTest extends TestCase {
   /**
    * Test of export method.
    */
+  @Test
   public void testExport() {
     LOGGER.info("export");
 
@@ -431,12 +331,5 @@ public class RDFEntityManagerTest extends TestCase {
       fail(ex.getMessage());
     }
     LOGGER.info("  export OK");
-  }
-
-  /** Performs one time tear down of test harness. This must be the last test method. */
-  public void testOneTimeTearDown() {
-    LOGGER.info("oneTimeTearDown");
-    CacheManager.getInstance().shutdown();
-    DistributedRepositoryManager.shutDown();
   }
 }

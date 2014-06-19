@@ -43,11 +43,14 @@ import org.texai.kb.persistence.benchmark.AbstractRDFTestEntity;
 @RDFEntity(namespaces = {
   @RDFNamespace(prefix = "texai", namespaceURI = Constants.TEXAI_NAMESPACE),
   @RDFNamespace(prefix = "cyc", namespaceURI = Constants.CYC_NAMESPACE)},
-subject = "texai:org.texai.kb.persistence.RDFTestEntity",
-context = "texai:TestContext",
-type = {"cyc:TransportationDeviceType", "cyc:SpatiallyDisjointObjectType"},
-subClassOf = {"cyc:Scooter", "cyc:Device-UserPowered"})
+        subject = "texai:org.texai.kb.persistence.RDFTestEntity",
+        context = "texai:TestContext",
+        type = {"cyc:TransportationDeviceType", "cyc:SpatiallyDisjointObjectType"},
+        subClassOf = {"cyc:Scooter", "cyc:Device-UserPowered"})
 public class RDFTestEntity extends AbstractRDFTestEntity implements RDFPersistent {
+
+  /** the serial version UID */
+  private static final long serialVersionUID = 1L;
 
   // required annotation and field type
   /** the RDF entity id injected by the container */
@@ -67,7 +70,7 @@ public class RDFTestEntity extends AbstractRDFTestEntity implements RDFPersisten
   private int numberOfCrew;
   /** the number of crew members needed to operate this scooter */
   @RDFProperty(predicate = "cyc:maxNbrOfScooterRiders",
-  subPropertyOf = "texai:hasAttribute")
+          subPropertyOf = "texai:hasAttribute")
   private Integer maxNbrOfScooterRiders;
   /** the collection of peers */
   @RDFProperty(predicate = "texai:testRDFEntityPeer", subPropertyOf = "cyc:conceptuallyRelated", range = "texai:org.texai.kb.persistence.RDFTestEntity")
@@ -151,7 +154,7 @@ public class RDFTestEntity extends AbstractRDFTestEntity implements RDFPersisten
   @RDFProperty(predicate = "texai:testUUIDField", subPropertyOf = "hasAttribute")
   private UUID uuidField;
   /** a test Map field */
-  @RDFProperty(mapKeyType="java.lang.Integer", mapValueType="java.lang.String")
+  @RDFProperty(mapKeyType = "java.lang.Integer", mapValueType = "java.lang.String")
   public Map<Integer, String> mapField;
 
   /**

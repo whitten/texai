@@ -39,7 +39,7 @@ import org.texai.kb.persistence.DistributedRepositoryManager;
 import org.texai.kb.persistence.RDFEntityManager;
 import org.texai.kb.persistence.RDFUtility;
 
-/**
+/** This test does not modify the production OpenCyc repository.
  *
  * @author reed
  */
@@ -79,15 +79,14 @@ public class CachedSubsumptionGraphTest {
     final CachedSubsumptionGraph cachedSubsumptionGraph1 = CachedSubsumptionGraph.getInstance();
     cachedSubsumptionGraph1.logDictionaryStatistics();
     final List<URI> superClasses = new ArrayList<>(cachedSubsumptionGraph1.getDirectSuperClasses("OpenCyc", new URIImpl(Constants.CYC_NAMESPACE + "Person")));
-    Collections.sort(superClasses, new RDFUtility.ResourceComparator());
     assertNotNull(superClasses);
-    //LOGGER.info(RDFUtility.formatResources(superClasses));
-    assertTrue(RDFUtility.formatResources(superClasses).startsWith("{cyc:HomoSapiens, cyc:LegalAgent, cyc:NarrativeRole, cyc:Sentient, cyc:SocialBeing"));
+    LOGGER.info(RDFUtility.formatSortedResources(superClasses));
+    assertEquals("{cyc:HomoSapiens, cyc:LegalAgent, cyc:NarrativeRole, cyc:Sentient, cyc:SocialBeing}", RDFUtility.formatSortedResources(superClasses));
 
     final List<URI> disjointWiths = new ArrayList<>(cachedSubsumptionGraph1.getDirectDisjointWiths(new URIImpl(Constants.CYC_NAMESPACE + "Person")));
     Collections.sort(disjointWiths, new RDFUtility.ResourceComparator());
     assertNotNull(disjointWiths);
-    assertEquals("{cyc:ConsumableProduct, cyc:Crystalline, cyc:DisposableProduct, cyc:FoodIngredientOnly, cyc:FoodOrDrink, cyc:IBTGeneration, cyc:MailableObject, cyc:MilitaryEquipment, cyc:NonPersonAnimal, cyc:PackagedObject, cyc:PhysicalDevice, cyc:TouristAttraction}", RDFUtility.formatResources(disjointWiths));
+    assertEquals("{cyc:ConsumableProduct, cyc:Crystalline, cyc:DisposableProduct, cyc:FoodIngredientOnly, cyc:FoodOrDrink, cyc:IBTGeneration, cyc:MailableObject, cyc:MilitaryEquipment, cyc:NonPersonAnimal, cyc:PackagedObject, cyc:PhysicalDevice, cyc:TouristAttraction}", RDFUtility.formatSortedResources(disjointWiths));
 
     DistributedRepositoryManager.shutDown();
     CacheManager.getInstance().shutdown();

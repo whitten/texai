@@ -381,6 +381,20 @@ public final class RDFUtility {
     return stringBuilder.toString();
   }
 
+  /** Formats the given resources with common namespaces after sortng them.
+   *
+   * @param resources the given URI or BNode
+   * @return the formatted URI
+   */
+  public static String formatSortedResources(final Collection<? extends Resource> resources) {
+    //preconditions
+    assert resources != null : "resources must not be null";
+
+    final List<Resource> sortedResources = new ArrayList<>(resources);
+    Collections.sort(sortedResources, new ResourceComparator());
+    return formatResources(sortedResources);
+  }
+
   /** Formats the given resource with common namespaces.
    *
    * @param resource the given URI or BNode

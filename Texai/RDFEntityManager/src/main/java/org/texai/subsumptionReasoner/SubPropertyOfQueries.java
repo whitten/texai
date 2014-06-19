@@ -56,9 +56,9 @@ public class SubPropertyOfQueries {
   /** the RDF entity manager */
   private final RDFEntityManager rdfEntityManager;
   /** the isSubPropertyOf cache */
-  private IsSubPropertyOfCache isSubPropertyOfCache = new IsSubPropertyOfCache();
+  private final IsSubPropertyOfCache isSubPropertyOfCache = new IsSubPropertyOfCache();
   /** the super property cache */
-  private SuperPropertyCache superPropertyCache = new SuperPropertyCache();
+  private final SuperPropertyCache superPropertyCache = new SuperPropertyCache();
 
   /** Constructs a new SubPropertyOfQueries instance.
    *
@@ -135,7 +135,7 @@ public class SubPropertyOfQueries {
             repositoryName,
             property1,
             property2,
-            new HashSet<URI>());
+            new HashSet<>());
     if (isSubPropertyOf && repositoryName.equals("OpenCyc")) {
         isSubPropertyOfCache.get().add(key);
     }
@@ -147,7 +147,7 @@ public class SubPropertyOfQueries {
    * @param repositoryName the repository name
    * @param property1 the given term
    * @param property2 the given property term
-   * @param visitedTypeTerms the visited property terms
+   * @param visitedPropertyTerms the visited property terms
    * @return whether the first given property is directly or indirectly a subproperty of the second given property
    */
   private boolean isSubPropertyOf(

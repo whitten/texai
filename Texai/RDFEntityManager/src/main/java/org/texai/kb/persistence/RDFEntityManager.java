@@ -77,7 +77,7 @@ public final class RDFEntityManager {
   /** the journal writer */
   private final JournalWriter journalWriter;
   /** the cached indicator whether to automatically commit every repository operation */
-  private boolean isAutoCommit = true;   // NOPMD
+  private final boolean isAutoCommit = true;   // NOPMD
   /** the type queries object */
   private TypeQueries typeQueries;
   /** the subclass queries object */

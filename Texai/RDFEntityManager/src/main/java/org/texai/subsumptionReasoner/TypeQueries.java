@@ -72,11 +72,11 @@ public class TypeQueries {
   private final RDFEntityManager rdfEntityManager;
 
   /** the isType cache */
-  private IsTypeCache isTypeCache = new IsTypeCache();
+  private final IsTypeCache isTypeCache = new IsTypeCache();
   /** the type hierarchy cache */
-  private TypeHierarchyCache typeHierarchyCache = new TypeHierarchyCache();
+  private final TypeHierarchyCache typeHierarchyCache = new TypeHierarchyCache();
   /** the types cache */
-  private TypesCache typesCache = new TypesCache();
+  private final TypesCache typesCache = new TypesCache();
 
 
   /** Constructs a new TypeQueries instance.
@@ -143,7 +143,7 @@ public class TypeQueries {
     assert term != null : "term must not be null";
     assert typeTerm != null : "typeTerm must not be null";
 
-    List<URI> typeHierarchy = null;
+    List<URI> typeHierarchy;
     final List<URI> key = new ArrayList<>(2);
     if (repositoryName.equals("OpenCyc")) {
       key.add(term);
@@ -382,6 +382,7 @@ public class TypeQueries {
    * @param typeTerm1 the subclass term
    * @param typeTerm2 the superclass term
    * @param visitedTypeTerms the visited type terms
+   * @param repositoryConnection the repository connection
    * @return the subclass hierarchy terms between the two given type terms
    */
   protected List<URI> subClassOfHierarchy(

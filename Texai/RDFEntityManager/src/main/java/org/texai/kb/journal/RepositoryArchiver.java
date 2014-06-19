@@ -74,9 +74,9 @@ public final class RepositoryArchiver {
     // open archive directory
     final String absolutePath = dataDirectory.getAbsolutePath();
     final File archiveDirectory;
-    if (absolutePath.indexOf("repositories") > -1) {
+    if (absolutePath.contains("repositories")) {
       archiveDirectory = new File(absolutePath.replace("repositories", "archiveRepositories"));
-    } else if (absolutePath.indexOf("Repositories") > -1) {
+    } else if (absolutePath.contains("Repositories")) {
       archiveDirectory = new File(absolutePath.replace("Repositories", "archiveRepositories"));
     } else {
       throw new TexaiException("invalid repositories path for archiving");
@@ -107,7 +107,7 @@ public final class RepositoryArchiver {
         continue;
       }
       final File archiveFile;
-      if (absolutePath.indexOf("repositories") > -1) {
+      if (absolutePath.contains("repositories")) {
         archiveFile = new File(dataFile.getAbsolutePath().replace("repositories", "archiveRepositories"));
       } else {
         archiveFile = new File(dataFile.getAbsolutePath().replace("Repositories", "archiveRepositories"));

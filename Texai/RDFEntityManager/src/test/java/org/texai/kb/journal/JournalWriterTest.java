@@ -7,31 +7,31 @@ package org.texai.kb.journal;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import junit.framework.TestCase;
 import org.apache.log4j.Logger;
 import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDF;
 import org.texai.kb.Constants;
+import org.junit.Test;
 
 /**
  *
  * @author reed
  */
-public class JournalWriterTest extends TestCase {
+public class JournalWriterTest {
 
   /** the log4j logger */
   private static final Logger LOGGER = Logger.getLogger(JournalWriterTest.class);
   /** the test repository name */
-  private static String TEST_REPOSITORY_NAME = "Test";
+  private static final String TEST_REPOSITORY_NAME = "Test";
 
-  public JournalWriterTest(String testName) {
-    super(testName);
+  public JournalWriterTest() {
   }
 
   /**
    * Test of write method, of class JournalWriter.
    */
+  @Test
   public void testWrite() {
     LOGGER.info("write");
     final File directory = new File("./journals/");

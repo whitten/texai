@@ -74,6 +74,7 @@ public final class JournalReader {
    * @param dataDirectoryPath the repository data directory path, or null if the repository is in the default location and its name
    * should be extracted from the given journal file path
    */
+  @SuppressWarnings("null")
   public void read(final String journalFilePath, final String dataDirectoryPath) {
     //Preconditions
     assert journalFilePath != null : "journalFilePath must not be null";
@@ -94,7 +95,7 @@ public final class JournalReader {
     int index = canonicalJournalFilePath.lastIndexOf(File.separator);
     final String journalFileName = canonicalJournalFilePath.substring(index + 1);
 
-    Repository repository = null;
+    Repository repository;
     RepositoryConnection repositoryConnection = null;
     if (dataDirectoryPath == null) {
       // extract repository name from the given journal file path
@@ -109,7 +110,7 @@ public final class JournalReader {
         repository = new SailRepository(new NativeStore(dataDirectory, indices));
         repository.initialize();
         repositoryConnection = repository.getConnection();
-      } catch (Exception ex) {
+      } catch (RepositoryException ex) {
         throw new TexaiException(ex);
       }
     }

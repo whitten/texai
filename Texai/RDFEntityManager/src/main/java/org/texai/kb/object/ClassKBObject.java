@@ -44,6 +44,7 @@ public final class ClassKBObject extends AbstractKBObject {
   /** Constructs a new ClassKBObject instance.
    *
    * @param statements the statements
+   * @param repositoryName the repository name
    */
   public ClassKBObject(
           final Set<Statement> statements,

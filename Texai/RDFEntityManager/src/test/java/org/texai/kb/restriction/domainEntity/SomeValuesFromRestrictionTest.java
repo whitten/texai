@@ -45,7 +45,9 @@ public class SomeValuesFromRestrictionTest {
   /** the logger */
   private static final Logger LOGGER = Logger.getLogger(SomeValuesFromRestrictionTest.class);
   /** the RDF entity manager */
-  private static RDFEntityManager rdfEntityManager = new RDFEntityManager();
+  private static final RDFEntityManager rdfEntityManager = new RDFEntityManager();
+  /** the name of the test repository */
+  private static final String TEST = "Test";
 
   public SomeValuesFromRestrictionTest() {
   }
@@ -54,10 +56,9 @@ public class SomeValuesFromRestrictionTest {
   public static void setUpClass() throws Exception {
     CacheInitializer.initializeCaches();
     JournalWriter.deleteJournalFiles();
-    DistributedRepositoryManager.addRepositoryPath(
-            "ConceptuallyRelatedTerms",
-            System.getenv("REPOSITORIES_TMPFS") + "/Test");
-    DistributedRepositoryManager.clearNamedRepository("Test");
+    DistributedRepositoryManager.addTestRepositoryPath(
+            TEST,
+            true); // isRepositoryDirectoryCleaned
   }
 
   @AfterClass
@@ -124,7 +125,6 @@ public class SomeValuesFromRestrictionTest {
     final URI onProperty = new URIImpl(Constants.CYC_NAMESPACE + "performedBy");
     final URI someValuesClass = new URIImpl(Constants.CYC_NAMESPACE + "Person");
     SomeValuesFromRestriction instance = new SomeValuesFromRestriction(onProperty, someValuesClass);
-    assertFalse(instance.equals("abc"));
     final URI someValuesClass2 = new URIImpl(Constants.CYC_NAMESPACE + "DomesticCat");
     SomeValuesFromRestriction instance2 = new SomeValuesFromRestriction(onProperty, someValuesClass2);
     assertFalse(instance.equals(instance2));
@@ -156,14 +156,14 @@ public class SomeValuesFromRestrictionTest {
     SomeValuesFromRestriction instance = new SomeValuesFromRestriction(onProperty, someValuesClass);
     assertTrue(RDFEntityManager.isSerializable(instance));
     assertNull(instance.getId());
-    rdfEntityManager.persist(instance, "Test");
+    rdfEntityManager.persist(instance, TEST);
     final URI id = instance.getId();
     assertNotNull(id);
-    final SomeValuesFromRestriction loadedInstance = rdfEntityManager.find(SomeValuesFromRestriction.class, id, "Test");
+    final SomeValuesFromRestriction loadedInstance = rdfEntityManager.find(SomeValuesFromRestriction.class, id, TEST);
     assertNotNull(loadedInstance);
     assertEquals(instance, loadedInstance);
-    rdfEntityManager.remove(instance, "Test");
-    assertNull(rdfEntityManager.find(SomeValuesFromRestriction.class, id, "Test"));
+    rdfEntityManager.remove(instance, TEST);
+    assertNull(rdfEntityManager.find(SomeValuesFromRestriction.class, id, TEST));
   }
 
 }

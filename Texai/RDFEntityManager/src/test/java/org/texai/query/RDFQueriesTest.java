@@ -5,9 +5,12 @@
 package org.texai.query;
 
 import java.util.List;
-import junit.framework.TestCase;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.fail;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -21,7 +24,7 @@ import org.texai.turtleStatementParser.TurtleStatementParser;
  *
  * @author reed
  */
-public class RDFQueriesTest extends TestCase {
+public class RDFQueriesTest {
 
   /** the log4j logger */
   private static final Logger LOGGER = Logger.getLogger(RDFQueriesTest.class);
@@ -30,13 +33,13 @@ public class RDFQueriesTest extends TestCase {
   /** the indicator whether info logging is enabled */
   private static final boolean IS_INFO_LOGGING_ENABLED = LOGGER.isEnabledFor(Level.INFO);
 
-  public RDFQueriesTest(String testName) {
-    super(testName);
+  public RDFQueriesTest() {
   }
 
   /**
    * Test of isTrueAnyS1_P1_O1_P2_O2 method, of class RDFQueries.
    */
+  @Test
   public void testIsTrueAnyS1_P1_O1_P2_O2() {
     System.out.println("isTrueAnyS1_P1_O1_P2_O2");
     String string =
@@ -64,12 +67,12 @@ public class RDFQueriesTest extends TestCase {
     URI object2 = new URIImpl(Constants.TEXAI_NAMESPACE + "Texai");
     boolean result = RDFQueries.isTrueAnyS1_P1_O1_P2_O2(statements, predicate1, object1, predicate2, object2);
     assertEquals(true, result);
-    
+
     string =
       "<texai:Assignment-Obligation2> <cyc:allottedAgents> <texai:Texai> .\n" +
       "<texai:Assignment-Obligation2> <cyc:assigner> <texai:ConsoleGuestUser> .\n" +
       "<texai:Assignment-Obligation2> <rdf:type> <cyc:Assignment> .\n" +   // will not match
-      "<texai:Learning3> <cyc:actionFulfillsAssignment> <texai:Assignment-Obligation2> .\n" + 
+      "<texai:Learning3> <cyc:actionFulfillsAssignment> <texai:Assignment-Obligation2> .\n" +
       "<texai:Learning3> <cyc:situationConstituents> <texai:Texai> .\n" +
       "<texai:Learning3> <cyc:thingComprehended> <texai:ProperCountNoun1_Group> .\n" +
       "<texai:Learning3> <rdf:type> <cyc:Learning> .\n" +

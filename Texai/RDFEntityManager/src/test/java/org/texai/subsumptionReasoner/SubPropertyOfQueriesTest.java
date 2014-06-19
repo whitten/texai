@@ -24,11 +24,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import org.apache.log4j.Logger;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import net.sf.ehcache.CacheManager;
+import org.apache.log4j.Logger;
+import org.junit.After;
+import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.texai.kb.CacheInitializer;
@@ -42,44 +46,40 @@ import org.texai.kb.persistence.RDFUtility.ResourceComparator;
  *
  * @author reed
  */
-public class SubPropertyOfQueriesTest extends TestCase {
+public class SubPropertyOfQueriesTest {
 
   /** the log4j logger */
   private static final Logger LOGGER = Logger.getLogger(SubPropertyOfQueriesTest.class);
   /** the RDF entity manager */
   private static RDFEntityManager rdfEntityManager;
 
-  public SubPropertyOfQueriesTest(String testName) {
-    super(testName);
+  public SubPropertyOfQueriesTest() {
   }
 
-  /** Returns a method-ordered test suite.
-   *
-   * @return a method-ordered test suite
-   */
-public static Test suite() {
-  final TestSuite suite = new TestSuite();
-   suite.addTest(new SubPropertyOfQueriesTest("testOneTimeSetup"));
-   suite.addTest(new SubPropertyOfQueriesTest("testIsDirectSubPropertyOf"));
-   suite.addTest(new SubPropertyOfQueriesTest("testIsSubPropertyOf"));
-   suite.addTest(new SubPropertyOfQueriesTest("testGetDirectSuperProperties"));
-   suite.addTest(new SubPropertyOfQueriesTest("testGetSuperProperties_String_URI"));
-   suite.addTest(new SubPropertyOfQueriesTest("testGetDirectSubProperties"));
-   suite.addTest(new SubPropertyOfQueriesTest("testClearCaches"));
-   suite.addTest(new SubPropertyOfQueriesTest("testOneTimeTearDown"));
-   return suite;
-}
-
-  /** one time setup */
-  public void testOneTimeSetup() {
-    LOGGER.info("testOneTimeSetup");
+  @BeforeClass
+  public static void setUpClass() throws Exception {
     CacheInitializer.initializeCaches();
     rdfEntityManager = new RDFEntityManager();
+  }
+
+  @AfterClass
+  public static void tearDownClass() throws Exception {
+    DistributedRepositoryManager.shutDown();
+    CacheManager.getInstance().shutdown();
+  }
+
+  @Before
+  public void setUp() {
+  }
+
+  @After
+  public void tearDown() {
   }
 
   /**
    * Test of isDirectSubPropertyOf method, of class SubPropertyOfQueries.
    */
+  @Test
   public void testIsDirectSubPropertyOf() {
     LOGGER.info("isDirectSubPropertyOf");
     String repositoryName = "OpenCyc";
@@ -93,6 +93,7 @@ public static Test suite() {
   /**
    * Test of isSubPropertyOf method, of class SubPropertyOfQueries.
    */
+  @Test
   public void testIsSubPropertyOf() {
     LOGGER.info("isSubPropertyOf");
     String repositoryName = "OpenCyc";
@@ -106,13 +107,14 @@ public static Test suite() {
   /**
    * Test of getDirectSuperProperties method, of class SubPropertyOfQueries.
    */
+  @Test
   public void testGetDirectSuperProperties() {
     LOGGER.info("getDirectSuperProperties");
     String repositoryName = "OpenCyc";
     URI term = new URIImpl(Constants.CYC_NAMESPACE + "doneBy");
     SubPropertyOfQueries instance = new SubPropertyOfQueries(rdfEntityManager);
     Set<URI> result = instance.getDirectSuperProperties(repositoryName, term);
-    List<URI> orderedResult = new ArrayList<URI>();
+    List<URI> orderedResult = new ArrayList<>();
     orderedResult.addAll(result);
     Collections.sort(orderedResult, new ResourceComparator());
     assertTrue(orderedResult.size() > 2);
@@ -122,13 +124,14 @@ public static Test suite() {
   /**
    * Test of getSuperProperties method, of class SubPropertyOfQueries.
    */
+  @Test
   public void testGetSuperProperties_String_URI() {
     LOGGER.info("getSuperProperties");
     String repositoryName = "OpenCyc";
     URI term = new URIImpl(Constants.CYC_NAMESPACE + "performedBy");
     SubPropertyOfQueries instance = new SubPropertyOfQueries(rdfEntityManager);
     Set<URI> result = instance.getSuperProperties(repositoryName, term);
-    List<URI> orderedResult = new ArrayList<URI>();
+    List<URI> orderedResult = new ArrayList<>();
     orderedResult.addAll(result);
     Collections.sort(orderedResult, new ResourceComparator());
     assertTrue(orderedResult.size() > 2);
@@ -138,13 +141,14 @@ public static Test suite() {
   /**
    * Test of getDirectSubProperties method, of class SubPropertyOfQueries.
    */
+  @Test
   public void testGetDirectSubProperties() {
     LOGGER.info("getDirectSubProperties");
     String repositoryName = "OpenCyc";
     URI term = new URIImpl(Constants.CYC_NAMESPACE + "doneBy");
     SubPropertyOfQueries instance = new SubPropertyOfQueries(rdfEntityManager);
     Set<URI> result = instance.getDirectSubProperties(repositoryName, term);
-    List<URI> orderedResult = new ArrayList<URI>();
+    List<URI> orderedResult = new ArrayList<>();
     orderedResult.addAll(result);
     Collections.sort(orderedResult, new ResourceComparator());
     assertTrue(orderedResult.size() > 2);
@@ -154,17 +158,11 @@ public static Test suite() {
   /**
    * Test of clearCaches method, of class SubPropertyOfQueries.
    */
+  @Test
   public void testClearCaches() {
     LOGGER.info("clearCaches");
     SubPropertyOfQueries instance = new SubPropertyOfQueries(rdfEntityManager);
     instance.clearCaches();
   }
 
-  /** one time tear-down */
-  public void testOneTimeTearDown() {
-    LOGGER.info("testOneTimeTearDown");
-    CacheManager.getInstance().shutdown();
-    rdfEntityManager.close();
-    DistributedRepositoryManager.shutDown();
-  }
 }

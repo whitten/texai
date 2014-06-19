@@ -33,7 +33,7 @@ import org.texai.kb.persistence.RDFEntityManager;
 public class RestrictionInitializer {
 
   /** the logger */
-  private static Logger LOGGER = Logger.getLogger(RestrictionInitializer.class);
+  private static final Logger LOGGER = Logger.getLogger(RestrictionInitializer.class);
   /** the RDF entity manager */
   private final RDFEntityManager rdfEntityManager = new RDFEntityManager();
   /** the OpenCyc repository */
@@ -51,7 +51,7 @@ public class RestrictionInitializer {
 
   /** Processes this application. */
   private void process() {
-    
+
   }
 
   /** Closes this application and releases its resources. */

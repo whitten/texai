@@ -151,7 +151,7 @@ public class SubClassOfQueries {
               repositoryName,
               typeTerm1,
               typeTerm2,
-              new HashSet<URI>()); // visitedTypeTerms
+              new HashSet<>()); // visitedTypeTerms
       cache.put(new Element(key, isSubClassOf));
       return isSubClassOf;
     } else {
@@ -176,9 +176,7 @@ public class SubClassOfQueries {
     final Set<URI> typesToRemove = new HashSet<>();
     for (final URI typeTerm : typeTerms) {
       for (final URI otherTypeTerm : typeTerms) {
-        if (typeTerm.equals(otherTypeTerm)) {
-          continue;
-        } else if (isSubClassOf(repositoryName, otherTypeTerm, typeTerm)) {
+        if (!(typeTerm.equals(otherTypeTerm)) && isSubClassOf(repositoryName, otherTypeTerm, typeTerm)) {
           typesToRemove.add(typeTerm);
         }
       }
@@ -313,7 +311,7 @@ public class SubClassOfQueries {
     assert !repositoryName.isEmpty() : "repositoryName must not be empty";
     assert term != null : "term must not be null";
 
-     if (cachedSubsumptionGraph == null) {
+    if (cachedSubsumptionGraph == null) {
       final RepositoryConnection repositoryConnection = rdfEntityManager.getConnectionToNamedRepository(repositoryName);
       final Set<URI> directSuperClassTerms = new ArraySet<>();
       try {
@@ -334,7 +332,7 @@ public class SubClassOfQueries {
       }
 //    LOGGER.info("getDirectSuperClasses for " + RDFUtility.formatResource(term)
 //            + ", directSuperClassTerms: " + RDFUtility.formatResources(directSuperClassTerms));
-    return directSuperClassTerms;
+      return directSuperClassTerms;
     } else {
       return cachedSubsumptionGraph.getDirectSuperClasses(repositoryName, term);
     }

@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Stack;
 import javax.persistence.Id;
 import net.jcip.annotations.NotThreadSafe;
@@ -821,7 +822,7 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
           writer.write(RDFUtility.formatStatementAsTurtle(statement));
           writer.newLine();
         } catch (IOException ex) {
-          new TexaiException(ex);
+          throw new TexaiException(ex);
         }
       }
       getLogger().info("added: " + RDFUtility.formatStatement(statement) + " to " + repositoryConnection.getRepository().getDataDir().getName());
@@ -838,7 +839,7 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
           writer.write(RDFUtility.formatStatementAsTurtle(statement));
           writer.newLine();
         } catch (IOException ex) {
-          new TexaiException(ex);
+          throw new TexaiException(ex);
         }
       }
       getLogger().info("added: " + RDFUtility.formatStatement(statement) + " to " + repositoryConnection.getRepository().getDataDir().getName());
@@ -858,7 +859,7 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
         writer.write(RDFUtility.formatStatementAsTurtle(statement));
         writer.newLine();
       } catch (IOException ex) {
-        new TexaiException(ex);
+        throw new TexaiException(ex);
       }
     }
     getLogger().info("added: " + RDFUtility.formatStatement(statement) + " to " + repositoryConnection.getRepository().getDataDir().getName());
@@ -874,7 +875,7 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
         writer.write(RDFUtility.formatStatementAsTurtle(statement));
         writer.newLine();
       } catch (IOException ex) {
-        new TexaiException(ex);
+        throw new TexaiException(ex);
       }
     }
     getLogger().info("added: " + RDFUtility.formatStatement(statement) + " to " + repositoryConnection.getRepository().getDataDir().getName());
@@ -1136,6 +1137,7 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
      *
      * @param bNode the blank node that persisted the map entry
      * @param repositoryConnection the repository connection
+     * @param effectiveContextURI the effective context term
      * @return the map entry
      */
     static MapEntry makeMapEntry(
@@ -1195,6 +1197,21 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
         return false;
       }
       return true;
+    }
+
+    /** Returns a hash code for this object.
+     *
+     * @return a hash code for this object
+     */
+    @Override
+    public int hashCode() {
+      int hash = 7;
+      hash = 37 * hash + Objects.hashCode(this.key);
+      hash = 37 * hash + Objects.hashCode(this.keyRDFValue);
+      hash = 37 * hash + Objects.hashCode(this.value);
+      hash = 37 * hash + Objects.hashCode(this.valueRDFValue);
+      hash = 37 * hash + Objects.hashCode(this.bNode);
+      return hash;
     }
   }
 }

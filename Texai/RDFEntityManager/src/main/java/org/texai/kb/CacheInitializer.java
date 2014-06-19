@@ -40,9 +40,9 @@ public final class CacheInitializer {
   /** indicates whether the caches have been initialized */
   private static boolean areCachesInitialized = false;
   /** the cache access lock */
-  private static Lock cacheAccessLock = new ReentrantLock();
+  private static final Lock cacheAccessLock = new ReentrantLock();
   /** the list of dynamically named caches */
-  private static List<String> dynamicallyNamedCacheList = new ArrayList<>();
+  private static final List<String> dynamicallyNamedCacheList = new ArrayList<>();
 
   /** This class has only static methods and is never instantiated. */
   private CacheInitializer() {
@@ -50,7 +50,7 @@ public final class CacheInitializer {
 
   /** Adds the given named cache to the list of dynamically named caches.
    *
-   * @param namedCaches the named cache
+   * @param namedCache the named cache
    */
   public static void addNamedCache(final String namedCache) {
     //Preconditions

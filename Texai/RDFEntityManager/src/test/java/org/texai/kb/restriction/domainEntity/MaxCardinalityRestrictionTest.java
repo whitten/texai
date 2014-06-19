@@ -45,7 +45,9 @@ public class MaxCardinalityRestrictionTest {
   /** the logger */
   private static final Logger LOGGER = Logger.getLogger(MaxCardinalityRestrictionTest.class);
   /** the RDF entity manager */
-  private static RDFEntityManager rdfEntityManager = new RDFEntityManager();
+  private static final RDFEntityManager rdfEntityManager = new RDFEntityManager();
+  /** the name of the test repository */
+  private static final String TEST = "Test";
 
   public MaxCardinalityRestrictionTest() {
   }
@@ -54,10 +56,9 @@ public class MaxCardinalityRestrictionTest {
   public static void setUpClass() throws Exception {
     CacheInitializer.initializeCaches();
     JournalWriter.deleteJournalFiles();
-    DistributedRepositoryManager.addRepositoryPath(
-            "ConceptuallyRelatedTerms",
-            System.getenv("REPOSITORIES_TMPFS") + "/Test");
-    DistributedRepositoryManager.clearNamedRepository("Test");
+    DistributedRepositoryManager.addTestRepositoryPath(
+            TEST,
+            true); // isRepositoryDirectoryCleaned
   }
 
   @AfterClass
@@ -120,7 +121,6 @@ public class MaxCardinalityRestrictionTest {
     LOGGER.info("equals");
     final URI onProperty = new URIImpl(Constants.CYC_NAMESPACE + "performedBy");
     MaxCardinalityRestriction instance = new MaxCardinalityRestriction(onProperty, 10);
-    assertFalse(instance.equals("abc"));
     MaxCardinalityRestriction instance2 = new MaxCardinalityRestriction(onProperty, 11);
     assertFalse(instance.equals(instance2));
     MaxCardinalityRestriction instance3 = new MaxCardinalityRestriction(onProperty, 10);
@@ -149,14 +149,14 @@ public class MaxCardinalityRestrictionTest {
     MaxCardinalityRestriction instance = new MaxCardinalityRestriction(onProperty, 10);
     assertTrue(RDFEntityManager.isSerializable(instance));
     assertNull(instance.getId());
-    rdfEntityManager.persist(instance, "Test");
+    rdfEntityManager.persist(instance, TEST);
     final URI id = instance.getId();
     assertNotNull(id);
-    final MaxCardinalityRestriction loadedInstance = rdfEntityManager.find(MaxCardinalityRestriction.class, id, "Test");
+    final MaxCardinalityRestriction loadedInstance = rdfEntityManager.find(MaxCardinalityRestriction.class, id, TEST);
     assertNotNull(loadedInstance);
     assertEquals(instance, loadedInstance);
-    rdfEntityManager.remove(instance, "Test");
-    assertNull(rdfEntityManager.find(MaxCardinalityRestriction.class, id, "Test"));
+    rdfEntityManager.remove(instance, TEST);
+    assertNull(rdfEntityManager.find(MaxCardinalityRestriction.class, id, TEST));
   }
 
 }

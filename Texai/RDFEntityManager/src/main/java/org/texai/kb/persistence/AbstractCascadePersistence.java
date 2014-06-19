@@ -30,6 +30,8 @@ import org.openrdf.model.URI;
  */
 @NotThreadSafe
 public abstract class AbstractCascadePersistence implements CascadePersistence {
+  /** the default serial version UID */
+  private static final long serialVersionUID = 1L;
 
   /** the id assigned by the persistence framework */
   @Id

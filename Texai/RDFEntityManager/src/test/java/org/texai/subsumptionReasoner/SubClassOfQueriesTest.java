@@ -5,18 +5,20 @@
 package org.texai.subsumptionReasoner;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import net.sf.ehcache.CacheManager;
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.junit.After;
+import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.StatementImpl;
@@ -37,12 +39,12 @@ import org.texai.util.TexaiException;
  *
  * @author reed
  */
-public class SubClassOfQueriesTest extends TestCase {
+public class SubClassOfQueriesTest {
 
   /** the log4j logger */
   private static final Logger LOGGER = Logger.getLogger(SubClassOfQueriesTest.class);
   /** the test repository name */
-  private static String TEST_REPOSITORY_NAME = "Test";
+  private static final String TEST_REPOSITORY_NAME = "Test";
   /** the repository connection */
   private static RepositoryConnection repositoryConnection;
   /** the RDF entity manager */
@@ -50,67 +52,19 @@ public class SubClassOfQueriesTest extends TestCase {
   /** the directory containing the test repository */
   private static File testRepositoryDirectory;
 
-  public SubClassOfQueriesTest(String testName) {
-    super(testName);
+  public SubClassOfQueriesTest() {
   }
 
-  /** Returns a method-ordered test suite.
-   *
-   * @return a method-ordered test suite
-   */
-public static Test suite() {
-  final TestSuite suite = new TestSuite();
-   suite.addTest(new SubClassOfQueriesTest("testOneTimeSetup"));
-   suite.addTest(new SubClassOfQueriesTest("testIsDirectSubClassOf"));
-   suite.addTest(new SubClassOfQueriesTest("testIsSubClassOf"));
-   suite.addTest(new SubClassOfQueriesTest("testAreSubClassesOf"));
-   suite.addTest(new SubClassOfQueriesTest("testRemoveRedundantTypes"));
-   suite.addTest(new SubClassOfQueriesTest("testGetDirectSuperClasses"));
-   suite.addTest(new SubClassOfQueriesTest("testGetSuperClasses"));
-   suite.addTest(new SubClassOfQueriesTest("testGetDirectSubClasses"));
-   suite.addTest(new SubClassOfQueriesTest("testOneTimeTearDown"));
-   return suite;
-}
-
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-  }
-
-  @Override
-  protected void tearDown() throws Exception {
-    super.tearDown();
-  }
-
-  /** one time setup */
-  public void testOneTimeSetup() {
+  @BeforeClass
+  public static void setUpClass() throws Exception {
     LOGGER.info("testOneTimeSetup");
     JournalWriter.deleteJournalFiles();
     CacheInitializer.resetCaches();
     CacheInitializer.initializeCaches();
 
-    String testRepositoryPath = System.getenv("REPOSITORIES_TMPFS");
-    if (testRepositoryPath == null || testRepositoryPath.isEmpty()) {
-      testRepositoryPath = System.getProperty("user.dir") + "/data/repositories";
-    } else if (testRepositoryPath.endsWith("/")) {
-      testRepositoryPath = testRepositoryPath.substring(0, testRepositoryPath.length() - 1);
-    }
-    assertFalse(testRepositoryPath.isEmpty());
-
-    testRepositoryDirectory = new File(testRepositoryPath);
-    try {
-      if (testRepositoryDirectory.exists()) {
-        FileUtils.cleanDirectory(testRepositoryDirectory);
-      } else {
-        FileUtils.deleteDirectory(testRepositoryDirectory);
-      }
-    } catch (final IOException ex) {
-      fail(ex.getMessage());
-    }
-    assertNotNull(testRepositoryDirectory);
-    DistributedRepositoryManager.addRepositoryPath(
+    DistributedRepositoryManager.addTestRepositoryPath(
             TEST_REPOSITORY_NAME,
-            testRepositoryPath + "/" + TEST_REPOSITORY_NAME);
+            true); // isRepositoryDirectoryCleaned
 
     try {
       repositoryConnection = DistributedRepositoryManager.getInstance().getRepositoryConnectionForRepositoryName(TEST_REPOSITORY_NAME);
@@ -140,9 +94,24 @@ public static Test suite() {
     }
   }
 
+  @AfterClass
+  public static void tearDownClass() throws Exception {
+    DistributedRepositoryManager.shutDown();
+    CacheManager.getInstance().shutdown();
+  }
+
+  @Before
+  public void setUp() {
+  }
+
+  @After
+  public void tearDown() {
+  }
+
   /**
    * Test of isDirectSubClassOf method, of class SubClassOfQueries.
    */
+  @Test
   public void testIsDirectSubClassOf() {
     LOGGER.info("isDirectSubClassOf");
     URI term = new URIImpl(Constants.CYC_NAMESPACE + "DomesticCat");
@@ -155,6 +124,7 @@ public static Test suite() {
   /**
    * Test of isSubClassOf method, of class SubClassOfQueries.
    */
+  @Test
   public void testIsSubClassOf() {
     LOGGER.info("isSubClassOf");
     URI term = new URIImpl(Constants.CYC_NAMESPACE + "DomesticCat");
@@ -187,7 +157,7 @@ public static Test suite() {
    */
   public void testRemoveRedundantTypes() {
     LOGGER.info("removeRedundantTypes");
-    Collection<URI> typeTerms = new ArrayList<URI>();
+    Collection<URI> typeTerms = new ArrayList<>();
     typeTerms.add(new URIImpl(Constants.CYC_NAMESPACE + "Cat"));
     SubClassOfQueries instance = new SubClassOfQueries(rdfEntityManager);
     instance.removeRedundantTypes("OpenCyc", typeTerms);
@@ -205,12 +175,13 @@ public static Test suite() {
   /**
    * Test of areSubClassesOf method, of class SubClassOfQueries.
    */
+  @Test
   public void testAreSubClassesOf() {
     LOGGER.info("areSubClassesOf");
 
     SubClassOfQueries instance = new SubClassOfQueries(rdfEntityManager);
-    final List<URI> typeTerms1 = new ArrayList<URI>();
-    final List<URI> typeTerms2 = new ArrayList<URI>();
+    final List<URI> typeTerms1 = new ArrayList<>();
+    final List<URI> typeTerms2 = new ArrayList<>();
     assertTrue(instance.areSubClassesOf("OpenCyc", typeTerms1, typeTerms2));
 
     typeTerms1.clear();
@@ -266,6 +237,7 @@ public static Test suite() {
   /**
    * Test of getDirectSuperClasses method, of class SubClassOfQueries.
    */
+  @Test
   public void testGetDirectSuperClasses() {
     LOGGER.info("getDirectSuperClasses");
     URI term = new URIImpl(Constants.CYC_NAMESPACE + "DomesticCat");
@@ -278,6 +250,7 @@ public static Test suite() {
   /**
    * Test of getSuperClasses method, of class SubClassOfQueries.
    */
+  @Test
   public void testGetSuperClasses() {
     LOGGER.info("getSuperClasses");
     URI term = new URIImpl(Constants.CYC_NAMESPACE + "DomesticCat");
@@ -285,7 +258,7 @@ public static Test suite() {
     assertEquals(
             "[http://sw.cyc.com/2006/07/27/cyc/CarnivoreOrder, http://sw.cyc.com/2006/07/27/cyc/Cat]",
             instance.getSuperClasses(TEST_REPOSITORY_NAME, term).toString());
-    final List<URI> superClasses = new ArrayList<URI>(instance.getSuperClasses(
+    final List<URI> superClasses = new ArrayList<>(instance.getSuperClasses(
             "OpenCyc",
             new URIImpl(Constants.CYC_NAMESPACE + "Winning")));
     Collections.sort(superClasses, new RDFUtility.ResourceComparator());
@@ -298,6 +271,7 @@ public static Test suite() {
   /**
    * Test of getDirectSubClasses method, of class SubClassOfQueries.
    */
+  @Test
   public void testGetDirectSubClasses() {
     LOGGER.info("getDirectSubClasses");
     URI term = new URIImpl(Constants.CYC_NAMESPACE + "Cat");
@@ -309,23 +283,4 @@ public static Test suite() {
     assertEquals("[]", instance.getDirectSubClasses(TEST_REPOSITORY_NAME, term3).toString());
   }
 
-  /** one time tear-down */
-  public void testOneTimeTearDown() {
-    LOGGER.info("testOneTimeTearDown");
-    CacheManager.getInstance().shutdown();
-    try {
-      repositoryConnection.close();
-    } catch (RepositoryException ex) {
-      throw new TexaiException(ex);
-    }
-    rdfEntityManager.close();
-    DistributedRepositoryManager.shutDown();
-    try {
-      if (testRepositoryDirectory.exists()) {
-        FileUtils.deleteDirectory(testRepositoryDirectory);
-      }
-    } catch (final IOException ex) {
-      // ignore failure to delete TMPFS directory
-    }
-  }
 }

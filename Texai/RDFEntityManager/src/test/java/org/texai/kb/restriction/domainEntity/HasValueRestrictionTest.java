@@ -45,7 +45,9 @@ public class HasValueRestrictionTest {
   /** the logger */
   private static final Logger LOGGER = Logger.getLogger(HasValueRestrictionTest.class);
   /** the RDF entity manager */
-  private static RDFEntityManager rdfEntityManager = new RDFEntityManager();
+  private static final RDFEntityManager rdfEntityManager = new RDFEntityManager();
+  /** the name of the test repository */
+  private static final String TEST = "Test";
 
   public HasValueRestrictionTest() {
   }
@@ -54,10 +56,9 @@ public class HasValueRestrictionTest {
   public static void setUpClass() throws Exception {
     CacheInitializer.initializeCaches();
     JournalWriter.deleteJournalFiles();
-    DistributedRepositoryManager.addRepositoryPath(
-            "ConceptuallyRelatedTerms",
-            System.getenv("REPOSITORIES_TMPFS") + "/Test");
-    DistributedRepositoryManager.clearNamedRepository("Test");
+    DistributedRepositoryManager.addTestRepositoryPath(
+            TEST,
+            true); // isRepositoryDirectoryCleaned
   }
 
   @AfterClass
@@ -124,12 +125,11 @@ public class HasValueRestrictionTest {
     final URI onProperty = new URIImpl(Constants.CYC_NAMESPACE + "performedBy");
     final URI allValuesClass = new URIImpl(Constants.CYC_NAMESPACE + "Person");
     HasValueRestriction instance = new HasValueRestriction(onProperty, allValuesClass);
-    assertEquals(false, instance.equals("abc"));
     final URI allValuesClass2 = new URIImpl(Constants.CYC_NAMESPACE + "DomesticCat");
     HasValueRestriction instance2 = new HasValueRestriction(onProperty, allValuesClass2);
-    assertEquals(false, instance.equals(instance2));
+    assertFalse(instance.equals(instance2));
     HasValueRestriction instance3 = new HasValueRestriction(onProperty, allValuesClass);
-    assertEquals(true, instance.equals(instance3));
+    assertTrue(instance.equals(instance3));
   }
 
   /**
@@ -156,14 +156,14 @@ public class HasValueRestrictionTest {
     HasValueRestriction instance = new HasValueRestriction(onProperty, allValuesClass);
     assertTrue(RDFEntityManager.isSerializable(instance));
     assertNull(instance.getId());
-    rdfEntityManager.persist(instance, "Test");
+    rdfEntityManager.persist(instance, TEST);
     final URI id = instance.getId();
     assertNotNull(id);
-    final HasValueRestriction loadedInstance = rdfEntityManager.find(HasValueRestriction.class, id, "Test");
+    final HasValueRestriction loadedInstance = rdfEntityManager.find(HasValueRestriction.class, id, TEST);
     assertNotNull(loadedInstance);
     assertEquals(instance, loadedInstance);
-    rdfEntityManager.remove(instance, "Test");
-    assertNull(rdfEntityManager.find(HasValueRestriction.class, id, "Test"));
+    rdfEntityManager.remove(instance, TEST);
+    assertNull(rdfEntityManager.find(HasValueRestriction.class, id, TEST));
   }
 
 }

@@ -7,7 +7,6 @@
 package org.texai.kb.persistence;
 
 import java.io.File;
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,10 +17,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import junit.framework.*;
+import static junit.framework.Assert.assertEquals;
 import net.sf.ehcache.CacheManager;
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.junit.After;
+import org.junit.AfterClass;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
@@ -41,91 +48,62 @@ import org.texai.kb.persistence.RDFUtility.ResourceComparator;
  *
  * @author reed
  */
-public class RDFUtilityTest extends TestCase {
+public class RDFUtilityTest {
 
   /** the log4j logger */
   private static final Logger LOGGER = Logger.getLogger(RDFUtilityTest.class);
   /** the test repository name */
-  private static String TEST_REPOSITORY_NAME = "Test";
+  private static final String TEST_REPOSITORY_NAME = "Test";
   /** the directory containing the test repository */
   private static File testRepositoryDirectory;
   /** the Sesame repository connection */
   static RepositoryConnection repositoryConnection = null;
 
-  public RDFUtilityTest(String testName) {
-    super(testName);
+  public RDFUtilityTest() {
   }
 
-  /** Returns a method-ordered test suite.
-   *
-   * @return a method-ordered test suite
-   */
-  public static Test suite() {
-    final TestSuite suite = new TestSuite();
-    suite.addTest(new RDFUtilityTest("testGetLiteralForDate"));
-    suite.addTest(new RDFUtilityTest("testGetLiteralForCalendar"));
-    suite.addTest(new RDFUtilityTest("testRenameURI"));
-    suite.addTest(new RDFUtilityTest("testFormatStatementAsXMLTurtle"));
-    suite.addTest(new RDFUtilityTest("testFormatStatements"));
-    suite.addTest(new RDFUtilityTest("testIsVariableURI"));
-    suite.addTest(new RDFUtilityTest("testIsInstanceURI"));
-    suite.addTest(new RDFUtilityTest("testDecodeNamespace"));
-    suite.addTest(new RDFUtilityTest("testFormatResources"));
-    suite.addTest(new RDFUtilityTest("testURIComparator"));
-    suite.addTest(new RDFUtilityTest("testMakeURIFromAlias"));
-    suite.addTest(new RDFUtilityTest("testGetDefaultClassFromId"));
-    suite.addTest(new RDFUtilityTest("testOneTimeTearDown"));
-    return suite;
-  }
+  @BeforeClass
+  public static void setUpClass() throws Exception {
+    LOGGER.info("oneTimeSetup");
+    CacheInitializer.initializeCaches();
 
-  @Override
-  protected void setUp() throws Exception {
-    if (repositoryConnection == null) {
-      LOGGER.info("oneTimeSetup");
+    DistributedRepositoryManager.addTestRepositoryPath(
+            TEST_REPOSITORY_NAME,
+            true); // isRepositoryDirectoryCleaned
 
-      String testRepositoryPath = System.getenv("REPOSITORIES_TMPFS");
-      if (testRepositoryPath == null || testRepositoryPath.isEmpty()) {
-        testRepositoryPath = System.getProperty("user.dir") + "/repositories";
-      } else if (testRepositoryPath.endsWith("/")) {
-        testRepositoryPath = testRepositoryPath.substring(0, testRepositoryPath.length() - 1);
-      }
-      assertFalse(testRepositoryPath.isEmpty());
-
-      testRepositoryDirectory = new File(testRepositoryPath);
-      try {
-        if (testRepositoryDirectory.exists()) {
-          FileUtils.cleanDirectory(testRepositoryDirectory);
-        } else {
-          FileUtils.deleteDirectory(testRepositoryDirectory);
-        }
-      } catch (final IOException ex) {
-        fail(ex.getMessage());
-      }
-      assertNotNull(testRepositoryDirectory);
-      DistributedRepositoryManager.addRepositoryPath(
-              TEST_REPOSITORY_NAME,
-              testRepositoryPath + "/" + TEST_REPOSITORY_NAME);
-
-      try {
-        getClass().getClassLoader().setDefaultAssertionStatus(true);
-        CacheInitializer.resetCaches();
-        CacheInitializer.initializeCaches();
-        repositoryConnection = DistributedRepositoryManager.getInstance().getRepositoryConnectionForRepositoryName(TEST_REPOSITORY_NAME);
-        repositoryConnection.clear();
-      } catch (Exception e) {
-        e.printStackTrace();
-        fail(e.getMessage());
-      }
+    try {
+      RDFUtilityTest.class.getClassLoader().setDefaultAssertionStatus(true);
+      repositoryConnection = DistributedRepositoryManager.getInstance().getRepositoryConnectionForRepositoryName(TEST_REPOSITORY_NAME);
+      repositoryConnection.clear();
+    } catch (RepositoryException e) {
+      e.printStackTrace();
+      fail(e.getMessage());
     }
   }
 
-  @Override
-  protected void tearDown() throws Exception {
+  @AfterClass
+  public static void tearDownClass() throws Exception {
+    try {
+      repositoryConnection.close();
+    } catch (final RepositoryException ex) {
+      ex.printStackTrace();
+    }
+    DistributedRepositoryManager.shutDown();
+    CacheManager.getInstance().shutdown();
+  }
+
+  @Before
+  public void setUp() {
+  }
+
+  @After
+  public void tearDown() {
   }
 
   /**
    * Test of getLiteralForDate method, of class org.texai.kb.persistence.RDFUtility.
    */
+  @Test
   public void testGetLiteralForDate() {
     LOGGER.info("getLiteralForDate");
 
@@ -142,6 +120,7 @@ public class RDFUtilityTest extends TestCase {
   /**
    * Test of getLiteralForCalendar method, of class org.texai.kb.persistence.RDFUtility.
    */
+  @Test
   public void testGetLiteralForCalendar() {
     LOGGER.info("getLiteralForCalendar");
     SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss", Locale.US);
@@ -164,6 +143,7 @@ public class RDFUtilityTest extends TestCase {
   /**
    * Test of renameURI method, of class org.texai.kb.persistence.RDFUtility.
    */
+  @Test
   public void testRenameURI() {
     LOGGER.info("renameURI");
 
@@ -240,6 +220,7 @@ public class RDFUtilityTest extends TestCase {
   /**
    * Test of formatStatementAsXMLTurtle method, of class org.texai.kb.persistence.RDFUtility.
    */
+  @Test
   public void testFormatStatementAsXMLTurtle() {
     LOGGER.info("formatStatementAsXMLTurtle");
     URI a = new URIImpl("http://texai.org/texai/a");
@@ -252,11 +233,12 @@ public class RDFUtilityTest extends TestCase {
   /**
    * Test of formatStatements method, of class org.texai.kb.persistence.RDFUtility.
    */
+  @Test
   public void testFormatStatements() {
     LOGGER.info("formatStatements");
     URI a = new URIImpl("http://texai.org/texai/a");
     URI c = new URIImpl(Constants.CYC_NAMESPACE + "c");
-    final List<Statement> statements = new ArrayList<Statement>();
+    final List<Statement> statements = new ArrayList<>();
     statements.add(new StatementImpl(a, RDF.TYPE, c));
     statements.add(new StatementImpl(c, RDF.TYPE, a));
     assertEquals("{(texai:a rdf:type cyc:c), (cyc:c rdf:type texai:a)}", RDFUtility.formatStatements(statements));
@@ -265,6 +247,7 @@ public class RDFUtilityTest extends TestCase {
   /**
    * Test of isVariableURI method, of class org.texai.kb.persistence.RDFUtility.
    */
+  @Test
   public void testIsVariableURI() {
     LOGGER.info("isVariableURI");
     assertFalse(RDFUtility.isVariableURI(null));
@@ -275,6 +258,7 @@ public class RDFUtilityTest extends TestCase {
   /**
    * Test of isInstanceURI method, of class org.texai.kb.persistence.RDFUtility.
    */
+  @Test
   public void testIsInstanceURI() {
     LOGGER.info("isInstanceURI");
     assertFalse(RDFUtility.isInstanceURI(null));
@@ -287,6 +271,7 @@ public class RDFUtilityTest extends TestCase {
   /**
    * Test of decodeNamespace method, of class org.texai.kb.persistence.RDFUtility.
    */
+  @Test
   public void testDecodeNamespace() {
     LOGGER.info("decodeNamespace");
     assertEquals("http://www.w3.org/1999/02/22-rdf-syntax-ns#", RDFUtility.decodeNamespace("rdf"));
@@ -300,9 +285,10 @@ public class RDFUtilityTest extends TestCase {
   /**
    * Test of formatResources method, of class org.texai.kb.persistence.RDFUtility.
    */
+  @Test
   public void testFormatResources() {
     LOGGER.info("formatResources");
-    final Set<Resource> resources = new HashSet<Resource>();
+    final Set<Resource> resources = new HashSet<>();
     resources.add(RDF.TYPE);
     resources.add(new BNodeImpl("abc"));
     assertEquals("{_:abc, rdf:type}", RDFUtility.formatResources(resources));
@@ -311,9 +297,10 @@ public class RDFUtilityTest extends TestCase {
   /**
    * Test of ResourceComparator class, of class org.texai.kb.persistence.RDFUtility.
    */
+  @Test
   public void testURIComparator() {
     LOGGER.info("URIComparator");
-    final List<Resource> resources = new ArrayList<Resource>();
+    final List<Resource> resources = new ArrayList<>();
     resources.add(RDF.TYPE);
     resources.add(new BNodeImpl("xyz"));
     resources.add(new BNodeImpl("def"));
@@ -325,6 +312,7 @@ public class RDFUtilityTest extends TestCase {
   /**
    * Test of makeURIFromAlias method, of class org.texai.kb.persistence.RDFUtility.
    */
+  @Test
   public void testMakeURIFromAlias() {
     LOGGER.info("makeURIFromAlias");
     assertEquals("http://sw.cyc.com/2006/07/27/cyc/TransportationDevice", RDFUtility.makeURIFromAlias("cyc:TransportationDevice").toString());
@@ -335,22 +323,11 @@ public class RDFUtilityTest extends TestCase {
   /**
    * Test of getDefaultClassFromId and getDefaultClassFromIdString methods, of class org.texai.kb.persistence.RDFUtility.
    */
+  @Test
   public void testGetDefaultClassFromId() {
     LOGGER.info("getDefaultClassFromId");
     final URI id = new URIImpl("http://texai.org/texai/org.texai.ahcsSupport.domainEntity.RoleType_e75bd4bd-5f29-4b3e-ba2a-298d42acc730");
     assertEquals("org.texai.ahcsSupport.domainEntity.RoleType", RDFUtility.getDefaultClassFromId(id));
     assertEquals("org.texai.ahcsSupport.domainEntity.RoleType", RDFUtility.getDefaultClassFromIdString(id.toString()));
-  }
-
-  /** Performs one time tear down of test harness. This must be the last test method. */
-  public void testOneTimeTearDown() {
-    LOGGER.info("oneTimeTearDown");
-    CacheManager.getInstance().shutdown();
-    try {
-      repositoryConnection.close();
-    } catch (final Exception ex) {
-      ex.printStackTrace();
-    }
-    DistributedRepositoryManager.shutDown();
   }
 }

@@ -204,7 +204,7 @@ public final class RDFEntityPersister extends AbstractRDFEntityAccessor {  // NO
     assert repositoryConnection != null : "repositoryConnection must not be null";
     assert rdfEntity != null : "rdfEntity must not be null";
     assert isRDFEntity(rdfEntity) : rdfEntity + "(" + rdfEntity.getClass().getName() + ") must be have a @RDFEntity class level annotation in " + Arrays.toString(rdfEntity.getClass().getAnnotations());
-    assert rdfEntity.getClass().getName().indexOf("CGLIB") == -1 : "proxy entity " + rdfEntity.getClass().getName()
+    assert !rdfEntity.getClass().getName().contains("CGLIB") : "proxy entity " + rdfEntity.getClass().getName()
             + " cannot be persisted. Fix by first accessing a proxy method to replace it by the instantiated object in the containing field";
 
     final boolean isAutoCommit;
@@ -681,7 +681,7 @@ public final class RDFEntityPersister extends AbstractRDFEntityAccessor {  // NO
    * to the RDF store as propositions.
    *
    * @param repositoryConnection the repository connection
-   * @param outputStream the export output stream, or null when objects are ordinarily persisted to the given RDF quad store
+   * @param writer the export output writer, or null when objects are ordinarily persisted to the given RDF quad store
    */
   private void persistFields(
           final RepositoryConnection repositoryConnection,
@@ -698,7 +698,6 @@ public final class RDFEntityPersister extends AbstractRDFEntityAccessor {  // NO
         if (isDebugEnabled) {
           logger.debug(stackLevel() + "  skipping Id field");
         }
-        continue;
       } else {
         if (annotation instanceof RDFProperty) {
           persistField(
@@ -1070,7 +1069,7 @@ public final class RDFEntityPersister extends AbstractRDFEntityAccessor {  // NO
       if (!definedClassAndPredicateURIs.contains(getClassURI())) {
         // query for existing definition of the true class
         final Set<URI> existingTypes = new HashSet<>();
-        TupleQuery existingTypesTupleQuery = null;
+        TupleQuery existingTypesTupleQuery;
         TupleQueryResult tupleQueryResult;
         existingTypesTupleQuery = repositoryConnection.prepareTupleQuery(
                 QueryLanguage.SERQL,
@@ -1129,7 +1128,7 @@ public final class RDFEntityPersister extends AbstractRDFEntityAccessor {  // NO
       }
 
       // assert the truth value relationship
-      if (value.booleanValue()) {
+      if (value) {
         if (!existingValues.contains(trueClass)) {
           final Statement statement = getValueFactory().createStatement(
                   getInstanceURI(),
@@ -1215,7 +1214,6 @@ public final class RDFEntityPersister extends AbstractRDFEntityAccessor {  // NO
    * @param rdfProperty the RDF property annotation
    * @param predicateURI the predicate that represents the association
    * @param writer the export output writer, or null when objects are ordinarily persisted to the given RDF quad store
-   * @return the set of asserted RDF values
    */
   @SuppressWarnings("unchecked")
   private void persistMapFieldValue(
@@ -1668,7 +1666,7 @@ public final class RDFEntityPersister extends AbstractRDFEntityAccessor {  // NO
     Value rdfValue = null;
     if (value instanceof Byte) {
       if (rdfProperty.range().endsWith("unsignedByte")) {
-        if (((Byte) value).byteValue() < 0) {
+        if (((Byte) value) < 0) {
           throw new TexaiException("attempt to persist a negative byte value [" + value + "] for an unsignedByte field");
         }
         rdfValue = getValueFactory().createLiteral(value.toString(), XMLSchema.UNSIGNED_BYTE);
@@ -1677,7 +1675,7 @@ public final class RDFEntityPersister extends AbstractRDFEntityAccessor {  // NO
       }
     } else if (value instanceof Short) {
       if (rdfProperty.range().endsWith("unsignedShort")) {
-        if (((Short) value).shortValue() < 0) {
+        if (((Short) value) < 0) {
           throw new TexaiException("attempt to persist a negative short value [" + value + "] for an unsignedShort field");
         }
         rdfValue = getValueFactory().createLiteral(value.toString(), XMLSchema.UNSIGNED_SHORT);
@@ -1688,7 +1686,7 @@ public final class RDFEntityPersister extends AbstractRDFEntityAccessor {  // NO
       if (rdfProperty.range().isEmpty()) {
         rdfValue = getValueFactory().createLiteral((Integer) value);
       } else if (rdfProperty.range().endsWith("unsignedInt")) {
-        if (((Integer) value).intValue() < 0) {
+        if (((Integer) value) < 0) {
           throw new TexaiException("attempt to persist a negative integer value [" + value + "] for an unsignedInt field");
         }
         rdfValue = getValueFactory().createLiteral(value.toString(), XMLSchema.UNSIGNED_INT);
@@ -1697,7 +1695,7 @@ public final class RDFEntityPersister extends AbstractRDFEntityAccessor {  // NO
       }
     } else if (value instanceof Long) {
       if (rdfProperty.range().endsWith("unsignedLong")) {
-        if (((Long) value).longValue() < 0) {
+        if (((Long) value) < 0) {
           throw new TexaiException("attempt to persist a negative long value [" + value + "] for an unsignedLong field");
         }
         rdfValue = getValueFactory().createLiteral(value.toString(), XMLSchema.UNSIGNED_LONG);

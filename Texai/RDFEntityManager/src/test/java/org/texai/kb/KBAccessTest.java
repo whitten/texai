@@ -4,59 +4,66 @@
  */
 package org.texai.kb;
 
-import org.texai.kb.persistence.KBAccess;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import net.sf.ehcache.CacheManager;
 import org.apache.log4j.Logger;
+import org.junit.After;
+import org.junit.AfterClass;
+import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.texai.kb.journal.JournalWriter;
 import org.texai.kb.persistence.DistributedRepositoryManager;
+import org.texai.kb.persistence.KBAccess;
 import org.texai.kb.persistence.RDFEntityManager;
 
 /**
  *
  * @author reed
  */
-public class KBAccessTest extends TestCase {
+public class KBAccessTest {
 
   /** the log4j logger */
   private static final Logger LOGGER = Logger.getLogger(KBAccessTest.class);
   /** the OpenCyc repository name */
   private static final String OPEN_CYC = "OpenCyc";
 
-  public KBAccessTest(String testName) {
-    super(testName);
+  public KBAccessTest() {
   }
 
-  /** Returns a method-ordered test suite.
-   *
-   * @return a method-ordered test suite
-   */
-public static Test suite() {
-  final TestSuite suite = new TestSuite();
-   suite.addTest(new KBAccessTest("testDoesTermExist"));
-   suite.addTest(new KBAccessTest("testFinalization"));
-   return suite;
-}
+  @BeforeClass
+  public static void setUpClass() throws Exception {
+    CacheInitializer.initializeCaches();
+    DistributedRepositoryManager.copyProductionRepositoryToTest(OPEN_CYC);
+    DistributedRepositoryManager.addTestRepositoryPath(
+            OPEN_CYC,
+            false); // isRepositoryDirectoryCleaned
+  }
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @AfterClass
+  public static void tearDownClass() throws Exception {
+    DistributedRepositoryManager.shutDown();
+    CacheManager.getInstance().shutdown();
+  }
+
+  @Before
+  public void setUp() {
+  }
+
+  @After
+  public void tearDown() {
   }
 
   /**
-   * Test of doesTermExist method, of class KBAccess.
+   * Test of doesTermExist method, of class KBAccess. This does not modify the production OpenCyc repository.
    */
+  @Test
   public void testDoesTermExist() {
-    System.out.println("doesTermExist");
+    LOGGER.info("doesTermExist");
     CacheInitializer.resetCaches();
     CacheInitializer.initializeCaches();
-    DistributedRepositoryManager.addRepositoryPath(
-            OPEN_CYC,
-            "data/repositories/" + OPEN_CYC);
     URI term = new URIImpl(Constants.CYC_NAMESPACE + "CityOfAustinTX");
     final RDFEntityManager rdfEntityManager = new RDFEntityManager();
     KBAccess instance = new KBAccess(rdfEntityManager);
@@ -69,11 +76,5 @@ public static Test suite() {
     assertTrue(!result);
     JournalWriter.close();
     rdfEntityManager.close();
-  }
-
-  public void testFinalization() {
-    System.out.println("finalization");
-    CacheManager.getInstance().shutdown();
-    DistributedRepositoryManager.shutDown();
   }
 }

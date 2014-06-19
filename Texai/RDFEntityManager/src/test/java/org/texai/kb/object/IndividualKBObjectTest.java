@@ -7,11 +7,16 @@ package org.texai.kb.object;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import net.sf.ehcache.CacheManager;
 import org.apache.log4j.Logger;
+import org.junit.After;
+import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.texai.kb.CacheInitializer;
@@ -23,50 +28,42 @@ import org.texai.kb.persistence.RDFEntityManager;
 import org.texai.kb.persistence.RDFUtility;
 import org.texai.kb.persistence.RDFUtility.ResourceComparator;
 
-/**
+/** This test does not modify the production OpenCyc repository.
  *
  * @author reed
  */
-public class IndividualKBObjectTest extends TestCase {
+public class IndividualKBObjectTest {
 
   /** the log4j logger */
   private static final Logger LOGGER = Logger.getLogger(IndividualKBObjectTest.class);
   /** the OpenCyc repository name */
   private static final String OPEN_CYC = "OpenCyc";
 
-  public IndividualKBObjectTest(String testName) {
-    super(testName);
+  public IndividualKBObjectTest() {
   }
 
-  /** Returns a method-ordered test suite.
-   *
-   * @return a method-ordered test suite
-   */
-public static Test suite() {
-  final TestSuite suite = new TestSuite();
-   suite.addTest(new IndividualKBObjectTest("test"));
-   suite.addTest(new IndividualKBObjectTest("testMakeIndividualKBObject"));
-   suite.addTest(new IndividualKBObjectTest("testFinalization"));
-   return suite;
-}
-
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-  }
-
-  @Override
-  protected void tearDown() throws Exception {
-    super.tearDown();
-  }
-
-  public void test() {
-    System.out.println("test");
-    CacheInitializer.resetCaches();
+  @BeforeClass
+  public static void setUpClass() throws Exception {
     CacheInitializer.initializeCaches();
-    DistributedRepositoryManager.addRepositoryPath(
-            OPEN_CYC,
-            "data/repositories/" + OPEN_CYC);
+  }
+
+  @AfterClass
+  public static void tearDownClass() throws Exception {
+    DistributedRepositoryManager.shutDown();
+    CacheManager.getInstance().shutdown();
+  }
+
+  @Before
+  public void setUp() {
+  }
+
+  @After
+  public void tearDown() {
+  }
+
+  @Test
+  public void test() {
+    LOGGER.info("test");
     final RDFEntityManager rdfEntityManager = new RDFEntityManager();
     final KBAccess kbAccess = new KBAccess(rdfEntityManager);
     URI term = new URIImpl(Constants.CYC_NAMESPACE + "CityOfAustinTX");
@@ -88,6 +85,7 @@ public static Test suite() {
   /**
    * Test of makeIndividualKBObject method, of class IndividualKBObject.
    */
+  @Test
   public void testMakeIndividualKBObject() {
     LOGGER.info("makeIndividualKBObject");
     final String string =
@@ -100,9 +98,4 @@ public static Test suite() {
     assertEquals("[http://texai.org/texai/MyGroup]", individualKBObject.getTypes().toString());
   }
 
-  public void testFinalization() {
-    System.out.println("finalization");
-    CacheManager.getInstance().shutdown();
-    DistributedRepositoryManager.shutDown();
-  }
 }

@@ -45,7 +45,9 @@ public class MinCardinalityRestrictionTest {
   /** the logger */
   private static final Logger LOGGER = Logger.getLogger(MinCardinalityRestrictionTest.class);
   /** the RDF entity manager */
-  private static RDFEntityManager rdfEntityManager = new RDFEntityManager();
+  private static final RDFEntityManager rdfEntityManager = new RDFEntityManager();
+  /** the name of the test repository */
+  private static final String TEST = "Test";
 
   public MinCardinalityRestrictionTest() {
   }
@@ -54,10 +56,9 @@ public class MinCardinalityRestrictionTest {
   public static void setUpClass() throws Exception {
     CacheInitializer.initializeCaches();
     JournalWriter.deleteJournalFiles();
-    DistributedRepositoryManager.addRepositoryPath(
-            "ConceptuallyRelatedTerms",
-            System.getenv("REPOSITORIES_TMPFS") + "/Test");
-    DistributedRepositoryManager.clearNamedRepository("Test");
+    DistributedRepositoryManager.addTestRepositoryPath(
+            TEST,
+            true); // isRepositoryDirectoryCleaned
   }
 
   @AfterClass
@@ -120,7 +121,6 @@ public class MinCardinalityRestrictionTest {
     LOGGER.info("equals");
     final URI onProperty = new URIImpl(Constants.CYC_NAMESPACE + "performedBy");
     MinCardinalityRestriction instance = new MinCardinalityRestriction(onProperty, 10);
-    assertFalse(instance.equals("abc"));
     MinCardinalityRestriction instance2 = new MinCardinalityRestriction(onProperty, 11);
     assertFalse(instance.equals(instance2));
     MinCardinalityRestriction instance3 = new MinCardinalityRestriction(onProperty, 10);
@@ -149,14 +149,14 @@ public class MinCardinalityRestrictionTest {
     MinCardinalityRestriction instance = new MinCardinalityRestriction(onProperty, 10);
     assertTrue(RDFEntityManager.isSerializable(instance));
     assertNull(instance.getId());
-    rdfEntityManager.persist(instance, "Test");
+    rdfEntityManager.persist(instance, TEST);
     final URI id = instance.getId();
     assertNotNull(id);
-    final MinCardinalityRestriction loadedInstance = rdfEntityManager.find(MinCardinalityRestriction.class, id, "Test");
+    final MinCardinalityRestriction loadedInstance = rdfEntityManager.find(MinCardinalityRestriction.class, id, TEST);
     assertNotNull(loadedInstance);
     assertEquals(instance, loadedInstance);
-    rdfEntityManager.remove(instance, "Test");
-    assertNull(rdfEntityManager.find(MinCardinalityRestriction.class, id, "Test"));
+    rdfEntityManager.remove(instance, TEST);
+    assertNull(rdfEntityManager.find(MinCardinalityRestriction.class, id, TEST));
   }
 
 }

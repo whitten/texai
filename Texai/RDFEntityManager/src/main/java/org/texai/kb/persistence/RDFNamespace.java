@@ -36,9 +36,13 @@ import java.lang.annotation.Target;
 @Retention(RUNTIME)
 public @interface RDFNamespace {
 
-    /** the namespace prefix */
+    /** Gets the namespace prefix.
+     * @return the namespace prefix
+     */
     String prefix();
 
-    /** the namespace URI */
+    /** Gets the namespace URI.
+     * @return the namespace URI
+     */
     String namespaceURI();
 }

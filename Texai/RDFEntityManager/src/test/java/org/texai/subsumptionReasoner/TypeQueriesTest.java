@@ -5,16 +5,18 @@
 package org.texai.subsumptionReasoner;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import net.sf.ehcache.CacheManager;
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.junit.After;
+import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.StatementImpl;
@@ -35,10 +37,10 @@ import org.texai.util.TexaiException;
  *
  * @author reed
  */
-public class TypeQueriesTest extends TestCase {
+public class TypeQueriesTest {
 
   /** the test repository name */
-  private static String TEST_REPOSITORY_NAME = "Test";
+  private static final String TEST_REPOSITORY_NAME = "Test";
   /** the RDF entity manager */
   private static RDFEntityManager rdfEntityManager;
   /** the repository connection */
@@ -48,68 +50,20 @@ public class TypeQueriesTest extends TestCase {
   /** the directory containing the test repository */
   private static File testRepositoryDirectory;
 
-  public TypeQueriesTest(String testName) {
-    super(testName);
+  public TypeQueriesTest() {
   }
 
-  /** Returns a method-ordered test suite.
-   *
-   * @return a method-ordered test suite
-   */
-  public static Test suite() {
-    final TestSuite suite = new TestSuite();
-    suite.addTest(new TypeQueriesTest("testOneTimeSetup"));
-    suite.addTest(new TypeQueriesTest("testIsDirectType"));
-    suite.addTest(new TypeQueriesTest("testIsType"));
-    suite.addTest(new TypeQueriesTest("testGetDirectTypes"));
-    suite.addTest(new TypeQueriesTest("testGetDirectTypes2"));
-    suite.addTest(new TypeQueriesTest("testGetDirectInstances"));
-    suite.addTest(new TypeQueriesTest("testSubClassOfHierarchy"));
-    suite.addTest(new TypeQueriesTest("testTypeHierarchy"));
-    suite.addTest(new TypeQueriesTest("testOneTimeTearDown"));
-    return suite;
-  }
-
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-  }
-
-  @Override
-  protected void tearDown() throws Exception {
-    super.tearDown();
-  }
-
-  /** one time setup */
-  public void testOneTimeSetup() {
+  @BeforeClass
+  public static void setUpClass() throws Exception {
     LOGGER.info("testOneTimeSetup");
-    LOGGER.info("working directory: " + System.getProperty("user.dir"));
+
     JournalWriter.deleteJournalFiles();
     CacheInitializer.resetCaches();
     CacheInitializer.initializeCaches();
 
-    String testRepositoryPath = System.getenv("REPOSITORIES_TMPFS");
-    if (testRepositoryPath == null || testRepositoryPath.isEmpty()) {
-      testRepositoryPath = System.getProperty("user.dir") + "/repositories";
-    } else if (testRepositoryPath.endsWith("/")) {
-      testRepositoryPath = testRepositoryPath.substring(0, testRepositoryPath.length() - 1);
-    }
-    assertFalse(testRepositoryPath.isEmpty());
-
-    testRepositoryDirectory = new File(testRepositoryPath);
-    try {
-      if (testRepositoryDirectory.exists()) {
-        FileUtils.cleanDirectory(testRepositoryDirectory);
-      } else {
-        FileUtils.deleteDirectory(testRepositoryDirectory);
-      }
-    } catch (final IOException ex) {
-      fail(ex.getMessage());
-    }
-    assertNotNull(testRepositoryDirectory);
-    DistributedRepositoryManager.addRepositoryPath(
+    DistributedRepositoryManager.addTestRepositoryPath(
             TEST_REPOSITORY_NAME,
-            testRepositoryPath + "/" + TEST_REPOSITORY_NAME);
+            true); // isRepositoryDirectoryCleaned
 
     try {
       repositoryConnection = DistributedRepositoryManager.getInstance().getRepositoryConnectionForRepositoryName(TEST_REPOSITORY_NAME);
@@ -139,9 +93,28 @@ public class TypeQueriesTest extends TestCase {
     }
   }
 
+  @AfterClass
+  public static void tearDownClass() throws Exception {
+    DistributedRepositoryManager.shutDown();
+    CacheManager.getInstance().shutdown();
+  }
+
+  @Before
+  public void setUp() {
+  }
+
+  @After
+  public void tearDown() {
+  }
+
+  /** one time setup */
+  public void testOneTimeSetup() {
+  }
+
   /**
    * Test of isDirectType method, of class TypeQueries.
    */
+  @Test
   public void testIsDirectType() {
     LOGGER.info("isDirectType");
     URI term = new URIImpl(Constants.TEXAI_NAMESPACE + "Buster");
@@ -156,6 +129,7 @@ public class TypeQueriesTest extends TestCase {
   /**
    * Test of isType method, of class TypeQueries.
    */
+  @Test
   public void testIsType() {
     LOGGER.info("isType");
     URI term = new URIImpl(Constants.TEXAI_NAMESPACE + "Buster");
@@ -173,7 +147,8 @@ public class TypeQueriesTest extends TestCase {
   /**
    * Test of getDirectTypes method, of class TypeQueries.
    */
-  public void testGetDirectTypes() {
+    @Test
+public void testGetDirectTypes() {
     LOGGER.info("getDirectTypes");
     URI term = new URIImpl(Constants.TEXAI_NAMESPACE + "Buster");
     TypeQueries instance = new TypeQueries(rdfEntityManager);
@@ -185,18 +160,18 @@ public class TypeQueriesTest extends TestCase {
   /**
    * Test of getDirectTypes method, of class TypeQueries.
    */
+  @Test
   public void testGetDirectTypes2() {
     LOGGER.info("getDirectTypes");
     TypeQueries instance = new TypeQueries(rdfEntityManager);
     URI typeTerm = new URIImpl(Constants.CYC_NAMESPACE + "DomesticCat");
-    final String result = RDFUtility.formatResources(instance.getDirectTypes("OpenCyc", typeTerm));
-    assertTrue("{cyc:OrganismClassificationType, cyc:DomesticatedAnimalType}".equals(result) ||
-            "{cyc:DomesticatedAnimalType, cyc:OrganismClassificationType}".equals(result));
+    assertEquals("{cyc:DomesticatedAnimalType, cyc:OrganismClassificationType}", RDFUtility.formatSortedResources(instance.getDirectTypes("OpenCyc", typeTerm)));
   }
 
   /**
    * Test of getDirectInstances method, of class TypeQueries.
    */
+  @Test
   public void testGetDirectInstances() {
     LOGGER.info("getDirectInstances");
     URI typeTerm = new URIImpl(Constants.CYC_NAMESPACE + "DomesticCat");
@@ -209,11 +184,12 @@ public class TypeQueriesTest extends TestCase {
   /**
    * Test of subClassOfHierarchy method, of class TypeQueries.
    */
+  @Test
   public void testSubClassOfHierarchy() {
     LOGGER.info("subClassOfHierarchy");
     URI typeTerm1 = new URIImpl(Constants.CYC_NAMESPACE + "DomesticCat");
     URI typeTerm2 = new URIImpl(Constants.CYC_NAMESPACE + "Cat");
-    final Set<URI> visitedTypeTerms = new HashSet<URI>();
+    final Set<URI> visitedTypeTerms = new HashSet<>();
     TypeQueries instance = new TypeQueries(rdfEntityManager);
     final RepositoryConnection repositoryConnection1 = rdfEntityManager.getConnectionToNamedRepository("OpenCyc");
     List<URI> result = instance.subClassOfHierarchy(
@@ -249,6 +225,7 @@ public class TypeQueriesTest extends TestCase {
   /**
    * Test of typeHierarchy method, of class TypeQueries.
    */
+  @Test
   public void testTypeHierarchy() {
     LOGGER.info("typeHierarchy");
     URI term = new URIImpl(Constants.CYC_NAMESPACE + "CityOfAustinTX");
@@ -269,23 +246,4 @@ public class TypeQueriesTest extends TestCase {
 
   }
 
-  /** one time tear-down */
-  public void testOneTimeTearDown() {
-    LOGGER.info("one time tear-down");
-    CacheManager.getInstance().shutdown();
-    try {
-      repositoryConnection.close();
-    } catch (RepositoryException ex) {
-      throw new TexaiException(ex);
-    }
-    rdfEntityManager.close();
-    DistributedRepositoryManager.shutDown();
-    try {
-      if (testRepositoryDirectory.exists()) {
-        FileUtils.deleteDirectory(testRepositoryDirectory);
-      }
-    } catch (final IOException ex) {
-      // ignore failure to delete TMPFS directory
-    }
-  }
 }

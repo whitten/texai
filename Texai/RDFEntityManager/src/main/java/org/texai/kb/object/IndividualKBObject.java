@@ -62,7 +62,7 @@ public final class IndividualKBObject extends AbstractKBObject {
     assert string != null : "string must not be null";
     assert !string.isEmpty() : "string must not be empty";
 
-    final Set<Statement> statements = new HashSet<Statement>(TurtleStatementParser.makeTurtleStatementParser(string).getStatements());
+    final Set<Statement> statements = new HashSet<>(TurtleStatementParser.makeTurtleStatementParser(string).getStatements());
     boolean isSubClassOfFound = false;
     for (final Statement statement : statements) {
       if (statement.getPredicate().equals(RDF.TYPE)) {

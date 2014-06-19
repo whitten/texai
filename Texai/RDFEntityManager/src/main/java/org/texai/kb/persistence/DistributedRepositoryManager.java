@@ -1,9 +1,9 @@
 /*
- * RepositoryManager.java
+ * DistributedRepositoryManager.java
  *
  * Created on May 18, 2009, 12:48:39 PM
  *
- * Description: Provides a repository manager.
+ * Description: Provides a distributed repository manager.
  *
  * Copyright (C) May 18, 2009 Stephen L. Reed.
  *
@@ -24,6 +24,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -34,6 +35,7 @@ import java.util.Set;
 import javax.xml.bind.DatatypeConverter;
 import net.jcip.annotations.NotThreadSafe;
 import net.jcip.annotations.ThreadSafe;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.ws.jaxme.impl.DatatypeConverterImpl;
 import org.openrdf.model.URI;
@@ -49,6 +51,7 @@ import org.texai.kb.persistence.domainEntity.RepositoryContentDescriptionItem;
 import org.texai.kb.persistence.parser.ParseException;
 import org.texai.kb.persistence.parser.RepositoryContentDescriptionParser;
 import org.texai.util.FileSystemUtils;
+import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 
 /** Provides a repository manager.
@@ -90,14 +93,49 @@ public final class DistributedRepositoryManager {
   private static final Map<String, String> REPOSITORY_PATH_DICTIONARY = new HashMap<>();
   /** the Sesame server host URL, or null to use the local native store */
   private static String sesameServerAddress = null;
+  /** the directory in which the production repositories are located */
+  private static final String REPOSITORIES_DIRECTORY = System.getenv("REPOSITORIES");
+  /** the directory in which the test repositories are located */
+  private static final String TEST_REPOSITORIES_DIRECTORY = System.getenv("REPOSITORIES_TMPFS");
 
   /** Constructs a new DistributedRepositoryManager instance.  */
   public DistributedRepositoryManager() {
   }
 
+  /** Copies the named repository from the production directory to the test directory.
+   *
+   * @param repositoryName the name of the repository to copy
+   */
+  public static void copyProductionRepositoryToTest(final String repositoryName) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(repositoryName) : "repositoryName must not be empty";
+    assert StringUtils.isNonEmptyString(REPOSITORIES_DIRECTORY) : "REPOSITORIES must set to the production repositories directory";
+    assert StringUtils.isNonEmptyString(TEST_REPOSITORIES_DIRECTORY) : "REPOSITORIES_TMPFS must set to the test repositories directory, e.g. /mnt/tmpfs/repositories";
+
+    try {
+      final String testRepositoryPath = TEST_REPOSITORIES_DIRECTORY + '/' + repositoryName;
+      final File testRepositoryDirectory = new File(testRepositoryPath);
+      try {
+        if (testRepositoryDirectory.exists()) {
+          LOGGER.info("cleaning the test repository for " + repositoryName);
+          FileUtils.cleanDirectory(testRepositoryDirectory);
+        }
+      } catch (final IOException ex) {
+        throw new TexaiException(ex);
+      }
+
+      final String repositoryPath = REPOSITORIES_DIRECTORY + '/' + repositoryName;
+      final File repositoryDirectory = new File(repositoryPath);
+      LOGGER.info("copying the " + repositoryName + " from production (" + repositoryDirectory.getPath() + ") to test (" + testRepositoryDirectory.getPath() + ")");
+      FileUtils.copyDirectory(repositoryDirectory, testRepositoryDirectory);
+    } catch (IOException ex) {
+      throw new TexaiException(ex);
+    }
+  }
+
   /** Gets the Sesame server host URL.
    *
-   * @return the sesameServerAddress the Sesame server host URL, or null to use the local native stor
+   * @return the sesameServerAddress the Sesame server host URL, or null to use the local native store
    */
   public static String getSesameServerAddress() {
     return sesameServerAddress;
@@ -118,12 +156,40 @@ public final class DistributedRepositoryManager {
    */
   public static void addRepositoryPath(final String repositoryName, final String repositoryPath) {
     //Preconditions
-    assert repositoryName != null : "repositoryName must not be null";
-    assert !repositoryName.isEmpty() : "repositoryName must not be empty";
-    assert repositoryPath != null : "repositoryPath must not be null";
-    assert !repositoryPath.isEmpty() : "repositoryPath must not be empty";
+    assert StringUtils.isNonEmptyString(repositoryName) : "repositoryName must not be empty";
+    assert StringUtils.isNonEmptyString(repositoryPath) : "repositoryPath must not be empty";
 
-    REPOSITORY_PATH_DICTIONARY.put(repositoryName, repositoryPath);
+    synchronized (REPOSITORY_PATH_DICTIONARY) {
+      REPOSITORY_PATH_DICTIONARY.put(repositoryName, repositoryPath);
+    }
+  }
+
+  /** Adds the given test repository name and its looked-up path entry to the repository path dictionary.
+   *
+   * @param repositoryName the repository name
+   * @param isRepositoryDirectoryCleaned the indicator to clean the the directory containing the given named test repository files
+   */
+  public static void addTestRepositoryPath(final String repositoryName, final boolean isRepositoryDirectoryCleaned) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(repositoryName) : "repositoryName must not be empty";
+    assert StringUtils.isNonEmptyString(TEST_REPOSITORIES_DIRECTORY) : "REPOSITORIES_TMPFS must set to the test repositories directory, e.g. /mnt/tmpfs/repositories";
+
+    final String testRepositoryPath = TEST_REPOSITORIES_DIRECTORY + '/' + repositoryName;
+    final File testRepositoryDirectory = new File(testRepositoryPath);
+    if (isRepositoryDirectoryCleaned) {
+      try {
+        if (testRepositoryDirectory.exists()) {
+          FileUtils.cleanDirectory(testRepositoryDirectory);
+        }
+      } catch (final IOException ex) {
+        throw new TexaiException(ex);
+      }
+    }
+    assert testRepositoryDirectory != null : "testRepositoryDirectory must not be null";
+
+    synchronized (REPOSITORY_PATH_DICTIONARY) {
+      REPOSITORY_PATH_DICTIONARY.put(repositoryName, testRepositoryPath);
+    }
   }
 
   /** Gets the singleton distributed repository manager instance, while performing two phase initialization.
@@ -169,8 +235,7 @@ public final class DistributedRepositoryManager {
    */
   public static void clearNamedRepository(final String repositoryName) {
     //Preconditions
-    assert repositoryName != null : "repositoryName must not be null";
-    assert !repositoryName.isEmpty() : "repositoryName must not be empty";
+    assert StringUtils.isNonEmptyString(repositoryName) : "repositoryName must not be empty";
 
     final RepositoryConnection repositoryConnection = getInstance().getRepositoryConnectionForRepositoryName(repositoryName);
     final String repositoryPath = repositoryConnection.getRepository().getDataDir().toString();
@@ -192,18 +257,15 @@ public final class DistributedRepositoryManager {
    */
   public static void deleteNamedRepository(final String repositoryName) {
     //Preconditions
-    assert repositoryName != null : "repositoryName must not be null";
-    assert !repositoryName.isEmpty() : "repositoryName must not be empty";
+    assert StringUtils.isNonEmptyString(repositoryName) : "repositoryName must not be empty";
+    assert StringUtils.isNonEmptyString(REPOSITORIES_DIRECTORY) : "REPOSITORIES must set to the production repositories directory";
 
-    String repositoryPath = REPOSITORY_PATH_DICTIONARY.get(repositoryName);
+    String repositoryPath;
+    synchronized (REPOSITORY_PATH_DICTIONARY) {
+      repositoryPath = REPOSITORY_PATH_DICTIONARY.get(repositoryName);
+    }
     if (repositoryPath == null) {
-      final String repositoriesDirectory = System.getenv("REPOSITORIES");
-      if (repositoriesDirectory == null) {
-        // node runtime release location
-        repositoryPath = "data/repositories" + repositoryName;
-      } else {
-        repositoryPath = repositoriesDirectory + "/" + repositoryName;
-      }
+      repositoryPath = REPOSITORIES_DIRECTORY + "/" + repositoryName;
     }
     final File dataDirectory = new File(repositoryPath);
     LOGGER.info("deleting Sesame2 repository in " + dataDirectory.toString());
@@ -212,21 +274,13 @@ public final class DistributedRepositoryManager {
 
   /** Initializes the repository content descriptions without using the RDF entity manager to load or persist them. */
   private void initializeUsingFile() {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(REPOSITORIES_DIRECTORY) : "REPOSITORIES must set to the production repositories directory";
+
     BufferedInputStream bufferedInputStream;
     File repositoryContentDescriptionsFile;
-    // on the installed node runtime the file is located in the data directory
-    final String userDirectory = System.getProperty("user.dir");
-    LOGGER.info("trying data/repository.rcd");
-    repositoryContentDescriptionsFile = new File("data/repository.rcd");
-    if (!repositoryContentDescriptionsFile.exists()) {
-      // on the development system the file is located in the Main module
-      LOGGER.info("trying ../Main/data/repository.rcd");
-      repositoryContentDescriptionsFile = new File("../Main/data/repository.rcd");
-    }
-    if (!repositoryContentDescriptionsFile.exists()) {
-      LOGGER.info("trying ../Texai/Main/data/repository.rcd");
-      repositoryContentDescriptionsFile = new File("../Texai/Main/data/repository.rcd");
-    }
+    repositoryContentDescriptionsFile = new File(REPOSITORIES_DIRECTORY + "/repository.rcd");
+    assert repositoryContentDescriptionsFile.exists() : REPOSITORIES_DIRECTORY + "/repository.rcd not found";
     try {
       bufferedInputStream = new BufferedInputStream(new FileInputStream(repositoryContentDescriptionsFile));
     } catch (FileNotFoundException ex) {
@@ -237,8 +291,8 @@ public final class DistributedRepositoryManager {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("parsing the repository content descriptions file " + repositoryContentDescriptionsFile.toString());
     }
-    final RepositoryContentDescriptionParser repositoryContentDescriptionParser =
-            new RepositoryContentDescriptionParser(bufferedInputStream);
+    final RepositoryContentDescriptionParser repositoryContentDescriptionParser
+            = new RepositoryContentDescriptionParser(bufferedInputStream);
     try {
       repositoryContentDescriptions = repositoryContentDescriptionParser.parseInput();
     } catch (final ParseException ex) {
@@ -552,18 +606,16 @@ public final class DistributedRepositoryManager {
 
     /** Immediately initializes this repository. */
     private synchronized void immediatelyInitialize() {
+      //Preconditions
+      assert StringUtils.isNonEmptyString(REPOSITORIES_DIRECTORY) : "REPOSITORIES must set to the production repositories directory";
+
       LOGGER.info("initializing: " + repositoryName);
       if (repository == null) {
         try {
           if (sesameServerAddress == null) {
-            String repositoryDirectory = System.getenv("REPOSITORIES");
-            if (repositoryDirectory == null || repositoryDirectory.isEmpty()) {
-              // installed node runtime location
-              repositoryDirectory = "data/repositories";
-            }
             String repositoryPath = REPOSITORY_PATH_DICTIONARY.get(repositoryName);
             if (repositoryPath == null) {
-              repositoryPath = repositoryDirectory + "/" + repositoryName;
+              repositoryPath = REPOSITORIES_DIRECTORY + "/" + repositoryName;
             }
             final File dataDirectory = new File(repositoryPath);
             LOGGER.info("accessing local Sesame2 repository in " + dataDirectory.toString());
@@ -575,7 +627,7 @@ public final class DistributedRepositoryManager {
             LOGGER.info("remote repository: " + repository);
           }
           repository.initialize();
-        } catch (final Throwable ex) {
+        } catch (final RepositoryException ex) {
           LOGGER.error("error while initializing: " + repositoryName);
           throw new TexaiException(ex);
         }

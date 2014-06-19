@@ -23,13 +23,21 @@ package org.texai.kb.persistence;
 import java.io.File;
 import java.io.IOException;
 import javax.xml.bind.DatatypeConverter;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import net.sf.ehcache.CacheManager;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.ws.jaxme.impl.DatatypeConverterImpl;
+import org.junit.After;
+import org.junit.AfterClass;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.openrdf.repository.Repository;
 import org.texai.kb.CacheInitializer;
 import org.texai.kb.persistence.sample.PersistANewFriend;
@@ -38,7 +46,7 @@ import org.texai.kb.persistence.sample.PersistANewFriend;
  *
  * @author reed
  */
-public class PersistANewFriendTest extends TestCase {
+public class PersistANewFriendTest {
 
   /** the log4j logger */
   private static final Logger LOGGER = Logger.getLogger(PersistANewFriendTest.class);
@@ -51,71 +59,40 @@ public class PersistANewFriendTest extends TestCase {
 
   /**
    * Creates a new instance of PersistANewFriendTest.
-   * @param testName 
    */
-  public PersistANewFriendTest(String testName) {
-    super(testName);
+  public PersistANewFriendTest() {
   }
-
-  /** Returns a method-ordered test suite.
-   *
-   * @return a method-ordered test suite
-   */
-  public static Test suite() {
-    final TestSuite suite = new TestSuite();
-    suite.addTest(new PersistANewFriendTest("test"));
-    suite.addTest(new PersistANewFriendTest("testOneTimeTearDown"));
-    return suite;
-  }
-
-  @Override
-  protected void setUp() throws Exception {
-  }
-
-  @Override
-  protected void tearDown() throws Exception {
-  }
-
-  public void test() {
-    System.out.println("test");
-    CacheInitializer.resetCaches();
+  @BeforeClass
+  public static void setUpClass() throws Exception {
     CacheInitializer.initializeCaches();
+  }
 
-    String testRepositoryPath = System.getenv("REPOSITORIES_TMPFS");
-    if (testRepositoryPath == null || testRepositoryPath.isEmpty()) {
-      testRepositoryPath = System.getProperty("user.dir") + "/repositories";
-    } else if (testRepositoryPath.endsWith("/")) {
-      testRepositoryPath = testRepositoryPath.substring(0, testRepositoryPath.length() - 1);
-    }
-    assertFalse(testRepositoryPath.isEmpty());
+  @AfterClass
+  public static void tearDownClass() throws Exception {
+    DistributedRepositoryManager.shutDown();
+    CacheManager.getInstance().shutdown();
+  }
 
-    testRepositoryDirectory = new File(testRepositoryPath);
-    try {
-      if (testRepositoryDirectory.exists()) {
-        FileUtils.cleanDirectory(testRepositoryDirectory);
-      } else {
-        FileUtils.deleteDirectory(testRepositoryDirectory);
-      }
-    } catch (final IOException ex) {
-      fail(ex.getMessage());
-    }
-    assertNotNull(testRepositoryDirectory);
-    DistributedRepositoryManager.addRepositoryPath(
+  @Before
+  public void setUp() {
+  }
+
+  @After
+  public void tearDown() {
+  }
+
+  @Test
+  public void test() {
+    LOGGER.info("test");
+    DistributedRepositoryManager.addTestRepositoryPath(
             TEST_REPOSITORY_NAME,
-            testRepositoryPath + "/" + TEST_REPOSITORY_NAME);
+            true); // isRepositoryDirectoryCleaned
 
     DatatypeConverter.setDatatypeConverter(new DatatypeConverterImpl());
     final PersistANewFriend persistANewFriend = new PersistANewFriend();
     persistANewFriend.initialize();
     persistANewFriend.createAndPersistAFriend();
     persistANewFriend.finalization();
-    System.out.println("  test OK");
-  }
-
-  /** Performs one time tear down of test harness. This must be the last test method. */
-  public void testOneTimeTearDown() {
-    System.out.println("oneTimeTearDown");
-    CacheManager.getInstance().shutdown();
-    DistributedRepositoryManager.shutDown();
+    LOGGER.info("  test OK");
   }
 }

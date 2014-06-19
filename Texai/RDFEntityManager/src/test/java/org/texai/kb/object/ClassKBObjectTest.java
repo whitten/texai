@@ -7,11 +7,16 @@ package org.texai.kb.object;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import net.sf.ehcache.CacheManager;
 import org.apache.log4j.Logger;
+import org.junit.After;
+import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.texai.kb.CacheInitializer;
@@ -23,54 +28,46 @@ import org.texai.kb.persistence.RDFEntityManager;
 import org.texai.kb.persistence.RDFUtility;
 import org.texai.kb.persistence.RDFUtility.ResourceComparator;
 
-/**
+/** This test does not modify the production OpenCyc repository.
  *
  * @author reed
  */
-public class ClassKBObjectTest extends TestCase {
+public class ClassKBObjectTest {
 
   /** the log4j logger */
   private static final Logger LOGGER = Logger.getLogger(ClassKBObjectTest.class);
   /** the OpenCyc repository name */
   private static final String OPEN_CYC = "OpenCyc";
 
-  public ClassKBObjectTest(String testName) {
-    super(testName);
+  public ClassKBObjectTest() {
   }
 
-  /** Returns a method-ordered test suite.
-   *
-   * @return a method-ordered test suite
-   */
-  public static Test suite() {
-    final TestSuite suite = new TestSuite();
-    suite.addTest(new ClassKBObjectTest("testGetSuperClasses"));
-    suite.addTest(new ClassKBObjectTest("testMakeClassKBObject"));
-    suite.addTest(new ClassKBObjectTest("testFinalization"));
-    return suite;
+  @BeforeClass
+  public static void setUpClass() throws Exception {
+    CacheInitializer.initializeCaches();
   }
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @AfterClass
+  public static void tearDownClass() throws Exception {
+    DistributedRepositoryManager.shutDown();
+    CacheManager.getInstance().shutdown();
   }
 
-  @Override
-  protected void tearDown() throws Exception {
-    super.tearDown();
+  @Before
+  public void setUp() {
+  }
+
+  @After
+  public void tearDown() {
   }
 
   /**
    * Test of getSuperClasses method, of class ClassKBObject.
    */
+  @Test
   public void testGetSuperClasses() {
     LOGGER.info("getSuperClasses");
     CacheInitializer.initializeCaches();
-
-    DistributedRepositoryManager.addRepositoryPath(
-            OPEN_CYC,
-            "data/repositories/" + OPEN_CYC);
-
     final RDFEntityManager rdfEntityManager = new RDFEntityManager();
     URI term = new URIImpl(Constants.CYC_NAMESPACE + "TransportationDevice");
     final KBAccess kbAccess = new KBAccess(rdfEntityManager);
@@ -98,6 +95,7 @@ public class ClassKBObjectTest extends TestCase {
   /**
    * Test of makeClassKBObject method, of class ClassKBObject.
    */
+  @Test
   public void testMakeClassKBObject() {
     LOGGER.info("makeClassKBObject");
     final String string =
@@ -113,9 +111,4 @@ public class ClassKBObjectTest extends TestCase {
     assertEquals("[http://sw.cyc.com/2006/07/27/cyc/Group]", classKBObject.getSuperClasses().toString());
   }
 
-  public void testFinalization() {
-    LOGGER.info("finalization");
-    CacheManager.getInstance().shutdown();
-    DistributedRepositoryManager.shutDown();
-  }
 }

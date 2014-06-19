@@ -20,7 +20,6 @@
  */
 package org.texai.kb.persistence;
 
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.Id;
@@ -103,6 +102,7 @@ public class StatementHolder implements Comparable<StatementHolder>, CascadePers
    * @return a clone of this object
    */
   @Override
+  @SuppressWarnings("CloneDeclaresCloneNotSupported")
   public StatementHolder clone() {
     //Preconditions
     assert subject != null : "subject must not be null";
@@ -125,7 +125,7 @@ public class StatementHolder implements Comparable<StatementHolder>, CascadePers
     //Preconditions
     assert statementHolders != null : "statementHolders must not be null";
 
-    final Set<StatementHolder> clonedStatementHolders = new ArraySet<StatementHolder>();
+    final Set<StatementHolder> clonedStatementHolders = new ArraySet<>();
     for (final StatementHolder statementHolder : statementHolders) {
       clonedStatementHolders.add(statementHolder.clone());
     }
@@ -142,7 +142,7 @@ public class StatementHolder implements Comparable<StatementHolder>, CascadePers
     //Preconditions
     assert statements != null : "statements must not be null";
 
-    final Set<StatementHolder> statementHolders = new ArraySet<StatementHolder>();
+    final Set<StatementHolder> statementHolders = new ArraySet<>();
     for (final Statement statement : statements) {
       statementHolders.add(new StatementHolder(statement));
     }
@@ -152,14 +152,14 @@ public class StatementHolder implements Comparable<StatementHolder>, CascadePers
 
   /** Creates a set of statements for the given statement holders.
    *
-   * @param statement holders the given statement holders
+   * @param statementHolders the given statement holders
    * @return a set of statements for the given statement holders
    */
   public static Set<Statement> toStatements(final Set<StatementHolder> statementHolders) {
     //Preconditions
     assert statementHolders != null : "statementHolders must not be null";
 
-    final Set<Statement> statements = new HashSet<Statement>();
+    final Set<Statement> statements = new HashSet<>();
     for (final StatementHolder statementHolder : statementHolders) {
       statements.add(statementHolder.getStatement());
     }

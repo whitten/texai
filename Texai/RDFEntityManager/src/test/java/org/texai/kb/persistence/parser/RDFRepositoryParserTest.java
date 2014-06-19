@@ -5,7 +5,18 @@
 package org.texai.kb.persistence.parser;
 
 import java.util.Set;
-import junit.framework.TestCase;
+import net.sf.ehcache.CacheManager;
+import org.junit.After;
+import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.texai.kb.CacheInitializer;
+import org.texai.kb.persistence.DistributedRepositoryManager;
 import org.texai.kb.persistence.domainEntity.RepositoryContentDescription;
 import org.texai.util.StringUtils;
 
@@ -13,25 +24,34 @@ import org.texai.util.StringUtils;
  *
  * @author reed
  */
-public class RDFRepositoryParserTest extends TestCase {
+public class RDFRepositoryParserTest {
 
-  public RDFRepositoryParserTest(String testName) {
-    super(testName);
+  public RDFRepositoryParserTest() {
   }
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @BeforeClass
+  public static void setUpClass() throws Exception {
+    CacheInitializer.initializeCaches();
   }
 
-  @Override
-  protected void tearDown() throws Exception {
-    super.tearDown();
+  @AfterClass
+  public static void tearDownClass() throws Exception {
+    DistributedRepositoryManager.shutDown();
+    CacheManager.getInstance().shutdown();
+  }
+
+  @Before
+  public void setUp() {
+  }
+
+  @After
+  public void tearDown() {
   }
 
   /**
    * Test of makeRuleParser method, of class RDFRepositoryParser.
    */
+  @Test
   public void testMakeRDFRepositoryParser() {
     System.out.println("makeRDFRepositoryParser");
     String string =
@@ -63,7 +83,7 @@ public class RDFRepositoryParserTest extends TestCase {
               "  (indices: \"spoc,posc\")\n" +
               "  (className: org.texai.fcg.domainEntity.GrammarRuleUnitTestSpecification))",
               RepositoryContentDescription.toString(rdfRepositories));
-    } catch (final Exception ex) {
+    } catch (final ParseException ex) {
       ex.printStackTrace();
       fail(ex.getMessage());
     }

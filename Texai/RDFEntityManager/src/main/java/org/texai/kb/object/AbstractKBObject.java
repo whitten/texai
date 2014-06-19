@@ -36,7 +36,10 @@ import org.texai.util.ArraySet;
  * @author Stephen L. Reed
  */
 @NotThreadSafe
-public abstract class AbstractKBObject implements Serializable {    // NOPMD
+public abstract class AbstractKBObject implements Serializable {
+  /** the default serial version UID */
+  private static final long serialVersionUID = 1L;
+// NOPMD
 
   private URI id;    // NOPMD
   /** the statements */
@@ -49,6 +52,7 @@ public abstract class AbstractKBObject implements Serializable {    // NOPMD
   /** Constructs a new AbstractKBObject instance.
    *
    * @param statements the statements
+   * @param repositoryName the repository name
    */
   public AbstractKBObject(
           final Set<Statement> statements,

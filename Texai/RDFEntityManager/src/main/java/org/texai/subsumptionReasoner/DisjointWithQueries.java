@@ -33,6 +33,7 @@ import org.openrdf.OpenRDFException;
 import org.openrdf.model.URI;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
@@ -92,7 +93,6 @@ public class DisjointWithQueries {
 
   /** Returns whether the two given terms are disjoint classes.
    *
-   * @param repositoryName the repository name
    * @param term1 the first given term
    * @param term2 the second given term
    * @return whether the two given terms are disjoint classes.
@@ -307,7 +307,7 @@ public class DisjointWithQueries {
         areDisjoint = tupleQueryResult.hasNext();
         tupleQueryResult.close();
       }
-    } catch (final OpenRDFException ex) {
+    } catch (final QueryEvaluationException ex) {
       throw new TexaiException(ex);
     }
     return areDisjoint;
@@ -344,7 +344,7 @@ public class DisjointWithQueries {
           disjointWithTerms.add((URI) bindingSet.getBinding("s").getValue());
         }
         tupleQueryResult.close();
-      } catch (final OpenRDFException ex) {
+      } catch (final QueryEvaluationException ex) {
         throw new TexaiException(ex);
       }
       return disjointWithTerms;

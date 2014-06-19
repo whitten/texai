@@ -56,7 +56,7 @@ public class KBAccessTest {
   /** the logger */
   private static final Logger LOGGER = Logger.getLogger(KBAccessTest.class);
   /** the RDF entity manager */
-  private static RDFEntityManager rdfEntityManager = new RDFEntityManager();
+  private static final RDFEntityManager rdfEntityManager = new RDFEntityManager();
   /** the OpenCyc repository name */
   private static final String OPEN_CYC = "OpenCyc";
 
@@ -68,13 +68,10 @@ public class KBAccessTest {
     Logger.getLogger(KBAccess.class).setLevel(Level.DEBUG);
     CacheInitializer.initializeCaches();
     JournalWriter.deleteJournalFiles();
-    DistributedRepositoryManager.addRepositoryPath(
-            "ConceptuallyRelatedTerms",
-            System.getenv("REPOSITORIES_TMPFS") + "/Test");
-    DistributedRepositoryManager.addRepositoryPath(
-            "OpenCyc",
-            "data/repositories/OpenCyc");
-    DistributedRepositoryManager.clearNamedRepository("Test");
+    DistributedRepositoryManager.copyProductionRepositoryToTest(OPEN_CYC);
+    DistributedRepositoryManager.addTestRepositoryPath(
+            OPEN_CYC,
+            false); // isRepositoryDirectoryCleaned
     final KBAccess kbAccess = new KBAccess(rdfEntityManager);
     URI predicate = new URIImpl(Constants.CYC_NAMESPACE + "performedBy");
     final URI actionTerm = new URIImpl(Constants.CYC_NAMESPACE + "Action");
@@ -188,7 +185,7 @@ public class KBAccessTest {
             OPEN_CYC,
             new URIImpl(Constants.CYC_NAMESPACE + "Snowboarding"),
             predicate);
-    assertEquals("[[Restriction on cyc:performedBy, allVauesFrom cyc:Agent-Generic], [Restriction on cyc:performedBy, someVauesFrom cyc:MaleHuman]]", result.toString());
+    assertEquals("[[Restriction on cyc:performedBy, someVauesFrom cyc:MaleHuman]]", StringUtils.toSortedStrings(result).toString());
     result = instance.getRestrictions(
             OPEN_CYC,
             new URIImpl(Constants.CYC_NAMESPACE + "DeckOfCards"),
@@ -218,7 +215,7 @@ public class KBAccessTest {
     final URI predicate = new URIImpl(Constants.CYC_NAMESPACE + "nearbyTheaters");
 
     // clear testing state in the otherwise non-cleared repository
-    final Set<AbstractRestriction> existingRestrictions = new HashSet<AbstractRestriction>();
+    final Set<AbstractRestriction> existingRestrictions = new HashSet<>();
     existingRestrictions.addAll(instance.getRestrictionsByPredicate(OPEN_CYC, predicate));
     for (final AbstractRestriction restriction : existingRestrictions) {
       instance.removeRestriction(OPEN_CYC, restriction, subject);

@@ -5,10 +5,14 @@
 package org.texai.kb.journal;
 
 import java.io.File;
-import junit.framework.TestCase;
 import org.apache.log4j.Logger;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+import org.junit.Test;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.sail.nativerdf.NativeStore;
 
@@ -16,41 +20,24 @@ import org.openrdf.sail.nativerdf.NativeStore;
  *
  * @author reed
  */
-public class RepositoryArchiverTest extends TestCase {
+public class RepositoryArchiverTest {
 
   /** the log4j logger */
   private static final Logger LOGGER = Logger.getLogger(JournalWriterTest.class);
   /** the test repository name */
-  private static String TEST_REPOSITORY_NAME = "Test";
-  /** the directory containing the test repository */
-  private static File testRepositoryDirectory;
+  private static final String TEST_REPOSITORY_NAME = "Test";
 
-  public RepositoryArchiverTest(String testName) {
-    super(testName);
-  }
-
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-  }
-
-  @Override
-  protected void tearDown() throws Exception {
-    super.tearDown();
+  public RepositoryArchiverTest() {
   }
 
   /**
    * Test of archive method, of class RepositoryArchiver.
    */
+  @Test
   public void testArchive() {
     LOGGER.info("archive");
 
     String testRepositoryPath = System.getenv("REPOSITORIES_TMPFS");
-    if (testRepositoryPath == null || testRepositoryPath.isEmpty()) {
-      testRepositoryPath = System.getProperty("user.dir") + "/repositories";
-    } else if (testRepositoryPath.endsWith("/")) {
-      testRepositoryPath = testRepositoryPath.substring(0, testRepositoryPath.length() - 1);
-    }
     assertFalse(testRepositoryPath.isEmpty());
 
     Repository repository = null;
@@ -63,14 +50,14 @@ public class RepositoryArchiverTest extends TestCase {
       repository.initialize();
       final RepositoryConnection repositoryConnection = repository.getConnection();
       repositoryConnection.close();
-    } catch (Exception ex) {
+    } catch (RepositoryException ex) {
       ex.printStackTrace();
       fail(ex.getMessage());
     }
     assertNotNull(repository);
     try {
       repository.shutDown();
-    } catch (Exception ex) {
+    } catch (RepositoryException ex) {
       ex.printStackTrace();
       fail(ex.getMessage());
     }

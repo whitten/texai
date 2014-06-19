@@ -5,13 +5,26 @@
 package org.texai.turtleStatementParser;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.util.List;
-import junit.framework.TestCase;
+import net.sf.ehcache.CacheManager;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.junit.After;
+import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.openrdf.model.Statement;
+import org.texai.kb.CacheInitializer;
+import org.texai.kb.persistence.DistributedRepositoryManager;
 import org.texai.kb.persistence.RDFUtility;
 import org.texai.turtleStatementParser.misc.ParsedTurtleStatementHandler;
 import org.texai.util.StringUtils;
@@ -20,7 +33,7 @@ import org.texai.util.StringUtils;
  *
  * @author reed
  */
-public class TurtleStatementParserTest extends TestCase {
+public class TurtleStatementParserTest {
 
   /** the log4j logger */
   private static final Logger LOGGER = Logger.getLogger(TurtleStatementParserTest.class);
@@ -31,13 +44,32 @@ public class TurtleStatementParserTest extends TestCase {
   /** the number of RDF statements in the test file */
   private static int statementsCnt = 0;
 
-  public TurtleStatementParserTest(String testName) {
-    super(testName);
+  public TurtleStatementParserTest() {
+  }
+
+  @BeforeClass
+  public static void setUpClass() throws Exception {
+    CacheInitializer.initializeCaches();
+  }
+
+  @AfterClass
+  public static void tearDownClass() throws Exception {
+    DistributedRepositoryManager.shutDown();
+    CacheManager.getInstance().shutdown();
+  }
+
+  @Before
+  public void setUp() {
+  }
+
+  @After
+  public void tearDown() {
   }
 
   /**
    * Test of makeTurtleStatementParser method, of class TurtleStatementParser.
    */
+  @Test
   public void testMakeTurtleStatementParser1() {
     LOGGER.info("makeTurtleStatementParser1");
     String string =
@@ -96,17 +128,46 @@ public class TurtleStatementParserTest extends TestCase {
   /**
    * Test of makeTurtleStatementParser method, of class TurtleStatementParser.
    */
+  @Test
   public void testMakeTurtleStatementParser2() {
     LOGGER.info("makeTurtleStatementParser2");
 
+    statementsCnt = 0;
     final BufferedInputStream inputStream;
     try {
       inputStream = new BufferedInputStream(new FileInputStream("data/parsing-test.turtle"));
       final ParsedTurtleStatementHandler parsedTurtleStatementHandler = new MyParsedTurtleStatementHandler();
-      TurtleStatementParser turtleStatementParser = TurtleStatementParser.makeTurtleStatementParser(inputStream, parsedTurtleStatementHandler);
+      TurtleStatementParser turtleStatementParser = TurtleStatementParser.makeTurtleStatementParser(
+              inputStream,
+              parsedTurtleStatementHandler);
       turtleStatementParser.getStatements();
       assertEquals(5, statementsCnt);
-    } catch (IOException ex) {
+    } catch (FileNotFoundException ex) {
+      ex.printStackTrace();
+      fail(ex.getMessage());
+    }
+  }
+
+  /**
+   * Test of makeTurtleStatementParser method, of class TurtleStatementParser.
+   */
+  @Test
+  public void testMakeTurtleStatementParser3() {
+    LOGGER.info("makeTurtleStatementParser3");
+
+    statementsCnt = 0;
+    final BufferedInputStream inputStream;
+    try {
+      final String statementFilePath = "../Main/data/kb-statements.txt";
+      assertTrue((new File(statementFilePath)).exists());
+      inputStream = new BufferedInputStream(new FileInputStream(statementFilePath));
+      final ParsedTurtleStatementHandler parsedTurtleStatementHandler = new MyParsedTurtleStatementHandler();
+      TurtleStatementParser turtleStatementParser = TurtleStatementParser.makeTurtleStatementParser(
+              inputStream,
+              parsedTurtleStatementHandler);
+      turtleStatementParser.getStatements();
+      assertTrue(statementsCnt > 100);
+    } catch (FileNotFoundException ex) {
       ex.printStackTrace();
       fail(ex.getMessage());
     }

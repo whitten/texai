@@ -28,18 +28,18 @@ public class TurtleStatementParser implements TurtleStatementParserConstants {
   /** the log4j logger */
   private static final Logger LOGGER = Logger.getLogger(TurtleStatementParser.class.getName());
   /** the parsed turtle statement handler */
-  private static ParsedTurtleStatementHandler parsedTurtleStatementHandler;
+  private ParsedTurtleStatementHandler parsedTurtleStatementHandler;
 
   /** the URI namespace dictionary, prefix --> namespace */
-  private final HashMap<String, String> namespaceDictionary = new HashMap<String, String>();
+  private final HashMap<String, String> namespaceDictionary = new HashMap<>();
 
   /** Returns a statement parser for the given string.
    * @param string the given string
    * @return a statement parser for the given string
    */
   public static TurtleStatementParser makeTurtleStatementParser(final String string) {
-    final TurtleStatementParser turtleStatementParser =
-      new TurtleStatementParser(new BufferedInputStream(new ByteArrayInputStream(string.getBytes())));
+    final TurtleStatementParser turtleStatementParser
+            = new TurtleStatementParser(new BufferedInputStream(new ByteArrayInputStream(string.getBytes())));
     turtleStatementParser.initialize();
     return turtleStatementParser;
   }
@@ -50,8 +50,8 @@ public class TurtleStatementParser implements TurtleStatementParserConstants {
    * @return a statement parser for the given input stream and the given statement handler
    */
   public static TurtleStatementParser makeTurtleStatementParser(
-    final BufferedInputStream inputStream,
-    final ParsedTurtleStatementHandler parsedTurtleStatementHandler) {
+          final BufferedInputStream inputStream,
+          final ParsedTurtleStatementHandler parsedTurtleStatementHandler) {
     //Preconditions
     assert inputStream != null : "inputStream must not be null";
     assert parsedTurtleStatementHandler != null : "parsedTurtleStatementHandler must not be null";
@@ -83,7 +83,7 @@ public class TurtleStatementParser implements TurtleStatementParserConstants {
       if (!ex.getMessage().startsWith("Encountered \"<EOF>\"")) {
         throw new TexaiException(ex);
       }
-      return new ArrayList<Statement>();
+      return new ArrayList<>();
     }
   }
 
@@ -95,22 +95,22 @@ public class TurtleStatementParser implements TurtleStatementParserConstants {
     this.parsedTurtleStatementHandler = parsedTurtleStatementHandler;
   }
 
-/* GRAMMAR PRODUCTIONS */
+  /* GRAMMAR PRODUCTIONS */
   final public List<Statement> Statements() throws ParseException {
-  List<Statement> statements = new ArrayList<Statement>();
-  Statement statement;
+    List<Statement> statements = new ArrayList<>();
+    Statement statement;
     label_1:
     while (true) {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case IDENTIFIER:
-      case VARIABLE:
-      case QNAME:
-      case URI:
+      switch ((jj_ntk == -1) ? jj_ntk() : jj_ntk) {
+        case IDENTIFIER:
+        case VARIABLE:
+        case QNAME:
+        case URI:
         ;
-        break;
-      default:
-        jj_la1[0] = jj_gen;
-        break label_1;
+          break;
+        default:
+          jj_la1[0] = jj_gen;
+          break label_1;
       }
       statement = Statement();
       if (parsedTurtleStatementHandler == null) {
@@ -119,89 +119,109 @@ public class TurtleStatementParser implements TurtleStatementParserConstants {
         parsedTurtleStatementHandler.handleStatement(statement);
       }
     }
-    {if (true) return statements;}
+    {
+      if (true) {
+        return statements;
+      }
+    }
     throw new Error("Missing return statement in function");
   }
 
   final public Statement Statement() throws ParseException {
-  Resource subject;
-  Resource predicate;
-  Value object;
-  Resource context = null;
+    Resource subject;
+    Resource predicate;
+    Value object;
+    Resource context = null;
     subject = Resource();
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case IDENTIFIER:
-    case VARIABLE:
-    case URI:
-      predicate = URI();
-      break;
-    case QNAME:
-      predicate = QName();
-      break;
-    default:
-      jj_la1[1] = jj_gen;
-      jj_consume_token(-1);
-      throw new ParseException();
+    switch ((jj_ntk == -1) ? jj_ntk() : jj_ntk) {
+      case IDENTIFIER:
+      case VARIABLE:
+      case URI:
+        predicate = URI();
+        break;
+      case QNAME:
+        predicate = QName();
+        break;
+      default:
+        jj_la1[1] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
     }
     object = Value();
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case IN:
-      jj_consume_token(IN);
-      context = Resource();
-      break;
-    default:
-      jj_la1[2] = jj_gen;
-      ;
+    switch ((jj_ntk == -1) ? jj_ntk() : jj_ntk) {
+      case IN:
+        jj_consume_token(IN);
+        context = Resource();
+        break;
+      default:
+        jj_la1[2] = jj_gen;
+        ;
     }
     jj_consume_token(DOT);
     if (context == null) {
-      {if (true) return new StatementImpl(subject, (URI) predicate, object);}
+      {
+        if (true) {
+          return new StatementImpl(subject, (URI) predicate, object);
+        }
+      }
     } else {
-      {if (true) return new ContextStatementImpl(subject, (URI) predicate, object, context);}
+      {
+        if (true) {
+          return new ContextStatementImpl(subject, (URI) predicate, object, context);
+        }
+      }
     }
     throw new Error("Missing return statement in function");
   }
 
   final public Value Value() throws ParseException {
-  Value value;
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case IDENTIFIER:
-    case VARIABLE:
-    case QNAME:
-    case URI:
-      value = Resource();
-      break;
-    case INTEGER_LITERAL:
-    case FLOATING_POINT_LITERAL:
-    case STRING_LITERAL:
-      value = Literal();
-      break;
-    default:
-      jj_la1[3] = jj_gen;
-      jj_consume_token(-1);
-      throw new ParseException();
+    Value value;
+    switch ((jj_ntk == -1) ? jj_ntk() : jj_ntk) {
+      case IDENTIFIER:
+      case VARIABLE:
+      case QNAME:
+      case URI:
+        value = Resource();
+        break;
+      case INTEGER_LITERAL:
+      case FLOATING_POINT_LITERAL:
+      case STRING_LITERAL:
+        value = Literal();
+        break;
+      default:
+        jj_la1[3] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
     }
-    {if (true) return value;}
+    {
+      if (true) {
+        return value;
+      }
+    }
     throw new Error("Missing return statement in function");
   }
 
   final public Resource Resource() throws ParseException {
-  Resource resource;
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case IDENTIFIER:
-    case VARIABLE:
-    case URI:
-      resource = URI();
-      break;
-    case QNAME:
-      resource = QName();
-      break;
-    default:
-      jj_la1[4] = jj_gen;
-      jj_consume_token(-1);
-      throw new ParseException();
+    Resource resource;
+    switch ((jj_ntk == -1) ? jj_ntk() : jj_ntk) {
+      case IDENTIFIER:
+      case VARIABLE:
+      case URI:
+        resource = URI();
+        break;
+      case QNAME:
+        resource = QName();
+        break;
+      default:
+        jj_la1[4] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
     }
-    {if (true) return resource;}
+    {
+      if (true) {
+        return resource;
+      }
+    }
     throw new Error("Missing return statement in function");
   }
 
@@ -211,78 +231,114 @@ public class TurtleStatementParser implements TurtleStatementParserConstants {
     int index = uriString.indexOf(":");
     if (index > -1) {
       final String prefix = uriString.substring(0, index);
-      final String localName =uriString.substring(index + 1);
+      final String localName = uriString.substring(index + 1);
       if (prefix.equals("_")) {
-        {if (true) return new BNodeImpl(localName);}
+        {
+          if (true) {
+            return new BNodeImpl(localName);
+          }
+        }
       }
       final String namespace = namespaceDictionary.get(prefix);
       if (namespace == null) {
-        {if (true) throw new TexaiException("missing namespace for URI " + uriString +
-            "\nprefix: " + prefix + " namespace: " + namespace + " namespaceDictionary: " + namespaceDictionary);}
+        {
+          if (true) {
+            throw new TexaiException("missing namespace for URI " + uriString
+                    + "\nprefix: " + prefix + " namespace: " + namespace + " namespaceDictionary: " + namespaceDictionary);
+          }
+        }
       } else {
-        {if (true) return new URIImpl(namespace + localName);}
+        {
+          if (true) {
+            return new URIImpl(namespace + localName);
+          }
+        }
       }
-     } else {
-       {if (true) throw new TexaiException("malformed URI " + token.image);}
-     }
+    } else {
+      {
+        if (true) {
+          throw new TexaiException("malformed URI " + token.image);
+        }
+      }
+    }
     throw new Error("Missing return statement in function");
   }
 
   final public URI URI() throws ParseException {
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case IDENTIFIER:
-      jj_consume_token(IDENTIFIER);
-      break;
-    case URI:
-      jj_consume_token(URI);
-      break;
-    case VARIABLE:
-      jj_consume_token(VARIABLE);
-      break;
-    default:
-      jj_la1[5] = jj_gen;
-      jj_consume_token(-1);
-      throw new ParseException();
+    switch ((jj_ntk == -1) ? jj_ntk() : jj_ntk) {
+      case IDENTIFIER:
+        jj_consume_token(IDENTIFIER);
+        break;
+      case URI:
+        jj_consume_token(URI);
+        break;
+      case VARIABLE:
+        jj_consume_token(VARIABLE);
+        break;
+      default:
+        jj_la1[5] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
     }
     if (token.image.startsWith("<") && token.image.endsWith(">")) {
       String uriString = token.image.substring(1, token.image.length() - 1);
       int index = uriString.indexOf(":");
       if (index > -1) {
         final String prefix = uriString.substring(0, index);
-        final String localName =uriString.substring(index + 1);
+        final String localName = uriString.substring(index + 1);
         final String namespace = namespaceDictionary.get(prefix);
         if (namespace == null) {
-          {if (true) throw new TexaiException("missing namespace for URI " + uriString +
-              "\nnamespace: " + namespace + " namespaceDictionary: " + namespaceDictionary);}
+          {
+            if (true) {
+              throw new TexaiException("missing namespace for URI " + uriString
+                      + "\nnamespace: " + namespace + " namespaceDictionary: " + namespaceDictionary);
+            }
+          }
         } else {
-          {if (true) return new URIImpl(namespace + localName);}
+          {
+            if (true) {
+              return new URIImpl(namespace + localName);
+            }
+          }
         }
-       } else {
-         {if (true) throw new TexaiException("malformed URI " + token.image);}
-       }
+      } else {
+        {
+          if (true) {
+            throw new TexaiException("malformed URI " + token.image);
+          }
+        }
+      }
     } else {
-        {if (true) return new URIImpl(Constants.TEXAI_NAMESPACE + token.image);}
+      {
+        if (true) {
+          return new URIImpl(Constants.TEXAI_NAMESPACE + token.image);
+        }
+      }
     }
     throw new Error("Missing return statement in function");
   }
 
   final public Literal Literal() throws ParseException {
-  Literal literal;
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case INTEGER_LITERAL:
-      literal = IntegerLiteral();
-      break;
-    case FLOATING_POINT_LITERAL:
-      literal = FloatingPointLiteral();
-      break;
-    case STRING_LITERAL:
-      literal = StringLiteral();
-    {if (true) return literal;}
-      break;
-    default:
-      jj_la1[6] = jj_gen;
-      jj_consume_token(-1);
-      throw new ParseException();
+    Literal literal;
+    switch ((jj_ntk == -1) ? jj_ntk() : jj_ntk) {
+      case INTEGER_LITERAL:
+        literal = IntegerLiteral();
+        break;
+      case FLOATING_POINT_LITERAL:
+        literal = FloatingPointLiteral();
+        break;
+      case STRING_LITERAL:
+        literal = StringLiteral();
+         {
+          if (true) {
+            return literal;
+          }
+        }
+        break;
+      default:
+        jj_la1[6] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
     }
     throw new Error("Missing return statement in function");
   }
@@ -291,16 +347,28 @@ public class TurtleStatementParser implements TurtleStatementParserConstants {
     jj_consume_token(INTEGER_LITERAL);
     final long longValue = Long.parseLong(token.image);
     if (longValue >= Integer.MIN_VALUE && longValue <= Integer.MAX_VALUE) {
-      {if (true) return new NumericLiteralImpl((int) longValue);}
+      {
+        if (true) {
+          return new NumericLiteralImpl((int) longValue);
+        }
+      }
     } else {
-      {if (true) return new NumericLiteralImpl(longValue);}
+      {
+        if (true) {
+          return new NumericLiteralImpl(longValue);
+        }
+      }
     }
     throw new Error("Missing return statement in function");
   }
 
   final public Literal FloatingPointLiteral() throws ParseException {
     jj_consume_token(FLOATING_POINT_LITERAL);
-    {if (true) return new NumericLiteralImpl(Double.parseDouble(token.image));}
+    {
+      if (true) {
+        return new NumericLiteralImpl(Double.parseDouble(token.image));
+      }
+    }
     throw new Error("Missing return statement in function");
   }
 
@@ -308,10 +376,18 @@ public class TurtleStatementParser implements TurtleStatementParserConstants {
     jj_consume_token(STRING_LITERAL);
     final int index = token.image.indexOf("^^<");
     if (index == -1) {
-      {if (true) return new LiteralImpl(token.image.substring(1, token.image.length() - 1));}
+      {
+        if (true) {
+          return new LiteralImpl(token.image.substring(1, token.image.length() - 1));
+        }
+      }
     } else {
       final URI datatype = new URIImpl(token.image.substring(index + 3, token.image.length() - 1));
-      {if (true) return new LiteralImpl(token.image.substring(1, index - 1), datatype);}
+      {
+        if (true) {
+          return new LiteralImpl(token.image.substring(1, index - 1), datatype);
+        }
+      }
     }
     throw new Error("Missing return statement in function");
   }
@@ -324,39 +400,56 @@ public class TurtleStatementParser implements TurtleStatementParserConstants {
   final private int[] jj_la1 = new int[7];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
+
   static {
-      jj_la1_0();
-      jj_la1_1();
-   }
-   private static void jj_la1_0() {
-      jj_la1_0 = new int[] {0x0,0x0,0x80000,0x48800000,0x0,0x0,0x48800000,};
-   }
-   private static void jj_la1_1() {
-      jj_la1_1 = new int[] {0x1032,0x1032,0x0,0x1032,0x1032,0x1012,0x0,};
-   }
+    jj_la1_0();
+    jj_la1_1();
+  }
+
+  private static void jj_la1_0() {
+    jj_la1_0 = new int[]{0x0, 0x0, 0x80000, 0x48800000, 0x0, 0x0, 0x48800000,};
+  }
+
+  private static void jj_la1_1() {
+    jj_la1_1 = new int[]{0x1032, 0x1032, 0x0, 0x1032, 0x1032, 0x1012, 0x0,};
+  }
 
   public TurtleStatementParser(java.io.InputStream stream) {
-     this(stream, null);
+    this(stream, null);
   }
+
   public TurtleStatementParser(java.io.InputStream stream, String encoding) {
-    try { jj_input_stream = new SimpleCharStream(stream, encoding, 1, 1); } catch(java.io.UnsupportedEncodingException e) { throw new RuntimeException(e); }
+    try {
+      jj_input_stream = new SimpleCharStream(stream, encoding, 1, 1);
+    } catch (java.io.UnsupportedEncodingException e) {
+      throw new RuntimeException(e);
+    }
     token_source = new TurtleStatementParserTokenManager(jj_input_stream);
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 7; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 7; i++) {
+      jj_la1[i] = -1;
+    }
   }
 
   public void ReInit(java.io.InputStream stream) {
-     ReInit(stream, null);
+    ReInit(stream, null);
   }
+
   public void ReInit(java.io.InputStream stream, String encoding) {
-    try { jj_input_stream.ReInit(stream, encoding, 1, 1); } catch(java.io.UnsupportedEncodingException e) { throw new RuntimeException(e); }
+    try {
+      jj_input_stream.ReInit(stream, encoding, 1, 1);
+    } catch (java.io.UnsupportedEncodingException e) {
+      throw new RuntimeException(e);
+    }
     token_source.ReInit(jj_input_stream);
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 7; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 7; i++) {
+      jj_la1[i] = -1;
+    }
   }
 
   public TurtleStatementParser(java.io.Reader stream) {
@@ -365,7 +458,9 @@ public class TurtleStatementParser implements TurtleStatementParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 7; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 7; i++) {
+      jj_la1[i] = -1;
+    }
   }
 
   public void ReInit(java.io.Reader stream) {
@@ -374,7 +469,9 @@ public class TurtleStatementParser implements TurtleStatementParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 7; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 7; i++) {
+      jj_la1[i] = -1;
+    }
   }
 
   public TurtleStatementParser(TurtleStatementParserTokenManager tm) {
@@ -382,7 +479,9 @@ public class TurtleStatementParser implements TurtleStatementParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 7; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 7; i++) {
+      jj_la1[i] = -1;
+    }
   }
 
   public void ReInit(TurtleStatementParserTokenManager tm) {
@@ -390,13 +489,18 @@ public class TurtleStatementParser implements TurtleStatementParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 7; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 7; i++) {
+      jj_la1[i] = -1;
+    }
   }
 
   final private Token jj_consume_token(int kind) throws ParseException {
     Token oldToken;
-    if ((oldToken = token).next != null) token = token.next;
-    else token = token.next = token_source.getNextToken();
+    if ((oldToken = token).next != null) {
+      token = token.next;
+    } else {
+      token = token.next = token_source.getNextToken();
+    }
     jj_ntk = -1;
     if (token.kind == kind) {
       jj_gen++;
@@ -408,8 +512,11 @@ public class TurtleStatementParser implements TurtleStatementParserConstants {
   }
 
   final public Token getNextToken() {
-    if (token.next != null) token = token.next;
-    else token = token.next = token_source.getNextToken();
+    if (token.next != null) {
+      token = token.next;
+    } else {
+      token = token.next = token_source.getNextToken();
+    }
     jj_ntk = -1;
     jj_gen++;
     return token;
@@ -418,17 +525,21 @@ public class TurtleStatementParser implements TurtleStatementParserConstants {
   final public Token getToken(int index) {
     Token t = token;
     for (int i = 0; i < index; i++) {
-      if (t.next != null) t = t.next;
-      else t = t.next = token_source.getNextToken();
+      if (t.next != null) {
+        t = t.next;
+      } else {
+        t = t.next = token_source.getNextToken();
+      }
     }
     return t;
   }
 
   final private int jj_ntk() {
-    if ((jj_nt=token.next) == null)
-      return (jj_ntk = (token.next=token_source.getNextToken()).kind);
-    else
+    if ((jj_nt = token.next) == null) {
+      return (jj_ntk = (token.next = token_source.getNextToken()).kind);
+    } else {
       return (jj_ntk = jj_nt.kind);
+    }
   }
 
   private java.util.Vector jj_expentries = new java.util.Vector();
@@ -448,11 +559,11 @@ public class TurtleStatementParser implements TurtleStatementParserConstants {
     for (int i = 0; i < 7; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
-          if ((jj_la1_0[i] & (1<<j)) != 0) {
+          if ((jj_la1_0[i] & (1 << j)) != 0) {
             la1tokens[j] = true;
           }
-          if ((jj_la1_1[i] & (1<<j)) != 0) {
-            la1tokens[32+j] = true;
+          if ((jj_la1_1[i] & (1 << j)) != 0) {
+            la1tokens[32 + j] = true;
           }
         }
       }
@@ -466,7 +577,7 @@ public class TurtleStatementParser implements TurtleStatementParserConstants {
     }
     int[][] exptokseq = new int[jj_expentries.size()][];
     for (int i = 0; i < jj_expentries.size(); i++) {
-      exptokseq[i] = (int[])jj_expentries.elementAt(i);
+      exptokseq[i] = (int[]) jj_expentries.elementAt(i);
     }
     return new ParseException(token, exptokseq, tokenImage);
   }

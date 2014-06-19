@@ -95,9 +95,7 @@ public final class RDFEntityRemover extends AbstractRDFEntityAccessor {
       // remove the blank nodes that persist list fields and map fields
       for (final Field field : getFieldAnnotationDictionary().keySet()) {
         final Annotation annotation = getFieldAnnotationDictionary().get(field);
-        if ("@javax.persistence.Id()".equals(annotation.toString())) {
-          continue;
-        } else {
+        if (!("@javax.persistence.Id()".equals(annotation.toString()))) {
           if (annotation instanceof RDFProperty) {
             final Class<?> fieldType = field.getType();
             if (List.class.isAssignableFrom(fieldType) || field.getType().isArray()) {

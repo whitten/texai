@@ -50,6 +50,8 @@ import org.texai.kb.persistence.RDFProperty;
 }, subClassOf = {"cyc:Scooter", "cyc:Device-UserPowered"
 })
 public class RDFTestEntity extends AbstractRDFTestEntity implements RDFPersistent {
+  /** the default serial version UID */
+  private static final long serialVersionUID = 1L;
 
   // required annotation and field type
   /** the id allocated by the RDF persistence framework */
