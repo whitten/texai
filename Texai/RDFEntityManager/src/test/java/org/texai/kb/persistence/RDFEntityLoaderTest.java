@@ -78,6 +78,13 @@ public class RDFEntityLoaderTest {
   static RepositoryConnection repositoryConnection = null;
   /** the RDF entity manager */
   static RDFEntityManager rdfEntityManager = null;
+  /** the persisted test entity. */
+  RDFTestEntity rdfTestEntity1;
+  /** the ID of the persisted test entity */
+  private URI uri1;
+  /** a test UUID */
+  private final UUID testUUID = UUID.randomUUID();
+
 
   /**
    * Creates a new instance of RDFEntityLoaderTest.
@@ -115,11 +122,95 @@ public class RDFEntityLoaderTest {
       DistributedRepositoryManager.shutDown();
     } catch (final RepositoryException ex) {
       ex.printStackTrace();
+      fail();
     }
   }
 
   @Before
   public void setUp() {
+    try {
+      repositoryConnection.clear();
+    } catch (RepositoryException ex) {
+      ex.printStackTrace();
+      fail();
+    }
+    // persist a test entity
+    rdfTestEntity1 = new RDFTestEntity();
+    final RDFTestEntity rdfTestEntity2 = new RDFTestEntity();
+    rdfTestEntity1.setIsSomething(true);
+    rdfTestEntity1.setIsSomethingElse(true);
+    rdfTestEntity1.setDontCareField("do not care");
+    rdfTestEntity1.setFavoriteTestRDFEntityPeer(rdfTestEntity2);
+    rdfTestEntity1.setMaxNbrOfScooterRiders(2);
+    List<RDFTestEntity> myPeers = new ArrayList<>(1);
+    myPeers.add(rdfTestEntity2);
+    rdfTestEntity1.setMyPeers(myPeers);
+    rdfTestEntity1.setName("TestDomainEntity 1");
+    rdfTestEntity1.setNumberOfCrew(1);
+    final String[] comments1 = {"comment 1", "comment 2"};
+    rdfTestEntity1.setComment(comments1);
+    Set<Integer> someIntegers = new HashSet<>();
+    someIntegers.add(1);
+    someIntegers.add(2);
+    rdfTestEntity1.setSomeIntegers(someIntegers);
+    Set<URI> someURIs = new ArraySet<>();
+    someURIs.add(new URIImpl("http://texai.org/texai/uri1"));
+    someURIs.add(new URIImpl("http://texai.org/texai/uri2"));
+    rdfTestEntity1.setSomeURIs(someURIs);
+    rdfTestEntity2.setDontCareField("do not care");
+    rdfTestEntity2.setFavoriteTestRDFEntityPeer(rdfTestEntity2);
+    rdfTestEntity2.setMaxNbrOfScooterRiders(2);
+    myPeers = new ArrayList<>(1);
+    myPeers.add(rdfTestEntity1);
+    rdfTestEntity2.setMyPeers(myPeers);
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+    List<Double> myPeersStrengths = new ArrayList<>();
+    myPeersStrengths.add(0.5d);
+    rdfTestEntity2.setName("TestDomainEntity 2");
+    rdfTestEntity2.setNumberOfCrew(1);
+    final String[] comments2 = {"comment 1", "comment 2"};
+    rdfTestEntity2.setComment(comments2);
+    rdfTestEntity1.setUuidField(testUUID);
+
+    // set XML datatype fields in the first test RDF entity
+    rdfTestEntity1.setByteField((byte) 5);
+    rdfTestEntity1.setUnsignedByteField((byte) 4);
+    rdfTestEntity1.setIntField(-6);
+    rdfTestEntity1.setUnsignedIntField(303);
+    rdfTestEntity1.setLongField(-7L);
+    rdfTestEntity1.setUnsignedLongField(404);
+    rdfTestEntity1.setFloatField(1.1F);
+    rdfTestEntity1.setDoubleField(1.2D);
+    rdfTestEntity1.setBigIntegerField(new BigInteger("-100"));
+    rdfTestEntity1.setPositiveBigIntegerField(new BigInteger("101"));
+    rdfTestEntity1.setNonNegativeBigIntegerField(new BigInteger("0"));
+    rdfTestEntity1.setNonPositiveBigIntegerField(new BigInteger("-102"));
+    rdfTestEntity1.setNegativeBigIntegerField(new BigInteger("-103"));
+    rdfTestEntity1.setBigDecimalField(new BigDecimal("-100.001"));
+    rdfTestEntity1.setCalendarField(Calendar.getInstance());
+    rdfTestEntity1.setDateTimeField(new DateTime());
+    rdfTestEntity1.setDateField(Calendar.getInstance().getTime());
+    rdfTestEntity1.mapField = new HashMap<>();
+    rdfTestEntity1.mapField.put(1, "a");
+    rdfTestEntity1.mapField.put(2, "b");
+    rdfTestEntity1.mapField.put(3, "c");
+
+    assertNotNull(rdfEntityManager);
+    RDFEntityPersister rdfEntityPersister = new RDFEntityPersister(rdfEntityManager);
+    try {
+      assertTrue(repositoryConnection.isAutoCommit());
+    } catch (final RepositoryException ex) {
+      fail(ex.getMessage());
+    }
+    rdfEntityPersister.persist(repositoryConnection, rdfTestEntity1);
+    try {
+      assertTrue(repositoryConnection.isAutoCommit());
+    } catch (final RepositoryException ex) {
+      fail(ex.getMessage());
+    }
+    assertNotNull(rdfTestEntity1.getId());
+    uri1 = rdfTestEntity1.getId();
+
   }
 
   @After
@@ -253,86 +344,9 @@ public class RDFEntityLoaderTest {
   public void testFind() {
     LOGGER.info("find");
 
-    // persist two RDF entities
-    final RDFTestEntity rdfTestEntity1 = new RDFTestEntity();
-    final RDFTestEntity rdfTestEntity2 = new RDFTestEntity();
-    rdfTestEntity1.setIsSomething(true);
-    rdfTestEntity1.setIsSomethingElse(true);
-    rdfTestEntity1.setDontCareField("do not care");
-    rdfTestEntity1.setFavoriteTestRDFEntityPeer(rdfTestEntity2);
-    rdfTestEntity1.setMaxNbrOfScooterRiders(2);
-    List<RDFTestEntity> myPeers = new ArrayList<>(1);
-    myPeers.add(rdfTestEntity2);
-    rdfTestEntity1.setMyPeers(myPeers);
-    rdfTestEntity1.setName("TestDomainEntity 1");
-    rdfTestEntity1.setNumberOfCrew(1);
-    final String[] comments1 = {"comment 1", "comment 2"};
-    rdfTestEntity1.setComment(comments1);
-    Set<Integer> someIntegers = new HashSet<>();
-    someIntegers.add(1);
-    someIntegers.add(2);
-    rdfTestEntity1.setSomeIntegers(someIntegers);
-    Set<URI> someURIs = new ArraySet<>();
-    someURIs.add(new URIImpl("http://texai.org/texai/uri1"));
-    someURIs.add(new URIImpl("http://texai.org/texai/uri2"));
-    rdfTestEntity1.setSomeURIs(someURIs);
-    rdfTestEntity2.setDontCareField("do not care");
-    rdfTestEntity2.setFavoriteTestRDFEntityPeer(rdfTestEntity2);
-    rdfTestEntity2.setMaxNbrOfScooterRiders(2);
-    myPeers = new ArrayList<>(1);
-    myPeers.add(rdfTestEntity1);
-    rdfTestEntity2.setMyPeers(myPeers);
-    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
-    List<Double> myPeersStrengths = new ArrayList<>();
-    myPeersStrengths.add(0.5d);
-    rdfTestEntity2.setName("TestDomainEntity 2");
-    rdfTestEntity2.setNumberOfCrew(1);
-    final String[] comments2 = {"comment 1", "comment 2"};
-    rdfTestEntity2.setComment(comments2);
-    final UUID testUUID = UUID.randomUUID();
-    rdfTestEntity1.setUuidField(testUUID);
-
-    // set XML datatype fields in the first test RDF entity
-    rdfTestEntity1.setByteField((byte) 5);
-    rdfTestEntity1.setUnsignedByteField((byte) 4);
-    rdfTestEntity1.setIntField(-6);
-    rdfTestEntity1.setUnsignedIntField(303);
-    rdfTestEntity1.setLongField(-7L);
-    rdfTestEntity1.setUnsignedLongField(404);
-    rdfTestEntity1.setFloatField(1.1F);
-    rdfTestEntity1.setDoubleField(1.2D);
-    rdfTestEntity1.setBigIntegerField(new BigInteger("-100"));
-    rdfTestEntity1.setPositiveBigIntegerField(new BigInteger("101"));
-    rdfTestEntity1.setNonNegativeBigIntegerField(new BigInteger("0"));
-    rdfTestEntity1.setNonPositiveBigIntegerField(new BigInteger("-102"));
-    rdfTestEntity1.setNegativeBigIntegerField(new BigInteger("-103"));
-    rdfTestEntity1.setBigDecimalField(new BigDecimal("-100.001"));
-    rdfTestEntity1.setCalendarField(Calendar.getInstance());
-    rdfTestEntity1.setDateTimeField(new DateTime());
-    rdfTestEntity1.setDateField(Calendar.getInstance().getTime());
-    rdfTestEntity1.mapField = new HashMap<>();
-    rdfTestEntity1.mapField.put(1, "a");
-    rdfTestEntity1.mapField.put(2, "b");
-    rdfTestEntity1.mapField.put(3, "c");
-
-    assertNotNull(rdfEntityManager);
-    RDFEntityPersister rdfEntityPersister = new RDFEntityPersister(rdfEntityManager);
-    try {
-      assertTrue(repositoryConnection.isAutoCommit());
-    } catch (final RepositoryException ex) {
-      fail(ex.getMessage());
-    }
-    rdfEntityPersister.persist(repositoryConnection, rdfTestEntity1);
-    try {
-      assertTrue(repositoryConnection.isAutoCommit());
-    } catch (final RepositoryException ex) {
-      fail(ex.getMessage());
-    }
-    assertNotNull(rdfTestEntity1.getId());
 
     // load a persisted entity
     RDFEntityLoader instance = new RDFEntityLoader();
-    URI uri1 = rdfTestEntity1.getId();
     Object result = instance.find(
             repositoryConnection,
             RDFTestEntity.class,
@@ -483,23 +497,23 @@ public class RDFEntityLoaderTest {
     assertNotNull(resultList);
     assertEquals(1, resultList.size());
     assertTrue(resultList.get(0) instanceof RDFTestEntity);
-    RDFTestEntity rdfTestEntity1 = resultList.get(0);
-    rdfTestEntity1.getCyclistNotes().size();  // load the lazy-loaded field
-    assertEquals("[]", rdfTestEntity1.getCyclistNotes().toString());
-    rdfTestEntity1.getIntegerList().size();  // load the lazy-loaded field
-    assertEquals("[]", rdfTestEntity1.getIntegerList().toString());
-    assertEquals("[comment 1, comment 2]", Arrays.asList(rdfTestEntity1.getComment()).toString());
+    RDFTestEntity loadedRDFTestEntity = resultList.get(0);
+    loadedRDFTestEntity.getCyclistNotes().size();  // load the lazy-loaded field
+    assertEquals("[]", loadedRDFTestEntity.getCyclistNotes().toString());
+    loadedRDFTestEntity.getIntegerList().size();  // load the lazy-loaded field
+    assertEquals("[]", loadedRDFTestEntity.getIntegerList().toString());
+    assertEquals("[comment 1, comment 2]", Arrays.asList(loadedRDFTestEntity.getComment()).toString());
 
-    rdfTestEntity1.getCyclistNotes().add("a");
-    rdfTestEntity1.getIntegerList().add(1);
-    rdfTestEntity1.getComment()[1] = "modified comment 2";
+    loadedRDFTestEntity.getCyclistNotes().add("a");
+    loadedRDFTestEntity.getIntegerList().add(1);
+    loadedRDFTestEntity.getComment()[1] = "modified comment 2";
     RDFEntityPersister rdfEntityPersister = new RDFEntityPersister(rdfEntityManager);
     try {
       assertTrue(repositoryConnection.isAutoCommit());
     } catch (final RepositoryException ex) {
       fail(ex.getMessage());
     }
-    rdfEntityPersister.persist(repositoryConnection, rdfTestEntity1);
+    rdfEntityPersister.persist(repositoryConnection, loadedRDFTestEntity);
     try {
       assertTrue(repositoryConnection.isAutoCommit());
     } catch (final RepositoryException ex) {
@@ -508,7 +522,7 @@ public class RDFEntityLoaderTest {
     RDFTestEntity rdfTestEntity2 = instance.find(
             repositoryConnection,
             RDFTestEntity.class,
-            rdfTestEntity1.getId());
+            loadedRDFTestEntity.getId());
     rdfTestEntity2.getCyclistNotes().size();  // load the lazy-loaded field
     assertEquals("[a]", rdfTestEntity2.getCyclistNotes().toString());
     rdfTestEntity2.getIntegerList().size();  // load the lazy-loaded field
@@ -542,7 +556,7 @@ public class RDFEntityLoaderTest {
     RDFTestEntity rdfTestEntity3 = instance.find(
             repositoryConnection,
             RDFTestEntity.class,
-            rdfTestEntity1.getId());
+            loadedRDFTestEntity.getId());
     rdfTestEntity3.getCyclistNotes().size();  // load the lazy-loaded field
     assertEquals("[x, y, z]", rdfTestEntity3.getCyclistNotes().toString());
     rdfTestEntity3.getIntegerList().size();  // load the lazy-loaded field
