@@ -99,6 +99,7 @@ public class HTTPUtilsTest {
     } catch (URISyntaxException ex) {
       fail(ex.getMessage());
     }
+    @SuppressWarnings("null")
     final String query = uri.getRawQuery();
     assertEquals("info_hash=7%09%D5QNd%80%0F%1A1%BB%01y%E68%8D9%3EL%AD&peer_id=-SN1000-zYDrC20WtdBw&port=8088&uploaded=0&downloaded=0&left=0&compact=1&ip=192.168.0.4&event=started", query);
     final Map<String, String> parameterDictionary = HTTPUtils.getQueryMap(query);

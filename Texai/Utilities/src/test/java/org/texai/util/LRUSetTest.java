@@ -65,7 +65,7 @@ public class LRUSetTest {
   @Test
   public void testContains() {
     LOGGER.info("contains");
-    LRUSet<String> instance = new LRUSet<String>(2, 2);
+    LRUSet<String> instance = new LRUSet<>(2, 2);
     assertFalse(instance.contains("abc"));
     instance.add("abc");
     assertTrue(instance.contains("abc"));
@@ -84,7 +84,7 @@ public class LRUSetTest {
   @Test
   public void testIterator() {
     LOGGER.info("iterator");
-    LRUSet<String> instance = new LRUSet<String>(2, 10);
+    LRUSet<String> instance = new LRUSet<>(2, 10);
     instance.add("abc");
     instance.add("def");
     instance.add("hij");
@@ -104,7 +104,7 @@ public class LRUSetTest {
   @Test
   public void testToArray_0args() {
     LOGGER.info("toArray");
-    LRUSet<String> instance = new LRUSet<String>(2, 10);
+    LRUSet<String> instance = new LRUSet<>(2, 10);
     instance.add("abc");
     instance.add("def");
     Object[] result = instance.toArray();
@@ -120,7 +120,7 @@ public class LRUSetTest {
   public void testToArray_GenericType() {
     LOGGER.info("toArray");
     String[] a = {null, null};
-    LRUSet<String> instance = new LRUSet<String>(2, 10);
+    LRUSet<String> instance = new LRUSet<>(2, 10);
     instance.add("abc");
     instance.add("def");
     Object[] result = instance.toArray(a);
@@ -135,7 +135,7 @@ public class LRUSetTest {
   @Test
   public void testAdd() {
     LOGGER.info("add");
-    LRUSet<String> instance = new LRUSet<String>(2, 10);
+    LRUSet<String> instance = new LRUSet<>(2, 10);
     instance.add("abc");
     instance.add("def");
     instance.add("abc");
@@ -148,7 +148,7 @@ public class LRUSetTest {
   @Test
   public void testRemove() {
     LOGGER.info("remove");
-    LRUSet<String> instance = new LRUSet<String>(2, 10);
+    LRUSet<String> instance = new LRUSet<>(2, 10);
     instance.add("abc");
     instance.add("def");
     assertEquals("[abc, def]", instance.toString());
@@ -166,9 +166,9 @@ public class LRUSetTest {
   @Test
   public void testContainsAll() {
     LOGGER.info("containsAll");
-    Collection<String> c = new ArrayList<String>();
+    Collection<String> c = new ArrayList<>();
     c.add("abc");
-    LRUSet<String> instance = new LRUSet<String>(2, 10);
+    LRUSet<String> instance = new LRUSet<>(2, 10);
     instance.add("abc");
     instance.add("def");
     assertTrue(instance.containsAll(c));
@@ -179,11 +179,11 @@ public class LRUSetTest {
    */
   @Test
   public void testAddAll() {
-    Collection<String> c = new ArrayList<String>();
+    Collection<String> c = new ArrayList<>();
     c.add("abc");
     c.add("def");
     c.add("hij");
-    LRUSet<String> instance = new LRUSet<String>(2, 10);
+    LRUSet<String> instance = new LRUSet<>(2, 10);
     assertEquals("[]", instance.toString());
     instance.addAll(c);
     assertEquals("[abc, def, hij]", instance.toString());
@@ -195,11 +195,11 @@ public class LRUSetTest {
   @Test
   public void testRetainAll() {
     LOGGER.info("retainAll");
-    Collection<String> c = new ArrayList<String>();
+    Collection<String> c = new ArrayList<>();
     c.add("abc");
     c.add("def");
     c.add("hij");
-    LRUSet<String> instance = new LRUSet<String>(2, 10);
+    LRUSet<String> instance = new LRUSet<>(2, 10);
     instance.add("1");
     instance.add("2");
     instance.add("3");
@@ -216,11 +216,11 @@ public class LRUSetTest {
   @Test
   public void testRemoveAll() {
     LOGGER.info("removeAll");
-    Collection<String> c = new ArrayList<String>();
+    Collection<String> c = new ArrayList<>();
     c.add("abc");
     c.add("def");
     c.add("hij");
-    LRUSet<String> instance = new LRUSet<String>(2, 10);
+    LRUSet<String> instance = new LRUSet<>(2, 10);
     instance.add("1");
     instance.add("2");
     instance.add("3");
@@ -237,7 +237,7 @@ public class LRUSetTest {
   @Test
   public void testSize() {
     LOGGER.info("size");
-    LRUSet<String> instance = new LRUSet<String>(2, 10);
+    LRUSet<String> instance = new LRUSet<>(2, 10);
     instance.add("abc");
     instance.add("def");
     instance.add("abc");
@@ -250,7 +250,7 @@ public class LRUSetTest {
   @Test
   public void testIsEmpty() {
     LOGGER.info("isEmpty");
-    LRUSet<String> instance = new LRUSet<String>(2, 10);
+    LRUSet<String> instance = new LRUSet<>(2, 10);
     assertTrue(instance.isEmpty());
     instance.add("abc");
     instance.add("def");
@@ -264,7 +264,7 @@ public class LRUSetTest {
   @Test
   public void testClear() {
     LOGGER.info("clear");
-    LRUSet<String> instance = new LRUSet<String>(2, 10);
+    LRUSet<String> instance = new LRUSet<>(2, 10);
     assertTrue(instance.isEmpty());
     instance.add("abc");
     instance.add("def");

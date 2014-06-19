@@ -41,7 +41,7 @@ public class SerialExecutorTest {
   /** the executor service */
   private final ExecutorService executorService = Executors.newCachedThreadPool();
   /** the task counter */
-  private static AtomicInteger counter = new AtomicInteger(0);
+  private static final AtomicInteger counter = new AtomicInteger(0);
 
   public SerialExecutorTest() {
   }

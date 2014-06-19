@@ -63,12 +63,13 @@ public class IdentitySetTest {
   @Test
   public void testSize() {
     LOGGER.info("size");
-    IdentitySet<Integer> instance = new IdentitySet<Integer>();
+    IdentitySet<Integer> instance = new IdentitySet<>();
     instance.add(1);
     instance.add(2);
     assertEquals(2, instance.size());
     instance.add(3);
     assertEquals(3, instance.size());
+    @SuppressWarnings("UnnecessaryBoxing")
     final Integer element = new Integer(1);
     instance.add(element);
     assertEquals(4, instance.size());
@@ -82,7 +83,7 @@ public class IdentitySetTest {
   @Test
   public void testIsEmpty() {
     LOGGER.info("isEmpty");
-    IdentitySet<Integer> instance = new IdentitySet<Integer>();
+    IdentitySet<Integer> instance = new IdentitySet<>();
     assertTrue(instance.isEmpty());
     instance.add(1);
     assertFalse(instance.isEmpty());
@@ -92,10 +93,11 @@ public class IdentitySetTest {
    * Test of contains method, of class IdentitySet.
    */
   @Test
+  @SuppressWarnings({"element-type-mismatch", "UnnecessaryBoxing"})
   public void testContains() {
     LOGGER.info("contains");
-    IdentitySet<Integer> instance = new IdentitySet<Integer>();
-    final Integer element = new Integer(1);
+    IdentitySet<Integer> instance = new IdentitySet<>();
+    final Integer element = 1;
     instance.add(element);
     assertTrue(instance.contains(element));
     instance.add(1);
@@ -110,7 +112,7 @@ public class IdentitySetTest {
   @Test
   public void testIterator() {
     LOGGER.info("iterator");
-    IdentitySet<Integer> instance = new IdentitySet<Integer>();
+    IdentitySet<Integer> instance = new IdentitySet<>();
     Iterator<Integer> iterator = instance.iterator();
     assertTrue(!iterator.hasNext());
     instance.add(1);
@@ -125,7 +127,7 @@ public class IdentitySetTest {
   @Test
   public void testAdd() {
     LOGGER.info("add");
-    IdentitySet<Integer> instance = new IdentitySet<Integer>();
+    IdentitySet<Integer> instance = new IdentitySet<>();
     instance.add(1);
     instance.add(1);
     assertEquals("[1]", instance.toString());
@@ -137,9 +139,9 @@ public class IdentitySetTest {
   @Test
   public void testRemove() {
     LOGGER.info("remove");
-    IdentitySet<Integer> instance = new IdentitySet<Integer>();
+    IdentitySet<Integer> instance = new IdentitySet<>();
     assertEquals(0, instance.size());
-    Integer element = new Integer(1);
+    Integer element = 1;
     instance.add(element);
     assertEquals(1, instance.size());
     boolean isRemoved = instance.remove(element);
@@ -163,9 +165,9 @@ public class IdentitySetTest {
   @Test
   public void testClear() {
     LOGGER.info("clear");
-    IdentitySet<Integer> instance = new IdentitySet<Integer>();
+    IdentitySet<Integer> instance = new IdentitySet<>();
     assertEquals(0, instance.size());
-    Integer element = new Integer(1);
+    Integer element = 1;
     instance.add(element);
     assertEquals(1, instance.size());
     instance.clear();

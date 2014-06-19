@@ -65,10 +65,10 @@ public class ThreadUtilsTest {
     LOGGER.info("getAllThreads");
     List<Thread> result = ThreadUtils.getAllThreads();
     LOGGER.info("  all threads: " + result.toString());
-    assertTrue(result.toString().indexOf("main") > -1);
-    assertTrue(result.toString().indexOf("Reference Handler") > -1);
-    assertTrue(result.toString().indexOf("Finalizer") > -1);
-    assertTrue(result.toString().indexOf("Signal Dispatcher") > -1);
+    assertTrue(result.toString().contains("main"));
+    assertTrue(result.toString().contains("Reference Handler"));
+    assertTrue(result.toString().contains("Finalizer"));
+    assertTrue(result.toString().contains("Signal Dispatcher"));
   }
 
   /**

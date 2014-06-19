@@ -20,56 +20,53 @@
 
 package org.texai.util;
 
-import junit.framework.*;
-import junit.textui.TestRunner;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+
 
 /**
  *
  * @author reed
  */
-public class JWhichTest extends TestCase {
-  
-  public JWhichTest(String testName) {
-    super(testName);
-  }
+public class JWhichTest {
 
-  protected void setUp() throws Exception {
-  }
-
-  protected void tearDown() throws Exception {
+  public JWhichTest() {
   }
 
   /**
    * Test of formatClasspath method, of class org.texai.util.JWhich.
    */
+  @Test
   public void testFormatClasspath() {
     System.out.println("formatClasspath");
-    
+
     String classpath = "../../Utilities/dist/Utilities.jar";
     JWhich instance = new JWhich();
-    
+
     String expResult = "\n    ../../Utilities/dist/Utilities.jar";
     String result = instance.formatClasspath(classpath);
     assertEquals(expResult, result);
-    
+
     classpath = "../../Utilities/dist/Utilities.jar:../../KB/lib/OpenCyc.jar";
     expResult = "\n    ../../Utilities/dist/Utilities.jar\n    ../../KB/lib/OpenCyc.jar";
     result = instance.formatClasspath(classpath);
     assertEquals(expResult, result);
-    
+
   }
-  
+
   /**
    * Test of which method, of class org.texai.util.JWhich.
    */
+  @Test
   public void testWhich() {
     System.out.println("which");
-    
+
     String className = "org.texai.util.JWhich";
     JWhich instance = new JWhich();
-    
+
     String result = instance.which(className);
-    assertTrue(result.indexOf(" found in ") > -1);
-    
+    assertTrue(result.contains(" found in "));
+
   }
 }

@@ -7,28 +7,31 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertEquals;
-import junit.framework.TestCase;
 import org.apache.log4j.Logger;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import org.junit.Test;
 
 /**
  *
  * @author reed
  */
-public class StringUtilsTest extends TestCase {
+public class StringUtilsTest {
 
   /** the logger */
   private static final Logger LOGGER = Logger.getLogger(StringUtilsTest.class);
 
-  public StringUtilsTest(String testName) {
-    super(testName);
+  public StringUtilsTest() {
   }
 
   /**
    * Test of floatArrayToString method, of class StringUtils.
    */
+  @Test
   public void testFloatArrayToString() {
     LOGGER.info("floatArrayToString");
     float[] floatArray = {1.0f, 2.0f, 3.1f};
@@ -40,6 +43,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of toSortedStrings method, of class StringUtils.
    */
+  @Test
   public void testToSortedStrings() {
     LOGGER.info("toSortedStrings");
     final Collection<Object> objects = new HashSet<>();
@@ -58,6 +62,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of booleanArrayToBitString method, of class StringUtils.
    */
+  @Test
   public void testBooleanArrayToBitString() {
     LOGGER.info("booleanArrayToBitString");
     boolean[] booleanArray = {true};
@@ -71,6 +76,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of htmlUnescape method, of class StringUtils.
    */
+  @Test
   public void testHtmlUnescape() {
     LOGGER.info("htmlUnescape");
     assertEquals("abc", StringUtils.htmlUnescape("abc"));
@@ -81,6 +87,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of isJavaClassName method, of class StringUtils.
    */
+  @Test
   public void testIsJavaClassName() {
     LOGGER.info("isJavaClassName");
     assertFalse(StringUtils.isJavaClassName(null));
@@ -95,6 +102,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of isNonEmptyString method, of class StringUtils.
    */
+  @Test
   public void testIsNonEmptyString() {
     LOGGER.info("isNonEmptyString");
     assertFalse(StringUtils.isNonEmptyString(null));
@@ -105,6 +113,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of splitOnSpace method, of class StringUtils.
    */
+  @Test
   public void testSplitOnSpace() {
     LOGGER.info("splitOnSpace");
     assertEquals("[abc]", StringUtils.splitOnSpace("abc").toString());
@@ -120,6 +129,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of splitHTMLTags method, of class StringUtils.
    */
+  @Test
   public void testSplitHTMLTags() {
     LOGGER.info("splitHTMLTags");
     assertEquals("[abc]", StringUtils.splitHTMLTags("abc").toString());
@@ -139,6 +149,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of logStringCharacterDifferences method, of class StringUtils.
    */
+  @Test
   public void testLogStringCharacterDifferences() {
     LOGGER.info("logStringCharacterDifferences");
     StringUtils.logStringCharacterDifferences("abc", "abc");
@@ -154,6 +165,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of escapeSingleQuotes method, of class StringUtils.
    */
+  @Test
   public void testEscapeSingleQuotes() {
     LOGGER.info("escapeSingleQuotes");
     String string = "abc\"def'ghi";
@@ -164,11 +176,12 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of getStackTraceAsString method, of class StringUtils.
    */
+  @Test
   public void testGetStackTraceAsString() {
     LOGGER.info("getStackTraceAsString");
     try {
       throw new TexaiException("test");
-    } catch (final Throwable ex) {
+    } catch (final TexaiException ex) {
       String result = StringUtils.getStackTraceAsString(ex);
       assertTrue(result.startsWith("org.texai.util.TexaiException: test"));
     }
@@ -177,6 +190,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of removeEnclosingDoubleQuotes method, of class StringUtils.
    */
+  @Test
   public void testRemoveEnclosingDoubleQuotes() {
     LOGGER.info("removeEnclosingDoubleQuotes");
     String string = "abc";
@@ -203,6 +217,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of convertInputStreamToString method, of class StringUtils.
    */
+  @Test
   public void testConvertInputStreamToString() {
     LOGGER.info("convertInputStreamToString");
     final String string = "abcd\n1234";
@@ -220,6 +235,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of indentSpaces method, of class StringUtils.
    */
+  @Test
   public void testindentSpaces() {
     LOGGER.info("indentSpaces");
     final StringBuilder stringBuilder = new StringBuilder();
@@ -236,6 +252,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of makeBlankString method, of class StringUtils.
    */
+  @Test
   public void testMakeBlankString() {
     LOGGER.info("makeBlankString");
     assertEquals("", StringUtils.makeBlankString(0));
@@ -250,6 +267,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of getLowerCasePredicateName method, of class StringUtils.
    */
+  @Test
   public void testGetLowerCasePredicateName() {
     LOGGER.info("getLowerCasePredicateName");
     assertEquals("a", StringUtils.getLowerCasePredicateName("A"));
@@ -270,6 +288,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of hasLength method, of class StringUtils.
    */
+  @Test
   public void testHasLength() {
     LOGGER.info("hasLength");
     assertTrue(StringUtils.hasLength("abc"));
@@ -280,6 +299,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of replace method, of class StringUtils.
    */
+  @Test
   public void testReplace() {
     LOGGER.info("replace");
     assertEquals("zycdef", StringUtils.replace("abcdef", "ab", "zy"));
@@ -288,6 +308,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of toHex method, of class StringUtils.
    */
+  @Test
   public void testToHex() {
     System.out.println("toHex");
     byte[] buffer = "".getBytes();
@@ -302,6 +323,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of capitalize method, of class StringUtils.
    */
+  @Test
   public void testCapitalize() {
     LOGGER.info("capitalize");
     assertEquals("30313233", StringUtils.capitalize("30313233"));
@@ -312,6 +334,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of uncapitalize method, of class StringUtils.
    */
+  @Test
   public void testUncapitalize() {
     LOGGER.info("uncapitalize");
     assertEquals("30313233", StringUtils.uncapitalize("30313233"));
@@ -322,6 +345,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of packageFromClassName method, of class StringUtils.
    */
+  @Test
   public void testPackageFromClassName() {
     LOGGER.info("packageFromClassName");
     assertEquals("java.lang", StringUtils.packageFromClassName(String.class.getName()));
@@ -330,6 +354,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of simpleClassName method, of class StringUtils.
    */
+  @Test
   public void testSimpleClassName() {
     LOGGER.info("simpleClassName");
     assertEquals("String", StringUtils.simpleClassName(String.class.getName()));
@@ -338,6 +363,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of countOccurrencesOf method, of class StringUtils.
    */
+  @Test
   public void testCountOccurrencesOf() {
     LOGGER.info("countOccurrencesOf");
 
@@ -351,6 +377,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of ensureTwoNewLines method, of class StringUtils.
    */
+  @Test
   public void testEnsureTwoNewLines() {
     LOGGER.info("ensureTwoNewLines");
 
@@ -382,6 +409,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of ensureOneNewLine method, of class StringUtils.
    */
+  @Test
   public void testEnsureOneNewLine() {
     LOGGER.info("ensureOneNewLine");
 
@@ -413,6 +441,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of toSingleString method, of class StringUtils.
    */
+  @Test
   public void testToSingleString() {
     LOGGER.info("toSingleString");
 
@@ -443,6 +472,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of padWithTrailingSpaces method, of class StringUtils.
    */
+  @Test
   public void testPadWithTrailingSpaces() {
     LOGGER.info("padWithTrailingSpaces");
 
@@ -458,6 +488,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of stripNumericSuffix method, of class StringUtils.
    */
+  @Test
   public void testStripNumericSuffix() {
     LOGGER.info("stripNumericSuffix");
 
@@ -475,6 +506,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of htmlEscape method, of class StringUtils.
    */
+  @Test
   public void testHtmlEscape() {
     LOGGER.info("htmlEscape");
 
@@ -490,6 +522,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of stripPunctuationAndDigits method, of class StringUtils.
    */
+  @Test
   public void testStripPunctuationAndDigits() {
     LOGGER.info("stripPunctuationAndDigits");
 
@@ -505,6 +538,7 @@ public class StringUtilsTest extends TestCase {
   /**
    * Test of isOrderConsistent method, of class StringUtils.
    */
+  @Test
   public void testIsOrderConsistent() {
     LOGGER.info("isOrderConsistent");
 

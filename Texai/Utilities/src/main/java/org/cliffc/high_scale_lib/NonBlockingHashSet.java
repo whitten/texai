@@ -23,7 +23,7 @@ public class NonBlockingHashSet<E> extends AbstractSet<E> implements Serializabl
   /** Make a new empty {@link NonBlockingHashSet}.  */
   public NonBlockingHashSet() {
     super();
-    _map = new NonBlockingHashMap<E, Object>();
+    _map = new NonBlockingHashMap<>();
   }
 
   /** Add {@code o} to the set.

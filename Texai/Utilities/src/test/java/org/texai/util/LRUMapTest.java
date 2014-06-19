@@ -65,7 +65,7 @@ public class LRUMapTest {
     LOGGER.info("removeEldestEntry");
     final int initialCapacity = 3;
     final int maximumCapacity = 3;
-    LRUMap<String, String> instance = new LRUMap<String, String>(initialCapacity, maximumCapacity);
+    LRUMap<String, String> instance = new LRUMap<>(initialCapacity, maximumCapacity);
     assertEquals(0, instance.size());
 
     instance.put("a", "1");

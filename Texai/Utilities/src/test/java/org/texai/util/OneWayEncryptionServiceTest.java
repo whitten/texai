@@ -2,34 +2,24 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package org.texai.util;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 
 /**
  *
  * @author reed
  */
-public class OneWayEncryptionServiceTest extends TestCase {
-    
-    public OneWayEncryptionServiceTest(String testName) {
-        super(testName);
-    }            
+public class OneWayEncryptionServiceTest {
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
+  public OneWayEncryptionServiceTest() {
+  }
 
   /**
    * Test of encrypt method, of class OneWayEncryptionService.
    */
+  @Test
   public void testEncrypt1() {
     System.out.println("encrypt");
     String plaintext = "mypassword";
@@ -42,6 +32,7 @@ public class OneWayEncryptionServiceTest extends TestCase {
   /**
    * Test of encrypt method, of class OneWayEncryptionService.
    */
+  @Test
   public void testEncrypt2() {
     System.out.println("encrypt");
     long nbr = 12345;
