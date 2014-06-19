@@ -51,6 +51,7 @@ public final class ThreadUtils {
     final ThreadGroup root = getRootThreadGroup();
     final ThreadMXBean thbean = ManagementFactory.getThreadMXBean();
     int nAlloc = thbean.getThreadCount();
+    @SuppressWarnings("UnusedAssignment")
     int n = 0;
     Thread[] threads;
     do {

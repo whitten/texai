@@ -82,7 +82,7 @@ public class HtmlCharacterEntityReferences {
       final String reference = entityReferences.getProperty(key);
       characterToEntityReferenceMap[index] = REFERENCE_START + reference + REFERENCE_END;
       LOGGER.debug("index: " + index + " --> " + REFERENCE_START + reference + REFERENCE_END);
-      final Character ch = new Character((char) referredChar);
+      final Character ch = (char) referredChar;
       entityReferenceToCharacterMap.put(reference, ch);
       LOGGER.debug(reference + " --> " + ch);
     }
@@ -132,7 +132,7 @@ public class HtmlCharacterEntityReferences {
 
     Character referredCharacter = entityReferenceToCharacterMap.get(entityReference);
     if (referredCharacter != null) {
-      return referredCharacter.charValue();
+      return referredCharacter;
     }
     return CHAR_NULL;
   }

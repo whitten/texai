@@ -49,6 +49,7 @@ public class ArraySet<E> extends AbstractSet<E> implements Cloneable, Serializab
    *
    * @param collection the given collection
    */
+  @SuppressWarnings("OverridableMethodCallInConstructor")
   public ArraySet(final Collection<? extends E> collection) {
     list = new ArrayList<>();
 
@@ -68,7 +69,7 @@ public class ArraySet<E> extends AbstractSet<E> implements Cloneable, Serializab
    * @param size the given initial capacity
    */
   public ArraySet(final int size) {
-    list = new ArrayList<E>(size);
+    list = new ArrayList<>(size);
   }
 
   /** Returns an iterator over the elements in this set.

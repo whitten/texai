@@ -61,7 +61,7 @@ public class SerialExecutor implements Executor {
     //Preconditions
     assert task != null : "task must not be null";
 
-    tasks.offer(new Runnable() {
+    tasks.offer((Runnable) new Runnable() {
 
       @Override
       public void run() {

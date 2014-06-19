@@ -40,7 +40,7 @@ public class IdentitySet<E> extends AbstractSet<E> implements Cloneable, Seriali
   /** the underlying map */
   private Map<E, Object> map;
   /** the contains placeholder object */
-  private Object CONTAINS = new Object();
+  private final Object CONTAINS = new Object();
 
   /** Creates a new IdentitySet instance with the default initial size of 10 elements. */
   public IdentitySet() {
@@ -81,6 +81,7 @@ public class IdentitySet<E> extends AbstractSet<E> implements Cloneable, Seriali
    * @return <tt>true</tt> if this set contains the specified element
    */
   @Override
+  @SuppressWarnings("element-type-mismatch")
   public boolean contains(final Object element) {
     return map.containsKey(element);
   }
@@ -111,7 +112,7 @@ public class IdentitySet<E> extends AbstractSet<E> implements Cloneable, Seriali
    * @return <tt>true</tt> if this set contained the specified element
    */
   @Override
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "element-type-mismatch"})
   public boolean remove(final Object element) {
     return map.remove(element) == CONTAINS;
   }

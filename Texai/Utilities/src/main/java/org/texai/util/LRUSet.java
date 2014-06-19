@@ -61,6 +61,7 @@ public class LRUSet<E> implements Set<E> {
    * @return <tt>true</tt> if this set contains the specified element
    */
   @Override
+  @SuppressWarnings("element-type-mismatch")
   public boolean contains(final Object obj) {
     return map.containsKey(obj);
   }
@@ -97,6 +98,7 @@ public class LRUSet<E> implements Set<E> {
    * @throws NullPointerException if the specified array is null
    */
   @Override
+  @SuppressWarnings("SuspiciousToArrayCall")
   public <T> T[] toArray(final T[] a) {
     //Preconditions
     assert a != null;
@@ -147,6 +149,7 @@ public class LRUSet<E> implements Set<E> {
     //Preconditions
     assert o != null;
 
+    @SuppressWarnings("element-type-mismatch")
     final Object obj = map.remove(o);
     return obj != null;
   }
@@ -333,10 +336,7 @@ public class LRUSet<E> implements Set<E> {
     }
     @SuppressWarnings("unchecked")
     final LRUSet<E> other = (LRUSet<E>) obj;
-    if (this.map != other.map && (this.map == null || !this.map.equals(other.map))) {
-      return false;
-    }
-    return true;
+    return this.map == other.map || (this.map != null && this.map.equals(other.map));
   }
 
   /** Returns a hash code for this object.

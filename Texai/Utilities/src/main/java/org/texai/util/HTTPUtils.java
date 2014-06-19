@@ -228,6 +228,7 @@ public final class HTTPUtils {
    * @param userAgent the given user-agent string
    * @return the name of the bot if the given user-agent is a bot, otherwise returns null
    */
+  @SuppressWarnings("UnusedAssignment")
   public static String[] getBotName(final String userAgent) {
     final String userAgentLowerCase = userAgent.toLowerCase();
     int position = 0;
@@ -271,6 +272,7 @@ public final class HTTPUtils {
    * @param userAgent the given user-agent string
    * @return the client operating system
    */
+  @SuppressWarnings("UnusedAssignment")
   public static String[] getOS(final String userAgent) {
     if (getBotName(userAgent) != null) {
       return getArray("Bot", "Bot", "Bot");
@@ -279,7 +281,7 @@ public final class HTTPUtils {
     int position;
     if ((position = userAgent.indexOf("Windows-NT")) > -1) {
       result = getArray("Win", "WinNT", "Win" + getVersionNumber(userAgent, position + 8));
-    } else if (userAgent.indexOf("Windows NT") > -1) {
+    } else if (userAgent.contains("Windows NT")) {
       // The different versions of Windows NT are decoded in the verbosity level 2
       // ie: Windows NT 5.1 = Windows XP
       if ((position = userAgent.indexOf("Windows NT 5.1")) > -1) {
@@ -301,8 +303,8 @@ public final class HTTPUtils {
       } else {
         result = getArray("Win", "<b>WinNT?</b>", "<b>WinNT?</b>");
       }
-    } else if (userAgent.indexOf("Win") > -1) {
-      if (userAgent.indexOf("Windows") > -1) {
+    } else if (userAgent.contains("Win")) {
+      if (userAgent.contains("Windows")) {
         if ((position = userAgent.indexOf("Windows 98")) > -1) {
           result = getArray("Win", "Win98", "Win" + getVersionNumber(userAgent, position + 7));
         } else if ((position = userAgent.indexOf("Windows_98")) > -1) {
@@ -366,7 +368,7 @@ public final class HTTPUtils {
     } else if ((position = userAgent.indexOf("Mac_PowerPC")) > -1) {
       result = getArray("Mac", "MacPPC", "MacOS " + getVersionNumber(userAgent, position + 3));
     } else if ((position = userAgent.indexOf("Macintosh")) > -1) {
-      if (userAgent.indexOf("PPC") > -1) {
+      if (userAgent.contains("PPC")) {
         result = getArray("Mac", "MacPPC", "MacOS?");
       } else {
         result = getArray("Mac?", "Mac?", "MacOS?");
@@ -418,6 +420,7 @@ public final class HTTPUtils {
    * @param userAgent the given user-agent string
    * @return the browser and version number
    */
+  @SuppressWarnings("UnusedAssignment")
   public static String[] getBrowser(String userAgent) {
     final String[] botName;
     if ((botName = getBotName(userAgent)) != null) {
@@ -451,7 +454,7 @@ public final class HTTPUtils {
       result = getArray("w3m", "w3m", "w3m" + getVersionNumber(userAgent, position + 4));
     } else if ((position = userAgent.indexOf("HandHTTP ")) > -1) {
       result = getArray("HandHTTP", "HandHTTP", "HandHTTP" + getVersionNumber(userAgent, position + 9));
-    } else if (userAgent.indexOf("MSIE") > -1) {
+    } else if (userAgent.contains("MSIE")) {
       if ((position = userAgent.indexOf("MSIE 6.0")) > -1) {
         result = getArray("MSIE", "MSIE6", "MSIE" + getVersionNumber(userAgent, position + 4));
       } else if ((position = userAgent.indexOf("MSIE 5.0")) > -1) {
@@ -462,9 +465,9 @@ public final class HTTPUtils {
         result = getArray("MSIE", "MSIE5.x", "MSIE" + getVersionNumber(userAgent, position + 4));
       } else if ((position = userAgent.indexOf("MSIE 4")) > -1) {
         result = getArray("MSIE", "MSIE4", "MSIE" + getVersionNumber(userAgent, position + 4));
-      } else if ((position = userAgent.indexOf("MSIE 7")) > -1 && userAgent.indexOf("Trident/4.0") < 0) {
+      } else if ((position = userAgent.indexOf("MSIE 7")) > -1 && !userAgent.contains("Trident/4.0")) {
         result = getArray("MSIE", "MSIE7", "MSIE" + getVersionNumber(userAgent, position + 4));
-      } else if ((position = userAgent.indexOf("MSIE 8")) > -1 || userAgent.indexOf("Trident/4.0") > -1) {
+      } else if ((position = userAgent.indexOf("MSIE 8")) > -1 || userAgent.contains("Trident/4.0")) {
         result = getArray("MSIE", "MSIE8", "MSIE" + getVersionNumber(userAgent, position + 4));
       } else {
         result = getArray("MSIE", "<b>MSIE?</b>", "<b>MSIE?" + getVersionNumber(userAgent, userAgent.indexOf("MSIE") + 4) + "</b>");
@@ -522,8 +525,8 @@ public final class HTTPUtils {
     } else // We will interpret Mozilla/4.x as Netscape Communicator is and only if x
     // is not 0 or 5
     if (userAgent.indexOf("Mozilla/4.") == 0
-            && userAgent.indexOf("Mozilla/4.0") < 0
-            && userAgent.indexOf("Mozilla/4.5 ") < 0) {
+            && !userAgent.contains("Mozilla/4.0")
+            && !userAgent.contains("Mozilla/4.5 ")) {
       result = getArray("Communicator", "Communicator", "Communicator" + getVersionNumber(userAgent, position + 8));
     } else if ((position = userAgent.indexOf("Mozilla/")) > -1) {
       result = getArray("Mozilla", "Mozilla", "Mozilla" + getVersionNumber(userAgent, position + 8));

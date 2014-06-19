@@ -74,6 +74,7 @@ public final class JWhich {
     assert classpath != null : "classpath must not be null";
 
     int beginIndex = 0;
+    @SuppressWarnings("UnusedAssignment")
     int endIndex = 0;
     final StringBuilder stringBuilder = new StringBuilder(1000);
     do {

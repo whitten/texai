@@ -59,8 +59,8 @@ public final class FileSystemUtils {
       if (root.isDirectory()) {
         final File[] children = root.listFiles();
         if (children != null) {
-          for (int i = 0; i < children.length; i++) {
-            deleteRecursively(children[i]);
+          for (final File child : children) {
+            deleteRecursively(child);
           }
         }
       }
@@ -97,8 +97,7 @@ public final class FileSystemUtils {
     if (files == null) {  // null if security restricted
       throw new TexaiException("Failed to list contents of " + sourceDirectory);
     }
-    for (int i = 0; i < files.length; i++) {
-      final File sourceFile = files[i];
+    for (final File sourceFile : files) {
       final File destinationFile = new File(destinationDirectory, sourceFile.getName());
       if (sourceFile.isDirectory()) {
         // recurse

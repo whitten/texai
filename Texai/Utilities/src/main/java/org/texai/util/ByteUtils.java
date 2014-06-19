@@ -75,11 +75,13 @@ public final class ByteUtils {
       objectOutputStream.writeObject(obj);
       objectOutputStream.close();
       return byteArrayOutputStream.toByteArray();
-    } catch (Exception ex) {
+    } catch (IOException ex) {
       throw new TexaiException(ex);
     } finally {
       try {
-        objectOutputStream.close();
+        if (objectOutputStream != null) {
+          objectOutputStream.close();
+        }
       } catch (IOException ex) {
         throw new TexaiException(ex);
       }
@@ -104,7 +106,9 @@ public final class ByteUtils {
       throw new TexaiException(ex);
     } finally {
       try {
-        objectInputStream.close();
+        if (objectInputStream != null) {
+          objectInputStream.close();
+        }
       } catch (IOException ex) {
         throw new TexaiException(ex);
       }
@@ -200,7 +204,7 @@ public final class ByteUtils {
     final byte[] byteArray = toBytes(uuid);
     final Byte[] bytes = new Byte[byteArray.length];
     for (int i = 0; i < byteArray.length; i++) {
-      bytes[i] = Byte.valueOf(byteArray[i]);
+      bytes[i] = byteArray[i];
     }
     return bytes;
   }
@@ -216,7 +220,7 @@ public final class ByteUtils {
 
     final Byte[] byteObjectArray = new Byte[bytes.length];
     for (int i = 0; i < bytes.length; i++) {
-      byteObjectArray[i] = Byte.valueOf(bytes[i]);
+      byteObjectArray[i] = bytes[i];
     }
     return byteObjectArray;
   }
@@ -232,7 +236,7 @@ public final class ByteUtils {
 
     final byte[] bytes = new byte[byteObjectArray.length];
     for (int i = 0; i < byteObjectArray.length; i++) {
-      bytes[i] = byteObjectArray[i].byteValue();
+      bytes[i] = byteObjectArray[i];
     }
     return bytes;
   }
@@ -275,14 +279,14 @@ public final class ByteUtils {
     assert bytes != null : "bytes must not be null";
     assert bytes.length == 8 : "the byte array must be length 8";
 
-    return ((((long) bytes[7]) & 0xFF) +
-            ((((long) bytes[6]) & 0xFF) << 8) +
-            ((((long) bytes[5]) & 0xFF) << 16) +
-            ((((long) bytes[4]) & 0xFF) << 24) +
-            ((((long) bytes[3]) & 0xFF) << 32) +
-            ((((long) bytes[2]) & 0xFF) << 40) +
-            ((((long) bytes[1]) & 0xFF) << 48) +
-            ((((long) bytes[0]) & 0xFF) << 56));
+    return ((((long) bytes[7]) & 0xFF)
+            + ((((long) bytes[6]) & 0xFF) << 8)
+            + ((((long) bytes[5]) & 0xFF) << 16)
+            + ((((long) bytes[4]) & 0xFF) << 24)
+            + ((((long) bytes[3]) & 0xFF) << 32)
+            + ((((long) bytes[2]) & 0xFF) << 40)
+            + ((((long) bytes[1]) & 0xFF) << 48)
+            + ((((long) bytes[0]) & 0xFF) << 56));
   }
 
   /** Returns a 4-byte array built from an int.
@@ -486,12 +490,6 @@ public final class ByteUtils {
 
     if (lhs == rhs) {
       return 0;
-    }
-    if (lhs == null) {
-      return -1;
-    }
-    if (rhs == null) {
-      return +1;
     }
     if (lhs.length != rhs.length) {
       return ((lhs.length < rhs.length) ? -1 : +1);

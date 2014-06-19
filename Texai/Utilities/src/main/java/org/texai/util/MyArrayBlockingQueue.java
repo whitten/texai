@@ -136,7 +136,10 @@ public final class MyArrayBlockingQueue<E> extends AbstractQueue<E> implements B
   // Internal helper methods
   /**
    * Circularly increment i.
+   * @param i the index
+   * @return the index
    */
+  @SuppressWarnings("AssignmentToMethodParameter")
   final int inc(int i) {
     return (++i == items.length) ? 0 : i;
   }
@@ -144,6 +147,8 @@ public final class MyArrayBlockingQueue<E> extends AbstractQueue<E> implements B
   /**
    * Inserts element at current put position, advances, and signals.
    * Call only when holding lock.
+
+   * @param x the element to insertg
    */
   private void insert(final E x) {
     items[putIndex] = x;
@@ -155,6 +160,8 @@ public final class MyArrayBlockingQueue<E> extends AbstractQueue<E> implements B
   /**
    * Extracts element at current take position, advances, and signals.
    * Call only when holding lock.
+
+   * @return the extracted element
    */
   private E extract() {
     final E[] myItems = items;
@@ -169,7 +176,9 @@ public final class MyArrayBlockingQueue<E> extends AbstractQueue<E> implements B
   /**
    * Utility for remove and iterator.remove: Delete item at position i.
    * Call only when holding lock.
+   * @param i the index
    */
+  @SuppressWarnings("AssignmentToMethodParameter")
   void removeAt(int i) {
     final E[] myItems = items;
     // if removing front item, just advance
@@ -604,7 +613,7 @@ public final class MyArrayBlockingQueue<E> extends AbstractQueue<E> implements B
    *         this queue
    * @throws NullPointerException if the specified array is null
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "AssignmentToMethodParameter"})
   @Override
   public <T> T[] toArray(T[] a) {
     final E[] myItems = items;
@@ -653,6 +662,7 @@ public final class MyArrayBlockingQueue<E> extends AbstractQueue<E> implements B
    */
   @Override
   public void clear() {
+    @SuppressWarnings({"MismatchedReadAndWriteOfArray", "UnusedAssignment"})
     final E[] myItems = items;
     final ReentrantLock myLock = lock;
     myLock.lock();

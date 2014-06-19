@@ -50,6 +50,7 @@ public class StreamConsumer extends Thread {
   public void run() {
     try {
       final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+      @SuppressWarnings("UnusedAssignment")
       String line = null;
       while ((line = bufferedReader.readLine()) != null) {
         logger.info(">" + line);

@@ -113,7 +113,7 @@ public final class NetworkUtils {
       while (address.hasMoreElements()) {
         final InetAddress inetAddress = address.nextElement();
         if (!inetAddress.isLoopbackAddress()
-                && !(inetAddress.getHostAddress().indexOf(":") > -1)) {
+                && !inetAddress.getHostAddress().contains(":")) {
           return inetAddress;
         }
       }
@@ -261,12 +261,11 @@ public final class NetworkUtils {
     Socket socket = new Socket();
     try {
       socket.connect(new InetSocketAddress(host, port), CONNECTION_TIMEOUT);
-    } catch (Exception ex) {
-      if (socket != null) {
-        try {
-          socket.close();
-        } catch (IOException ex1) {
-        }
+    } catch (IOException ex) {
+
+      try {
+        socket.close();
+      } catch (IOException ex1) {
       }
       return false;
     }

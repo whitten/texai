@@ -58,7 +58,7 @@ public class XMLUtils {
 
   /** Formats the given XML document.
    *
-   * @param document the given XML document
+   * @param xmlString the given XML document
    * @return the formatted XML string
    */
   public static String prettyPrintWithDOM3LS(final String xmlString) {

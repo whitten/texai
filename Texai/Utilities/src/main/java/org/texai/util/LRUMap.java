@@ -36,7 +36,7 @@ public class LRUMap<K, V> extends LinkedHashMap<K, V> {
   /** the serial version UID */
   private static final long serialVersionUID = 1L;
   /** the maximum capacity of the cache */
-  private int maxCapacity;
+  private final int maxCapacity;
 
   /** Constructs a new LRUMap instance.
    *

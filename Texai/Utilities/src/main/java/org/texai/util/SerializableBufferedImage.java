@@ -79,6 +79,7 @@ public class SerializableBufferedImage implements Serializable {
    *
    * @return a string representation of this object
    */
+  @Override
   public String toString() {
     final String typeString;
     switch (type) {
