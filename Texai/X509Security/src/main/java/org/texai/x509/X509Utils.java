@@ -18,11 +18,7 @@
  * You should have received a copy of the GNU General Public License along with this program;
  * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-
 // refer to http://www.bouncycastle.org/docs/docs1.5on/index.html for substitutes for deprecated references
-
-
 package org.texai.x509;
 
 import java.io.BufferedReader;
@@ -80,27 +76,37 @@ import java.util.Set;
 import java.util.UUID;
 import javax.crypto.Cipher;
 import javax.security.auth.x500.X500Principal;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.KeyUsage;
-import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
-import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
-import org.bouncycastle.x509.extension.SubjectKeyIdentifierStructure;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
+import sun.security.x509.X509CertImpl;
 
 /** X509 utilities adapted from "Beginning Cryptography With Java", David Hook, WROX.
  *
  * How to regenerate the root X.509 certificate on the development system.
  * (1) delete /home/reed/texai-keystore.jceks
  * (2) run the JUnit test X509UtilsTest.java - expect several unit test failures
- * (3) copy the byte array values from the unit test output into the array initialialization value for ROOT_CERTIFICATE_BYTES.
- * (4) delete /home/reed/svn/Texai/X509Security/data/truststore.*, test-client-keystore.*, test-server-keystore.*
+ * (3) copy the byte array values from the unit test output (root certificate bytes...)
+ *     into the array initialialization value for ROOT_CERTIFICATE_BYTES.
+ * (4) delete X509Security/data/truststore.*, test-client-keystore.*, test-server-keystore.*
  * (5) re-run the unit test correcting for the new root UID
  * (6) likewise correct KeyStoreTestUtilsTest, X509SecurityInfoTest and TexaiSSLContextFactoryTest
- * (7) ensure that subversion updates the new keystore files when committing
+ * (7) ensure that Git updates the new keystore files when committing
  *
  * @author reed
  */
@@ -119,58 +125,57 @@ public final class X509Utils {
   /** the Bouncy Castle cryptography provider */
   public static final String BOUNCY_CASTLE_PROVIDER = "BC";
   /** the digital signature algorithm */
-  public static final String DIGITAL_SIGNATURE_ALGORITHM = "SHA512WithRSAEncryption";
+  public static final String DIGITAL_SIGNATURE_ALGORITHM = "SHA512withRSA";
   /** the indicator whether the JCE unlimited strength jurisdiction policy files are installed */
   private static boolean isJCEUnlimitedStrenthPolicy;
   /** the root certificate bytes */
   private final static byte[] ROOT_CERTIFICATE_BYTES = {
-    48, -126, 4, -95, 48, -126, 3, 9, -96, 3, 2, 1, 2, 2, 1, 1, 48, 13, 6, 9, 42, -122, 72, -122, -9, 13, 1, 1, 13, 5,
-    0, 48, 114, 49, 52, 48, 50, 6, 10, 9, -110, 38, -119, -109, -14, 44, 100, 1, 1, 19, 36, 50, 51, 51, 98, 102, 100,
-    98, 50, 45, 57, 50, 56, 55, 45, 52, 98, 52, 49, 45, 98, 51, 48, 52, 45, 101, 98, 49, 50, 49, 101, 97, 55, 99, 52,
-    100, 101, 49, 38, 48, 36, 6, 3, 85, 4, 10, 19, 29, 84, 101, 120, 97, 105, 32, 67, 101, 114, 116, 105, 102, 105, 99,
-    97, 116, 105, 111, 110, 32, 65, 117, 116, 104, 111, 114, 105, 116, 121, 49, 18, 48, 16, 6, 3, 85, 4, 3, 19, 9, 116,
-    101, 120, 97, 105, 46, 111, 114, 103, 48, 30, 23, 13, 49, 48, 48, 53, 49, 50, 49, 56, 50, 50, 50, 57, 90, 23, 13,
-    50, 48, 48, 53, 48, 57, 49, 56, 50, 50, 51, 57, 90, 48, 114, 49, 52, 48, 50, 6, 10, 9, -110, 38, -119, -109, -14,
-    44, 100, 1, 1, 19, 36, 50, 51, 51, 98, 102, 100, 98, 50, 45, 57, 50, 56, 55, 45, 52, 98, 52, 49, 45, 98, 51, 48, 52,
-    45, 101, 98, 49, 50, 49, 101, 97, 55, 99, 52, 100, 101, 49, 38, 48, 36, 6, 3, 85, 4, 10, 19, 29, 84, 101, 120, 97,
-    105, 32, 67, 101, 114, 116, 105, 102, 105, 99, 97, 116, 105, 111, 110, 32, 65, 117, 116, 104, 111, 114, 105, 116,
-    121, 49, 18, 48, 16, 6, 3, 85, 4, 3, 19, 9, 116, 101, 120, 97, 105, 46, 111, 114, 103, 48, -126, 1, -94, 48, 13, 6,
-    9, 42, -122, 72, -122, -9, 13, 1, 1, 1, 5, 0, 3, -126, 1, -113, 0, 48, -126, 1, -118, 2, -126, 1, -127, 0, -71, -99,
-    17, 77, 28, -109, -123, 86, 126, 123, 72, 111, -126, -32, -43, -107, 111, 60, -15, 30, -22, 92, -79, -4, -35, -90,
-    -125, -43, -46, 105, -80, -4, 118, -40, 20, 60, -55, -90, -2, -3, 93, -79, -126, 79, 20, 35, -70, 110, 72, -65, 97,
-    -14, 127, 60, -28, 5, -83, -49, 118, 21, 120, 113, 109, -99, 13, 83, 45, -31, 69, 60, -57, -41, -59, -99, -68, 54,
-    -14, 43, 30, 35, -3, 72, -25, -64, -58, 56, -90, 75, 85, 80, -52, -59, -86, -119, -89, -26, 57, -38, 64, -107, -56,
-    89, -92, -1, -104, -27, 6, 11, -96, 21, -16, 35, 83, -49, 58, 49, 9, -127, 86, -78, -75, -123, -63, -35, -95, -85,
-    6, 41, -80, -79, 104, -103, 5, 55, -10, -114, 88, -23, -107, -46, -37, 72, 103, 110, -64, 106, -89, -90, -101, 49,
-    -31, 26, -41, -127, 111, -55, 10, -40, -56, -113, -12, -71, -85, -53, 92, 2, 109, -15, 40, 52, -115, 5, -33, -39,
-    -30, -15, 114, 120, 47, -102, 42, 54, -14, -118, 90, 78, -25, 65, 16, -107, 16, -29, 78, 111, 81, -32, 123, -104,
-    -108, 56, 30, -56, 86, -18, 23, -55, 105, -4, 10, 113, -92, -96, 103, -95, 61, 32, -124, 124, -120, 73, 3, -22,
-    -125, -41, 79, 56, 29, 96, 127, -120, 54, -100, 29, 125, -46, 48, 38, -25, 22, 33, -18, -72, -32, -76, 93, 36, -55,
-    105, 112, -50, -51, -128, 15, -35, -68, -21, -45, 6, -50, 41, -13, 63, 58, -80, -40, 78, -42, -107, 104, 114, 63,
-    60, 89, 74, 95, -128, 88, 44, -72, 90, -16, 107, -66, -32, -21, 88, 2, -35, 64, 50, 110, 84, 1, -43, -9, -122, 65,
-    101, 118, 74, -44, 45, 123, 44, -120, -64, -46, 61, -53, -76, 103, -91, -128, 117, -16, 7, 83, 15, -81, -90, 47,
-    -55, 32, -84, -50, -30, -38, 2, -16, 112, 100, 53, 120, 41, -47, 6, -123, 86, -55, 67, -62, -22, 99, 112, 88, -74,
-    -15, -62, -7, 3, -94, 59, -90, -69, -16, 60, 79, 26, -16, 44, -127, 105, -99, -56, 47, 8, -39, 115, 119, 90, 67, 91,
-    121, 106, -109, 47, -68, 73, 86, 0, 86, -4, -48, 33, 2, 3, 1, 0, 1, -93, 66, 48, 64, 48, 29, 6, 3, 85, 29, 14, 4,
-    22, 4, 20, -101, -55, 78, 40, 117, -42, -27, 117, 25, 22, -91, -100, 87, 86, -43, 23, -120, -61, 96, -92, 48, 15, 6,
-    3, 85, 29, 19, 1, 1, -1, 4, 5, 48, 3, 1, 1, -1, 48, 14, 6, 3, 85, 29, 15, 1, 1, -1, 4, 4, 3, 2, 1, 6, 48, 13, 6, 9,
-    42, -122, 72, -122, -9, 13, 1, 1, 13, 5, 0, 3, -126, 1, -127, 0, 99, 117, 41, 103, 37, -7, 122, -20, -127, 90, -107,
-    88, 110, 7, -55, 7, 71, -70, 42, -58, -5, 6, -87, 99, 91, -61, 2, -79, 38, -75, -69, -75, 99, -84, 58, 113, 119,
-    -67, -120, -67, 36, 39, -125, 23, 109, 19, 22, 19, -122, -26, 68, -114, 74, 23, -63, -54, -42, -126, -22, 19, -51,
-    66, 100, 19, -46, 124, 116, 27, 31, -21, 112, 125, -126, 25, -28, -102, -67, 27, 77, -81, -41, 19, 75, 21, 19, 3,
-    -84, 4, -92, 126, 114, -122, -90, -56, -7, 15, -108, 9, 77, 10, 44, 6, -115, -40, 10, -75, -59, 64, 59, -65, 99,
-    -100, 11, 69, -31, 3, 103, 101, 67, -61, -40, 100, 27, -48, 105, -73, -122, 18, -106, 110, 50, 108, 119, 87, -33,
-    113, -35, 44, 42, -50, 93, 118, -106, 53, -127, 27, 42, -67, -48, -44, 121, 0, 7, -112, 82, 24, -45, -2, -47, 83,
-    101, -39, 126, -127, -82, -33, 103, 76, 14, -35, 47, -92, 103, -17, 90, 36, -53, -28, -70, -79, 118, -74, 41, 93,
-    -119, -30, 95, -19, -31, 119, 102, 117, 53, -26, 7, 75, 55, 11, -22, 13, -70, -51, -62, -21, -40, 101, -63, 25, -71,
-    -67, -59, 52, 1, 103, 82, 98, 58, 98, 27, 106, -52, 101, -48, 121, -68, -82, 110, -119, 19, 23, -116, 29, -44, 21,
-    -111, 116, 52, 82, 38, -105, 106, -124, 114, -118, -39, -71, 78, -114, 80, -59, 15, 111, -1, -96, -83, 8, 58, -8,
-    -7, -128, -114, 21, 102, 10, 127, 106, 77, 22, 6, -60, -68, 83, -93, 89, -34, -66, -72, 96, -23, 124, -77, -24, 86,
-    -44, -6, 74, -127, -52, 52, -8, 24, -72, -44, 30, 94, -4, 7, -18, 82, 72, -128, 65, 125, 51, -36, 118, 18, -47, 124,
-    89, -62, 110, -41, -82, -47, -59, -24, -105, 42, -110, 110, -65, -22, 62, 19, 98, 5, -54, 11, -68, -125, 34, -52,
-    99, -69, 111, 93, -7, -106, 106, 118, 113, 99, -115, -80, -21, 97, 78, 120, 32, -85, 27, -45, -4, -44, -80, -123,
-    105, 90, 121, -75, 83, -51, -17, 58, 40, 15, 66, -32, -48, 12, 76, -125, -116, 111, -50, -74, -48, -5, -2, 75, -20,
-    -123, 6};
+    48, -126, 4, -94, 48, -126, 3, 10, -96, 3, 2, 1, 2, 2, 2, 1, -127, 48, 13, 6, 9, 42, -122, 72, -122, -9, 13, 1, 1,
+    13, 5, 0, 48, 114, 49, 18, 48, 16, 6, 3, 85, 4, 3, 12, 9, 116, 101, 120, 97, 105, 46, 111, 114, 103, 49, 38, 48,
+    36, 6, 3, 85, 4, 10, 12, 29, 84, 101, 120, 97, 105, 32, 67, 101, 114, 116, 105, 102, 105, 99, 97, 116, 105, 111,
+    110, 32, 65, 117, 116, 104, 111, 114, 105, 116, 121, 49, 52, 48, 50, 6, 10, 9, -110, 38, -119, -109, -14, 44, 100,
+    1, 1, 12, 36, 57, 97, 100, 98, 101, 97, 49, 49, 45, 99, 102, 101, 57, 45, 52, 100, 53, 57, 45, 56, 54, 48, 52, 45,
+    54, 98, 52, 97, 102, 101, 55, 99, 53, 55, 97, 53, 48, 30, 23, 13, 49, 52, 48, 54, 50, 48, 48, 52, 52, 48, 49, 57,
+    90, 23, 13, 50, 52, 48, 54, 49, 55, 48, 52, 52, 48, 50, 57, 90, 48, 114, 49, 18, 48, 16, 6, 3, 85, 4, 3, 12, 9, 116,
+    101, 120, 97, 105, 46, 111, 114, 103, 49, 38, 48, 36, 6, 3, 85, 4, 10, 12, 29, 84, 101, 120, 97, 105, 32, 67, 101,
+    114, 116, 105, 102, 105, 99, 97, 116, 105, 111, 110, 32, 65, 117, 116, 104, 111, 114, 105, 116, 121, 49, 52, 48, 50,
+    6, 10, 9, -110, 38, -119, -109, -14, 44, 100, 1, 1, 12, 36, 57, 97, 100, 98, 101, 97, 49, 49, 45, 99, 102, 101, 57,
+    45, 52, 100, 53, 57, 45, 56, 54, 48, 52, 45, 54, 98, 52, 97, 102, 101, 55, 99, 53, 55, 97, 53, 48, -126, 1, -94, 48,
+    13, 6, 9, 42, -122, 72, -122, -9, 13, 1, 1, 1, 5, 0, 3, -126, 1, -113, 0, 48, -126, 1, -118, 2, -126, 1, -127, 0,
+    -125, 91, 21, -120, -83, -108, -52, 15, -18, -128, -104, -68, -70, -9, 58, 58, -111, 5, -47, -7, -119, 110, 63, -24,
+    89, -61, -98, -108, -53, -84, 56, -65, 62, -40, 31, -97, -99, -121, 64, -77, 43, -15, -12, -16, -108, 110, 101, -12,
+    -7, -98, -50, -62, -121, -41, -69, -118, 37, 19, -3, 119, 26, 111, -80, 62, 124, -99, -42, 86, 125, 32, -74, 97, 79,
+    -26, 3, -30, 13, -61, 35, -54, 44, 114, -43, 84, -13, -33, 80, 22, 73, 93, 77, 90, 12, -117, 50, -104, 63, 38, 99,
+    -109, -119, -118, 19, 86, 18, -48, 87, -14, 119, 69, -67, -69, -74, -13, 24, 31, 60, -79, -62, -2, -114, -118, -15,
+    121, 68, 116, 67, -97, -9, -69, -36, -94, -33, -93, 12, -46, -105, -92, 21, 27, 120, -58, -37, 5, 47, -21, 106, 25,
+    -101, 3, -104, 31, -5, 60, -89, -74, 20, 25, 65, -116, -75, 48, -8, 50, -11, 70, 108, -49, -43, -35, 67, 106, -51,
+    127, 39, 87, -93, 71, -10, 103, -13, -54, 101, -80, 15, 11, 112, 19, -107, -44, -49, -63, 86, -112, -74, 9, 102, -124,
+    81, 74, -98, -109, 44, 29, 37, 42, 106, 87, -58, -128, -58, 67, 73, -39, -103, -30, -2, -13, 121, -90, -95, 120, -4,
+    20, 114, 8, 97, 40, -26, 38, -96, -87, -4, 6, -87, -48, -53, 72, 10, 1, -62, -15, -2, 54, -67, 3, 4, -115, -90, 31,
+    -25, 102, -30, 89, 124, -46, -91, -83, 83, 95, -39, -70, 57, -121, -13, -35, 105, -84, -33, -30, -93, -94, -79, -7,
+    -15, 21, -15, 36, -11, -92, 90, 36, 61, 110, 103, 66, 31, 103, -71, 24, 4, 45, -72, -60, 26, 45, -123, 11, 0, 97, -34,
+    -113, -99, -99, -33, -71, 102, 127, 29, 36, 95, -17, 0, -3, -97, -124, 117, -52, -92, -23, -41, -45, 76, -115, 61, -38,
+    -44, 52, -51, 94, -118, 110, -126, -7, -51, -44, -69, -19, 88, -25, -28, -89, -75, -113, 26, -99, -16, -90, 97, 56,
+    -91, 26, -58, 22, 81, 48, -92, -65, -95, -28, 50, -73, 110, -63, -63, 43, 111, 76, 58, 102, 96, 25, -4, 48, -52, -20,
+    123, 100, 21, 116, -26, 65, 115, -107, 2, 3, 1, 0, 1, -93, 66, 48, 64, 48, 29, 6, 3, 85, 29, 14, 4, 22, 4, 20, 1, 119,
+    4, -4, 27, -14, 82, -42, -46, -98, -16, -87, -109, -19, -27, -102, 72, -75, -126, -44, 48, 15, 6, 3, 85, 29, 19, 1, 1,
+    -1, 4, 5, 48, 3, 1, 1, -1, 48, 14, 6, 3, 85, 29, 15, 1, 1, -1, 4, 4, 3, 2, 1, 6, 48, 13, 6, 9, 42, -122, 72, -122, -9,
+    13, 1, 1, 13, 5, 0, 3, -126, 1, -127, 0, 19, 72, -48, -5, 65, -67, 6, 116, 88, -28, -101, 84, -46, -74, 59, -97, -37,
+    -26, 85, -81, -59, 109, -100, 64, -22, -98, 59, 42, 56, -59, -103, -28, 102, 59, -91, 10, 5, 77, -21, -118, 127, 88,
+    42, 68, -96, -103, 65, 54, -57, -6, -112, 90, -23, -104, 105, 117, -58, -92, 38, -32, -44, 104, -112, -128, -29, -67,
+    36, -20, -94, -53, 93, -63, -94, -109, -27, -116, -36, 30, 85, -13, 81, -108, 69, 33, 32, -16, 79, 125, -62, -98, 4,
+    -19, -100, -92, 106, 37, 52, -50, -37, -128, -69, 119, -72, 74, -71, -9, -7, 95, 20, -32, -35, 108, 45, -5, 125, 30,
+    63, -93, 7, 32, 68, -59, -31, -113, 70, 5, 19, 76, -5, -30, -100, -23, 101, -109, -128, 104, -44, 42, -48, -38, 60,
+    112, 125, 90, -57, 108, 67, -14, -16, 111, 86, 108, -65, -99, 83, 91, 39, 5, -128, -114, 6, 7, 5, 10, 88, 36, 104,
+    -45, 86, 108, -24, 82, 81, -82, 67, 66, -2, -52, 22, 106, 91, 64, -25, -94, 15, -7, -60, 42, -111, -71, -10, -5, -114,
+    -15, 108, -10, 61, -113, -55, -92, 97, -58, -58, 14, -65, -71, 77, 98, 86, -61, 71, -9, -109, 85, 61, 27, -72, -32, 74,
+    61, -53, 18, 126, -53, 119, 100, -60, 0, 34, 41, -76, 122, -44, -10, -104, -124, -43, -1, -97, 30, -113, 66, 74, -74,
+    -112, -111, -100, 73, 18, -13, -100, -128, 94, -47, 21, 68, 61, 82, 124, -49, 34, -21, 58, 8, 26, -86, 22, 111, 72,
+    -67, 92, -107, 73, 80, -118, 8, 50, 106, -106, -10, -93, 104, 68, -127, 108, -30, -14, -53, 92, -20, 62, 94, 68, 68,
+    93, -38, 8, -103, 117, 31, 27, 92, 53, 11, 2, 31, 116, -101, -114, 92, -69, -80, -124, -1, 116, 7, -42, -37, 35, 66,
+    45, 8, -72, -91, -7, 124, -127, -51, 51, 9, 123, -98, 2, 54, -9, -86, 88, 80, 31, 67, 42, 43, 27, -41, -61, 73, 7,
+    -124, 60, 72, 15, -98, -27, 87, 41, -44, 95, -63, -31, 74, -82, 116, -99, -46, -34, 62, -44, -120, 91, 63, -118, -39,
+    70, -20, -5, -99, -66, 95, -41, 46, 69, 92, 104, -111,};
   /** the root certificate */
   private static final X509Certificate ROOT_X509_CERTIFICATE;
   /** the truststore entry alias */
@@ -197,11 +202,12 @@ public final class X509Utils {
   static {
     LOGGER.info("adding Bouncy Castle cryptography provider");
     Security.addProvider(new BouncyCastleProvider());
+
+    LOGGER.info("initializing the root X.509 certificate");
+
     try {
-      LOGGER.info("initializing the root X.509 certificate");
-      final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(ROOT_CERTIFICATE_BYTES);
-      ROOT_X509_CERTIFICATE = readX509Certificate(byteArrayInputStream);
-    } catch (CertificateException | NoSuchProviderException ex) {
+      ROOT_X509_CERTIFICATE = new X509CertImpl(ROOT_CERTIFICATE_BYTES);
+    } catch (CertificateException ex) {
       throw new TexaiException(ex);
     }
   }
@@ -216,6 +222,36 @@ public final class X509Utils {
 
   /** Prevents the instantiation of this utility class. */
   private X509Utils() {
+  }
+
+  /** Makes a canonical X.509 certificate by serializing it to bytes and reconsituting it. This ensures
+   * that all issuer and subject names have no space following the commas.
+
+   * @param x509Certificate the input certificate
+   * @return the canonical certificate
+   */
+  public static X509Certificate makeCanonicalX509Certificate(final X509Certificate x509Certificate) {
+    //Preconditions
+    assert x509Certificate != null : "x509Certificate must not be null";
+
+    X509Certificate canonicalX509Certificate;
+    try {
+      final byte[] certificateBytes = x509Certificate.getEncoded();
+      final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(certificateBytes);
+      canonicalX509Certificate = readX509Certificate(byteArrayInputStream);
+    } catch (CertificateException | NoSuchProviderException ex) {
+      throw new TexaiException(ex);
+    }
+
+    LOGGER.debug("x509Certificate (" + x509Certificate.getClass().getName() + ")...\n" + x509Certificate
+            + "\ncanonicalX509Certificate(" + canonicalX509Certificate.getClass().getName() + ")...\n" + canonicalX509Certificate);
+
+    //Postconditions
+    assert canonicalX509Certificate.equals(x509Certificate) :
+            "canonicalX509Certificate must equal x509Certificate,\ncanonicalX509Certificate...\n" + canonicalX509Certificate
+            + "\nx509Certificate...\n" + x509Certificate;
+
+    return canonicalX509Certificate;
   }
 
   /** Gets the secure random, and lazily initializes it.
@@ -474,32 +510,44 @@ public final class X509Utils {
     assert issuerPrivateKey != null : "issuerPrivateKey must not be null";
     assert issuerCertificate != null : "issuerCertificate must not be null";
 
-    final X509V3CertificateGenerator x509V3CertificateGenerator = new X509V3CertificateGenerator();
-    x509V3CertificateGenerator.setSerialNumber(getNextSerialNumber());
-    x509V3CertificateGenerator.setIssuerDN(issuerCertificate.getSubjectX500Principal());
-    x509V3CertificateGenerator.setNotBefore(new Date(System.currentTimeMillis() - 10000L));
-    final Date notAfterDate = new Date(System.currentTimeMillis() + VALIDITY_PERIOD);
-    x509V3CertificateGenerator.setNotAfter(notAfterDate);
-    final UUID rootUUID = UUID.randomUUID();
-    final X500Principal x500Principal = new X500Principal("CN=texai.org,DC=IntermediateCertificate,UID=" + rootUUID);
-    x509V3CertificateGenerator.setSubjectDN(x500Principal);
-    x509V3CertificateGenerator.setPublicKey(myPublicKey);
-    x509V3CertificateGenerator.setSignatureAlgorithm(DIGITAL_SIGNATURE_ALGORITHM);
+    //final X500Name issuer = new X500Name(issuerCertificate.getSubjectX500Principal().getName());
+    final X500Name issuer = new X500Name(StringUtils.reverseCommaDelimitedString(issuerCertificate.getSubjectX500Principal().getName()));
+    final UUID intermediateUUID = UUID.randomUUID();
+    // provide items to X500Principal in reverse order
+    final X500Principal x500Principal = new X500Principal("UID=" + intermediateUUID + ", DC=IntermediateCertificate, CN=texai.org");
+    final X500Name subject = new X500Name(x500Principal.getName());
+    SubjectPublicKeyInfo publicKeyInfo = new SubjectPublicKeyInfo(ASN1Sequence.getInstance(myPublicKey.getEncoded()));
+    final X509v3CertificateBuilder x509v3CertificateBuilder = new X509v3CertificateBuilder(
+            issuer,
+            getNextSerialNumber(), // serial
+            new Date(System.currentTimeMillis() - 10000L), // notBefore,
+            new Date(System.currentTimeMillis() + VALIDITY_PERIOD), // notAfter,
+            subject,
+            publicKeyInfo);
 
     // see http://www.ietf.org/rfc/rfc3280.txt
+    // see http://stackoverflow.com/questions/20175447/creating-certificates-for-ssl-communication
+    final JcaX509ExtensionUtils jcaX509ExtensionUtils = new JcaX509ExtensionUtils();
 
-    x509V3CertificateGenerator.addExtension(
-            X509Extensions.AuthorityKeyIdentifier,
-            false,
-            new AuthorityKeyIdentifierStructure(issuerCertificate));
-    x509V3CertificateGenerator.addExtension(
-            X509Extensions.SubjectKeyIdentifier,
-            false,
-            new SubjectKeyIdentifierStructure(myPublicKey));
-    x509V3CertificateGenerator.addExtension(
-            X509Extensions.BasicConstraints,
-            true,
+    // Add authority key identifier
+    x509v3CertificateBuilder.addExtension(
+            Extension.authorityKeyIdentifier,
+            false, // isCritical
+            jcaX509ExtensionUtils.createAuthorityKeyIdentifier(issuerCertificate));
+
+    // Add subject key identifier
+    x509v3CertificateBuilder.addExtension(
+            Extension.subjectKeyIdentifier,
+            false, // isCritical
+            jcaX509ExtensionUtils.createSubjectKeyIdentifier(myPublicKey));
+
+    // add basic constraints
+    x509v3CertificateBuilder.addExtension(
+            Extension.basicConstraints,
+            true, // isCritical
             new BasicConstraints(pathLengthConstraint)); // is a CA certificate with specified certification path length
+
+    // add key usage
     final KeyUsage keyUsage = new KeyUsage(
             // the keyCertSign bit indicates that the subject public key may be used for verifying a signature on
             // certificates
@@ -507,11 +555,21 @@ public final class X509Utils {
             | // the cRLSign indicates that the subject public key may be used for verifying a signature on revocation
             // information
             KeyUsage.cRLSign);
-    x509V3CertificateGenerator.addExtension(
-            X509Extensions.KeyUsage,
-            true,
+
+    x509v3CertificateBuilder.addExtension(
+            Extension.keyUsage,
+            true, // isCritical
             keyUsage);
-    final X509Certificate x509Certificate = x509V3CertificateGenerator.generate(issuerPrivateKey, BOUNCY_CASTLE_PROVIDER);
+
+    X509Certificate x509Certificate;
+    try {
+      final ContentSigner contentSigner = new JcaContentSignerBuilder(DIGITAL_SIGNATURE_ALGORITHM).setProvider(BOUNCY_CASTLE_PROVIDER).build(issuerPrivateKey);
+      final X509CertificateHolder x509CertificateHolder = x509v3CertificateBuilder.build(contentSigner);
+      final JcaX509CertificateConverter jcaX509CertificateConverter = new JcaX509CertificateConverter();
+      x509Certificate = makeCanonicalX509Certificate(jcaX509CertificateConverter.getCertificate(x509CertificateHolder));
+    } catch (CertificateException | OperatorCreationException ex) {
+      throw new TexaiException(ex);
+    }
 
     //Postconditions
     try {
@@ -656,36 +714,47 @@ public final class X509Utils {
     assert issuerCertificate != null : "issuerCertificate must not be null";
     assert uid != null : "uid must not be null";
 
-    final X509V3CertificateGenerator x509V3CertificateGenerator = new X509V3CertificateGenerator();
-    x509V3CertificateGenerator.setSerialNumber(getNextSerialNumber());
-    x509V3CertificateGenerator.setIssuerDN(issuerCertificate.getSubjectX500Principal());
-    x509V3CertificateGenerator.setNotBefore(new Date(System.currentTimeMillis() - 10000L));
-    x509V3CertificateGenerator.setNotAfter(new Date(System.currentTimeMillis() + VALIDITY_PERIOD));
     final String x500PrincipalString;
+    // provide items to X500Principal in reverse order
     if (domainComponent == null || domainComponent.isEmpty()) {
-      x500PrincipalString = "CN=texai.org,UID=" + uid;
+      x500PrincipalString = "UID=" + uid + ", CN=texai.org";
     } else {
-      x500PrincipalString = "CN=texai.org,DC=" + domainComponent + ",UID=" + uid;
+      x500PrincipalString = "UID=" + uid + ", DC=" + domainComponent + " ,CN=texai.org";
     }
     final X500Principal x500Principal = new X500Principal(x500PrincipalString);
-    x509V3CertificateGenerator.setSubjectDN(x500Principal);
-    x509V3CertificateGenerator.setPublicKey(myPublicKey);
-    x509V3CertificateGenerator.setSignatureAlgorithm(DIGITAL_SIGNATURE_ALGORITHM);
+
+    LOGGER.info("issuer: " + issuerCertificate.getIssuerX500Principal().getName());
+
+    final X509v3CertificateBuilder x509v3CertificateBuilder = new X509v3CertificateBuilder(
+            new X500Name(StringUtils.reverseCommaDelimitedString(issuerCertificate.getSubjectX500Principal().getName())), // issuer,
+            getNextSerialNumber(), // serial
+            new Date(System.currentTimeMillis() - 10000L), // notBefore,
+            new Date(System.currentTimeMillis() + VALIDITY_PERIOD), // notAfter,
+            new X500Name(x500Principal.getName()), // subject,
+            new SubjectPublicKeyInfo(ASN1Sequence.getInstance(myPublicKey.getEncoded()))); // publicKeyInfo
 
     // see http://www.ietf.org/rfc/rfc3280.txt
+    // see http://stackoverflow.com/questions/20175447/creating-certificates-for-ssl-communication
+    final JcaX509ExtensionUtils jcaX509ExtensionUtils = new JcaX509ExtensionUtils();
+    // Add authority key identifier
+    x509v3CertificateBuilder.addExtension(
+            Extension.authorityKeyIdentifier,
+            false, // isCritical
+            jcaX509ExtensionUtils.createAuthorityKeyIdentifier(issuerCertificate));
 
-    x509V3CertificateGenerator.addExtension(
-            X509Extensions.AuthorityKeyIdentifier,
-            false,
-            new AuthorityKeyIdentifierStructure(issuerCertificate));
-    x509V3CertificateGenerator.addExtension(
-            X509Extensions.SubjectKeyIdentifier,
-            false,
-            new SubjectKeyIdentifierStructure(myPublicKey));
-    x509V3CertificateGenerator.addExtension(
-            X509Extensions.BasicConstraints,
-            true,
+    // Add subject key identifier
+    x509v3CertificateBuilder.addExtension(
+            Extension.subjectKeyIdentifier,
+            false, // isCritical
+            jcaX509ExtensionUtils.createSubjectKeyIdentifier(myPublicKey));
+
+    // add basic constraints
+    x509v3CertificateBuilder.addExtension(
+            Extension.basicConstraints,
+            true, // isCritical
             new BasicConstraints(false)); // is not a CA certificate
+
+    // add key usage
     final KeyUsage keyUsage = new KeyUsage(
             // the digitalSignature usage indicates that the subject public key may be used with a digital signature
             // mechanism to support security services other than non-repudiation, certificate signing, or revocation
@@ -713,11 +782,20 @@ public final class X509Utils {
             | // see http://www.docjar.com/html/api/sun/security/validator/EndEntityChecker.java.html - bit 0 needs to set for SSL
             // client authorization
             KeyUsage.encipherOnly);
-    x509V3CertificateGenerator.addExtension(
-            X509Extensions.KeyUsage,
-            true,
+    x509v3CertificateBuilder.addExtension(
+            Extension.keyUsage,
+            true, // isCritical
             keyUsage);
-    final X509Certificate x509Certificate = x509V3CertificateGenerator.generate(issuerPrivateKey, BOUNCY_CASTLE_PROVIDER);
+
+    X509Certificate x509Certificate;
+    try {
+      final ContentSigner contentSigner = new JcaContentSignerBuilder(DIGITAL_SIGNATURE_ALGORITHM).setProvider(BOUNCY_CASTLE_PROVIDER).build(issuerPrivateKey);
+      final X509CertificateHolder x509CertificateHolder = x509v3CertificateBuilder.build(contentSigner);
+      final JcaX509CertificateConverter jcaX509CertificateConverter = new JcaX509CertificateConverter();
+      x509Certificate = makeCanonicalX509Certificate(jcaX509CertificateConverter.getCertificate(x509CertificateHolder));
+    } catch (CertificateException | OperatorCreationException ex) {
+      throw new TexaiException(ex);
+    }
 
     //Postconditions
     try {
@@ -730,7 +808,6 @@ public final class X509Utils {
 
     return x509Certificate;
   }
-
 
   /** Returns whether the given certificate has the given key usage bit set, i.e. digitalSignature usage.
    *
@@ -779,7 +856,7 @@ public final class X509Utils {
     assert !subjectString.isEmpty() : "subject DN must not be empty";
     final int index = subjectString.indexOf("UID=");
     assert index > -1 : "UID not found in the subject DN";
-    final String uuidString = subjectString.substring(index + 4);
+    final String uuidString = subjectString.substring(index + 4, index + 40);
     return UUID.fromString(uuidString);
   }
 
@@ -793,8 +870,11 @@ public final class X509Utils {
     //Preconditions
     assert inputStream != null : "inputStream must not be null";
 
-    final CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509", BOUNCY_CASTLE_PROVIDER);
-    return (X509Certificate) certificateFactory.generateCertificate(inputStream);
+    try {
+      return new X509CertImpl(IOUtils.toByteArray(inputStream));
+    } catch (IOException ex) {
+      throw new TexaiException(ex);
+    }
   }
 
   /** Writes a DER encoded certificate to the given file path.
@@ -1492,7 +1572,6 @@ public final class X509Utils {
               X509Utils.getRootPrivateKey(),
               X509Utils.getRootX509Certificate(), null);
 
-
       // proceed as though the JCE unlimited strength jurisdiction policy files are installed, which they will be on the
       // trusted development system.
       LOGGER.info("creating installer-keystore.uber");
@@ -1547,47 +1626,66 @@ public final class X509Utils {
     //Preconditions
     assert keyPair != null : "keyPair must not be null";
 
-    final X509V3CertificateGenerator x509V3CertificateGenerator = new X509V3CertificateGenerator();
-    resetSerialNumber();
-    x509V3CertificateGenerator.setSerialNumber(getNextSerialNumber());
     final UUID rootUUID = UUID.randomUUID();
-    final X500Principal rootX500Principal = new X500Principal("CN=texai.org,O=Texai Certification Authority,UID=" + rootUUID);
-    x509V3CertificateGenerator.setIssuerDN(rootX500Principal);
-    x509V3CertificateGenerator.setNotBefore(new Date(System.currentTimeMillis() - 10000L));
-    final Date notAfterDate = new Date(System.currentTimeMillis() + VALIDITY_PERIOD);
-    x509V3CertificateGenerator.setNotAfter(notAfterDate);
-    x509V3CertificateGenerator.setSubjectDN(rootX500Principal);
-    x509V3CertificateGenerator.setPublicKey(keyPair.getPublic());
-    x509V3CertificateGenerator.setSignatureAlgorithm(DIGITAL_SIGNATURE_ALGORITHM);
+    // provide items to X500Principal in reverse order
+    final X500Principal rootX500Principal =
+            new X500Principal("UID=" + rootUUID + ", O=Texai Certification Authority, CN=texai.org");
+    final X500Name subject = new X500Name(rootX500Principal.getName());
+    final X509v3CertificateBuilder x509v3CertificateBuilder = new X509v3CertificateBuilder(
+            new X500Name(rootX500Principal.getName()), // issuer,
+            getNextSerialNumber(), // serial
+            new Date(System.currentTimeMillis() - 10000L), // notBefore,
+            new Date(System.currentTimeMillis() + VALIDITY_PERIOD), // notAfter,
+            subject,
+            new SubjectPublicKeyInfo(ASN1Sequence.getInstance(keyPair.getPublic().getEncoded()))); // publicKeyInfo
 
+    // see http://www.ietf.org/rfc/rfc3280.txt
+    // see http://stackoverflow.com/questions/20175447/creating-certificates-for-ssl-communication
+    final JcaX509ExtensionUtils jcaX509ExtensionUtils = new JcaX509ExtensionUtils();
+
+    // Add subject key identifier
+    x509v3CertificateBuilder.addExtension(
+            Extension.subjectKeyIdentifier,
+            false, // isCritical
+            jcaX509ExtensionUtils.createSubjectKeyIdentifier(keyPair.getPublic()));
+
+    // add basic constraints
+    x509v3CertificateBuilder.addExtension(
+            Extension.basicConstraints,
+            true, // isCritical
+            new BasicConstraints(true)); // is a CA certificate with an unlimited certification path length
+
+    final KeyUsage keyUsage = new KeyUsage(
+            // the keyCertSign bit indicates that the subject public key may be used for verifying a signature on
+            // certificates
+            KeyUsage.keyCertSign
+            | // the cRLSign indicates that the subject public key may be used for verifying a signature on revocation
+            // information
+            KeyUsage.cRLSign);
+
+    // add key usage
+    x509v3CertificateBuilder.addExtension(
+            Extension.keyUsage,
+            true, // isCritical
+            keyUsage);
+
+    X509Certificate rootX509Certificate;
     try {
-      x509V3CertificateGenerator.addExtension(
-              X509Extensions.SubjectKeyIdentifier,
-              false,
-              new SubjectKeyIdentifierStructure(keyPair.getPublic()));
-      x509V3CertificateGenerator.addExtension(
-              X509Extensions.BasicConstraints,
-              true,
-              new BasicConstraints(true)); // is a CA certificate with an unlimited certification path length
-      final KeyUsage keyUsage = new KeyUsage(
-              // the keyCertSign bit indicates that the subject public key may be used for verifying a signature on
-              // certificates
-              KeyUsage.keyCertSign
-              | // the cRLSign indicates that the subject public key may be used for verifying a signature on revocation
-              // information
-              KeyUsage.cRLSign);
-      x509V3CertificateGenerator.addExtension(
-              X509Extensions.KeyUsage,
-              true,
-              keyUsage);
-      final X509Certificate rootX509Certificate = x509V3CertificateGenerator.generate(keyPair.getPrivate(), BOUNCY_CASTLE_PROVIDER);
+      final ContentSigner contentSigner = new JcaContentSignerBuilder(DIGITAL_SIGNATURE_ALGORITHM).setProvider(BOUNCY_CASTLE_PROVIDER).build(keyPair.getPrivate());
+      final X509CertificateHolder x509CertificateHolder = x509v3CertificateBuilder.build(contentSigner);
+      final JcaX509CertificateConverter jcaX509CertificateConverter = new JcaX509CertificateConverter();
+      rootX509Certificate = jcaX509CertificateConverter.getCertificate(x509CertificateHolder);
+    } catch (CertificateException | OperatorCreationException ex) {
+      throw new TexaiException(ex);
+    }
 
-      //Postconditions
+    //Postconditions
+    try {
       rootX509Certificate.checkValidity();
       rootX509Certificate.verify(keyPair.getPublic());
 
       return rootX509Certificate;
-    } catch (IllegalStateException | NoSuchProviderException | NoSuchAlgorithmException | SignatureException | InvalidKeyException | CertificateException ex) {
+    } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchProviderException | SignatureException | CertificateException ex) {
       throw new TexaiException(ex);
     }
   }
@@ -1615,13 +1713,14 @@ public final class X509Utils {
       final KeyPair rootKeyPair = generateRSAKeyPair3072();
       LOGGER.info("creating Texai root X.509 certificate");
       final X509Certificate rootX509Certificate = generateRootX509Certificate(rootKeyPair);
-      LOGGER.info("root certificate:\n" + rootX509Certificate);
+      LOGGER.info("root certificate...\n" + rootX509Certificate);
       final StringBuilder stringBuilder = new StringBuilder();
       for (final byte b : rootX509Certificate.getEncoded()) {
         stringBuilder.append(Byte.toString(b));
         stringBuilder.append(", ");
       }
-      LOGGER.info("\n" + stringBuilder.toString());
+      LOGGER.info("root certificate...\n" + rootX509Certificate);
+      LOGGER.info("\nroot certificate bytes...\n" + stringBuilder.toString());
       LOGGER.info("creating Texai root X.509 certificate keystore");
       final KeyStore rootKeyStore = X509Utils.findOrCreateJceksKeyStore(filePath, keyStorePassword);
       rootKeyStore.setKeyEntry(
@@ -1677,7 +1776,7 @@ public final class X509Utils {
         assert keyStorePassword.length > 0;
       }
       return keyStorePassword;
-    } catch (Exception ex) {
+    } catch (IOException ex) {
       throw new TexaiException(ex);
     }
   }
@@ -1726,12 +1825,10 @@ public final class X509Utils {
     String filePath = "data/truststore.uber";
     File truststoreFile = new File(filePath);
 
-
 //    if (truststoreFile.exists()) {
 //      // do not overwrite it
 //      return;
 //    }
-
     try {
       LOGGER.info("creating truststore.uber");
       truststore = X509Utils.findOrCreateKeyStore(filePath, TRUSTSTORE_PASSWORD);
