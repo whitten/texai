@@ -20,10 +20,13 @@
  */
 package org.texai.x509;
 
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.CertPath;
+import java.security.cert.CertPathValidatorException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
@@ -148,7 +151,7 @@ public class X509SecurityInfoTest {
     X509SecurityInfo instance = KeyStoreTestUtils.getClientX509SecurityInfo();
     X509Certificate result = instance.getX509Certificate();
     assertNotNull(result);
-    assertEquals("CN=texai.org, UID=b31650cd-0efd-4b87-b347-62bf6a5b0db0", result.getSubjectX500Principal().toString());
+    assertTrue(result.getSubjectX500Principal().toString().startsWith("CN=texai.org, UID="));
   }
 
   /**
@@ -166,13 +169,13 @@ public class X509SecurityInfoTest {
       final KeyStore keyStore = x509SecurityInfo.getKeyStore();
       final X509Certificate clientX509Certificate = (X509Certificate) keyStore.getCertificate(X509Utils.ENTRY_ALIAS);
       assertNotNull(clientX509Certificate);
-      assertTrue(clientX509Certificate.getSubjectX500Principal().toString().indexOf("CN=texai.org") > -1);
+      assertTrue(clientX509Certificate.getSubjectX500Principal().toString().contains("CN=texai.org"));
       Certificate[] certificateChain = keyStore.getCertificateChain(X509Utils.ENTRY_ALIAS);
       assertEquals(2, certificateChain.length);
       assertEquals(clientX509Certificate, certificateChain[0]);
       final Certificate rootX509Certificate = certificateChain[1];
       assertTrue(rootX509Certificate instanceof X509Certificate);
-      assertEquals("CN=texai.org, O=Texai Certification Authority, UID=233bfdb2-9287-4b41-b304-eb121ea7c4de", ((X509Certificate) rootX509Certificate).getSubjectX500Principal().toString());
+      assertEquals("CN=texai.org, O=Texai Certification Authority, UID=ed6d6718-80de-4848-af43-fed7bdba3c36", ((X509Certificate) rootX509Certificate).getSubjectX500Principal().toString());
       //assertTrue(X509CertImpl.isSelfIssued((X509Certificate) rootX509Certificate));
       assertEquals(3, ((X509Certificate) rootX509Certificate).getVersion());
 
@@ -184,7 +187,7 @@ public class X509SecurityInfoTest {
       assertEquals(1, certificates.size());
       assertEquals(clientX509Certificate, certificates.get(0));
       X509Utils.validateCertificatePath(certPath);
-    } catch (Exception ex) {
+    } catch (InvalidAlgorithmParameterException | KeyStoreException | NoSuchAlgorithmException | CertPathValidatorException ex) {
       ex.printStackTrace();
       fail(ex.getMessage());
     }

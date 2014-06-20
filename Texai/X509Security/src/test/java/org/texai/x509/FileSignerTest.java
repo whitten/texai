@@ -20,7 +20,11 @@
  */
 package org.texai.x509;
 
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import javax.net.ssl.X509KeyManager;
 import org.apache.log4j.Logger;
@@ -94,7 +98,7 @@ public class FileSignerTest {
       boolean result = FileSigner.verify(datafile, x509Certificate, signatureBytes);
       System.out.println("Signature Verification Result = " + x509Certificate);
       assertTrue(result);
-    } catch (Exception ex) {
+    } catch (IOException | InvalidKeyException | NoSuchAlgorithmException | SignatureException ex) {
       fail(ex.getMessage());
     }
   }

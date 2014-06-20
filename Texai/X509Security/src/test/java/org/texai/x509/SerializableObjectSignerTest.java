@@ -20,9 +20,13 @@
  */
 package org.texai.x509;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import javax.net.ssl.X509KeyManager;
 import org.apache.log4j.Logger;
@@ -87,7 +91,7 @@ public class SerializableObjectSignerTest {
     byte[] signatureBytes = null;
     try {
       signatureBytes = SerializableObjectSigner.sign(serializableObject, privateKey);
-    } catch (Exception ex) {
+    } catch (IOException | InvalidKeyException | NoSuchAlgorithmException | SignatureException ex) {
       fail(ex.getMessage());
     }
     assertNotNull(signatureBytes);
@@ -98,7 +102,7 @@ public class SerializableObjectSignerTest {
       assertTrue(SerializableObjectSigner.verify(serializableObject2, x509Certificate, signatureBytes));
       Serializable serializableObject3 = new MySerializableObject("def", new InetSocketAddress("192.168.0.10", 443));
       assertFalse(SerializableObjectSigner.verify(serializableObject3, x509Certificate, signatureBytes));
-    } catch (Exception ex) {
+    } catch (IOException | InvalidKeyException | NoSuchAlgorithmException | SignatureException ex) {
       fail(ex.getMessage());
     }
   }
@@ -115,7 +119,7 @@ public class SerializableObjectSignerTest {
     byte[] signatureBytes = null;
     try {
       signatureBytes = SerializableObjectSigner.sign(serializableObject, privateKey);
-    } catch (Exception ex) {
+    } catch (IOException | InvalidKeyException | NoSuchAlgorithmException | SignatureException ex) {
       fail(ex.getMessage());
     }
     assertNotNull(signatureBytes);
@@ -125,7 +129,7 @@ public class SerializableObjectSignerTest {
       assertFalse(SerializableObjectSigner.verify(serializableObject, x509Certificate, signatureBytes));
       serializableObject.signatureBytes = null;
       assertTrue(SerializableObjectSigner.verify(serializableObject, x509Certificate, signatureBytes));
-    } catch (Exception ex) {
+    } catch (IOException | InvalidKeyException | NoSuchAlgorithmException | SignatureException ex) {
       fail(ex.getMessage());
     }
   }

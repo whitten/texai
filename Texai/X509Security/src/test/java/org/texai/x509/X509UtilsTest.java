@@ -47,7 +47,6 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.x509.KeyUsage;
@@ -243,8 +242,8 @@ public class X509UtilsTest {
       X509Certificate rootX509Certificate = X509Utils.getRootX509Certificate();
       LOGGER.info("root certificate:\n" + rootX509Certificate);
       assertNotNull(rootX509Certificate);
-      assertEquals("UID=9adbea11-cfe9-4d59-8604-6b4afe7c57a5, O=Texai Certification Authority, CN=texai.org", rootX509Certificate.getIssuerDN().toString());
-      assertEquals("UID=9adbea11-cfe9-4d59-8604-6b4afe7c57a5, O=Texai Certification Authority, CN=texai.org", rootX509Certificate.getSubjectDN().toString());
+      assertEquals("CN=texai.org, O=Texai Certification Authority, UID=ed6d6718-80de-4848-af43-fed7bdba3c36", rootX509Certificate.getIssuerDN().toString());
+      assertEquals("CN=texai.org, O=Texai Certification Authority, UID=ed6d6718-80de-4848-af43-fed7bdba3c36", rootX509Certificate.getSubjectDN().toString());
       assertEquals(X509Utils.DIGITAL_SIGNATURE_ALGORITHM, rootX509Certificate.getSigAlgName());
     } catch (Exception ex) {
       fail(ex.getMessage());
@@ -271,7 +270,7 @@ public class X509UtilsTest {
 
       LOGGER.info("generated certificate...\n" + x509Certificate);
       assertNotNull(x509Certificate);
-      assertTrue(x509Certificate.getIssuerDN().toString().contains("O=Texai Certification Authority, CN=texai.org"));
+      assertTrue(x509Certificate.getIssuerDN().toString().startsWith("CN=texai.org, O=Texai Certification Authority, UID="));
       assertTrue(x509Certificate.getSubjectDN().toString().contains("CN=texai.org"));
       assertTrue(!x509Certificate.getSubjectDN().toString().contains("O=Texai Certification Authority"));
       assertEquals(X509Utils.DIGITAL_SIGNATURE_ALGORITHM, x509Certificate.getSigAlgName());
@@ -309,7 +308,7 @@ public class X509UtilsTest {
       X509Certificate x509Certificate = (X509Certificate) certPath.getCertificates().get(0);
       LOGGER.info("generated certificate...\n" + x509Certificate);
       assertNotNull(x509Certificate);
-      assertTrue(x509Certificate.getIssuerDN().toString().contains("O=Texai Certification Authority, CN=texai.org"));
+      assertTrue(x509Certificate.getIssuerDN().toString().startsWith("CN=texai.org, O=Texai Certification Authority, UID="));
       assertTrue(x509Certificate.getSubjectDN().toString().contains("CN=texai.org"));
       assertTrue(!x509Certificate.getSubjectDN().toString().contains("O=Texai Certification Authority"));
       assertEquals(X509Utils.DIGITAL_SIGNATURE_ALGORITHM, x509Certificate.getSigAlgName());
@@ -341,7 +340,7 @@ public class X509UtilsTest {
       LOGGER.info("generated intermediate certificate:\n" + intermediateX509Certificate);
       assertNotNull(intermediateX509Certificate);
       LOGGER.info("intermediateX509Certificate.getIssuerDN(): " + intermediateX509Certificate.getIssuerDN().toString());
-      assertTrue(intermediateX509Certificate.getIssuerDN().toString().contains("O=Texai Certification Authority, CN=texai.org"));
+      assertTrue(intermediateX509Certificate.getIssuerDN().toString().startsWith("CN=texai.org, O=Texai Certification Authority, UID="));
       assertTrue(intermediateX509Certificate.getSubjectDN().toString().contains("CN=texai.org"));
       assertTrue(!intermediateX509Certificate.getSubjectDN().toString().contains("O=Texai Certification Authority"));
       assertEquals(X509Utils.DIGITAL_SIGNATURE_ALGORITHM, intermediateX509Certificate.getSigAlgName());
@@ -399,7 +398,7 @@ public class X509UtilsTest {
 
       LOGGER.info("generated certificate...\n" + x509Certificate);
       assertNotNull(x509Certificate);
-      assertTrue(x509Certificate.getIssuerDN().toString().contains("O=Texai Certification Authority, CN=texai.org"));
+      assertTrue(x509Certificate.getIssuerDN().toString().startsWith("CN=texai.org, O=Texai Certification Authority, UID="));
       assertTrue(x509Certificate.getSubjectDN().toString().contains("CN=texai.org"));
       assertTrue(!x509Certificate.getSubjectDN().toString().contains("O=Texai Certification Authority"));
       assertEquals(X509Utils.DIGITAL_SIGNATURE_ALGORITHM, x509Certificate.getSigAlgName());
@@ -410,13 +409,11 @@ public class X509UtilsTest {
 
       final X509Certificate canonicalX509Certificate = X509Utils.makeCanonicalX509Certificate(x509Certificate);
       LOGGER.info("canonical certificate...\n" + canonicalX509Certificate);
-      assertTrue(canonicalX509Certificate.getIssuerDN().toString().contains("O=Texai Certification Authority, CN=texai.org"));
+      assertTrue(canonicalX509Certificate.getIssuerDN().toString().startsWith("CN=texai.org, O=Texai Certification Authority, UID="));
       assertTrue(canonicalX509Certificate.getSubjectDN().toString().contains("CN=texai.org"));
 
       assertEquals(canonicalX509Certificate.getSubjectDN().toString(), x509Certificate.getSubjectDN().toString());
       assertEquals(canonicalX509Certificate.getIssuerDN().toString(), x509Certificate.getIssuerDN().toString());
-
-      LOGGER.info("break");
 
     } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | SignatureException | InvalidKeyException | IOException | CertificateException ex) {
       LOGGER.info(StringUtils.getStackTraceAsString(ex));
@@ -600,7 +597,7 @@ public class X509UtilsTest {
     try {
       final X509Certificate rootX509Certificate = X509Utils.getRootX509Certificate();
       LOGGER.info("root certificate: " + rootX509Certificate);
-      assertEquals("9adbea11-cfe9-4d59-8604-6b4afe7c57a5", X509Utils.getUUID(rootX509Certificate).toString());
+      assertEquals("ed6d6718-80de-4848-af43-fed7bdba3c36", X509Utils.getUUID(rootX509Certificate).toString());
     } catch (Exception ex) {
       fail(ex.getMessage());
     }
@@ -653,7 +650,8 @@ public class X509UtilsTest {
               issuerCertificate,
               uid,
               keystorePassword,
-              isJCEUnlimitedStrengthPolicy, null);
+              isJCEUnlimitedStrengthPolicy,
+              null); // domainComponent
       assertNotNull(x509SecurityInfo.getCertPath());
       assertNotNull(x509SecurityInfo.getKeyManagers());
       assertNotNull(x509SecurityInfo.getKeyStore());

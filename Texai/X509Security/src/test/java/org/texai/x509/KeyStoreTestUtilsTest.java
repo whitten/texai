@@ -20,8 +20,14 @@
  */
 package org.texai.x509;
 
+import java.security.InvalidKeyException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import org.apache.log4j.Logger;
 import org.junit.After;
@@ -80,15 +86,15 @@ public class KeyStoreTestUtilsTest {
     try {
       assertTrue(result.containsAlias(X509Utils.ENTRY_ALIAS));
       final X509Certificate serverX509Certificate = (X509Certificate) result.getCertificate(X509Utils.ENTRY_ALIAS);
-      assertTrue(serverX509Certificate.getSubjectX500Principal().toString().indexOf("CN=texai.org") > -1);
+      assertTrue(serverX509Certificate.getSubjectX500Principal().toString().contains("CN=texai.org"));
       Certificate[] certificateChain = result.getCertificateChain(X509Utils.ENTRY_ALIAS);
       assertEquals(2, certificateChain.length);
       assertEquals(serverX509Certificate, certificateChain[0]);
       final Certificate rootX509Certificate = certificateChain[1];
       assertTrue(rootX509Certificate instanceof X509Certificate);
-      assertEquals("CN=texai.org, O=Texai Certification Authority, UID=233bfdb2-9287-4b41-b304-eb121ea7c4de", ((X509Certificate) rootX509Certificate).getSubjectX500Principal().toString());
+      assertEquals("CN=texai.org, O=Texai Certification Authority, UID=ed6d6718-80de-4848-af43-fed7bdba3c36", ((X509Certificate) rootX509Certificate).getSubjectX500Principal().toString());
       serverX509Certificate.verify(rootX509Certificate.getPublicKey());
-    } catch (Exception ex) {
+    } catch (InvalidKeyException | KeyStoreException | NoSuchAlgorithmException | NoSuchProviderException | SignatureException | CertificateException ex) {
       fail(ex.getMessage());
     }
   }
@@ -110,15 +116,15 @@ public class KeyStoreTestUtilsTest {
     try {
       assertTrue(result.containsAlias(X509Utils.ENTRY_ALIAS));
       final X509Certificate clientX509Certificate = (X509Certificate) result.getCertificate(X509Utils.ENTRY_ALIAS);
-      assertTrue(clientX509Certificate.getSubjectX500Principal().toString().indexOf("CN=texai.org") > -1);
+      assertTrue(clientX509Certificate.getSubjectX500Principal().toString().contains("CN=texai.org"));
       Certificate[] certificateChain = result.getCertificateChain(X509Utils.ENTRY_ALIAS);
       assertEquals(2, certificateChain.length);
       assertEquals(clientX509Certificate, certificateChain[0]);
       final Certificate rootX509Certificate = certificateChain[1];
       assertTrue(rootX509Certificate instanceof X509Certificate);
-      assertEquals("CN=texai.org, O=Texai Certification Authority, UID=233bfdb2-9287-4b41-b304-eb121ea7c4de", ((X509Certificate) rootX509Certificate).getSubjectX500Principal().toString());
+      assertTrue(((X509Certificate) rootX509Certificate).getSubjectX500Principal().toString().startsWith("CN=texai.org, O=Texai Certification Authority, UID="));
       clientX509Certificate.verify(rootX509Certificate.getPublicKey());
-    } catch (Exception ex) {
+    } catch (InvalidKeyException | KeyStoreException | NoSuchAlgorithmException | NoSuchProviderException | SignatureException | CertificateException ex) {
       ex.printStackTrace();
       fail(ex.getMessage());
     }

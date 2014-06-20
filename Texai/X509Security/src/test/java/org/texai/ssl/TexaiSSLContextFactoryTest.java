@@ -20,8 +20,14 @@
  */
 package org.texai.ssl;
 
+import java.security.InvalidKeyException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PublicKey;
+import java.security.SignatureException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
@@ -91,7 +97,7 @@ public class TexaiSSLContextFactoryTest {
       X509Certificate[] acceptedIssuers = x509TrustManager.getAcceptedIssuers();
       assertNotNull(acceptedIssuers);
       assertEquals(1, acceptedIssuers.length);
-      assertEquals("CN=texai.org, O=Texai Certification Authority, UID=233bfdb2-9287-4b41-b304-eb121ea7c4de", acceptedIssuers[0].getSubjectX500Principal().toString());
+      assertEquals("CN=texai.org, O=Texai Certification Authority, UID=ed6d6718-80de-4848-af43-fed7bdba3c36", acceptedIssuers[0].getSubjectX500Principal().toString());
       Certificate[] chain = KeyStoreTestUtils.getClientKeyStore().getCertificateChain(X509Utils.ENTRY_ALIAS);
       assertNotNull(chain);
       assertEquals(2, chain.length);
@@ -99,14 +105,14 @@ public class TexaiSSLContextFactoryTest {
       final X509Certificate clientX509Certificate = x509Chain[0];
       final X509Certificate rootX509Certificate = x509Chain[1];
       LOGGER.info("client certificate: " + clientX509Certificate);
-      assertTrue(clientX509Certificate.getSubjectX500Principal().toString().indexOf("CN=texai.org") > -1);
+      assertTrue(clientX509Certificate.getSubjectX500Principal().toString().contains("CN=texai.org"));
       LOGGER.info("root certificate: " + rootX509Certificate);
-      assertEquals("CN=texai.org, O=Texai Certification Authority, UID=233bfdb2-9287-4b41-b304-eb121ea7c4de", rootX509Certificate.getSubjectX500Principal().toString());
+      assertEquals("CN=texai.org, O=Texai Certification Authority, UID=ed6d6718-80de-4848-af43-fed7bdba3c36", rootX509Certificate.getSubjectX500Principal().toString());
       final PublicKey rootPublicKey = rootX509Certificate.getPublicKey();
       LOGGER.info("rootPublicKey: " + rootPublicKey);
       clientX509Certificate.verify(rootPublicKey);
       x509TrustManager.checkClientTrusted(x509Chain, "RSA");
-    } catch (Exception ex) {
+    } catch (InvalidKeyException | KeyStoreException | NoSuchAlgorithmException | NoSuchProviderException | SignatureException | CertificateException ex) {
       ex.printStackTrace();
       fail(ex.getMessage());
     }
@@ -125,7 +131,7 @@ public class TexaiSSLContextFactoryTest {
       SSLEngine sslEngine = sslContext.createSSLEngine();
       assertFalse(sslEngine.getNeedClientAuth());
       assertFalse(sslEngine.getUseClientMode());
-      final List<String> enabledCipherSuites = new ArrayList<String>();
+      final List<String> enabledCipherSuites = new ArrayList<>();
       LOGGER.info("default ciphers ...");
       for (final String enabledCipherSuite : sslEngine.getEnabledCipherSuites()) {
         enabledCipherSuites.add(enabledCipherSuite);
