@@ -1,0 +1,460 @@
+/*
+ * AHCSConstants.java
+ *
+ * Created on Jun 26, 2009, 2:32:17 PM
+ *
+ * Description: Provides constants for the Albus hierarchical control system.
+ *
+ * Copyright (C) Jun 26, 2009 Stephen L. Reed.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms
+ * of the GNU General Public License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+package org.texai.ahcsSupport;
+
+import net.jcip.annotations.NotThreadSafe;
+import org.openrdf.model.URI;
+import org.openrdf.model.impl.URIImpl;
+import org.texai.kb.Constants;
+
+/** Provides constants for the Albus hierarchical control system.
+ *
+ * @author Stephen L. Reed
+ */
+@NotThreadSafe
+public final class AHCSConstants {
+
+  /** Constructs a new AHCSConstants instance. */
+  private AHCSConstants() {
+  }
+
+  /** the role and skill states */
+  public enum State {
+    UNINITIALIZED,
+    INITIALIZED,
+    READY,
+    SHUTDOWN}
+
+  //
+  //
+  // sensation messages - end with _Sensation, and are sent from a child node to its parent node
+  //
+  /** the exitApplication_Sensation operation */
+  public static final String AHCS_EXIT_APPLICATION_SENSATION = "AHCS exitApplication_Sensation";
+  //
+  /** the detected face_Sensation operation */
+  public static final String DETECTED_FACE_SENSATION = "detected face_Sensation";
+  //
+  /** the disconnectedSession_Sensation operation */
+  public static final String DISCONNECTED_SESSION_SENSATION = "disconnectedSession_Sensation";
+  //
+  /** the recognizedFace_Sensation operation */
+  public static final String RECOGNIZED_FACE_SENSATION = "recognizedFace_Sensation";
+  //
+  /** the sensedWord_Sensation operation */
+  public static final String SENSED_WORD_SENSATION = "sensedWord_Sensation";
+  //
+  /** the sensedWord parameter of the sensedWord_Sensation */
+  public static final String SENSED_WORD_SENSATION_SENSED_WORD = "sensedWord_Sensation_sensedWord";
+  //
+  /** the unrecognizedFace_Sensation operation */
+  public static final String UNRECOGNIZED_FACE_SENSATION = "unrecognizedFace_Sensation";
+  //
+  /** the utteranceMeaning_Sensation operation */
+  public static final String UTTERANCE_MEANING_SENSATION = "utteranceMeaning_Sensation";
+  /** the meaningStatements parameter of the the utteranceMeaning_Sensation */
+  public static final String UTTERANCE_MEANING_SENSATION_MEANING_STATEMENTS = "utteranceMeaning_Sensation_meaningStatements";
+  /** the discourseContext parameter of the the utteranceMeaning_Sensation */
+  public static final String UTTERANCE_MEANING_SENSATION_DISCOURSE_CONTEXT = "utteranceMeaning_Sensation_discourseContext";
+  /** the utterance parameter of the the utteranceMeaning_Sensation */
+  public static final String UTTERANCE_MEANING_SENSATION_UTTERANCE = "utteranceMeaning_Sensation_utterance";
+  /** the receiverNodeNickname parameter of the the utteranceMeaning_Sensation */
+  public static final String UTTERANCE_MEANING_SENSATION_RECEIVER_NODE_NICKNAME = "utteranceMeaning_Sensation_receiverNodeNickname";
+  /** the effectiveUtterance parameter of the the utteranceMeaning_Sensation */
+  public static final String UTTERANCE_MEANING_SENSATION_EFFECTIVE_UTTERANCE = "utteranceMeaning_Sensation_effectiveUtterance";
+  //
+  /** the webcam_image_Sensation operation */
+  public static final String WEBCAM_IMAGE_SENSATION = "webcamImage_Sensation";
+  //
+  /** the webcamPresent_Sensation operation */
+  public static final String WEBCAM_PRESENT_SENSATION = "webcamPresent_Sensation";
+  //
+  //
+  // task messages - end with _Task, and are sent from the parent node to one of its child nodes
+  //
+  /** the addUnrecognizedFaceToTrainingSet_Task operation */
+  public static final String ADD_UNRECOGNIZED_FACE_TO_TRAINING_SET_TASK = "addUnrecognizedFaceToTrainingSet_Task";
+  //
+  /** the initialize_Task operation */
+  public static final String AHCS_INITIALIZE_TASK = "AHCS initialize_Task";
+  //
+  /** the quiesce_Task operation */
+  public static final String AHCS_QUIESCE_TASK = "AHCS quiesce_Task";
+  //
+  /** the ready_Task operation */
+  public static final String AHCS_READY_TASK = "AHCS ready_Task";
+  //
+  /** the restart_Task operation */
+  public static final String AHCS_RESTART_TASK = "AHCS restart_Task";
+  /** the node runtime id */
+  public static final String AHCS_RESTART_TASK_NODE_RUNTIME_ID = "AHCS restart_Task_nodeRuntimeId";
+  /** the indicator whether repositories are backed up */
+  public static final String AHCS_RESTART_TASK_ARE_REPOSITORIES_BACKED_UP = "AHCS restart_Task_areRepositoriesBackedUp";
+  /** the indicator whether remote debugging is enabled */
+  public static final String AHCS_RESTART_TASK_IS_REMOTE_DEBUGGING_ENABLED = "AHCS restart_Task_isRemoteDebuggingEnabled";
+  //
+  /** the shutdown_Task operation */
+  public static final String AHCS_SHUTDOWN_TASK = "AHCS shutdown_Task";
+  //
+  /** the connect child role to parent_Task operation */
+  public static final String CONNECT_CHILD_ROLE_TO_PARENT_TASK = "connect child role to parent_Task";
+  //
+  /** the converseYesNoQueryWithUser_Task operation */
+  public static final String CONVERSE_YES_NO_QUERY_WITH_USER_TASK = "converseYesNoQueryWithUser_Task";
+  //
+  /** the create node_Task operation */
+  public static final String CREATE_NODE_TASK = "create node_Task";
+  //
+  /** the defineNewNode_Task operation */
+  public static final String DEFINE_NEW_NODE_TASK = "defineNewNode_Task";
+  //
+  /** the defineNewNodeType_Task operation */
+  public static final String DEFINE_NEW_NODE_TYPE_TASK = "defineNewNodeType_Task";
+  //
+  /** the defineNewSimpleNode_Task operation */
+  public static final String DEFINE_NEW_SIMPLE_NODE_TASK = "defineNewSimpleNode_Task";
+  //
+  /** the defineNewRoleType_Task operation */
+  public static final String DEFINE_NEW_ROLE_TYPE_TASK = "defineNewRoleType_Task";
+  //
+  /** the defineNewRoleType_Task operation */
+  public static final String DEFINE_NEW_SKILL_CLASS_TASK = "defineNewSkillClass_Task";
+  //
+  /** the describe nodes_Task operation */
+  public static final String DESCRIBE_NODES_TASK = "describe nodes_Task";
+  //
+  /** the directNextUtteranceBackToSender_Task operation */
+  public static final String DIRECT_NEXT_UTTERANCE_BACK_TO_SENDER_TASK = "directNextUtteranceBackToSender_Task";
+  /** the senderSkill parameter */
+  public static final String SENDER_SKILL = "senderSkill";
+  //
+  /** the generate_Task operation */
+  public static final String GENERATE_FROM_CONSTITUENTS_TASK = "generateFromConstitutents_Task";
+  /** the rootSemanticConstituentNode user parameter of the generate_Task */
+  public static final String GENERATE_FROM_CONSTITUENTS_TASK_ROOT_SEMANTIC_CONSTITUENT_NODE = "generateFromConstitutents_Task_rootSemanticConstituentNode";
+  //
+  /** the greeting_Task operation */
+  public static final String GREETING_TASK = "greeting_Task";
+  //
+  /** the interpret fact acquisition script_Task operation */
+  public static final String INTERPRET_FACT_ACQUISITION_SCRIPT_TASK = "interpret fact acquisition script_Task";
+  /** the script name */
+  public static final String INTERPRET_FACT_ACQUISITION_SCRIPT_TASK_NAME = "interpret fact acquisition script_Task_name";
+  //
+  /** the learn faces_Task operation */
+  public static final String LEARN_FACES_TASK = "learn faces_Task";
+  //
+  /** the listNodeTypes_Task operation */
+  public static final String LIST_NODE_TYPES_TASK = "listNodeTypes_Task";
+  //
+  /** the listRoleTypes_Task operation */
+  public static final String LIST_ROLE_TYPES_TASK = "listRoleTypes_Task";
+  //
+  /** the logOperation_Task operation */
+  public static final String LOG_OPERATION_TASK = "logOperation_Task";
+  /** logged operation message parameter */
+  public static final String LOG_OPERATION_TASK_LOGGED_OPERATION = "logOperation_Task_loggedOperation";
+  //
+  /** the logUserWord_Task operation */
+  public static final String LOG_USER_WORD_TASK = "logUserWord_Task";
+  /** the logUserWord_Task_word parameter */
+  public static final String LOG_USER_WORD_SKILL_WORD = "logUserWord_Skill_word";
+  //
+  /** the registerSensedUtterance_Task operation */
+  public static final String REGISTER_SENSED_UTTERANCE_PROCESSOR_TASK = "registerSensedUtterance_Task";
+  /** understoodUtteranceTemplate message parameter */
+  public static final String REGISTER_SENSED_UTTERANCE_PROCESSOR_TASK_UNDERSTOOD_UTTERANCE_TEMPLATE = "registerSensedUtterance_Task_understoodUtteranceTemplate";
+  //
+  /** the removeRoleType_Task operation */
+  public static final String REMOVE_ROLE_TYPE_TASK = "removeRoleType_Task";
+  //
+  //
+  /** the removeRoleType_Task operation */
+  public static final String REMOVE_SKILL_CLASS_TASK = "removeSkillClass_Task";
+  //
+  /** the sendGreetingToUser_Task operation */
+  public static final String SEND_GREETING_TO_USER_TASK = "sendGreetingToUser_Task";
+  //
+  /** the sendIDoNotUnderstandThatToUser_Task operation */
+  public static final String SEND_DO_NOT_UNDERSTAND_TO_USER_TASK = "sendIDoNotUnderstandThatToUser_Task";
+  //
+  /** the sendInterjectionToUser_Task operation */
+  public static final String SEND_INTERJECTION_TO_USER_TASK = "sendInterjectionToUser_Task";
+  /** the statements parameter of the sendInterjectionToUser_Task */
+  public static final String SEND_INTERJECTION_TO_USER_TASK_STATEMENTS = "sendInterjectionToUser_Task_statements";
+  //
+  /** the sendOKToUser_Task operation */
+  public static final String SEND_OK_TO_USER_TASK = "sendOKToUser_Task";
+  //
+  /** the sendSpeechActToUser_Task operation */
+  public static final String SEND_SPEECH_ACT_TO_USER_TASK = "sendSpeechActToUser_Task";
+  //
+  /** the sendTextToUser_Task operation */
+  public static final String SEND_TEXT_TO_USER_TASK = "sendTextToUser_Task";
+  //
+  /** the set logging level operation */
+  public static final String SET_LOGGING_LEVEL = "set_logging_level_Task";
+  //
+  /** the shutdown node runtime operation */
+  public static final String SHUTDOWN_NODE_RUNTIME = "shutdown_node_runtime_Task";
+  //
+  /** the take_the_dialog_initiative_Task operation */
+  public static final String TAKE_THE_DIALOG_INITIATIVE_TASK = "take_the_dialog_initiative_Task";
+  //
+  /** the unlogOperation_Task operation */
+  public static final String UNLOG_OPERATION_TASK = "unlogOperation_Task";
+  /** unlogged operation message parameter */
+  public static final String UNLOG_OPERATION_TASK_UNLOGGED_OPERATION = "unlogOperation_Task_unloggedOperation";
+  //
+  /** the verifyNodesRolesAndSkills_Task operation */
+  public static final String VERIFY_NODES_ROLES_AND_SKILLS_TASK = "verifyNodesRolesAndSkills_Task";
+  //
+  /** visuallyRecognizeUser_Task operation */
+  public static final String VISUALLY_RECOGNIZE_USER_TASK = "visuallyRecognizeUser_Task";
+  //
+  /** the want_the_dialog_initiative_Task operation */
+  public static final String WANT_THE_DIALOG_INITIATIVE_TASK = "want_the_dialog_initiative_Task";
+  //
+  /** the writeFormFillTextToUser_Task operation */
+  public static final String WRITE_FORM_FILL_TEXT_TO_USER_TASK = "writeFormFillTextToUser_Task";
+  /** the text parameter of the the writeFormFillTextToUser_Task */
+  public static final String WRITE_FORM_FILL_TEXT_TO_USER_TASK_TEXT = "writeFormFillTextToUser_Task_text";
+  //
+  /** the writeSpokenTextToUser_Task operation */
+  public static final String WRITE_SPOKEN_TEXT_TO_USER_TASK = "writeSpokenTextToUser_Task";
+  /** the text parameter of the the writeSpokenTextToUser_Task */
+  public static final String WRITE_SPOKEN_TEXT_TO_USER_TASK_TEXT = "writeSpokenTextToUser_Task_text";
+  //
+  /** the writeWordToUser_Task operation */
+  public static final String WRITE_WORD_TO_USER_TASK = "writeWordToUser_Task";
+  /** the word parameter of the the writeWordToUser_Task */
+  public static final String WRITE_WORD_TO_USER_TASK_WORD = "writeWordToUser_Task_word";
+  //
+  //
+  // information messages - end with _Info
+  //
+  /** the keep-alive operation */
+  public static final String KEEP_ALIVE_INFO = "keepAlive_Info";
+  //
+  /** the messageNotUnderstood_Info operation */
+  public static final String MESSAGE_NOT_UNDERSTOOD_INFO = "messageNotUnderstood_Info";
+  //
+  /** the returnFromConverseYesNoQueryWithUser_Info operation */
+  public static final String RETURN_FROM_CONVERSE_YES_NO_QUERY_WITH_USER_INFO = "returnFromConverseYesNoQueryWithUser_Info";
+  public static final String RETURN_FROM_CONVERSE_YES_NO_QUERY_WITH_USER_INFO_RESPONSE = "returnFromConverseYesNoQueryWithUser_Info_response";
+
+  //
+  // shared message parameters
+  //
+  /** the AHCS originalMessage parameter */
+  public static final String AHCS_ORIGINAL_MESSAGE = "AHCS originalMessage";
+  /** the message parameter naming the session value */
+  public static final String SESSION = "AHCS session";
+  /** the message parameter for the child role ID */
+  public static final String MSG_PARM_CHILD_ROLE_ID = "child role id";
+  /** the message parameter for class name */
+  public static final String MSG_PARM_CLASS_NAME = "class name";
+  /** the message parameter for conversation ID */
+  public static final String MSG_PARM_CONVERSATION_ID = "conversationId";
+  /** the formFillText */
+  public static final String MSG_PARM_FORM_FILL_TEXT = "formFillText";
+  /** the message parameter for image */
+  public static final String MSG_PARM_IMAGE = "image";
+  /** the message parameter for logging level */
+  public static final String MSG_PARM_LOGGING_LEVEL = "logging level";
+  /** the message parameter for the node nickname */
+  public static final String MSG_PARM_NODE_NICKNAME = "node nickname";
+  /** the message parameter for the node type name */
+  public static final String MSG_PARM_NODE_TYPE_NAME = "node type name";
+  /** the message parameter for the node type name */
+  public static final String MSG_PARM_OPERATION = "operation";
+  /** the message parameter for the parent role ID */
+  public static final String MSG_PARM_PARENT_ROLE_ID = "parent role id";
+  /** the message parameter for the recipient role id */
+  public static final String MSG_PARM_RECIPIENT_ROLE_ID = "recipient role id";
+  /** the message parameter for the role type name */
+  public static final String MSG_PARM_ROLE_TYPE_NAME = "role type name";
+  /** the message parameter for the skill class name */
+  public static final String MSG_PARM_SKILL_CLASS_NAME = "skill class name";
+  /** the spokenText parameter */
+  public static final String MSG_PARM_SPOKEN_TEXT = "spokenText";
+  /** the registered user parameter */
+  public static final String MSG_PARM_REGISTERED_USER = "registeredUser";
+  /** the message parameter for the role id */
+  public static final String MSG_PARM_ROLE_ID = "role id";
+  /** the message parameter for service */
+  public static final String MSG_PARM_SERVICE = "service";
+  /** the text parameter */
+  public static final String MSG_PARM_TEXT = "text";
+  //
+  // the Albus Hierarchical Control System Levels
+  //
+  /** the 2 years (24 months) granularity level */
+  public static final URI ALBUS_HCS_2_YEAR_GRANULARITY_LEVEL = new URIImpl(Constants.TEXAI_NAMESPACE + "AlbusHCS2YearGranularityLevel");
+  /** the 3 months (91.31 days) granularity level */
+  public static final URI ALBUS_HCS_3_MONTH_GRANULARITY_LEVEL = new URIImpl(Constants.TEXAI_NAMESPACE + "AlbusHCS3MonthGranularityLevel");
+  /** the 10 days granularity level */
+  public static final URI ALBUS_HCS_10_DAY_GRANULARITY_LEVEL = new URIImpl(Constants.TEXAI_NAMESPACE + "AlbusHCS10DayGranularityLevel");
+  /** the 1 day (86,400 seconds) granularity level */
+  public static final URI ALBUS_HCS_1_DAY_GRANULARITY_LEVEL = new URIImpl(Constants.TEXAI_NAMESPACE + "AlbusHCS1DayGranularityLevel");
+  /** the 10,000 seconds  (2.78 hours) granularity level */
+  public static final URI ALBUS_HCS_10000_SECOND_GRANULARITY_LEVEL = new URIImpl(Constants.TEXAI_NAMESPACE + "AlbusHCS10000SecondGranularityLevel");
+  /** the 1000 seconds (16.67 minutes) granularity level */
+  public static final URI ALBUS_HCS_1000_SECOND_GRANULARITY_LEVEL = new URIImpl(Constants.TEXAI_NAMESPACE + "AlbusHCS1000SecondGranularityLevel");
+  /** the 100 seconds  (1.67 minutes) granularity level */
+  public static final URI ALBUS_HCS_100_SECOND_GRANULARITY_LEVEL = new URIImpl(Constants.TEXAI_NAMESPACE + "AlbusHCS100SecondGranularityLevel");
+  /** the 10 seconds granularity level */
+  public static final URI ALBUS_HCS_10_SECOND_GRANULARITY_LEVEL = new URIImpl(Constants.TEXAI_NAMESPACE + "AlbusHCS10SecondGranularityLevel");
+  /** the 1 second granularity level */
+  public static final URI ALBUS_HCS_1_SECOND_GRANULARITY_LEVEL = new URIImpl(Constants.TEXAI_NAMESPACE + "AlbusHCS1SecondGranularityLevel");
+  /** 100 milliseconds granularity level */
+  public static final URI ALBUS_HCS_100_MILLISECOND_GRANULARITY_LEVEL = new URIImpl(Constants.TEXAI_NAMESPACE + "AlbusHCS100MillisecondGranularityLevel");
+  /** the 10 milliseconds granularity level */
+  public static final URI ALBUS_HCS_10_MILLISECOND_GRANULARITY_LEVEL = new URIImpl(Constants.TEXAI_NAMESPACE + "AlbusHCS10MillisecondGranularityLevel");
+  /** the 1 millisecond granularity level */
+  public static final URI ALBUS_HCS_1_MILLISECOND_GRANULARITY_LEVEL = new URIImpl(Constants.TEXAI_NAMESPACE + "AlbusHCS1MillisecondGranularityLevel");
+  /** the 100 microseconds granularity level */
+  public static final URI ALBUS_HCS_100_MICROSECOND_GRANULARITY_LEVEL = new URIImpl(Constants.TEXAI_NAMESPACE + "AlbusHCS100MicrosecondGranularityLevel");
+  /** the 10 microseconds granularity level */
+  public static final URI ALBUS_HCS_10_MICROSECOND_GRANULARITY_LEVEL = new URIImpl(Constants.TEXAI_NAMESPACE + "AlbusHCS10MicroSecondGranularityLevel");
+  /** the 1 microsecond granularity level */
+  public static final URI ALBUS_HCS_1_MICROSECOND_GRANULARITY_LEVEL = new URIImpl(Constants.TEXAI_NAMESPACE + "AlbusHCS1MicrosecondGranularityLevel");
+  //
+  // node types
+  //
+  /** the dialog session node type */
+  public static final String DIALOG_SESSION_NODE_TYPE = "DialogSessionNodeType";
+  /** the face detection node type */
+  public static final String FACE_DETECTION_NODE_TYPE = "FaceDetectionNodeType";
+  /** the face recognition node type */
+  public static final String FACE_RECOGNITION_NODE_TYPE = "FaceRecognitionNodeType";
+  /** the governance management node type */
+  public static final String GOVERNANCE_MANAGEMENT_NODE_TYPE = "GovernanceManagementNodeType";
+  /** the JVM logger management node type */
+  public static final String JVM_LOGGER_MANAGEMENT_NODE_TYPE = "JVMLoggerManagementNodeType";
+  /** the knowledge acquisition management node type */
+  public static final String KNOWLEDGE_ACQUISITION_MANAGEMENT_NODE_TYPE = "KnowledgeAcquisitionManagementNodeType";
+  /** the life cycle management node type */
+  public static final String LIFE_CYCLE_MANAGEMENT_NODE_TYPE = "LifeCycleManagementNodeType";
+  /** the linguistic knowledge acquisition effector node type */
+  public static final String LINGUISTIC_KNOWLEDGE_ACQUISITION_EFFECTOR_NODE_TYPE = "LinguisticKnowledgeAcquisitionEffectorNodeType";
+  /** the logger management node type */
+  public static final String LOGGER_MANAGEMENT_NODE_TYPE = "LoggerManagementNodeType";
+  /** the Netty web chat session node type */
+  public static final String NETTY_WEB_CHAT_SESSION_NODE_TYPE = "NettyWebChatSessionNodeType";
+  /** the test chat session node type */
+  public static final String TEST_CHAT_SESSION_NODE_TYPE = "TestChatSessionNodeType";
+  /** the top friendship node type */
+  public static final String TOP_FRIENDSHIP_NODE_TYPE = "TopFriendshipNodeType";
+  /** the universal node type */
+  public static final String UNIVERSAL_NODE_TYPE = "UniversalNodeType";
+  /** the user communication node type */
+  public static final String USER_COMMUNICATION_NODE_TYPE = "UserCommunicationNodeType";
+  //
+  // role types
+  //
+  /** the bootstrap role type */
+  public static final String BOOTSTRAP_ROLE_TYPE = "BootstrapRoleType";
+  /** the dialog session role type */
+  public static final String DIALOG_SESSION_ROLE_TYPE = "DialogSessionRoleType";
+  /** the face detection role type */
+  public static final String FACE_DETECTION_ROLE_TYPE = "FaceDetectionRoleType";
+  /** the face recognition role type */
+  public static final String FACE_RECOGNITION_ROLE_TYPE = "FaceRecognitionRoleType";
+  /** the governance role type */
+  public static final String GOVERNANCE_ROLE_TYPE = "GovernanceRoleType";
+  /** the governance management role type */
+  public static final String GOVERNANCE_MANAGEMENT_ROLE_TYPE = "GovernanceManagementRoleType";
+  /** the heartbeat role type */
+  public static final String HEARTBEAT_ROLE_TYPE = "HeartbeatRoleType";
+  /** the JVM logger management role type */
+  public static final String JVM_LOGGER_MANAGEMENT_ROLE_TYPE = "JVMLoggerManagementRoleType";
+  /** the knowledge acquisition management role type */
+  public static final String KNOWLEDGE_ACQUISITION_MANAGEMENT_ROLE_TYPE = "KnowledgeAcquisitionManagementRoleType";
+  /** the linguistic knowledge acquisition effector role type */
+  public static final String LINGUISTIC_KNOWLEDGE_ACQUISITION_EFFECTOR_ROLE_TYPE = "LinguisticKnowledgeAcquisitionEffectorRoleType";
+  /** the life cycle management role type */
+  public static final String LIFE_CYCLE_MANAGEMENT_ROLE_TYPE = "LifeCycleManagementRoleType";
+  /** the logger management role type */
+  public static final String LOGGER_MANAGEMENT_ROLE_TYPE = "LoggerManagementRoleType";
+  /** the Netty web chat session role type */
+  public static final String NETTY_WEB_CHAT_SESSION_ROLE_TYPE = "NettyWebChatSessionRoleType";
+  /** the node-life-cycle role type */
+  public static final String NODE_LIFE_CYCLE_ROLE_TYPE = "NodeLifeCycleRoleType";
+  /** the node logger role type */
+  public static final String NODE_LOGGER_ROLE_TYPE = "NodeLoggerRoleType";
+  /** the test chat session role type */
+  public static final String TEST_CHAT_SESSION_ROLE_TYPE = "TestChatSessionRoleType";
+  /** the top friendship role type */
+  public static final String TOP_FRIENDSHIP_ROLE_TYPE = "TopFriendshipRoleType";
+  /** the user communication role type */
+  public static final String USER_COMMUNICATION_ROLE_TYPE = "UserCommunicationRoleType";
+  //
+  // node nicknames
+  //
+  /** the the user communication node nickname */
+  public static final String NODE_NICKNAME_COMMUNICATOR = "Communicator";
+  /** the the dialog session node nickname */
+  public static final String NODE_NICKNAME_DIALOGER = "Dialoger";
+  /** the face detector node nickname */
+  public static final String NODE_NICKNAME_FACE_DETECTOR = "FaceDetector";
+  /** the face recognizer node nickname */
+  public static final String NODE_NICKNAME_FACE_RECOGNIZER = "FaceRecognizer";
+  /** the meta fact acquisition node nickname */
+  public static final String NODE_NICKNAME_FACT_SCRIPTER = "FactScripter";
+  /** the governance management node nickname */
+  public static final String NODE_NICKNAME_GOVERNOR = "Governor";
+  /** the life cycle management node nickname */
+  public static final String NODE_NICKNAME_LIFER = "Lifer";
+  /** the JVM logger management node nickname */
+  public static final String NODE_NICKNAME_LOGGER = "Logger";
+  /** the the knowledge acquisition management node nickname */
+  public static final String NODE_NICKNAME_TOP_KA = "TopKA";
+  /** the logger management node nickname */
+  public static final String NODE_NICKNAME_TOP_LOGGER = "TopLogger";
+  /** the top friendship node nickname */
+  public static final String NODE_NICKNAME_TOPPER = "Topper";
+  /** the Netty web chat session node nickname */
+  public static final String NODE_NICKNAME_WEB_CHATTER = "WebChatter";
+
+  //
+  // node or role state variables
+  //
+  /** the chat session role id */
+  public static final String VAR_CHAT_SESSION_ROLE_ID = "chatSessionRoleId";
+  /** the chat session service */
+  public static final String VAR_CHAT_SESSION_SERVICE = "chatSessionService";
+  /** the conversation skill dictionary */
+  public static final String CONVERSATION_SKILL_DICTIONARY = "conversationSkillDictionary";
+  /** the is-unit-test */
+  public static final String VAR_IS_UNIT_TEST = "isUnitTest";
+  //
+  // Miscellaneous
+  //
+  /** the predicate that relates the role type with the role granularity level */
+  public static final URI ALBUS_HCS_GRANULARITY_LEVEL = new URIImpl(Constants.TEXAI_NAMESPACE + "albusHCSGranularityLevel");
+  /** the texai:ahcsRoleType_typeName term */
+  public static final URI AHCS_ROLE_TYPE_TYPE_NAME_TERM = new URIImpl(Constants.TEXAI_NAMESPACE + "ahcsRoleType_typeName");
+  /** the texai:ahcsNodeType_typeName term */
+  public static final URI AHCS_NODE_TYPE_TYPE_NAME_TERM = new URIImpl(Constants.TEXAI_NAMESPACE + "ahcsNodeType_typeName");
+  /** the texai:skillClass_skillClassName term */
+  public static final URI SKILL_CLASS_SKILL_CLASS_NAME_TERM = new URIImpl(Constants.TEXAI_NAMESPACE + "skillClass_skillClassName");
+}

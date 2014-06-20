@@ -30,6 +30,7 @@
   </developers>
 
   <modules>
+    <module>AlbusHCNSupport</module>
     <module>BitTorrentSupport</module>
     <module>RDFEntityManager</module>
     <module>Utilities</module>
