@@ -41,6 +41,18 @@ public class StringUtilsTest {
   }
 
   /**
+   * Test of reverseCommaDelimitedString method, of class StringUtils.
+   */
+  @Test
+  public void testReverseCommaDelimitedString() {
+    LOGGER.info("reverseCommaDelimitedString");
+    String result = StringUtils.reverseCommaDelimitedString("a, b, c");
+    assertEquals(result, "c, b, a");
+    result = StringUtils.reverseCommaDelimitedString("UID=2847e3a8-c270-4848-a947-aeea5aa2f8b8, DC=IntermediateCertificate, CN=texai.org");
+    assertEquals(result, "CN=texai.org, DC=IntermediateCertificate, UID=2847e3a8-c270-4848-a947-aeea5aa2f8b8");
+  }
+
+  /**
    * Test of toSortedStrings method, of class StringUtils.
    */
   @Test

@@ -157,6 +157,42 @@ public final class StringUtils {
     return words;
   }
 
+  /** Reverses a string which consists of comma-separated items.
+   *  "a, b, c" --> "c, b, a"
+   *
+   * @param string the given string
+   * @return the string with the comma-separated items reversed
+   */
+  public static String reverseCommaDelimitedString(final String string) {
+    final List<String> items = new ArrayList<>();
+    final int string_len = string.length();
+    int index = 0;
+    for (int i = 0; i < string_len; i++) {
+      final char ch = string.charAt(i);
+      if (ch == ',') {
+        if (i > index) {
+          items.add(string.substring(index, i).trim());
+        }
+        index = i + 1;
+      }
+    }
+    if (index < string_len) {
+      items.add(string.substring(index).trim());
+    }
+
+    final StringBuilder stringBuilder = new StringBuilder();
+    boolean isFirst = true;
+    for (int i = items.size() - 1; i >= 0; i--) {
+      if (isFirst) {
+        isFirst = false;
+      } else {
+        stringBuilder.append(", ");
+      }
+      stringBuilder.append(items.get(i));
+    }
+    return stringBuilder.toString();
+  }
+
   /** Splits the given string on spaces and certain embedded HTML tags.
    *
    * @param string the given string
