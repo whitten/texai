@@ -30,6 +30,7 @@
   </developers>
 
   <modules>
+    <module>BitTorrentSupport</module>
     <module>RDFEntityManager</module>
     <module>Utilities</module>
     <module>X509Security</module>
