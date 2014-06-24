@@ -121,6 +121,8 @@ public class X509UtilsTest {
     } catch (KeyStoreException ex) {
       fail(ex.getMessage());
     }
+
+    X509Utils.logAliases(truststore);
   }
 
   /**

@@ -1916,7 +1916,6 @@ public final class X509Utils {
       }
       assert aliasCnt > 0;
 
-
     } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | NoSuchProviderException ex) {
       throw new TexaiException(ex);
     } finally {
@@ -1931,4 +1930,20 @@ public final class X509Utils {
     }
   }
 
+  /** Logs the aliases contained in the given keystore.
+
+  @param keyStore the given keystore
+  */
+  public static void logAliases(final KeyStore keyStore) {
+    Enumeration<String> aliases;
+    try {
+      aliases = keyStore.aliases();
+    } catch (KeyStoreException ex) {
+      throw new TexaiException(ex);
+    }
+    LOGGER.info("aliases...");
+    while (aliases.hasMoreElements()) {
+      LOGGER.info("  " + aliases.nextElement());
+    }
+  }
 }
