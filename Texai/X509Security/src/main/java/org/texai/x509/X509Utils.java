@@ -107,7 +107,7 @@ import sun.security.x509.X509CertImpl;
  * (5) re-run the unit test correcting for the new root UID
  * (6) likewise correct KeyStoreTestUtilsTest, X509SecurityInfoTest and TexaiSSLContextFactoryTest
  * (7) ensure that Git updates the new keystore files when committing
- * (7) copy truststore files to the Network data directory and to the X509CertificateServer data directory
+ * (7) copy truststore.uber and truststore.jks files to the Network data directory and to the X509CertificateServer data directory
  *
  * @author reed
  */
