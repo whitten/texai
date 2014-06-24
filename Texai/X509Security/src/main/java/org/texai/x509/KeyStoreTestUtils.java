@@ -52,10 +52,6 @@ public final class KeyStoreTestUtils {
   private static final char[] SERVER_KEYSTORE_PASSWORD = "server-keystore-password".toCharArray();
   /** the client keystore password */
   private static final char[] CLIENT_KEYSTORE_PASSWORD = "client-keystore-password".toCharArray();
-  /** the server keystore */
-  private static KeyStore serverKeyStore;
-  /** the client keystore */
-  private static KeyStore clientKeyStore;
 
   /** Prevents the instantiation of this utility class. */
   private KeyStoreTestUtils() {
@@ -88,7 +84,7 @@ public final class KeyStoreTestUtils {
       }
       LOGGER.info("creating test-server-keystore.uber");
       assert X509Utils.isJCEUnlimitedStrengthPolicy();
-      serverKeyStore = X509Utils.findOrCreateKeyStore(filePath, SERVER_KEYSTORE_PASSWORD);
+      KeyStore serverKeyStore = X509Utils.findOrCreateKeyStore(filePath, SERVER_KEYSTORE_PASSWORD);
       serverKeyStore.setKeyEntry(
               X509Utils.ENTRY_ALIAS,
               serverKeyPair.getPrivate(),
@@ -142,7 +138,7 @@ public final class KeyStoreTestUtils {
       }
       LOGGER.info("creating test-client-keystore.uber");
       assert X509Utils.isJCEUnlimitedStrengthPolicy();
-      clientKeyStore = X509Utils.findOrCreateKeyStore(filePath, CLIENT_KEYSTORE_PASSWORD);
+      KeyStore clientKeyStore = X509Utils.findOrCreateKeyStore(filePath, CLIENT_KEYSTORE_PASSWORD);
       clientKeyStore.setKeyEntry(
               X509Utils.ENTRY_ALIAS,
               clientKeyPair.getPrivate(),
@@ -218,27 +214,9 @@ public final class KeyStoreTestUtils {
   public static KeyStore getClientKeyStore() {
     String filePath;
     if (X509Utils.isJCEUnlimitedStrengthPolicy()) {
-      filePath = "../X509Security/data/test-client-keystore.uber";
-      File file = new File(filePath);
-      if (!file.exists()) {
-        filePath = "../Texai/X509Security/data/test-client-keystore.uber";
-      }
-      file = new File(filePath);
-      if (!file.exists()) {
-        // for other applications
-        filePath = "data/test-client-keystore.uber";
-      }
+      filePath = "data/test-client-keystore.uber";
     } else {
-      filePath = "../X509Security/data/test-client-keystore.jceks";
-      File file = new File(filePath);
-      if (!file.exists()) {
-        filePath = "../Texai/X509Security/data/test-client-keystore.jceks";
-      }
-      file = new File(filePath);
-      if (!file.exists()) {
-        // for other applications
-        filePath = "data/test-client-keystore.jceks";
-      }
+      filePath = "data/test-client-keystore.jceks";
     }
     LOGGER.info("test-client-keystore path: " + filePath);
     try {
