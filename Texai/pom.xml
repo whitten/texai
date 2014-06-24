@@ -34,6 +34,7 @@
     <module>BitTorrentSupport</module>
     <module>Network</module>
     <module>RDFEntityManager</module>
+    <module>UPNPLib</module>
     <module>Utilities</module>
     <module>X509Security</module>
   </modules>
