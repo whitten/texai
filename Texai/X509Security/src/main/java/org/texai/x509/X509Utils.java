@@ -108,7 +108,7 @@ import sun.security.x509.X509CertImpl;
  * (6) likewise correct KeyStoreTestUtilsTest, X509SecurityInfoTest and TexaiSSLContextFactoryTest
  * (7) ensure that Git updates the new keystore files when committing
  * (7) copy truststore.uber and truststore.jks files to the Network, AlbusHCNSupport and X509CertificateServer
- *     data directories
+ *     (development and production) data directories
  *
  * @author reed
  */
