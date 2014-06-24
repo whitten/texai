@@ -126,6 +126,7 @@ public final class PortUnification2Test {
     // configure the server channel pipeline factory
     final AbstractHTTPRequestHandlerFactory httpRequestHandlerFactory = new MockHTTPRequestHandlerFactory();
     final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getServerX509SecurityInfo();
+    LOGGER.info("server x509SecurityInfo...\n" + x509SecurityInfo);
 
     final Executor serverExecutor = Executors.newCachedThreadPool();
     final ServerBootstrap serverBootstrap = ConnectionUtils.createPortUnificationServer(
@@ -137,21 +138,20 @@ public final class PortUnification2Test {
             serverExecutor, // bossExecutor
             serverExecutor); // workerExecutor
 
-
     LOGGER.info("testing clients");
     // test clients
     webSocketClient();
-    httpClient();
-    nettyWebSocketClient();
-    httpClient();
-    webSocketClient();
-    webSocketClient();
-    nettyWebSocketClient();
-    nettyWebSocketClient();
-    httpClient();
-    httpClient();
-    nettyWebSocketClient();
-    httpClient();
+//    httpClient();
+//    nettyWebSocketClient();
+//    httpClient();
+//    webSocketClient();
+//    webSocketClient();
+//    nettyWebSocketClient();
+//    nettyWebSocketClient();
+//    httpClient();
+//    httpClient();
+//    nettyWebSocketClient();
+//    httpClient();
 
     // shut down executor threads to exit
 //    LOGGER.info("releasing server resources");
@@ -258,6 +258,7 @@ public final class PortUnification2Test {
             webSocketClientHandshaker,
             clientResume_lock);
     final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
+    LOGGER.info("Netty websocket client x509SecurityInfo...\n" + x509SecurityInfo);
     final ChannelPipeline channelPipeline = WebSocketClientPipelineFactory.getPipeline(
             webSocketResponseHandler,
             x509SecurityInfo);
@@ -325,16 +326,20 @@ public final class PortUnification2Test {
   private void webSocketClient() {
 
     // configure websocket client
-
     LOGGER.info("configuring websocket client");
+    // production and test relative file location
     System.setProperty("javax.net.ssl.trustStore", "data/truststore.jks");
     System.setProperty("javax.net.ssl.trustStorePassword", new String(X509Utils.TRUSTSTORE_PASSWORD));
     try {
       final KeyStore truststore = X509Utils.findOrCreateJKSKeyStore("data/truststore.jks", X509Utils.TRUSTSTORE_PASSWORD);
       final Enumeration<String> aliases = truststore.aliases();
+      int aliasCnt = 0;
       while (aliases.hasMoreElements()) {
         LOGGER.info("alias: " + aliases.nextElement());
+        aliasCnt++;
       }
+      LOGGER.info("******************** assert fails");
+      assertTrue(aliasCnt > 0);
     } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | NoSuchProviderException ex) {
       fail(ex.getMessage());
     }
@@ -372,7 +377,6 @@ public final class PortUnification2Test {
     // Ping
     LOGGER.info("web socket client sending ping");
     webSocket.ping("my ping");
-
 
     // wait three seconds for the messages to process
     try {

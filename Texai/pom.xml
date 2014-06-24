@@ -32,6 +32,7 @@
   <modules>
     <module>AlbusHCNSupport</module>
     <module>BitTorrentSupport</module>
+    <module>Network</module>
     <module>RDFEntityManager</module>
     <module>Utilities</module>
     <module>X509Security</module>

@@ -131,6 +131,7 @@ public final class PortUnificationTest {
     final AbstractBitTorrentHandlerFactory bitTorrentHandlerFactory = new MockBitTorrentHandlerFactory();
     final AbstractHTTPRequestHandlerFactory httpRequestHandlerFactory = new MockHTTPRequestHandlerFactory();
     final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getServerX509SecurityInfo();
+    LOGGER.info("server x509SecurityInfo...\n" + x509SecurityInfo);
 
     final Executor serverExecutor = Executors.newCachedThreadPool();
     final ServerBootstrap serverBootstrap = ConnectionUtils.createPortUnificationServer(
@@ -328,6 +329,7 @@ public final class PortUnificationTest {
             webSocketClientHandshaker,
             clientResume_lock);
     final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
+    LOGGER.info("Netty websocket client x509SecurityInfo...\n" + x509SecurityInfo);
     final ChannelPipeline channelPipeline = WebSocketClientPipelineFactory.getPipeline(
             webSocketResponseHandler,
             x509SecurityInfo);
