@@ -37,6 +37,7 @@ import java.security.cert.X509Certificate;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.util.TexaiException;
+import static org.texai.x509.X509Utils.isTrustedDevelopmentSystem;
 
 /** Provides keystores and passwords for testing.
  *
@@ -74,13 +75,15 @@ public final class KeyStoreTestUtils {
               X509Utils.getRootPrivateKey(),
               X509Utils.getRootX509Certificate(), null);
 
-
       // proceed as though the JCE unlimited strength jurisdiction policy files are installed, which they will be on the
       // trusted development system.
       String filePath = "data/test-server-keystore.uber";
       File file = new File(filePath);
       if (file.exists()) {
         // do not overwrite it
+
+        //Postconditions
+        assert !isTrustedDevelopmentSystem() || X509Utils.isJCEUnlimitedStrengthPolicy() : "JCE unlimited strength policy must be in effect";
         return;
       }
       LOGGER.info("creating test-server-keystore.uber");
@@ -110,6 +113,9 @@ public final class KeyStoreTestUtils {
     } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | SignatureException | InvalidKeyException | IOException | KeyStoreException | CertificateException ex) {
       throw new TexaiException(ex);
     }
+
+    //Postconditions
+    assert !isTrustedDevelopmentSystem() || X509Utils.isJCEUnlimitedStrengthPolicy() : "JCE unlimited strength policy must be in effect";
   }
 
   /** Initializes the test client keystore on the trusted development system, from where it is copied into the distributed code. */
@@ -127,14 +133,12 @@ public final class KeyStoreTestUtils {
               X509Utils.getRootPrivateKey(),
               X509Utils.getRootX509Certificate(), null);
 
-
       // proceed as though the JCE unlimited strength jurisdiction policy files are installed, which they will be on the
       // trusted development system.
       String filePath = "data/test-client-keystore.uber";
       File file = new File(filePath);
       if (file.exists()) {
-        // do not overwrite it
-        return;
+        file.delete();
       }
       LOGGER.info("creating test-client-keystore.uber");
       assert X509Utils.isJCEUnlimitedStrengthPolicy();
@@ -145,6 +149,7 @@ public final class KeyStoreTestUtils {
               CLIENT_KEYSTORE_PASSWORD,
               new Certificate[]{clientX509Certificate, X509Utils.getRootX509Certificate()});
       clientKeyStore.store(new FileOutputStream(filePath), CLIENT_KEYSTORE_PASSWORD);
+      assert "UBER".equals(clientKeyStore.getType());
 
       // then proceed after disabling the JCE unlimited strength jurisdiction policy files indicator
       X509Utils.setIsJCEUnlimitedStrengthPolicy(false);
@@ -157,12 +162,16 @@ public final class KeyStoreTestUtils {
               CLIENT_KEYSTORE_PASSWORD,
               new Certificate[]{clientX509Certificate, X509Utils.getRootX509Certificate()});
       clientKeyStore.store(new FileOutputStream(filePath), CLIENT_KEYSTORE_PASSWORD);
+      assert "JCEKS".equals(clientKeyStore.getType());
       // restore the JCE unlimited strength jurisdiction policy files indicator
       X509Utils.setIsJCEUnlimitedStrengthPolicy(true);
 
     } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | SignatureException | InvalidKeyException | IOException | KeyStoreException | CertificateException ex) {
       throw new TexaiException(ex);
     }
+
+    //Postconditions
+    assert !isTrustedDevelopmentSystem() || X509Utils.isJCEUnlimitedStrengthPolicy() : "JCE unlimited strength policy must be in effect";
   }
 
   /** Gets the test server keystore.
@@ -231,11 +240,20 @@ public final class KeyStoreTestUtils {
         filePath = "data/test-client-keystore.jceks";
       }
     }
+    LOGGER.info("test-client-keystore path: " + filePath);
     try {
-      return X509Utils.findOrCreateKeyStore(filePath, CLIENT_KEYSTORE_PASSWORD);
+      final KeyStore clientKeyStore = X509Utils.findOrCreateKeyStore(filePath, CLIENT_KEYSTORE_PASSWORD);
+
+      //Postconditions
+      assert !filePath.endsWith("uber") || clientKeyStore.getType().equals("UBER") :
+              "keystore type is " + clientKeyStore.getType() + ", must be UBER";
+
+      return clientKeyStore;
+
     } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | NoSuchProviderException ex) {
       throw new TexaiException(ex);
     }
+
   }
 
   /** Gets the X509 security information for a test client.

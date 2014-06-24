@@ -107,6 +107,7 @@ import sun.security.x509.X509CertImpl;
  * (5) re-run the unit test correcting for the new root UID
  * (6) likewise correct KeyStoreTestUtilsTest, X509SecurityInfoTest and TexaiSSLContextFactoryTest
  * (7) ensure that Git updates the new keystore files when committing
+ * (7) copy truststore files to the Network data directory and to the X509CertificateServer data directory
  *
  * @author reed
  */
@@ -176,11 +177,11 @@ public final class X509Utils {
     77, -21, -100, 98, -95, 13, -56, -86, -60, -28, -94, -4, 93, 25, 19, -89, -38, 126, 80, -24, 20, -109, -19, 95,
     -42, -48, 23, -7, -36, 105, -33, 60, 3, -24, -62, 76, 89, 9, 7, -64, -123, 123, 22, 26, 96, -24, -40, 117, 118,
     126, 60, -118, -91, -61, 20, 105, -72, -3, 113, -35, 66, -36, 117, -45, -120, 31, -85
-};
+  };
   /** the root certificate */
   private static final X509Certificate ROOT_X509_CERTIFICATE;
   /** the truststore entry alias */
-  public static final String TRUSTSTORE_ENTRY_ALIAS = "Texai root certificate";
+  public static final String TRUSTSTORE_ENTRY_ALIAS = "texai root certificate";
   /** the truststore */
   private static KeyStore truststore;
   /** the truststore password */
@@ -195,6 +196,7 @@ public final class X509Utils {
   static {
     try {
       setIsJCEUnlimitedStrengthPolicy(Cipher.getMaxAllowedKeyLength("AES") == Integer.MAX_VALUE);
+      assert !isTrustedDevelopmentSystem() || X509Utils.isJCEUnlimitedStrengthPolicy() : "JCE unlimited strength policy must be in effect";
     } catch (NoSuchAlgorithmException ex) {
       throw new TexaiException(ex);
     }
@@ -345,6 +347,7 @@ public final class X509Utils {
    */
   public static synchronized void setIsJCEUnlimitedStrengthPolicy(boolean _isJCEUnlimitedStrenthPolicy) {
     isJCEUnlimitedStrenthPolicy = _isJCEUnlimitedStrenthPolicy;
+    LOGGER.debug("isJCEUnlimitedStrenthPolicy: " + isJCEUnlimitedStrenthPolicy);
   }
 
   /** Returns the maximum key length allowed by the ciphers on this JVM, which depends on whether the unlimited
@@ -433,43 +436,32 @@ public final class X509Utils {
    * @return the truststore
    */
   public static synchronized KeyStore getTruststore() {
-    if (truststore == null) {
-      LOGGER.info("reading truststore");
+    //Preconditions
+    assert (new File("data/truststore.uber")).exists() || (new File("data/truststore.jceks")).exists() :
+            "truststore file must exist";
+    assert !isTrustedDevelopmentSystem() || X509Utils.isJCEUnlimitedStrengthPolicy() : "JCE unlimited strength policy must be in effect";
 
-      String filePath;
+    String filePath = "";
+    if (truststore == null) {
+
       if (X509Utils.isJCEUnlimitedStrengthPolicy()) {
-        filePath = "../X509Security/data/truststore.uber";
+        filePath = "data/truststore.uber";
         File file = new File(filePath);
-        if (!file.exists()) {
-          filePath = "../Texai/X509Security/data/truststore.uber";
-        }
-        file = new File(filePath);
-        if (!file.exists()) {
-          // for MessageRouter & X.509 certificate server
-          filePath = "data/truststore.uber";
-        }
       } else {
-        filePath = "../X509Security/data/truststore.jceks";
-        File file = new File(filePath);
-        if (!file.exists()) {
-          filePath = "../Texai/X509Security/data/truststore.jceks";
-        }
-        file = new File(filePath);
-        if (!file.exists()) {
-          // for MessageRouter
-          filePath = "data/truststore.jceks";
-        }
+        filePath = "data/truststore.jceks";
       }
-      final File serverKeyStoreFile = new File(filePath);
-      assert serverKeyStoreFile.exists();
+      LOGGER.info("reading truststore from " + filePath);
       try {
         truststore = X509Utils.findOrCreateKeyStore(filePath, TRUSTSTORE_PASSWORD);
       } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | NoSuchProviderException ex) {
         throw new TexaiException(ex);
       }
     }
+
     //Postconditions
     assert truststore != null : "truststore must not be null";
+    assert X509Utils.BOUNCY_CASTLE_PROVIDER.equals(truststore.getProvider().getName()) : "truststore type must be " + BOUNCY_CASTLE_PROVIDER + ", but was " + truststore.getProvider().getName() + ", filePath: " + filePath;
+    assert !filePath.endsWith(".uber") || truststore.getType().equals("UBER") : "truststore type must be UBER, but was " + truststore.getType() + ", filePath: " + filePath;
 
     return truststore;
   }
@@ -948,6 +940,11 @@ public final class X509Utils {
         keyStore.store(keyStoreOutputStream, password);
       }
     }
+
+    //Postconditions
+    assert !filePath.endsWith(".uber") || keyStore.getType().equals("UBER") :
+            "keyStore type is " + keyStore.getType() + ", expected UBER, filePath: " + filePath;
+
     return keyStore;
   }
 
@@ -1602,6 +1599,9 @@ public final class X509Utils {
       LOGGER.error(StringUtils.getStackTraceAsString(ex));
       throw new TexaiException(ex);
     }
+
+    //Postconditions
+    assert !isTrustedDevelopmentSystem() || X509Utils.isJCEUnlimitedStrengthPolicy() : "JCE unlimited strength policy must be in effect";
   }
 
   /** Generates a self-signed certificate to use as a CA root certificate.
@@ -1629,8 +1629,8 @@ public final class X509Utils {
 
     final UUID rootUUID = UUID.randomUUID();
     // provide items to X500Principal in reverse order
-    final X500Principal rootX500Principal =
-            new X500Principal("UID=" + rootUUID + ", O=Texai Certification Authority, CN=texai.org");
+    final X500Principal rootX500Principal
+            = new X500Principal("UID=" + rootUUID + ", O=Texai Certification Authority, CN=texai.org");
     final X500Name subject = new X500Name(rootX500Principal.getName());
     final X509v3CertificateBuilder x509v3CertificateBuilder = new X509v3CertificateBuilder(
             new X500Name(rootX500Principal.getName()), // issuer,
@@ -1805,6 +1805,7 @@ public final class X509Utils {
 
       //Postconditions
       assert privateKey != null : "privateKey must not be null";
+      assert !isTrustedDevelopmentSystem() || X509Utils.isJCEUnlimitedStrengthPolicy() : "JCE unlimited strength policy must be in effect";
 
       return privateKey;
     } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | NoSuchProviderException | UnrecoverableKeyException ex) {
@@ -1824,55 +1825,110 @@ public final class X509Utils {
     // files are installed, which they will be on the trusted development system.
     assert isJCEUnlimitedStrengthPolicy();
     String filePath = "data/truststore.uber";
-    File truststoreFile = new File(filePath);
 
-//    if (truststoreFile.exists()) {
-//      // do not overwrite it
-//      return;
-//    }
     try {
       LOGGER.info("creating truststore.uber");
+      (new File(filePath)).delete();
       truststore = X509Utils.findOrCreateKeyStore(filePath, TRUSTSTORE_PASSWORD);
       truststore.setCertificateEntry(
               TRUSTSTORE_ENTRY_ALIAS,
               getRootX509Certificate());
-      truststore.store(new FileOutputStream(filePath), TRUSTSTORE_PASSWORD);
+      final FileOutputStream fileOutputStream = new FileOutputStream(filePath);
+      truststore.store(fileOutputStream, TRUSTSTORE_PASSWORD);
+      assert "UBER".equals(truststore.getType());
+      Enumeration<String> aliases = truststore.aliases();
+      int aliasCnt = 0;
+      while (aliases.hasMoreElements()) {
+        aliasCnt++;
+        aliases.nextElement();
+      }
+      assert aliasCnt > 0;
 
       // then proceed after disabling the JCE unlimited strength jurisdiction policy files indicator
       setIsJCEUnlimitedStrengthPolicy(false);
       filePath = "data/truststore.jceks";
+      (new File(filePath)).delete();
       LOGGER.info("creating truststore.jceks");
       truststore = X509Utils.findOrCreateKeyStore(filePath, TRUSTSTORE_PASSWORD);
       truststore.setCertificateEntry(
               TRUSTSTORE_ENTRY_ALIAS,
               getRootX509Certificate());
       truststore.store(new FileOutputStream(filePath), TRUSTSTORE_PASSWORD);
+      assert "JCEKS".equals(truststore.getType());
+      aliases = truststore.aliases();
+      aliasCnt = 0;
+      while (aliases.hasMoreElements()) {
+        aliasCnt++;
+        aliases.nextElement();
+      }
+      assert aliasCnt > 0;
+
+      filePath = "data/truststore.jks";
+      (new File(filePath)).delete();
+      LOGGER.info("creating truststore.jks");
+      truststore = X509Utils.findOrCreateJKSKeyStore(filePath, TRUSTSTORE_PASSWORD);
+      truststore.setCertificateEntry(
+              TRUSTSTORE_ENTRY_ALIAS,
+              getRootX509Certificate());
+      truststore.store(new FileOutputStream(filePath), TRUSTSTORE_PASSWORD);
+      assert "JKS".equals(truststore.getType());
+      aliases = truststore.aliases();
+      aliasCnt = 0;
+      while (aliases.hasMoreElements()) {
+        aliasCnt++;
+        aliases.nextElement();
+      }
+      assert aliasCnt > 0;
 
       filePath = "data/truststore.bks";
+      (new File(filePath)).delete();
       LOGGER.info("creating truststore.bks");
       truststore = X509Utils.findOrCreateBKSKeyStore(filePath, TRUSTSTORE_PASSWORD);
       truststore.setCertificateEntry(
               TRUSTSTORE_ENTRY_ALIAS,
               getRootX509Certificate());
       truststore.store(new FileOutputStream(filePath), TRUSTSTORE_PASSWORD);
-      // restore the JCE unlimited strength jurisdiction policy files indicator
-      setIsJCEUnlimitedStrengthPolicy(true);
+      assert "BKS".equals(truststore.getType());
+      aliases = truststore.aliases();
+      aliasCnt = 0;
+      while (aliases.hasMoreElements()) {
+        aliasCnt++;
+        aliases.nextElement();
+      }
+      assert aliasCnt > 0;
 
       // create the PKCS12 keystore from which the trusted certificate can be imported into a web browser
-      final String pkcs12FilePath = "data/truststore.p12";
-      final File pkcs12TruststoreFile = new File(pkcs12FilePath);
-      if (pkcs12TruststoreFile.exists()) {
-        // do not overwrite it
-        return;
-      }
+      filePath = "data/truststore.p12";
+      (new File(filePath)).delete();
       LOGGER.info("creating truststore.p12");
-      final KeyStore pkcs12Truststore = X509Utils.findOrCreatePKCS12KeyStore(pkcs12FilePath, TRUSTSTORE_PASSWORD);
-      pkcs12Truststore.setCertificateEntry(
+      truststore = X509Utils.findOrCreatePKCS12KeyStore(filePath, TRUSTSTORE_PASSWORD);
+      truststore.setCertificateEntry(
               TRUSTSTORE_ENTRY_ALIAS,
               getRootX509Certificate());
-      pkcs12Truststore.store(new FileOutputStream(pkcs12FilePath), TRUSTSTORE_PASSWORD);
+      truststore.store(new FileOutputStream(filePath), TRUSTSTORE_PASSWORD);
+      assert truststore != null;
+      assert "pkcs12".equals(truststore.getType());
+      aliases = truststore.aliases();
+      aliasCnt = 0;
+      while (aliases.hasMoreElements()) {
+        aliasCnt++;
+        aliases.nextElement();
+      }
+      assert aliasCnt > 0;
+
+
     } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | NoSuchProviderException ex) {
       throw new TexaiException(ex);
+    } finally {
+      // restore the JCE unlimited strength jurisdiction policy files indicator
+      setIsJCEUnlimitedStrengthPolicy(true);
+      // refresh the cached reference to the truststore
+      truststore = null;
+      getTruststore();
+
+      //Postconditions
+      assert !isTrustedDevelopmentSystem() || X509Utils.isJCEUnlimitedStrengthPolicy() : "JCE unlimited strength policy must be in effect";
     }
   }
+
 }
