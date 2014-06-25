@@ -1,0 +1,556 @@
+// Texai permissions
+grant codeBase "file:${user.home}/.m2/repository/cglib/cglib/2.2/cglib-2.2.jar" {
+  permission  java.lang.RuntimePermission "accessDeclaredMembers", "";
+  permission  java.lang.RuntimePermission "getProtectionDomain", "";
+  permission  java.lang.reflect.ReflectPermission "suppressAccessChecks", "";
+  permission  java.util.PropertyPermission "cglib.debugLocation", "read";
+  permission  java.util.PropertyPermission "org.openrdf.repository.debug", "read";
+};
+
+grant codeBase "file:${user.home}/.m2/repository/info/aduna/commons/aduna-commons-concurrent/2.5.0/aduna-commons-concurrent-2.5.0.jar" {
+  permission  java.util.PropertyPermission "info.aduna.concurrent.locks.trackLocks", "read";
+};
+
+grant codeBase "file:${user.home}/.m2/repository/info/aduna/commons/aduna-commons-io/2.7.0/aduna-commons-io-2.7.0.jar" {
+  permission  java.io.FilePermission "${user.home}/repositories/-", "read";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "write";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "read";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "write";
+};
+
+grant codeBase "file:${user.home}/.m2/repository/info/aduna/commons/aduna-commons-lang/2.7.0/aduna-commons-lang-2.7.0.jar" {
+  permission  java.io.FilePermission "${user.home}/.m2/repository/-", "read";
+};
+
+grant codeBase "file:${user.home}/.m2/repository/joda-time/joda-time/1.6/joda-time-1.6.jar" {
+  permission  java.io.FilePermission "${user.home}/.m2/repository/-", "read";
+  permission  java.io.FilePermission "${user.home}/jdk1.6.0_17/jre/lib/zi", "read";
+  permission  java.util.PropertyPermission "org.joda.time.DateTimeZone.NameProvider", "read";
+  permission  java.util.PropertyPermission "org.joda.time.DateTimeZone.Provider", "read";
+  permission  java.util.PropertyPermission "org.joda.time.tz.CachedDateTimeZone.size", "read";
+  permission  java.util.PropertyPermission "user.timezone", "read";
+};
+
+grant codeBase "file:${user.home}/.m2/repository/junit/junit/4.7/junit-4.7.jar" {
+  permission  java.io.FilePermission "../RDFEntityManager/data/repository.rcd", "read";
+  permission  java.io.FilePermission "./journals", "read";
+  permission  java.io.FilePermission "./journals/-", "delete";
+  permission  java.io.FilePermission "./journals/-", "read";
+  permission  java.io.FilePermission "./journals/-", "write";
+  permission  java.io.FilePermission "${user.home}/.m2/repository/-", "read";
+  permission  java.io.FilePermission "${user.home}/.netbeans/-", "write";
+  permission  java.io.FilePermission "${user.home}/jdk1.6.0_17/jre/lib/zi", "read";
+  permission  java.io.FilePermission "${user.home}/archiveRepositories/-", "delete";
+  permission  java.io.FilePermission "${user.home}/archiveRepositories/-", "read";
+  permission  java.io.FilePermission "${user.home}/archiveRepositories/-", "write";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "delete";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "read";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "write";
+  permission  java.io.FilePermission "${user.home}/svn/Texai/Dialog/target/classes/ehcache.xml", "read";
+  permission  java.io.FilePermission "${user.home}/svn/Texai/RDFEntityManager/target/classes/ehcache.xml", "read";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "delete";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "read";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "write";
+  permission  java.io.FilePermission "actr-models/commands/learn-common-nouns.lisp", "read";
+  permission  java.io.FilePermission "actr-models/commands/learn-proper-nouns.lisp", "read";
+  permission  java.io.FilePermission "data/bootstrap-dialog.fcg", "read";
+  permission  java.io.FilePermission "data/bootstrap-queries.xml", "read";
+  permission  java.io.FilePermission "data/selected-basic-constructions.fcg", "read";
+  permission  java.lang.RuntimePermission "accessClassInPackage.sun.util.logging.resources", "";
+  permission  java.lang.RuntimePermission "accessDeclaredMembers", "";
+  permission  java.lang.RuntimePermission "getenv.REPOSITORIES", "";
+  permission  java.lang.RuntimePermission "getenv.REPOSITORIES_TMPFS", "";
+  permission  java.lang.RuntimePermission "shutdownHooks", "";
+  permission  java.lang.reflect.ReflectPermission "suppressAccessChecks", "";
+  permission  java.net.SocketPermission "64.95.112.233:80", "connect,resolve";
+  permission  java.net.SocketPermission "64.95.112.236:80", "connect,resolve";
+  permission  java.net.SocketPermission "mccarthy", "resolve";
+  permission  java.net.SocketPermission "svn.terracotta.org", "resolve";
+  permission  java.net.SocketPermission "svn.terracotta.org:80", "connect,resolve";
+  permission  java.net.SocketPermission "www.terracotta.org", "resolve";
+  permission  java.net.SocketPermission "www.terracotta.org:80", "connect,resolve";
+  permission  java.util.PropertyPermission "cglib.debugLocation", "read";
+  permission  java.util.PropertyPermission "ehcache.disk.store.dir", "read";
+  permission  java.util.PropertyPermission "ehcache.update-check.url", "read";
+  permission  java.util.PropertyPermission "elementAttributeLimit", "read";
+  permission  java.util.PropertyPermission "entityExpansionLimit", "read";
+  permission  java.util.PropertyPermission "info.aduna.concurrent.locks.trackLocks", "read";
+  permission  java.util.PropertyPermission "java.io.tmpdir", "read";
+  permission  java.util.PropertyPermission "java.version", "read";
+  permission  java.util.PropertyPermission "java.vm.name", "read";
+  permission  java.util.PropertyPermission "line.separator", "read";
+  permission  java.util.PropertyPermission "maxOccurLimit", "read";
+  permission  java.util.PropertyPermission "net.sf.ehcache.disabled", "read";
+  permission  java.util.PropertyPermission "net.sf.ehcache.enableShutdownHook", "read";
+  permission  java.util.PropertyPermission "net.sf.ehcache.skipUpdateCheck", "read";
+  permission  java.util.PropertyPermission "net.sf.ehcache.use.classic.lru", "read";
+  permission  java.util.PropertyPermission "org.joda.time.DateTimeZone.NameProvider", "read";
+  permission  java.util.PropertyPermission "org.joda.time.DateTimeZone.Provider", "read";
+  permission  java.util.PropertyPermission "org.joda.time.tz.CachedDateTimeZone.size", "read";
+  permission  java.util.PropertyPermission "org.openrdf.repository.debug", "read";
+  permission  java.util.PropertyPermission "os.arch", "read";
+  permission  java.util.PropertyPermission "os.name", "read";
+  permission  java.util.PropertyPermission "tc.active", "read";
+  permission  java.util.PropertyPermission "user.dir", "read";
+  permission  java.util.PropertyPermission "user.home", "read";
+  permission  java.util.PropertyPermission "user.timezone", "read";
+};
+
+grant codeBase "file:${user.home}/.m2/repository/log4j/log4j/1.2.15/log4j-1.2.15.jar" {
+  permission  java.lang.RuntimePermission "accessDeclaredMembers", "";
+  permission  java.util.PropertyPermission "org.openrdf.repository.debug", "read";
+};
+
+grant codeBase "file:${user.home}/.m2/repository/net/sf/ehcache/ehcache-core/1.7.1/ehcache-core-1.7.1.jar" {
+  permission  java.io.FilePermission "${user.home}/.m2/repository/-", "read";
+  permission  java.io.FilePermission "${user.home}/svn/Texai/Dialog/target/classes/ehcache.xml", "read";
+  permission  java.io.FilePermission "${user.home}/svn/Texai/RDFEntityManager/target/classes/ehcache.xml", "read";
+  permission  java.lang.RuntimePermission "accessClassInPackage.sun.util.logging.resources", "";
+  permission  java.lang.RuntimePermission "accessDeclaredMembers", "";
+  permission  java.net.SocketPermission "64.95.112.233:80", "connect,resolve";
+  permission  java.net.SocketPermission "64.95.112.236:80", "connect,resolve";
+  permission  java.net.SocketPermission "mccarthy", "resolve";
+  permission  java.net.SocketPermission "svn.terracotta.org", "resolve";
+  permission  java.net.SocketPermission "svn.terracotta.org:80", "connect,resolve";
+  permission  java.net.SocketPermission "www.terracotta.org", "resolve";
+  permission  java.net.SocketPermission "www.terracotta.org:80", "connect,resolve";
+  permission  java.util.PropertyPermission "ehcache.disk.store.dir", "read";
+  permission  java.util.PropertyPermission "ehcache.update-check.url", "read";
+  permission  java.util.PropertyPermission "elementAttributeLimit", "read";
+  permission  java.util.PropertyPermission "entityExpansionLimit", "read";
+  permission  java.util.PropertyPermission "java.io.tmpdir", "read";
+  permission  java.util.PropertyPermission "java.version", "read";
+  permission  java.util.PropertyPermission "java.vm.name", "read";
+  permission  java.util.PropertyPermission "maxOccurLimit", "read";
+  permission  java.util.PropertyPermission "net.sf.ehcache.disabled", "read";
+  permission  java.util.PropertyPermission "net.sf.ehcache.enableShutdownHook", "read";
+  permission  java.util.PropertyPermission "net.sf.ehcache.skipUpdateCheck", "read";
+  permission  java.util.PropertyPermission "net.sf.ehcache.use.classic.lru", "read";
+  permission  java.util.PropertyPermission "os.arch", "read";
+  permission  java.util.PropertyPermission "os.name", "read";
+  permission  java.util.PropertyPermission "tc.active", "read";
+  permission  java.util.PropertyPermission "user.dir", "read";
+  permission  java.util.PropertyPermission "user.home", "read";
+};
+
+grant codeBase "file:${user.home}/.m2/repository/org/openrdf/sesame/sesame-queryalgebra-model/2.3.0/sesame-queryalgebra-model-2.3.0.jar" {
+  permission  java.util.PropertyPermission "line.separator", "read";
+};
+
+grant codeBase "file:${user.home}/.m2/repository/org/openrdf/sesame/sesame-queryparser-api/2.3.0/sesame-queryparser-api-2.3.0.jar" {
+  permission  java.io.FilePermission "${user.home}/.m2/repository/-", "read";
+  permission  java.util.PropertyPermission "line.separator", "read";
+};
+
+grant codeBase "file:${user.home}/.m2/repository/org/openrdf/sesame/sesame-queryparser-serql/2.3.0/sesame-queryparser-serql-2.3.0.jar" {
+  permission  java.util.PropertyPermission "line.separator", "read";
+};
+
+grant codeBase "file:${user.home}/.m2/repository/org/openrdf/sesame/sesame-queryparser-sparql/2.3.0/sesame-queryparser-sparql-2.3.0.jar" {
+  permission  java.util.PropertyPermission "line.separator", "read";
+};
+
+grant codeBase "file:${user.home}/.m2/repository/org/openrdf/sesame/sesame-repository-api/2.3.0/sesame-repository-api-2.3.0.jar" {
+  permission  java.io.FilePermission "${user.home}/.m2/repository/-", "read";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "delete";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "read";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "write";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "delete";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "read";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "write";
+  permission  java.util.PropertyPermission "line.separator", "read";
+};
+
+grant codeBase "file:${user.home}/.m2/repository/org/openrdf/sesame/sesame-repository-sail/2.3.0/sesame-repository-sail-2.3.0.jar" {
+  permission  java.io.FilePermission "${user.home}/.m2/repository/-", "read";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "delete";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "read";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "write";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "delete";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "read";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "write";
+  permission  java.lang.RuntimePermission "shutdownHooks", "";
+  permission  java.net.SocketPermission "mccarthy", "resolve";
+  permission  java.util.PropertyPermission "info.aduna.concurrent.locks.trackLocks", "read";
+  permission  java.util.PropertyPermission "line.separator", "read";
+  permission  java.util.PropertyPermission "org.openrdf.repository.debug", "read";
+};
+
+grant codeBase "file:${user.home}/.m2/repository/org/openrdf/sesame/sesame-sail-api/2.3.0/sesame-sail-api-2.3.0.jar" {
+  permission  java.io.FilePermission "${user.home}/repositories/-", "delete";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "read";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "write";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "delete";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "read";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "write";
+  permission  java.lang.RuntimePermission "shutdownHooks", "";
+  permission  java.net.SocketPermission "mccarthy", "resolve";
+  permission  java.util.PropertyPermission "info.aduna.concurrent.locks.trackLocks", "read";
+  permission  java.util.PropertyPermission "line.separator", "read";
+  permission  java.util.PropertyPermission "org.openrdf.repository.debug", "read";
+};
+
+grant codeBase "file:${user.home}/.m2/repository/org/openrdf/sesame/sesame-sail-memory/2.3.0/sesame-sail-memory-2.3.0.jar" {
+  permission  java.util.PropertyPermission "info.aduna.concurrent.locks.trackLocks", "read";
+  permission  java.util.PropertyPermission "org.openrdf.repository.debug", "read";
+};
+
+grant codeBase "file:${user.home}/.m2/repository/org/openrdf/sesame/sesame-sail-nativerdf/2.3.0/sesame-sail-nativerdf-2.3.0.jar" {
+  permission  java.io.FilePermission "${user.home}/jdk1.6.0_17/jre/lib/zi", "read";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "delete";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "read";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "write";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "delete";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "read";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "write";
+  permission  java.lang.RuntimePermission "shutdownHooks", "";
+  permission  java.net.SocketPermission "mccarthy", "resolve";
+  permission  java.util.PropertyPermission "info.aduna.concurrent.locks.trackLocks", "read";
+  permission  java.util.PropertyPermission "line.separator", "read";
+  permission  java.util.PropertyPermission "org.openrdf.repository.debug", "read";
+};
+
+grant codeBase "file:${user.home}/netbeans-6.7.1/java2/ant/lib/ant.jar" {
+  permission  java.util.PropertyPermission "line.separator", "read";
+};
+
+grant codeBase "file:${user.home}/netbeans-6.7.1/java2/ant/patches/72080.jar" {
+  permission  java.io.FilePermission "../RDFEntityManager/data/repository.rcd", "read";
+  permission  java.io.FilePermission "./journals", "read";
+  permission  java.io.FilePermission "./journals/-", "delete";
+  permission  java.io.FilePermission "./journals/-", "read";
+  permission  java.io.FilePermission "./journals/-", "write";
+  permission  java.io.FilePermission "${user.home}/.m2/repository/-", "read";
+  permission  java.io.FilePermission "${user.home}/.netbeans/-", "write";
+  permission  java.io.FilePermission "${user.home}/jdk1.6.0_17/jre/lib/zi", "read";
+  permission  java.io.FilePermission "${user.home}/archiveRepositories/-", "read";
+  permission  java.io.FilePermission "${user.home}/archiveRepositories/-", "write";
+  permission  java.io.FilePermission "${user.home}/archiveRepositories/-", "delete";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "delete";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "read";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "write";
+  permission  java.io.FilePermission "${user.home}/svn/Texai/Dialog/target/classes/ehcache.xml", "read";
+  permission  java.io.FilePermission "${user.home}/svn/Texai/RDFEntityManager/target/classes/ehcache.xml", "read";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "delete";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "read";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "write";
+  permission  java.io.FilePermission "actr-models/commands/learn-common-nouns.lisp", "read";
+  permission  java.io.FilePermission "actr-models/commands/learn-proper-nouns.lisp", "read";
+  permission  java.io.FilePermission "data/bootstrap-dialog.fcg", "read";
+  permission  java.io.FilePermission "data/bootstrap-queries.xml", "read";
+  permission  java.io.FilePermission "data/selected-basic-constructions.fcg", "read";
+  permission  java.lang.RuntimePermission "accessClassInPackage.sun.util.logging.resources", "";
+  permission  java.lang.RuntimePermission "accessDeclaredMembers", "";
+  permission  java.lang.RuntimePermission "exitVM.0", "";
+  permission  java.lang.RuntimePermission "getenv.REPOSITORIES", "";
+  permission  java.lang.RuntimePermission "getenv.REPOSITORIES_TMPFS", "";
+  permission  java.lang.RuntimePermission "setIO", "";
+  permission  java.lang.RuntimePermission "shutdownHooks", "";
+  permission  java.lang.reflect.ReflectPermission "suppressAccessChecks", "";
+  permission  java.net.SocketPermission "64.95.112.233:80", "connect,resolve";
+  permission  java.net.SocketPermission "64.95.112.236:80", "connect,resolve";
+  permission  java.net.SocketPermission "mccarthy", "resolve";
+  permission  java.net.SocketPermission "svn.terracotta.org", "resolve";
+  permission  java.net.SocketPermission "svn.terracotta.org:80", "connect,resolve";
+  permission  java.net.SocketPermission "www.terracotta.org", "resolve";
+  permission  java.net.SocketPermission "www.terracotta.org:80", "connect,resolve";
+  permission  java.util.PropertyPermission "cglib.debugLocation", "read";
+  permission  java.util.PropertyPermission "ehcache.disk.store.dir", "read";
+  permission  java.util.PropertyPermission "ehcache.update-check.url", "read";
+  permission  java.util.PropertyPermission "elementAttributeLimit", "read";
+  permission  java.util.PropertyPermission "entityExpansionLimit", "read";
+  permission  java.util.PropertyPermission "info.aduna.concurrent.locks.trackLocks", "read";
+  permission  java.util.PropertyPermission "java.io.tmpdir", "read";
+  permission  java.util.PropertyPermission "java.version", "read";
+  permission  java.util.PropertyPermission "java.vm.name", "read";
+  permission  java.util.PropertyPermission "line.separator", "read";
+  permission  java.util.PropertyPermission "maxOccurLimit", "read";
+  permission  java.util.PropertyPermission "net.sf.ehcache.disabled", "read";
+  permission  java.util.PropertyPermission "net.sf.ehcache.enableShutdownHook", "read";
+  permission  java.util.PropertyPermission "net.sf.ehcache.skipUpdateCheck", "read";
+  permission  java.util.PropertyPermission "net.sf.ehcache.use.classic.lru", "read";
+  permission  java.util.PropertyPermission "org.joda.time.DateTimeZone.NameProvider", "read";
+  permission  java.util.PropertyPermission "org.joda.time.DateTimeZone.Provider", "read";
+  permission  java.util.PropertyPermission "org.joda.time.tz.CachedDateTimeZone.size", "read";
+  permission  java.util.PropertyPermission "org.openrdf.repository.debug", "read";
+  permission  java.util.PropertyPermission "os.arch", "read";
+  permission  java.util.PropertyPermission "os.name", "read";
+  permission  java.util.PropertyPermission "tc.active", "read";
+  permission  java.util.PropertyPermission "user.dir", "read";
+  permission  java.util.PropertyPermission "user.home", "read";
+  permission  java.util.PropertyPermission "user.timezone", "read";
+};
+
+grant codeBase "file:${user.home}/svn/Texai/AlbusHCN/target/classes/" {
+  permission  java.io.FilePermission "./journals", "read";
+  permission  java.io.FilePermission "./journals/-", "read";
+  permission  java.io.FilePermission "./journals/-", "write";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "delete";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "read";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "write";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "delete";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "read";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "write";
+  permission  java.lang.RuntimePermission "accessDeclaredMembers", "";
+  permission  java.lang.RuntimePermission "getenv.REPOSITORIES", "";
+  permission  java.lang.RuntimePermission "shutdownHooks", "";
+  permission  java.lang.reflect.ReflectPermission "suppressAccessChecks", "";
+  permission  java.net.SocketPermission "mccarthy", "resolve";
+  permission  java.util.PropertyPermission "elementAttributeLimit", "read";
+  permission  java.util.PropertyPermission "entityExpansionLimit", "read";
+  permission  java.util.PropertyPermission "info.aduna.concurrent.locks.trackLocks", "read";
+  permission  java.util.PropertyPermission "maxOccurLimit", "read";
+  permission  java.util.PropertyPermission "org.openrdf.repository.debug", "read";
+};
+
+grant codeBase "file:${user.home}/svn/Texai/BehaviorLanguage/target/classes/" {
+  permission  java.io.FilePermission "./journals", "read";
+  permission  java.io.FilePermission "./journals/-", "read";
+  permission  java.io.FilePermission "./journals/-", "write";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "delete";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "read";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "write";
+  permission  java.io.FilePermission "actr-models/commands/learn-common-nouns.lisp", "read";
+  permission  java.io.FilePermission "actr-models/commands/learn-proper-nouns.lisp", "read";
+  permission  java.lang.RuntimePermission "accessDeclaredMembers", "";
+  permission  java.lang.reflect.ReflectPermission "suppressAccessChecks", "";
+  permission  java.util.PropertyPermission "org.openrdf.repository.debug", "read";
+};
+
+grant codeBase "file:${user.home}/svn/Texai/BehaviorLanguageSupport/target/classes/" {
+  permission  java.io.FilePermission "./journals", "read";
+  permission  java.io.FilePermission "./journals/-", "read";
+  permission  java.io.FilePermission "./journals/-", "write";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "delete";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "read";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "write";
+  permission  java.lang.RuntimePermission "accessDeclaredMembers", "";
+  permission  java.lang.reflect.ReflectPermission "suppressAccessChecks", "";
+  permission  java.util.PropertyPermission "org.openrdf.repository.debug", "read";
+};
+
+grant codeBase "file:${user.home}/svn/Texai/Dialog/target/classes/" {
+  permission  java.io.FilePermission "./journals", "read";
+  permission  java.io.FilePermission "./journals/-", "read";
+  permission  java.io.FilePermission "./journals/-", "write";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "delete";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "read";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "write";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "delete";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "read";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "write";
+  permission  java.lang.RuntimePermission "accessDeclaredMembers", "";
+  permission  java.lang.RuntimePermission "getenv.REPOSITORIES", "";
+  permission  java.lang.RuntimePermission "shutdownHooks", "";
+  permission  java.lang.reflect.ReflectPermission "suppressAccessChecks", "";
+  permission  java.net.SocketPermission "mccarthy", "resolve";
+  permission  java.util.PropertyPermission "elementAttributeLimit", "read";
+  permission  java.util.PropertyPermission "entityExpansionLimit", "read";
+  permission  java.util.PropertyPermission "info.aduna.concurrent.locks.trackLocks", "read";
+  permission  java.util.PropertyPermission "maxOccurLimit", "read";
+  permission  java.util.PropertyPermission "org.openrdf.repository.debug", "read";
+};
+
+grant codeBase "file:${user.home}/svn/Texai/Dialog/target/test-classes/" {
+  permission  java.io.FilePermission "../RDFEntityManager/data/repository.rcd", "read";
+  permission  java.io.FilePermission "./journals", "read";
+  permission  java.io.FilePermission "./journals/-", "delete";
+  permission  java.io.FilePermission "./journals/-", "read";
+  permission  java.io.FilePermission "./journals/-", "write";
+  permission  java.io.FilePermission "${user.home}/.m2/repository/-", "read";
+  permission  java.io.FilePermission "${user.home}/jdk1.6.0_17/jre/lib/zi", "read";
+  permission  java.io.FilePermission "${user.home}/archiveRepositories/-", "delete";
+  permission  java.io.FilePermission "${user.home}/archiveRepositories/-", "read";
+  permission  java.io.FilePermission "${user.home}/archiveRepositories/-", "write";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "delete";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "read";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "write";
+  permission  java.io.FilePermission "${user.home}/svn/Texai/Dialog/target/classes/ehcache.xml", "read";
+  permission  java.io.FilePermission "${user.home}/svn/Texai/RDFEntityManager/target/classes/ehcache.xml", "read";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "delete";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "read";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "write";
+  permission  java.io.FilePermission "actr-models/commands/learn-common-nouns.lisp", "read";
+  permission  java.io.FilePermission "actr-models/commands/learn-proper-nouns.lisp", "read";
+  permission  java.io.FilePermission "data/bootstrap-dialog.fcg", "read";
+  permission  java.io.FilePermission "data/bootstrap-queries.xml", "read";
+  permission  java.io.FilePermission "data/selected-basic-constructions.fcg", "read";
+  permission  java.lang.RuntimePermission "accessClassInPackage.sun.util.logging.resources", "";
+  permission  java.lang.RuntimePermission "accessDeclaredMembers", "";
+  permission  java.lang.RuntimePermission "getenv.REPOSITORIES", "";
+  permission  java.lang.RuntimePermission "getenv.REPOSITORIES_TMPFS", "";
+  permission  java.lang.RuntimePermission "shutdownHooks", "";
+  permission  java.lang.reflect.ReflectPermission "suppressAccessChecks", "";
+  permission  java.net.SocketPermission "64.95.112.233:80", "connect,resolve";
+  permission  java.net.SocketPermission "64.95.112.236:80", "connect,resolve";
+  permission  java.net.SocketPermission "mccarthy", "resolve";
+  permission  java.net.SocketPermission "svn.terracotta.org", "resolve";
+  permission  java.net.SocketPermission "svn.terracotta.org:80", "connect,resolve";
+  permission  java.net.SocketPermission "www.terracotta.org", "resolve";
+  permission  java.net.SocketPermission "www.terracotta.org:80", "connect,resolve";
+  permission  java.util.PropertyPermission "cglib.debugLocation", "read";
+  permission  java.util.PropertyPermission "ehcache.disk.store.dir", "read";
+  permission  java.util.PropertyPermission "ehcache.update-check.url", "read";
+  permission  java.util.PropertyPermission "elementAttributeLimit", "read";
+  permission  java.util.PropertyPermission "entityExpansionLimit", "read";
+  permission  java.util.PropertyPermission "info.aduna.concurrent.locks.trackLocks", "read";
+  permission  java.util.PropertyPermission "java.io.tmpdir", "read";
+  permission  java.util.PropertyPermission "java.version", "read";
+  permission  java.util.PropertyPermission "java.vm.name", "read";
+  permission  java.util.PropertyPermission "line.separator", "read";
+  permission  java.util.PropertyPermission "maxOccurLimit", "read";
+  permission  java.util.PropertyPermission "net.sf.ehcache.disabled", "read";
+  permission  java.util.PropertyPermission "net.sf.ehcache.enableShutdownHook", "read";
+  permission  java.util.PropertyPermission "net.sf.ehcache.skipUpdateCheck", "read";
+  permission  java.util.PropertyPermission "net.sf.ehcache.use.classic.lru", "read";
+  permission  java.util.PropertyPermission "org.joda.time.DateTimeZone.NameProvider", "read";
+  permission  java.util.PropertyPermission "org.joda.time.DateTimeZone.Provider", "read";
+  permission  java.util.PropertyPermission "org.joda.time.tz.CachedDateTimeZone.size", "read";
+  permission  java.util.PropertyPermission "org.openrdf.repository.debug", "read";
+  permission  java.util.PropertyPermission "os.arch", "read";
+  permission  java.util.PropertyPermission "os.name", "read";
+  permission  java.util.PropertyPermission "tc.active", "read";
+  permission  java.util.PropertyPermission "user.dir", "read";
+  permission  java.util.PropertyPermission "user.home", "read";
+  permission  java.util.PropertyPermission "user.timezone", "read";
+};
+
+grant codeBase "file:${user.home}/svn/Texai/DialogSupport/target/classes/" {
+  permission  java.io.FilePermission "./journals", "read";
+  permission  java.io.FilePermission "./journals/-", "read";
+  permission  java.io.FilePermission "./journals/-", "write";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "delete";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "read";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "write";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "delete";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "read";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "write";
+  permission  java.lang.RuntimePermission "accessDeclaredMembers", "";
+  permission  java.lang.reflect.ReflectPermission "suppressAccessChecks", "";
+  permission  java.util.PropertyPermission "org.openrdf.repository.debug", "read";
+};
+
+grant codeBase "file:${user.home}/svn/Texai/IncrementalFCG/target/classes/" {
+  permission  java.io.FilePermission "./journals", "read";
+  permission  java.io.FilePermission "./journals/-", "read";
+  permission  java.io.FilePermission "./journals/-", "write";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "delete";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "read";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "write";
+  permission  java.io.FilePermission "data/bootstrap-dialog.fcg", "read";
+  permission  java.io.FilePermission "data/selected-basic-constructions.fcg", "read";
+  permission  java.lang.RuntimePermission "accessDeclaredMembers", "";
+  permission  java.lang.RuntimePermission "getenv.REPOSITORIES", "";
+  permission  java.lang.RuntimePermission "shutdownHooks", "";
+  permission  java.lang.reflect.ReflectPermission "suppressAccessChecks", "";
+  permission  java.net.SocketPermission "mccarthy", "resolve";
+  permission  java.util.PropertyPermission "cglib.debugLocation", "read";
+  permission  java.util.PropertyPermission "elementAttributeLimit", "read";
+  permission  java.util.PropertyPermission "entityExpansionLimit", "read";
+  permission  java.util.PropertyPermission "info.aduna.concurrent.locks.trackLocks", "read";
+  permission  java.util.PropertyPermission "maxOccurLimit", "read";
+  permission  java.util.PropertyPermission "org.openrdf.repository.debug", "read";
+};
+
+grant codeBase "file:${user.home}/svn/Texai/Inference/target/classes/" {
+  permission  java.io.FilePermission "./journals", "read";
+  permission  java.io.FilePermission "./journals/-", "read";
+  permission  java.io.FilePermission "./journals/-", "write";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "delete";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "read";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "write";
+  permission  java.io.FilePermission "data/bootstrap-queries.xml", "read";
+  permission  java.lang.RuntimePermission "accessDeclaredMembers", "";
+  permission  java.lang.reflect.ReflectPermission "suppressAccessChecks", "";
+  permission  java.util.PropertyPermission "elementAttributeLimit", "read";
+  permission  java.util.PropertyPermission "entityExpansionLimit", "read";
+  permission  java.util.PropertyPermission "info.aduna.concurrent.locks.trackLocks", "read";
+  permission  java.util.PropertyPermission "line.separator", "read";
+  permission  java.util.PropertyPermission "maxOccurLimit", "read";
+  permission  java.util.PropertyPermission "org.openrdf.repository.debug", "read";
+};
+
+grant codeBase "file:${user.home}/svn/Texai/RDFEntityManager/target/classes/" {
+  permission  java.io.FilePermission "../RDFEntityManager/data/repository.rcd", "read";
+  permission  java.io.FilePermission "./journals", "read";
+  permission  java.io.FilePermission "./journals/-", "delete";
+  permission  java.io.FilePermission "./journals/-", "read";
+  permission  java.io.FilePermission "./journals/-", "write";
+  permission  java.io.FilePermission "${user.home}/.m2/repository/-", "read";
+  permission  java.io.FilePermission "${user.home}/jdk1.6.0_17/jre/lib/zi", "read";
+  permission  java.io.FilePermission "${user.home}/archiveRepositories/-", "delete";
+  permission  java.io.FilePermission "${user.home}/archiveRepositories/-", "read";
+  permission  java.io.FilePermission "${user.home}/archiveRepositories/-", "write";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "delete";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "read";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "write";
+  permission  java.io.FilePermission "${user.home}/svn/Texai/Dialog/target/classes/ehcache.xml", "read";
+  permission  java.io.FilePermission "${user.home}/svn/Texai/RDFEntityManager/target/classes/ehcache.xml", "read";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "delete";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "read";
+  permission  java.io.FilePermission "${org.texai.tempRepositories}/-", "write";
+  permission  java.lang.RuntimePermission "accessClassInPackage.sun.util.logging.resources", "";
+  permission  java.lang.RuntimePermission "accessDeclaredMembers", "";
+  permission  java.lang.RuntimePermission "getenv.REPOSITORIES", "";
+  permission  java.lang.RuntimePermission "shutdownHooks", "";
+  permission  java.lang.reflect.ReflectPermission "suppressAccessChecks", "";
+  permission  java.net.SocketPermission "64.95.112.233:80", "connect,resolve";
+  permission  java.net.SocketPermission "64.95.112.236:80", "connect,resolve";
+  permission  java.net.SocketPermission "mccarthy", "resolve";
+  permission  java.net.SocketPermission "svn.terracotta.org", "resolve";
+  permission  java.net.SocketPermission "svn.terracotta.org:80", "connect,resolve";
+  permission  java.net.SocketPermission "www.terracotta.org", "resolve";
+  permission  java.net.SocketPermission "www.terracotta.org:80", "connect,resolve";
+  permission  java.util.PropertyPermission "cglib.debugLocation", "read";
+  permission  java.util.PropertyPermission "ehcache.disk.store.dir", "read";
+  permission  java.util.PropertyPermission "ehcache.update-check.url", "read";
+  permission  java.util.PropertyPermission "elementAttributeLimit", "read";
+  permission  java.util.PropertyPermission "entityExpansionLimit", "read";
+  permission  java.util.PropertyPermission "info.aduna.concurrent.locks.trackLocks", "read";
+  permission  java.util.PropertyPermission "java.io.tmpdir", "read";
+  permission  java.util.PropertyPermission "java.version", "read";
+  permission  java.util.PropertyPermission "java.vm.name", "read";
+  permission  java.util.PropertyPermission "line.separator", "read";
+  permission  java.util.PropertyPermission "maxOccurLimit", "read";
+  permission  java.util.PropertyPermission "net.sf.ehcache.disabled", "read";
+  permission  java.util.PropertyPermission "net.sf.ehcache.enableShutdownHook", "read";
+  permission  java.util.PropertyPermission "net.sf.ehcache.skipUpdateCheck", "read";
+  permission  java.util.PropertyPermission "net.sf.ehcache.use.classic.lru", "read";
+  permission  java.util.PropertyPermission "org.joda.time.DateTimeZone.NameProvider", "read";
+  permission  java.util.PropertyPermission "org.joda.time.DateTimeZone.Provider", "read";
+  permission  java.util.PropertyPermission "org.joda.time.tz.CachedDateTimeZone.size", "read";
+  permission  java.util.PropertyPermission "org.openrdf.repository.debug", "read";
+  permission  java.util.PropertyPermission "os.arch", "read";
+  permission  java.util.PropertyPermission "os.name", "read";
+  permission  java.util.PropertyPermission "tc.active", "read";
+  permission  java.util.PropertyPermission "user.dir", "read";
+  permission  java.util.PropertyPermission "user.home", "read";
+  permission  java.util.PropertyPermission "user.timezone", "read";
+};
+
+grant codeBase "file:/home/reed/svn/Texai/SpreadingActivation/target/classes/" {
+  permission  java.util.PropertyPermission "org.openrdf.repository.debug", "read";
+  permission  java.util.PropertyPermission "os.arch", "read";
+  permission  java.util.PropertyPermission "os.name", "read";
+  permission  java.util.PropertyPermission "tc.active", "read";
+  permission  java.util.PropertyPermission "user.dir", "read";
+  permission  java.util.PropertyPermission "user.home", "read";
+  permission  java.util.PropertyPermission "user.timezone", "read";
+};
+
+grant codeBase "file:${user.home}/svn/Texai/SpreadingActivation/target/classes/" {
+  permission  java.util.PropertyPermission "org.openrdf.repository.debug", "read";
+};
+
+grant codeBase "file:${user.home}/svn/Texai/WorkFlow/target/classes/" {
+  permission  java.io.FilePermission "${user.home}/repositories/-", "read";
+  permission  java.io.FilePermission "${user.home}/repositories/-", "write";
+  permission  java.lang.RuntimePermission "accessDeclaredMembers", "";
+  permission  java.lang.RuntimePermission "getenv.REPOSITORIES", "";
+  permission  java.lang.RuntimePermission "shutdownHooks", "";
+  permission  java.lang.reflect.ReflectPermission "suppressAccessChecks", "";
+  permission  java.net.SocketPermission "mccarthy", "resolve";
+  permission  java.util.PropertyPermission "info.aduna.concurrent.locks.trackLocks", "read";
+  permission  java.util.PropertyPermission "org.openrdf.repository.debug", "read";
+};
+
