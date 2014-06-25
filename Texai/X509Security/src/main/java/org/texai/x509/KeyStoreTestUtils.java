@@ -218,10 +218,12 @@ public final class KeyStoreTestUtils {
     } else {
       filePath = "data/test-client-keystore.jceks";
     }
-    LOGGER.info("test-client-keystore path: " + filePath);
+    LOGGER.debug("test-client-keystore path: " + filePath);
     try {
       final KeyStore clientKeyStore = X509Utils.findOrCreateKeyStore(filePath, CLIENT_KEYSTORE_PASSWORD);
-      X509Utils.logAliases(clientKeyStore);
+      if (LOGGER.isDebugEnabled()) {
+        X509Utils.logAliases(clientKeyStore);
+      }
 
       //Postconditions
       assert !filePath.endsWith("uber") || clientKeyStore.getType().equals("UBER") :

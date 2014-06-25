@@ -36,6 +36,7 @@
     <module>RDFEntityManager</module>
     <module>UPNPLib</module>
     <module>Utilities</module>
+    <module>X509CertificateServerTest</module>
     <module>X509Security</module>
   </modules>
 
