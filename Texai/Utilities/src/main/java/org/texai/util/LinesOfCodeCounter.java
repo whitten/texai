@@ -33,6 +33,7 @@ public final class LinesOfCodeCounter {
 
   /** paths to count lines of code */
   private static final String[] PATHS = {
+    "/home/reed/git/texai/Texai/AlbusHCN/src/main",
     "/home/reed/git/texai/Texai/AlbusHCNSupport/src/main",
     "/home/reed/git/texai/Texai/BitTorrentSupport/src/main",
     "/home/reed/git/texai/Texai/Network/src/main",
