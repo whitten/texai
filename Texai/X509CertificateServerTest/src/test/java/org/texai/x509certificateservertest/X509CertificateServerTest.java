@@ -127,9 +127,14 @@ public class X509CertificateServerTest {
     assertTrue(NetworkUtils.isHostAvailable(host, SERVER_PORT));
 
     // test chat server with mock clients
-    //final int nbrThreads = 1;
-    final int nbrThreads = Runtime.getRuntime().availableProcessors();
-    LOGGER.info("launching " + nbrThreads + " test threads");
+    int nbrThreads;
+    if (X509Utils.isTrustedDevelopmentSystem()) {
+      nbrThreads = Runtime.getRuntime().availableProcessors();
+      LOGGER.info("launching " + nbrThreads + " test thread(s");
+    } else {
+      nbrThreads = 1;
+      LOGGER.info("launching 1 test thread");
+    }
     final CountDownLatch countDownLatch = new CountDownLatch(nbrThreads);
     for (int i = 0; i < nbrThreads; i++) {
       final MockHTTPClientTask mockHTTPClientTask = new MockHTTPClientTask(host, countDownLatch, i + 1);
@@ -172,7 +177,7 @@ public class X509CertificateServerTest {
       Thread.currentThread().setName("thread " + threadNbr);
       LOGGER.info("**** starting " + Thread.currentThread().getName());
       //for (int i = 0; i < 1; i++) {
-      for (int i = 0; i < 40; i++) {
+      for (int i = 0; i < 20; i++) {
         mockHTTPClient();
         LOGGER.debug(Thread.currentThread().getName() + " generated certificate " + String.valueOf(i + 1));
       }
