@@ -94,7 +94,7 @@ public class RoleInfoTest {
   public void testGetRoleId() {
     LOGGER.info("getRoleId");
     final URI roleId = new URIImpl(Constants.TEXAI_NAMESPACE + X509Utils.getUUID(certificateChain[0]).toString());
-    assertEquals("e122cba3-2f36-41a2-abe3-4399d803fab7", roleId.getLocalName());
+    assertEquals("b19d4261-3e4f-47c5-9d9b-6db6cdcfb977", roleId.getLocalName());
     final UUID localAreaNetworkID = UUID.randomUUID();
     final String externalHostName = "texai.dyndns.org";
     final int externalPort = 5048;
@@ -129,7 +129,7 @@ public class RoleInfoTest {
             internalHostName,
             internalPort);
     URI result = instance.getRoleId();
-    assertEquals("e122cba3-2f36-41a2-abe3-4399d803fab7", result.getLocalName());
+    assertEquals("b19d4261-3e4f-47c5-9d9b-6db6cdcfb977", result.getLocalName());
   }
 
   /**
@@ -140,8 +140,8 @@ public class RoleInfoTest {
   public void testGetCertPath() {
     LOGGER.info("getCertPath");
     final URI roleId = new URIImpl(Constants.TEXAI_NAMESPACE + X509Utils.getUUID(certificateChain[0]).toString());
-    assertEquals("e122cba3-2f36-41a2-abe3-4399d803fab7", roleId.getLocalName());
-    final UUID localAreaNetworkID = UUID.fromString("e122cba3-2f36-41a2-abe3-4399d803fab7");
+    assertEquals("b19d4261-3e4f-47c5-9d9b-6db6cdcfb977", roleId.getLocalName());
+    final UUID localAreaNetworkID = UUID.fromString("b19d4261-3e4f-47c5-9d9b-6db6cdcfb977");
     final String externalHostName = "texai.dyndns.org";
     final int externalPort = 5048;
     final String internalHostName = "turing";
@@ -185,8 +185,8 @@ public class RoleInfoTest {
   public void testToString() {
     LOGGER.info("toString");
     final URI roleId = new URIImpl(Constants.TEXAI_NAMESPACE + X509Utils.getUUID(certificateChain[0]).toString());
-    assertEquals("e122cba3-2f36-41a2-abe3-4399d803fab7", roleId.getLocalName());
-    final UUID localAreaNetworkID = UUID.fromString("e122cba3-2f36-41a2-abe3-4399d803fab7");
+    assertEquals("b19d4261-3e4f-47c5-9d9b-6db6cdcfb977", roleId.getLocalName());
+    final UUID localAreaNetworkID = UUID.fromString("b19d4261-3e4f-47c5-9d9b-6db6cdcfb977");
     final String externalHostName = "texai.dyndns.org";
     final int externalPort = 5048;
     final String internalHostName = "turing";
@@ -217,7 +217,7 @@ public class RoleInfoTest {
             externalPort,
             internalHostName,
             internalPort);
-    assertEquals("[RoleInfo http://texai.org/texai/e122cba3-2f36-41a2-abe3-4399d803fab7, lan: e122cba3-2f36-41a2-abe3-4399d803fab7, external host address: texai.dyndns.org:5048, internal host address: turing:50000]", instance.toString());
+    assertEquals("[RoleInfo http://texai.org/texai/b19d4261-3e4f-47c5-9d9b-6db6cdcfb977, lan: b19d4261-3e4f-47c5-9d9b-6db6cdcfb977, external host address: texai.dyndns.org:5048, internal host address: turing:50000]", instance.toString());
   }
 
   /**
@@ -228,8 +228,8 @@ public class RoleInfoTest {
   public void testGetSignature() {
     LOGGER.info("getSignature");
     final URI roleId = new URIImpl(Constants.TEXAI_NAMESPACE + X509Utils.getUUID(certificateChain[0]).toString());
-    assertEquals("e122cba3-2f36-41a2-abe3-4399d803fab7", roleId.getLocalName());
-    final UUID localAreaNetworkID = UUID.fromString("e122cba3-2f36-41a2-abe3-4399d803fab7");
+    assertEquals("b19d4261-3e4f-47c5-9d9b-6db6cdcfb977", roleId.getLocalName());
+    final UUID localAreaNetworkID = UUID.fromString("b19d4261-3e4f-47c5-9d9b-6db6cdcfb977");
     final String externalHostName = "texai.dyndns.org";
     final int externalPort = 5048;
     final String internalHostName = "turing";
