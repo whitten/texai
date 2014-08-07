@@ -743,5 +743,10 @@ public final class DistributedRepositoryManager {
     public synchronized Repository getRepository() {
       return repository;
     }
+
+    @Override
+    public boolean isInitialized() {
+      return true;
+    }
   }
 }
