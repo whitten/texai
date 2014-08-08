@@ -7,8 +7,8 @@ The Java application uses the Java Cryptography Extension (JCE) Unlimited Streng
 
 The Maven local artifact repository is controlled by git. You may copy the contents to your .m2/repository directory, or modify Maven settings.xml to reference your local git directory. For example, ...
 
-<settings>
+  <settings>
 
-  <localRepository>${user.home}/git/maven-local-repository/repository</localRepository>
+    <localRepository>${user.home}/git/maven-local-repository/repository</localRepository>
   
-  ...
+    ...
