@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
 import javax.xml.bind.DatatypeConverter;
 import net.jcip.annotations.NotThreadSafe;
 import net.sf.cglib.proxy.Factory;
@@ -798,6 +799,7 @@ public final class RDFUtility {
 
     final Calendar calendar = Calendar.getInstance();
     calendar.setTime(date);
+    calendar.setTimeZone(TimeZone.getTimeZone("America/Chicago"));
     return getLiteralForCalendar(calendar);
   }
 
