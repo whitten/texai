@@ -79,7 +79,7 @@ public final class RepositoryArchiver {
     } else if (absolutePath.contains("Repositories")) {
       archiveDirectory = new File(absolutePath.replace("Repositories", "archiveRepositories"));
     } else {
-      throw new TexaiException("invalid repositories path for archiving");
+      archiveDirectory = new File(absolutePath + "/archiveRepositories");
     }
 
     if (archiveDirectory.exists()) {
