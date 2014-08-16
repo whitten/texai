@@ -1,0 +1,55 @@
+Lexicon Acquisition Workflow
+
+Unless otherwise noted, queues are ordered by gloss word usage frequency
+
+Automatic process:  gather noun gloss words missing plural word form
+
+input queue:   gloss words
+
+output queue:  noun gloss words missing plural word form
+
+
+
+Interactive process:  determine plural word form
+
+input queue:   noun gloss words missing plural word form
+
+
+
+Automatic process: attach word senses via lexicon lookup
+
+input queue:   gloss words
+
+output queue:  unmapped noun word senses
+
+output queue:  mapped noun word senses
+
+output queue:  disambiguated mapped noun word senses
+
+output queue:  verb word senses
+
+output queue:  adjective word senses
+
+output queue:  adverb word senses
+
+output queue:  preposition word senses
+
+output queue:  other word senses
+
+output queue:  gloss words having no word sense entry
+
+
+
+Interactive process: map noun word sense to knowledge base term
+
+input queue:   unmapped noun word senses
+
+output queue:  mapped noun word senses
+
+
+
+Interactive process: disambiguate noun word sense for parsing and generation
+
+input queue:   mapped noun word senses
+
+output queue:  disambiguated mapped noun word senses
