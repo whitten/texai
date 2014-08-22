@@ -20,7 +20,6 @@
  */
 package org.texai.ahcs.impl;
 
-import de.uniba.wiai.lspi.chord.data.URL;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -54,11 +53,11 @@ import net.jcip.annotations.NotThreadSafe;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
-
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
-import org.texai.ahcs.router.MessageRouter;
+import org.texai.ahcs.router.AbstractMessageRouter;
+import org.texai.ahcs.router.CPOSMessageRouter;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AlbusMessageDispatcher;
 import org.texai.ahcsSupport.Message;
@@ -114,9 +113,9 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
     CACHE_X509_CERTIFICATES
   };
   /** the node runtime application thread */
-  private Thread nodeRuntimeApplicationThread;
+  private final Thread nodeRuntimeApplicationThread;
   /** the message router */
-  private MessageRouter messageRouter;
+  private final AbstractMessageRouter messageRouter;
   /** the node runtime keystore, which contains the single X509 certificate chain used by SSL client authentication */
   private KeyStore nodeRuntimeKeyStore;
   /** the node runtime keystore lock */
@@ -126,7 +125,7 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
   /** the role keystore lock */
   private final Object roleKeyStore_lock = new Object();
   /** the node runtime RDF entity manager */
-  private RDFEntityManager rdfEntityManager;
+  private final RDFEntityManager rdfEntityManager;
   /** the node access object */
   private final NodeAccess nodeAccess;
   // the intermediate certificate-signing certificate
@@ -146,15 +145,15 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
   /** the node runtime X.509 certificate */
   private X509Certificate nodeRuntimeX509Certificate;
   /** the indicator to quit this application */
-  private AtomicBoolean isQuit = new AtomicBoolean(false);
+  private final AtomicBoolean isQuit = new AtomicBoolean(false);
   /** the launcher role id */
   private final URI launcherRoleId;
   /** the indicator whether finalization has occurred */
-  private AtomicBoolean isFinalized = new AtomicBoolean(false);
+  private final AtomicBoolean isFinalized = new AtomicBoolean(false);
   /** the indicator that initialization has completed, and that the node runtime should be persisted upon shutdown */
-  private AtomicBoolean isInitialized = new AtomicBoolean(false);
+  private final AtomicBoolean isInitialized = new AtomicBoolean(false);
   /** the shutdown hook */
-  private ShutdownHook shutdownHook;
+  private final ShutdownHook shutdownHook;
   /** the local area network ID */
   private final UUID localAreaNetworkID;
   /** the TCP port as presented to the Internet */
@@ -178,24 +177,20 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
    * @param nodeRuntimeId the node runtime id
    * @param internalPort the internal port
    * @param externalPort the external port
-   * @param localURL the URL of this node in the Chord network
-   * @param bootstrapURL the bootstrap URL, or null if this is the first node in the Chord network
    * @param localAreaNetworkID the local area network ID
    */
+  @SuppressWarnings("CallToThreadStartDuringObjectConstruction")
   public NodeRuntimeImpl(
           final URI launcherRoleId,
           final URI nodeRuntimeId,
           final int internalPort,
           final int externalPort,
-          final URL localURL,
-          final URL bootstrapURL,
           final UUID localAreaNetworkID) {
     //Preconditions
     assert launcherRoleId != null : "launcherRoleId must not be null";
     assert nodeRuntimeId != null : "nodeRuntimeId must not be null";
     assert internalPort > 0 : "internalPort must be positive";
     assert externalPort > 0 : "externalPort must be positive";
-    assert localURL != null : "localURL must not be null";
     assert localAreaNetworkID != null : "localAreaNetworkID must not be null";
 
     this.launcherRoleId = launcherRoleId;
@@ -248,12 +243,7 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
     nodeRuntimeConfiguration.instantiate();
 
     initializeX509SecurityInfo();
-    messageRouter = new MessageRouter(
-            this,
-            internalPort,
-            externalPort,
-            localURL,
-            bootstrapURL);
+    messageRouter = new CPOSMessageRouter(this);
 
     if (getNode(AHCSConstants.NODE_NICKNAME_TOPPER) == null) {
       // first time direct assembly of the top friendship node - the Bootstrap skill does the rest
@@ -304,6 +294,7 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
    *
    * @param operation the given operation
    */
+  @Override
   public void addLoggedOperation(final String operation) {
     //Preconditions
     assert operation != null : "operation must not be null";
@@ -318,6 +309,7 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
    *
    * @param operation the given operation
    */
+  @Override
   public void removeLoggedOperation(final String operation) {
     //Preconditions
     assert operation != null : "operation must not be null";
@@ -333,6 +325,7 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
    * @param message the given message
    * @return whether the given message is to be logged
    */
+  @Override
   public boolean isMessageLogged(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
@@ -349,15 +342,6 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
   @Override
   public UUID getLocalAreaNetworkID() {
     return localAreaNetworkID;
-  }
-
-  /** Gets the host address as presented to the Internet, e.g. texai.dyndns.org.
-   *
-   * @return the host address as presented to the Internet
-   */
-  @Override
-  public String getExternalHostName() {
-    return messageRouter.getExternalHostName();
   }
 
   /** Gets the TCP port as presented to the Internet.
@@ -400,6 +384,7 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
    *
    * @return the node access object
    */
+  @Override
   public NodeAccess getNodeAccess() {
     return nodeAccess;
   }
@@ -460,6 +445,11 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
       return role.getId();
     }
   }
+
+    @Override
+    public String getExternalHostName() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 
   /** Provides a shutdown hook to finalize resources when the JVM is unexpectedly shutdown. */
   class ShutdownHook extends Thread {
@@ -548,6 +538,7 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
    * @param nodeNickname the given nickname
    * @return the node having the given nickname, or null if not found
    */
+  @Override
   public final Node getNode(final String nodeNickname) {
     //Preconditions
     assert nodeNickname != null : "nodeNickname must not be null";
@@ -560,6 +551,7 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
    *
    * @param node the local node to add
    */
+  @Override
   public void addNode(final Node node) {
     //Preconditions
     assert node != null : "node must not be null";
@@ -575,6 +567,7 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
    *
    * @param node the given local node to remove
    */
+  @Override
   public void removeNode(final Node node) {
     //Preconditions
     assert node != null : "node must not be null";
@@ -642,6 +635,7 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
    * @param roleId the role id
    * @return the local role having the given id, or null if not found
    */
+  @Override
   public Role getLocalRole(final URI roleId) {
     //Preconditions
     assert roleId != null : "roleId must not be null";
@@ -654,6 +648,7 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
    * @param roleId the given role id
    * @return whether the given role id belongs to a local role
    */
+  @Override
   public boolean isLocalRole(final URI roleId) {
     //Preconditions
     assert roleId != null : "roleId must not be null";
@@ -661,6 +656,7 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
     return nodeRuntimeConfiguration.isLocalRole(roleId);
   }
 
+  //TODO - use this method or delete it.
   /** Resumes the thread that was suspended awaiting the reply message.
    *
    * @param message the reply message
@@ -674,6 +670,7 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
       inReplyToDictionary.put(inReplyTo, message);
     }
 
+    @SuppressWarnings("UnusedAssignment")
     Object threadLock = null;
     synchronized (replyWithsDictionary) {
       threadLock = replyWithsDictionary.get(inReplyTo);
@@ -803,6 +800,7 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
    *
    * @return the X.509 security information for this node runtime
    */
+  @Override
   public X509SecurityInfo getX509SecurityInfo() {
     return x509SecurityInfo;
   }
@@ -821,6 +819,7 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
   /** Gets the executor.
    * @return the executor
    */
+  @Override
   public Executor getExecutor() {
     return executor;
   }
@@ -829,6 +828,7 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
    *
    * @return the timer
    */
+  @Override
   public Timer getTimer() {
     return timer;
   }
@@ -1051,6 +1051,7 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
    *
    * @return the launcher role id
    */
+  @Override
   public URI getLauncherRoleId() {
     return launcherRoleId;
   }
@@ -1156,18 +1157,26 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
   /** Perform post-loading node, role and skill dependency injection. */
   private void postLoadingDependencyInjection() {
     LOGGER.info("installing roles and their skills, from the existing node runtime configuration");
-    for (final Node node : getNodeRuntimeConfiguration().getNodes()) {
-      node.setNodeRuntime(this);
-      node.installRoles(nodeAccess);
-      for (final Role role : node.getRoles()) {
-        role.setNodeRuntime(this);
-        role.setNode(node);
-        role.setX509SecurityInfo(X509Utils.getX509SecurityInfo(
-                roleKeyStoreFilePath,
-                KEY_STORE_PASSWORD,
-                role.getRoleAlias()));
-      }
-    }
+    getNodeRuntimeConfiguration().getNodes().stream().map((node) -> {
+          node.setNodeRuntime(this);
+          return node;
+      }).map((node) -> {
+          node.installRoles(nodeAccess);
+          return node;
+      }).forEach((node) -> {
+          node.getRoles().stream().map((role) -> {
+            role.setNodeRuntime(this);
+            return role;
+        }).map((role) -> {
+            role.setNode(node);
+            return role;
+        }).forEach((role) -> {
+            role.setX509SecurityInfo(X509Utils.getX509SecurityInfo(
+                    roleKeyStoreFilePath,
+                    KEY_STORE_PASSWORD,
+                    role.getRoleAlias()));
+        });
+      });
   }
 
   /** Provides a thread to run the node runtime application, by initializing it and thereafter sleeping to keep the it from
@@ -1191,6 +1200,7 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
 
     /** Executes the the node runtime application. */
     @Override
+    @SuppressWarnings("SleepWhileInLoop")
     public void run() {
       Thread.currentThread().setName("Node Runtime");
       LOGGER.info("starting the node runtime");

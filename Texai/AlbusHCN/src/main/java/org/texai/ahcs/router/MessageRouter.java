@@ -581,17 +581,17 @@ public final class MessageRouter extends AbstractAlbusHCSMessageHandler implemen
 
   /** Retrieves the role information from the Chord network using the given role id as the key.
    *
-   * @param chordRoleId the given role id
+   * @param roleId the given role id
    * @return the role information from the Chord network
    */
-  public RoleInfo getRoleInfo(final URI chordRoleId) {
+  public RoleInfo getRoleInfo(final URI roleId) {
     //Preconditions
-    assert chordRoleId != null : "chordRoleId must not be null";
+    assert roleId != null : "roleId must not be null";
 
-    final String chordRoleIdString = chordRoleId.toString();
+    final String chordRoleIdString = roleId.toString();
     final Set<Serializable> roleInfos;
     try {
-      LOGGER.info("retrieving role information from chord for: " + chordRoleId + ", string: " + chordRoleIdString);
+      LOGGER.info("retrieving role information from chord for: " + roleId + ", string: " + chordRoleIdString);
       String threadName = Thread.currentThread().getName();
       Thread.currentThread().setName("role-info-retriever-thread");
       synchronized (roleInfoRetrievalLock) {
