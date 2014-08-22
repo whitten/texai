@@ -1,8 +1,0 @@
-2014-06-17T13:06:09.469-05:00 1 add texai:org.texai.kb.restriction.domainEntity.HasValueRestriction rdf:type cyc:ObjectType in cyc:UniversalVocabularyMt .
-2014-06-17T13:06:09.512-05:00 1 add texai:org.texai.kb.restriction.domainEntity.HasValueRestriction rdfs:subClassOf owl:Restriction in cyc:UniversalVocabularyMt .
-2014-06-17T13:06:09.512-05:00 1 add texai:org.texai.kb.restriction.domainEntity.HasValueRestriction_61420384-f623-4204-b534-df9c467d0d46 rdf:type texai:org.texai.kb.restriction.domainEntity.HasValueRestriction in cyc:UniversalVocabularyMt .
-2014-06-17T13:06:09.518-05:00 1 add texai:org.texai.kb.restriction.domainEntity.HasValueRestriction_61420384-f623-4204-b534-df9c467d0d46 owl:onProperty cyc:performedBy in texai:KBObjectContext .
-2014-06-17T13:06:09.522-05:00 1 add texai:org.texai.kb.restriction.domainEntity.HasValueRestriction_61420384-f623-4204-b534-df9c467d0d46 texai:org.texai.kb.restriction.domainEntity.HasValueRestriction_HasValueClass cyc:Person in texai:KBObjectContext .
-2014-06-17T13:06:09.527-05:00 1 remove texai:org.texai.kb.restriction.domainEntity.HasValueRestriction_61420384-f623-4204-b534-df9c467d0d46 rdf:type texai:org.texai.kb.restriction.domainEntity.HasValueRestriction in cyc:UniversalVocabularyMt .
-2014-06-17T13:06:09.528-05:00 1 remove texai:org.texai.kb.restriction.domainEntity.HasValueRestriction_61420384-f623-4204-b534-df9c467d0d46 owl:onProperty cyc:performedBy in texai:KBObjectContext .
-2014-06-17T13:06:09.528-05:00 1 remove texai:org.texai.kb.restriction.domainEntity.HasValueRestriction_61420384-f623-4204-b534-df9c467d0d46 texai:org.texai.kb.restriction.domainEntity.HasValueRestriction_HasValueClass cyc:Person in texai:KBObjectContext .

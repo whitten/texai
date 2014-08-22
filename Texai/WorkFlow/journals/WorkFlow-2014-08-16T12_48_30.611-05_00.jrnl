@@ -1,5 +1,0 @@
-2014-08-16T12:48:30.550-05:00 1 add texai:org.texai.workflow.domainEntity.WorkList rdf:type cyc:ObjectType in cyc:UniversalVocabularyMt .
-2014-08-16T12:48:30.626-05:00 1 add texai:org.texai.workflow.domainEntity.WorkList rdfs:subClassOf cyc:AbstractInformationStructure in cyc:UniversalVocabularyMt .
-2014-08-16T12:48:30.627-05:00 1 add texai:org.texai.workflow.domainEntity.WorkList_2dc8680b-b54a-4d7a-9970-86d19d821c8b rdf:type texai:org.texai.workflow.domainEntity.WorkList in cyc:UniversalVocabularyMt .
-2014-08-16T12:48:30.693-05:00 1 add texai:org.texai.workflow.domainEntity.WorkList_2dc8680b-b54a-4d7a-9970-86d19d821c8b texai:workListSize "0"^^<http://www.w3.org/2001/XMLSchema#int> in texai:WorkFlowContext .
-2014-08-16T12:48:30.717-05:00 1 add texai:org.texai.workflow.domainEntity.WorkList_2dc8680b-b54a-4d7a-9970-86d19d821c8b texai:workListPurposeTerm texai:NounsMissingPlural_WorkList in texai:WorkFlowContext .
