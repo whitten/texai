@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <artifactId>Texai</artifactId>
+    <groupId>org.texai</groupId>
+    <version>1.0</version>
+  </parent>
+
+  <groupId>org.texai</groupId>
+  <artifactId>Main</artifactId>
+  <version>1.0</version>
+  <name>Main</name>
+  <description>the Texai launcher</description>
+  <url>http://texai.org</url>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.1</version>
+        <configuration>
+          <showDeprecation>true</showDeprecation>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.9.1</version>
+        <configuration>
+          <source>1.8</source>
+          <encoding>utf8</encoding>
+          <quiet>false</quiet>
+          <links>
+            <link>http://java.sun.com/javase/6/docs/api/</link>
+          </links>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <!-- run each unit test in a forked JVM to avoid inconsistences due to static class state -->
+          <forkMode>always</forkMode>
+          <argLine></argLine>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.texai</groupId>
+      <artifactId>Skills</artifactId>
+      <version>1.0</version>
+    </dependency>
+  </dependencies>
+</project>

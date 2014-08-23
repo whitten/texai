@@ -174,21 +174,25 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
   /** Constructs a new singleton NodeRuntime instance.
    *
    * @param launcherRoleId the launcher role id
-   * @param nodeRuntimeId the node runtime id
+   * @param nodeRuntimeRoleId the node runtime role id
    * @param internalPort the internal port
    * @param externalPort the external port
+   * @param localURI the URI of this node in the Texai network
+   * @param bootstrapURI the bootstrap node runtime URI, or null if this is the first node in the Texai network
    * @param localAreaNetworkID the local area network ID
    */
   @SuppressWarnings("CallToThreadStartDuringObjectConstruction")
   public NodeRuntimeImpl(
           final URI launcherRoleId,
-          final URI nodeRuntimeId,
+          final URI nodeRuntimeRoleId,
           final int internalPort,
           final int externalPort,
+          final URI localURI,
+          final URI bootstrapURI,
           final UUID localAreaNetworkID) {
     //Preconditions
     assert launcherRoleId != null : "launcherRoleId must not be null";
-    assert nodeRuntimeId != null : "nodeRuntimeId must not be null";
+    assert nodeRuntimeRoleId != null : "nodeRuntimeRoleId must not be null";
     assert internalPort > 0 : "internalPort must be positive";
     assert externalPort > 0 : "externalPort must be positive";
     assert localAreaNetworkID != null : "localAreaNetworkID must not be null";
@@ -234,8 +238,8 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
     }
 
     // instantiate the node runtime configuration: nodes, roles, and state/value bindings
-    nodeRuntimeConfiguration = nodeAccess.getNodeRuntimeConfiguration(nodeRuntimeId);
-    assert nodeRuntimeConfiguration != null : "configuration not found for " + nodeRuntimeId;
+    nodeRuntimeConfiguration = nodeAccess.getNodeRuntimeConfiguration(nodeRuntimeRoleId);
+    assert nodeRuntimeConfiguration != null : "configuration not found for " + nodeRuntimeRoleId;
     LOGGER.info("instantiating " + nodeRuntimeConfiguration);
 
     assert !Logger.getLogger(RDFEntityPersister.class).isInfoEnabled();

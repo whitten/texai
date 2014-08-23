@@ -1,0 +1,113 @@
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <artifactId>Texai</artifactId>
+    <groupId>org.texai</groupId>
+    <version>1.0</version>
+  </parent>
+
+  <groupId>org.texai</groupId>
+  <artifactId>TexaiLauncher</artifactId>
+  <version>1.0</version>
+  <name>TexaiLauncher</name>
+  <url>http://texai.org</url>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.1</version>
+        <configuration>
+          <showDeprecation>true</showDeprecation>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.9.1</version>
+        <configuration>
+          <source>1.8</source>
+          <encoding>utf8</encoding>
+          <quiet>false</quiet>
+          <links>
+            <link>http://java.sun.com/javase/6/docs/api/</link>
+          </links>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <!-- run each unit test in a forked JVM to avoid inconsistences due to static class state -->
+          <forkMode>always</forkMode>
+          <argLine></argLine>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>create-executable-jar</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/all-dependencies.xml</descriptor>
+              </descriptors>
+              <archive>
+                <manifest>
+                  <mainClass>org.texai.exactEnglish.GenerateLexiconForRegularVerb</mainClass>
+                </manifest>
+              </archive>
+              <archiverConfig>
+                <duplicateBehavior>skip</duplicateBehavior>
+              </archiverConfig>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>install-to-production</id>
+            <phase>install</phase>
+            <configuration>
+              <tasks>
+                <exec dir="scripts" executable="sh" spawn="false">
+                  <arg value="install.sh"/>
+                </exec>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>org.texai</groupId>
+      <artifactId>Main</artifactId>
+      <version>1.0</version>
+    </dependency>
+  </dependencies>
+</project>

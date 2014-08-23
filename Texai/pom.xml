@@ -34,11 +34,13 @@
     <module>AlbusHCNSupport</module>
     <module>BitTorrentSupport</module>
     <module>Inference</module>
+    <module>Main</module>
     <module>Network</module>
     <module>RDFEntityManager</module>
     <module>Security</module>
     <module>Skills</module>
     <module>SSLBitTorrent</module>
+    <module>TexaiLauncher</module>
     <module>UPNPLib</module>
     <module>Utilities</module>
     <module>WebServer</module>

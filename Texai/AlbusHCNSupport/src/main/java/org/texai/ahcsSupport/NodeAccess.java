@@ -399,19 +399,19 @@ public final class NodeAccess {
 
   /** Retrieves the node runtime configuration for the given id.
    *
-   * @param nodeRuntimeId the node runtime id
+   * @param nodeRuntimeRoleId the node runtime role id
    * @return the node runtime configuration for the given id
    */
-  public synchronized NodeRuntimeConfiguration getNodeRuntimeConfiguration(final URI nodeRuntimeId) {
+  public synchronized NodeRuntimeConfiguration getNodeRuntimeConfiguration(final URI nodeRuntimeRoleId) {
     //Preconditions
-    assert nodeRuntimeId != null : "nodeRuntimeId must not be null";
+    assert nodeRuntimeRoleId != null : "nodeRuntimeRoleId must not be null";
 
     final List<NodeRuntimeConfiguration> results = rdfEntityManager.find(
             NODE_RUNTIME_CONFIGURATION_NODE_RUNTIME_ID, //predicate
-            nodeRuntimeId, // rdfValue
+            nodeRuntimeRoleId, // rdfValue
             NodeRuntimeConfiguration.class); // clazz
     if (results.isEmpty()) {
-      LOGGER.info("node runtime configuration for " + nodeRuntimeId + " was not found, existing configurations are ...");
+      LOGGER.info("node runtime configuration for " + nodeRuntimeRoleId + " was not found, existing configurations are ...");
       final Iterator<NodeRuntimeConfiguration> nodeRuntimeConfiguration_iter = rdfEntityManager.rdfEntityIterator(NodeRuntimeConfiguration.class);
       while (nodeRuntimeConfiguration_iter.hasNext()) {
         LOGGER.info("  " + nodeRuntimeConfiguration_iter.next());
@@ -420,7 +420,7 @@ public final class NodeAccess {
     } else if (results.size() == 1) {
       return results.get(0);
     } else {
-      throw new TexaiException("non-unique nodeRuntimeId fields in " + results);
+      throw new TexaiException("non-unique nodeRuntimeRoleId fields in " + results);
     }
   }
 
