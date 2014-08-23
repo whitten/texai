@@ -1,0 +1,369 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<queries>
+
+<QueryContainer>
+<name>display a chat log on your console</name>
+<SPARQL>
+<![CDATA[
+PREFIX cyc: <http://sw.cyc.com/2006/07/27/cyc/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX texai: <http://texai.org/texai/>
+
+SELECT ?ChatLog
+WHERE {
+    _:Addressee texai:fcgDiscourseRole texai:Texai .
+    _:Addressee rdf:type texai:Texai .
+    _:Assignment-Obligation cyc:allottedAgents texai:Texai .
+    _:Assignment-Obligation cyc:assigner texai:User_stephenreed .
+    _:Assignment-Obligation texai:assignmentPostCondition _:DisplayingSomething .
+    _:Assignment-Obligation rdf:type cyc:Assignment-Obligation .
+    ?ChatLog rdf:type cyc:Console-Device .
+    ?ChatLog rdf:type texai:ChatLog .
+    ?ChatLog rdf:type texai:IndefiniteThingInThisDiscourse .
+    _:DisplayingSomething cyc:actionFulfillsAssignment _:Assignment-Obligation .
+    _:DisplayingSomething cyc:performedBy texai:Texai .
+    _:DisplayingSomething cyc:situationConstituents texai:Texai .
+    _:DisplayingSomething cyc:thingDisplayed ?ChatLog .
+    _:DisplayingSomething texai:fcgDiscourseRole texai:Texai .
+    _:DisplayingSomething texai:situationHappeningOnDate cyc:Now .
+    _:DisplayingSomething rdf:type cyc:DisplayingSomething .
+    _:OnPhysicalSituation cyc:situationConstituents ?ChatLog .
+    _:OnPhysicalSituation cyc:situationConstituents texai:Texai .
+    _:OnPhysicalSituation rdf:type texai:OnPhysicalSituation .
+    _:PossessionSituation texai:possessedThing ?ChatLog .
+    _:PossessionSituation texai:possessor _:Addressee .
+    _:PossessionSituation texai:situationHappeningOnDate cyc:Now .
+    _:PossessionSituation rdf:type texai:PossessionSituation .
+}
+]]>
+</SPARQL>
+</QueryContainer>
+
+<QueryContainer>
+<name>hello</name>
+<SPARQL>
+<![CDATA[
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX owl: <http://www.w3.org/2002/07/owl#>
+  PREFIX cyc: <http://sw.cyc.com/2006/07/27/cyc/>
+  PREFIX texai: <http://texai.org/texai/>
+
+  SELECT ?Speaker
+  WHERE {
+    _:GreetingSomeone1 rdf:type cyc:GreetingSomeone .
+    _:GreetingSomeone1 cyc:communicatorOfInfo ?Speaker .
+    _:GreetingSomeone1 cyc:infoCommunicatedTo ?Addressee .
+  FILTER (
+    !sameTerm(?Speaker, ?Addressee))  
+  }
+]]>
+</SPARQL>
+</QueryContainer>
+
+<QueryContainer>
+<name>help</name>
+<SPARQL>
+<![CDATA[
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX owl: <http://www.w3.org/2002/07/owl#>
+  PREFIX cyc: <http://sw.cyc.com/2006/07/27/cyc/>
+  PREFIX texai: <http://texai.org/texai/>
+
+  SELECT ?Speaker
+  WHERE {
+    _:Assignment-Obligation cyc:allottedAgents texai:Texai .
+    _:Assignment-Obligation cyc:assigner ?Speaker .
+    _:Assignment-Obligation texai:assignmentPostCondition _:HelpingAnAgent .
+    _:Assignment-Obligation rdf:type cyc:Assignment-Obligation .
+    _:HelpingAnAgent cyc:actionFulfillsAssignment _:Assignment-Obligation .
+    _:HelpingAnAgent texai:benefactor texai:Texai .
+    _:HelpingAnAgent texai:situationHappeningOnDate cyc:Now .
+    _:HelpingAnAgent rdf:type cyc:HelpingAnAgent .
+  }
+]]>
+</SPARQL>
+</QueryContainer>
+
+<QueryContainer>
+<name>lexical_word</name>
+<SPARQL>
+<![CDATA[
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX owl: <http://www.w3.org/2002/07/owl#>
+  PREFIX cyc: <http://sw.cyc.com/2006/07/27/cyc/>
+  PREFIX texai: <http://texai.org/texai/>
+
+  SELECT ?CharacterString
+  WHERE {
+    _:LexicalWord1 rdf:type cyc:LexicalWord .
+    _:LexicalWord1 cyc:wordStrings ?CharacterString .
+  }
+]]>
+</SPARQL>
+</QueryContainer>
+
+<QueryContainer>
+<name>no</name>
+<SPARQL>
+<![CDATA[
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX owl: <http://www.w3.org/2002/07/owl#>
+  PREFIX cyc: <http://sw.cyc.com/2006/07/27/cyc/>
+  PREFIX texai: <http://texai.org/texai/>
+
+  SELECT ?Speaker ?Addressee
+  WHERE {
+    _:Negating-CommunicationAct1 rdf:type texai:Negating-CommunicationAct .
+    _:Negating-CommunicationAct1 cyc:communicatorOfInfo ?Speaker .
+    _:Negating-CommunicationAct1 cyc:infoCommunicatedTo ?Addressee .
+  FILTER (
+    !sameTerm(?Speaker, ?Addressee))  
+  }
+]]>
+</SPARQL>
+</QueryContainer>
+
+<QueryContainer>
+<name>prompt_me</name>
+<SPARQL>
+<![CDATA[
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX cyc: <http://sw.cyc.com/2006/07/27/cyc/>
+  PREFIX texai: <http://texai.org/texai/>
+
+  SELECT ?prompter
+  WHERE {
+   _:Assignment-Obligation cyc:allottedAgents texai:Texai .
+   _:Assignment-Obligation cyc:assigner ?user .
+   _:Assignment-Obligation texai:assignmentPostCondition _:PromptingSomeone .
+   _:Assignment-Obligation rdf:type cyc:Assignment-Obligation .
+   _:IntelligentAgent rdf:type cyc:IntelligentAgent .
+   _:PromptingSomeone cyc:actionFulfillsAssignment _:Assignment-Obligation .
+   _:PromptingSomeone texai:promptedAgent _:IntelligentAgent .
+   _:PromptingSomeone texai:prompter ?prompter .
+   _:PromptingSomeone texai:situationHappeningOnDate cyc:Now .
+   _:PromptingSomeone rdf:type texai:PromptingSomeone .
+
+  }
+]]>
+</SPARQL>
+</QueryContainer>
+
+<QueryContainer>
+<name>skip</name>
+<SPARQL>
+<![CDATA[
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX cyc: <http://sw.cyc.com/2006/07/27/cyc/>
+  PREFIX texai: <http://texai.org/texai/>
+
+  SELECT ?speaker
+  WHERE {
+   _:Assignment-Obligation cyc:allottedAgents texai:Texai .
+   _:Assignment-Obligation cyc:assigner ?speaker .
+   _:Assignment-Obligation texai:assignmentPostCondition _:SkippingSomething .
+   _:Assignment-Obligation rdf:type cyc:Assignment-Obligation .
+   _:SkippingSomething cyc:actionFulfillsAssignment _:Assignment-Obligation .
+   _:SkippingSomething cyc:situationConstituents texai:Texai .
+   _:SkippingSomething texai:situationHappeningOnDate cyc:Now .
+   _:SkippingSomething texai:skipper texai:Texai .
+   _:SkippingSomething rdf:type texai:SkippingSomething .
+  }
+]]>
+</SPARQL>
+</QueryContainer>
+
+<QueryContainer>
+<name>SUBJECT_LEXICAL_WORD</name>
+<SPARQL>
+<![CDATA[
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX cyc: <http://sw.cyc.com/2006/07/27/cyc/>
+  PREFIX texai: <http://texai.org/texai/>
+
+  SELECT ?CharacterString
+  WHERE {
+    _:LexicalWord1 rdf:type texai:FCGClauseSubject .
+    _:LexicalWord1 rdf:type cyc:LexicalWord .
+    _:LexicalWord1 cyc:wordStrings ?CharacterString .
+  }
+]]>
+</SPARQL>
+</QueryContainer>
+
+<QueryContainer>
+<name>the_plural_is_X</name>
+<SPARQL>
+<![CDATA[
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX cyc: <http://sw.cyc.com/2006/07/27/cyc/>
+  PREFIX texai: <http://texai.org/texai/>
+
+  SELECT ?PluralExpression1 ?CharacterString
+  WHERE {
+    ?PluralExpression1 rdf:type texai:PluralExpression .
+    ?PluralExpression1 rdf:type texai:FCGClauseSubject .
+    ?LexicalWord2 rdf:type cyc:LexicalWord .
+    ?LexicalWord2 cyc:wordStrings ?CharacterString .
+    _:ImplicationSituation4 texai:implicationAntecedant ?PluralExpression1 .
+    _:ImplicationSituation4 texai:implicationConsequent ?LexicalWord2 .
+  }
+]]>
+</SPARQL>
+</QueryContainer>
+
+<QueryContainer>
+<name>wrong</name>
+<SPARQL>
+<![CDATA[
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX cyc: <http://sw.cyc.com/2006/07/27/cyc/>
+  PREFIX texai: <http://texai.org/texai/>
+
+  SELECT ?FalseSituation1
+  WHERE {
+    ?FalseSituation1 rdf:type texai:FalseSituation .
+  }
+]]>
+</SPARQL>
+</QueryContainer>
+
+<QueryContainer>
+<name>X_is_a_count_noun</name>
+<SPARQL>
+<![CDATA[
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX cyc: <http://sw.cyc.com/2006/07/27/cyc/>
+  PREFIX texai: <http://texai.org/texai/>
+
+  SELECT ?LexicalWord1 ?CharacterString
+  WHERE {
+    ?LexicalWord1 cyc:wordStrings ?CharacterString .
+    ?LexicalWord1 rdf:type cyc:LexicalWord .
+    ?CountNoun2 rdf:type cyc:CountNoun .
+    _:ImplicationSituation3 texai:implicationAntecedant ?LexicalWord1 .
+    _:ImplicationSituation3 texai:implicationConsequent ?CountNoun2 .
+  }
+]]>
+</SPARQL>
+</QueryContainer>
+
+<QueryContainer>
+<name>X_is_a_proper_noun</name>
+<SPARQL>
+<![CDATA[
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX cyc: <http://sw.cyc.com/2006/07/27/cyc/>
+  PREFIX texai: <http://texai.org/texai/>
+
+  SELECT ?LexicalWord1 ?CharacterString
+  WHERE {
+    ?LexicalWord1 cyc:wordStrings ?CharacterString .
+    ?LexicalWord1 rdf:type cyc:LexicalWord .
+    ?ProperCountNoun2 rdf:type cyc:ProperCountNoun .
+    _:ImplicationSituation3 texai:implicationAntecedant ?LexicalWord1 .
+    _:ImplicationSituation3 texai:implicationConsequent ?ProperCountNoun2 .
+  }
+]]>
+</SPARQL>
+</QueryContainer>
+
+<QueryContainer>
+<name>X_is_a_Y</name>
+<SPARQL>
+<![CDATA[
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX owl: <http://www.w3.org/2002/07/owl#>
+  PREFIX cyc: <http://sw.cyc.com/2006/07/27/cyc/>
+  PREFIX texai: <http://texai.org/texai/>
+
+  SELECT ?Individual ?Thing
+  WHERE {
+    ?Object rdf:type ?Thing .
+    ?Object rdf:type texai:IndefiniteThingInThisDiscourse .
+    _:ImplicationSituation2 texai:implicationAntecedant ?Individual .
+    _:ImplicationSituation2 texai:implicationConsequent ?Object .
+  FILTER (
+    !sameTerm(?Thing, texai:FCGClauseSubject) && 
+    !sameTerm(?Thing, texai:IndefiniteThingInThisDiscourse))  
+  }
+]]>
+</SPARQL>
+</QueryContainer>
+
+<QueryContainer>
+<name>yes</name>
+<SPARQL>
+<![CDATA[
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX owl: <http://www.w3.org/2002/07/owl#>
+  PREFIX cyc: <http://sw.cyc.com/2006/07/27/cyc/>
+  PREFIX texai: <http://texai.org/texai/>
+
+  SELECT ?Speaker ?Addressee
+  WHERE {
+    _:Affirming-CommunicationAct1 rdf:type texai:Affirming-CommunicationAct .
+    _:Affirming-CommunicationAct1 cyc:communicatorOfInfo ?Speaker .
+    _:Affirming-CommunicationAct1 cyc:infoCommunicatedTo ?Addressee .
+  FILTER (
+    !sameTerm(?Speaker, ?Addressee))
+  }
+]]>
+</SPARQL>
+</QueryContainer>
+
+<QueryContainer>
+<name>what_lexical_entries_do_you_know_about_Y</name>
+<SPARQL>
+<![CDATA[
+PREFIX cyc: <http://sw.cyc.com/2006/07/27/cyc/>
+  PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX texai: <http://texai.org/texai/>
+
+SELECT ?word
+WHERE {
+ _:AnswerToWhatQuery rdf:type texai:AnswerToWhatQuery .
+ _:AnswerToWhatQuery cyc:groupMemberType texai:LexiconEntry .
+ _:AnswerToWhatQuery rdf:type cyc:Group .
+ _:IntelligentAgent owl:sameAs texai:Texai .
+ _:LexicalWord cyc:wordStrings ?word .
+ _:LexicalWord rdf:type cyc:LexicalWord .
+ _:PurposefulAction-Auxiliary texai:knower _:IntelligentAgent .
+ _:PurposefulAction-Auxiliary texai:situationHappeningOnDate cyc:Now .
+ _:PurposefulAction-Auxiliary texai:situationQueryVariable _:IntelligentAgent .
+ _:PurposefulAction-Auxiliary texai:thingKnown _:AnswerToWhatQuery .
+ _:PurposefulAction-Auxiliary rdf:type texai:KnowingSomething .
+ _:RegardingSituation texai:regardingSituation_Object _:LexicalWord .
+ _:RegardingSituation rdf:type texai:RegardingSituation .
+}
+]]>
+</SPARQL>
+</QueryContainer>
+
+<QueryContainer>
+<name>quit</name>
+<SPARQL>
+<![CDATA[
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX cyc: <http://sw.cyc.com/2006/07/27/cyc/>
+  PREFIX texai: <http://texai.org/texai/>
+
+  SELECT ?addressee
+  WHERE {
+   _:Assignment-Obligation cyc:allottedAgents ?addressee .
+   _:Assignment-Obligation cyc:assigner ?user .
+   _:Assignment-Obligation texai:assignmentPostCondition _:DiscontinuingAnActivity .
+   _:Assignment-Obligation rdf:type cyc:Assignment-Obligation .
+   _:DiscontinuingAnActivity cyc:actionFulfillsAssignment _:Assignment-Obligation .
+   _:DiscontinuingAnActivity texai:quitter ?addressee .
+   _:DiscontinuingAnActivity texai:situationHappeningOnDate cyc:Now .
+   _:DiscontinuingAnActivity rdf:type cyc:DiscontinuingAnActivity .
+  }
+]]>
+</SPARQL>
+</QueryContainer>
+
+</queries>
+

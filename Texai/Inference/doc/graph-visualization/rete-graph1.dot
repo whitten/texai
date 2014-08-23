@@ -1,0 +1,125 @@
+digraph "rete-graph1" {
+  ratio = "auto" ;
+  mincross = 2.0 ;
+subgraph cluster_test1 {
+  label = "test1"
+  N1 [
+
+    style = filled
+    fillcolor = green
+    label = "DummyTop1" ];
+  N2 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 1\n(?Individual rdf:type ?Thing)" ];
+  N3 [
+
+    style = filled
+    fillcolor = greenyellow
+    label = "BetaMemory1" ];
+  N4 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 2\n(?Individual rdf:type texai:FCGClauseSubject)" ];
+  N5 [
+
+    style = filled
+    fillcolor = greenyellow
+    label = "BetaMemory2" ];
+  N6 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 3\n(?Individual rdf:type texai:IndefiniteThingInThisDiscourse)" ];
+  N7 [
+
+    style = filled
+    fillcolor = greenyellow
+    label = "BetaMemory3" ];
+  N8 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 4\n(_:Situation_Localized rdf:type cyc:Situation-Localized)" ];
+  N9 [
+
+    style = filled
+    fillcolor = greenyellow
+    label = "BetaMemory4" ];
+  N10 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 5\n(_:Situation_Localized cyc:situationConstituents ?Individual)" ];
+  N11 [
+
+    style = filled
+    fillcolor = greenyellow
+    label = "BetaMemory5" ];
+  N12 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 6\n(_:Situation_Localized texai:situationHappeningOnDate cyc:Now)" ];
+  N13 [
+
+    shape = box
+    style = filled
+    fillcolor = cornflowerblue
+    label = "Production test1" ];
+  N1 -> N2;
+  N2 -> N3;
+  N3 -> N4;
+  N4 -> N5;
+  N5 -> N6;
+  N6 -> N7;
+  N7 -> N8;
+  N8 -> N9;
+  N9 -> N10;
+  N10 -> N11;
+  N11 -> N12;
+  N12 -> N13;
+}
+  N14 [
+    style = filled
+    fillcolor = cornflowerblue
+    label = "Entrance" ];
+  N15 [
+    style = filled
+    fillcolor = cyan
+    label = "pattern 'cyc:situationConstituents'" ];
+  N14 -> N15;
+  N15 -> N10;
+  N16 [
+    style = filled
+    fillcolor = cyan
+    label = "pattern 'rdf:type'" ];
+  N14 -> N16;
+  N16 -> N2;
+  N17 [
+    style = filled
+    fillcolor = cyan
+    label = "pattern 'rdf:type cyc:Situation-Localized'" ];
+  N14 -> N17;
+  N17 -> N8;
+  N18 [
+    style = filled
+    fillcolor = cyan
+    label = "pattern 'rdf:type texai:FCGClauseSubject'" ];
+  N14 -> N18;
+  N18 -> N4;
+  N19 [
+    style = filled
+    fillcolor = cyan
+    label = "pattern 'rdf:type texai:IndefiniteThingInThisDiscourse'" ];
+  N14 -> N19;
+  N19 -> N6;
+  N20 [
+    style = filled
+    fillcolor = cyan
+    label = "pattern 'texai:situationHappeningOnDate cyc:Now'" ];
+  N14 -> N20;
+  N20 -> N12;
+}

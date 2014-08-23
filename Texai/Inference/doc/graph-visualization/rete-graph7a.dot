@@ -1,0 +1,121 @@
+digraph "rete-graph7a" {
+  ratio = "auto" ;
+  mincross = 2.0 ;
+subgraph cluster_test1 {
+  label = "test1"
+  N1 [
+
+    style = filled
+    fillcolor = green
+    label = "DummyTop1" ];
+  N2 [
+
+    shape = circle fixedsize = true height = 0.9
+    style = filled
+    fillcolor = magenta
+    label = "Join1" ];
+  N3 [
+
+    style = filled
+    fillcolor = green
+    label = "BetaMemory1\n?Individual=texai:SituationLocalized1 ?Thing=cyc:Situation-Localized\n?Individual=texai:Sam ?Thing=cyc:Agent\n* ?Individual=texai:Buster ?Thing=cyc:DomesticCat" ];
+  N4 [
+
+    shape = circle fixedsize = true height = 0.9
+    style = filled
+    fillcolor = magenta
+    label = "Join2" ];
+  N5 [
+
+    style = filled
+    fillcolor = green
+    label = "BetaMemory2\n* ?Individual=texai:Buster" ];
+  N6 [
+
+    shape = circle fixedsize = true height = 0.9
+    style = filled
+    fillcolor = magenta
+    label = "Join3" ];
+  N7 [
+
+    style = filled
+    fillcolor = green
+    label = "BetaMemory3\n* ?Individual=texai:Buster" ];
+  N8 [
+
+    shape = circle fixedsize = true height = 0.9
+    style = filled
+    fillcolor = magenta
+    label = "Join4" ];
+  N9 [
+
+    style = filled
+    fillcolor = green
+    label = "BetaMemory4\n* Situation_Localized=texai:SituationLocalized1" ];
+  N10 [
+
+    shape = circle fixedsize = true height = 0.9
+    style = filled
+    fillcolor = magenta
+    label = "Join5" ];
+  N11 [
+
+    style = filled
+    fillcolor = green
+    label = "BetaMemory5\n* Situation_Localized=texai:SituationLocalized1 ?Individual=texai:Buster" ];
+  N12 [
+
+    shape = circle fixedsize = true height = 0.9
+    style = filled
+    fillcolor = magenta
+    label = "Join6" ];
+  N13 [
+
+    shape = box
+    style = filled
+    fillcolor = gold
+    label = "Production test1\n* Situation_Localized=texai:SituationLocalized1" ];
+  N1 -> N2;
+  N2 -> N3;
+  N3 -> N4;
+  N4 -> N5;
+  N5 -> N6;
+  N6 -> N7;
+  N7 -> N8;
+  N8 -> N9;
+  N9 -> N10;
+  N10 -> N11;
+  N11 -> N12;
+  N12 -> N13;
+}
+  N15 [
+    style = filled
+    fillcolor = cyan3
+    label = "pattern 'cyc:situationConstituents'\n(texai:SituationLocalized1 cyc:situationConstituents texai:Buster)" ];
+  N15 -> N10;
+  N16 [
+    style = filled
+    fillcolor = cyan3
+    label = "pattern 'rdf:type'\n(texai:SituationLocalized1 rdf:type cyc:Situation-Localized)\n(texai:Sam rdf:type cyc:Agent)\n(texai:Buster rdf:type cyc:DomesticCat)" ];
+  N16 -> N2;
+  N17 [
+    style = filled
+    fillcolor = cyan3
+    label = "pattern 'rdf:type cyc:Situation-Localized'\n(texai:SituationLocalized1 rdf:type cyc:Situation-Localized)" ];
+  N17 -> N8;
+  N18 [
+    style = filled
+    fillcolor = cyan3
+    label = "pattern 'rdf:type texai:FCGClauseSubject'\n(texai:Buster rdf:type texai:FCGClauseSubject)" ];
+  N18 -> N4;
+  N19 [
+    style = filled
+    fillcolor = cyan3
+    label = "pattern 'rdf:type texai:IndefiniteThingInThisDiscourse'\n(texai:Buster rdf:type texai:IndefiniteThingInThisDiscourse)" ];
+  N19 -> N6;
+  N20 [
+    style = filled
+    fillcolor = cyan3
+    label = "pattern 'texai:situationHappeningOnDate cyc:Now'\n(texai:SituationLocalized1 texai:situationHappeningOnDate cyc:Now)" ];
+  N20 -> N12;
+}

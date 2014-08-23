@@ -1,0 +1,371 @@
+digraph "rete-graph3" {
+  ratio = "auto" ;
+  mincross = 2.0 ;
+subgraph cluster_test2 {
+  label = "test2"
+  N1 [
+
+    style = filled
+    fillcolor = green
+    label = "DummyTop1" ];
+  N2 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 1\n(_:Agent3 rdf:type cyc:Agent)" ];
+  N3 [
+
+    style = filled
+    fillcolor = green
+    label = "BetaMemory1\nAgent3=texai:Sam" ];
+  N4 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 2\n(_:Agent3 texai:fcgDiscourseRole ?Speaker)" ];
+  N5 [
+
+    style = filled
+    fillcolor = greenyellow
+    label = "BetaMemory2" ];
+  N6 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 3\n(_:Agent3 rdf:type texai:FCGClauseObject)" ];
+  N7 [
+
+    style = filled
+    fillcolor = greenyellow
+    label = "BetaMemory3" ];
+  N8 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 4\n(_:Assignment-Obligation1 rdf:type cyc:Assignment-Obligation)" ];
+  N9 [
+
+    style = filled
+    fillcolor = greenyellow
+    label = "BetaMemory4" ];
+  N10 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 5\n(_:Assignment-Obligation1 cyc:allottedAgents ?prompter)" ];
+  N11 [
+
+    style = filled
+    fillcolor = greenyellow
+    label = "BetaMemory5" ];
+  N12 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 6\n(_:Assignment-Obligation1 cyc:assigner ?Speaker)" ];
+  N13 [
+
+    style = filled
+    fillcolor = greenyellow
+    label = "BetaMemory6" ];
+  N14 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 7\n(_:Assignment-Obligation1 texai:assignmentPostCondition _:PromptingSomeone2)" ];
+  N15 [
+
+    style = filled
+    fillcolor = greenyellow
+    label = "BetaMemory7" ];
+  N16 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 8\n(_:PromptingSomeone2 rdf:type cyc:PromptingSomeone)" ];
+  N17 [
+
+    style = filled
+    fillcolor = greenyellow
+    label = "BetaMemory8" ];
+  N18 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 9\n(_:PromptingSomeone2 cyc:actionFulfillsAssignment _:Assignment-Obligation1)" ];
+  N19 [
+
+    style = filled
+    fillcolor = greenyellow
+    label = "BetaMemory9" ];
+  N20 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 10\n(_:PromptingSomeone2 cyc:communicatorOfInfo ?prompter)" ];
+  N21 [
+
+    style = filled
+    fillcolor = greenyellow
+    label = "BetaMemory10" ];
+  N22 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 11\n(_:PromptingSomeone2 cyc:recipientOfInfo texai:Agent3)" ];
+  N23 [
+
+    style = filled
+    fillcolor = greenyellow
+    label = "BetaMemory11" ];
+  N24 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 12\n(_:PromptingSomeone2 cyc:situationConstituents ?prompter)" ];
+  N25 [
+
+    style = filled
+    fillcolor = greenyellow
+    label = "BetaMemory12" ];
+  N26 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 13\n(_:PromptingSomeone2 texai:fcgDiscourseRole ?prompter)" ];
+  N27 [
+
+    style = filled
+    fillcolor = greenyellow
+    label = "BetaMemory13" ];
+  N28 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 14\n(_:PromptingSomeone2 texai:situationHappeningOnDate cyc:Now)" ];
+  N29 [
+
+    shape = box
+    style = filled
+    fillcolor = cornflowerblue
+    label = "Production test2" ];
+  N1 -> N2;
+  N2 -> N3;
+  N3 -> N4;
+  N4 -> N5;
+  N5 -> N6;
+  N6 -> N7;
+  N7 -> N8;
+  N8 -> N9;
+  N9 -> N10;
+  N10 -> N11;
+  N11 -> N12;
+  N12 -> N13;
+  N13 -> N14;
+  N14 -> N15;
+  N15 -> N16;
+  N16 -> N17;
+  N17 -> N18;
+  N18 -> N19;
+  N19 -> N20;
+  N20 -> N21;
+  N21 -> N22;
+  N22 -> N23;
+  N23 -> N24;
+  N24 -> N25;
+  N25 -> N26;
+  N26 -> N27;
+  N27 -> N28;
+  N28 -> N29;
+}
+subgraph cluster_test1 {
+  label = "test1"
+  N30 [
+
+    style = filled
+    fillcolor = green
+    label = "DummyTop2" ];
+  N31 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 15\n(?Individual rdf:type ?Thing)" ];
+  N32 [
+
+    style = filled
+    fillcolor = green
+    label = "BetaMemory14\n?Individual=texai:SituationLocalized1 ?Thing=cyc:Situation-Localized\n?Individual=texai:Sam ?Thing=cyc:Agent\n* ?Individual=texai:Buster ?Thing=cyc:DomesticCat" ];
+  N33 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 16\n(?Individual rdf:type texai:FCGClauseSubject)" ];
+  N34 [
+
+    style = filled
+    fillcolor = green
+    label = "BetaMemory15\n* ?Individual=texai:Buster" ];
+  N35 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 17\n(?Individual rdf:type texai:IndefiniteThingInThisDiscourse)" ];
+  N36 [
+
+    style = filled
+    fillcolor = green
+    label = "BetaMemory16\n* ?Individual=texai:Buster" ];
+  N37 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 18\n(_:Situation_Localized rdf:type cyc:Situation-Localized)" ];
+  N38 [
+
+    style = filled
+    fillcolor = green
+    label = "BetaMemory17\n* Situation_Localized=texai:SituationLocalized1" ];
+  N39 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 19\n(_:Situation_Localized cyc:situationConstituents ?Individual)" ];
+  N40 [
+
+    style = filled
+    fillcolor = green
+    label = "BetaMemory18\n* Situation_Localized=texai:SituationLocalized1 ?Individual=texai:Buster" ];
+  N41 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 20\n(_:Situation_Localized texai:situationHappeningOnDate cyc:Now)" ];
+  N42 [
+
+    shape = box
+    style = filled
+    fillcolor = gold
+    label = "Production test1\n* Situation_Localized=texai:SituationLocalized1" ];
+  N30 -> N31;
+  N31 -> N32;
+  N32 -> N33;
+  N33 -> N34;
+  N34 -> N35;
+  N35 -> N36;
+  N36 -> N37;
+  N37 -> N38;
+  N38 -> N39;
+  N39 -> N40;
+  N40 -> N41;
+  N41 -> N42;
+}
+  N43 [
+    style = filled
+    fillcolor = cornflowerblue
+    label = "Entrance" ];
+  N44 [
+    style = filled
+    fillcolor = cyan
+    label = "pattern 'cyc:actionFulfillsAssignment'" ];
+  N43 -> N44;
+  N44 -> N18;
+  N45 [
+    style = filled
+    fillcolor = cyan
+    label = "pattern 'cyc:allottedAgents'" ];
+  N43 -> N45;
+  N45 -> N10;
+  N46 [
+    style = filled
+    fillcolor = cyan
+    label = "pattern 'cyc:assigner'" ];
+  N43 -> N46;
+  N46 -> N12;
+  N47 [
+    style = filled
+    fillcolor = cyan
+    label = "pattern 'cyc:communicatorOfInfo'" ];
+  N43 -> N47;
+  N47 -> N20;
+  N48 [
+    style = filled
+    fillcolor = cyan
+    label = "pattern 'cyc:recipientOfInfo texai:Agent3'" ];
+  N43 -> N48;
+  N48 -> N22;
+  N49 [
+    style = filled
+    fillcolor = cyan3
+    label = "pattern 'cyc:situationConstituents'\n(texai:SituationLocalized1 cyc:situationConstituents texai:Buster)" ];
+  N43 -> N49;
+  N49 -> N24;
+  N49 -> N39;
+  N50 [
+    style = filled
+    fillcolor = cyan3
+    label = "pattern 'rdf:type'\n(texai:SituationLocalized1 rdf:type cyc:Situation-Localized)\n(texai:Sam rdf:type cyc:Agent)\n(texai:Buster rdf:type cyc:DomesticCat)" ];
+  N43 -> N50;
+  N50 -> N31;
+  N51 [
+    style = filled
+    fillcolor = cyan3
+    label = "pattern 'rdf:type cyc:Agent'\n(texai:Sam rdf:type cyc:Agent)" ];
+  N43 -> N51;
+  N51 -> N2;
+  N52 [
+    style = filled
+    fillcolor = cyan
+    label = "pattern 'rdf:type cyc:Assignment-Obligation'" ];
+  N43 -> N52;
+  N52 -> N8;
+  N53 [
+    style = filled
+    fillcolor = cyan
+    label = "pattern 'rdf:type cyc:PromptingSomeone'" ];
+  N43 -> N53;
+  N53 -> N16;
+  N54 [
+    style = filled
+    fillcolor = cyan3
+    label = "pattern 'rdf:type cyc:Situation-Localized'\n(texai:SituationLocalized1 rdf:type cyc:Situation-Localized)" ];
+  N43 -> N54;
+  N54 -> N37;
+  N55 [
+    style = filled
+    fillcolor = cyan
+    label = "pattern 'rdf:type texai:FCGClauseObject'" ];
+  N43 -> N55;
+  N55 -> N6;
+  N56 [
+    style = filled
+    fillcolor = cyan3
+    label = "pattern 'rdf:type texai:FCGClauseSubject'\n(texai:Buster rdf:type texai:FCGClauseSubject)" ];
+  N43 -> N56;
+  N56 -> N33;
+  N57 [
+    style = filled
+    fillcolor = cyan3
+    label = "pattern 'rdf:type texai:IndefiniteThingInThisDiscourse'\n(texai:Buster rdf:type texai:IndefiniteThingInThisDiscourse)" ];
+  N43 -> N57;
+  N57 -> N35;
+  N58 [
+    style = filled
+    fillcolor = cyan
+    label = "pattern 'texai:assignmentPostCondition'" ];
+  N43 -> N58;
+  N58 -> N14;
+  N59 [
+    style = filled
+    fillcolor = cyan
+    label = "pattern 'texai:fcgDiscourseRole'" ];
+  N43 -> N59;
+  N59 -> N26;
+  N59 -> N4;
+  N60 [
+    style = filled
+    fillcolor = cyan3
+    label = "pattern 'texai:situationHappeningOnDate cyc:Now'\n(texai:SituationLocalized1 texai:situationHappeningOnDate cyc:Now)" ];
+  N43 -> N60;
+  N60 -> N28;
+  N60 -> N41;
+}

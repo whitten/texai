@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<queries>
+<QueryContainer>
+<name>X_is_a_Y</name>
+<SPARQL>
+<![CDATA[
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX owl: <http://www.w3.org/2002/07/owl#>
+  PREFIX cyc: <http://sw.cyc.com/2006/07/27/cyc/>
+  PREFIX texai: <http://texai.org/texai/>
+
+  SELECT ?Individual ?Thing
+  WHERE {
+    ?Individual owl:sameAs ?Individual .
+    ?Individual rdf:type ?Thing .
+    ?Individual rdf:type texai:FCGClauseSubject .
+    ?Individual rdf:type texai:IndefiniteThingInThisDiscourse .
+    _:Situation_Localized rdf:type cyc:Situation-Localized .
+    _:Situation_Localized cyc:situationConstituents ?Individual .
+    _:Situation_Localized texai:situationHappeningOnDate cyc:Now .
+  FILTER (
+    !sameTerm(?Thing, texai:FCGClauseSubject) && 
+    !sameTerm(?Thing, texai:IndefiniteThingInThisDiscourse))  
+  }
+]]>
+</SPARQL>
+</QueryContainer>
+
+<QueryContainer>
+<name>X_is_a_proper_noun</name>
+<SPARQL>
+<![CDATA[
+  PREFIX cyc: <http://sw.cyc.com/2006/07/27/cyc/>
+  PREFIX texai: <http://texai.org/texai/>
+
+  SELECT ?LexicalWord1 ?string
+  WHERE {
+    ?LexicalWord1 cyc:wordStrings ?string .
+    ?LexicalWord1 texai:fcgStatus texai:SingleObject .
+    ?LexicalWord1 texai:typeOrSubClassOf cyc:LexicalWord .
+    ?LexicalWord1 texai:typeOrSubClassOf cyc:ProperCountNoun .
+  }
+]]>
+</SPARQL>
+</QueryContainer>
+</queries>

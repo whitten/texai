@@ -1,0 +1,13 @@
+(
+description: "if there is a room then it is likely that a table is in the room"
+context: InferenceRuleTestContext
+if:
+   ?situation-localized rdf:type cyc:Situation-Localized .
+   ?room rdf:type cyc:RoomInAConstruction .
+   ?situation-localized cyc:situationConstituents ?room .
+then:
+   _:in-completely-situation-localized rdf:type InCompletelySituationLocalized .
+   ?situation-localized likelySubSituations _:in-completely-situation-localized .
+   _:table rdf:type cyc:Table_PieceOfFurniture .
+   _:table in-ContCompletely ?room .
+)

@@ -1,0 +1,8 @@
+DummyTop1  [DummyTopNode]
+Join 1\n(?Agent1 texai:parentOf ?Agent2)  [JoinNode ?Agent1 texai:parentOf ?Agent2 .]
+BetaMemory1\n?Agent1=texai:Cathy ?Agent2=texai:David\n?Agent1=texai:Betty ?Agent2=texai:Cathy\n* ?Agent1=texai:Alfred ?Agent2=texai:Betty  [BetaMemoryNode [Token (texai:Cathy texai:parentOf texai:David) ?Agent1=texai:Cathy ?Agent2=texai:David], Token (texai:Betty texai:parentOf texai:Cathy) ?Agent1=texai:Betty ?Agent2=texai:Cathy], Token (texai:Alfred texai:parentOf texai:Betty) ?Agent1=texai:Alfred ?Agent2=texai:Betty]]]
+Join 2\n(?Agent2 texai:parentOf ?Agent3)  [JoinNode ?Agent2 texai:parentOf ?Agent3 .]
+BetaMemory2\n* ?Agent2=texai:Betty ?Agent3=texai:Cathy  [BetaMemoryNode [Token (texai:Betty texai:parentOf texai:Cathy) ?Agent2=texai:Betty ?Agent3=texai:Cathy]]]
+Join 3\n(?Agent3 texai:parentOf ?Agent4)  [JoinNode ?Agent3 texai:parentOf ?Agent4 .]
+Production test3\n* ?Agent3=texai:Cathy ?Agent4=texai:David  [BetaMemoryNode test3 [Token (texai:Cathy texai:parentOf texai:David) ?Agent3=texai:Cathy ?Agent4=texai:David]]]
+Alpha1  [AlphaMemory texai:parentOf]

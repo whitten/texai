@@ -1,0 +1,61 @@
+digraph "rete-graph9" {
+  ratio = "auto" ;
+  mincross = 2.0 ;
+subgraph cluster_test3 {
+  label = "test3"
+  N1 [
+
+    style = filled
+    fillcolor = green
+    label = "DummyTop1" ];
+  N2 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 1\n(?Agent1 texai:parentOf ?Agent2)" ];
+  N3 [
+
+    style = filled
+    fillcolor = green
+    label = "BetaMemory1\n?Agent1=texai:Cathy ?Agent2=texai:David\n?Agent1=texai:Betty ?Agent2=texai:Cathy\n* ?Agent1=texai:Alfred ?Agent2=texai:Betty" ];
+  N4 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 2\n(?Agent2 texai:parentOf ?Agent3)" ];
+  N5 [
+
+    style = filled
+    fillcolor = green
+    label = "BetaMemory2\n* ?Agent2=texai:Betty ?Agent3=texai:Cathy" ];
+  N6 [
+
+    style = filled
+    fillcolor = magenta
+    label = "Join 3\n(?Agent3 texai:parentOf ?Agent4)" ];
+  N7 [
+
+    shape = box
+    style = filled
+    fillcolor = gold
+    label = "Production test3\n* ?Agent3=texai:Cathy ?Agent4=texai:David" ];
+  N1 -> N2;
+  N2 -> N3;
+  N3 -> N4;
+  N4 -> N5;
+  N5 -> N6;
+  N6 -> N7;
+}
+  N8 [
+    style = filled
+    fillcolor = cornflowerblue
+    label = "Entrance" ];
+  N9 [
+    style = filled
+    fillcolor = cyan3
+    label = "pattern 'texai:parentOf'\n(texai:Cathy texai:parentOf texai:David)\n(texai:Betty texai:parentOf texai:Cathy)\n(texai:Alfred texai:parentOf texai:Betty)" ];
+  N8 -> N9;
+  N9 -> N6;
+  N9 -> N4;
+  N9 -> N2;
+}
