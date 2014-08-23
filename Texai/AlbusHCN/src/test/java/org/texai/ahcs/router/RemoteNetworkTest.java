@@ -21,42 +21,10 @@
  */
 package org.texai.ahcs.router;
 
-import org.texai.ahcs.*;
-import org.texai.ahcsSupport.Message;
-import de.uniba.wiai.lspi.util.logging.Log4jLogger;
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.cert.X509Certificate;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import net.jcip.annotations.NotThreadSafe;
-import net.sf.ehcache.CacheManager;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.joda.time.DateTime;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openrdf.model.URI;
-import org.openrdf.model.impl.URIImpl;
-import org.texai.ahcsSupport.domainEntity.Node;
-import org.texai.ahcsSupport.domainEntity.Role;
-import org.texai.ahcs.router.MessageRouter;
-import org.texai.kb.CacheInitializer;
-import org.texai.kb.Constants;
-import org.texai.kb.journal.JournalWriter;
-import org.texai.kb.persistence.DistributedRepositoryManager;
 import org.texai.kb.persistence.RDFEntityManager;
-import org.texai.kb.persistence.RDFEntityPersister;
-import org.texai.kb.util.UUIDUtils;
-import org.texai.network.netty.handler.PortUnificationHandler;
-import org.texai.network.netty.handler.TaggedObjectDecoder;
-import org.texai.network.netty.handler.TaggedObjectEncoder;
-import org.texai.x509.KeyStoreTestUtils;
-import org.texai.x509.X509SecurityInfo;
-import org.texai.x509.X509Utils;
-import static org.junit.Assert.*;
 
 /** Tests a simulated network spanning two JVMs in which the inter-node communications take place over
  * SSL transport.
@@ -71,7 +39,7 @@ public class RemoteNetworkTest {
   /** the RDF entity manager */
   private static final RDFEntityManager rdfEntityManager = new RDFEntityManager();
   /** the message router */
-  private static MessageRouter messageRouter;
+  private static CPOSMessageRouter messageRouter;
 
   /** sets debugging */
 //  static {

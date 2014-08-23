@@ -686,6 +686,7 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
   /** Obtains the X.509 certificate that is owned by the identified role from the message router.
    *
    * @param ownerRoleId the owner's role id
+   * @return the X.509 certificate
    */
   private X509Certificate getRemoteRoleX509Certificate(final URI ownerRoleId) {
     //Preconditions

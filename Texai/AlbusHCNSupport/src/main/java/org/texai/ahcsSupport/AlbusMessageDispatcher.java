@@ -32,7 +32,7 @@ public interface AlbusMessageDispatcher {
    */
   void dispatchAlbusMessage(final Message message);
 
-  /** When implemented by a message router, registers the given SSL proxy.
+  /** When implemented by a Chord message router, registers the given SSL proxy.
    *
    * @param sslProxy the given SSL proxy
    */

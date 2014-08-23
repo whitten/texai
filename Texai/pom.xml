@@ -30,6 +30,7 @@
   </developers>
 
   <modules>
+    <module>AlbusHCN</module>
     <module>AlbusHCNSupport</module>
     <module>BitTorrentSupport</module>
     <module>Network</module>
