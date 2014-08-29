@@ -170,7 +170,6 @@ public class Mint extends AbstractSkill {
       "-c",
       ""
     };
-    //toGraphViz(System.getProperty("user.dir") + "/doc/graph-visualization", graphName, focalQueryContainerName);
     final StringBuilder stringBuilder = new StringBuilder();
     stringBuilder.append("cd ");
     stringBuilder.append(System.getProperty("user.dir"));
