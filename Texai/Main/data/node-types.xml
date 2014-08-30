@@ -1,47 +1,5 @@
 <node-types>
   <node-type>
-    <name>DialogSessionNodeType</name>
-    <mission>Provides dialog session behavior.</mission>
-    <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.NodeType_e55fa5b8-8862-4229-97f7-2f29505ceea5</id>
-    <inherited-node-type-names>
-      <inherited-node-type-name>UniversalNodeType</inherited-node-type-name>
-    </inherited-node-type-names>
-    <role-type-names>
-      <role-type-name>DialogSessionRoleType</role-type-name>
-    </role-type-names>
-    <semantics>
-    </semantics>
-  </node-type>
-
-  <node-type>
-    <name>FaceDetectionNodeType</name>
-    <mission>Detects faces in webcam images.</mission>
-    <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.NodeType_0c859391-692f-4331-8d23-d25d6647af9e</id>
-    <inherited-node-type-names>
-      <inherited-node-type-name>UniversalNodeType</inherited-node-type-name>
-    </inherited-node-type-names>
-    <role-type-names>
-      <role-type-name>FaceDetectionRoleType</role-type-name>
-    </role-type-names>
-    <semantics>
-    </semantics>
-  </node-type>
-
-  <node-type>
-    <name>FaceRecognitionNodeType</name>
-    <mission>Recognizes a detected-face image as similar to a set of training faces.</mission>
-    <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.NodeType_d05f09fd-3233-44ee-b2b1-d24b0de62a42</id>
-    <inherited-node-type-names>
-      <inherited-node-type-name>UniversalNodeType</inherited-node-type-name>
-    </inherited-node-type-names>
-    <role-type-names>
-      <role-type-name>FaceRecognitionRoleType</role-type-name>
-    </role-type-names>
-    <semantics>
-    </semantics>
-  </node-type>
-
-  <node-type>
     <name>GovernanceManagementNodeType</name>
     <mission>Manages the governance role hierarchy.</mission>
     <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.NodeType_80fc3f50-e629-4eeb-a8b6-63b0825f887c</id>
@@ -70,20 +28,6 @@
   </node-type>
 
   <node-type>
-    <name>KnowledgeAcquisitionManagementNodeType</name>
-    <mission>Manages the knowledge acquisition role hierarchy.</mission>
-    <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.NodeType_fda3297d-0a1f-4e92-96d2-d0cb8a52c244</id>
-    <inherited-node-type-names>
-      <inherited-node-type-name>UniversalNodeType</inherited-node-type-name>
-    </inherited-node-type-names>
-    <role-type-names>
-      <role-type-name>KnowledgeAcquisitionManagementRoleType</role-type-name>
-    </role-type-names>
-    <semantics>
-    </semantics>
-  </node-type>
-
-  <node-type>
     <name>LifeCycleManagementNodeType</name>
     <mission>Manages the lifecycle role hierarchy, including creating nodes, establishing specified role instances, and connecting them to their parent and child roles.</mission>
     <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.NodeType_5a391570-2f15-4bcc-857c-1c1265fd110f</id>
@@ -98,20 +42,6 @@
   </node-type>
 
   <node-type>
-    <name>LinguisticKnowledgeAcquisitionEffectorNodeType</name>
-    <mission>Provides lowest level linguistic knowledge acquisition behavior.</mission>
-    <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.NodeType_cd834367-f105-454b-8a14-0db6287583b3</id>
-    <inherited-node-type-names>
-      <inherited-node-type-name>UniversalNodeType</inherited-node-type-name>
-    </inherited-node-type-names>
-    <role-type-names>
-      <role-type-name>LinguisticKnowledgeAcquisitionEffectorRoleType</role-type-name>
-    </role-type-names>
-    <semantics>
-    </semantics>
-  </node-type>
-
-  <node-type>
     <name>LoggerManagementNodeType</name>
     <mission>Governs the logger role hierarchy over one or more JVMs.</mission>
     <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.NodeType_0e6e444e-1dcb-4e21-a6ab-4cf4b10eb08b</id>
@@ -120,34 +50,6 @@
     </inherited-node-type-names>
     <role-type-names>
       <role-type-name>LoggerManagementRoleType</role-type-name>
-    </role-type-names>
-    <semantics>
-    </semantics>
-  </node-type>
-
-  <node-type>
-    <name>NettyWebChatSessionNodeType</name>
-    <mission>Provides web chat session behavior.</mission>
-    <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.NodeType_9ebb5092-6a69-4b75-acee-0124feb4f5e7</id>
-    <inherited-node-type-names>
-      <inherited-node-type-name>UniversalNodeType</inherited-node-type-name>
-    </inherited-node-type-names>
-    <role-type-names>
-      <role-type-name>NettyWebChatSessionRoleType</role-type-name>
-    </role-type-names>
-    <semantics>
-    </semantics>
-  </node-type>
-
-  <node-type>
-    <name>TestChatSessionNodeType</name>
-    <mission>Provides test non-interactive chat session behavior.</mission>
-    <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.NodeType_a7c46e52-8e11-4527-ad98-785fa6d151c2</id>
-    <inherited-node-type-names>
-      <inherited-node-type-name>UniversalNodeType</inherited-node-type-name>
-    </inherited-node-type-names>
-    <role-type-names>
-      <role-type-name>TestChatSessionRoleType</role-type-name>
     </role-type-names>
     <semantics>
     </semantics>
@@ -177,20 +79,6 @@
       <role-type-name>HeartbeatRoleType</role-type-name>
       <role-type-name>NodeLifeCycleRoleType</role-type-name>
       <role-type-name>NodeLoggerRoleType</role-type-name>
-    </role-type-names>
-    <semantics>
-    </semantics>
-  </node-type>
-
-  <node-type>
-    <name>UserCommunicationNodeType</name>
-    <mission>Provides a user communication behavior that manages a dialog session and mediates conversation between the user and other nodes.</mission>
-    <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.NodeType_5008c0da-b02d-4b77-bbd4-2633192d7f65</id>
-    <inherited-node-type-names>
-      <inherited-node-type-name>UniversalNodeType</inherited-node-type-name>
-    </inherited-node-type-names>
-    <role-type-names>
-      <role-type-name>UserCommunicationRoleType</role-type-name>
     </role-type-names>
     <semantics>
     </semantics>
