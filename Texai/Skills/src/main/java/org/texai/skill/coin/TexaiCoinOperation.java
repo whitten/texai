@@ -1,9 +1,14 @@
 package org.texai.skill.coin;
 
+import java.io.IOException;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.util.EnvironmentUtils;
+import org.texai.util.StreamConsumer;
+import org.texai.util.StringUtils;
+import org.texai.util.TexaiException;
 
 /**
  * Created on Aug 30, 2014, 11:31:08 PM.
@@ -16,26 +21,20 @@ import org.texai.ahcsSupport.Message;
  *
  * Copyright (C) 2014 Texai
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+public class TexaiCoinOperation extends AbstractSkill {
 
-public class CoopcoinOperation extends AbstractSkill {
   /**
    * the logger
    */
-  private static final Logger LOGGER = Logger.getLogger(CoopcoinOperation.class);
-
+  private static final Logger LOGGER = Logger.getLogger(TexaiCoinOperation.class);
 
   /**
    * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
@@ -109,8 +108,63 @@ public class CoopcoinOperation extends AbstractSkill {
     return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.AHCS_READY_TASK,
+      AHCSConstants.AHCS_READY_TASK,};
+  }
+
+  /** Starts the bitcoind instance. */
+  private void startBitcoind() {
+    sendCommandToBitcoind("");
+  }
+
+  /** Shuts down the bitcoind instance. */
+  private void shutdownBitcoind() {
+    sendCommandToBitcoind("");
+  }
+
+  /**
+   * Perform a remote procedure call to the bitcoind instance with the given command string.
+   *
+   * @param command the bitcoind command
+   */
+  private void sendCommandToBitcoind(final String command) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(command) : "message must be a non-empty string";
+    if (!EnvironmentUtils.isLinux()) {
+      throw new TexaiException("must be running on Linux");
+    }
+
+    String[] cmdArray = {
+      "sh",
+      "-c",
+      ""
     };
+    final StringBuilder stringBuilder = new StringBuilder();
+    stringBuilder.append("bitcoind-cli ");
+    cmdArray[2] = stringBuilder.toString();
+    LOGGER.info("shell cmd: " + cmdArray[2]);
+    try {
+      final Process process = Runtime.getRuntime().exec(cmdArray);
+      final StreamConsumer errorConsumer = new StreamConsumer(process.getErrorStream(), LOGGER);
+      final StreamConsumer outputConsumer = new StreamConsumer(process.getInputStream(), LOGGER);
+      errorConsumer.setName("errorConsumer");
+      errorConsumer.start();
+      outputConsumer.setName("outputConsumer");
+      outputConsumer.start();
+      int exitVal = process.waitFor();
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("exitVal: " + exitVal);
+      }
+
+      process.getInputStream().close();
+      process.getOutputStream().close();
+    } catch (InterruptedException ex) {
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("interrupted");
+      }
+    } catch (final IOException ex) {
+      throw new TexaiException(ex);
+    }
+
   }
 
 }
