@@ -32,6 +32,7 @@
   <modules>
     <module>AlbusHCN</module>
     <module>AlbusHCNSupport</module>
+    <module>CoinSkills</module>
     <module>BitTorrentSupport</module>
     <module>Inference</module>
     <module>Main</module>

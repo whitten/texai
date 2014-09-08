@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.texai</groupId>
+    <artifactId>Texai</artifactId>
+    <version>1.0</version>
+  </parent>
+
+  <artifactId>CoinSkills</artifactId>
+  <packaging>jar</packaging>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  <description>Cryptocurrency operation skills for the Albus Hierarchical Control System</description>
+  <url>http://texai.org</url>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.texai</groupId>
+      <artifactId>Skills</artifactId>
+      <version>1.0</version>
+    </dependency>
+  </dependencies>
+</project>
