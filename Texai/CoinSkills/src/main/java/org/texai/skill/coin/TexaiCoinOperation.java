@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.skill.coin.support.BitcoinMessageReceiver;
 import org.texai.util.EnvironmentUtils;
 import org.texai.util.StreamConsumer;
 import org.texai.util.StringUtils;
@@ -29,7 +30,7 @@ import org.texai.util.TexaiException;
  *
  * You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-public class TexaiCoinOperation extends AbstractSkill {
+public class TexaiCoinOperation extends AbstractSkill implements BitcoinMessageReceiver {
 
   /**
    * the logger
@@ -164,6 +165,16 @@ public class TexaiCoinOperation extends AbstractSkill {
     } catch (final IOException ex) {
       throw new TexaiException(ex);
     }
+
+  }
+
+  @Override
+  /** Receives an outbound bitcoin message from the slave peer.
+   *
+   * @param message the given bitcoin protocol message
+   */
+  public void receiveBitcoinMessageFromSlave(final com.google.bitcoin.core.Message message) {
+    // send the outbound bitcoin message from the slave peer to the Texai network recipient.
 
   }
 
