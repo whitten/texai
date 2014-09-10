@@ -227,7 +227,7 @@ public class SlavedBitcoindAdapter implements PeerEventListener {
   /**
    * Called when a message is received by a peer, before the message is processed. The returned message is processed instead. Returning null
    * will cause the message to be ignored by the Peer returning the same message object allows you to see the messages received but not
-   * change them. The result from one event listeners callback is passed as "m" to the next, forming a chain.
+   * change them.
    *
    * @param peer the peer receiving the message
    * @param message the message
