@@ -85,7 +85,10 @@ public class Bootstrap extends AbstractSkill {
             };
   }
 
-  /** Performs the initialization operation. */
+  /** Performs the initialization operation.
+   *
+   * @param message the initialization message
+   */
   private void initialization(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
@@ -108,47 +111,47 @@ public class Bootstrap extends AbstractSkill {
     // through its child role hierarchies.  TODO: When initializing, Topper destroys the bootstrap role.
 
     final NodeRuntimeImpl nodeRuntime = (NodeRuntimeImpl) getNodeRuntime();
-    final Node topFriendshipNode = nodeRuntime.getNode(AHCSConstants.NODE_NICKNAME_TOPPER);
+    final Node topFriendshipNode = nodeRuntime.getNode(AHCSConstants.NODE_NICKNAME_TOP_LEVEL_FRIENDSHIP_AGENT);
     assert topFriendshipNode != null;
 
     final Node loggerNode;
-    if (nodeRuntime.getNode(AHCSConstants.NODE_NICKNAME_LIFER) == null) {
+    if (nodeRuntime.getNode(AHCSConstants.NODE_NICKNAME_NODE_LIFE_CYCLE_AGENT) == null) {
       // create Lifer & other nodes ...
 
       LOGGER.info("creating the LifeCycleManagementNode - Lifer");
       final Node liferNode = NodeAccess.createNode(
               AHCSConstants.LIFE_CYCLE_MANAGEMENT_NODE_TYPE, // nodeTypeName
-              AHCSConstants.NODE_NICKNAME_LIFER, // nodeNickname
+              null, // nodeNickname
               getRole().getNodeRuntime());
 
       LOGGER.info("creating the GoveranceManagementNode - Governor");
       final Node governorNode = NodeAccess.createNode(
               AHCSConstants.GOVERNANCE_MANAGEMENT_NODE_TYPE, // nodeTypeName
-              AHCSConstants.NODE_NICKNAME_GOVERNOR, // nodeNickname
+              null, // nodeNickname
               getRole().getNodeRuntime());
 
       LOGGER.info("creating the LoggerManagementNode - TopLogger");
       final Node topLoggerNode = NodeAccess.createNode(
               AHCSConstants.LOGGER_MANAGEMENT_NODE_TYPE, // nodeTypeName
-              AHCSConstants.NODE_NICKNAME_TOP_LOGGER, // nodeNickname
+              null, // nodeNickname
               getRole().getNodeRuntime());
 
       LOGGER.info("creating the JVMLoggerManagementNode - Logger");
       loggerNode = NodeAccess.createNode(
               AHCSConstants.JVM_LOGGER_MANAGEMENT_NODE_TYPE, // nodeTypeName
-              AHCSConstants.NODE_NICKNAME_LOGGER, // nodeNickname
+              null, // nodeNickname
               getRole().getNodeRuntime());
 
       LOGGER.info("creating the UserCommunicationNode - Communicator");
       final Node userCommunicatorNode = NodeAccess.createNode(
               AHCSConstants.USER_COMMUNICATION_NODE_TYPE, // nodeTypeName
-              AHCSConstants.NODE_NICKNAME_COMMUNICATOR, // nodeNickname
+              AHCSConstants.NODE_NICKNAME_USER_COMMUNICATION_AGENT, // nodeNickname
               getRole().getNodeRuntime());
 
       LOGGER.info("creating the DialogSessionNode - Dialoger");
       final Node dialogSessionNode = NodeAccess.createNode(
               AHCSConstants.DIALOG_SESSION_NODE_TYPE, // nodeTypeName
-              AHCSConstants.NODE_NICKNAME_DIALOGER, // nodeNickname
+              AHCSConstants.NODE_NICKNAME_DIALOG_SESSION_AGENT, // nodeNickname
               getRole().getNodeRuntime());
 
       final Role userCommunicationRole =
@@ -161,7 +164,7 @@ public class Bootstrap extends AbstractSkill {
       LOGGER.info("creating the NettyWebChatSessionNode - WebChatter");
       final Node nettyWebChatSessionNode = NodeAccess.createNode(
               AHCSConstants.NETTY_WEB_CHAT_SESSION_NODE_TYPE, // nodeTypeName
-              AHCSConstants.NODE_NICKNAME_WEB_CHATTER, // nodeNickname
+              null, // nodeNickname
               getRole().getNodeRuntime());
 
       final Role nettyWebChatSessionRole =
@@ -177,19 +180,19 @@ public class Bootstrap extends AbstractSkill {
       LOGGER.info("creating the face recognition node - FaceRecognizer");
       final Node faceRecognitionNode = NodeAccess.createNode(
               AHCSConstants.FACE_RECOGNITION_NODE_TYPE, // nodeTypeName
-              AHCSConstants.NODE_NICKNAME_FACE_RECOGNIZER, // nodeNickname
+              null, // nodeNickname
               getRole().getNodeRuntime());
 
       LOGGER.info("creating the face detection node - FaceDetector");
       final Node faceDetectionNode = NodeAccess.createNode(
               AHCSConstants.FACE_DETECTION_NODE_TYPE, // nodeTypeName
-              AHCSConstants.NODE_NICKNAME_FACE_DETECTOR, // nodeNickname
+              null, // nodeNickname
               getRole().getNodeRuntime());
 
       LOGGER.info("creating the KnowledgeAcquisitionManagementNode - TopKA");
       final Node topKANode = NodeAccess.createNode(
               AHCSConstants.KNOWLEDGE_ACQUISITION_MANAGEMENT_NODE_TYPE, // nodeTypeName
-              AHCSConstants.NODE_NICKNAME_TOP_KA, // nodeNickname
+              AHCSConstants.NODE_NICKNAME_TOP_LEVEL_KNOWLEDGE_ACQUISITION_AGENT, // nodeNickname
               getRole().getNodeRuntime());
 
       // connect bootstrap role to parent role
@@ -361,7 +364,7 @@ public class Bootstrap extends AbstractSkill {
       nodeRuntime.persistNodeRuntimeConfiguration();
     } else {
       // the nodes have already been loaded with the node runtime configuration object
-      loggerNode = nodeRuntime.getNode(AHCSConstants.NODE_NICKNAME_LOGGER);
+      loggerNode = nodeRuntime.getNode(AHCSConstants.NODE_NICKNAME_LEVEL_1_LOG_MANAGEMENT_AGENT);
       assert loggerNode != null;
 
       oneTimeInstallation(

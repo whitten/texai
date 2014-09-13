@@ -183,4 +183,9 @@ public class MockNodeRuntime implements NodeRuntime {
   public URI getRoleId(String nodeNickname, String roleType) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
+
+  @Override
+  public Node getSingletonNodeOfType(String nodeTypeName) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 }

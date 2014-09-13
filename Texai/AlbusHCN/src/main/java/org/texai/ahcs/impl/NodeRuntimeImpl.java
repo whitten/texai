@@ -249,7 +249,7 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
     initializeX509SecurityInfo();
     messageRouter = new CPOSMessageRouter(this);
 
-    if (getNode(AHCSConstants.NODE_NICKNAME_TOPPER) == null) {
+    if (getNode(AHCSConstants.NODE_NICKNAME_TOP_LEVEL_FRIENDSHIP_AGENT) == null) {
       // first time direct assembly of the top friendship node - the Bootstrap skill does the rest
       installTopFriendshipNode();
     } else {
@@ -535,6 +535,19 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
    */
   public Set<Node> getNodes() {
     return nodeRuntimeConfiguration.getNodes();
+  }
+
+  /** Returns the singleton node within the scope of this node runtime having the given node type.
+   *
+   * @param nodeTypeName the given node type
+   * @return the singleton node, or null if not found
+   */
+  @Override
+  public final Node getSingletonNodeOfType(final String nodeTypeName) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(nodeTypeName) : "nodeNickname must be non emptyl";
+
+    return nodeRuntimeConfiguration.getNode(NodeAccess.makeNodeNickname(nodeTypeName));
   }
 
   /** Returns the node having the given nickname.
@@ -1150,7 +1163,7 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
     LOGGER.info("  top friendship node type: " + topFriendshipNodeType);
     final Node topFriendshipNode = new Node(topFriendshipNodeType, this);
     LOGGER.info("  top friendship node: " + topFriendshipNode);
-    topFriendshipNode.setNodeNickname(AHCSConstants.NODE_NICKNAME_TOPPER);
+    topFriendshipNode.setNodeNickname(AHCSConstants.NODE_NICKNAME_TOP_LEVEL_FRIENDSHIP_AGENT);
     topFriendshipNode.installRoles(getNodeAccess());
     rdfEntityManager.persist(topFriendshipNode);
     addNode(topFriendshipNode);
@@ -1211,7 +1224,7 @@ public class NodeRuntimeImpl implements NodeRuntime, AlbusMessageDispatcher {
       LOGGER.info("starting the node runtime");
 
       // send an initialize task message to the BootstrapRole, which configures and initializes the remainder of the nodes
-      final Node topFriendshipNode = nodeRuntime.getNode(AHCSConstants.NODE_NICKNAME_TOPPER);
+      final Node topFriendshipNode = nodeRuntime.getNode(AHCSConstants.NODE_NICKNAME_TOP_LEVEL_FRIENDSHIP_AGENT);
       assert topFriendshipNode != null;
       final Role bootstrapRole = topFriendshipNode.getRoleForTypeName(AHCSConstants.BOOTSTRAP_ROLE_TYPE);
       assert bootstrapRole != null;

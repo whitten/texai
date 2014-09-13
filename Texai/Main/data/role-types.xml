@@ -14,48 +14,6 @@
     <granularity-level></granularity-level>
   </role-type>
   <role-type>
-    <name>DialogSessionRoleType</name>
-    <description>Provides dialog session behavior.</description>
-    <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.RoleType_d715f0e6-0ed4-4bd6-b186-c4bc73a3ee20</id>
-    <skill-classes>
-      <skill-class>
-        <skill-class-name>org.texai.skill.dialog.DialogSessionSkill</skill-class-name>
-        <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.SkillClass_cc3e7b4e-6493-432e-9e4f-d2ce234a0f52</id>
-      </skill-class>
-    </skill-classes>
-    <semantics>
-    </semantics>
-    <granularity-level></granularity-level>
-  </role-type>
-  <role-type>
-    <name>FaceDetectionRoleType</name>
-    <description>Detects faces in webcam images.</description>
-    <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.RoleType_b8414a30-5907-4972-9e95-3cc552f3646c</id>
-    <skill-classes>
-      <skill-class>
-        <skill-class-name>org.texai.skill.faceDetection.FaceDetection</skill-class-name>
-        <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.SkillClass_1e77fca8-3f31-4e52-8fff-3f20ab676e7a</id>
-      </skill-class>
-    </skill-classes>
-    <semantics>
-    </semantics>
-    <granularity-level></granularity-level>
-  </role-type>
-  <role-type>
-    <name>FaceRecognitionRoleType</name>
-    <description>Recognizes a detected-face image as similar to a set of training faces.</description>
-    <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.RoleType_395ccf39-c2b1-44c7-8ec3-d12b8b187496</id>
-    <skill-classes>
-      <skill-class>
-        <skill-class-name>org.texai.skill.faceDetection.FaceRecognition</skill-class-name>
-        <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.SkillClass_189e23c9-5788-441e-a266-ffc8c8f5b7d2</id>
-      </skill-class>
-    </skill-classes>
-    <semantics>
-    </semantics>
-    <granularity-level></granularity-level>
-  </role-type>
-  <role-type>
     <name>GovernanceManagementRoleType</name>
     <description>Manages the governance role hierarchy.</description>
     <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.RoleType_ab111b74-2cdd-4feb-8c29-564d648c2449</id>
@@ -112,20 +70,6 @@
     <granularity-level></granularity-level>
   </role-type>
   <role-type>
-    <name>KnowledgeAcquisitionManagementRoleType</name>
-    <description>Manages the knowledge acquisition role hierarchy.</description>
-    <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.RoleType_bc88f4b8-3122-4d80-8625-67dbbd896cb0</id>
-    <skill-classes>
-      <skill-class>
-        <skill-class-name>org.texai.skill.dialog.ke.KnowledgeAcquisitionManagement</skill-class-name>
-        <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.SkillClass_deedc38b-5ce5-4373-b932-d65e96b42ae3</id>
-      </skill-class>
-    </skill-classes>
-    <semantics>
-    </semantics>
-    <granularity-level></granularity-level>
-  </role-type>
-  <role-type>
     <name>LifeCycleManagementRoleType</name>
     <description>Creates nodes, connects parent and child roles, and manages the persistence state of nodes.</description>
     <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.RoleType_1883246c-38a0-4035-a4ec-15cd5b82d6b2</id>
@@ -140,20 +84,6 @@
     <granularity-level></granularity-level>
   </role-type>
   <role-type>
-    <name>LinguisticKnowledgeAcquisitionEffectorRoleType</name>
-    <description>Provides lowest level linguistic knowledge acquisition behavior.</description>
-    <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.RoleType_22a5f0dc-3d2a-493a-9e7a-15b049f3481f</id>
-    <skill-classes>
-      <skill-class>
-        <skill-class-name>org.texai.skill.dialog.LinguisticKnowledgeAcquisition</skill-class-name>
-        <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.SkillClass_33e01518-090a-43cf-ad1a-8e1fec1661e9</id>
-      </skill-class>
-    </skill-classes>
-    <semantics>
-    </semantics>
-    <granularity-level></granularity-level>
-  </role-type>
-  <role-type>
     <name>LoggerManagementRoleType</name>
     <description>Governs the logger role hierarchy over one or more JVMs.</description>
     <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.RoleType_65b48aba-3311-436f-aaea-34df5284f598</id>
@@ -161,20 +91,6 @@
       <skill-class>
         <skill-class-name>org.texai.skill.logging.LoggerManagement</skill-class-name>
         <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.SkillClass_5d327745-9c0a-4f5e-8b33-29dbe133286a</id>
-      </skill-class>
-    </skill-classes>
-    <semantics>
-    </semantics>
-    <granularity-level></granularity-level>
-  </role-type>
-  <role-type>
-    <name>NettyWebChatSessionRoleType</name>
-    <description>Provides web chat session behavior.</description>
-    <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.RoleType_488ccc36-c811-4b07-a6e5-a0411589f5db</id>
-    <skill-classes>
-      <skill-class>
-        <skill-class-name>org.texai.skill.chat.NettyWebChatSession</skill-class-name>
-        <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.SkillClass_c5704075-4614-4602-b29c-2dc7306e4013</id>
       </skill-class>
     </skill-classes>
     <semantics>
@@ -203,20 +119,6 @@
       <skill-class>
         <skill-class-name>org.texai.skill.logging.NodeLogger</skill-class-name>
         <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.SkillClass_f2c106b0-bcf3-44ce-8cc9-3ce55de68310</id>
-      </skill-class>
-    </skill-classes>
-    <semantics>
-    </semantics>
-    <granularity-level></granularity-level>
-  </role-type>
-  <role-type>
-    <name>TestChatSessionRoleType</name>
-    <description>Provides test non-interatctive chat session behavior.</description>
-    <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.RoleType_1ef87cfd-7c6e-4657-86c2-18a9e6b9eb69</id>
-    <skill-classes>
-      <skill-class>
-        <skill-class-name>org.texai.skill.chat.TestChatSession</skill-class-name>
-        <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.SkillClass_da2f8894-f8e0-41d1-ad2d-fa933a8419c1</id>
       </skill-class>
     </skill-classes>
     <semantics>
@@ -264,63 +166,5 @@
     <semantics>
     </semantics>
     <granularity-level></granularity-level>
-  </role-type>
-  <role-type>
-    <name>UserCommunicationRoleType</name>
-    <description>Provides a user communication skill that manages a dialog session and mediates conversation between the user and other nodes.</description>
-    <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.RoleType_6c5f07ce-6090-40e9-b68d-ad3762d9002b</id>
-    <skill-classes>
-      <skill-class>
-        <skill-class-name>org.texai.skill.dialog.UserCommunication</skill-class-name>
-        <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.SkillClass_dde561ec-53bf-4c4e-afe4-a44cbb6aa205</id>
-      </skill-class>
-    </skill-classes>
-    <semantics>
-    </semantics>
-    <granularity-level></granularity-level>
-  </role-type>
-  <role-type>
-    <name>VNCFeatureRecognitionRoleType</name>
-    <description>Applies actions to a remote UI session , and perceives UI component state .</description>
-    <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.RoleType_adfb268a-1916-4594-9c8b-0fda81931a8b</id>
-    <skill-classes>
-      <skill-class>
-        <skill-class-name>org.texai.skill.vncrobot.VNCFeatureRecognition</skill-class-name>
-        <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.SkillClass_df29f37e-965d-49b5-9675-6bbbb64b080d</id>
-      </skill-class>
-    </skill-classes>
-  </role-type>
-  <role-type>
-    <name>VNCOperationManagement</name>
-    <description>Manages remote UI sessions .</description>
-    <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.RoleType_3ff50e96-66d3-4ce1-a8c6-b9ec77982b25</id>
-    <skill-classes>
-      <skill-class>
-        <skill-class-name>org.texai.skill.vncrobot.VNCOperationManagement</skill-class-name>
-        <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.SkillClass_9a4bd651-369e-41d2-8c2f-9a045dc64c28</id>
-      </skill-class>
-    </skill-classes>
-  </role-type>
-  <role-type>
-    <name>VNCOperationRoleType</name>
-    <description>Applies actions to remote apps and perceives remote app state .</description>
-    <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.RoleType_401c3fac-d162-4a63-9356-115c9d2bd49f</id>
-    <skill-classes>
-      <skill-class>
-        <skill-class-name>org.texai.skill.vncrobot.VNCOperation</skill-class-name>
-        <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.SkillClass_546cc130-c24d-4a9e-bc8b-1e5f6b1afacb</id>
-      </skill-class>
-    </skill-classes>
-  </role-type>
-  <role-type>
-    <name>VNCRobotRoleType</name>
-    <description>Adapts to a VNC remote UI , applying mouse and keyboard actions , and sensing the frame buffer .</description>
-    <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.RoleType_8b585a63-c370-46ea-8b19-28a42659ee8d</id>
-    <skill-classes>
-      <skill-class>
-        <skill-class-name>org.texai.skill.vncrobot.VNCRobot</skill-class-name>
-        <id>http://texai.org/texai/org.texai.ahcsSupport.domainEntity.SkillClass_39d28f33-05f5-40b9-876a-644109846b9a</id>
-      </skill-class>
-    </skill-classes>
   </role-type>
 </role-types>

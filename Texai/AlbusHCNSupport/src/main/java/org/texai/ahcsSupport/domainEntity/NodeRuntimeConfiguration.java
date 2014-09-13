@@ -334,7 +334,7 @@ public class NodeRuntimeConfiguration implements CascadePersistence {
   public Role getTopFriendshipRole() {
     if (topFriendshipRole == null) {
       synchronized (getLocalNodeDictionary()) { // force lazy initialization
-        final Node topFriendshipNode = localNodeDictionary.get(AHCSConstants.NODE_NICKNAME_TOPPER);
+        final Node topFriendshipNode = localNodeDictionary.get(AHCSConstants.NODE_NICKNAME_TOP_LEVEL_FRIENDSHIP_AGENT);
         assert topFriendshipNode != null;
         topFriendshipRole = topFriendshipNode.getRoleForTypeName(AHCSConstants.TOP_FRIENDSHIP_ROLE_TYPE);
       }

@@ -467,6 +467,20 @@ public final class NodeAccess {
     return nodeType;
   }
 
+  /** Makes a node nickname from the given node type name. Within the scope of each NodeRuntime, the node nickname
+   * must be unique
+   *
+   * @param nodeTypeName the given nodeTypeName, e.g. "FaceDetectionNodeType"
+   * @return a node nickname corresponding to the type, e.g. "FaceDetectionAgent"
+   */
+  public static String makeNodeNickname(final String nodeTypeName) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(nodeTypeName) : "nodeTypeName must not be empty";
+    assert nodeTypeName.endsWith("NodeType") : "nodeTypeName must end with NodeType";
+
+    return nodeTypeName.replace("NodeType", "Agent");
+  }
+
   /** Creates a node of the given type.
    *
    * @param nodeTypeName the node type name
@@ -481,16 +495,16 @@ public final class NodeAccess {
     //Preconditions
     assert nodeTypeName != null : "nodeTypeName must not be null";
     assert !nodeTypeName.isEmpty() : "nodeTypeName must not be empty";
-    assert nodeNickname != null : "nodeNickname must not be null";
-    assert !nodeNickname.isEmpty() : "nodeNickname must not be empty";
     assert nodeRuntime != null : "nodeRuntime must not be null";
-    assert nodeRuntime.getNode(nodeNickname) == null : "node must not already exist: " + nodeNickname;
+
+    final String nodeNickname1 = StringUtils.isNonEmptyString(nodeNickname) ? nodeNickname : makeNodeNickname(nodeTypeName);
+    assert nodeRuntime.getNode(nodeNickname1) == null : "node must not already exist: " + nodeNickname;
 
     // create the node of the given type and nickname
     final NodeAccess nodeAccess = nodeRuntime.getNodeAccess();
     final NodeType nodeType = nodeAccess.findNodeType(nodeTypeName);
     final Node node = new Node(nodeType, nodeRuntime);
-    node.setNodeNickname(nodeNickname);
+    node.setNodeNickname(nodeNickname1);
     nodeRuntime.addNode(node);
 
     // create its roles

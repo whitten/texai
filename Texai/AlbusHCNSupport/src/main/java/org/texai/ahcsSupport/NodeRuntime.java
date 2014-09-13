@@ -144,6 +144,13 @@ public interface NodeRuntime extends AlbusMessageDispatcher {
    */
   Role getLocalRole(final URI roleId);
 
+  /** Returns the singleton node within the scope of this node runtime having the given node type.
+   *
+   * @param nodeTypeName the given node type
+   * @return the singleton node, or null if not found
+   */
+  Node getSingletonNodeOfType(final String nodeTypeName);
+
   /** Returns the node having the given nickname.
    *
    * @param nodeNickname the given nickname

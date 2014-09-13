@@ -105,7 +105,7 @@ public class NodeAccessTest2 {
             topFriendshipNodeType,
             new MockNodeRuntime()); // nodeRuntime
     LOGGER.info("  top friendship node: " + topFriendshipNode);
-    topFriendshipNode.setNodeNickname(AHCSConstants.NODE_NICKNAME_TOPPER);
+    topFriendshipNode.setNodeNickname(AHCSConstants.NODE_NICKNAME_TOP_LEVEL_FRIENDSHIP_AGENT);
     topFriendshipNode.installRoles(instance);
     nodeRuntimeConfiguration.addNode(topFriendshipNode);
     final Role bootstrapRole = topFriendshipNode.getRoleForTypeName(AHCSConstants.BOOTSTRAP_ROLE_TYPE);
@@ -125,7 +125,7 @@ public class NodeAccessTest2 {
     final NodeRuntimeConfiguration loadedNodeRuntimeConfiguration = instance.getNodeRuntimeConfiguration(nodeRuntimeId);
     assertNotNull(loadedNodeRuntimeConfiguration);
     assertEquals(nodeRuntimeConfiguration, loadedNodeRuntimeConfiguration);
-    final Node loadedFriendshipNode = loadedNodeRuntimeConfiguration.getNode(AHCSConstants.NODE_NICKNAME_TOPPER);
+    final Node loadedFriendshipNode = loadedNodeRuntimeConfiguration.getNode(AHCSConstants.NODE_NICKNAME_TOP_LEVEL_FRIENDSHIP_AGENT);
     assertNotNull(loadedFriendshipNode);
     final Role loadedBootstrapRole = topFriendshipNode.getRoleForTypeName(AHCSConstants.BOOTSTRAP_ROLE_TYPE);
     assertNotNull(loadedBootstrapRole);

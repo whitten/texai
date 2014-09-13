@@ -708,51 +708,51 @@ public final class AHCSConstants {
   /**
    * the the user communication node nickname
    */
-  public static final String NODE_NICKNAME_COMMUNICATOR = "Communicator";
+  public static final String NODE_NICKNAME_USER_COMMUNICATION_AGENT = "UserCommunicationAgent";
   /**
    * the the dialog session node nickname
    */
-  public static final String NODE_NICKNAME_DIALOGER = "Dialoger";
+  public static final String NODE_NICKNAME_DIALOG_SESSION_AGENT = "DialogSessionAgent";
   /**
    * the face detector node nickname
    */
-  public static final String NODE_NICKNAME_FACE_DETECTOR = "FaceDetector";
+  public static final String NODE_NICKNAME_FACE_DETECTION_AGENT = "FaceDetectionAgent";
   /**
    * the face recognizer node nickname
    */
-  public static final String NODE_NICKNAME_FACE_RECOGNIZER = "FaceRecognizer";
+  public static final String NODE_NICKNAME_FACE_RECOGNITION_AGENT = "FaceRecognitionAgent";
   /**
    * the meta fact acquisition node nickname
    */
-  public static final String NODE_NICKNAME_FACT_SCRIPTER = "FactScripter";
+  public static final String NODE_NICKNAME_FACT_ACQUISITION_SCRIPT_AGENT = "FactScriptAcquisitionAgent";
   /**
    * the governance management node nickname
    */
-  public static final String NODE_NICKNAME_GOVERNOR = "Governor";
+  public static final String NODE_NICKNAME_GOVERNANCE_MANANGEMENT_AGENT = "GovernanceManagementAgent";
   /**
    * the life cycle management node nickname
    */
-  public static final String NODE_NICKNAME_LIFER = "Lifer";
+  public static final String NODE_NICKNAME_NODE_LIFE_CYCLE_AGENT = "NodeLifeCycleAgent";
   /**
    * the JVM logger management node nickname
    */
-  public static final String NODE_NICKNAME_LOGGER = "Logger";
+  public static final String NODE_NICKNAME_LEVEL_1_LOG_MANAGEMENT_AGENT = "Level1LogManagementAgent";
   /**
    * the the knowledge acquisition management node nickname
    */
-  public static final String NODE_NICKNAME_TOP_KA = "TopKA";
+  public static final String NODE_NICKNAME_TOP_LEVEL_KNOWLEDGE_ACQUISITION_AGENT = "TopLevelKnowledgeAcquisitionAgent";
   /**
    * the logger management node nickname
    */
-  public static final String NODE_NICKNAME_TOP_LOGGER = "TopLogger";
+  public static final String NODE_NICKNAME_TOP_LEVEL_LOG_AGENT = "TopLevelLogAgent";
   /**
    * the top friendship node nickname
    */
-  public static final String NODE_NICKNAME_TOPPER = "Topper";
+  public static final String NODE_NICKNAME_TOP_LEVEL_FRIENDSHIP_AGENT = "TopLevelFriendshipAgent";
   /**
    * the Netty web chat session node nickname
    */
-  public static final String NODE_NICKNAME_WEB_CHATTER = "WebChatter";
+  public static final String NODE_NICKNAME_WEB_CHATTER = "WebChatAgent";
 
   //
   // node or role state variables
