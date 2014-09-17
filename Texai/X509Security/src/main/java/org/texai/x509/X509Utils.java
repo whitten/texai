@@ -96,42 +96,59 @@ import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 import sun.security.x509.X509CertImpl;
 
-/** X509 utilities adapted from "Beginning Cryptography With Java", David Hook, WROX.
+/**
+ * X509 utilities adapted from "Beginning Cryptography With Java", David Hook, WROX.
  *
- * How to regenerate the root X.509 certificate on the development system.
- * (1) delete /home/reed/texai-keystore.jceks
- * (2) run the JUnit test X509UtilsTest.java - expect several unit test failures [none on most recent regeneration]
- * (3) copy the byte array values from the unit test output (root certificate bytes...)
- *     into the array initialialization value for ROOT_CERTIFICATE_BYTES.
- * (4) delete X509Security/data/truststore.*, test-client-keystore.*, test-server-keystore.*
- * (5) re-run the unit test correcting for the new root UID
- * (6) likewise correct KeyStoreTestUtilsTest, X509SecurityInfoTest and TexaiSSLContextFactoryTest
- * (7) ensure that Git updates the new keystore files when committing
- * (7) copy truststore.uber and truststore.jceks files to the Network, AlbusHCNSupport, WebServer, X509CertificateServerTest, and X509CertificateServer
- *     (development and production) data directories
- * (8) copy test-client-keystore.uber and test-client-keystore.jceks to AlbusHCNSupport, Network, WebServer and X509CertificateServerTest data directories
+ * How to regenerate the root X.509 certificate on the development system. (1) delete /home/reed/texai-keystore.jceks
+ * (2) run the JUnit test X509UtilsTest.java - expect several unit test failures [none on most recent regeneration] (3)
+ * copy the byte array values from the unit test output (root certificate bytes...) into the array initialialization
+ * value for ROOT_CERTIFICATE_BYTES. (4) delete X509Security/data/truststore.*, test-client-keystore.*,
+ * test-server-keystore.* (5) re-run the unit test correcting for the new root UID (6) likewise correct
+ * KeyStoreTestUtilsTest, X509SecurityInfoTest and TexaiSSLContextFactoryTest (7) ensure that Git updates the new
+ * keystore files when committing (7) copy truststore.uber and truststore.jceks files to the Network, AlbusHCNSupport,
+ * WebServer, X509CertificateServerTest, and X509CertificateServer (development and production) data directories (8)
+ * copy test-client-keystore.uber and test-client-keystore.jceks to AlbusHCNSupport, Network, WebServer and
+ * X509CertificateServerTest data directories
  *
  * @author reed
  */
 public final class X509Utils {
 
-  /** the logger */
+  /**
+   * the logger
+   */
   private static final Logger LOGGER = Logger.getLogger(X509Utils.class);
-  /** the default secure random serialization path */
+  /**
+   * the default secure random serialization path
+   */
   public static final String DEFAULT_SECURE_RANDOM_PATH = "data/secure-random.ser";
-  /** the root certificate alias */
+  /**
+   * the root certificate alias
+   */
   public static final String ROOT_ALIAS = "root";
-  /** the root certificate alias */
+  /**
+   * the root certificate alias
+   */
   public static final String JAR_SIGNER_ALIAS = "jar-signer";
-  /** the period in which the certificate is valid */
+  /**
+   * the period in which the certificate is valid
+   */
   private static final long VALIDITY_PERIOD = 10L * 365L * 24L * 60L * 60L * 1000L; // ten years
-  /** the Bouncy Castle cryptography provider */
+  /**
+   * the Bouncy Castle cryptography provider
+   */
   public static final String BOUNCY_CASTLE_PROVIDER = "BC";
-  /** the digital signature algorithm */
+  /**
+   * the digital signature algorithm
+   */
   public static final String DIGITAL_SIGNATURE_ALGORITHM = "SHA512withRSA";
-  /** the indicator whether the JCE unlimited strength jurisdiction policy files are installed */
+  /**
+   * the indicator whether the JCE unlimited strength jurisdiction policy files are installed
+   */
   private static boolean isJCEUnlimitedStrenthPolicy;
-  /** the root certificate bytes */
+  /**
+   * the root certificate bytes
+   */
   private final static byte[] ROOT_CERTIFICATE_BYTES = {
     48, -126, 4, -94, 48, -126, 3, 10, -96, 3, 2, 1, 2, 2, 2, 3, -72, 48, 13, 6, 9, 42, -122, 72, -122, -9, 13,
     1, 1, 13, 5, 0, 48, 114, 49, 52, 48, 50, 6, 10, 9, -110, 38, -119, -109, -14, 44, 100, 1, 1, 12, 36, 101, 100,
@@ -180,19 +197,33 @@ public final class X509Utils {
     -42, -48, 23, -7, -36, 105, -33, 60, 3, -24, -62, 76, 89, 9, 7, -64, -123, 123, 22, 26, 96, -24, -40, 117, 118,
     126, 60, -118, -91, -61, 20, 105, -72, -3, 113, -35, 66, -36, 117, -45, -120, 31, -85
   };
-  /** the root certificate */
+  /**
+   * the root certificate
+   */
   private static final X509Certificate ROOT_X509_CERTIFICATE;
-  /** the truststore entry alias */
+  /**
+   * the truststore entry alias
+   */
   public static final String TRUSTSTORE_ENTRY_ALIAS = "texai root certificate";
-  /** the truststore */
+  /**
+   * the truststore
+   */
   private static KeyStore truststore;
-  /** the truststore password */
+  /**
+   * the truststore password
+   */
   public static final char[] TRUSTSTORE_PASSWORD = "truststore-password".toCharArray();
-  /** the certificate entry alias */
+  /**
+   * the certificate entry alias
+   */
   public static final String ENTRY_ALIAS = "certificate";
-  /** the installer keystore password */
+  /**
+   * the installer keystore password
+   */
   public static final char[] INSTALLER_KEYSTORE_PASSWORD = "installer-keystore-password".toCharArray();
-  /** the intermediate, signing entry alias */
+  /**
+   * the intermediate, signing entry alias
+   */
   public static final String INTERMEDIATE_ENTRY_ALIAS = "Texai intermediate certificate";
 
   static {
@@ -216,22 +247,29 @@ public final class X509Utils {
       throw new TexaiException(ex);
     }
   }
-  /** the secure random */
+  /**
+   * the secure random
+   */
   private static SecureRandom secureRandom;
-  /** the secure random synchronization lock */
+  /**
+   * the secure random synchronization lock
+   */
   private static final Object secureRandom_lock = new Object();
 
   static {
     X509Utils.initializeSecureRandom(DEFAULT_SECURE_RANDOM_PATH);
   }
 
-  /** Prevents the instantiation of this utility class. */
+  /**
+   * Prevents the instantiation of this utility class.
+   */
   private X509Utils() {
   }
 
-  /** Makes a canonical X.509 certificate by serializing it to bytes and reconsituting it. This ensures
-   * that all issuer and subject names have no space following the commas.
-
+  /**
+   * Makes a canonical X.509 certificate by serializing it to bytes and reconsituting it. This ensures that all issuer
+   * and subject names have no space following the commas.
+   *
    * @param x509Certificate the input certificate
    * @return the canonical certificate
    */
@@ -259,7 +297,8 @@ public final class X509Utils {
     return canonicalX509Certificate;
   }
 
-  /** Gets the secure random, and lazily initializes it.
+  /**
+   * Gets the secure random, and lazily initializes it.
    *
    * @return the initialized secure random
    */
@@ -268,7 +307,9 @@ public final class X509Utils {
       if (secureRandom == null) {
         LOGGER.info("creating and seeding secure random");
         try {
-          secureRandom = SecureRandom.getInstance("SHA1PRNG");
+          // on Linux, use /dev/urandom
+          secureRandom = SecureRandom.getInstance("NativePRNG");
+          // force it to seed itself
           secureRandom.nextInt();
         } catch (NoSuchAlgorithmException ex) {
           throw new TexaiException(ex);
@@ -279,7 +320,8 @@ public final class X509Utils {
     }
   }
 
-  /** Initializes the secure random from a serialized object.
+  /**
+   * Initializes the secure random from a serialized object.
    *
    * @param path the path to the previously serialized secure random
    * @return the initialized secure random
@@ -308,7 +350,8 @@ public final class X509Utils {
     return secureRandom;
   }
 
-  /** Serializes the secure random to a file for a subsequent restart.
+  /**
+   * Serializes the secure random to a file for a subsequent restart.
    *
    * @param path the path to the previously serialized secure random
    */
@@ -327,7 +370,8 @@ public final class X509Utils {
     }
   }
 
-  /** Gets the root X509 certificate.
+  /**
+   * Gets the root X509 certificate.
    *
    * @return the root X509 certificate
    */
@@ -335,7 +379,8 @@ public final class X509Utils {
     return ROOT_X509_CERTIFICATE;
   }
 
-  /** Gets the indicator whether the JCE unlimited strength jurisdiction policy files are installed.
+  /**
+   * Gets the indicator whether the JCE unlimited strength jurisdiction policy files are installed.
    *
    * @return the indicator whether the JCE unlimited strength jurisdiction policy files are installed
    */
@@ -343,17 +388,20 @@ public final class X509Utils {
     return isJCEUnlimitedStrenthPolicy;
   }
 
-  /** Sets the indicator whether the JCE unlimited strength jurisdiction policy files are installed.
+  /**
+   * Sets the indicator whether the JCE unlimited strength jurisdiction policy files are installed.
    *
-   * @param _isJCEUnlimitedStrenthPolicy the indicator whether the JCE unlimited strength jurisdiction policy files are installed
+   * @param _isJCEUnlimitedStrenthPolicy the indicator whether the JCE unlimited strength jurisdiction policy files are
+   * installed
    */
   public static synchronized void setIsJCEUnlimitedStrengthPolicy(boolean _isJCEUnlimitedStrenthPolicy) {
     isJCEUnlimitedStrenthPolicy = _isJCEUnlimitedStrenthPolicy;
     LOGGER.debug("isJCEUnlimitedStrenthPolicy: " + isJCEUnlimitedStrenthPolicy);
   }
 
-  /** Returns the maximum key length allowed by the ciphers on this JVM, which depends on whether the unlimited
-   * strength encryption policy jar files have been downloaded and installed.
+  /**
+   * Returns the maximum key length allowed by the ciphers on this JVM, which depends on whether the unlimited strength
+   * encryption policy jar files have been downloaded and installed.
    *
    * @return the maximum allowed key size
    * @throws NoSuchAlgorithmException when the encryption algorithm cannot be found
@@ -362,7 +410,9 @@ public final class X509Utils {
     return Cipher.getMaxAllowedKeyLength("AES");
   }
 
-  /** Logs the cryptography providers. */
+  /**
+   * Logs the cryptography providers.
+   */
   public static void logProviders() {
     LOGGER.info("cryptography providers ...");
     final Provider[] providers = Security.getProviders();
@@ -371,7 +421,9 @@ public final class X509Utils {
     }
   }
 
-  /** Logs the capabilities of the cryptography providers.
+  /**
+   * Logs the capabilities of the cryptography providers.
+   *
    * @param providerString the provider identifier
    */
   public static void logProviderCapabilities(final String providerString) {
@@ -394,17 +446,19 @@ public final class X509Utils {
       propertyStrings.add(propertyString);
     }
     Collections.sort(propertyStrings);
-    for (final String propertyString : propertyStrings) {
+    propertyStrings.stream().forEach((propertyString) -> {
       final String factoryClass = propertyString.substring(0, propertyString.indexOf('.'));
       final String name = propertyString.substring(factoryClass.length() + 1);
       LOGGER.info("  " + factoryClass + ": " + name);
-    }
+    });
   }
 
-  /** Creates a random 3072 bit RSA key pair.
+  /**
+   * Creates a random 3072 bit RSA key pair.
+   *
    * @return a random 3072 bit RSA key pair
    * @throws NoSuchAlgorithmException when an invalid algorithm is given
-   * @throws NoSuchProviderException  when an invalid provider is given
+   * @throws NoSuchProviderException when an invalid provider is given
    * @throws InvalidAlgorithmParameterException when an invalid algorithm parameter is given
    */
   public static KeyPair generateRSAKeyPair3072() throws
@@ -417,10 +471,12 @@ public final class X509Utils {
     return keyPairGenerator.generateKeyPair();
   }
 
-  /** Creates a random 2048 bit RSA key pair.
+  /**
+   * Creates a random 2048 bit RSA key pair.
+   *
    * @return a random 2048 bit RSA key pair
    * @throws NoSuchAlgorithmException when an invalid algorithm is given
-   * @throws NoSuchProviderException  when an invalid provider is given
+   * @throws NoSuchProviderException when an invalid provider is given
    * @throws InvalidAlgorithmParameterException when an invalid algorithm parameter is given
    */
   public static KeyPair generateRSAKeyPair2048() throws
@@ -433,7 +489,8 @@ public final class X509Utils {
     return keyPairGenerator.generateKeyPair();
   }
 
-  /** Gets the truststore that contains the single trusted root X.509 certificate.
+  /**
+   * Gets the truststore that contains the single trusted root X.509 certificate.
    *
    * @return the truststore
    */
@@ -467,15 +524,17 @@ public final class X509Utils {
     return truststore;
   }
 
-  /** Generates an intermediate CA certificate, that is to be used to sign end-use certificates.
+  /**
+   * Generates an intermediate CA certificate, that is to be used to sign end-use certificates.
    *
    * @param myPublicKey the public key for this certificate
    * @param issuerPrivateKey the issuer's private key
    * @param issuerCertificate the issuer's certificate, which is either the root CA certificate or another intermediate
    * CA certificate
-   * @param pathLengthConstraint the maximum number of CA certificates that may follow this certificate in a certification
-   * path. (Note: One end-entity certificate will follow the final CA certificate in the path. The last certificate in a path
-   * is considered an end-entity certificate, whether the subject of the certificate is a CA or not.)
+   * @param pathLengthConstraint the maximum number of CA certificates that may follow this certificate in a
+   * certification path. (Note: One end-entity certificate will follow the final CA certificate in the path. The last
+   * certificate in a path is considered an end-entity certificate, whether the subject of the certificate is a CA or
+   * not.)
    * @return an intermediate CA certificate
    *
    * @throws CertificateParsingException when the certificate cannot be parsed
@@ -576,7 +635,8 @@ public final class X509Utils {
     return x509Certificate;
   }
 
-  /** Generates a signed end-use certificate that cannot be used to sign other certificates.
+  /**
+   * Generates a signed end-use certificate that cannot be used to sign other certificates.
    *
    * @param myPublicKey the public key for this certificate
    * @param issuerPrivateKey the issuer's private key
@@ -618,8 +678,9 @@ public final class X509Utils {
             domainComponent);
   }
 
-  /** Generates a certificate path for a signed end-use certificate that cannot be used to sign other certificates, but can be used for authentication
-   * and for message signing.
+  /**
+   * Generates a certificate path for a signed end-use certificate that cannot be used to sign other certificates, but
+   * can be used for authentication and for message signing.
    *
    * @param myPublicKey the public key for this certificate
    * @param issuerPrivateKey the issuer's private key
@@ -670,8 +731,9 @@ public final class X509Utils {
     return generateCertPath(certificateList);
   }
 
-  /** Generates a signed end-use certificate that cannot be used to sign other certificates, but can be used for authentication
-   * and for message signing.
+  /**
+   * Generates a signed end-use certificate that cannot be used to sign other certificates, but can be used for
+   * authentication and for message signing.
    *
    * @param myPublicKey the public key for this certificate
    * @param issuerPrivateKey the issuer's private key
@@ -803,17 +865,133 @@ public final class X509Utils {
     return x509Certificate;
   }
 
-  /** Returns whether the given certificate has the given key usage bit set, i.e. digitalSignature usage.
+  /**
+   * Generates a self-signed end-entity certificate, which has no chain of trust from a root certificate, and can be
+   * used for authentication and for message signing.
    *
-   *       digitalSignature        (0)
-   *       nonRepudiation          (1)
-   *       keyEncipherment         (2)
-   *       dataEncipherment        (3)
-   *       keyAgreement            (4)
-   *       keyCertSign             (5)
-   *       cRLSign                 (6)
-   *       encipherOnly            (7)
-   *       decipherOnly            (8)
+   * @param keyPair the root public/private key pair
+   * @param uid the subject UID
+   * @param domainComponent the domain component, e.g. TexaiLauncher or NodeRuntime
+   * @return a self-signed end-use certificate
+   *
+   * @throws CertificateParsingException when the certificate cannot be parsed
+   * @throws CertificateEncodingException when the certificate cannot be encoded
+   * @throws NoSuchProviderException when an invalid provider is given
+   * @throws NoSuchAlgorithmException when an invalid algorithm is given
+   * @throws SignatureException when the an invalid signature is present
+   * @throws InvalidKeyException when the given key is invalid
+   * @throws IOException if an input/output error occurs while processing the serial number file
+   */
+  public static X509Certificate generateSelfSignedEndEntityX509Certificate(
+          final KeyPair keyPair,
+          final UUID uid,
+          final String domainComponent)
+          throws
+          CertificateParsingException,
+          CertificateEncodingException,
+          NoSuchProviderException,
+          NoSuchAlgorithmException,
+          SignatureException,
+          InvalidKeyException,
+          IOException {
+    //Preconditions
+    assert keyPair != null : "keyPair must not be null";
+    assert uid != null : "uid must not be null";
+
+    final String x500PrincipalString;
+    // provide items to X500Principal in reverse order
+    if (domainComponent == null || domainComponent.isEmpty()) {
+      x500PrincipalString = "UID=" + uid + ", CN=texai.org";
+    } else {
+      x500PrincipalString = "UID=" + uid + ", DC=" + domainComponent + " ,CN=texai.org";
+    }
+    final X500Principal x500Principal = new X500Principal(x500PrincipalString);
+
+    final X509v3CertificateBuilder x509v3CertificateBuilder = new X509v3CertificateBuilder(
+            new X500Name(x500Principal.getName()), // issuer,
+            getNextSerialNumber(), // serial
+            new Date(System.currentTimeMillis() - 10000L), // notBefore,
+            new Date(System.currentTimeMillis() + VALIDITY_PERIOD), // notAfter,
+            new X500Name(x500Principal.getName()), // subject,
+            new SubjectPublicKeyInfo(ASN1Sequence.getInstance(keyPair.getPublic().getEncoded()))); // publicKeyInfo
+
+    // see http://www.ietf.org/rfc/rfc3280.txt
+    // see http://stackoverflow.com/questions/20175447/creating-certificates-for-ssl-communication
+    final JcaX509ExtensionUtils jcaX509ExtensionUtils = new JcaX509ExtensionUtils();
+    // Add subject key identifier
+    x509v3CertificateBuilder.addExtension(
+            Extension.subjectKeyIdentifier,
+            false, // isCritical
+            jcaX509ExtensionUtils.createSubjectKeyIdentifier(keyPair.getPublic()));
+
+    // add basic constraints
+    x509v3CertificateBuilder.addExtension(
+            Extension.basicConstraints,
+            true, // isCritical
+            new BasicConstraints(false)); // is not a CA certificate
+
+    // add key usage
+    final KeyUsage keyUsage = new KeyUsage(
+            // the digitalSignature usage indicates that the subject public key may be used with a digital signature
+            // mechanism to support security services other than non-repudiation, certificate signing, or revocation
+            // information signing
+            KeyUsage.digitalSignature
+            | // the nonRepudiation usage indicates that the subject public key may be used to verify digital signatures
+            // used to provide a non-repudiation service which protects against the signing entity falsely denying some
+            // action, excluding certificate or CRL signing
+            KeyUsage.nonRepudiation
+            | // the keyEncipherment usage indicates that the subject public key may be used for key transport, e.g. the
+            // exchange of efficient symmetric keys in SSL
+            KeyUsage.keyEncipherment
+            | // the dataEncipherment usage indicates that the subject public key may be used for enciphering user data,
+            // other than cryptographic keys
+            KeyUsage.dataEncipherment
+            | // the keyAgreement usage indicates that the subject public key may be used for key agreement, e.g. when a
+            // Diffie-Hellman key is to be used for key management
+            KeyUsage.keyAgreement
+            | // the keyCertSign bit indicates that the subject public key may be used for verifying a signature on
+            // certificates
+            KeyUsage.keyCertSign
+            | // the cRLSign indicates that the subject public key may be used for verifying a signature on revocation
+            // information
+            KeyUsage.cRLSign
+            | // see http://www.docjar.com/html/api/sun/security/validator/EndEntityChecker.java.html - bit 0 needs to set for SSL
+            // client authorization
+            KeyUsage.encipherOnly);
+    x509v3CertificateBuilder.addExtension(
+            Extension.keyUsage,
+            true, // isCritical
+            keyUsage);
+
+    X509Certificate x509Certificate;
+    try {
+      // self signed
+      final ContentSigner contentSigner = new JcaContentSignerBuilder(DIGITAL_SIGNATURE_ALGORITHM).setProvider(BOUNCY_CASTLE_PROVIDER).build(keyPair.getPrivate());
+      final X509CertificateHolder x509CertificateHolder = x509v3CertificateBuilder.build(contentSigner);
+      final JcaX509CertificateConverter jcaX509CertificateConverter = new JcaX509CertificateConverter();
+      x509Certificate = makeCanonicalX509Certificate(jcaX509CertificateConverter.getCertificate(x509CertificateHolder));
+    } catch (CertificateException | OperatorCreationException ex) {
+      throw new TexaiException(ex);
+    }
+
+    //Postconditions
+    try {
+      x509Certificate.checkValidity();
+      // verify self-signature
+      x509Certificate.verify(keyPair.getPublic());
+    } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException | SignatureException ex) {
+      throw new TexaiException(ex);
+    }
+    assert x509Certificate.getKeyUsage()[0] : "must have digital signature key usage";
+
+    return x509Certificate;
+  }
+
+  /**
+   * Returns whether the given certificate has the given key usage bit set, i.e. digitalSignature usage.
+   *
+   * digitalSignature (0) nonRepudiation (1) keyEncipherment (2) dataEncipherment (3) keyAgreement (4) keyCertSign (5)
+   * cRLSign (6) encipherOnly (7) decipherOnly (8)
    *
    * @param x509Certificate the given certificate
    * @param keyUsageBitMask the given key usage bit, i.e. KeyUsage.digitalSignature
@@ -837,7 +1015,8 @@ public final class X509Utils {
     return (certificateKeyUsageBitmask & keyUsageBitMask) != 0;
   }
 
-  /** Gets the UUID from the subject name contained in the given X.509 certificate.
+  /**
+   * Gets the UUID from the subject name contained in the given X.509 certificate.
    *
    * @param x509Certificate the given X.509 certificate
    * @return the UUID
@@ -854,7 +1033,9 @@ public final class X509Utils {
     return UUID.fromString(uuidString);
   }
 
-  /** Reads a DER encoded certificate from an input stream.
+  /**
+   * Reads a DER encoded certificate from an input stream.
+   *
    * @param inputStream the input stream containing the DER encoded bytes of an X.509 certificate
    * @return the certificate
    * @throws CertificateException when an invalid certificate is read
@@ -871,7 +1052,9 @@ public final class X509Utils {
     }
   }
 
-  /** Writes a DER encoded certificate to the given file path.
+  /**
+   * Writes a DER encoded certificate to the given file path.
+   *
    * @param x509Certificate the X.509 certificate
    * @param filePath the given file path
    * @throws CertificateEncodingException if the certificate cannot be encoded
@@ -893,14 +1076,15 @@ public final class X509Utils {
     }
   }
 
-  /** Finds or creates the keystore specified by the given path.
+  /**
+   * Finds or creates the keystore specified by the given path.
    *
    * @param filePath the file path to the keystore
    * @param password the keystore password
    * @return the keystore
    * @throws KeyStoreException if no Provider supports a KeyStoreSpi implementation for the specified type
-   * @throws IOException if there is an I/O or format problem with the keystore data,
-   * if a password is required but not given, or if the given password was incorrect
+   * @throws IOException if there is an I/O or format problem with the keystore data, if a password is required but not
+   * given, or if the given password was incorrect
    * @throws NoSuchAlgorithmException if the algorithm used to check the integrity of the keystore cannot be found
    * @throws CertificateException if any of the certificates in the keystore could not be loaded
    * @throws NoSuchProviderException if the cryptography provider cannot be found
@@ -949,14 +1133,15 @@ public final class X509Utils {
     return keyStore;
   }
 
-  /** Finds or creates the jceks keystore specified by the given path.
+  /**
+   * Finds or creates the jceks keystore specified by the given path.
    *
    * @param filePath the file path to the keystore
    * @param password the keystore password
    * @return the keystore
    * @throws KeyStoreException if no Provider supports a KeyStoreSpi implementation for the specified type
-   * @throws IOException if there is an I/O or format problem with the keystore data,
-   * if a password is required but not given, or if the given password was incorrect
+   * @throws IOException if there is an I/O or format problem with the keystore data, if a password is required but not
+   * given, or if the given password was incorrect
    * @throws NoSuchAlgorithmException if the algorithm used to check the integrity of the keystore cannot be found
    * @throws CertificateException if any of the certificates in the keystore could not be loaded
    * @throws NoSuchProviderException if the cryptography provider cannot be found
@@ -991,14 +1176,15 @@ public final class X509Utils {
     return keyStore;
   }
 
-  /** Finds or creates the uber keystore specified by the given path.
+  /**
+   * Finds or creates the uber keystore specified by the given path.
    *
    * @param filePath the file path to the keystore
    * @param password the keystore password
    * @return the keystore
    * @throws KeyStoreException if no Provider supports a KeyStoreSpi implementation for the specified type
-   * @throws IOException if there is an I/O or format problem with the keystore data,
-   * if a password is required but not given, or if the given password was incorrect
+   * @throws IOException if there is an I/O or format problem with the keystore data, if a password is required but not
+   * given, or if the given password was incorrect
    * @throws NoSuchAlgorithmException if the algorithm used to check the integrity of the keystore cannot be found
    * @throws CertificateException if any of the certificates in the keystore could not be loaded
    * @throws NoSuchProviderException if the cryptography provider cannot be found
@@ -1034,15 +1220,16 @@ public final class X509Utils {
     return keyStore;
   }
 
-  /** Copies the given keystore from the .uber format to the .jceks format.
+  /**
+   * Copies the given keystore from the .uber format to the .jceks format.
    *
    * @param uberKeyStorePath the .uber keystore path
    * @param uberKeyStorePassword the .uber keystore password
    * @param jceksKeyStorePath the .jceks keystore path
    * @param jceksKeyStorePassword the .jceks keystore password
    * @throws KeyStoreException if no Provider supports a KeyStoreSpi implementation for the specified type
-   * @throws IOException if there is an I/O or format problem with the keystore data,
-   * if a password is required but not given, or if the given password was incorrect
+   * @throws IOException if there is an I/O or format problem with the keystore data, if a password is required but not
+   * given, or if the given password was incorrect
    * @throws NoSuchAlgorithmException if the algorithm used to check the integrity of the keystore cannot be found
    * @throws CertificateException if any of the certificates in the keystore could not be loaded
    * @throws NoSuchProviderException if the cryptography provider cannot be found
@@ -1085,14 +1272,15 @@ public final class X509Utils {
     jceksKeyStore.store(new FileOutputStream(jceksKeyStorePath), jceksKeyStorePassword);
   }
 
-  /** Finds the keystore specified by the given path.
+  /**
+   * Finds the keystore specified by the given path.
    *
    * @param filePath the file path to the keystore
    * @param password the keystore password
    * @return the keystore
    * @throws KeyStoreException if no Provider supports a KeyStoreSpi implementation for the specified type
-   * @throws IOException if there is an I/O or format problem with the keystore data,
-   * if a password is required but not given, or if the given password was incorrect
+   * @throws IOException if there is an I/O or format problem with the keystore data, if a password is required but not
+   * given, or if the given password was incorrect
    * @throws NoSuchAlgorithmException if the algorithm used to check the integrity of the keystore cannot be found
    * @throws CertificateException if any of the certificates in the keystore could not be loaded
    * @throws NoSuchProviderException if the cryptography provider cannot be found
@@ -1130,14 +1318,15 @@ public final class X509Utils {
     }
   }
 
-  /** Finds or creates the PKCS12 keystore specified by the given path.
+  /**
+   * Finds or creates the PKCS12 keystore specified by the given path.
    *
    * @param filePath the file path to the keystore, having the .pkcs12 extension
    * @param password the keystore password
    * @return the keystore
    * @throws KeyStoreException if no Provider supports a KeyStoreSpi implementation for the specified type
-   * @throws IOException if there is an I/O or format problem with the keystore data,
-   * if a password is required but not given, or if the given password was incorrect
+   * @throws IOException if there is an I/O or format problem with the keystore data, if a password is required but not
+   * given, or if the given password was incorrect
    * @throws NoSuchAlgorithmException if the algorithm used to check the integrity of the keystore cannot be found
    * @throws CertificateException if any of the certificates in the keystore could not be loaded
    * @throws NoSuchProviderException if the cryptography provider cannot be found
@@ -1177,14 +1366,15 @@ public final class X509Utils {
     return keyStore;
   }
 
-  /** Finds or creates the BKS keystore specified by the given path.
+  /**
+   * Finds or creates the BKS keystore specified by the given path.
    *
    * @param filePath the file path to the keystore, having the .bks extension
    * @param password the keystore password
    * @return the keystore
    * @throws KeyStoreException if no Provider supports a KeyStoreSpi implementation for the specified type
-   * @throws IOException if there is an I/O or format problem with the keystore data,
-   * if a password is required but not given, or if the given password was incorrect
+   * @throws IOException if there is an I/O or format problem with the keystore data, if a password is required but not
+   * given, or if the given password was incorrect
    * @throws NoSuchAlgorithmException if the algorithm used to check the integrity of the keystore cannot be found
    * @throws CertificateException if any of the certificates in the keystore could not be loaded
    * @throws NoSuchProviderException if the cryptography provider cannot be found
@@ -1220,14 +1410,15 @@ public final class X509Utils {
     return keyStore;
   }
 
-  /** Finds or creates the JKS keystore specified by the given path.
+  /**
+   * Finds or creates the JKS keystore specified by the given path.
    *
    * @param filePath the file path to the keystore, having the .jks extension
    * @param password the keystore password
    * @return the keystore
    * @throws KeyStoreException if no Provider supports a KeyStoreSpi implementation for the specified type
-   * @throws IOException if there is an I/O or format problem with the keystore data,
-   * if a password is required but not given, or if the given password was incorrect
+   * @throws IOException if there is an I/O or format problem with the keystore data, if a password is required but not
+   * given, or if the given password was incorrect
    * @throws NoSuchAlgorithmException if the algorithm used to check the integrity of the keystore cannot be found
    * @throws CertificateException if any of the certificates in the keystore could not be loaded
    * @throws NoSuchProviderException if the cryptography provider cannot be found
@@ -1263,7 +1454,8 @@ public final class X509Utils {
     return keyStore;
   }
 
-  /** Adds an entry to the specified keystore, creating the keystore if it does not already exist.
+  /**
+   * Adds an entry to the specified keystore, creating the keystore if it does not already exist.
    *
    * @param keyStoreFilePath the file path to the keystore
    * @param keyStorePassword the keystore's password
@@ -1300,7 +1492,8 @@ public final class X509Utils {
             privateKey);
   }
 
-  /** Adds an entry to the specified keystore, creating the keystore if it does not already exist.
+  /**
+   * Adds an entry to the specified keystore, creating the keystore if it does not already exist.
    *
    * @param keyStoreFilePath the file path to the keystore
    * @param keyStorePassword the keystore's password
@@ -1352,7 +1545,8 @@ public final class X509Utils {
     return keyStore;
   }
 
-  /** Resets the certificate serial number.
+  /**
+   * Resets the certificate serial number.
    *
    * @throws IOException if an input/output error occurred
    */
@@ -1363,7 +1557,8 @@ public final class X509Utils {
     }
   }
 
-  /** Returns the next certificate serial number.
+  /**
+   * Returns the next certificate serial number.
    *
    * @return the next certificate serial number
    * @throws IOException if an input/output error occurred
@@ -1401,7 +1596,8 @@ public final class X509Utils {
     return new BigInteger(String.valueOf(nextSerialNumber));
   }
 
-  /** Returns whether this is the trusted development system.
+  /**
+   * Returns whether this is the trusted development system.
    *
    * @return whether this is the trusted development system
    */
@@ -1410,7 +1606,8 @@ public final class X509Utils {
     return keyStorePasswordFile.exists();
   }
 
-  /** Returns a certificate path consisting of the given certificate array.
+  /**
+   * Returns a certificate path consisting of the given certificate array.
    *
    * @param certificates the given certificate array
    * @return the certificate path consisting of the given certificate list
@@ -1425,7 +1622,8 @@ public final class X509Utils {
     return generateCertPath(certificateList);
   }
 
-  /** Returns a certificate path consisting of the given certificate list.
+  /**
+   * Returns a certificate path consisting of the given certificate list.
    *
    * @param certificateList the given certificate list
    * @return the certificate path consisting of the given certificate list
@@ -1437,7 +1635,8 @@ public final class X509Utils {
     return certificateFactory.generateCertPath(certificateList);
   }
 
-  /** Validates the given X.509 certificate path, throwing an exception if the path is invalid.
+  /**
+   * Validates the given X.509 certificate path, throwing an exception if the path is invalid.
    *
    * @param certPath the given X.509 certificate path, which does not include the trust anchor in contrast to a
    * certificate chain that does
@@ -1464,15 +1663,16 @@ public final class X509Utils {
     certPathValidator.validate(certPath, params);
   }
 
-  /** Generates the X.509 security information.
+  /**
+   * Generates the X.509 security information.
    *
    * @param keyPair the key pair for the generated certificate
    * @param issuerPrivateKey the issuer's private key
    * @param issuerCertificate the issuer's certificate
    * @param uid the generated certificate's subject UID
    * @param keystorePassword the keystore password
-   * @param isJCEUnlimitedStrengthPolicy the indicator whether the generated X.509 security information will be
-   * hosted on a system with unlimited strength policy
+   * @param isJCEUnlimitedStrengthPolicy the indicator whether the generated X.509 security information will be hosted
+   * on a system with unlimited strength policy
    * @param domainComponent the domain component
    * @return the X509 security information
    */
@@ -1522,7 +1722,8 @@ public final class X509Utils {
     }
   }
 
-  /** Gets the X509 security information for the given keystore and private key alias.
+  /**
+   * Gets the X509 security information for the given keystore and private key alias.
    *
    * @param keyStoreFilePath the file path to the keystore
    * @param keyStorePassword the keystore password
@@ -1550,7 +1751,10 @@ public final class X509Utils {
     }
   }
 
-  /** Initializes the installer keystore on the trusted development system, from where it is copied into the distributed code. */
+  /**
+   * Initializes the installer keystore on the trusted development system, from where it is copied into the distributed
+   * code.
+   */
   public static synchronized void initializeInstallerKeyStore() {
     if (!X509Utils.isTrustedDevelopmentSystem()) {
       return;
@@ -1605,7 +1809,8 @@ public final class X509Utils {
     assert !isTrustedDevelopmentSystem() || X509Utils.isJCEUnlimitedStrengthPolicy() : "JCE unlimited strength policy must be in effect";
   }
 
-  /** Generates a self-signed certificate to use as a CA root certificate.
+  /**
+   * Generates a self-signed certificate to use as a CA root certificate.
    *
    * @param keyPair the root public/private key pair
    * @return a self-signed CA root certificate
@@ -1692,8 +1897,9 @@ public final class X509Utils {
     }
   }
 
-  /** Creates the Texai root X.509 certificate keystore on the trusted development system.  This
-   * keystore also includes a jar-signing certificate.
+  /**
+   * Creates the Texai root X.509 certificate keystore on the trusted development system. This keystore also includes a
+   * jar-signing certificate.
    */
   protected static synchronized void createTexaiRootKeyStore() {
     //Preconditions
@@ -1760,7 +1966,8 @@ public final class X509Utils {
     }
   }
 
-  /** Gets the root keystore password, or null if not executing on a trusted root system.
+  /**
+   * Gets the root keystore password, or null if not executing on a trusted root system.
    *
    * @return the root keystore password, or null if not executing on a trusted root system
    */
@@ -1783,7 +1990,8 @@ public final class X509Utils {
     }
   }
 
-  /** Gets the root private key or null if not executing on a trusted root system.
+  /**
+   * Gets the root private key or null if not executing on a trusted root system.
    *
    * @return the root private key or null if not executing on a trusted root system
    */
@@ -1814,8 +2022,10 @@ public final class X509Utils {
     }
   }
 
-  /** Initializes the truststore on the trusted development system, from where the truststore is copied to the
-   * code repository. */
+  /**
+   * Initializes the truststore on the trusted development system, from where the truststore is copied to the code
+   * repository.
+   */
   public static synchronized void initializeTrustore() {
     if (!isTrustedDevelopmentSystem()) {
       return;
@@ -1931,10 +2141,11 @@ public final class X509Utils {
     }
   }
 
-  /** Logs the aliases contained in the given keystore.
-
-  @param keyStore the given keystore
-  */
+  /**
+   * Logs the aliases contained in the given keystore.
+   *
+   * @param keyStore the given keystore
+   */
   public static void logAliases(final KeyStore keyStore) {
     Enumeration<String> aliases;
     try {

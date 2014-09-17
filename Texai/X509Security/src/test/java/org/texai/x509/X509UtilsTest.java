@@ -41,7 +41,9 @@ import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.PublicKey;
+import java.security.Security;
 import java.security.cert.CertPath;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
@@ -67,7 +69,9 @@ import static org.texai.x509.X509Utils.isTrustedDevelopmentSystem;
  */
 public class X509UtilsTest {
 
-  /** the logger */
+  /**
+   * the logger
+   */
   private static final Logger LOGGER = Logger.getLogger(X509UtilsTest.class);
 
   public X509UtilsTest() {
@@ -76,7 +80,9 @@ public class X509UtilsTest {
   @BeforeClass
   public static void setUpClass() throws Exception {
     X509Utils.logProviders();
-    X509Utils.logProviderCapabilities(X509Utils.BOUNCY_CASTLE_PROVIDER);
+    for (final Provider provider : Security.getProviders()) {
+      X509Utils.logProviderCapabilities(provider.getName());
+    }
     X509Utils.createTexaiRootKeyStore();
     X509Utils.initializeInstallerKeyStore();
   }
@@ -213,6 +219,45 @@ public class X509UtilsTest {
     } catch (IOException ex) {
       fail(ex.getMessage());
     }
+  }
+
+  /**
+   * Test of generateSelfSignedEndEntityX509Certificate method, of class X509Utils.
+   */
+  @Test
+  public void testGenerateSelfSignedEndEntityX509Certificate() {
+    LOGGER.info("generateSelfSignedEndEntityX509Certificate");
+    final int nbrIterations = 30;
+    long startMillis = System.currentTimeMillis();
+    for (int i = 0; i < nbrIterations; i++) {
+      try {
+        final KeyPair keyPair = X509Utils.generateRSAKeyPair3072();
+        final UUID uuid = UUID.randomUUID();
+        LOGGER.info("generating self-signed certificate number " + (i + 1));
+        X509Certificate x509Certificate
+                = X509Utils.generateSelfSignedEndEntityX509Certificate(
+                        keyPair,
+                        uuid,
+                        "TestComponent");
+        if (i == 0) {
+          LOGGER.info("generated self-signed end-entity certificate...\n" + x509Certificate);
+          assertNotNull(x509Certificate);
+          assertTrue(x509Certificate.getIssuerDN().toString().startsWith("CN=texai.org, DC=TestComponent, UID="));
+          assertEquals(x509Certificate.getIssuerDN().toString(), x509Certificate.getSubjectDN().toString());
+          assertEquals(X509Utils.DIGITAL_SIGNATURE_ALGORITHM, x509Certificate.getSigAlgName());
+          assertEquals(keyPair.getPublic(), x509Certificate.getPublicKey());
+          x509Certificate.verify(keyPair.getPublic());
+          LOGGER.info("principal: " + x509Certificate.getSubjectX500Principal().toString());
+          assertTrue(x509Certificate.getSubjectX500Principal().toString().contains("UID="));
+        }
+      } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | SignatureException | InvalidKeyException | IOException | CertificateException ex) {
+        LOGGER.info(StringUtils.getStackTraceAsString(ex));
+        fail(ex.getMessage());
+      }
+    }
+    long endMillis = System.currentTimeMillis();
+    LOGGER.info("number of self-signed certificates generated: " + nbrIterations);
+    LOGGER.info("seconds per certificate to generate: " + ((float) (endMillis - startMillis) / 1000.0 / (float) nbrIterations));
   }
 
   /**
@@ -802,7 +847,9 @@ public class X509UtilsTest {
     }
   }
 
-  /** Checks whether the trustores are populated.  */
+  /**
+   * Checks whether the trustores are populated.
+   */
   public void verifyTruststoresPopulated() {
 
     if (!X509Utils.isTrustedDevelopmentSystem()) {
