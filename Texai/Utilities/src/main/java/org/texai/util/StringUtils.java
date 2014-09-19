@@ -37,18 +37,26 @@ import org.apache.log4j.Logger;
  */
 public final class StringUtils {
 
-  /** the logger */
+  /**
+   * the logger
+   */
   private static final Logger LOGGER = Logger.getLogger(StringUtils.class);
-  /** the hex digits */
+  /**
+   * the hex digits
+   */
   private static final String HEX_DIGITS = "0123456789abcdef";
 
-  /** Creates a new instance of StringUtils. */
+  /**
+   * Creates a new instance of StringUtils.
+   */
   private StringUtils() {
   }
 
-  /** Returns a sorted list of the strings corresponding to the given collection of objects.
+  /**
+   * Returns a sorted list of the strings corresponding to the given collection of objects.
    *
    * @param objects the given collection of objects
+   *
    * @return a sorted list of the strings
    */
   public static List<String> toSortedStrings(final Collection<? extends Object> objects) {
@@ -63,9 +71,11 @@ public final class StringUtils {
     return strings;
   }
 
-  /** Returns a string representation of the given float array.
+  /**
+   * Returns a string representation of the given float array.
    *
    * @param floatArray the given float array
+   *
    * @return a string representation of the given float array
    */
   public static String floatArrayToString(final float[] floatArray) {
@@ -85,9 +95,11 @@ public final class StringUtils {
     return stringBuilder.toString();
   }
 
-  /** Returns a bit-string representation of the given boolean array.
+  /**
+   * Returns a bit-string representation of the given boolean array.
    *
    * @param booleanArray the given boolean array
+   *
    * @return a bit-string representation of the given boolean array
    */
   public static String booleanArrayToBitString(final boolean[] booleanArray) {
@@ -102,9 +114,11 @@ public final class StringUtils {
     return stringBuilder.toString();
   }
 
-  /** Returns whether the given string is a valid Java class name.
+  /**
+   * Returns whether the given string is a valid Java class name.
    *
    * @param string the given string
+   *
    * @return whether the given string is a valid Java class name
    */
   public static boolean isJavaClassName(final String string) {
@@ -124,18 +138,22 @@ public final class StringUtils {
     return true;
   }
 
-  /** Returns whether the given string is a non-empty string.
+  /**
+   * Returns whether the given string is a non-empty string.
    *
    * @param string the given string
+   *
    * @return whether the given string is a non-empty string
    */
   public static boolean isNonEmptyString(final String string) {
     return string != null && !string.isEmpty();
   }
 
-  /** Splits the given string on spaces, which is faster than String.split(...) for this special case.
+  /**
+   * Splits the given string on spaces, which is faster than String.split(...) for this special case.
    *
    * @param string the given string
+   *
    * @return the words that compose the string
    */
   public static List<String> splitOnSpace(final String string) {
@@ -157,10 +175,11 @@ public final class StringUtils {
     return words;
   }
 
-  /** Reverses a string which consists of comma-separated items.
-   *  "a, b, c" --> "c, b, a"
+  /**
+   * Reverses a string which consists of comma-separated items. "a, b, c" --> "c, b, a"
    *
    * @param string the given string
+   *
    * @return the string with the comma-separated items reversed
    */
   public static String reverseCommaDelimitedString(final String string) {
@@ -193,9 +212,11 @@ public final class StringUtils {
     return stringBuilder.toString();
   }
 
-  /** Splits the given string on spaces and certain embedded HTML tags.
+  /**
+   * Splits the given string on spaces and certain embedded HTML tags.
    *
    * @param string the given string
+   *
    * @return the words and HTML tags that compose the string
    */
   public static List<String> splitHTMLTags(final String string) {
@@ -215,7 +236,8 @@ public final class StringUtils {
     return splitOnSpace(tempString.trim());
   }
 
-  /** Logs the character differences between two given equal length strings.
+  /**
+   * Logs the character differences between two given equal length strings.
    *
    * @param string1 the first given string
    * @param string2 the second given string
@@ -241,11 +263,12 @@ public final class StringUtils {
     }
   }
 
-  /** Escapes embedded single quote and backslash characters in the given string.
+  /**
+   * Escapes embedded single quote and backslash characters in the given string.
    *
    * @param string the given string
-   * @return the given string with embedded single quote characters
-   * preceded by a backslash character, and with embedded backslash
+   *
+   * @return the given string with embedded single quote characters preceded by a backslash character, and with embedded backslash
    * characters preceded by another (escaping) backslash character
    */
   public static String escapeSingleQuotes(final String string) {
@@ -256,9 +279,11 @@ public final class StringUtils {
     return result.replaceAll("'", "\\\\'");
   }
 
-  /** Gets the given throwable stack trace as a string.
+  /**
+   * Gets the given throwable stack trace as a string.
    *
    * @param throwable the throwable
+   *
    * @return the given throwable stack trace as a string
    */
   public static String getStackTraceAsString(final Throwable throwable) {
@@ -270,9 +295,11 @@ public final class StringUtils {
     return stringWriter.toString();
   }
 
-  /** Removes any enclosing double quotes from the given string.
+  /**
+   * Removes any enclosing double quotes from the given string.
    *
    * @param string the given string
+   *
    * @return the given string after removing any enclosing double quotes
    */
   public static String removeEnclosingDoubleQuotes(final String string) {
@@ -289,7 +316,8 @@ public final class StringUtils {
     return resultString;
   }
 
-  /** Appends the given number of spaces to the given string builder.
+  /**
+   * Appends the given number of spaces to the given string builder.
    *
    * @param stringBuilder the given string builder
    * @param indent the given number of spaces
@@ -304,7 +332,8 @@ public final class StringUtils {
     }
   }
 
-  /** Appends the given number of spaces to the given buffered writer.
+  /**
+   * Appends the given number of spaces to the given buffered writer.
    *
    * @param bufferedWriter the given buffered writer
    * @param indent the given number of spaces
@@ -323,9 +352,11 @@ public final class StringUtils {
     }
   }
 
-  /** Returns the contents of the given input stream as a string.
+  /**
+   * Returns the contents of the given input stream as a string.
    *
    * @param inputStream the given input stream
+   *
    * @return the contents of the given input stream as a string
    */
   public static String convertInputStreamToString(final InputStream inputStream) {
@@ -345,9 +376,11 @@ public final class StringUtils {
     return stringBuilder.toString();
   }
 
-  /** Returns a string of length len made up of blanks.
+  /**
+   * Returns a string of length len made up of blanks.
    *
    * @param length the length of the output String.
+   *
    * @return the string of blanks.
    */
   public static String makeBlankString(final int length) {
@@ -361,10 +394,12 @@ public final class StringUtils {
     return new String(buffer);
   }
 
-  /** Returns given byte array as a hex string.
+  /**
+   * Returns given byte array as a hex string.
    *
    * @param buffer the buffer containing the bytes to be converted to hex.
    * @param length the number of bytes to be converted
+   *
    * @return a hex representation of the bytes.
    */
   public static String toHex(final byte[] buffer, final int length) {
@@ -379,18 +414,22 @@ public final class StringUtils {
     return stringBuffer.toString();
   }
 
-  /** Returns the given byte array as a hex string.
+  /**
+   * Returns the given byte array as a hex string.
    *
    * @param buffer the bytes to be converted.
+   *
    * @return a hex representation of data.
    */
   public static String toHex(final byte[] buffer) {
     return toHex(buffer, buffer.length);
   }
 
-  /** Returns the package name from the fully qualified class name.
+  /**
+   * Returns the package name from the fully qualified class name.
    *
    * @param className the fully qualified class name
+   *
    * @return the package name
    */
   public static String packageFromClassName(final String className) {
@@ -403,9 +442,11 @@ public final class StringUtils {
     return className.substring(0, index);
   }
 
-  /** Returns the simple class name from the fully qualified class name.
+  /**
+   * Returns the simple class name from the fully qualified class name.
    *
    * @param className the fully qualified class name
+   *
    * @return the package name
    */
   public static String simpleClassName(final String className) {
@@ -418,9 +459,11 @@ public final class StringUtils {
     return className.substring(index + 1);
   }
 
-  /** Gets a lower case predicate or variable name derived from the given simple class name.
+  /**
+   * Gets a lower case predicate or variable name derived from the given simple class name.
    *
    * @param simpleClassName the given simple class name
+   *
    * @return a lower case predicate or variable name derived from the given simple class name
    */
   public static String getLowerCasePredicateName(final String simpleClassName) {
@@ -464,7 +507,8 @@ public final class StringUtils {
     }
   }
 
-  /** Ensures that the given string builder has one newline characters at the end of its buffer.
+  /**
+   * Ensures that the given string builder has one newline characters at the end of its buffer.
    *
    * @param stringBuilder the given string builder
    */
@@ -486,7 +530,8 @@ public final class StringUtils {
     }
   }
 
-  /** Ensures that the given string builder has two newline characters at the end of its buffer.
+  /**
+   * Ensures that the given string builder has two newline characters at the end of its buffer.
    *
    * @param stringBuilder the given string builder
    */
@@ -525,9 +570,11 @@ public final class StringUtils {
     }
   }
 
-  /** Returns the single string formed by concatenating the given strings, separating them by a space.
+  /**
+   * Returns the single string formed by concatenating the given strings, separating them by a space.
    *
    * @param strings the given strings
+   *
    * @return the single string formed by concatenating the given strings, separating them by a space
    */
   public static String toSingleString(final List<String> strings) {
@@ -547,10 +594,12 @@ public final class StringUtils {
     return stringBuilder.toString();
   }
 
-  /** Returns the given string padded with spaces if required to have the given length.
+  /**
+   * Returns the given string padded with spaces if required to have the given length.
    *
    * @param string the given string
    * @param length the given length
+   *
    * @return the given string padded with spaces if required to have the given length
    */
   public static String padWithTrailingSpaces(final String string, final int length) {
@@ -570,9 +619,11 @@ public final class StringUtils {
     return stringBuilder.toString();
   }
 
-  /** Returns the given string after removing any numeric suffix.
+  /**
+   * Returns the given string after removing any numeric suffix.
    *
    * @param string the given string
+   *
    * @return the given string after removing any numeric suffix
    */
   public static String stripNumericSuffix(final String string) {
@@ -593,11 +644,13 @@ public final class StringUtils {
     return string.substring(0, index + 1);
   }
 
-  /** Returns whether two lists of strings are consistent with respect to order, while allowing missing items in the
-   * second list, and allowing optional capitalization of the first word in the first list.
+  /**
+   * Returns whether two lists of strings are consistent with respect to order, while allowing missing items in the second list, and
+   * allowing optional capitalization of the first word in the first list.
    *
    * @param strings1 the first list of strings
    * @param strings2 the second list of strings
+   *
    * @return
    */
   public static boolean isOrderConsistent(final List<String> strings1, final List<String> strings2) {
@@ -649,30 +702,36 @@ public final class StringUtils {
   //---------------------------------------------------------------------
   // General convenience methods for working with Strings
   //---------------------------------------------------------------------
-  /** Capitalizes a <code>String</code>, changing the first letter to
-   * upper case as per {@link Character#toUpperCase(char)}.
-   * No other letters are changed.
+  /**
+   * Capitalizes a <code>String</code>, changing the first letter to upper case as per {@link Character#toUpperCase(char)}. No other letters
+   * are changed.
+   *
    * @param string the String to capitalize, may be <code>null</code>
+   *
    * @return the capitalized String, <code>null</code> if null
    */
   public static String capitalize(final String string) {
     return changeFirstCharacterCase(string, true);
   }
 
-  /** Uncapitalizes a <code>String</code>, changing the first letter to
-   * lower case as per {@link Character#toLowerCase(char)}.
-   * No other letters are changed.
+  /**
+   * Uncapitalizes a <code>String</code>, changing the first letter to lower case as per {@link Character#toLowerCase(char)}. No other
+   * letters are changed.
+   *
    * @param string the String to uncapitalize, may be <code>null</code>
+   *
    * @return the uncapitalized String, <code>null</code> if null
    */
   public static String uncapitalize(final String string) {
     return changeFirstCharacterCase(string, false);
   }
 
-  /** Changes case of the first character of the string.
+  /**
+   * Changes case of the first character of the string.
    *
    * @param string the given string
    * @param isCapitalized whether to capitalize the first character
+   *
    * @return the transformed string
    */
   private static String changeFirstCharacterCase(final String string, final boolean isCapitalized) {
@@ -689,15 +748,19 @@ public final class StringUtils {
     return stringBuilder.toString();
   }
 
-  /** Returns whether the given CharSequence is neither <code>null</code> nor length 0.
-   * Note: Will return <code>true</code> for a CharSequence that purely consists of whitespace.
-   * <p><pre>
+  /**
+   * Returns whether the given CharSequence is neither <code>null</code> nor length 0. Note: Will return <code>true</code> for a
+   * CharSequence that purely consists of whitespace.
+   * <p>
+   * <pre>
    * StringUtils.hasLength(null) = false
    * StringUtils.hasLength("") = false
    * StringUtils.hasLength(" ") = true
    * StringUtils.hasLength("Hello") = true
    * </pre>
+   *
    * @param str the CharSequence to check (may be <code>null</code>)
+   *
    * @return <code>true</code> if the CharSequence is not null and has length
    * @see #hasText(String)
    */
@@ -705,9 +768,12 @@ public final class StringUtils {
     return (str != null && str.length() > 0);
   }
 
-  /** Returns whether the given String is neither <code>null</code> nor length 0.
-   * Note: Will return <code>true</code> for a String that purely consists of whitespace.
+  /**
+   * Returns whether the given String is neither <code>null</code> nor length 0. Note: Will return <code>true</code> for a String that
+   * purely consists of whitespace.
+   *
    * @param str the String to check (may be <code>null</code>)
+   *
    * @return <code>true</code> if the String is not null and has length
    * @see #hasLength(CharSequence)
    */
@@ -715,11 +781,13 @@ public final class StringUtils {
     return hasLength((CharSequence) str);
   }
 
-  /** Replaces all occurrences of a substring within a string with
-   * another string.
+  /**
+   * Replaces all occurrences of a substring within a string with another string.
+   *
    * @param inString String to examine
    * @param oldPattern String to replace
    * @param newPattern String to insert
+   *
    * @return a String with the replacements
    */
   public static String replace(
@@ -750,7 +818,9 @@ public final class StringUtils {
     return stringBuilder.toString();
   }
 
-  /** Counts the occurrences of the substring in the given string.
+  /**
+   * Counts the occurrences of the substring in the given string.
+   *
    * @param string the given string
    * @param substring the given substring
    *
@@ -770,9 +840,11 @@ public final class StringUtils {
     return count;
   }
 
-  /** Strips punctuation and digits from the given string.
+  /**
+   * Strips punctuation and digits from the given string.
    *
    * @param string the given string
+   *
    * @return a string consisting of the given string with punctuation and digits removed
    */
   public static String stripPunctuationAndDigits(final String string) {
@@ -799,19 +871,22 @@ public final class StringUtils {
   /**
    * Shared instance of pre-parsed HTML character entity references.
    */
-  private static final HtmlCharacterEntityReferences characterEntityReferences =
-          new HtmlCharacterEntityReferences();
+  private static final HtmlCharacterEntityReferences characterEntityReferences
+          = new HtmlCharacterEntityReferences();
 
-  /** Turns special characters into HTML character references.
-   * Handles complete character set defined in HTML 4.01 recommendation.  Also changes newlines to HTML break tags,
-   * and considers all spaces to be non-break spaces.
-   * <p>Escapes all special characters to their corresponding
-   * entity reference (e.g. <code>&lt;</code>).
-   * <p>Reference:
+  /**
+   * Turns special characters into HTML character references. Handles complete character set defined in HTML 4.01 recommendation. Also
+   * changes newlines to HTML break tags, and considers all spaces to be non-break spaces.
+   * <p>
+   * Escapes all special characters to their corresponding entity reference (e.g. <code>&lt;</code>).
+   * <p>
+   * Reference:
    * <a href="http://www.w3.org/TR/html4/sgml/entities.html">
    * http://www.w3.org/TR/html4/sgml/entities.html
    * </a>
+   *
    * @param input the (unescaped) input string
+   *
    * @return the escaped string
    */
   public static String htmlEscape(final String input) {
@@ -840,21 +915,24 @@ public final class StringUtils {
   //---------------------------------------------------------------------
   /**
    * Turn HTML character references into their plain text UNICODE equivalent.
-   * <p>Handles complete character set defined in HTML 4.01 recommendation
-   * and all reference types (decimal, hex, and entity).
-   * <p>Correctly converts the following formats:
+   * <p>
+   * Handles complete character set defined in HTML 4.01 recommendation and all reference types (decimal, hex, and entity).
+   * <p>
+   * Correctly converts the following formats:
    * <blockquote>
    * &amp;#<i>Entity</i>; - <i>(Example: &amp;amp;) case sensitive</i>
    * &amp;#<i>Decimal</i>; - <i>(Example: &amp;#68;)</i><br>
    * &amp;#x<i>Hex</i>; - <i>(Example: &amp;#xE5;) case insensitive</i><br>
    * </blockquote>
-   * Gracefully handles malformed character references by copying original
-   * characters as is when encountered.<p>
-   * <p>Reference:
+   * Gracefully handles malformed character references by copying original characters as is when encountered.<p>
+   * <p>
+   * Reference:
    * <a HREF="http://www.w3.org/TR/html4/sgml/entities.html">
    * http://www.w3.org/TR/html4/sgml/entities.html
    * </a>
+   *
    * @param input the (escaped) input string
+   *
    * @return the unescaped string
    */
   public static String htmlUnescape(String input) {
