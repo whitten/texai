@@ -31,7 +31,7 @@ import java.io.IOException;
  */
 public final class LinesOfCodeCounter {
 
-  /** paths to count lines of code */
+  // paths to count lines of code
   private static final String[] PATHS = {
     "/home/reed/git/texai/Texai/AlbusHCN/src/main",
     "/home/reed/git/texai/Texai/AlbusHCNSupport/src/main",

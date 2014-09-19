@@ -27,13 +27,13 @@ import org.apache.log4j.Logger;
 @NotThreadSafe
 public class Patterns {
 
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(Patterns.class);
-  /** the pattern dictionary, pattern --> operation */
+  // the pattern dictionary, pattern --> operation
   private final Map<Pattern, String> patternDictionary = new HashMap<>();
-  /** the matched operation */
+  // the matched operation
   private String matchedOperation;
-  /** the matcher */
+  // the matcher
   private Matcher matchedMatcher;
 
   /** Constructs a new Patterns instance. */

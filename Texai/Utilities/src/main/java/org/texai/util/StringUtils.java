@@ -37,13 +37,9 @@ import org.apache.log4j.Logger;
  */
 public final class StringUtils {
 
-  /**
-   * the logger
-   */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(StringUtils.class);
-  /**
-   * the hex digits
-   */
+  // the hex digits
   private static final String HEX_DIGITS = "0123456789abcdef";
 
   /**

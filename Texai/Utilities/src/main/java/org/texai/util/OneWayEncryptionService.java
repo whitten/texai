@@ -38,18 +38,16 @@ import net.jcip.annotations.ThreadSafe;
 @ThreadSafe
 public final class OneWayEncryptionService {
 
-  /** the singleton one-way encryption service */
+  // the singleton one-way encryption service
   private static OneWayEncryptionService instance;
 
-  /** Privately constructs a new one-way encryption service instance. */
+  // Privately constructs a new one-way encryption service instance.
   private OneWayEncryptionService() {
   }
 
-  /** Encrypts the given plaintext and returns the encrypted text.
-   *
-   * @param plaintext the plaintext
-   * @return the encrypted text
-   */
+  // 
+  // @param plaintext the plaintext
+  // @return the encrypted text
   public synchronized String encrypt(final String plaintext) {
     //Preconditions
     assert plaintext != null : "plaintext must not be null";
@@ -70,11 +68,9 @@ public final class OneWayEncryptionService {
     return new String(Base64Coder.encode(raw));
   }
 
-  /** Encrypts the bytes that constitute the given number and returns the encrypted text.
-   *
-   * @param nbr the number to be encrypted
-   * @return the encrypted text
-   */
+  // 
+  // @param nbr the number to be encrypted
+  // @return the encrypted text
   public synchronized String encrypt(final long nbr) {
     final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
     final DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
@@ -95,10 +91,8 @@ public final class OneWayEncryptionService {
     return new String(Base64Coder.encode(raw));
   }
 
-  /** Gets the singleton one-way encryption service.
-   *
-   * @return the singleton one-way encryption service
-   */
+  // 
+  // @return the singleton one-way encryption service
   public static synchronized OneWayEncryptionService getInstance() {
     if (instance == null) {
       return new OneWayEncryptionService();

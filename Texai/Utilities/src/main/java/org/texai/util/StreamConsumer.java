@@ -24,9 +24,9 @@ import org.apache.log4j.Logger;
 @NotThreadSafe
 public class StreamConsumer extends Thread {
 
-  /** the input stream that consumes the graph program standard output stream */
+  // the input stream that consumes the graph program standard output stream
   private final InputStream inputStream;
-  /** the logger */
+  // the logger
   private final Logger logger;
 
   /** Constructs a new StreamConsumer instance.

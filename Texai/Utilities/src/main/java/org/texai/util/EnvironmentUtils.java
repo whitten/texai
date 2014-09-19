@@ -34,7 +34,7 @@ import org.apache.log4j.Logger;
 @NotThreadSafe
 public final class EnvironmentUtils {
 
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(EnvironmentUtils.class);
 
   /** Private constructor to ensure non-instantiation. */

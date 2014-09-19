@@ -35,13 +35,13 @@ import net.jcip.annotations.NotThreadSafe;
 @NotThreadSafe
 public class PackageList {
 
-  /** the first comma-delimited list */
+  // the first comma-delimited list
   private String list1;
-  /** the second comma-delimited list */
+  // the second comma-delimited list
   private String list2;
-  /** the merged entries string builder */
+  // the merged entries string builder
   final StringBuilder stringBuilder = new StringBuilder();
-  /** the ordered entries */
+  // the ordered entries
   private final List<String> entries = new ArrayList<>();
 
   /** Constructs a new PackageList instance. */

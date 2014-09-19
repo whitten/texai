@@ -21,7 +21,7 @@ import org.apache.log4j.Logger;
 @NotThreadSafe
 public class LinuxScreenUtils {
 
-  /** the logger */
+  // the logger
   public static final Logger LOGGER = Logger.getLogger(LinuxScreenUtils.class);
 
   /** Prevents the construction a new LinuxScreenUtils instance. */

@@ -30,7 +30,7 @@ import org.apache.log4j.Logger;
  */
 public final class UUIDGenerator {
 
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(UUIDGenerator.class);
 
   /** Creates a new instance of UUIDGenerator. */

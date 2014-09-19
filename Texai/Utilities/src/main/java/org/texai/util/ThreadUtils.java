@@ -34,9 +34,9 @@ import org.apache.log4j.Logger;
 @ThreadSafe
 public final class ThreadUtils {
 
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(ThreadUtils.class);
-  /** the root JVM thread group */
+  // the root JVM thread group
   private static ThreadGroup rootThreadGroup = null;
 
   /** Prevents the instantiation of this utility class. */

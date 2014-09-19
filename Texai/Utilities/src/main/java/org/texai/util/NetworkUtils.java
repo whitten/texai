@@ -47,19 +47,19 @@ import org.apache.log4j.Logger;
 @NotThreadSafe
 public final class NetworkUtils {
 
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(NetworkUtils.class);
-  /** the lower bound of dynamic TCP ports */
+  // the lower bound of dynamic TCP ports
   static final int LOWER_PORT_BOUND = 49152;
-  /** the upper bound of dynamic TCP ports */
+  // the upper bound of dynamic TCP ports
   static final int UPPER_PORT_BOUND = 65535;
-  /** the server port number file path */
+  // the server port number file path
   static final String SERVER_PORT_PATH = "data/server-port.txt";
-  /** the IANA registered service port for Texai: http://www.iana.org/assignments/port-numbers */
+  // the IANA registered service port for Texai: http://www.iana.org/assignments/port-numbers
   public static final int TEXAI_PORT = 5048;
-  /** the launcher port */
+  // the launcher port
   public static final int LAUNCHER_PORT = 5049;
-  /** the socket connection timeout */
+  // the socket connection timeout
   public static final int CONNECTION_TIMEOUT = 10000;
 
   /** Private constructor because this class is never instantiated. */

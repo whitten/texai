@@ -35,9 +35,9 @@ import org.apache.log4j.Logger;
 @NotThreadSafe
 public final class HTTPUtils {
 
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(HTTPUtils.class);
-  /** the HTTP response buffer size */
+  // the HTTP response buffer size
   public static final int HTTP_RESPONSE_BUFFER_SIZE = 2048;
 
   /** Prevents the instantiation of this utility class. */

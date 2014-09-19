@@ -31,7 +31,7 @@ import net.jcip.annotations.NotThreadSafe;
 @NotThreadSafe
 public final class ExecutorUtils {
 
-  /** the executor service */
+  // the executor service
   private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
 
   /** Prevents the instantiation of this utility class. */

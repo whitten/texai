@@ -28,7 +28,7 @@ package org.texai.util;
  */
 public final class TexaiException extends RuntimeException {
 
-  /** the default serial version UID */
+  // the default serial version UID
   private static final long serialVersionUID = 1L;
 
   /** Creates a new instance of <code>TexaiException</code> without detail message.

@@ -41,7 +41,7 @@ import org.apache.log4j.Logger;
 @NotThreadSafe
 public class HtmlCharacterEntityReferences {
 
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(HtmlCharacterEntityReferences.class);
   private static final char REFERENCE_START = '&';
   private static final String DECIMAL_REFERENCE_START = "&#";

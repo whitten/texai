@@ -37,7 +37,7 @@ import java.util.UUID;
  */
 public final class ByteUtils {
 
-  /** the hex characters */
+  // the hex characters
   private static final byte[] HEX_CHARACTERS = {
     '0', '1', '2', '3',
     '4', '5', '6', '7',

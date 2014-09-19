@@ -35,90 +35,75 @@ import net.jcip.annotations.NotThreadSafe;
 @NotThreadSafe
 public class IdentitySet<E> extends AbstractSet<E> implements Cloneable, Serializable {
 
-  /** the serial version UID */
+  // the serial version UID
   private static final long serialVersionUID = 1L;
-  /** the underlying map */
+  // the underlying map
   private Map<E, Object> map;
-  /** the contains placeholder object */
+  // the contains placeholder object
   private final Object CONTAINS = new Object();
 
-  /** Creates a new IdentitySet instance with the default initial size of 10 elements. */
+  // Creates a new IdentitySet instance with the default initial size of 10 elements.
   public IdentitySet() {
     this(10);
   }
 
-  /** Creates a new IdentitySet instance with the given initial size.
-   *
-   * @param size the given initial size
-   */
+  // 
+  // @param size the given initial size
   public IdentitySet(int size) {
     this.map = new IdentityHashMap<>(size);
   }
 
-  /** Returns the number of elements in this set (its cardinality).  If this
-   * set contains more than <tt>Integer.MAX_VALUE</tt> elements, returns
-   * <tt>Integer.MAX_VALUE</tt>.
-   *
-   * @return the number of elements in this set (its cardinality)
-   */
+  // set contains more than <tt>Integer.MAX_VALUE</tt> elements, returns
+  // <tt>Integer.MAX_VALUE</tt>.
+  // 
+  // @return the number of elements in this set (its cardinality)
   @Override
   public int size() {
     return map.size();
   }
 
-  /** Returns <tt>true</tt> if this set contains no elements.
-   *
-   * @return <tt>true</tt> if this set contains no elements
-   */
+  // 
+  // @return <tt>true</tt> if this set contains no elements
   @Override
   public boolean isEmpty() {
     return map.isEmpty();
   }
 
-  /** Returns <tt>true</tt> if this set contains the specified element.
-   *
-   * @param element the element whose presence in this set is to be tested
-   * @return <tt>true</tt> if this set contains the specified element
-   */
+  // 
+  // @param element the element whose presence in this set is to be tested
+  // @return <tt>true</tt> if this set contains the specified element
   @Override
   @SuppressWarnings("element-type-mismatch")
   public boolean contains(final Object element) {
     return map.containsKey(element);
   }
 
-  /** Returns an iterator over the elements in this set.
-   *
-   * @return an iterator over the elements in this set
-   */
+  // 
+  // @return an iterator over the elements in this set
   @Override
   public Iterator<E> iterator() {
     return map.keySet().iterator();
   }
 
-  /** Adds the specified element to this set if it is not already present.
-   *
-   * @param element element to be added to this set
-   * @return <tt>true</tt> if this set did not already contain the specified
-   *         element
-   */
+  // 
+  // @param element element to be added to this set
+  // @return <tt>true</tt> if this set did not already contain the specified
+  // element
   @Override
   public boolean add(final E element) {
     return map.put(element, CONTAINS) == null;
   }
 
-  /** Removes the specified element from this set if it is present
-   *
-   * @param element the element to be removed from this set, if present
-   * @return <tt>true</tt> if this set contained the specified element
-   */
+  // 
+  // @param element the element to be removed from this set, if present
+  // @return <tt>true</tt> if this set contained the specified element
   @Override
   @SuppressWarnings({"unchecked", "element-type-mismatch"})
   public boolean remove(final Object element) {
     return map.remove(element) == CONTAINS;
   }
 
-  /** Removes all of the elements from this set (optional operation).
-   * The set will be empty after this call returns.  */
+  // The set will be empty after this call returns.
   @Override
   public void clear() {
     map.clear();

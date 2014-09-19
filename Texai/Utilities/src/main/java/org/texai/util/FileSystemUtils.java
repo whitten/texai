@@ -35,7 +35,7 @@ import org.apache.log4j.Logger;
  */
 public final class FileSystemUtils {
 
-  /** the logger */
+  // the logger
   public static final Logger LOGGER = Logger.getLogger(FileSystemUtils.class);
 
   /** This class is never instantiated. */

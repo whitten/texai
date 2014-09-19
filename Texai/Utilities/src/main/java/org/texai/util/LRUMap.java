@@ -33,16 +33,14 @@ import net.jcip.annotations.NotThreadSafe;
 @NotThreadSafe
 public class LRUMap<K, V> extends LinkedHashMap<K, V> {
 
-  /** the serial version UID */
+  // the serial version UID
   private static final long serialVersionUID = 1L;
-  /** the maximum capacity of the cache */
+  // the maximum capacity of the cache
   private final int maxCapacity;
 
-  /** Constructs a new LRUMap instance.
-   *
-   * @param initialCapacity the initial capacity of the cache
-   * @param maxCapacity the maximum capacity of the cache
-   */
+  // 
+  // @param initialCapacity the initial capacity of the cache
+  // @param maxCapacity the maximum capacity of the cache
   public LRUMap(final int initialCapacity, final int maxCapacity) {
     super(
             initialCapacity,
@@ -51,21 +49,19 @@ public class LRUMap<K, V> extends LinkedHashMap<K, V> {
     this.maxCapacity = maxCapacity;
   }
 
-  /** Returns <tt>true</tt> if this map should remove its eldest entry.
-   * This method is invoked by <tt>put</tt> and <tt>putAll</tt> after
-   * inserting a new entry into the map.
-   *
-   * @param    eldest The least recently inserted entry in the map, or if
-   *           this is an access-ordered map, the least recently accessed
-   *           entry.  This is the entry that will be removed it this
-   *           method returns <tt>true</tt>.  If the map was empty prior
-   *           to the <tt>put</tt> or <tt>putAll</tt> invocation resulting
-   *           in this invocation, this will be the entry that was just
-   *           inserted; in other words, if the map contains a single
-   *           entry, the eldest entry is also the newest.
-   * @return   <tt>true</tt> if the eldest entry should be removed
-   *           from the map; <tt>false</tt> if it should be retained.
-   */
+  // This method is invoked by <tt>put</tt> and <tt>putAll</tt> after
+  // inserting a new entry into the map.
+  // 
+  // @param    eldest The least recently inserted entry in the map, or if
+  // this is an access-ordered map, the least recently accessed
+  // entry.  This is the entry that will be removed it this
+  // method returns <tt>true</tt>.  If the map was empty prior
+  // to the <tt>put</tt> or <tt>putAll</tt> invocation resulting
+  // in this invocation, this will be the entry that was just
+  // inserted; in other words, if the map contains a single
+  // entry, the eldest entry is also the newest.
+  // @return   <tt>true</tt> if the eldest entry should be removed
+  // from the map; <tt>false</tt> if it should be retained.
   @Override
   protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
     return size() > this.maxCapacity;

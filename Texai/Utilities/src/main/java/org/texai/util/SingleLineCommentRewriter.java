@@ -63,6 +63,12 @@ public final class SingleLineCommentRewriter extends DirectoryWalker {
     assert depth >= 0 : "depth must not be negative";
     assert results != null : "results must not be null";
 
+    if (!file.getName().endsWith(".java")) {
+      return;
+    }
+    if (!file.getAbsolutePath().contains("/src/main/java/org/texai/")) {
+      return;
+    }
     // make a temp file
     final File systemTemporaryDirectory = new File("/var/tmp");
     final File temporaryFile = new File(systemTemporaryDirectory, "java-file.tmp");
@@ -86,8 +92,8 @@ public final class SingleLineCommentRewriter extends DirectoryWalker {
     assert temporaryFile.isFile() : "temporaryFile " + temporaryFile + " must be a file";
     assert file != null : "file must not be null";
 
-    LOGGER.info("input temporary file: " + temporaryFile);
-    LOGGER.info("output file:          " + file);
+    LOGGER.debug("input temporary file: " + temporaryFile);
+    LOGGER.debug("output file:          " + file);
     try (
             BufferedReader bufferedReader = new BufferedReader(new FileReader(temporaryFile));
             BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file))) {

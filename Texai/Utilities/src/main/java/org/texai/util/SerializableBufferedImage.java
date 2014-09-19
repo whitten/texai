@@ -21,15 +21,15 @@ import net.jcip.annotations.NotThreadSafe;
 @NotThreadSafe
 public class SerializableBufferedImage implements Serializable {
 
-  /** the serial version UID */
+  // the serial version UID
   private static final long serialVersionUID = 1L;
-  /** the image type */
+  // the image type
   private final int type;
-  /** the image byte array */
+  // the image byte array
   private final int[] rgbArray;
-  /** the width */
+  // the width
   private final int width;
-  /** the height */
+  // the height
   private final int height;
 
   /** Constructs a new SerializableBufferedImage instance.

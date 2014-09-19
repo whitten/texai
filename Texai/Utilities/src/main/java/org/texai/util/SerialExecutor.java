@@ -34,11 +34,11 @@ import net.jcip.annotations.NotThreadSafe;
 @NotThreadSafe
 public class SerialExecutor implements Executor {
 
-  /** the tasks queue */
+  // the tasks queue
   private final Queue<Runnable> tasks = new ArrayDeque<>();
-  /** the executor that serially executes the tasks */
+  // the executor that serially executes the tasks
   private final Executor executor;
-  /** the active task */
+  // the active task
   Runnable activeTask;
 
   /** Constructs a new SerialExecutor instance.
