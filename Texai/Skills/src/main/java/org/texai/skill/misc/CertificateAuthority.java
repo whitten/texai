@@ -38,7 +38,7 @@ import org.texai.ahcsSupport.Message;
 public class CertificateAuthority extends AbstractSkill {
 
   //TODO rename according to Albus HCS granularity level
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(CertificateAuthority.class);
 
   /** Constructs a new CertificateAuthority instance. */

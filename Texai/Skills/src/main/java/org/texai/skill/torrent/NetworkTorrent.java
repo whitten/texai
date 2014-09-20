@@ -1,5 +1,5 @@
 /*
- * TopTorrent.java
+ * NetworkTorrent.java
  *
  * Created on Jun 24, 2010, 5:53:02 PM
  *
@@ -32,13 +32,13 @@ import org.texai.ahcsSupport.Message;
  * @author reed
  */
 @NotThreadSafe
-public class TopTorrent extends AbstractSkill {
+public class NetworkTorrent extends AbstractSkill {
 
-  /** the logger */
-  private static final Logger LOGGER = Logger.getLogger(TopTorrent.class);
+  // the logger
+  private static final Logger LOGGER = Logger.getLogger(NetworkTorrent.class);
 
   /** Constructs a new TopTorrent instance. */
-  public TopTorrent() {
+  public NetworkTorrent() {
   }
 
   /** Receives and attempts to process the given message.  The skill is thread safe, given that any contained libraries are single threaded

@@ -19,7 +19,7 @@
  * You should have received a copy of the GNU General Public License along with this program;
  * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-package org.texai.skill.lifecycle;
+package org.texai.skill.heartbeat;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,17 +41,17 @@ import org.texai.ahcsSupport.Message;
  * @author reed
  */
 @ThreadSafe
-public class Heartbeat extends AbstractSkill {
+public final class Heartbeat extends AbstractSkill {
 
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(Heartbeat.class);
-  /** heartbeat roles to which keep-alive messages are periodically sent */
+  // heartbeat roles to which keep-alive messages are periodically sent
   private final Map<URI, InboundHeartbeatInfo> inboundHeartbeatInfos = new HashMap<>();
-  /** heartbeat roles from which keep-alive messages are periodically expected */
+  // heartbeat roles from which keep-alive messages are periodically expected
   private final Map<URI, OutboundHeartbeatInfo> outboundHeartbeatInfos = new HashMap<>();
-  /** the outbound heartbeat period milliseconds, which indicates how often to send */
+  // the outbound heartbeat period milliseconds, which indicates how often to send
   private final static long OUTBOUND_HEARTBEAT_PERIOD_MILLIS = 30_000;
-  /** the inbound heartbeat period milliseconds, which indicates the duration beyond which the expected heartbeat is considered missing */
+  // the inbound heartbeat period milliseconds, which indicates the duration beyond which the expected heartbeat is considered missing
   private final static long INBOUND_HEARTBEAT_PERIOD_MILLIS = 300_000;
 
   /** Constructs a new Heartbeat instance. */
@@ -131,7 +131,10 @@ public class Heartbeat extends AbstractSkill {
             };
   }
 
-  /** Initializes this skill. */
+  /** Initializes this skill.
+   *
+   * @param message the initialization message
+   */
   private void initialization(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
@@ -139,8 +142,8 @@ public class Heartbeat extends AbstractSkill {
 
     LOGGER.info("initializing " + toString() + " in role " + getRole());
 
-    if (getRole().getNode().getNodeTypeName().equals(AHCSConstants.TOP_FRIENDSHIP_NODE_TYPE)) {
-      // the top friendship node periodically sends a heartbeat to the Texai launcher
+    if (getRole().getNode().isContainerHeartbeatAgent()) {
+      // the container heartbeat node periodically sends a heartbeat to the Texai launcher
       final OutboundHeartbeatInfo outboundHeartbeatInfo = new OutboundHeartbeatInfo(
               getRole().getNodeRuntime().getLauncherRoleId(), // roleId
               "org.texai.texaiLauncher.TexaiLauncher", // service
@@ -285,6 +288,7 @@ public class Heartbeat extends AbstractSkill {
     /** Sends a heartbeat message to the given role.
      *
      * @param outboundHeartbeatInfo the given role heartbeat information
+     * @param heartbeat the heartbeat skill
      */
     private void sendHeartbeat(
             final OutboundHeartbeatInfo outboundHeartbeatInfo,
@@ -334,6 +338,7 @@ public class Heartbeat extends AbstractSkill {
      * @param obj the other object
      * @return whether some other object equals this one
      */
+    @Override
     public boolean equals(final Object obj) {
       if (obj == null) {
         return false;
@@ -342,16 +347,14 @@ public class Heartbeat extends AbstractSkill {
         return false;
       }
       final InboundHeartbeatInfo other = (InboundHeartbeatInfo) obj;
-      if (!Objects.equals(this.roleId, other.roleId)) {
-        return false;
-      }
-      return true;
+      return Objects.equals(this.roleId, other.roleId);
     }
 
     /** Returns a hash code for this object.
      *
      * @return a hash code for this object
      */
+    @Override
     public int hashCode() {
       int hash = 7;
       hash = 83 * hash + Objects.hashCode(this.roleId);
@@ -362,6 +365,7 @@ public class Heartbeat extends AbstractSkill {
      *
      * @return a string representation of this object
      */
+    @Override
     public String toString() {
       final StringBuilder stringBuilder = new StringBuilder();
       stringBuilder.append("[Inbound heartbeat, role: ");
@@ -391,6 +395,8 @@ public class Heartbeat extends AbstractSkill {
     /** Constructs a new OutboundHeartbeatInfo instance.
      *
      * @param roleId the heartbeat sender's role ID
+     * @param service the service, or null if not specified
+     * @param heartbeat the hearbeat skill instance
      */
     OutboundHeartbeatInfo(
             final URI roleId,
@@ -412,6 +418,7 @@ public class Heartbeat extends AbstractSkill {
      * @param obj the other object
      * @return whether some other object equals this one
      */
+    @Override
     public boolean equals(final Object obj) {
       if (obj == null) {
         return false;
@@ -420,16 +427,14 @@ public class Heartbeat extends AbstractSkill {
         return false;
       }
       final OutboundHeartbeatInfo other = (OutboundHeartbeatInfo) obj;
-      if (!Objects.equals(this.roleId, other.roleId)) {
-        return false;
-      }
-      return true;
+      return Objects.equals(this.roleId, other.roleId);
     }
 
     /** Returns a hash code for this object.
      *
      * @return a hash code for this object
      */
+    @Override
     public int hashCode() {
       int hash = 7;
       hash = 89 * hash + Objects.hashCode(this.roleId);
@@ -440,6 +445,7 @@ public class Heartbeat extends AbstractSkill {
      *
      * @return a string representation of this object
      */
+    @Override
     public String toString() {
       final StringBuilder stringBuilder = new StringBuilder();
       stringBuilder.append("[Outbound heartbeat, role: ");

@@ -22,6 +22,7 @@ package org.texai.skill.domainEntity;
 
 import java.util.Set;
 import net.jcip.annotations.Immutable;
+import net.jcip.annotations.ThreadSafe;
 import org.texai.inference.sparql.domainEntity.AbstractQuery;
 import org.texai.inference.sparql.domainEntity.BaseDeclaration;
 import org.texai.inference.sparql.domainEntity.PrefixDeclaration;
@@ -35,14 +36,15 @@ import org.texai.kb.persistence.RDFProperty;
  */
 @RDFEntity(context = "texai:BootstrapSkills")
 @Immutable
-public class SkillInvokingQueryContainer extends QueryContainer {
+@ThreadSafe
+public final class SkillInvokingQueryContainer extends QueryContainer {
 
-  /** the serial version ID */
+  // the serial version ID
   private static final long serialVersionUID = 1L;
-  /** the service name, e.g. the fully qualified class name */
+  // the service name, e.g. the fully qualified class name
   @RDFProperty
   private final String serviceName;
-  /** the operation */
+  // the operation
   @RDFProperty
   private final String operation;
 

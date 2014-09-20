@@ -26,7 +26,7 @@ import org.texai.ahcsSupport.Message;
 @ManagedSessionSkill
 public class VNCOperation extends AbstractSkill {
 
-  /** the log4j logger */
+  // the log4j logger
   private static final Logger LOGGER = Logger.getLogger(VNCOperation.class);
 
   /** Constructs a new VNCOperation instance. */

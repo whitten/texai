@@ -105,7 +105,7 @@ public class MockNodeRuntime implements NodeRuntime {
   }
 
   @Override
-  public Role getTopFriendshipRole() {
+  public Role getTopmostFriendshipRole() {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
@@ -180,12 +180,22 @@ public class MockNodeRuntime implements NodeRuntime {
   }
 
   @Override
-  public URI getRoleId(String nodeNickname, String roleType) {
+  public String getQualifiedRoleName(URI roleId) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override
-  public Node getSingletonNodeOfType(String nodeTypeName) {
+  public void putRoleId(String qualifiedRoleName, URI roleId) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
+  public URI getRoleId(String qualifiedRoleName) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
+  public String getContainerName() {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 }

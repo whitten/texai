@@ -3,7 +3,7 @@
  *
  * Created on May 5, 2010, 1:47:02 PM
  *
- * Description: Manages the governance role hierarchy.
+ * Description: Manages the container governorance agents to ensure friendly behavior.
  *
  * Copyright (C) May 5, 2010, Stephen L. Reed.
  *
@@ -28,22 +28,20 @@ import org.texai.ahcsSupport.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 
 /**
- * Manages the governance role hierarchy.
+ * Manages the container governorance agents to ensure friendly behavior.
  *
  * @author reed
  */
 @ThreadSafe
-public class GovernanceManagement extends AbstractSkill {
+public final class TopLevelGovernance extends AbstractSkill {
+
+  // the logger
+  private static final Logger LOGGER = Logger.getLogger(TopLevelGovernance.class);
 
   /**
-   * the logger
+   * Constructs a new TopLevelGovernance instance.
    */
-  private static final Logger LOGGER = Logger.getLogger(GovernanceManagement.class);
-
-  /**
-   * Constructs a new Governance instance.
-   */
-  public GovernanceManagement() {
+  public TopLevelGovernance() {
   }
 
   /**

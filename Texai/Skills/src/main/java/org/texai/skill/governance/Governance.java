@@ -32,9 +32,9 @@ import org.texai.ahcsSupport.Message;
  * @author reed
  */
 @ThreadSafe
-public class Governance extends AbstractSkill {
+public final class Governance extends AbstractSkill {
 
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(Governance.class);
 
   /** Constructs a new Governance instance. */

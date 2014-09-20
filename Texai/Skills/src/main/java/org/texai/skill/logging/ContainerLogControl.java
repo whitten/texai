@@ -34,27 +34,21 @@ import org.texai.ahcsSupport.Message;
  * @author reed
  */
 @ThreadSafe
-public class JVMLoggerManagement extends AbstractSkill {
+public class ContainerLogControl extends AbstractSkill {
 
-  /**
-   * the logger
-   */
-  private static final Logger LOGGER = Logger.getLogger(JVMLoggerManagement.class);
+  // the logger
+  private static final Logger LOGGER = Logger.getLogger(ContainerLogControl.class);
 
-  /**
-   * Constructs a new LifeCycleManagement instance.
-   */
-  public JVMLoggerManagement() {
+  // Constructs a new LifeCycleManagement instance.
+  public ContainerLogControl() {
   }
 
-  /**
-   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
-   * with regard to the conversation.
-   *
-   * @param message the given message
-   *
-   * @return whether the message was successfully processed
-   */
+  // Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
+  // with regard to the conversation.
+  // 
+  // @param message the given message
+  // 
+  // @return whether the message was successfully processed
   @Override
   public boolean receiveMessage(final Message message) {
     //Preconditions
@@ -96,12 +90,10 @@ public class JVMLoggerManagement extends AbstractSkill {
     return true;
   }
 
-  /**
-   * Sets the logging level for the given class.
-   *
-   * @param className the class name
-   * @param loggingLevel the logging level
-   */
+  // Sets the logging level for the given class.
+  // 
+  // @param className the class name
+  // @param loggingLevel the logging level
   private void setLoggingLevel(
           final String className,
           final String loggingLevel) {
@@ -143,14 +135,12 @@ public class JVMLoggerManagement extends AbstractSkill {
     Logger.getLogger(className).setLevel(level);
   }
 
-  /**
-   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single threaded with regard
-   * to the conversation.
-   *
-   * @param message the given message
-   *
-   * @return the response message or null if not applicable
-   */
+  // Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single threaded with regard
+  // to the conversation.
+  // 
+  // @param message the given message
+  // 
+  // @return the response message or null if not applicable
   @Override
   public Message converseMessage(final Message message) {
     //Preconditions
@@ -160,11 +150,9 @@ public class JVMLoggerManagement extends AbstractSkill {
     return notUnderstoodMessage(message);
   }
 
-  /**
-   * Returns the understood operations.
-   *
-   * @return the understood operations
-   */
+  // Returns the understood operations.
+  // 
+  // @return the understood operations
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
@@ -175,45 +163,30 @@ public class JVMLoggerManagement extends AbstractSkill {
       AHCSConstants.UNLOG_OPERATION_TASK,};
   }
 
-  /**
-   * Performs the initialization operation.
-   *
-   * @param message the received initialization message
-   */
+  // Performs the initialization operation.
+  // 
+  // @param message the received initialization message
   private void initialization(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
     assert this.getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
 
-    LOGGER.info("initializing");
-    // initialize child node logger roles
-    propagateOperationToChildRoles(
-            NodeLogger.class.getName(), // service
-            message.getOperation()); // operation
     setSkillState(State.INITIALIZED);
   }
 
-  /**
-   * Performs the ready operation.
-   * @param message the received ready message
-   */
+  // Performs the ready operation.
+  // @param message the received ready message
   private void ready(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
     assert this.getSkillState().equals(State.INITIALIZED) : "prior state must be initialized";
 
-    // ready child node logger roles
-    propagateOperationToChildRoles(
-            NodeLogger.class.getName(), // service
-            message.getOperation()); // operation
     setSkillState(State.READY);
   }
 
-  /**
-   * Records the operation for message logging.
-   *
-   * @param message the message containing the operation to be logged
-   */
+  // Records the operation for message logging.
+  // 
+  // @param message the message containing the operation to be logged
   private void logOperation(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
@@ -222,11 +195,9 @@ public class JVMLoggerManagement extends AbstractSkill {
     logOperation((String) message.get(AHCSConstants.LOG_OPERATION_TASK_LOGGED_OPERATION));
   }
 
-  /**
-   * Records the operation for message logging.
-   *
-   * @param loggedOperation the operation to be logged
-   */
+  // Records the operation for message logging.
+  // 
+  // @param loggedOperation the operation to be logged
   private void logOperation(final String loggedOperation) {
     //Preconditions
     assert loggedOperation != null : "loggedOperation must not be null";
@@ -237,11 +208,9 @@ public class JVMLoggerManagement extends AbstractSkill {
     getNodeRuntime().addLoggedOperation(loggedOperation);
   }
 
-  /**
-   * Removes the operation for message logging.
-   *
-   * @param message the message containing the operation to be unlogged
-   */
+  // Removes the operation for message logging.
+  // 
+  // @param message the message containing the operation to be unlogged
   private void unlogOperation(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
@@ -250,11 +219,9 @@ public class JVMLoggerManagement extends AbstractSkill {
     unlogOperation((String) message.get(AHCSConstants.UNLOG_OPERATION_TASK_UNLOGGED_OPERATION));
   }
 
-  /**
-   * Removes the operation for message logging.
-   *
-   * @param unloggedOperation the operation to be unlogged
-   */
+  // Removes the operation for message logging.
+  // 
+  // @param unloggedOperation the operation to be unlogged
   private void unlogOperation(final String unloggedOperation) {
     //Preconditions
     assert unloggedOperation != null : "unloggedOperation must not be null";
@@ -265,11 +232,9 @@ public class JVMLoggerManagement extends AbstractSkill {
     getNodeRuntime().removeLoggedOperation(unloggedOperation);
   }
 
-  /**
-   * Gets the logger.
-   *
-   * @return the logger
-   */
+  // Gets the logger.
+  // 
+  // @return the logger
   protected Logger getLogger() {
     return LOGGER;
   }

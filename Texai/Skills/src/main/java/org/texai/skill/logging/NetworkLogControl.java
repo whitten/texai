@@ -1,9 +1,9 @@
 /*
- * EpisodicMemory.java
+ * LifeCycleManagement.java
  *
- * Created on May 5, 2010, 1:46:51 PM
+ * Created on May 5, 2010, 1:47:14 PM
  *
- * Description: .
+ * Description: Governs the logger role hierarchy over one or more JVMs.
  *
  * Copyright (C) May 5, 2010, Stephen L. Reed.
  *
@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License along with this program;
  * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-package org.texai.skill.misc;
+package org.texai.skill.logging;
 
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
@@ -27,18 +27,18 @@ import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 
-/**
+/** Governs the logger role hierarchy over one or more JVMs.
  *
  * @author reed
  */
 @ThreadSafe
-public class EpisodicMemory extends AbstractSkill {
+public class NetworkLogControl extends AbstractSkill {
 
-  /** the logger */
-  private static final Logger LOGGER = Logger.getLogger(EpisodicMemory.class);
+  // the logger
+  private static final Logger LOGGER = Logger.getLogger(NetworkLogControl.class);
 
-  /** Constructs a new EpisodicMemory instance. */
-  public EpisodicMemory() {
+  /** Constructs a new LifeCycleManagement instance. */
+  public NetworkLogControl() {
   }
 
   /** Receives and attempts to process the given message.  The skill is thread safe, given that any contained libraries are single threaded
@@ -54,25 +54,23 @@ public class EpisodicMemory extends AbstractSkill {
 
     final String operation = message.getOperation();
     switch (operation) {
+      case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
+        LOGGER.warn(message);
+        return true;
+
       case AHCSConstants.AHCS_INITIALIZE_TASK:
-        assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
-        setSkillState(State.INITIALIZED);
+        initialization(message);
         return true;
 
       case AHCSConstants.AHCS_READY_TASK:
-        assert getSkillState().equals(State.INITIALIZED) : "prior state must be initialized";
-        setSkillState(State.READY);
+        ready(message);
         return true;
     }
 
     assert getSkillState().equals(State.READY) : "must be in the ready state";
-    if (operation.equals(AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO)) {
-      LOGGER.warn(message);
-      return true;
-    }
+    // other operations ...
 
-    //TODO handle operations
-
+    // not understood
     sendMessage(notUnderstoodMessage(message));
     return true;
   }
@@ -99,9 +97,37 @@ public class EpisodicMemory extends AbstractSkill {
    */
   @Override
   public String[] getUnderstoodOperations() {
-    return new String[] {
-      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
-    };
+    return new String[]{
+              AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+              AHCSConstants.AHCS_INITIALIZE_TASK,
+              AHCSConstants.AHCS_READY_TASK
+            };
   }
 
+  /** Performs the initialization operation. */
+  private void initialization(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert this.getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
+
+    // initialize child JVM logger management roles
+    LOGGER.info("initializing");
+    propagateOperationToChildRoles(
+            ContainerLogControl.class.getName(), // service
+            AHCSConstants.AHCS_INITIALIZE_TASK); // operation
+    setSkillState(State.INITIALIZED);
+  }
+
+  /** Performs the ready operation. */
+  private void ready(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert this.getSkillState().equals(State.INITIALIZED) : "prior state must be initialized";
+
+    // ready child JVM logger management roles
+    propagateOperationToChildRoles(
+            ContainerLogControl.class.getName(), // service
+            AHCSConstants.AHCS_READY_TASK); // operation
+    setSkillState(State.READY);
+  }
 }

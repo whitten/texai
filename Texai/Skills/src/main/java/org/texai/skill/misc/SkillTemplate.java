@@ -24,7 +24,7 @@ import org.texai.ahcsSupport.Message;
 @NotThreadSafe
 public class SkillTemplate extends AbstractSkill {
 
-  /** the log4j logger */
+  // the log4j logger
   private static final Logger LOGGER = Logger.getLogger(SkillTemplate.class);
 
   /** Constructs a new SkillTemplate instance. */

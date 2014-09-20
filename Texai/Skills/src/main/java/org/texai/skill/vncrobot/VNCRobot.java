@@ -26,7 +26,7 @@ import org.texai.ahcsSupport.Message;
 @ManagedSessionSkill
 public class VNCRobot extends AbstractSkill {
 
-  /** the log4j logger */
+  // the log4j logger
   private static final Logger LOGGER = Logger.getLogger(VNCRobot.class);
 
   /** Constructs a new VNCRobot instance. */

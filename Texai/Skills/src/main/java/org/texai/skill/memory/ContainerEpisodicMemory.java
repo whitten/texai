@@ -1,35 +1,46 @@
 /*
- * NodeLifeCycle.java
+ * ContainerEpisodicMemory.java
  *
- * Created on Oct 12, 2011, 4:10:37 PM
+ * Created on May 5, 2010, 1:46:51 PM
  *
- * Description: Provides node logging behavior.
+ * Description: .
  *
- * Copyright (C) Oct 12, 2011, Stephen L. Reed, Texai.org.
+ * Copyright (C) May 5, 2010, Stephen L. Reed.
  *
+ * This program is free software; you can redistribute it and/or modify it under the terms
+ * of the GNU General Public License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program;
+ * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-package org.texai.skill.logging;
+package org.texai.skill.memory;
 
-import net.jcip.annotations.NotThreadSafe;
+import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 
-/** Provides node logging behavior.
+/**
  *
  * @author reed
  */
-@NotThreadSafe
-public class NodeLogger extends AbstractSkill {
+@ThreadSafe
+public class ContainerEpisodicMemory extends AbstractSkill {
 
-  /** the logger */
-  private static final Logger LOGGER = Logger.getLogger(NodeLogger.class);
+  // the logger
+  private static final Logger LOGGER = Logger.getLogger(ContainerEpisodicMemory.class);
 
-  /** Constructs a new NodeLifeCycle instance. */
-  public NodeLogger() {
+  /** Constructs a new EpisodicMemory instance. */
+  public ContainerEpisodicMemory() {
   }
+
   /** Receives and attempts to process the given message.  The skill is thread safe, given that any contained libraries are single threaded
    * with regard to the conversation.
    *
@@ -43,24 +54,25 @@ public class NodeLogger extends AbstractSkill {
 
     final String operation = message.getOperation();
     switch (operation) {
-      case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
-        LOGGER.warn(message);
-        return true;
-
       case AHCSConstants.AHCS_INITIALIZE_TASK:
-        initialization(message);
+        assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
+        setSkillState(State.INITIALIZED);
         return true;
 
       case AHCSConstants.AHCS_READY_TASK:
-        ready(message);
+        assert getSkillState().equals(State.INITIALIZED) : "prior state must be initialized";
+        setSkillState(State.READY);
         return true;
-
     }
 
     assert getSkillState().equals(State.READY) : "must be in the ready state";
-    // other operations ...
+    if (operation.equals(AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO)) {
+      LOGGER.warn(message);
+      return true;
+    }
 
-    // not understood
+    //TODO handle operations
+
     sendMessage(notUnderstoodMessage(message));
     return true;
   }
@@ -89,26 +101,7 @@ public class NodeLogger extends AbstractSkill {
   public String[] getUnderstoodOperations() {
     return new String[] {
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
-      AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.AHCS_READY_TASK
     };
   }
 
-  /** Performs the initialization operation. */
-  private void initialization(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-    assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
-
-    setSkillState(State.INITIALIZED);
-  }
-
-  /** Performs the ready operation. */
-  private void ready(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-    assert getSkillState().equals(State.INITIALIZED) : "prior state must be initialized";
-
-    setSkillState(State.READY);
-  }
 }

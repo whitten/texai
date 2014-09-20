@@ -1,5 +1,5 @@
 /*
- * TorrentEffector.java
+ * ContainerTorrent.java
  *
  * Created on Jun 24, 2010, 6:38:08 PM
  *
@@ -31,13 +31,13 @@ import org.texai.ahcsSupport.Message;
  * @author reed
  */
 @NotThreadSafe
-public class TorrentEffector extends AbstractSkill {
+public class ContainerTorrent extends AbstractSkill {
 
-  /** the logger */
-  private static final Logger LOGGER = Logger.getLogger(TorrentEffector.class);
+  // the logger
+  private static final Logger LOGGER = Logger.getLogger(ContainerTorrent.class);
 
   /** Constructs a new TorrentEffector instance. */
-  public TorrentEffector() {
+  public ContainerTorrent() {
   }
 
   /** Receives and attempts to process the given message.  The skill is thread safe, given that any contained libraries are single threaded

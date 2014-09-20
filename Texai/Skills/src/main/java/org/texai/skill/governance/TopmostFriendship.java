@@ -1,11 +1,11 @@
 /*
- * LifeCycleManagement.java
+ * TopmostFriendship.java
  *
- * Created on May 5, 2010, 1:47:14 PM
+ * Created on Jun 23, 2010, 10:58:37 AM
  *
- * Description: Governs the logger role hierarchy over one or more JVMs.
+ * Description: Provides topmost perception and friendship behavior.
  *
- * Copyright (C) May 5, 2010, Stephen L. Reed.
+ * Copyright (C) Jun 23, 2010, Stephen L. Reed.
  *
  * This program is free software; you can redistribute it and/or modify it under the terms
  * of the GNU General Public License as published by the Free Software Foundation; either
@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License along with this program;
  * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-package org.texai.skill.logging;
+package org.texai.skill.governance;
 
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
@@ -27,24 +27,28 @@ import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 
-/** Governs the logger role hierarchy over one or more JVMs.
+/**
+ * Provides topmost perception and friendship behavior.
  *
  * @author reed
  */
 @ThreadSafe
-public class LoggerManagement extends AbstractSkill {
+public final class TopmostFriendship extends AbstractSkill {
 
-  /** the logger */
-  private static final Logger LOGGER = Logger.getLogger(LoggerManagement.class);
+  // the logger
+  private static final Logger LOGGER = Logger.getLogger(TopmostFriendship.class);
 
-  /** Constructs a new LifeCycleManagement instance. */
-  public LoggerManagement() {
+  /**
+   * Constructs a new TopmostFriendship instance.
+   */
+  public TopmostFriendship() {
   }
 
-  /** Receives and attempts to process the given message.  The skill is thread safe, given that any contained libraries are single threaded
-   * with regard to the conversation.
+  /**
+   * Receives and attempts to process the given message.
    *
    * @param message the given message
+   *
    * @return whether the message was successfully processed
    */
   @Override
@@ -61,24 +65,22 @@ public class LoggerManagement extends AbstractSkill {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         initialization(message);
         return true;
-
-      case AHCSConstants.AHCS_READY_TASK:
-        ready(message);
-        return true;
     }
 
     assert getSkillState().equals(State.READY) : "must be in the ready state";
-    // other operations ...
+    // handle other operations ...
 
     // not understood
     sendMessage(notUnderstoodMessage(message));
     return true;
   }
 
-  /** Synchronously processes the given message.  The skill is thread safe, given that any contained libraries are single threaded
-   * with regard to the conversation.
+  /**
+   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single threaded with regard
+   * to the conversation.
    *
    * @param message the given message
+   *
    * @return the response message or null if not applicable
    */
   @Override
@@ -86,48 +88,54 @@ public class LoggerManagement extends AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
 
-    //TODO handle operations
-
+    // handle operations ...
+    // not understood
     return notUnderstoodMessage(message);
   }
 
-  /** Returns the understood operations.
+  /**
+   * Returns the understood operations.
    *
    * @return the understood operations
    */
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
-              AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
-              AHCSConstants.AHCS_INITIALIZE_TASK,
-              AHCSConstants.AHCS_READY_TASK
-            };
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.AHCS_INITIALIZE_TASK,
+      AHCSConstants.UTTERANCE_MEANING_SENSATION
+    };
   }
 
-  /** Performs the initialization operation. */
+  /**
+   * Performs the initialization operation.
+   *
+   * @param message the received initialization message
+   */
   private void initialization(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
-    assert this.getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
+    assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
 
-    // initialize child JVM logger management roles
-    LOGGER.info("initializing");
-    propagateOperationToChildRoles(
-            JVMLoggerManagement.class.getName(), // service
-            AHCSConstants.AHCS_INITIALIZE_TASK); // operation
+    // initialize the child roles
+    LOGGER.info("initializing child roles");
+    propagateOperationToChildRoles(message.getOperation());
     setSkillState(State.INITIALIZED);
+
+    // ready the child roles
+    LOGGER.info("readying child roles");
+    propagateOperationToChildRoles(AHCSConstants.AHCS_READY_TASK); // operation
+
+    //TODO destroy the bootstrap role
+    setSkillState(State.READY);
   }
 
-  /** Performs the ready operation. */
-  private void ready(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-    assert this.getSkillState().equals(State.INITIALIZED) : "prior state must be initialized";
-
-    // ready child JVM logger management roles
-    propagateOperationToChildRoles(
-            JVMLoggerManagement.class.getName(), // service
-            AHCSConstants.AHCS_READY_TASK); // operation
-    setSkillState(State.READY);
+  /**
+   * Gets the logger.
+   *
+   * @return the logger
+   */
+  protected Logger getLogger() {
+    return LOGGER;
   }
 }
