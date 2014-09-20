@@ -1,14 +1,15 @@
-package org.texai.skill.coin;
+package org.texai.skill.texaicoin;
 
+import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 
 /**
- * Created on Aug 29, 2014, 6:44:58 PM.
+ * Created on Aug 29, 2014, 6:45:14 PM.
  *
- * Description: Replicates the canonical blockchain for a cyrptocurreny as new blocks are created by the nomadic mint agent.
+ * Description: Allocates the current block reward according to system policy.
  *
  * Copyright (C) Aug 29, 2014, Stephen L. Reed, Texai.org.
  *
@@ -16,29 +17,31 @@ import org.texai.ahcsSupport.Message;
  *
  * Copyright (C) 2014 Texai
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
+@ThreadSafe
+public final class XTCRewardAllocation extends AbstractSkill {
 
-public class BlockchainArchive extends AbstractSkill {
+  // the logger
+  private static final Logger LOGGER = Logger.getLogger(XTCRewardAllocation.class);
+
   /**
-   * the logger
+   * Constructs a new XTCRewardAllocation instance.
    */
-  private static final Logger LOGGER = Logger.getLogger(BlockchainArchive.class);
+  public XTCRewardAllocation() {
+  }
 
   /**
-   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
-   * with regard to the conversation.
+   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries
+   * are single threaded with regard to the conversation.
    *
    * @param message the given message
    *
@@ -82,8 +85,8 @@ public class BlockchainArchive extends AbstractSkill {
   }
 
   /**
-   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single threaded with regard
-   * to the conversation.
+   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single
+   * threaded with regard to the conversation.
    *
    * @param message the given message
    *
@@ -108,8 +111,7 @@ public class BlockchainArchive extends AbstractSkill {
     return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.AHCS_READY_TASK,
-    };
+      AHCSConstants.AHCS_READY_TASK,};
   }
 
 }

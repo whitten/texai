@@ -1,5 +1,6 @@
-package org.texai.skill.coin;
+package org.texai.skill.texaicoin;
 
+import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AbstractSkill;
@@ -32,11 +33,14 @@ import org.texai.ahcsSupport.Message;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public class Recovery extends AbstractSkill {
-  /**
-   * the logger
-   */
-  private static final Logger LOGGER = Logger.getLogger(Recovery.class);
+@ThreadSafe
+public final class XTCRecovery extends AbstractSkill {
+  // the logger
+  private static final Logger LOGGER = Logger.getLogger(XTCRecovery.class);
+
+  /** Constructs a new XTCRecovery instance. */
+  public XTCRecovery() {
+  }
 
   /**
    * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded

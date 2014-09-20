@@ -1,8 +1,9 @@
-package org.texai.skill.coin;
+package org.texai.skill.texaicoin;
 
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
+import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AbstractSkill;
@@ -29,21 +30,18 @@ import org.texai.util.TexaiException;
  *
  * You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-public class Mint extends AbstractSkill {
+@ThreadSafe
+public final class XTCMint extends AbstractSkill {
 
-  /**
-   * the logger
-   */
-  private static final Logger LOGGER = Logger.getLogger(Mint.class);
-  /**
-   * the timer
-   */
+  // the logger
+  private static final Logger LOGGER = Logger.getLogger(XTCMint.class);
+  // the timer
   private final Timer mintTimer;
 
   /**
-   * Constructs a new Mint instance.
+   * Constructs a new XTCMint instance.
    */
-  public Mint() {
+  public XTCMint() {
     mintTimer = new Timer(
             "mint timer", // name
             true); // isDaemon

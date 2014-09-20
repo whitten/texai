@@ -1,4 +1,4 @@
-package org.texai.skill.coin.support;
+package org.texai.skill.texaicoin.support;
 
 import com.google.bitcoin.core.Block;
 import com.google.bitcoin.core.FilteredBlock;
@@ -39,48 +39,30 @@ import org.texai.util.TexaiException;
  * You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 @NotThreadSafe
-public class SlavedBitcoindAdapter implements PeerEventListener {
+public class XTCSlavedBitcoindAdapter implements PeerEventListener {
 
-  /**
-   * the logger
-   */
-  public static final Logger LOGGER = Logger.getLogger(SlavedBitcoindAdapter.class);
-  /**
-   * the bitcoind slave
-   */
+  // the logger
+  public static final Logger LOGGER = Logger.getLogger(XTCSlavedBitcoindAdapter.class);
+  // the bitcoind slave
   private Peer slavePeer;
-  /** the bitcoin message receiver, which is the skill that handles outbound bitcoin messages from the slave peer */
-  private final BitcoinMessageReceiver bitcoinMessageReceiver;
-  /**
-   * the client connection manager
-   */
+  // the bitcoin message receiver, which is the skill that handles outbound bitcoin messages from the slave peer
+  private final XTCBitcoinMessageReceiver bitcoinMessageReceiver;
+  // the client connection manager
   private final ClientConnectionManager clientConnectionManager;
-  /**
-   * the version message to use for the bitcoind connection
-   */
+  // the version message to use for the bitcoind connection
   private final VersionMessage versionMessage;
-  /**
-   * the minimum protocol version allowed for the bitcoind slave instance
-   */
+  // the minimum protocol version allowed for the bitcoind slave instance
   private volatile int vMinRequiredProtocolVersion = FilteredBlock.MIN_PROTOCOL_VERSION;
-  /**
-   * Runs a background thread that we use for scheduling pings to our peers, so we can measure their performance and network latency. We
-   * ping peers every pingIntervalMsec milliseconds.
-   */
+  // Runs a background thread that we use for scheduling pings to our peers, so we can measure their performance and network latency. We
+  // ping peers every pingIntervalMsec milliseconds.
   private volatile Timer pingTimer;
-  /**
-   * How many milliseconds to wait after receiving a pong before sending another ping.
-   */
+  // How many milliseconds to wait after receiving a pong before sending another ping.
   public static final long DEFAULT_PING_INTERVAL_MSEC = 2000;
   private final long pingIntervalMsec = DEFAULT_PING_INTERVAL_MSEC;
-  /**
-   * The default timeout between when a connection attempt begins and version message exchange completes
-   */
+  // The default timeout between when a connection attempt begins and version message exchange completes
   public static final int DEFAULT_CONNECT_TIMEOUT_MILLIS = 5000;
   private volatile int connectTimeoutMillis = DEFAULT_CONNECT_TIMEOUT_MILLIS;
-  /**
-   * the network parameters, main net, test net, or regression test net
-   */
+  // the network parameters, main net, test net, or regression test net
   private final NetworkParameters networkParameters;
 
   /**
@@ -90,9 +72,9 @@ public class SlavedBitcoindAdapter implements PeerEventListener {
    * @param bitcoinMessageReceiver the bitcoin message receiver, which is the skill that handles outbound bitcoin messages from the
    * slave peer
    */
-  public SlavedBitcoindAdapter(
+  public XTCSlavedBitcoindAdapter(
           final NetworkParameters networkParameters,
-          final BitcoinMessageReceiver bitcoinMessageReceiver) {
+          final XTCBitcoinMessageReceiver bitcoinMessageReceiver) {
     // Preconditions
     assert networkParameters != null : "networkParameters must not be null";
     assert bitcoinMessageReceiver != null : "bitcoinMessageReceiver must not be null";

@@ -13,21 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.texai.skill.coin.support;
+package org.texai.skill.texaicoin.support;
 
 import com.google.bitcoin.core.NetworkParameters;
 import com.google.bitcoin.core.Sha256Hash;
 import com.google.bitcoin.core.Utils;
-
 import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Parameters for the main production network on which people trade goods and services.
  */
-public class TexaiMainNetParams extends NetworkParameters {
+public class XTCMainNetParams extends NetworkParameters {
+
   private static final long serialVersionUID = 1L;
 
-  public TexaiMainNetParams() {
+  /**
+   * Constructs a new XTCMainNetParams instance.
+   */
+  public XTCMainNetParams() {
     super();
     interval = INTERVAL;
     targetTimespan = TARGET_TIMESPAN;
@@ -48,7 +51,7 @@ public class TexaiMainNetParams extends NetworkParameters {
     checkState(genesisHash.equals("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
             genesisHash);
 
-        // This contains (at a minimum) the blocks which are not BIP30 compliant. BIP30 changed how duplicate
+    // This contains (at a minimum) the blocks which are not BIP30 compliant. BIP30 changed how duplicate
     // transactions are handled. Duplicated transactions could occur in the case where a coinbase had the same
     // extraNonce and the same outputs but appeared at different heights, and greatly complicated re-org handling.
     // Having these here simplifies block connection logic considerably.
@@ -67,11 +70,11 @@ public class TexaiMainNetParams extends NetworkParameters {
     };
   }
 
-  private static TexaiMainNetParams instance;
+  private static XTCMainNetParams instance;
 
-  public static synchronized TexaiMainNetParams get() {
+  public static synchronized XTCMainNetParams get() {
     if (instance == null) {
-      instance = new TexaiMainNetParams();
+      instance = new XTCMainNetParams();
     }
     return instance;
   }

@@ -1,20 +1,11 @@
-package org.texai.skill.coin;
-
-import org.apache.log4j.Logger;
-import org.texai.ahcsSupport.AHCSConstants;
-import org.texai.ahcsSupport.AbstractSkill;
-import org.texai.ahcsSupport.Message;
-
-/**
- * Created on Aug 30, 2014, 11:30:19 PM.
+/*
+ * XTCNetworkOperation.java
  *
- * Description: Provides network operations behavior for a single server.
+ * Created on Sep 18, 2014, 8:10:02 AM
  *
- * Copyright (C) Aug 30, 2014, Stephen L. Reed, Texai.org.
+ * Description: Manages the network, the containers, and the TexaiCoin agents within the containers. Interacts with human operators.
  *
- * @author reed
- *
- * Copyright (C) 2014 Texai
+ * Copyright (C) 2014 Stephen L. Reed
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,17 +20,34 @@ import org.texai.ahcsSupport.Message;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.texai.skill.texaicoin;
 
-public class NetworkOperation extends AbstractSkill {
+import net.jcip.annotations.ThreadSafe;
+import org.apache.log4j.Logger;
+import org.texai.ahcsSupport.AHCSConstants;
+import org.texai.ahcsSupport.AbstractSkill;
+import org.texai.ahcsSupport.Message;
+
+/**
+ * Manages the network, the containers, and the TexaiCoin agents within the containers. Interacts with human operators.
+ *
+ * @author reed
+ */
+@ThreadSafe
+public final class XTCNetworkOperation extends AbstractSkill {
+
+  // the logger
+  private static final Logger LOGGER = Logger.getLogger(XTCBlockchainArchive.class);
+
   /**
-   * the logger
+   * Constructs a new XTCNetworkOperation instance.
    */
-  private static final Logger LOGGER = Logger.getLogger(NetworkOperation.class);
-
+  public XTCNetworkOperation() {
+  }
 
   /**
-   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
-   * with regard to the conversation.
+   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries
+   * are single threaded with regard to the conversation.
    *
    * @param message the given message
    *
@@ -83,8 +91,8 @@ public class NetworkOperation extends AbstractSkill {
   }
 
   /**
-   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single threaded with regard
-   * to the conversation.
+   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single
+   * threaded with regard to the conversation.
    *
    * @param message the given message
    *
@@ -109,8 +117,7 @@ public class NetworkOperation extends AbstractSkill {
     return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.AHCS_READY_TASK,
-    };
+      AHCSConstants.AHCS_READY_TASK,};
   }
 
 }

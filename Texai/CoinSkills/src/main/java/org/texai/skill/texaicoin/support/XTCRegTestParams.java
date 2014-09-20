@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.texai.skill.coin.support;
+package org.texai.skill.texaicoin.support;
 
 import com.google.bitcoin.core.Block;
 import com.google.bitcoin.params.TestNet2Params;
@@ -23,12 +23,15 @@ import java.math.BigInteger;
 /**
  * Network parameters for the regression test mode of bitcoind in which all blocks are trivially solvable.
  */
-public class TexaiRegTestParams extends TestNet2Params {
+public class XTCRegTestParams extends TestNet2Params {
 
   private static final BigInteger PROOF_OF_WORK_LIMIT = new BigInteger("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16);
   private static final long serialVersionUID = 1L;
 
-  public TexaiRegTestParams() {
+  /**
+   * Constructs a new XTCRegTestParams instance.
+   */
+  public XTCRegTestParams() {
     super();
     interval = 10000;
     proofOfWorkLimit = PROOF_OF_WORK_LIMIT;
@@ -45,7 +48,7 @@ public class TexaiRegTestParams extends TestNet2Params {
 
   @Override
   public Block getGenesisBlock() {
-    synchronized (TexaiRegTestParams.class) {
+    synchronized (XTCRegTestParams.class) {
       if (genesis == null) {
         genesis = super.getGenesisBlock();
         genesis.setNonce(2);
@@ -57,11 +60,11 @@ public class TexaiRegTestParams extends TestNet2Params {
     }
   }
 
-  private static TexaiRegTestParams instance;
+  private static XTCRegTestParams instance;
 
-  public static synchronized TexaiRegTestParams get() {
+  public static synchronized XTCRegTestParams get() {
     if (instance == null) {
-      instance = new TexaiRegTestParams();
+      instance = new XTCRegTestParams();
     }
     return instance;
   }

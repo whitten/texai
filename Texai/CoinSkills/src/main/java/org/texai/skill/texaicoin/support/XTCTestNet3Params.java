@@ -13,23 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.texai.skill.coin.support;
+package org.texai.skill.texaicoin.support;
 
 import com.google.bitcoin.core.NetworkParameters;
 import com.google.bitcoin.core.Utils;
+import static com.google.common.base.Preconditions.checkState;
 import org.spongycastle.util.encoders.Hex;
 
-import static com.google.common.base.Preconditions.checkState;
-
 /**
- * Parameters for the testnet, a separate public instance of Bitcoin that has relaxed rules suitable for development and testing of
- * applications and new Bitcoin versions.
+ * Parameters for the testnet, a separate public instance of Bitcoin that has relaxed rules suitable for development and
+ * testing of applications and new Bitcoin versions.
  */
-public class TexaiTestNet3Params extends NetworkParameters {
+public class XTCTestNet3Params extends NetworkParameters {
 
   private static final long serialVersionUID = 1L;
 
-  public TexaiTestNet3Params() {
+  /**
+   * Constructs a new XTCTestNet3Params instance.
+   */
+  public XTCTestNet3Params() {
     super();
     id = ID_TESTNET;
     // Genesis hash is 000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943
@@ -55,11 +57,11 @@ public class TexaiTestNet3Params extends NetworkParameters {
       "testnet-seed.bitcoin.petertodd.org",};
   }
 
-  private static TexaiTestNet3Params instance;
+  private static XTCTestNet3Params instance;
 
-  public static synchronized TexaiTestNet3Params get() {
+  public static synchronized XTCTestNet3Params get() {
     if (instance == null) {
-      instance = new TexaiTestNet3Params();
+      instance = new XTCTestNet3Params();
     }
     return instance;
   }
