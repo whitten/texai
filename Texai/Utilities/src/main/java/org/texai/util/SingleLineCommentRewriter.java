@@ -35,7 +35,7 @@ import org.apache.log4j.Logger;
  *
  * @author reed
  */
-public final class SingleLineCommentRewriter extends DirectoryWalker {
+public final class SingleLineCommentRewriter extends DirectoryWalker<String> {
 
   // the logger
   private final static Logger LOGGER = Logger.getLogger(SingleLineCommentRewriter.class);
@@ -56,7 +56,7 @@ public final class SingleLineCommentRewriter extends DirectoryWalker {
    * @throws java.io.IOException
    */
   @Override
-  protected void handleFile(final File file, final int depth, final Collection results) throws IOException {
+  protected void handleFile(final File file, final int depth, final Collection<String> results) throws IOException {
     //Preconditions
     assert file != null : "file must not be null";
     assert file.isFile() : "file " + file + " must be a file";
@@ -249,11 +249,17 @@ public final class SingleLineCommentRewriter extends DirectoryWalker {
    * @param args the command line arguments (unused)
    */
   public static void main(final String[] args) {
-    if (args.length == 0) {
-      throw new TexaiException("the start directory argument is missing");
-    }
-    final String startDirectoryString = args[0];
+//    if (args.length == 0) {
+//      throw new TexaiException("the start directory argument is missing");
+//    }
+//    final String startDirectoryString = args[0];
+    final String startDirectoryString = "../CoinSkills/src/main/java";
     final File startDirectory = new File(startDirectoryString);
+    try {
+      LOGGER.info("startDirectory: " + startDirectory.getCanonicalPath());
+    } catch (IOException ex) {
+      throw new TexaiException(ex);
+    }
     if (!startDirectory.exists()) {
       throw new TexaiException("the start directory '" + startDirectory + "' does not exist");
     }
