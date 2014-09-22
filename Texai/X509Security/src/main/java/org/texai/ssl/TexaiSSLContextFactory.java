@@ -21,20 +21,21 @@
 package org.texai.ssl;
 
 import java.security.KeyManagementException;
-import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
-import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import org.apache.log4j.Logger;
 import org.texai.util.TexaiException;
 import org.texai.x509.X509SecurityInfo;
 import org.texai.x509.X509Utils;
 
-/** Provides a SSL context factory.
+/**
+ * Provides a SSL context factory.
  *
  * @author reed
  */
@@ -49,13 +50,17 @@ public final class TexaiSSLContextFactory {
   // the iOS incompatible cipher suites
   private static final List<String> iOSIncompatibleCipherSuites = new ArrayList<>();
 
-  /** Prevents this utility class from being instantiated. */
+  /**
+   * Prevents this utility class from being instantiated.
+   */
   private TexaiSSLContextFactory() {
   }
 
-  /** Gets the Secure Sockets Layer context.
+  /**
+   * Gets the Secure Sockets Layer context.
    *
    * @param x509SecurityInfo the X.509 security information
+   *
    * @return the SSL context
    */
   public static SSLContext getSSLContext(final X509SecurityInfo x509SecurityInfo) {
@@ -63,26 +68,23 @@ public final class TexaiSSLContextFactory {
     assert x509SecurityInfo != null : "x509SecurityInfo must not be null";
 
     // create key manager factory and SSL context
-
     try {
       final SSLContext sslContext = SSLContext.getInstance("TLS");
-      final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance("SunX509");
-      trustManagerFactory.init(x509SecurityInfo.getTrustStore());
-      final X509TrustManager x509TrustManager = (X509TrustManager) trustManagerFactory.getTrustManagers()[0];
+      final X509TrustManager x509TrustManager = new TexaiTrustManager();
       final X509TrustManager[] x509TrustManagers = new X509TrustManager[]{x509TrustManager};
       sslContext.init(
               x509SecurityInfo.getKeyManagers(), // the sources of authentication keys
               x509TrustManagers, // the sources of peer authentication trust decisions
               X509Utils.getSecureRandom());  // the source of randomness for this generator or null
       return sslContext;
-    } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException ex) {
+    } catch (NoSuchAlgorithmException | KeyManagementException ex) {
       throw new TexaiException(ex);
     }
   }
 
-  /** Configures the SSL engine for client or for the server. Arranges the enabled ciphers to favor the
-   * most secure over the less secure, and omits the least secure ciphers.  Requires that the SSL server
-   * authenticate the client.
+  /**
+   * Configures the SSL engine for client or for the server. Arranges the enabled ciphers to favor the most secure over the less secure, and
+   * omits the least secure ciphers. Requires that the SSL server authenticate the client.
    *
    * @param sslEngine the SSL engine
    * @param useClientMode the indicator whether the SSL engine is operating in client mode
@@ -116,7 +118,6 @@ public final class TexaiSSLContextFactory {
         iOSIncompatibleCipherSuites.add("TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA");
 
         // TLS_ECDHE_RSA_WITH_RC4_128_SHA is the negotiated cipher suite for iOS
-
         // select and arrange the highest security cipher suites and cache the result
         final String[] supportedCipherSuites = sslEngine.getSupportedCipherSuites();
         final List<String> enabledCipherSuitesList = new ArrayList<>(supportedCipherSuites.length);
@@ -153,5 +154,80 @@ public final class TexaiSSLContextFactory {
       }
       sslEngine.setEnabledCipherSuites(enabledCipherSuites);
     }
+  }
+
+  /**
+   * Provides a trust manager for Texai self-signed certificates.
+   */
+  static class TexaiTrustManager implements X509TrustManager {
+
+    /**
+     * Given the partial or complete certificate chain provided by the peer, build a certificate path to a trusted root and return if it can
+     * be validated and is trusted for client SSL authentication based on the authentication type.
+     *
+     * The authentication type is the key exchange algorithm portion of the cipher suites represented as a String, such as "RSA", "DHE_DSS".
+     * Note: for some exportable cipher suites, the key exchange algorithm is determined at run time during the handshake. For instance, for
+     * TLS_RSA_EXPORT_WITH_RC4_40_MD5, the authType should be RSA_EXPORT when an ephemeral RSA key is used for the key exchange, and RSA
+     * when the key from the server certificate is used. Checking is case-sensitive.
+     *
+     * @param certificateChain the X.509 certificate chain, which is expected to be a single certificate
+     * @param authType the key exchange algorithm portion of the cipher suites represented as a String, e.g. "RSA"
+     *
+     * @throws java.security.cert.CertificateException
+     */
+    @Override
+    public void checkClientTrusted(
+            final X509Certificate[] certificateChain,
+            final String authType) throws CertificateException {
+      //Preconditions
+      assert certificateChain != null : "certificateChain must not be null";
+
+      if (certificateChain.length != 1) {
+        throw new CertificateException("Expected client certificate chain length 1, received length " + certificateChain.length);
+      }
+      if (!authType.equals("RSA")) {
+        throw new CertificateException("Expected server authType RSA, received " + authType);
+      }
+      //TODO validate the subject info
+    }
+
+    /**
+     * Given the partial or complete certificate chain provided by the peer, build a certificate path to a trusted root and return if it can
+     * be validated and is trusted for server SSL authentication based on the authentication type.
+     *
+     * The authentication type is the key exchange algorithm portion of the cipher suites represented as a String, such as "RSA", "DHE_DSS".
+     * Note: for some exportable cipher suites, the key exchange algorithm is determined at run time during the handshake. For instance, for
+     * TLS_RSA_EXPORT_WITH_RC4_40_MD5, the authType should be RSA_EXPORT when an ephemeral RSA key is used for the key exchange, and RSA
+     * when the key from the server certificate is used. Checking is case-sensitive.
+     *
+     * @param certificateChain the X.509 certificate chain, which is expected to be a single certificate
+     * @param authType the key exchange algorithm portion of the cipher suites represented as a String, e.g. "RSA"
+     *
+     * @throws java.security.cert.CertificateException
+     */
+    @Override
+    public void checkServerTrusted(
+            final X509Certificate[] certificateChain,
+            final String authType) throws CertificateException {
+      //Preconditions
+      assert certificateChain != null : "certificateChain must not be null";
+
+      if (certificateChain.length != 1) {
+        throw new CertificateException("Expected client certificate chain length 1, received length " + certificateChain.length);
+      }
+      if (!authType.equals("RSA")) {
+        throw new CertificateException("Expected server authType RSA, received " + authType);
+      }
+      //TODO validate the subject info
+    }
+
+    /**
+     * Return an array of certificate authority certificates which are trusted for authenticating peers.
+     */
+    @Override
+    public X509Certificate[] getAcceptedIssuers() {
+      return null;
+    }
+
   }
 }

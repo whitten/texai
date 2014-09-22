@@ -34,12 +34,13 @@ import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.UUID;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.util.TexaiException;
-import static org.texai.x509.X509Utils.isTrustedDevelopmentSystem;
 
-/** Provides keystores and passwords for testing.
+/**
+ * Provides keystores and passwords for testing.
  *
  * @author reed
  */
@@ -52,24 +53,26 @@ public final class KeyStoreTestUtils {
   private static final char[] SERVER_KEYSTORE_PASSWORD = "server-keystore-password".toCharArray();
   // the client keystore password
   private static final char[] CLIENT_KEYSTORE_PASSWORD = "client-keystore-password".toCharArray();
+  // the test certificate alias
+  public static final String TEST_CERTIFICATE_ALIAS = "certificate";
 
-  /** Prevents the instantiation of this utility class. */
+  /**
+   * Prevents the instantiation of this utility class.
+   */
   private KeyStoreTestUtils() {
   }
 
-  /** Initializes the test server keystore on the trusted development system, from where it is copied into the distributed code. */
+  /**
+   * Initializes the test server keystore.
+   */
   public static synchronized void initializeServerKeyStore() {
-    if (!X509Utils.isTrustedDevelopmentSystem()) {
-      return;
-    }
     try {
-      // the test server keystore consists of the single test server X.509 certificate, which is generated and signed by
-      // the Texai root certificate on the developement system that has the root private key.
-      final KeyPair serverKeyPair = X509Utils.generateRSAKeyPair2048();
-      final X509Certificate serverX509Certificate = X509Utils.generateX509Certificate(
-              serverKeyPair.getPublic(),
-              X509Utils.getRootPrivateKey(),
-              X509Utils.getRootX509Certificate(), null);
+      // the test server keystore consists of the single test server X.509 certificate
+      final KeyPair serverKeyPair = X509Utils.generateRSAKeyPair3072();
+      final X509Certificate serverX509Certificate = X509Utils.generateSelfSignedEndEntityX509Certificate(
+              serverKeyPair,
+              UUID.randomUUID(), // uid
+              "test server"); // domainComponent
 
       // proceed as though the JCE unlimited strength jurisdiction policy files are installed, which they will be on the
       // trusted development system.
@@ -79,17 +82,17 @@ public final class KeyStoreTestUtils {
         // do not overwrite it
 
         //Postconditions
-        assert !isTrustedDevelopmentSystem() || X509Utils.isJCEUnlimitedStrengthPolicy() : "JCE unlimited strength policy must be in effect";
+        assert X509Utils.isJCEUnlimitedStrengthPolicy() : "JCE unlimited strength policy must be in effect";
         return;
       }
       LOGGER.info("creating test-server-keystore.uber");
       assert X509Utils.isJCEUnlimitedStrengthPolicy();
       KeyStore serverKeyStore = X509Utils.findOrCreateKeyStore(filePath, SERVER_KEYSTORE_PASSWORD);
       serverKeyStore.setKeyEntry(
-              X509Utils.ENTRY_ALIAS,
+              "certificate", // certificateAlias
               serverKeyPair.getPrivate(),
               SERVER_KEYSTORE_PASSWORD,
-              new Certificate[]{serverX509Certificate, X509Utils.getRootX509Certificate()});
+              new Certificate[]{serverX509Certificate});
       serverKeyStore.store(new FileOutputStream(filePath), SERVER_KEYSTORE_PASSWORD);
 
       // then proceed after disabling the JCE unlimited strength jurisdiction policy files indicator
@@ -98,10 +101,10 @@ public final class KeyStoreTestUtils {
       LOGGER.info("creating test-server-keystore.jceks");
       serverKeyStore = X509Utils.findOrCreateKeyStore(filePath, SERVER_KEYSTORE_PASSWORD);
       serverKeyStore.setKeyEntry(
-              X509Utils.ENTRY_ALIAS,
+              TEST_CERTIFICATE_ALIAS, // certificateAlias
               serverKeyPair.getPrivate(),
               SERVER_KEYSTORE_PASSWORD,
-              new Certificate[]{serverX509Certificate, X509Utils.getRootX509Certificate()});
+              new Certificate[]{serverX509Certificate});
       serverKeyStore.store(new FileOutputStream(filePath), SERVER_KEYSTORE_PASSWORD);
       // restore the JCE unlimited strength jurisdiction policy files indicator
       X509Utils.setIsJCEUnlimitedStrengthPolicy(true);
@@ -111,23 +114,21 @@ public final class KeyStoreTestUtils {
     }
 
     //Postconditions
-    assert !isTrustedDevelopmentSystem() || X509Utils.isJCEUnlimitedStrengthPolicy() : "JCE unlimited strength policy must be in effect";
+    assert X509Utils.isJCEUnlimitedStrengthPolicy() : "JCE unlimited strength policy must be in effect";
   }
 
-  /** Initializes the test client keystore on the trusted development system, from where it is copied into the distributed code. */
+  /**
+   * Initializes the test client keystore on the trusted development system, from where it is copied into the distributed code.
+   */
   public static synchronized void initializeClientKeyStore() {
-    if (!X509Utils.isTrustedDevelopmentSystem()) {
-      return;
-    }
-
     try {
       // the test client keystore consists of the single test client X.509 certificate, which is generated and signed by
       // the Texai root certificate on the developement system that has the root private key.
-      final KeyPair clientKeyPair = X509Utils.generateRSAKeyPair2048();
-      final X509Certificate clientX509Certificate = X509Utils.generateX509Certificate(
-              clientKeyPair.getPublic(),
-              X509Utils.getRootPrivateKey(),
-              X509Utils.getRootX509Certificate(), null);
+      final KeyPair clientKeyPair = X509Utils.generateRSAKeyPair3072();
+      final X509Certificate clientX509Certificate = X509Utils.generateSelfSignedEndEntityX509Certificate(
+              clientKeyPair,
+              UUID.randomUUID(), // uid
+              "test client"); // domainComponent
 
       // proceed as though the JCE unlimited strength jurisdiction policy files are installed, which they will be on the
       // trusted development system.
@@ -140,10 +141,10 @@ public final class KeyStoreTestUtils {
       assert X509Utils.isJCEUnlimitedStrengthPolicy();
       KeyStore clientKeyStore = X509Utils.findOrCreateKeyStore(filePath, CLIENT_KEYSTORE_PASSWORD);
       clientKeyStore.setKeyEntry(
-              X509Utils.ENTRY_ALIAS,
+              TEST_CERTIFICATE_ALIAS, // certificateAlias
               clientKeyPair.getPrivate(),
               CLIENT_KEYSTORE_PASSWORD,
-              new Certificate[]{clientX509Certificate, X509Utils.getRootX509Certificate()});
+              new Certificate[]{clientX509Certificate});
       clientKeyStore.store(new FileOutputStream(filePath), CLIENT_KEYSTORE_PASSWORD);
       assert "UBER".equals(clientKeyStore.getType());
 
@@ -153,10 +154,10 @@ public final class KeyStoreTestUtils {
       LOGGER.info("creating test-client-keystore.jceks");
       clientKeyStore = X509Utils.findOrCreateKeyStore(filePath, CLIENT_KEYSTORE_PASSWORD);
       clientKeyStore.setKeyEntry(
-              X509Utils.ENTRY_ALIAS,
+              "certificate", // certificateAlias
               clientKeyPair.getPrivate(),
               CLIENT_KEYSTORE_PASSWORD,
-              new Certificate[]{clientX509Certificate, X509Utils.getRootX509Certificate()});
+              new Certificate[]{clientX509Certificate});
       clientKeyStore.store(new FileOutputStream(filePath), CLIENT_KEYSTORE_PASSWORD);
       assert "JCEKS".equals(clientKeyStore.getType());
       // restore the JCE unlimited strength jurisdiction policy files indicator
@@ -167,10 +168,11 @@ public final class KeyStoreTestUtils {
     }
 
     //Postconditions
-    assert !isTrustedDevelopmentSystem() || X509Utils.isJCEUnlimitedStrengthPolicy() : "JCE unlimited strength policy must be in effect";
+    assert X509Utils.isJCEUnlimitedStrengthPolicy() : "JCE unlimited strength policy must be in effect";
   }
 
-  /** Gets the test server keystore.
+  /**
+   * Gets the test server keystore.
    *
    * @return the test server keystore
    */
@@ -207,7 +209,8 @@ public final class KeyStoreTestUtils {
     }
   }
 
-  /** Gets the test client keystore.
+  /**
+   * Gets the test client keystore.
    *
    * @return the test client keystore
    */
@@ -237,29 +240,32 @@ public final class KeyStoreTestUtils {
 
   }
 
-  /** Gets the X509 security information for a test client.
+  /**
+   * Gets the X509 security information for a test client.
    *
    * @return the X509 security information for a test client
    */
   public static X509SecurityInfo getClientX509SecurityInfo() {
     return new X509SecurityInfo(
-            X509Utils.getTruststore(),
             getClientKeyStore(),
-            CLIENT_KEYSTORE_PASSWORD, null);
+            CLIENT_KEYSTORE_PASSWORD,
+            TEST_CERTIFICATE_ALIAS); // certificateAlias
   }
 
-  /** Gets the X509 security information for a test server.
+  /**
+   * Gets the X509 security information for a test server.
    *
    * @return the X509 security information for a test server
    */
   public static X509SecurityInfo getServerX509SecurityInfo() {
     return new X509SecurityInfo(
-            X509Utils.getTruststore(),
             getServerKeyStore(),
-            SERVER_KEYSTORE_PASSWORD, null);
+            SERVER_KEYSTORE_PASSWORD,
+            TEST_CERTIFICATE_ALIAS);
   }
 
-  /** Gets the test server keystore password.
+  /**
+   * Gets the test server keystore password.
    *
    * @return the test server keystore password
    */
@@ -267,7 +273,8 @@ public final class KeyStoreTestUtils {
     return SERVER_KEYSTORE_PASSWORD;
   }
 
-  /** Gets the test client keystore password.
+  /**
+   * Gets the test client keystore password.
    *
    * @return the test client keystore password
    */

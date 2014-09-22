@@ -43,7 +43,9 @@ import static org.junit.Assert.*;
  */
 public class KeyStoreTestUtilsTest {
 
-  /** the logger */
+  /**
+   * the logger
+   */
   private static final Logger LOGGER = Logger.getLogger(KeyStoreTestUtilsTest.class);
 
   public KeyStoreTestUtilsTest() {
@@ -84,10 +86,10 @@ public class KeyStoreTestUtilsTest {
       assertEquals("JCEKS", result.getType());
     }
     try {
-      assertTrue(result.containsAlias(X509Utils.ENTRY_ALIAS));
-      final X509Certificate serverX509Certificate = (X509Certificate) result.getCertificate(X509Utils.ENTRY_ALIAS);
+      assertTrue(result.containsAlias(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS));
+      final X509Certificate serverX509Certificate = (X509Certificate) result.getCertificate(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS);
       assertTrue(serverX509Certificate.getSubjectX500Principal().toString().contains("CN=texai.org"));
-      Certificate[] certificateChain = result.getCertificateChain(X509Utils.ENTRY_ALIAS);
+      Certificate[] certificateChain = result.getCertificateChain(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS);
       assertEquals(2, certificateChain.length);
       assertEquals(serverX509Certificate, certificateChain[0]);
       final Certificate rootX509Certificate = certificateChain[1];
@@ -114,57 +116,16 @@ public class KeyStoreTestUtilsTest {
       assertEquals("JCEKS", result.getType());
     }
     try {
-      assertTrue(result.containsAlias(X509Utils.ENTRY_ALIAS));
-      final X509Certificate clientX509Certificate = (X509Certificate) result.getCertificate(X509Utils.ENTRY_ALIAS);
+      assertTrue(result.containsAlias(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS));
+      final X509Certificate clientX509Certificate = (X509Certificate) result.getCertificate(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS);
       assertTrue(clientX509Certificate.getSubjectX500Principal().toString().contains("CN=texai.org"));
-      Certificate[] certificateChain = result.getCertificateChain(X509Utils.ENTRY_ALIAS);
-      assertEquals(2, certificateChain.length);
+      Certificate[] certificateChain = result.getCertificateChain(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS);
+      assertEquals(1, certificateChain.length);
       assertEquals(clientX509Certificate, certificateChain[0]);
-      final Certificate rootX509Certificate = certificateChain[1];
-      assertTrue(rootX509Certificate instanceof X509Certificate);
-      assertTrue(((X509Certificate) rootX509Certificate).getSubjectX500Principal().toString().startsWith("CN=texai.org, O=Texai Certification Authority, UID="));
-      clientX509Certificate.verify(rootX509Certificate.getPublicKey());
-    } catch (InvalidKeyException | KeyStoreException | NoSuchAlgorithmException | NoSuchProviderException | SignatureException | CertificateException ex) {
+    } catch (KeyStoreException ex) {
       ex.printStackTrace();
       fail(ex.getMessage());
     }
   }
 
-  /**
-   * Test of getClientX509SecurityInfo method of class X509Utils.
-   */
-  @Test
-  public void testGetClientX509SecurityInfo() {
-    LOGGER.info("getClientX509SecurityInfo");
-
-    final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
-    assertNotNull(x509SecurityInfo.getTrustStore());
-    if (X509Utils.isJCEUnlimitedStrengthPolicy()) {
-      assertEquals(X509Utils.BOUNCY_CASTLE_PROVIDER, x509SecurityInfo.getTrustStore().getProvider().getName());
-      assertEquals("UBER", x509SecurityInfo.getTrustStore().getType());
-    } else {
-      assertEquals("SunJCE", x509SecurityInfo.getTrustStore().getProvider().getName());
-      assertEquals("JCEKS", x509SecurityInfo.getTrustStore().getType());
-    }
-    assertTrue(x509SecurityInfo.getKeyManagers().length > 0);
-  }
-
-  /**
-   * Test of getServerX509SecurityInfo method of class X509Utils.
-   */
-  @Test
-  public void testGetServerX509SecurityInfo() {
-    LOGGER.info("getServerX509SecurityInfo");
-
-    final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getServerX509SecurityInfo();
-    assertNotNull(x509SecurityInfo.getTrustStore());
-    if (X509Utils.isJCEUnlimitedStrengthPolicy()) {
-      assertEquals(X509Utils.BOUNCY_CASTLE_PROVIDER, x509SecurityInfo.getTrustStore().getProvider().getName());
-      assertEquals("UBER", x509SecurityInfo.getTrustStore().getType());
-    } else {
-      assertEquals("SunJCE", x509SecurityInfo.getTrustStore().getProvider().getName());
-      assertEquals("JCEKS", x509SecurityInfo.getTrustStore().getType());
-    }
-    assertTrue(x509SecurityInfo.getKeyManagers().length > 0);
-  }
 }

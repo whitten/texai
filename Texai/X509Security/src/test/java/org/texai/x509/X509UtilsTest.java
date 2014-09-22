@@ -27,7 +27,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.security.UnrecoverableEntryException;
-import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateParsingException;
@@ -48,7 +47,6 @@ import java.security.cert.CertPath;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.UUID;
 import org.apache.log4j.Logger;
@@ -60,8 +58,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 //import sun.security.x509.X509CertImpl;
 import static org.junit.Assert.*;
-import org.texai.util.TexaiException;
-import static org.texai.x509.X509Utils.isTrustedDevelopmentSystem;
 
 /**
  *
@@ -83,7 +79,6 @@ public class X509UtilsTest {
     for (final Provider provider : Security.getProviders()) {
       X509Utils.logProviderCapabilities(provider.getName());
     }
-    X509Utils.createTexaiRootKeyStore();
     X509Utils.initializeInstallerKeyStore();
   }
 
@@ -97,51 +92,6 @@ public class X509UtilsTest {
 
   @After
   public void tearDown() {
-  }
-
-  /**
-   * Test of initializeTrustore method of class X509Utils.
-   */
-  @Test
-  public void testInitializeTrustore() {
-    LOGGER.info("initializeTrustore");
-
-    X509Utils.initializeTrustore();
-    verifyTruststoresPopulated();
-  }
-
-  /**
-   * Test of getTruststore method of class X509Utils.
-   */
-  @Test
-  public void testGetTruststore() {
-    LOGGER.info("getTruststore");
-
-    final KeyStore truststore = X509Utils.getTruststore();
-    assertNotNull(truststore);
-    try {
-      assertTrue(truststore.containsAlias(X509Utils.TRUSTSTORE_ENTRY_ALIAS));
-      final X509Certificate rootX509Certificate = (X509Certificate) truststore.getCertificate(X509Utils.TRUSTSTORE_ENTRY_ALIAS);
-      LOGGER.info("rootX509Certificate from bytes...\n + " + X509Utils.getRootX509Certificate());
-      assertEquals(X509Utils.getRootX509Certificate(), rootX509Certificate);
-    } catch (KeyStoreException ex) {
-      fail(ex.getMessage());
-    }
-
-    X509Utils.logAliases(truststore);
-  }
-
-  /**
-   * Test of getRootKeyStorePassword method of class X509Utils.
-   */
-  @Test
-  public void testGetRootKeyStorePassword() {
-    LOGGER.info("getRootKeyStorePassword");
-
-    final char[] rootKeyStorePassword = X509Utils.getRootKeyStorePassword();
-    if (rootKeyStorePassword != null) {
-      LOGGER.info("root keystore password: '" + new String(rootKeyStorePassword) + "'");
-    }
   }
 
   /**
@@ -182,14 +132,14 @@ public class X509UtilsTest {
   }
 
   /**
-   * Test of generateRSAKeyPair2048 method, of class X509Utils.
+   * Test of generateRSAKeyPair3072 method, of class X509Utils.
    */
   @Test
   public void testGenerateRSAKeyPair() {
     LOGGER.info("generateRSAKeyPair");
     KeyPair result = null;
     try {
-      result = X509Utils.generateRSAKeyPair2048();
+      result = X509Utils.generateRSAKeyPair3072();
     } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException ex) {
       fail(ex.getMessage());
     }
@@ -261,170 +211,39 @@ public class X509UtilsTest {
   }
 
   /**
-   * Test of generateRootX509Certificate method, of class X509Utils.
-   */
-  @Test
-  public void testGenerateRootX509Certificate() {
-    LOGGER.info("generateRootX509Certificate");
-    KeyPair keyPair;
-    try {
-      keyPair = X509Utils.generateRSAKeyPair3072();
-      X509Certificate rootX509Certificate = X509Utils.generateRootX509Certificate(keyPair);
-      LOGGER.info("root certificate:\n" + rootX509Certificate);
-      assertNotNull(rootX509Certificate);
-      assertTrue(rootX509Certificate.getIssuerDN().toString().contains("CN=texai.org, O=Texai Certification Authority"));
-      assertTrue(rootX509Certificate.getSubjectDN().toString().contains("CN=texai.org, O=Texai Certification Authority"));
-      assertEquals(X509Utils.DIGITAL_SIGNATURE_ALGORITHM, rootX509Certificate.getSigAlgName());
-      assertEquals(keyPair.getPublic(), rootX509Certificate.getPublicKey());
-      //assertTrue(X509CertImpl.isSelfIssued(rootX509Certificate));
-      assertTrue(rootX509Certificate.getSubjectX500Principal().toString().contains("UID="));
-    } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | CertificateEncodingException | SignatureException | InvalidKeyException | IOException ex) {
-      fail(ex.getMessage());
-    }
-  }
-
-  /**
-   * Test of getRootX509Certificate method, of class X509Utils.
-   */
-  @Test
-  public void testGetRootX509Certificate() {
-    LOGGER.info("getRootX509Certificate");
-    try {
-      X509Certificate rootX509Certificate = X509Utils.getRootX509Certificate();
-      LOGGER.info("root certificate:\n" + rootX509Certificate);
-      assertNotNull(rootX509Certificate);
-      assertEquals("CN=texai.org, O=Texai Certification Authority, UID=ed6d6718-80de-4848-af43-fed7bdba3c36", rootX509Certificate.getIssuerDN().toString());
-      assertEquals("CN=texai.org, O=Texai Certification Authority, UID=ed6d6718-80de-4848-af43-fed7bdba3c36", rootX509Certificate.getSubjectDN().toString());
-      assertEquals(X509Utils.DIGITAL_SIGNATURE_ALGORITHM, rootX509Certificate.getSigAlgName());
-    } catch (Exception ex) {
-      fail(ex.getMessage());
-    }
-  }
-
-  /**
-   * Test of generateX509Certificate method, of class X509Utils.
-   */
-  @Test
-  public void testGenerateX509Certificate() {
-    LOGGER.info("generateX509Certificate");
-    if (!X509Utils.isTrustedDevelopmentSystem()) {
-      return;
-    }
-    try {
-      X509Certificate rootX509Certificate = X509Utils.getRootX509Certificate();
-      KeyPair keyPair = X509Utils.generateRSAKeyPair2048();
-      PublicKey publicKey = keyPair.getPublic();
-      PrivateKey certificateAuthorityPrivateKey = X509Utils.getRootPrivateKey();
-      LOGGER.info("root certificate (" + rootX509Certificate.getClass().getName() + "):\n" + rootX509Certificate);
-      X509Certificate x509Certificate
-              = X509Utils.generateX509Certificate(publicKey, certificateAuthorityPrivateKey, rootX509Certificate, "TestComponent");
-
-      LOGGER.info("generated certificate...\n" + x509Certificate);
-      assertNotNull(x509Certificate);
-      assertTrue(x509Certificate.getIssuerDN().toString().startsWith("CN=texai.org, O=Texai Certification Authority, UID="));
-      assertTrue(x509Certificate.getSubjectDN().toString().contains("CN=texai.org"));
-      assertTrue(!x509Certificate.getSubjectDN().toString().contains("O=Texai Certification Authority"));
-      assertEquals(X509Utils.DIGITAL_SIGNATURE_ALGORITHM, x509Certificate.getSigAlgName());
-      assertEquals(keyPair.getPublic(), x509Certificate.getPublicKey());
-      x509Certificate.verify(rootX509Certificate.getPublicKey());
-      LOGGER.info("principal: " + x509Certificate.getSubjectX500Principal().toString());
-      assertTrue(x509Certificate.getSubjectX500Principal().toString().contains("UID="));
-    } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | SignatureException | InvalidKeyException | IOException | CertificateException ex) {
-      LOGGER.info(StringUtils.getStackTraceAsString(ex));
-      fail(ex.getMessage());
-    }
-  }
-
-  /**
-   * Test of generateX509CertificatePath method, of class X509Utils.
-   */
-  @Test
-  public void testGenerateX509CertificatePath() {
-    LOGGER.info("generateX509CertificatePath");
-    if (!X509Utils.isTrustedDevelopmentSystem()) {
-      return;
-    }
-    try {
-      X509Certificate rootX509Certificate = X509Utils.getRootX509Certificate();
-      KeyPair keyPair = X509Utils.generateRSAKeyPair2048();
-      PublicKey publicKey = keyPair.getPublic();
-      PrivateKey certificateAuthorityPrivateKey = X509Utils.getRootPrivateKey();
-      LOGGER.info("root certificate (" + rootX509Certificate.getClass().getName() + "):\n" + rootX509Certificate);
-      final CertPath certPath = X509Utils.generateX509CertificatePath(
-              publicKey,
-              certificateAuthorityPrivateKey,
-              rootX509Certificate, // issuerCertificate
-              X509Utils.generateCertPath(new ArrayList<>()), null);  // issuerCertPath
-      assertEquals(1, certPath.getCertificates().size());
-      X509Certificate x509Certificate = (X509Certificate) certPath.getCertificates().get(0);
-      LOGGER.info("generated certificate...\n" + x509Certificate);
-      assertNotNull(x509Certificate);
-      assertTrue(x509Certificate.getIssuerDN().toString().startsWith("CN=texai.org, O=Texai Certification Authority, UID="));
-      assertTrue(x509Certificate.getSubjectDN().toString().contains("CN=texai.org"));
-      assertTrue(!x509Certificate.getSubjectDN().toString().contains("O=Texai Certification Authority"));
-      assertEquals(X509Utils.DIGITAL_SIGNATURE_ALGORITHM, x509Certificate.getSigAlgName());
-      assertEquals(keyPair.getPublic(), x509Certificate.getPublicKey());
-      x509Certificate.verify(rootX509Certificate.getPublicKey());
-    } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | CertificateException | SignatureException | InvalidKeyException | IOException ex) {
-      LOGGER.info(StringUtils.getStackTraceAsString(ex));
-      fail(ex.getMessage());
-    }
-  }
-
-  /**
-   * Test of generateIntermediateX509Certificate method, of class X509Utils.
-   */
-  @Test
-  public void testGenerateIntermediateX509Certificate() {
-    LOGGER.info("generateIntermediateX509Certificate");
-    if (!X509Utils.isTrustedDevelopmentSystem()) {
-      return;
-    }
-    try {
-      X509Certificate rootX509Certificate = X509Utils.getRootX509Certificate();
-      final KeyPair keyPair = X509Utils.generateRSAKeyPair3072();
-      PublicKey publicKey = keyPair.getPublic();
-      PrivateKey certificateAuthorityPrivateKey = X509Utils.getRootPrivateKey();
-      X509Certificate intermediateX509Certificate
-              = X509Utils.generateIntermediateX509Certificate(publicKey, certificateAuthorityPrivateKey, rootX509Certificate, 0);
-
-      LOGGER.info("generated intermediate certificate:\n" + intermediateX509Certificate);
-      assertNotNull(intermediateX509Certificate);
-      LOGGER.info("intermediateX509Certificate.getIssuerDN(): " + intermediateX509Certificate.getIssuerDN().toString());
-      assertTrue(intermediateX509Certificate.getIssuerDN().toString().startsWith("CN=texai.org, O=Texai Certification Authority, UID="));
-      assertTrue(intermediateX509Certificate.getSubjectDN().toString().contains("CN=texai.org"));
-      assertTrue(!intermediateX509Certificate.getSubjectDN().toString().contains("O=Texai Certification Authority"));
-      assertEquals(X509Utils.DIGITAL_SIGNATURE_ALGORITHM, intermediateX509Certificate.getSigAlgName());
-      assertEquals(keyPair.getPublic(), intermediateX509Certificate.getPublicKey());
-      //assertFalse(X509CertImpl.isSelfIssued(intermediateX509Certificate));
-      intermediateX509Certificate.verify(rootX509Certificate.getPublicKey());
-      LOGGER.info("principal: " + intermediateX509Certificate.getSubjectX500Principal().toString());
-      assertTrue(intermediateX509Certificate.getSubjectX500Principal().toString().contains("UID="));
-    } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | SignatureException | InvalidKeyException | IOException | CertificateException ex) {
-      fail(ex.getMessage());
-    }
-  }
-
-  /**
    * Test of writeX509Certificate method and readX509Certificate method, of class X509Utils.
    */
   @Test
   public void testWriteX509Certificate() {
     LOGGER.info("writeX509Certificate");
     try {
-      X509Certificate rootX509Certificate = X509Utils.getRootX509Certificate();
-      LOGGER.info("root certificate...\n" + rootX509Certificate);
-      assertNotNull(rootX509Certificate);
-      assertEquals(X509Utils.DIGITAL_SIGNATURE_ALGORITHM, rootX509Certificate.getSigAlgName());
-      X509Utils.writeX509Certificate(rootX509Certificate, "data/testRootCertificate.crt");
+      final KeyPair keyPair;
+      keyPair = X509Utils.generateRSAKeyPair3072();
+      final UUID uuid = UUID.randomUUID();
+      X509Certificate x509Certificate
+              = X509Utils.generateSelfSignedEndEntityX509Certificate(
+                      keyPair,
+                      uuid,
+                      "TestComponent");
+
+      LOGGER.info("certificate...\n" + x509Certificate);
+      assertNotNull(x509Certificate);
+      assertEquals(X509Utils.DIGITAL_SIGNATURE_ALGORITHM, x509Certificate.getSigAlgName());
+      X509Utils.writeX509Certificate(x509Certificate, "data/testCertificate.crt");
 
       LOGGER.info("readX509Certificate");
-      InputStream certificateInputStream = new FileInputStream("data/testRootCertificate.crt");
-      X509Certificate rootX509Certificate1 = X509Utils.readX509Certificate(certificateInputStream);
-      assertNotNull(rootX509Certificate1);
-      assertEquals(X509Utils.DIGITAL_SIGNATURE_ALGORITHM, rootX509Certificate1.getSigAlgName());
-      assertEquals(rootX509Certificate, rootX509Certificate1);
-    } catch (IOException | CertificateException | NoSuchProviderException ex) {
+      InputStream certificateInputStream = new FileInputStream("data/testCertificate.crt");
+      X509Certificate x509Certificate1 = X509Utils.readX509Certificate(certificateInputStream);
+      assertNotNull(x509Certificate1);
+      assertEquals(X509Utils.DIGITAL_SIGNATURE_ALGORITHM, x509Certificate1.getSigAlgName());
+      assertEquals(x509Certificate, x509Certificate1);
+    } catch (IOException |
+            CertificateException |
+            NoSuchProviderException |
+            InvalidKeyException |
+            SignatureException |
+            NoSuchAlgorithmException |
+            InvalidAlgorithmParameterException ex) {
       fail(ex.getMessage());
     }
   }
@@ -435,36 +254,30 @@ public class X509UtilsTest {
   @Test
   public void testMakeCanonicalX509Certificate() {
     LOGGER.info("makeCanonicalX509Certificate");
-    if (!X509Utils.isTrustedDevelopmentSystem()) {
-      return;
-    }
     try {
-      X509Certificate rootX509Certificate = X509Utils.getRootX509Certificate();
-      KeyPair keyPair = X509Utils.generateRSAKeyPair2048();
-      PublicKey publicKey = keyPair.getPublic();
-      PrivateKey certificateAuthorityPrivateKey = X509Utils.getRootPrivateKey();
-      LOGGER.info("root certificate (" + rootX509Certificate.getClass().getName() + "):\n" + rootX509Certificate);
+      final KeyPair keyPair;
+      keyPair = X509Utils.generateRSAKeyPair3072();
+      final UUID uuid = UUID.randomUUID();
       X509Certificate x509Certificate
-              = X509Utils.generateX509Certificate(publicKey, certificateAuthorityPrivateKey, rootX509Certificate, "TestComponent");
+              = X509Utils.generateSelfSignedEndEntityX509Certificate(
+                      keyPair,
+                      uuid,
+                      "TestComponent");
 
       LOGGER.info("generated certificate...\n" + x509Certificate);
       assertNotNull(x509Certificate);
-      assertTrue(x509Certificate.getIssuerDN().toString().startsWith("CN=texai.org, O=Texai Certification Authority, UID="));
-      assertTrue(x509Certificate.getSubjectDN().toString().contains("CN=texai.org"));
-      assertTrue(!x509Certificate.getSubjectDN().toString().contains("O=Texai Certification Authority"));
+      assertTrue(x509Certificate.getIssuerDN().toString().startsWith("CN=texai.org, DC=TestComponent, UID="));
       assertEquals(X509Utils.DIGITAL_SIGNATURE_ALGORITHM, x509Certificate.getSigAlgName());
       assertEquals(keyPair.getPublic(), x509Certificate.getPublicKey());
-      x509Certificate.verify(rootX509Certificate.getPublicKey());
       LOGGER.info("principal: " + x509Certificate.getSubjectX500Principal().toString());
       assertTrue(x509Certificate.getSubjectX500Principal().toString().contains("UID="));
 
       final X509Certificate canonicalX509Certificate = X509Utils.makeCanonicalX509Certificate(x509Certificate);
       LOGGER.info("canonical certificate...\n" + canonicalX509Certificate);
-      assertTrue(canonicalX509Certificate.getIssuerDN().toString().startsWith("CN=texai.org, O=Texai Certification Authority, UID="));
+      assertTrue(x509Certificate.getIssuerDN().toString().startsWith("CN=texai.org, DC=TestComponent, UID="));
       assertTrue(canonicalX509Certificate.getSubjectDN().toString().contains("CN=texai.org"));
 
       assertEquals(canonicalX509Certificate.getSubjectDN().toString(), x509Certificate.getSubjectDN().toString());
-      assertEquals(canonicalX509Certificate.getIssuerDN().toString(), x509Certificate.getIssuerDN().toString());
 
     } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | SignatureException | InvalidKeyException | IOException | CertificateException ex) {
       LOGGER.info(StringUtils.getStackTraceAsString(ex));
@@ -488,15 +301,7 @@ public class X509UtilsTest {
     X509SecurityInfo x509SecurityInfo = X509Utils.getX509SecurityInfo(
             keyStoreFilePath,
             KeyStoreTestUtils.getClientKeyStorePassword(),
-            null); // alias
-    assertNotNull(x509SecurityInfo.getTrustStore());
-    if (X509Utils.isJCEUnlimitedStrengthPolicy()) {
-      assertEquals(X509Utils.BOUNCY_CASTLE_PROVIDER, x509SecurityInfo.getTrustStore().getProvider().getName());
-      assertEquals("UBER", x509SecurityInfo.getTrustStore().getType());
-    } else {
-      assertEquals("SunJCE", x509SecurityInfo.getTrustStore().getProvider().getName());
-      assertEquals("JCEKS", x509SecurityInfo.getTrustStore().getType());
-    }
+            KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS); // alias
     assertTrue(x509SecurityInfo.getKeyManagers().length > 0);
   }
 
@@ -577,10 +382,6 @@ public class X509UtilsTest {
   @Test
   public void testAddEntryToKeyStore() {
     LOGGER.info("addEntryToKeyStore");
-    if (!X509Utils.isTrustedDevelopmentSystem()) {
-      return;
-    }
-
     // create a keystore
     final String filePath;
     if (X509Utils.isJCEUnlimitedStrengthPolicy()) {
@@ -604,13 +405,14 @@ public class X509UtilsTest {
       assertTrue(keyStoreFile.exists());
 
       // create a certificate path
-      X509Certificate rootX509Certificate = X509Utils.getRootX509Certificate();
-      final PrivateKey certificateAuthorityPrivateKey = X509Utils.getRootPrivateKey();
-      KeyPair keyPair = X509Utils.generateRSAKeyPair2048();
-      PublicKey publicKey = keyPair.getPublic();
+      final KeyPair keyPair;
+      keyPair = X509Utils.generateRSAKeyPair3072();
+      final UUID uuid = UUID.randomUUID();
       X509Certificate x509Certificate
-              = X509Utils.generateX509Certificate(publicKey, certificateAuthorityPrivateKey, rootX509Certificate, null);
-      x509Certificate.verify(rootX509Certificate.getPublicKey());
+              = X509Utils.generateSelfSignedEndEntityX509Certificate(
+                      keyPair,
+                      uuid,
+                      "TestComponent");
       final List<Certificate> certificateList = new ArrayList<>();
       certificateList.add(x509Certificate);
       CertPath certPath = X509Utils.generateCertPath(certificateList);
@@ -647,10 +449,17 @@ public class X509UtilsTest {
     LOGGER.info("getUUID");
 
     try {
-      final X509Certificate rootX509Certificate = X509Utils.getRootX509Certificate();
-      LOGGER.info("root certificate: " + rootX509Certificate);
-      assertEquals("ed6d6718-80de-4848-af43-fed7bdba3c36", X509Utils.getUUID(rootX509Certificate).toString());
-    } catch (Exception ex) {
+      final KeyPair keyPair;
+      keyPair = X509Utils.generateRSAKeyPair3072();
+      final UUID uuid = UUID.randomUUID();
+      X509Certificate x509Certificate
+              = X509Utils.generateSelfSignedEndEntityX509Certificate(
+                      keyPair,
+                      uuid,
+                      "TestComponent");
+      LOGGER.info("certificate: " + x509Certificate);
+      assertEquals(X509Utils.getUUID(x509Certificate).toString().length(), 36);
+    } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | CertificateParsingException | CertificateEncodingException | SignatureException | InvalidKeyException | IOException ex) {
       fail(ex.getMessage());
     }
   }
@@ -661,10 +470,6 @@ public class X509UtilsTest {
   @Test
   public void testCopyKeyStoreUberToJceks() {
     LOGGER.info("copyKeyStoreUberToJceks");
-    if (!X509Utils.isTrustedDevelopmentSystem()) {
-      return;
-    }
-
     final String uberKeyStorePath = "data/keystore.uber";
     final char[] keyStorePassword = "password".toCharArray();
     final String jceksKeyStorePath = "data/keystore-copy.jceks";
@@ -686,88 +491,24 @@ public class X509UtilsTest {
   @Test
   public void testGenerateX509SecurityInfo() {
     LOGGER.info("generateX509SecurityInfo");
-    if (!X509Utils.isTrustedDevelopmentSystem()) {
-      return;
-    }
     try {
-      final KeyPair keyPair = X509Utils.generateRSAKeyPair2048();
-      final PrivateKey issuerPrivateKey = X509Utils.getRootPrivateKey();
-      final X509Certificate issuerCertificate = X509Utils.getRootX509Certificate();
+      final KeyPair keyPair = X509Utils.generateRSAKeyPair3072();
       final UUID uid = UUID.randomUUID();
       final char[] keystorePassword = "my-password".toCharArray();
       final boolean isJCEUnlimitedStrengthPolicy = true;
       X509SecurityInfo x509SecurityInfo = X509Utils.generateX509SecurityInfo(
               keyPair,
-              issuerPrivateKey,
-              issuerCertificate,
               uid,
               keystorePassword,
               isJCEUnlimitedStrengthPolicy,
-              null); // domainComponent
+              null, // domainComponent
+              KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS); // certificateAlias
       assertNotNull(x509SecurityInfo.getCertPath());
       assertNotNull(x509SecurityInfo.getKeyManagers());
       assertNotNull(x509SecurityInfo.getKeyStore());
       assertNotNull(x509SecurityInfo.getPrivateKey());
-      assertNotNull(x509SecurityInfo.getTrustStore());
       assertNotNull(x509SecurityInfo.getX509Certificate());
     } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException ex) {
-      fail(ex.getMessage());
-    }
-  }
-
-  /**
-   * Test of validateCertificatePath method of class X509Utils.
-   */
-  @Test
-  public void testValidateCertificatePath() {
-    LOGGER.info("validateCertificatePath");
-
-    // debug by setting -Djava.security.debug=certpath in the Texai POM
-    if (!X509Utils.isTrustedDevelopmentSystem()) {
-      return;
-    }
-    try {
-      X509Certificate rootX509Certificate = X509Utils.getRootX509Certificate();
-      final PrivateKey certificateAuthorityPrivateKey = X509Utils.getRootPrivateKey();
-
-      // generate and validate an intermediate certificate
-      final KeyPair intermediateKeyPair = X509Utils.generateRSAKeyPair3072();
-      final PublicKey intermediatePublicKey = intermediateKeyPair.getPublic();
-      final PrivateKey intermediatePrivateKey = intermediateKeyPair.getPrivate();
-      final X509Certificate intermediateX509Certificate = X509Utils.generateIntermediateX509Certificate(
-              intermediatePublicKey,
-              certificateAuthorityPrivateKey,
-              rootX509Certificate,
-              0); // pathLengthConstraint
-      intermediateX509Certificate.verify(rootX509Certificate.getPublicKey());
-
-      // generate and validate an end-entity certificate
-      final KeyPair keyPair = X509Utils.generateRSAKeyPair2048();
-      final PublicKey publicKey = keyPair.getPublic();
-      final X509Certificate x509Certificate = X509Utils.generateX509Certificate(
-              publicKey,
-              intermediatePrivateKey,
-              intermediateX509Certificate,
-              null); // domainComponent
-      x509Certificate.verify(intermediateX509Certificate.getPublicKey());
-
-      // validate a certificate path consisting of three certificates: root, intermediate, and end-entity certificates
-      final List<Certificate> certificateList = new ArrayList<>();
-
-      LOGGER.info("validating path of length 3");
-
-      LOGGER.info("rootX509Certificate...\n" + rootX509Certificate);
-      LOGGER.info("intermediateX509Certificate...\n" + intermediateX509Certificate);
-      LOGGER.info("x509Certificate...\n" + x509Certificate);
-
-      certificateList.clear();
-      certificateList.add(x509Certificate);
-      certificateList.add(intermediateX509Certificate);
-      certificateList.add(rootX509Certificate);
-      final CertPath certPath = X509Utils.generateCertPath(certificateList);
-      X509Utils.validateCertificatePath(certPath);
-    } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | SignatureException | InvalidKeyException | IOException | CertificateException | CertPathValidatorException ex) {
-      LOGGER.info(StringUtils.getStackTraceAsString(ex));
       fail(ex.getMessage());
     }
   }
@@ -793,45 +534,12 @@ public class X509UtilsTest {
   public void testHasKeyUsage() {
     LOGGER.info("hasKeyUsage");
 
-    X509Certificate rootX509Certificate = X509Utils.getRootX509Certificate();
-    LOGGER.info("root certificate:\n" + rootX509Certificate);
-    LOGGER.info("root certificate class: " + rootX509Certificate.getClass().getName());
-    LOGGER.info("key usage bits: " + StringUtils.booleanArrayToBitString(rootX509Certificate.getKeyUsage()));
-    assertFalse(X509Utils.hasKeyUsage(rootX509Certificate, KeyUsage.digitalSignature));
-    assertFalse(X509Utils.hasKeyUsage(rootX509Certificate, KeyUsage.nonRepudiation));
-    assertFalse(X509Utils.hasKeyUsage(rootX509Certificate, KeyUsage.keyEncipherment));
-    assertFalse(X509Utils.hasKeyUsage(rootX509Certificate, KeyUsage.dataEncipherment));
-    assertFalse(X509Utils.hasKeyUsage(rootX509Certificate, KeyUsage.keyAgreement));
-    assertTrue(X509Utils.hasKeyUsage(rootX509Certificate, KeyUsage.keyCertSign));
-    assertTrue(X509Utils.hasKeyUsage(rootX509Certificate, KeyUsage.cRLSign));
-    assertFalse(X509Utils.hasKeyUsage(rootX509Certificate, KeyUsage.encipherOnly));
-
-    if (!X509Utils.isTrustedDevelopmentSystem()) {
-      return;
-    }
     try {
-      KeyPair keyPair = X509Utils.generateRSAKeyPair3072();
-      PublicKey publicKey = keyPair.getPublic();
-      PrivateKey certificateAuthorityPrivateKey = X509Utils.getRootPrivateKey();
-      X509Certificate intermediateX509Certificate
-              = X509Utils.generateIntermediateX509Certificate(publicKey, certificateAuthorityPrivateKey, rootX509Certificate, 0);
-
-      LOGGER.info("generated intermediate certificate:\n" + intermediateX509Certificate);
-      assertFalse(X509Utils.hasKeyUsage(intermediateX509Certificate, KeyUsage.digitalSignature));
-      assertFalse(X509Utils.hasKeyUsage(intermediateX509Certificate, KeyUsage.nonRepudiation));
-      assertFalse(X509Utils.hasKeyUsage(intermediateX509Certificate, KeyUsage.keyEncipherment));
-      assertFalse(X509Utils.hasKeyUsage(intermediateX509Certificate, KeyUsage.dataEncipherment));
-      assertFalse(X509Utils.hasKeyUsage(intermediateX509Certificate, KeyUsage.keyAgreement));
-      assertTrue(X509Utils.hasKeyUsage(intermediateX509Certificate, KeyUsage.keyCertSign));
-      assertTrue(X509Utils.hasKeyUsage(intermediateX509Certificate, KeyUsage.cRLSign));
-      assertFalse(X509Utils.hasKeyUsage(intermediateX509Certificate, KeyUsage.encipherOnly));
-
-      keyPair = X509Utils.generateRSAKeyPair2048();
-      publicKey = keyPair.getPublic();
-      certificateAuthorityPrivateKey = X509Utils.getRootPrivateKey();
-      LOGGER.info("root certificate (" + rootX509Certificate.getClass().getName() + "):\n" + rootX509Certificate);
       X509Certificate x509Certificate
-              = X509Utils.generateX509Certificate(publicKey, certificateAuthorityPrivateKey, rootX509Certificate, null);
+              = X509Utils.generateSelfSignedEndEntityX509Certificate(
+                      X509Utils.generateRSAKeyPair3072(),
+                      UUID.randomUUID(),
+                      "TestComponent");
 
       LOGGER.info("generated certificate:\n" + x509Certificate);
       assertTrue(X509Utils.hasKeyUsage(x509Certificate, KeyUsage.digitalSignature));
@@ -847,90 +555,4 @@ public class X509UtilsTest {
     }
   }
 
-  /**
-   * Checks whether the trustores are populated.
-   */
-  public void verifyTruststoresPopulated() {
-
-    if (!X509Utils.isTrustedDevelopmentSystem()) {
-      return;
-    }
-    try {
-
-      // truststore.uber
-      String truststorePath = "data/truststore.uber";
-      KeyStore truststore1 = X509Utils.findOrCreateKeyStore(truststorePath, X509Utils.TRUSTSTORE_PASSWORD);
-      Enumeration<String> aliases = truststore1.aliases();
-      int aliasCnt = 0;
-      while (aliases.hasMoreElements()) {
-        LOGGER.info(truststorePath + " uber trusted certificate alias: " + aliases.nextElement());
-        aliasCnt++;
-      }
-      if (aliasCnt == 0) {
-        fail();
-      }
-
-      // truststore.jceks
-      X509Utils.setIsJCEUnlimitedStrengthPolicy(false);
-      try {
-        truststorePath = "data/truststore.jceks";
-        truststore1 = X509Utils.findOrCreateKeyStore(truststorePath, X509Utils.TRUSTSTORE_PASSWORD);
-        aliases = truststore1.aliases();
-        aliasCnt = 0;
-        while (aliases.hasMoreElements()) {
-          LOGGER.info(truststorePath + " jceks trusted certificate alias: " + aliases.nextElement());
-          aliasCnt++;
-        }
-        if (aliasCnt == 0) {
-          fail();
-        }
-
-        // truststore.bks
-        truststorePath = "data/truststore.bks";
-        truststore1 = X509Utils.findOrCreateBKSKeyStore(truststorePath, X509Utils.TRUSTSTORE_PASSWORD);
-        aliases = truststore1.aliases();
-        aliasCnt = 0;
-        while (aliases.hasMoreElements()) {
-          LOGGER.info(truststorePath + " bks trusted certificate alias: " + aliases.nextElement());
-          aliasCnt++;
-        }
-        if (aliasCnt == 0) {
-          fail();
-        }
-
-        // truststore.jks
-        truststorePath = "data/truststore.jks";
-        truststore1 = X509Utils.findOrCreateJKSKeyStore(truststorePath, X509Utils.TRUSTSTORE_PASSWORD);
-        aliases = truststore1.aliases();
-        aliasCnt = 0;
-        while (aliases.hasMoreElements()) {
-          LOGGER.info(truststorePath + " jks trusted certificate alias: " + aliases.nextElement());
-          aliasCnt++;
-        }
-        if (aliasCnt == 0) {
-          fail();
-        }
-
-        // truststore.p12
-        truststorePath = "data/truststore.p12";
-        truststore1 = X509Utils.findOrCreatePKCS12KeyStore(truststorePath, X509Utils.TRUSTSTORE_PASSWORD);
-        aliases = truststore1.aliases();
-        aliasCnt = 0;
-        while (aliases.hasMoreElements()) {
-          LOGGER.info(truststorePath + " p12 trusted certificate alias: " + aliases.nextElement());
-          aliasCnt++;
-        }
-        if (aliasCnt == 0) {
-          fail();
-        }
-      } finally {
-        X509Utils.setIsJCEUnlimitedStrengthPolicy(true);
-      }
-    } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | NoSuchProviderException ex) {
-      throw new TexaiException(ex);
-    }
-
-    assertTrue(!isTrustedDevelopmentSystem() || X509Utils.isJCEUnlimitedStrengthPolicy());
-
-  }
 }

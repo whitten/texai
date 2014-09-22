@@ -15,8 +15,8 @@ import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.util.StringUtils;
 
-/** Performs a simulation of the SSL/TLS cipher suite negotiation that occurs when an iOS client
- * connects with the Texai https server.
+/**
+ * Performs a simulation of the SSL/TLS cipher suite negotiation that occurs when an iOS client connects with the Texai https server.
  *
  * @author reed
  */
@@ -148,12 +148,15 @@ public class CipherSuiteNegotiationSimulation {
     "SSL_RSA_WITH_3DES_EDE_CBC_SHA"
   };
 
-  /** Constructs a new CipherSuiteNegotiationSimulation instance. */
+  /**
+   * Constructs a new CipherSuiteNegotiationSimulation instance.
+   */
   public CipherSuiteNegotiationSimulation() {
   }
 
-  /** Simulates an SSL cipher suite negotiation between an iOS client and the Texai server, in order to help find
-   * compatible cipher suites for iOS clients which cannot be modified with respect to candidate cipher suites.
+  /**
+   * Simulates an SSL cipher suite negotiation between an iOS client and the Texai server, in order to help find compatible cipher suites
+   * for iOS clients which cannot be modified with respect to candidate cipher suites.
    */
   private void simulate() {
     for (final String iOSCipherSuite : IOS_CIPHER_SUITES) {
@@ -165,9 +168,11 @@ public class CipherSuiteNegotiationSimulation {
     }
   }
 
-  /** Returns whether the java cipher suites contain the given iOS cipher suite.
+  /**
+   * Returns whether the java cipher suites contain the given iOS cipher suite.
    *
    * @param iOSCipherSuite the given iOS cipher suite
+   *
    * @return whether the java cipher suites contain the given iOS cipher suite
    */
   private boolean javaCipherSuitesContain(final String iOSCipherSuite) {
@@ -182,7 +187,8 @@ public class CipherSuiteNegotiationSimulation {
     return false;
   }
 
-  /** Executes this application.
+  /**
+   * Executes this application.
    *
    * @param args the command line arguments - unused
    */

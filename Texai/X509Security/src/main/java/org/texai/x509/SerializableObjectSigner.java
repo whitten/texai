@@ -32,21 +32,26 @@ import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import net.jcip.annotations.NotThreadSafe;
 
-/** Provides digital signatures for serializable objects.
+/**
+ * Provides digital signatures for serializable objects.
  *
  * @author reed
  */
 @NotThreadSafe
 public final class SerializableObjectSigner {
 
-  /** Prevents this utility class from being instantiated. */
+  /**
+   * Prevents this utility class from being instantiated.
+   */
   private SerializableObjectSigner() {
   }
 
-  /** Signs the given serializable object and returns the digital signature bytes.
+  /**
+   * Signs the given serializable object and returns the digital signature bytes.
    *
    * @param serializableObject the serializable object
    * @param privateKey the sender's private key
+   *
    * @return the digital signature bytes
    *
    * @throws NoSuchAlgorithmException when the signature algorithm is invalid
@@ -75,11 +80,13 @@ public final class SerializableObjectSigner {
     return signature.sign();
   }
 
-  /** Returns whether the given signature bytes verify the given file.
+  /**
+   * Returns whether the given signature bytes verify the given file.
    *
    * @param serializableObject the serializable object
    * @param x509Certificate the sender's X.509 certificate, that contains the public key
    * @param signatureBytes the signature bytes
+   *
    * @return whether the given signature bytes verify the given file
    *
    * @throws NoSuchAlgorithmException when the signature algorithm is invalid

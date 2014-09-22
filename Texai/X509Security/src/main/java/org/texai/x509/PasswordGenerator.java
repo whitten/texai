@@ -22,7 +22,8 @@ package org.texai.x509;
 
 import net.jcip.annotations.NotThreadSafe;
 
-/** Generates random passwords.
+/**
+ * Generates random passwords.
  *
  * @author reed
  */
@@ -38,13 +39,17 @@ public final class PasswordGenerator {
     'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'
   };
 
-  /** Constructs a new PasswordGenerator instance. */
+  /**
+   * Constructs a new PasswordGenerator instance.
+   */
   public PasswordGenerator() {
   }
 
-  /** Returns the number of possible combinations of generated random passwords for the given length.
+  /**
+   * Returns the number of possible combinations of generated random passwords for the given length.
    *
    * @param length the password length
+   *
    * @return the number of possible combinations of generated random passwords for the given length
    */
   public double getNbrCombinations(final int length) {
@@ -56,9 +61,11 @@ public final class PasswordGenerator {
     return nbrCombinations;
   }
 
-  /** Generates a random password of the given length.
+  /**
+   * Generates a random password of the given length.
    *
    * @param length the password length
+   *
    * @return a random password of the given length
    */
   public String generate(final int length) {

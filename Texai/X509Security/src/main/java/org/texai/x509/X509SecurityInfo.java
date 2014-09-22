@@ -37,70 +37,58 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.X509KeyManager;
 import net.jcip.annotations.Immutable;
 import org.bouncycastle.asn1.x509.KeyUsage;
+import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 
-/**  Provides a container for X509 security information.
+/**
+ * Provides a container for X509 security information.
  *
  * @author reed
  */
 @Immutable
 public final class X509SecurityInfo {
 
-  // the key store containing the trusted Texai X.509 certificate
-  private final KeyStore trustStore;
+  // the certificate alias which identifies a self-signed certificate entry within the keystore
+  private final String certificateAlias;
   // the key manager factory
   private final KeyManagerFactory keyManagerFactory;
   // the key store
   private final KeyStore keyStore;
-  // the private key entry for a certain alias id that contains the X.509 certificate and private key for that id
+  // the cached private key entry that contains the self-signed X.509 certificate and private key
   private final PrivateKeyEntry privateKeyEntry;
 
-  /** Constructs a new X509SecurityInfo instance.
+  /**
+   * Constructs a new X509SecurityInfo instance.
    *
-   * @param trustStore the key store containing the trusted Texai X.509 certificate
    * @param keyStore the key store containing the peer's X.509 certificate chain
    * @param keyStorePassword the password to the key store
-   * @param alias the private key entry alias
+   * @param certificateAlias the private key entry alias
    */
   public X509SecurityInfo(
-          final KeyStore trustStore,
           final KeyStore keyStore,
           final char[] keyStorePassword,
-          final String alias) {
+          final String certificateAlias) {
     //Preconditions
-    assert trustStore != null : "trustStore must not be null";
     assert keyStore != null : "keyStore must not be null";
     assert keyStorePassword != null : "keyStorePassword must not be null";
+    assert StringUtils.isNonEmptyString(certificateAlias) : "certificateAlias must be a non-empty string";
 
-    this.trustStore = trustStore;
     this.keyStore = keyStore;
+    this.certificateAlias = certificateAlias;
     try {
       keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
       keyManagerFactory.init(keyStore, keyStorePassword);
-      if (alias == null) {
-        privateKeyEntry = null;
-      } else {
-        privateKeyEntry = (PrivateKeyEntry) keyStore.getEntry(alias, new PasswordProtection(keyStorePassword));
-        assert privateKeyEntry != null : "privateKeyEntry not found for alias " + alias;
-      }
+      privateKeyEntry = (PrivateKeyEntry) keyStore.getEntry(certificateAlias, new PasswordProtection(keyStorePassword));
+      assert privateKeyEntry != null : "privateKeyEntry not found for alias " + certificateAlias;
     } catch (NoSuchAlgorithmException | KeyStoreException | UnrecoverableEntryException ex) {
       throw new TexaiException(ex);
     }
-
   }
 
-  /** Gets the key store containing the trusted Texai X.509 certificate.
-   *
-   * @return the trustStore
-   */
-  public KeyStore getTrustStore() {
-    return trustStore;
-  }
-
-  /** Gets the key store.
+  /**
+   * Gets the key store.
    *
    * @return the key store
    */
@@ -108,7 +96,8 @@ public final class X509SecurityInfo {
     return keyStore;
   }
 
-  /** Returns one key manager for each type of key material.
+  /**
+   * Returns one key manager for each type of key material.
    *
    * @return the key managers
    */
@@ -116,42 +105,33 @@ public final class X509SecurityInfo {
     return keyManagerFactory.getKeyManagers();
   }
 
-  /** Returns the private key.
+  /**
+   * Returns the private key.
    *
    * @return the private key
    */
   public PrivateKey getPrivateKey() {
-    if (privateKeyEntry == null) {
-      // for unit tests
-      final X509KeyManager x509KeyManager = (X509KeyManager) getKeyManagers()[0];
-      return x509KeyManager.getPrivateKey(X509Utils.ENTRY_ALIAS);
-    } else {
-      return privateKeyEntry.getPrivateKey();
-    }
+    return privateKeyEntry.getPrivateKey();
   }
 
-  /** Returns the certificate chain.
+  /**
+   * Returns the certificate chain.
    *
    * @return the certificate chain
    */
   public X509Certificate[] getCertificateChain() {
     final X509Certificate[] certificateChain;
-    if (privateKeyEntry == null) {
-      // for unit tests
-      final X509KeyManager x509KeyManager = (X509KeyManager) getKeyManagers()[0];
-      certificateChain = x509KeyManager.getCertificateChain(X509Utils.ENTRY_ALIAS);
-    } else {
-      certificateChain =  (X509Certificate[]) privateKeyEntry.getCertificateChain();
-    }
+    certificateChain = (X509Certificate[]) privateKeyEntry.getCertificateChain();
 
     //Postconditions
     assert certificateChain != null;
-    assert certificateChain.length >= 2;
+    assert certificateChain.length == 1;
 
     return certificateChain;
   }
 
-  /** Returns the X.509 certificate.
+  /**
+   * Returns the X.509 certificate.
    *
    * @return the X.509 certificate
    */
@@ -159,7 +139,8 @@ public final class X509SecurityInfo {
     return getCertificateChain()[0];
   }
 
-  /** Returns the certificate path.
+  /**
+   * Returns the certificate path.
    *
    * @return the certificate path
    */
@@ -179,7 +160,8 @@ public final class X509SecurityInfo {
     }
   }
 
-  /** Returns a string representation of this object.
+  /**
+   * Returns a string representation of this object.
    *
    * @return a string representation of this object
    */
@@ -188,7 +170,8 @@ public final class X509SecurityInfo {
     return "[X509 certificate information for ...\n" + getX509Certificate().toString() + "]";
   }
 
-  /** Returns whether the X509 certificate can be used for digital signing.
+  /**
+   * Returns whether the X509 certificate can be used for digital signing.
    *
    * @return the X509 certificate can be used for digital signing
    */

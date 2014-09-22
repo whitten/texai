@@ -42,11 +42,17 @@ import static org.junit.Assert.*;
  */
 public class FileSignerTest {
 
-  /** the logger */
+  /**
+   * the logger
+   */
   private static final Logger LOGGER = Logger.getLogger(FileSignerTest.class);
-  /** the X509 certificate */
+  /**
+   * the X509 certificate
+   */
   private static X509Certificate x509Certificate;
-  /** the private key */
+  /**
+   * the private key
+   */
   private static PrivateKey privateKey;
 
   public FileSignerTest() {
@@ -56,18 +62,16 @@ public class FileSignerTest {
   public static void setUpClass() throws Exception {
     final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
     final X509KeyManager x509KeyManager = (X509KeyManager) x509SecurityInfo.getKeyManagers()[0];
-    final X509Certificate[] certificateChain = x509KeyManager.getCertificateChain(X509Utils.ENTRY_ALIAS);
+    final X509Certificate[] certificateChain = x509KeyManager.getCertificateChain(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS);
     assertNotNull(certificateChain);
     LOGGER.info("certificate chain length:\n" + certificateChain.length);
-    assertEquals(2, certificateChain.length);
+    assertEquals(1, certificateChain.length);
     x509Certificate = certificateChain[0];
     LOGGER.info("certificate: " + x509Certificate);
-    privateKey = x509KeyManager.getPrivateKey(X509Utils.ENTRY_ALIAS);
+    privateKey = x509KeyManager.getPrivateKey(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS);
     assertNotNull(privateKey);
     LOGGER.info("private key: " + privateKey);
     x509Certificate.checkValidity();
-    // validate the certificate with the issuer's public key
-    x509Certificate.verify(certificateChain[1].getPublicKey());
   }
 
   @AfterClass

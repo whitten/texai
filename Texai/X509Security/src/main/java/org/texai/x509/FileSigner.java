@@ -30,21 +30,26 @@ import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import net.jcip.annotations.NotThreadSafe;
 
-/** Provides digital signatures for files.
+/**
+ * Provides digital signatures for files.
  *
  * @author reed
  */
 @NotThreadSafe
 public final class FileSigner {
 
-  /** Prevents this utility class from being instantiated. */
+  /**
+   * Prevents this utility class from being instantiated.
+   */
   private FileSigner() {
   }
 
-  /** Signs the given file and returns the digital signature bytes.
+  /**
+   * Signs the given file and returns the digital signature bytes.
    *
    * @param pathName the file path name
    * @param privateKey the sender's private key
+   *
    * @return the digital signature bytes
    *
    * @throws NoSuchAlgorithmException when the signature algorithm is invalid
@@ -78,11 +83,13 @@ public final class FileSigner {
     return signature.sign();
   }
 
-  /** Returns whether the given signature bytes verify the given file.
+  /**
+   * Returns whether the given signature bytes verify the given file.
    *
    * @param pathName the file path name
    * @param x509Certificate the sender's X.509 certificate, that contains the public key
    * @param signatureBytes the signature bytes
+   *
    * @return whether the given signature bytes verify the given file
    *
    * @throws NoSuchAlgorithmException when the signature algorithm is invalid

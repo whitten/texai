@@ -43,11 +43,17 @@ import static org.junit.Assert.*;
  */
 public class SerializableObjectSignerTest {
 
-  /** the logger */
+  /**
+   * the logger
+   */
   private static final Logger LOGGER = Logger.getLogger(SerializableObjectSignerTest.class);
-  /** the X509 certificate */
+  /**
+   * the X509 certificate
+   */
   private static X509Certificate x509Certificate;
-  /** the private key */
+  /**
+   * the private key
+   */
   private static PrivateKey privateKey;
 
   public SerializableObjectSignerTest() {
@@ -57,13 +63,13 @@ public class SerializableObjectSignerTest {
   public static void setUpClass() throws Exception {
     final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
     final X509KeyManager x509KeyManager = (X509KeyManager) x509SecurityInfo.getKeyManagers()[0];
-    final X509Certificate[] certificateChain = x509KeyManager.getCertificateChain(X509Utils.ENTRY_ALIAS);
+    final X509Certificate[] certificateChain = x509KeyManager.getCertificateChain(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS);
     assertNotNull(certificateChain);
     LOGGER.info("certificate chain length:\n" + certificateChain.length);
-    assertEquals(2, certificateChain.length);
+    assertEquals(1, certificateChain.length);
     x509Certificate = certificateChain[0];
     LOGGER.info("client certificate: " + x509Certificate);
-    privateKey = x509KeyManager.getPrivateKey(X509Utils.ENTRY_ALIAS);
+    privateKey = x509KeyManager.getPrivateKey(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS);
     assertNotNull(privateKey);
     LOGGER.info("private key: " + privateKey);
   }
@@ -108,8 +114,8 @@ public class SerializableObjectSignerTest {
   }
 
   /**
-   * Test of sign method, of class SerializableObjectSigner.  When the signature bytes are embedded in the serializable
-   * object, then then that field must be null when the signature is calculated or verified.
+   * Test of sign method, of class SerializableObjectSigner. When the signature bytes are embedded in the serializable object, then then
+   * that field must be null when the signature is calculated or verified.
    */
   @Test
   public void testSign2() {
@@ -136,16 +142,25 @@ public class SerializableObjectSignerTest {
 
   static class MySerializableObject implements Serializable {
 
-    /** the serial version UID */
+    /**
+     * the serial version UID
+     */
     private static final long serialVersionUID = 1L;
-    /** a test string field */
+    /**
+     * a test string field
+     */
     private final String string;
-    /** a test InetSocketAddress field */
+    /**
+     * a test InetSocketAddress field
+     */
     private final InetSocketAddress inetSocketAddress;
-    /** the signature bytes */
+    /**
+     * the signature bytes
+     */
     private byte[] signatureBytes;
 
-    /** Constructs a new MySerializableObject instance.
+    /**
+     * Constructs a new MySerializableObject instance.
      *
      * @param string a test string field
      * @param inetSocketAddress a test InetSocketAddress field
@@ -159,7 +174,8 @@ public class SerializableObjectSignerTest {
       this.inetSocketAddress = inetSocketAddress;
     }
 
-    /** Returns a string representation of this object.
+    /**
+     * Returns a string representation of this object.
      *
      * @return a string representation of this object
      */

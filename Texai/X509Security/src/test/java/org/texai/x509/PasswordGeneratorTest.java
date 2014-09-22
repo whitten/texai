@@ -34,7 +34,9 @@ import static org.junit.Assert.*;
  */
 public class PasswordGeneratorTest {
 
-  /** the logger */
+  /**
+   * the logger
+   */
   private static final Logger LOGGER = Logger.getLogger(PasswordGeneratorTest.class);
 
   public PasswordGeneratorTest() {

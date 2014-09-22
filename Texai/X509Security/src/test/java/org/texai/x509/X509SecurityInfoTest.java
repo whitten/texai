@@ -20,17 +20,11 @@
  */
 package org.texai.x509;
 
-import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.cert.CertPath;
-import java.security.cert.CertPathValidatorException;
-import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
-import java.util.List;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.X509KeyManager;
 import org.apache.log4j.Logger;
@@ -48,7 +42,9 @@ import static org.junit.Assert.*;
  */
 public class X509SecurityInfoTest {
 
-  /** the logger */
+  /**
+   * the logger
+   */
   private static final Logger LOGGER = Logger.getLogger(X509SecurityInfoTest.class);
 
   public X509SecurityInfoTest() {
@@ -71,27 +67,6 @@ public class X509SecurityInfoTest {
   }
 
   /**
-   * Test of getTrustStore method, of class X509SecurityInfo.
-   */
-  @Test
-  public void testGetTrustStore() {
-    LOGGER.info("getTrustStore");
-    X509SecurityInfo instance = KeyStoreTestUtils.getClientX509SecurityInfo();
-    KeyStore result = instance.getTrustStore();
-    assertNotNull(result);
-    try {
-      LOGGER.info("truststore alias: " + result.aliases());
-      final Enumeration<String> aliasEnumeration = result.aliases();
-      while (aliasEnumeration.hasMoreElements()) {
-        LOGGER.info("truststore alias: " + aliasEnumeration.nextElement());
-      }
-      assertTrue(result.containsAlias(X509Utils.TRUSTSTORE_ENTRY_ALIAS));
-    } catch (KeyStoreException ex) {
-      fail(ex.getMessage());
-    }
-  }
-
-  /**
    * Test of getKeyStore method, of class X509SecurityInfo.
    */
   @Test
@@ -107,7 +82,7 @@ public class X509SecurityInfoTest {
       while (aliasEnumeration.hasMoreElements()) {
         LOGGER.info("key store alias: " + aliasEnumeration.nextElement());
       }
-      assertTrue(result.containsAlias(X509Utils.ENTRY_ALIAS));
+      assertTrue(result.containsAlias(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS));
     } catch (KeyStoreException ex) {
       fail(ex.getMessage());
     }
@@ -126,8 +101,8 @@ public class X509SecurityInfoTest {
     final KeyManager keyManager = result[0];
     assertTrue(keyManager instanceof X509KeyManager);
     final X509KeyManager x509KeyManager = (X509KeyManager) keyManager;
-    assertNotNull(x509KeyManager.getCertificateChain(X509Utils.ENTRY_ALIAS));
-    assertNotNull(x509KeyManager.getPrivateKey(X509Utils.ENTRY_ALIAS));
+    assertNotNull(x509KeyManager.getCertificateChain(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS));
+    assertNotNull(x509KeyManager.getPrivateKey(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS));
   }
 
   /**
@@ -149,47 +124,12 @@ public class X509SecurityInfoTest {
   public void testGetX509Certificate() {
     LOGGER.info("getX509Certificate");
     X509SecurityInfo instance = KeyStoreTestUtils.getClientX509SecurityInfo();
+    assertNotNull(instance);
     X509Certificate result = instance.getX509Certificate();
     assertNotNull(result);
-    assertTrue(result.getSubjectX500Principal().toString().startsWith("CN=texai.org, UID="));
+    LOGGER.info("client test certificate ...\n" + result);
+    assertTrue(result.getSubjectX500Principal().toString().contains("CN=texai.org"));
+    assertTrue(result.getSubjectX500Principal().toString().contains("DC=test client"));
   }
 
-  /**
-   * Test of getCertPath method, of class X509SecurityInfo.
-   */
-  @Test
-  public void testGetCertPath() {
-    LOGGER.info("getCertPath");
-    X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
-
-    try {
-
-      //  to turn on java security debugging, specify java.security.debug=certpath in the Texai POM
-
-      final KeyStore keyStore = x509SecurityInfo.getKeyStore();
-      final X509Certificate clientX509Certificate = (X509Certificate) keyStore.getCertificate(X509Utils.ENTRY_ALIAS);
-      assertNotNull(clientX509Certificate);
-      assertTrue(clientX509Certificate.getSubjectX500Principal().toString().contains("CN=texai.org"));
-      Certificate[] certificateChain = keyStore.getCertificateChain(X509Utils.ENTRY_ALIAS);
-      assertEquals(2, certificateChain.length);
-      assertEquals(clientX509Certificate, certificateChain[0]);
-      final Certificate rootX509Certificate = certificateChain[1];
-      assertTrue(rootX509Certificate instanceof X509Certificate);
-      assertEquals("CN=texai.org, O=Texai Certification Authority, UID=ed6d6718-80de-4848-af43-fed7bdba3c36", ((X509Certificate) rootX509Certificate).getSubjectX500Principal().toString());
-      //assertTrue(X509CertImpl.isSelfIssued((X509Certificate) rootX509Certificate));
-      assertEquals(3, ((X509Certificate) rootX509Certificate).getVersion());
-
-      CertPath certPath = x509SecurityInfo.getCertPath();
-      LOGGER.info("certPath: " + certPath);
-      assertNotNull(certPath);
-      @SuppressWarnings("unchecked")
-      final List<X509Certificate> certificates = (List<X509Certificate>) certPath.getCertificates();
-      assertEquals(1, certificates.size());
-      assertEquals(clientX509Certificate, certificates.get(0));
-      X509Utils.validateCertificatePath(certPath);
-    } catch (InvalidAlgorithmParameterException | KeyStoreException | NoSuchAlgorithmException | CertPathValidatorException ex) {
-      ex.printStackTrace();
-      fail(ex.getMessage());
-    }
-  }
 }

@@ -20,22 +20,10 @@
  */
 package org.texai.ssl;
 
-import java.security.InvalidKeyException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PublicKey;
-import java.security.SignatureException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -44,7 +32,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.texai.x509.KeyStoreTestUtils;
 import org.texai.x509.X509SecurityInfo;
-import org.texai.x509.X509Utils;
 import static org.junit.Assert.*;
 
 /**
@@ -53,7 +40,9 @@ import static org.junit.Assert.*;
  */
 public class TexaiSSLContextFactoryTest {
 
-  /** the logger */
+  /**
+   * the logger
+   */
   private static final Logger LOGGER = Logger.getLogger(TexaiSSLContextFactoryTest.class);
 
   public TexaiSSLContextFactoryTest() {
@@ -73,50 +62,6 @@ public class TexaiSSLContextFactoryTest {
 
   @After
   public void tearDown() {
-  }
-
-  /**
-   * Test of a TrustManagerFactory.
-   */
-  @Test
-  public void testTrustManagerFactory() {
-    LOGGER.info("testTrustManagerFactory");
-    try {
-      final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance("SunX509");
-      trustManagerFactory.init(X509Utils.getTruststore());
-      final TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
-      assertTrue(trustManagers.length > 0);
-      X509TrustManager x509TrustManager = null;
-      for (final TrustManager trustManager : trustManagers) {
-        LOGGER.info("trustManager class: " + trustManager.getClass().getName());
-        if (trustManager instanceof X509TrustManager) {
-          x509TrustManager = (X509TrustManager) trustManager;
-        }
-      }
-      assertNotNull(x509TrustManager);
-      X509Certificate[] acceptedIssuers = x509TrustManager.getAcceptedIssuers();
-      assertNotNull(acceptedIssuers);
-      assertEquals(1, acceptedIssuers.length);
-      assertEquals("CN=texai.org, O=Texai Certification Authority, UID=ed6d6718-80de-4848-af43-fed7bdba3c36", acceptedIssuers[0].getSubjectX500Principal().toString());
-      Certificate[] chain = KeyStoreTestUtils.getClientKeyStore().getCertificateChain(X509Utils.ENTRY_ALIAS);
-      assertNotNull(chain);
-      assertEquals(2, chain.length);
-      X509Certificate[] x509Chain = {(X509Certificate) chain[0], (X509Certificate) chain[1]};
-      final X509Certificate clientX509Certificate = x509Chain[0];
-      final X509Certificate rootX509Certificate = x509Chain[1];
-      LOGGER.info("client certificate: " + clientX509Certificate);
-      assertTrue(clientX509Certificate.getSubjectX500Principal().toString().contains("CN=texai.org"));
-      LOGGER.info("root certificate: " + rootX509Certificate);
-      assertEquals("CN=texai.org, O=Texai Certification Authority, UID=ed6d6718-80de-4848-af43-fed7bdba3c36", rootX509Certificate.getSubjectX500Principal().toString());
-      final PublicKey rootPublicKey = rootX509Certificate.getPublicKey();
-      LOGGER.info("rootPublicKey: " + rootPublicKey);
-      clientX509Certificate.verify(rootPublicKey);
-      x509TrustManager.checkClientTrusted(x509Chain, "RSA");
-    } catch (InvalidKeyException | KeyStoreException | NoSuchAlgorithmException | NoSuchProviderException | SignatureException | CertificateException ex) {
-      ex.printStackTrace();
-      fail(ex.getMessage());
-    }
-
   }
 
   /**
