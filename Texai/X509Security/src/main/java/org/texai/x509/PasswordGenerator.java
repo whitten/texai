@@ -29,7 +29,7 @@ import net.jcip.annotations.NotThreadSafe;
 @NotThreadSafe
 public final class PasswordGenerator {
 
-  /** printable ASCII characters */
+  // printable ASCII characters
   private static final char[] PRINTABLE_ASCII = {
     '!', '\"', '#', '$', '%', '(', ')', '*', '+', '-', '.', '/',
     '\'', '[', '\\', ']', '^', '_', '`', '{', '|', '}', '~',

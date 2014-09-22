@@ -49,13 +49,13 @@ import org.texai.util.TexaiException;
 @Immutable
 public final class X509SecurityInfo {
 
-  /** the key store containing the trusted Texai X.509 certificate */
+  // the key store containing the trusted Texai X.509 certificate
   private final KeyStore trustStore;
-  /** the key manager factory */
+  // the key manager factory
   private final KeyManagerFactory keyManagerFactory;
-  /** the key store */
+  // the key store
   private final KeyStore keyStore;
-  /** the private key entry for a certain alias id that contains the X.509 certificate and private key for that id */
+  // the private key entry for a certain alias id that contains the X.509 certificate and private key for that id
   private final PrivateKeyEntry privateKeyEntry;
 
   /** Constructs a new X509SecurityInfo instance.

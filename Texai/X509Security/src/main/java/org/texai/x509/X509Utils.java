@@ -114,41 +114,23 @@ import sun.security.x509.X509CertImpl;
  */
 public final class X509Utils {
 
-  /**
-   * the logger
-   */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(X509Utils.class);
-  /**
-   * the default secure random serialization path
-   */
+  // the default secure random serialization path
   public static final String DEFAULT_SECURE_RANDOM_PATH = "data/secure-random.ser";
-  /**
-   * the root certificate alias
-   */
+  // the root certificate alias
   public static final String ROOT_ALIAS = "root";
-  /**
-   * the root certificate alias
-   */
+  // the root certificate alias
   public static final String JAR_SIGNER_ALIAS = "jar-signer";
-  /**
-   * the period in which the certificate is valid
-   */
+  // the period in which the certificate is valid
   private static final long VALIDITY_PERIOD = 10L * 365L * 24L * 60L * 60L * 1000L; // ten years
-  /**
-   * the Bouncy Castle cryptography provider
-   */
+  // the Bouncy Castle cryptography provider
   public static final String BOUNCY_CASTLE_PROVIDER = "BC";
-  /**
-   * the digital signature algorithm
-   */
+  // the digital signature algorithm
   public static final String DIGITAL_SIGNATURE_ALGORITHM = "SHA512withRSA";
-  /**
-   * the indicator whether the JCE unlimited strength jurisdiction policy files are installed
-   */
+  // the indicator whether the JCE unlimited strength jurisdiction policy files are installed
   private static boolean isJCEUnlimitedStrenthPolicy;
-  /**
-   * the root certificate bytes
-   */
+  // the root certificate bytes
   private final static byte[] ROOT_CERTIFICATE_BYTES = {
     48, -126, 4, -94, 48, -126, 3, 10, -96, 3, 2, 1, 2, 2, 2, 3, -72, 48, 13, 6, 9, 42, -122, 72, -122, -9, 13,
     1, 1, 13, 5, 0, 48, 114, 49, 52, 48, 50, 6, 10, 9, -110, 38, -119, -109, -14, 44, 100, 1, 1, 12, 36, 101, 100,
@@ -197,33 +179,19 @@ public final class X509Utils {
     -42, -48, 23, -7, -36, 105, -33, 60, 3, -24, -62, 76, 89, 9, 7, -64, -123, 123, 22, 26, 96, -24, -40, 117, 118,
     126, 60, -118, -91, -61, 20, 105, -72, -3, 113, -35, 66, -36, 117, -45, -120, 31, -85
   };
-  /**
-   * the root certificate
-   */
+  // the root certificate
   private static final X509Certificate ROOT_X509_CERTIFICATE;
-  /**
-   * the truststore entry alias
-   */
+  // the truststore entry alias
   public static final String TRUSTSTORE_ENTRY_ALIAS = "texai root certificate";
-  /**
-   * the truststore
-   */
+  // the truststore
   private static KeyStore truststore;
-  /**
-   * the truststore password
-   */
+  // the truststore password
   public static final char[] TRUSTSTORE_PASSWORD = "truststore-password".toCharArray();
-  /**
-   * the certificate entry alias
-   */
+  // the certificate entry alias
   public static final String ENTRY_ALIAS = "certificate";
-  /**
-   * the installer keystore password
-   */
+  // the installer keystore password
   public static final char[] INSTALLER_KEYSTORE_PASSWORD = "installer-keystore-password".toCharArray();
-  /**
-   * the intermediate, signing entry alias
-   */
+  // the intermediate, signing entry alias
   public static final String INTERMEDIATE_ENTRY_ALIAS = "Texai intermediate certificate";
 
   static {
@@ -247,13 +215,9 @@ public final class X509Utils {
       throw new TexaiException(ex);
     }
   }
-  /**
-   * the secure random
-   */
+  // the secure random
   private static SecureRandom secureRandom;
-  /**
-   * the secure random synchronization lock
-   */
+  // the secure random synchronization lock
   private static final Object secureRandom_lock = new Object();
 
   static {

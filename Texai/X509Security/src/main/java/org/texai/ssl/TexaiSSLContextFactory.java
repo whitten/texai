@@ -40,13 +40,13 @@ import org.texai.x509.X509Utils;
  */
 public final class TexaiSSLContextFactory {
 
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(TexaiSSLContextFactory.class);
-  /** the enabled SSL cipher suites */
+  // the enabled SSL cipher suites
   private static String[] enabledCipherSuites;
-  /** the enabled SSL cipher suites lock */
+  // the enabled SSL cipher suites lock
   private static final Object ENABLED_CIPHER_SUITES_LOCK = new Object();
-  /** the iOS incompatible cipher suites */
+  // the iOS incompatible cipher suites
   private static final List<String> iOSIncompatibleCipherSuites = new ArrayList<>();
 
   /** Prevents this utility class from being instantiated. */

@@ -24,7 +24,7 @@ import org.texai.util.StringUtils;
 public class CipherSuiteNegotiationSimulation {
 
   private static final Logger LOGGER = Logger.getLogger(CipherSuiteNegotiationSimulation.class);
-  /** the iOS cipher suites */
+  // the iOS cipher suites
   private static final String[] IOS_CIPHER_SUITES = {
     "TLS_EMPTY_RENEGOTIATION_INFO_SCSV",
     "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384",
@@ -64,7 +64,7 @@ public class CipherSuiteNegotiationSimulation {
     "TLS_DHE_RSA_WITH_AES_256_CBC_SHA",
     "SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA"
   };
-  /** the Java cipher suites */
+  // the Java cipher suites
   private static final String[] JAVA_CIPHER_SUITES = {
     "TLS_ECDH_ECDSA_WITH_NULL_SHA",
     "TLS_DH_anon_WITH_AES_128_CBC_SHA256",

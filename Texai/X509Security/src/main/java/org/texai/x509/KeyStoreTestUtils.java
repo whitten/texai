@@ -46,11 +46,11 @@ import static org.texai.x509.X509Utils.isTrustedDevelopmentSystem;
 @NotThreadSafe
 public final class KeyStoreTestUtils {
 
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(KeyStoreTestUtils.class);
-  /** the server keystore password */
+  // the server keystore password
   private static final char[] SERVER_KEYSTORE_PASSWORD = "server-keystore-password".toCharArray();
-  /** the client keystore password */
+  // the client keystore password
   private static final char[] CLIENT_KEYSTORE_PASSWORD = "client-keystore-password".toCharArray();
 
   /** Prevents the instantiation of this utility class. */
