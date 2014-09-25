@@ -108,6 +108,7 @@ public class StringUtilsTest {
     assertFalse(StringUtils.isJavaClassName("org. texai.Abc"));
     assertFalse(StringUtils.isJavaClassName("org..texai.Abc"));
     assertFalse(StringUtils.isJavaClassName("org.texai.Abc "));
+    assertFalse(StringUtils.isJavaClassName("org.texai.abc"));
     assertTrue(StringUtils.isJavaClassName("org.texai.Abc"));
   }
 

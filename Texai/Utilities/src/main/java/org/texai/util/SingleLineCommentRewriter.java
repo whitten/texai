@@ -53,6 +53,7 @@ public final class SingleLineCommentRewriter extends DirectoryWalker<String> {
    * @param file the current file being processed
    * @param depth the current directory level (starting directory = 0)
    * @param results the list of processed file names
+   *
    * @throws java.io.IOException
    */
   @Override
@@ -80,8 +81,8 @@ public final class SingleLineCommentRewriter extends DirectoryWalker<String> {
   }
 
   /**
-   * Formats the given temporary file, replacing block comments in the declarative section with single line comments,
-   * writing the output to the given file.
+   * Formats the given temporary file, replacing block comments in the declarative section with single line comments, writing the output to
+   * the given file.
    *
    * @param temporaryFile the input temporary file
    * @param file the output file
@@ -109,9 +110,11 @@ public final class SingleLineCommentRewriter extends DirectoryWalker<String> {
         if (!isInterface) {
           index = line.indexOf(" class ");
           if (index > -1) {
-            isClass = true;
-            className = line.substring(index + 7).split(" ")[0];
-            LOGGER.debug("class name: '" + className + "'");
+            className = line.substring(index + 7).split(" ")[0].trim();
+            if (StringUtils.isJavaClassName(className)) {
+              isClass = true;
+              LOGGER.debug("class name: '" + className + "'");
+            }
           }
           if (!isClass) {
             index = line.indexOf(" interface ");
@@ -253,7 +256,7 @@ public final class SingleLineCommentRewriter extends DirectoryWalker<String> {
 //      throw new TexaiException("the start directory argument is missing");
 //    }
 //    final String startDirectoryString = args[0];
-    final String startDirectoryString = "../CoinSkills/src/main/java";
+    final String startDirectoryString = "../AlbusHCNSupport/src/main/java";
     final File startDirectory = new File(startDirectoryString);
     try {
       LOGGER.info("startDirectory: " + startDirectory.getCanonicalPath());

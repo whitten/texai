@@ -13,25 +13,25 @@ import org.junit.Test;
  * @author reed
  */
 public class SingleLineCommentRewriterTest {
-  
+
   // the logger
   private final static Logger LOGGER = Logger.getLogger(SingleLineCommentRewriterTest.class);
-  
+
   public SingleLineCommentRewriterTest() {
   }
-  
+
   @BeforeClass
   public static void setUpClass() {
   }
-  
+
   @AfterClass
   public static void tearDownClass() {
   }
-  
+
   @Before
   public void setUp() {
   }
-  
+
   @After
   public void tearDown() {
   }
@@ -40,10 +40,22 @@ public class SingleLineCommentRewriterTest {
    * Test of formatAndRewrite method, of class SingleLineCommentRewriter.
    */
   @Test
-  public void testFormatAndRewrite() {
+  public void testFormatAndRewrite1() {
     LOGGER.info("formatAndRewrite");
     final File temporaryFile = new File("data/comment-rewrite-input-test.java");
     final File file = new File("data/comment-rewrite-output-test.java");
+    SingleLineCommentRewriter instance = new SingleLineCommentRewriter();
+    instance.formatAndRewrite(temporaryFile, file);
+  }
+
+  /**
+   * Test of formatAndRewrite method, of class SingleLineCommentRewriter.
+   */
+  @Test
+  public void testFormatAndRewrite2() {
+    LOGGER.info("formatAndRewrite2");
+    final File temporaryFile = new File("data/comment-rewrite-input-test2.java");
+    final File file = new File("data/comment-rewrite-output-test2.java");
     SingleLineCommentRewriter instance = new SingleLineCommentRewriter();
     instance.formatAndRewrite(temporaryFile, file);
   }

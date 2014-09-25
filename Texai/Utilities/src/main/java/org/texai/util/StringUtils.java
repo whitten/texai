@@ -131,7 +131,9 @@ public final class StringUtils {
         return false;
       }
     }
-    return true;
+    final String[] lastNameParts = string.split("\\.");
+    final String lastNamePart = lastNameParts[lastNameParts.length - 1];
+    return Character.isUpperCase(lastNamePart.charAt(0));
   }
 
   /**
