@@ -81,7 +81,7 @@ public final class SerializableObjectSigner {
   }
 
   /**
-   * Returns whether the given signature bytes verify the given file.
+   * Returns whether the given signature bytes verify the given serializable object.
    *
    * @param serializableObject the serializable object
    * @param x509Certificate the sender's X.509 certificate, that contains the public key
@@ -116,4 +116,4 @@ public final class SerializableObjectSigner {
     signature.update(byteArrayOutputStream.toByteArray());
     return signature.verify(signatureBytes);
   }
-}
+  }
