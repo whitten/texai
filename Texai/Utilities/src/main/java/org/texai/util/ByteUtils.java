@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.Comparator;
 import java.util.UUID;
@@ -45,23 +46,62 @@ public final class ByteUtils {
     'c', 'd', 'e', 'f'
   };
 
-  /** <p>Hide constructor in utility class.</p>
+  private static Exception TexaiException(UnsupportedEncodingException ex) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  /**
+   * Hide constructor in this utility class.</p>
    */
   private ByteUtils() {
   }
 
-  /** Returns the lower 8 bits of the given int as a byte.
+  /**
+   * Returns a compact string from the given bytes. The 8-bit character set is specified to retain byte values.
+   *
+   * @param bytes the given bytes
+   *
+   * @return a compact string
+   */
+  public static String to8BitString(final byte[] bytes) {
+    try {
+      return new String(bytes, "ISO-8859-1");
+    } catch (UnsupportedEncodingException ex) {
+      throw new TexaiException(ex);
+    }
+  }
+
+  /**
+   * Returns the corresponding bytes of the given compact string.  The 8-bit character set is specified to retain byte values.
+   *
+   * @param string the given string
+   *
+   * @return he corresponding bytes
+   */
+  public static byte[] from8BitString(final String string) {
+    try {
+      return string.getBytes("ISO-8859-1");
+    } catch (UnsupportedEncodingException ex) {
+      throw new TexaiException(ex);
+    }
+  }
+
+  /**
+   * Returns the lower 8 bits of the given int as a byte.
    *
    * @param i the given int
+   *
    * @return the lower 8 bits of the given int as a byte
    */
   public static byte toUnsignedByte(final int i) {
     return (byte) (i & 0x000000ff);
   }
 
-  /** Serializes the given object into a byte array.
+  /**
+   * Serializes the given object into a byte array.
    *
    * @param obj the given object
+   *
    * @return the serialized byte array
    */
   public static byte[] serialize(final Serializable obj) {
@@ -88,9 +128,11 @@ public final class ByteUtils {
     }
   }
 
-  /** Deserializes the given byte array into an object.
+  /**
+   * Deserializes the given byte array into an object.
    *
    * @param bytes the given byte array
+   *
    * @return the deserialized object
    */
   public static Serializable deserialize(final byte[] bytes) {
@@ -115,7 +157,8 @@ public final class ByteUtils {
     }
   }
 
-  /** Returns the array of bytes resulting from a new UUID.
+  /**
+   * Returns the array of bytes resulting from a new UUID.
    *
    * @return the array of bytes resulting from a new UUID
    */
@@ -124,9 +167,11 @@ public final class ByteUtils {
     return append(toBytes(uuid.getMostSignificantBits()), toBytes(uuid.getLeastSignificantBits()));
   }
 
-  /** Returns true if the given byte array is all zeros.
+  /**
+   * Returns true if the given byte array is all zeros.
    *
    * @param bytes the given byte array
+   *
    * @return true if the given byte array is all zeros
    */
   public static boolean isZero(final Byte[] bytes) {
@@ -141,9 +186,11 @@ public final class ByteUtils {
     return true;
   }
 
-  /** Returns true if the given byte array is all zeros.
+  /**
+   * Returns true if the given byte array is all zeros.
    *
    * @param bytes the given byte array
+   *
    * @return true if the given byte array is all zeros
    */
   public static boolean isZero(final byte[] bytes) {
@@ -158,9 +205,11 @@ public final class ByteUtils {
     return true;
   }
 
-  /** Returns true if the given byte array is not all zeros.
+  /**
+   * Returns true if the given byte array is not all zeros.
    *
    * @param bytes the given byte array
+   *
    * @return true if the given byte array is not all zeros
    */
   public static boolean isNonZero(final Byte[] bytes) {
@@ -175,9 +224,11 @@ public final class ByteUtils {
     return true;
   }
 
-  /** Returns true if the given byte array is not all zeros.
+  /**
+   * Returns true if the given byte array is not all zeros.
    *
    * @param bytes the given byte array
+   *
    * @return true if the given byte array is not all zeros
    */
   public static boolean isNonZero(final byte[] bytes) {
@@ -192,9 +243,11 @@ public final class ByteUtils {
     return true;
   }
 
-  /** Returns an array of Byte objects for the given UUID.
+  /**
+   * Returns an array of Byte objects for the given UUID.
    *
    * @param uuid the UUID
+   *
    * @return an array of Byte objects for the given UUID
    */
   public static Byte[] toByteObjectArray(final UUID uuid) {
@@ -209,9 +262,11 @@ public final class ByteUtils {
     return bytes;
   }
 
-  /** Returns an array of Byte objects for the given byte array.
+  /**
+   * Returns an array of Byte objects for the given byte array.
    *
    * @param bytes the byte array
+   *
    * @return an array of Byte objects for the given byte array
    */
   public static Byte[] toByteObjectArray(final byte[] bytes) {
@@ -225,9 +280,11 @@ public final class ByteUtils {
     return byteObjectArray;
   }
 
-  /** Returns an array of bytes for the given Byte object array.
+  /**
+   * Returns an array of bytes for the given Byte object array.
    *
    * @param byteObjectArray the given Byte object array
+   *
    * @return an array of bytes for the given Byte object array
    */
   public static byte[] toByteArray(final Byte[] byteObjectArray) {
@@ -241,10 +298,12 @@ public final class ByteUtils {
     return bytes;
   }
 
-  /** Appends two bytes array into one.
+  /**
+   * Appends two bytes array into one.
    *
    * @param bytes1 the first given byte array
    * @param bytes2 the second given byte array
+   *
    * @return the byte array resulting from appending the two given byte arrays
    */
   public static byte[] append(final byte[] bytes1, final byte[] bytes2) {
@@ -258,9 +317,11 @@ public final class ByteUtils {
     return bytes3;
   }
 
-  /** Returns a 8-byte array built from a long.
+  /**
+   * Returns a 8-byte array built from a long.
    *
    * @param number the long number to convert
+   *
    * @return a byte array
    */
   public static byte[] toBytes(final long number) {
@@ -269,9 +330,11 @@ public final class ByteUtils {
     return byteBuffer.array();
   }
 
-  /** Builds a long from first 8 bytes of the array.
+  /**
+   * Builds a long from first 8 bytes of the array.
    *
    * @param bytes the byte array to convert
+   *
    * @return a long
    */
   public static long toLong(final byte[] bytes) {
@@ -289,9 +352,11 @@ public final class ByteUtils {
             + ((((long) bytes[0]) & 0xFF) << 56));
   }
 
-  /** Returns a 4-byte array built from an int.
+  /**
+   * Returns a 4-byte array built from an int.
    *
    * @param number the int number to convert
+   *
    * @return a byte array
    */
   public static byte[] toBytes(final int number) {
@@ -300,9 +365,11 @@ public final class ByteUtils {
     return byteBuffer.array();
   }
 
-  /** Returns the 16-byte array from the given UUID.
+  /**
+   * Returns the 16-byte array from the given UUID.
    *
    * @param uuid the given UUID
+   *
    * @return the 16-byte array from the given UUID
    */
   public static byte[] toBytes(final UUID uuid) {
@@ -312,9 +379,11 @@ public final class ByteUtils {
     return append(toBytes(uuid.getMostSignificantBits()), toBytes(uuid.getLeastSignificantBits()));
   }
 
-  /** Returns a hexadecimal string representation of the given byte array.
+  /**
+   * Returns a hexadecimal string representation of the given byte array.
    *
    * @param bytes the given byte array
+   *
    * @return a hexadecimal string representation of the given byte array
    */
   public static String toHex(final byte[] bytes) {
@@ -331,9 +400,11 @@ public final class ByteUtils {
     return stringBuilder.toString();
   }
 
-  /** Returns a string representation of the given byte.
+  /**
+   * Returns a string representation of the given byte.
    *
-   *@param byte1 the given byte
+   * @param byte1 the given byte
+   *
    * @return a string representation of the given byte
    */
   public static String toHex(final Byte byte1) {
@@ -344,9 +415,11 @@ public final class ByteUtils {
     return stringBuilder.toString();
   }
 
-  /** Returns the integer represented by the given hex digit character.
+  /**
+   * Returns the integer represented by the given hex digit character.
    *
    * @param hexCharacter the given hex digit character
+   *
    * @return the integer represented by the given hex digit character
    */
   public static int fromHex(final char hexCharacter) {
@@ -360,9 +433,11 @@ public final class ByteUtils {
     return -1;
   }
 
-  /** Returns the byte represented by the two hex digits.
+  /**
+   * Returns the byte represented by the two hex digits.
    *
    * @param string two hex digits
+   *
    * @return the byte represented by the two hex digits
    */
   public static Byte fromHex(final String string) {
@@ -374,9 +449,11 @@ public final class ByteUtils {
     return (byte) (16 * fromHex(c0) + fromHex(c1));
   }
 
-  /** Convert the byte array to an int.  The array must be four or less in length.
+  /**
+   * Convert the byte array to an int. The array must be four or less in length.
    *
    * @param bytes The byte array
+   *
    * @return the integer
    */
   public static int byteArrayToInt(final byte[] bytes) {
@@ -390,10 +467,12 @@ public final class ByteUtils {
     return byteArrayToInt(bytes, 0);
   }
 
-  /** Convert the byte array to an int starting from the given offset, and continuing for up to four bytes.
+  /**
+   * Convert the byte array to an int starting from the given offset, and continuing for up to four bytes.
    *
    * @param bytes The byte array
    * @param offset The array offset
+   *
    * @return the integer
    */
   public static int byteArrayToInt(final byte[] bytes, final int offset) {
@@ -415,10 +494,12 @@ public final class ByteUtils {
     return value;
   }
 
-  /** Compares two byte arrays for equality.
+  /**
+   * Compares two byte arrays for equality.
    *
    * @param bytes1 the first given byte array
    * @param bytes2 the second given byte array
+   *
    * @return True if the arrays have identical contents.
    */
   public static boolean areEqual(final byte[] bytes1, final byte[] bytes2) {
@@ -438,10 +519,12 @@ public final class ByteUtils {
     return true;
   }
 
-  /** Compares two byte arrays for equality.
+  /**
+   * Compares two byte arrays for equality.
    *
    * @param bytes1 the first given byte array
    * @param bytes2 the second given byte array
+   *
    * @return True if the arrays have identical contents.
    */
   public static boolean areEqual(final Byte[] bytes1, final Byte[] bytes2) {
@@ -461,12 +544,15 @@ public final class ByteUtils {
     return true;
   }
 
-  /** <p>Compares two Byte arrays as specified by <code>Comparable</code> with respect to each byte as a signed integer.
+  /**
+   * <
+   * p>
+   * Compares two Byte arrays as specified by <code>Comparable</code> with respect to each byte as a signed integer.
    *
    * @param lhs - left hand value in the comparison operation.
    * @param rhs - right hand value in the comparison operation.
-   * @return  a negative integer, zero, or a positive integer as <code>lhs</code>
-   *  is less than, equal to, or greater than <code>rhs</code>.
+   *
+   * @return a negative integer, zero, or a positive integer as <code>lhs</code> is less than, equal to, or greater than <code>rhs</code>.
    */
   public static int compareTo(final Byte[] lhs, final Byte[] rhs) {
     //Preconditions
@@ -476,12 +562,15 @@ public final class ByteUtils {
     return compareTo(toByteArray(lhs), toByteArray(rhs));
   }
 
-  /** <p>Compares two byte arrays as specified by <code>Comparable</code> with respect to each byte as a signed integer.
+  /**
+   * <
+   * p>
+   * Compares two byte arrays as specified by <code>Comparable</code> with respect to each byte as a signed integer.
    *
    * @param lhs - left hand value in the comparison operation.
    * @param rhs - right hand value in the comparison operation.
-   * @return  a negative integer, zero, or a positive integer as <code>lhs</code>
-   *  is less than, equal to, or greater than <code>rhs</code>.
+   *
+   * @return a negative integer, zero, or a positive integer as <code>lhs</code> is less than, equal to, or greater than <code>rhs</code>.
    */
   public static int compareTo(final byte[] lhs, final byte[] rhs) {
     //Preconditions
@@ -504,22 +593,29 @@ public final class ByteUtils {
     return 0;
   }
 
-  /** Provides a byte array comparator with respect to each byte as a signed integer. */
+  /**
+   * Provides a byte array comparator with respect to each byte as a signed integer.
+   */
   public static class ByteArrayComparator implements Comparator<Byte[]>, Serializable {
 
-    /** the serialization version ID */
+    /**
+     * the serialization version ID
+     */
     static final long serialVersionUID = 1;
 
-    /** Constructs a new ByteArrayComparator instance. */
+    /**
+     * Constructs a new ByteArrayComparator instance.
+     */
     public ByteArrayComparator() {
     }
 
-    /** Compares the two given byte arrays with respect to each byte as a signed integer.
+    /**
+     * Compares the two given byte arrays with respect to each byte as a signed integer.
      *
      * @param bytes1 the first given byte array
      * @param bytes2 the second given byte array
-     * @return a negative integer, zero, or a positive integer as <code>lhs</code>
-     *  is less than, equal to, or greater than <code>rhs</code>
+     *
+     * @return a negative integer, zero, or a positive integer as <code>lhs</code> is less than, equal to, or greater than <code>rhs</code>
      */
     @Override
     public int compare(final Byte[] bytes1, final Byte[] bytes2) {
