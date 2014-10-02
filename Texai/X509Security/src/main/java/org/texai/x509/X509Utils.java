@@ -125,8 +125,7 @@ public final class X509Utils {
   }
 
   static {
-    LOGGER.info("adding Bouncy Castle cryptography provider");
-    Security.addProvider(new BouncyCastleProvider());
+    addBouncyCastleSecurityProvider();
   }
 
   // the secure random
@@ -142,6 +141,14 @@ public final class X509Utils {
    * Prevents the instantiation of this utility class.
    */
   private X509Utils() {
+  }
+
+  /**
+   * Adds the Bouncy Castle security provider library.
+   */
+  public static void addBouncyCastleSecurityProvider() {
+    LOGGER.info("adding Bouncy Castle cryptography provider");
+    Security.addProvider(new BouncyCastleProvider());
   }
 
   /**
@@ -195,6 +202,9 @@ public final class X509Utils {
         }
         secureRandom.nextInt();
       }
+      //Postconditions
+      assert secureRandom != null;
+
       return secureRandom;
     }
   }
@@ -225,6 +235,7 @@ public final class X509Utils {
         throw new TexaiException(ex);
       }
     } else {
+      file.getParentFile().mkdirs();
       serializeSecureRandom(path);
     }
     return secureRandom;
@@ -246,6 +257,7 @@ public final class X509Utils {
         out.writeObject(getSecureRandom());
       }
     } catch (IOException ex) {
+      LOGGER.error("cannot write serialized secure random to " + path);
       throw new TexaiException(ex);
     }
   }
