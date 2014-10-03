@@ -45,6 +45,7 @@ import net.jcip.annotations.NotThreadSafe;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.Factory;
 import org.apache.log4j.Logger;
+import org.joda.time.Chronology;
 import org.joda.time.DateTime;
 import org.openrdf.OpenRDFException;
 import org.openrdf.model.BNode;
@@ -706,9 +707,7 @@ public final class RDFEntityLoader extends AbstractRDFEntityAccessor {   // NOPM
 
     } catch (final IllegalArgumentException ex) {
       throw new TexaiException(ex.getMessage() + "\n  rdfEntity: " + getRDFEntity() + "\n  instanceURI: " + getInstanceURI(), ex);
-    } catch (final URISyntaxException ex) {
-      throw new TexaiException(ex);
-    } catch (final IllegalAccessException ex) {
+    } catch (final URISyntaxException | IllegalAccessException ex) {
       throw new TexaiException(ex);
     }
   }
@@ -732,8 +731,6 @@ public final class RDFEntityLoader extends AbstractRDFEntityAccessor {   // NOPM
         if (isDebugEnabled) {
           getLogger().debug(stackLevel() + "  skipping Id field");
         }
-
-        continue;
       } else {
         if (annotation instanceof RDFProperty) {
           final Class<?> fieldType = field.getType();
@@ -1448,7 +1445,9 @@ public final class RDFEntityLoader extends AbstractRDFEntityAccessor {   // NOPM
         } else if (fieldType.equals(Calendar.class)) {
           value = calendarValue;
         } else if (fieldType.equals(DateTime.class)) {
-          value = new DateTime(calendarValue);
+          value = new DateTime(
+                  calendarValue,
+                  (Chronology) null); // force ISO chronolgy 
         } else {
           throw new TexaiException("cannot load " + literal + " into field type " + fieldType.getName());
         }

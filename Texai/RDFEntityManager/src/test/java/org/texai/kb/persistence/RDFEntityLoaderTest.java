@@ -396,6 +396,7 @@ public class RDFEntityLoaderTest {
     assertEquals(rdfTestEntity1.getBigDecimalField(), rdfTestEntity1_Loaded.getBigDecimalField());
     assertEquals(rdfTestEntity1.getDateField(), rdfTestEntity1_Loaded.getDateField());
     assertEquals(rdfTestEntity1.getDateTimeField().toString(), rdfTestEntity1_Loaded.getDateTimeField().toString());
+    assertEquals(rdfTestEntity1.getDateTimeField(), rdfTestEntity1_Loaded.getDateTimeField());
     assertEquals(rdfTestEntity1.getCalendarField().getTime(), rdfTestEntity1_Loaded.getCalendarField().getTime());
     assertTrue(Math.abs(rdfTestEntity1.getDoubleField() - rdfTestEntity1_Loaded.getDoubleField()) < 0.0000001);
     assertEquals(2, rdfTestEntity1_Loaded.getSomeIntegers().size());
