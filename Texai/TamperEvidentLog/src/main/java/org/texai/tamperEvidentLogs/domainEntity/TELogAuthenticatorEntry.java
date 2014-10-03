@@ -48,7 +48,7 @@ public class TELogAuthenticatorEntry extends AbstractTELogEntry {
   // the signing agent's name
   @RDFProperty
   private final String signingAgentName;
-  // the signing agent's X.509 signature, persisted as an 8-bit string
+  // the signing agent's X.509 signature, persisted as an 8-bit string, based upon the previous entry's digest
   @RDFProperty
   private final String encodedSignatureBytes;
 
@@ -64,12 +64,12 @@ public class TELogAuthenticatorEntry extends AbstractTELogEntry {
    * Constructs a new TELogAuthenticatorEntry.
    *
    * @param signingAgentName the signing agent's name
-   * @param encodedSignatureBytes the signing agent's X.509 signature, encoded in base 64
+   * @param encodedSignatureBytes the signing agent's X.509 signature, encoded in base 64 based upon the previous entry's digest
    * @param previousTELogEntry the previous tamper-evident log entry, or empty if this is the first
    * @param timestamp the logger's local timestamp, which is constrained to be unique for ordering the log
    * @param chaosValue an optional chaos value
-   * @param encodedDigest the SHA-512 hash digest of the previous entry's digest, plus this entry's timestamp, chaosValue
-   * and implementation fields, encoded in base 64
+   * @param encodedDigest the SHA-512 hash digest of the previous entry's digest, plus this entry's timestamp, chaosValue and implementation
+   * fields, encoded in base 64
    */
   public TELogAuthenticatorEntry(
           final String signingAgentName,
@@ -97,6 +97,7 @@ public class TELogAuthenticatorEntry extends AbstractTELogEntry {
   public boolean verifyDigest() {
     final byte[] recomputedDigest = makeTELogAuthenticatorEntryDigest(
             signingAgentName,
+            encodedSignatureBytes,
             getPreviousTELogEntry(),
             getTimestamp(),
             getChaosValue());
@@ -107,7 +108,8 @@ public class TELogAuthenticatorEntry extends AbstractTELogEntry {
    * Makes a SHA-512 hash digest of the given TELogAuthenticatorEntry fields.
    *
    * @param signingAgentName the signing agent's name
-   * @param previousTELogEntry the previous tamper-evident log entry, or empty if this is the first
+   * @param encodedSignatureBytes the base 64 encoded signature of the previous entries digest
+   * @param previousTELogEntry the previous tamper-evident log entry
    * @param timestamp the logger's local timestamp, which is constrained to be unique for ordering the log
    * @param chaosValue an optional chaos value
    *
@@ -115,24 +117,27 @@ public class TELogAuthenticatorEntry extends AbstractTELogEntry {
    */
   public static byte[] makeTELogAuthenticatorEntryDigest(
           final String signingAgentName,
+          final String encodedSignatureBytes,
           final AbstractTELogEntry previousTELogEntry,
           final DateTime timestamp,
           final String chaosValue) {
     //Preconditions
     assert StringUtils.isNonEmptyString(signingAgentName) : "signingAgentName must be a non-empty string";
     assert timestamp != null : "timestamp must not be null";
+    if (previousTELogEntry == null) {
+      throw new TexaiException("previousTELogEntry must not be null");
+    }
 
     try {
       final MessageDigest messageDigest = MessageDigest.getInstance("SHA-512", X509Utils.BOUNCY_CASTLE_PROVIDER);
       final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
       final DigestOutputStream digestOutputStream = new DigestOutputStream(byteArrayOutputStream, messageDigest);
       final ObjectOutputStream objectOutputStream = new ObjectOutputStream(digestOutputStream);
-      if (previousTELogEntry != null) {
-        // link the previous log entry in a hash chain
-        objectOutputStream.writeObject(previousTELogEntry.getEncodedDigest());
-      }
+      // link the previous log entry in a hash chain
+      objectOutputStream.writeObject(previousTELogEntry.getEncodedDigest());
       // hash the fields for this log entry
       objectOutputStream.writeObject(signingAgentName);
+      objectOutputStream.writeObject(encodedSignatureBytes);
       objectOutputStream.writeObject(timestamp);
       if (chaosValue != null) {
         objectOutputStream.writeObject(chaosValue);
@@ -150,9 +155,9 @@ public class TELogAuthenticatorEntry extends AbstractTELogEntry {
   }
 
   /**
-   * Signs the given tamper-evident log entry's digest.
+   * Signs the given previous tamper-evident log entry's digest.
    *
-   * @param digest the given digest
+   * @param digest the given previous entry's digest
    * @param x509Certificate the signing agent's X.509 certificate
    * @param privateKey the signing agent's private key
    *
@@ -183,30 +188,22 @@ public class TELogAuthenticatorEntry extends AbstractTELogEntry {
   }
 
   /**
-   * Returns whether the given X.509 certificate verifies the given tamper-evident log entry digest.
+   * Returns whether the given X.509 certificate verifies this entry's signature.
    *
-   * @param digest the tamper-evident log entry's digest
    * @param x509Certificate the sender's X.509 certificate, that contains the public key
-   * @param signatureBytes the tamper-evident log entry's signature bytes
    *
-   * @return whether the given X.509 certificate verifies the logged item
+   * @return whether the given X.509 certificate verifies this entry's signature
    */
-  public static boolean verify(
-          final byte[] digest,
-          final X509Certificate x509Certificate,
-          final byte[] signatureBytes) {
+  public boolean verify(final X509Certificate x509Certificate) {
     //Preconditions
-    assert digest != null : "digest must not be null";
-    assert digest.length > 0 : "digest must not be empty";
     assert x509Certificate != null : "x509Certificate must not be null";
-    assert signatureBytes != null : "signatureBytes must not be null";
-    assert signatureBytes.length > 0 : "signatureBytes must not be empty";
+    assert getPreviousTELogEntry() != null : "previousTELogEntry must not be null";
 
     try {
       return SerializableObjectSigner.verify(
-              digest,
+              getPreviousTELogEntry().getDigest(),
               x509Certificate,
-              signatureBytes);
+              getSignatureBytes());
     } catch (NoSuchAlgorithmException | InvalidKeyException | IOException | SignatureException ex) {
       throw new TexaiException(ex);
     }

@@ -14,6 +14,7 @@ package org.texai.tamperEvidentLogs;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
@@ -50,6 +51,7 @@ import org.texai.tamperEvidentLogs.domainEntity.TELogAuthenticatorEntry;
 import org.texai.tamperEvidentLogs.domainEntity.TELogHeader;
 import org.texai.tamperEvidentLogs.domainEntity.TELogItemEntry;
 import org.texai.util.ByteUtils;
+import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 import org.texai.x509.X509Utils;
 
@@ -111,44 +113,6 @@ public class TELogAccessTest {
     // test that there are no log entries
     teLogItemEntries_iter = rdfEntityManager.rdfEntityIterator(TELogItemEntry.class);
     assertFalse(teLogItemEntries_iter.hasNext());
-  }
-
-  /**
-   * Test of verify method, of class TELogAccess.
-   */
-  @Test
-  public void testVerify() {
-    LOGGER.info("verify");
-    String name = TEST_LOG;
-    int nbrEntries = -1;
-    TELogAccess instance = new TELogAccess(rdfEntityManager);
-
-    instance.createTELogHeader(TEST_LOG);
-    instance.appendTELogItemEntry(name, 1, "test chaos value 1");
-    instance.appendTELogItemEntry(name, 2, "test chaos value 2");
-    instance.appendTELogItemEntry(name, "test item string 3", "test chaos value 3");
-    instance.appendTELogItemEntry(name, "test item string 4", "test chaos value 4");
-
-    try {
-      String signingAgentName = "test-signing-agent";
-      KeyPair keyPair = X509Utils.generateRSAKeyPair3072();
-      X509Certificate x509Certificate = X509Utils.generateSelfSignedEndEntityX509Certificate(
-              keyPair,
-              UUID.randomUUID(), // uid,
-              signingAgentName); // domainComponent
-      PrivateKey privateKey = keyPair.getPrivate();
-      String chaosValue = "test chaos value 2";
-      instance.appendTELogAuthenticatorEntry(name, signingAgentName, x509Certificate, privateKey, chaosValue);
-
-      instance.appendTELogItemEntry(name, "test item string 5", "test chaos value 5");
-      instance.appendTELogItemEntry(name, "test item string 6", "test chaos value 6");
-
-      List<AbstractTELogEntry> teLogEntries = instance.getTELogEntries(name, nbrEntries);
-      assertEquals(7, teLogEntries.size());
-      assertTrue(TELogAccess.verify(teLogEntries, x509Certificate));
-    } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | CertificateParsingException | CertificateEncodingException | SignatureException | InvalidKeyException | IOException ex) {
-      fail(ex.getMessage());
-    }
   }
 
   /**
@@ -260,7 +224,8 @@ public class TELogAccessTest {
     String chaosValue = "test chaos value 1";
     TELogAccess instance = new TELogAccess(rdfEntityManager);
     instance.createTELogHeader(TEST_LOG);
-    instance.appendTELogItemEntry(name, item, chaosValue);
+    final TELogItemEntry teLogItemEntry =instance.appendTELogItemEntry(name, item, chaosValue);
+    assertNotNull(teLogItemEntry);
   }
 
   /**
@@ -270,6 +235,12 @@ public class TELogAccessTest {
   public void testAppendTELogAuthenticatorEntry() {
     LOGGER.info("appendTELogAuthenticatorEntry");
     String name = TEST_LOG;
+    TELogAccess instance = new TELogAccess(rdfEntityManager);
+    instance.createTELogHeader(TEST_LOG);
+    Serializable item = "test item string";
+    String chaosValue = "test chaos value 1";
+    instance.appendTELogItemEntry(name, item, chaosValue);
+
     String signingAgentName = "test-signing-agent";
     try {
 
@@ -279,10 +250,15 @@ public class TELogAccessTest {
               UUID.randomUUID(), // uid,
               signingAgentName); // domainComponent
       PrivateKey privateKey = keyPair.getPrivate();
-      String chaosValue = "test chaos value 2";
-      TELogAccess instance = new TELogAccess(rdfEntityManager);
-      instance.createTELogHeader(TEST_LOG);
-      instance.appendTELogAuthenticatorEntry(name, signingAgentName, x509Certificate, privateKey, chaosValue);
+      String chaosValue2 = "test chaos value 2";
+      final TELogAuthenticatorEntry teLogAuthenticatorEntry = instance.appendTELogAuthenticatorEntry(
+              name,
+              signingAgentName,
+              x509Certificate,
+              privateKey,
+              chaosValue2);
+      assertNotNull(teLogAuthenticatorEntry);
+      assertTrue(teLogAuthenticatorEntry.verify(x509Certificate));
     } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | CertificateParsingException | CertificateEncodingException | SignatureException | InvalidKeyException | IOException ex) {
       fail(ex.getMessage());
     }
@@ -332,6 +308,173 @@ public class TELogAccessTest {
     assertTrue(result.get(3) instanceof TELogAuthenticatorEntry);
     TELogAuthenticatorEntry teLogAuthenticatorEntry = (TELogAuthenticatorEntry) result.get(3);
     assertEquals("test-signing-agent", teLogAuthenticatorEntry.getSigningAgentName());
+  }
+
+  /**
+   * Test of verify method, of class TELogAccess.
+   */
+  @Test
+  public void testVerify() {
+    LOGGER.info("verify");
+    String name = TEST_LOG;
+    int nbrEntries = -1;
+    TELogAccess instance = new TELogAccess(rdfEntityManager);
+
+    instance.createTELogHeader(TEST_LOG);
+    instance.appendTELogItemEntry(name, 1, "test chaos value 0");
+    instance.appendTELogItemEntry(name, 2, "test chaos value 1");
+    instance.appendTELogItemEntry(name, "test item string 3", "test chaos value 2");
+    instance.appendTELogItemEntry(name, "test item string 4", "test chaos value 3");
+
+    try {
+      String signingAgentName = "test-signing-agent";
+      KeyPair keyPair = X509Utils.generateRSAKeyPair3072();
+      X509Certificate x509Certificate = X509Utils.generateSelfSignedEndEntityX509Certificate(
+              keyPair,
+              UUID.randomUUID(), // uid,
+              signingAgentName); // domainComponent
+      PrivateKey privateKey = keyPair.getPrivate();
+      String chaosValue = "test chaos value 4";
+      instance.appendTELogAuthenticatorEntry(name, signingAgentName, x509Certificate, privateKey, chaosValue);
+
+      instance.appendTELogItemEntry(name, "test item string 5", "test chaos value 5");
+      instance.appendTELogItemEntry(name, "test item string 6", "test chaos value 6");
+
+      List<AbstractTELogEntry> teLogEntries = instance.getTELogEntries(name, nbrEntries);
+      assertEquals(7, teLogEntries.size());
+      assertTrue(TELogAccess.verify(teLogEntries, x509Certificate));
+    } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | CertificateParsingException | CertificateEncodingException | SignatureException | InvalidKeyException | IOException ex) {
+      fail(ex.getMessage());
+    }
+  }
+
+  /**
+   * Test of verify method, of class TELogAccess.
+   */
+  @Test
+  public void testVerify2() {
+    LOGGER.info("verify2");
+    String name = TEST_LOG;
+    int nbrEntries = -1;
+    TELogAccess instance = new TELogAccess(rdfEntityManager);
+
+    instance.createTELogHeader(TEST_LOG);
+    instance.appendTELogItemEntry(name, 1, "test chaos value 0");
+    instance.appendTELogItemEntry(name, 2, "test chaos value 1");
+    instance.appendTELogItemEntry(name, "test item string 3", "test chaos value 2");
+    instance.appendTELogItemEntry(name, "test item string 4", "test chaos value 3");
+
+    try {
+      String signingAgentName = "test-signing-agent";
+      KeyPair keyPair = X509Utils.generateRSAKeyPair3072();
+      X509Certificate x509Certificate = X509Utils.generateSelfSignedEndEntityX509Certificate(
+              keyPair,
+              UUID.randomUUID(), // uid,
+              signingAgentName); // domainComponent
+      PrivateKey privateKey = keyPair.getPrivate();
+      String chaosValue = "test chaos value 4";
+      instance.appendTELogAuthenticatorEntry(name, signingAgentName, x509Certificate, privateKey, chaosValue);
+
+      instance.appendTELogItemEntry(name, "test item string 5", "test chaos value 5");
+      instance.appendTELogItemEntry(name, "test item string 6", "test chaos value 6");
+
+      List<AbstractTELogEntry> teLogEntries = instance.getTELogEntries(name, nbrEntries);
+      assertEquals(7, teLogEntries.size());
+
+      // get TELogItemEntry for tamper tests
+      assertTrue(teLogEntries.get(3) instanceof TELogItemEntry);
+      final TELogItemEntry teLogItemEntry3 = (TELogItemEntry) teLogEntries.get(3);
+      assertEquals("test chaos value 3", teLogItemEntry3.getChaosValue());
+
+      // get TELogAuthenticatorEntry for tamper tests
+      assertTrue(teLogEntries.get(4) instanceof TELogAuthenticatorEntry);
+      final TELogAuthenticatorEntry teLogAuthenticatorEntry4 = (TELogAuthenticatorEntry) teLogEntries.get(4);
+      assertEquals("test chaos value 4", teLogAuthenticatorEntry4.getChaosValue());
+
+      // corrupt each field in turn to demonstrate tamper-evidence - relection is used to mutate private fields
+      try {
+        // previousTELogEntry
+        assertTrue(TELogAccess.verify(teLogEntries, x509Certificate));
+        AbstractTELogEntry previousTELogEntry = teLogItemEntry3.getPreviousTELogEntry();
+        Field field = AbstractTELogEntry.class.getDeclaredField("previousTELogEntry");
+        field.setAccessible(true);
+        assertNotNull(teLogItemEntry3.getPreviousTELogEntry());
+        field.set(teLogItemEntry3, null); // corrupt
+        assertNull(teLogItemEntry3.getPreviousTELogEntry());
+        assertFalse(TELogAccess.verify(teLogEntries, x509Certificate));
+        field.set(teLogItemEntry3, previousTELogEntry); // valid
+        assertTrue(TELogAccess.verify(teLogEntries, x509Certificate));
+
+        // timestamp
+        DateTime timestamp = teLogItemEntry3.getTimestamp();
+        field = AbstractTELogEntry.class.getDeclaredField("timestamp");
+        field.setAccessible(true);
+        field.set(teLogItemEntry3, new DateTime()); // corrupt
+        assertFalse(TELogAccess.verify(teLogEntries, x509Certificate));
+        field.set(teLogItemEntry3, timestamp); // valid
+        assertTrue(TELogAccess.verify(teLogEntries, x509Certificate));
+
+        // chaosValue
+        String chaosValue1 = teLogItemEntry3.getChaosValue();
+        field = AbstractTELogEntry.class.getDeclaredField("chaosValue");
+        field.setAccessible(true);
+        field.set(teLogItemEntry3, "corrupt chaos value"); // corrupt
+        assertFalse(TELogAccess.verify(teLogEntries, x509Certificate));
+        field.set(teLogItemEntry3, chaosValue1); // valid
+        assertTrue(TELogAccess.verify(teLogEntries, x509Certificate));
+
+        // encodedDigest
+        String encodedDigest = teLogItemEntry3.getEncodedDigest();
+        assertTrue(StringUtils.isNonEmptyString(encodedDigest));
+        assertFalse(encodedDigest.equals(teLogAuthenticatorEntry4.getEncodedDigest()));
+        field = AbstractTELogEntry.class.getDeclaredField("encodedDigest");
+        field.setAccessible(true);
+        field.set(teLogItemEntry3, teLogAuthenticatorEntry4.getEncodedDigest()); // corrupt
+        assertFalse(TELogAccess.verify(teLogEntries, x509Certificate));
+        field.set(teLogItemEntry3, encodedDigest); // valid
+        assertTrue(TELogAccess.verify(teLogEntries, x509Certificate));
+
+        // encodedItem
+        String encodedItem = teLogItemEntry3.getEncodedItem();
+        field = TELogItemEntry.class.getDeclaredField("encodedItem");
+        field.setAccessible(true);
+        field.set(teLogItemEntry3, TELogItemEntry.encodeItem("corrupted item")); // corrupt
+        assertFalse(TELogAccess.verify(teLogEntries, x509Certificate));
+        field.set(teLogItemEntry3, encodedItem); // valid
+        assertTrue(TELogAccess.verify(teLogEntries, x509Certificate));
+
+        // signingAgentName
+        String signingAgentName1 = teLogAuthenticatorEntry4.getSigningAgentName();
+        field = TELogAuthenticatorEntry.class.getDeclaredField("signingAgentName");
+        field.setAccessible(true);
+        field.set(teLogAuthenticatorEntry4, "corrupted signing agent name"); // corrupt
+        assertFalse(TELogAccess.verify(teLogEntries, x509Certificate));
+        field.set(teLogAuthenticatorEntry4, signingAgentName1); // valid
+        assertTrue(TELogAccess.verify(teLogEntries, x509Certificate));
+
+        // encodedSignatureBytes
+        String encodedSignatureBytes = teLogAuthenticatorEntry4.getEncodedSignatureBytes();
+        field = TELogAuthenticatorEntry.class.getDeclaredField("encodedSignatureBytes");
+        field.setAccessible(true);
+        byte[] corruptSignatureBytes = teLogAuthenticatorEntry4.getSignatureBytes();
+        if (corruptSignatureBytes[0] < 0) {
+          corruptSignatureBytes[0] = (byte) (corruptSignatureBytes[0] + 1);
+        } else {
+          corruptSignatureBytes[0] = (byte) (corruptSignatureBytes[0] - 1);
+        }
+        field.set(teLogAuthenticatorEntry4, TELogAuthenticatorEntry.encodeSignatureBytes(corruptSignatureBytes)); // corrupt
+        assertFalse(TELogAccess.verify(teLogEntries, x509Certificate));
+        field.set(teLogAuthenticatorEntry4, encodedSignatureBytes); // valid
+        assertTrue(TELogAccess.verify(teLogEntries, x509Certificate));
+
+      } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
+        LOGGER.info(StringUtils.getStackTraceAsString(ex));
+        fail(ex.getMessage());
+      }
+
+    } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | CertificateParsingException | CertificateEncodingException | SignatureException | InvalidKeyException | IOException ex) {
+      fail(ex.getMessage());
+    }
   }
 
   /**

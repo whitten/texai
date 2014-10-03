@@ -135,9 +135,10 @@ public class TELogAccess {
    * @param name the name of the log hash chain
    * @param item the logged item, which must be serializable
    * @param chaosValue an optional chaos value
+   * @return the persisted tamper-evident log item
    */
   @SuppressWarnings({"SleepWhileInLoop", "SleepWhileHoldingLock"})
-  public void appendTELogItemEntry(
+  public TELogItemEntry appendTELogItemEntry(
           final String name,
           final Serializable item,
           final String chaosValue) {
@@ -195,20 +196,23 @@ public class TELogAccess {
 
       //Postconditions
       assert teLogItemEntry.verifyDigest() : "teLogItemEntry invalid digest";
+
+      return teLogItemEntry;
     }
   }
 
   /**
-   * Appends the given log authenticator entry to the head of the named log hash chain.
+   * Appends a log authenticator entry to the head of the named log hash chain.
    *
    * @param name the name of the tamper-evident log hash chain
    * @param signingAgentName the signing agent's name
    * @param x509Certificate the signing agents's X.509 certificate
    * @param privateKey the private key for the certificate, which is not stored after performing the signature
    * @param chaosValue an optional chaos value
+   * @return the persisted log authenticator entry
    */
   @SuppressWarnings({"SleepWhileInLoop", "SleepWhileHoldingLock"})
-  public void appendTELogAuthenticatorEntry(
+  public TELogAuthenticatorEntry appendTELogAuthenticatorEntry(
           final String name,
           final String signingAgentName,
           final X509Certificate x509Certificate,
@@ -226,14 +230,15 @@ public class TELogAccess {
     }
     synchronized (teLogHeader) {
       final AbstractTELogEntry previousTELogEntry = teLogHeader.getHeadTELogEntry();
+      if (teLogHeader.getHeadTELogEntry() == null) {
+        throw new TexaiException("previousTELogEntry must not be null");
+      }
       int counter = 0;
       DateTime timestamp;
       // ensure that timestamps are unique and ordered
       while (true) {
         timestamp = new DateTime();
-        if (previousTELogEntry == null) {
-          break;
-        } else if (timestamp.isAfter(previousTELogEntry.getTimestamp())) {
+        if (timestamp.isAfter(previousTELogEntry.getTimestamp())) {
           break;
         } else {
           counter++;
@@ -247,17 +252,18 @@ public class TELogAccess {
           }
         }
       }
+      final byte[] signatureBytes = TELogAuthenticatorEntry.signTELogAuthenticatorEntry(
+              previousTELogEntry.getDigest(),
+              x509Certificate,
+              privateKey);
+      final String encodedSignatureBytes = new String(Base64Coder.encode(signatureBytes));
       final byte[] digest = TELogAuthenticatorEntry.makeTELogAuthenticatorEntryDigest(
               signingAgentName,
+              TELogAuthenticatorEntry.encodeSignatureBytes(signatureBytes), // encodedSignatureBytes
               previousTELogEntry,
               timestamp,
               chaosValue);
       final String encodedDigest = new String(Base64Coder.encode(digest));
-      final byte[] signatureBytes = TELogAuthenticatorEntry.signTELogAuthenticatorEntry(
-              digest,
-              x509Certificate,
-              privateKey);
-      final String encodedSignatureBytes = new String(Base64Coder.encode(signatureBytes));
       final TELogAuthenticatorEntry teLogAuthenticatorEntry = new TELogAuthenticatorEntry(
               signingAgentName,
               encodedSignatureBytes,
@@ -271,6 +277,9 @@ public class TELogAccess {
 
       //Postconditions
       assert teLogAuthenticatorEntry.verifyDigest() : "teLogAuthenticatorEntry invalid digest";
+      assert teLogAuthenticatorEntry.verify(x509Certificate) : "x509Certificate failed to verify its signature";
+
+      return teLogAuthenticatorEntry;
     }
   }
 
@@ -364,15 +373,6 @@ public class TELogAccess {
       }
       if (!teLogEntry.verifyDigest()) {
         return false;
-      }
-      if (teLogEntry instanceof TELogAuthenticatorEntry) {
-        final TELogAuthenticatorEntry teLogAuthenticatorEntry = (TELogAuthenticatorEntry) teLogEntry;
-        if (!TELogAuthenticatorEntry.verify(
-                Base64Coder.decode(teLogAuthenticatorEntry.getEncodedDigest()), // digest
-                x509Certificate,
-                teLogAuthenticatorEntry.getSignatureBytes())) {
-          return false;
-        }
       }
       if (previousTELogEntry != null && !previousTELogEntry.equals(teLogEntry.getPreviousTELogEntry())) {
         return false;
