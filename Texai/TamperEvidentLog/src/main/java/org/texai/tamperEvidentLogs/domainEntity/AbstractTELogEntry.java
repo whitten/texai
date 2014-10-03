@@ -187,10 +187,9 @@ public abstract class AbstractTELogEntry implements RDFPersistent, Comparable<Ab
   @Override
   public int hashCode() {
     int hash = 5;
-    hash = 97 * hash + Objects.hashCode(this.previousTELogEntry);
-    hash = 97 * hash + Objects.hashCode(this.timestamp);
-    hash = 97 * hash + Objects.hashCode(this.chaosValue);
-    hash = 97 * hash + Objects.hashCode(this.encodedDigest);
+    hash = 97 * hash + Objects.hashCode(timestamp);
+    hash = 97 * hash + Objects.hashCode(chaosValue);
+    hash = 97 * hash + Objects.hashCode(encodedDigest);
     return hash;
   }
 
@@ -210,9 +209,6 @@ public abstract class AbstractTELogEntry implements RDFPersistent, Comparable<Ab
       return false;
     }
     final AbstractTELogEntry other = (AbstractTELogEntry) obj;
-    if (!Objects.equals(this.previousTELogEntry, other.previousTELogEntry)) {
-      return false;
-    }
     if (!Objects.equals(this.timestamp, other.timestamp)) {
       return false;
     }

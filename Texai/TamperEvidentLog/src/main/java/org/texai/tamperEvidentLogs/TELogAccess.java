@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.texai.kb.persistence.RDFEntityManager;
 import org.texai.tamperEvidentLogs.domainEntity.AbstractTELogEntry;
+import org.texai.tamperEvidentLogs.domainEntity.TEKeyedLogItemEntry;
 import org.texai.tamperEvidentLogs.domainEntity.TELogAuthenticatorEntry;
 import org.texai.tamperEvidentLogs.domainEntity.TELogItemEntry;
 import org.texai.tamperEvidentLogs.domainEntity.TELogHeader;
@@ -106,7 +107,8 @@ public class TELogAccess {
     synchronized (teLogHeaderDictionary) {
       teLogHeader = teLogHeaderDictionary.get(name);
       if (teLogHeader == null) {
-        final List<TELogHeader> results = rdfEntityManager.find(TELogHeader.NAME_FIELD_PREDICATE_TERM, // predicate
+        final List<TELogHeader> results = rdfEntityManager.find(
+                TELogHeader.NAME_FIELD_PREDICATE_TERM, // predicate
                 name, // value
                 TELogHeader.class); // clazz
         if (results.isEmpty()) {
@@ -135,6 +137,7 @@ public class TELogAccess {
    * @param name the name of the log hash chain
    * @param item the logged item, which must be serializable
    * @param chaosValue an optional chaos value
+   *
    * @return the persisted tamper-evident log item
    */
   @SuppressWarnings({"SleepWhileInLoop", "SleepWhileHoldingLock"})
@@ -146,7 +149,7 @@ public class TELogAccess {
     assert StringUtils.isNonEmptyString(name) : "name must be a non-empty string";
     assert item != null : "item must not be null";
 
-    final TELogHeader teLogHeader = this.findTELogHeader(name);
+    final TELogHeader teLogHeader = findTELogHeader(name);
     if (teLogHeader == null) {
       throw new TexaiException("TELogHeader not found for " + name);
     }
@@ -202,6 +205,117 @@ public class TELogAccess {
   }
 
   /**
+   * Appends the given keyed log item to the head of the named log hash chain.
+   *
+   * @param name the name of the log hash chain
+   * @param item the logged item, which must be serializable
+   * @param key the key used to retrieve this entry from the persistent store
+   * @param chaosValue an optional chaos value
+   *
+   * @return the persisted tamper-evident log item
+   */
+  @SuppressWarnings({"SleepWhileInLoop", "SleepWhileHoldingLock"})
+  public TEKeyedLogItemEntry appendTEKeyedLogItemEntry(
+          final String name,
+          final Serializable item,
+          final String key,
+          final String chaosValue) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(name) : "name must be a non-empty string";
+    assert item != null : "item must not be null";
+    assert StringUtils.isNonEmptyString(key) : "key must be a non-empty string";
+
+    final TELogHeader teLogHeader = this.findTELogHeader(name);
+    if (teLogHeader == null) {
+      throw new TexaiException("TELogHeader not found for " + name);
+    }
+    synchronized (teLogHeader) {
+      final AbstractTELogEntry previousTELogEntry = teLogHeader.getHeadTELogEntry();
+      int counter = 0;
+      DateTime timestamp;
+      // ensure that timestamps are unique and ordered
+      while (true) {
+        timestamp = new DateTime();
+        if (previousTELogEntry == null) {
+          break;
+        } else if (timestamp.isAfter(previousTELogEntry.getTimestamp())) {
+          break;
+        } else {
+          counter++;
+          if (counter > 10000) {
+            throw new TexaiException("waiting too long for out-of-sync timestamp");
+          }
+          try {
+            Thread.sleep(1);
+          } catch (InterruptedException ex) {
+            throw new TexaiException(ex);
+          }
+        }
+      }
+      final String encodedItem = new String(Base64Coder.encode(ByteUtils.serialize(item)));
+      final byte[] digest = TEKeyedLogItemEntry.makeTEKeyedLogItemEntryDigest(
+              encodedItem,
+              key,
+              previousTELogEntry,
+              timestamp,
+              chaosValue);
+      final String encodedDigest = new String(Base64Coder.encode(digest));
+      final TEKeyedLogItemEntry teKeyedLogItemEntry = new TEKeyedLogItemEntry(
+              encodedItem,
+              key,
+              previousTELogEntry,
+              timestamp,
+              chaosValue,
+              encodedDigest);
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.info("chaosValue:       " + teKeyedLogItemEntry.getChaosValue());
+        LOGGER.info("digest:           " + teKeyedLogItemEntry.getEncodedDigest());
+      }
+      rdfEntityManager.persist(teKeyedLogItemEntry);
+      teLogHeader.setHeadTELogEntry(teKeyedLogItemEntry);
+      rdfEntityManager.persist(teLogHeader);
+
+      //Postconditions
+      assert teKeyedLogItemEntry.verifyDigest() : "teKeyedLogItemEntry invalid digest";
+
+      return teKeyedLogItemEntry;
+    }
+  }
+
+  /**
+   * Finds the most recently added log item having the given unique key.
+   *
+   * @param name the name of the log hash chain
+   * @param key the given key
+   *
+   * @return the most recently added log item having the given key, or null if not found
+   */
+  public Serializable findTEKeyedLogItem(final String name, final String key) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(name) : "name must be a non-empty string";
+    assert StringUtils.isNonEmptyString(key) : "key must be a non-empty string";
+
+    final TELogHeader teLogHeader = findTELogHeader(name);
+    if (teLogHeader == null) {
+      throw new TexaiException("TELogHeader not found for " + name);
+    }
+    synchronized (teLogHeader) {
+      final List<TEKeyedLogItemEntry> results = rdfEntityManager.find(
+              TEKeyedLogItemEntry.KEY_FIELD_PREDICATE_TERM, // predicate
+              key, // value
+              TEKeyedLogItemEntry.class); // clazz
+      if (results.isEmpty()) {
+        return null;
+      } else if (results.size() == 1) {
+        return results.get(0).getItem();
+      } else {
+        Collections.sort(results);
+        return results.get(results.size() - 1).getItem();
+      }
+    }
+  }
+
+  /**
    * Appends a log authenticator entry to the head of the named log hash chain.
    *
    * @param name the name of the tamper-evident log hash chain
@@ -209,6 +323,7 @@ public class TELogAccess {
    * @param x509Certificate the signing agents's X.509 certificate
    * @param privateKey the private key for the certificate, which is not stored after performing the signature
    * @param chaosValue an optional chaos value
+   *
    * @return the persisted log authenticator entry
    */
   @SuppressWarnings({"SleepWhileInLoop", "SleepWhileHoldingLock"})

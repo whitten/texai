@@ -26,8 +26,10 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import net.sf.ehcache.CacheManager;
 import org.apache.log4j.Level;
@@ -47,6 +49,7 @@ import org.texai.kb.persistence.RDFEntityManager;
 import org.texai.kb.persistence.RDFEntityPersister;
 import org.texai.kb.persistence.RDFEntityRemover;
 import org.texai.tamperEvidentLogs.domainEntity.AbstractTELogEntry;
+import org.texai.tamperEvidentLogs.domainEntity.TEKeyedLogItemEntry;
 import org.texai.tamperEvidentLogs.domainEntity.TELogAuthenticatorEntry;
 import org.texai.tamperEvidentLogs.domainEntity.TELogHeader;
 import org.texai.tamperEvidentLogs.domainEntity.TELogItemEntry;
@@ -224,8 +227,59 @@ public class TELogAccessTest {
     String chaosValue = "test chaos value 1";
     TELogAccess instance = new TELogAccess(rdfEntityManager);
     instance.createTELogHeader(TEST_LOG);
-    final TELogItemEntry teLogItemEntry =instance.appendTELogItemEntry(name, item, chaosValue);
+    final TELogItemEntry teLogItemEntry = instance.appendTELogItemEntry(name, item, chaosValue);
     assertNotNull(teLogItemEntry);
+  }
+
+  /**
+   * Test of appendTEKeyedLogItemEntry method, of class TELogAccess.
+   */
+  @Test
+  public void testAppendTEKeyedLogItemEntry() {
+    LOGGER.info("appendTEKeyedLogItemEntry");
+    String name = TEST_LOG;
+    TELogAccess instance = new TELogAccess(rdfEntityManager);
+    instance.createTELogHeader(TEST_LOG);
+    TEKeyedLogItemEntry teKeyedLogItemEntry = instance.appendTEKeyedLogItemEntry(
+            name,
+            "item a", // item
+            "key a", // key
+            "chaos 0"); // chaos value
+    assertNotNull(teKeyedLogItemEntry);
+    assertEquals("item a", teKeyedLogItemEntry.getItem());
+    assertEquals("key a", teKeyedLogItemEntry.getKey());
+    assertEquals("chaos 0", teKeyedLogItemEntry.getChaosValue());
+    final URI id = teKeyedLogItemEntry.getId();
+    assertNotNull(id);
+    final TEKeyedLogItemEntry loadedTEKeyedLogItemEntry = rdfEntityManager.find(TEKeyedLogItemEntry.class, id);
+    assertNotNull(loadedTEKeyedLogItemEntry);
+    assertEquals("item a", loadedTEKeyedLogItemEntry.getItem());
+    assertEquals("key a", loadedTEKeyedLogItemEntry.getKey());
+    assertEquals("chaos 0", loadedTEKeyedLogItemEntry.getChaosValue());
+    assertEquals(teKeyedLogItemEntry.toString(), loadedTEKeyedLogItemEntry.toString());
+    assertEquals(teKeyedLogItemEntry.getTimestamp().toString(), loadedTEKeyedLogItemEntry.getTimestamp().toString());
+    // test persistence and loading of the DateTime object and ensuring the default ISO chronolgy is used
+    assertEquals(teKeyedLogItemEntry.getTimestamp(), loadedTEKeyedLogItemEntry.getTimestamp());
+    assertEquals(teKeyedLogItemEntry.hashCode(), loadedTEKeyedLogItemEntry.hashCode());
+    assertEquals(teKeyedLogItemEntry, loadedTEKeyedLogItemEntry);
+    instance.appendTEKeyedLogItemEntry(name, "item b", "key b", "chaos 1");
+    instance.appendTEKeyedLogItemEntry(name, "item e", "key e", "chaos 2");
+    instance.appendTEKeyedLogItemEntry(name, "item f", "key f", "chaos 3");
+    instance.appendTEKeyedLogItemEntry(name, "item g", "key g", "chaos 4");
+    instance.appendTEKeyedLogItemEntry(name, "item c", "key c", "chaos 5");
+    // duplicate key to an earlier entry
+    instance.appendTEKeyedLogItemEntry(name, "item g2", "key g", "chaos 6");
+    instance.appendTEKeyedLogItemEntry(name, "item d", "key d", "chaos 7");
+    assertNull(instance.findTEKeyedLogItem(TEST_LOG, "wrong key"));
+    Serializable item = instance.findTEKeyedLogItem(TEST_LOG, "key a");
+    assertNotNull(item);
+    assertEquals("item a", item);
+    assertEquals("item b", instance.findTEKeyedLogItem(TEST_LOG, "key b"));
+    assertEquals("item c", instance.findTEKeyedLogItem(TEST_LOG, "key c"));
+    assertEquals("item d", instance.findTEKeyedLogItem(TEST_LOG, "key d"));
+    assertEquals("item e", instance.findTEKeyedLogItem(TEST_LOG, "key e"));
+    assertEquals("item f", instance.findTEKeyedLogItem(TEST_LOG, "key f"));
+    assertEquals("item g2", instance.findTEKeyedLogItem(TEST_LOG, "key g"));
   }
 
   /**

@@ -9,6 +9,7 @@ import org.texai.kb.Constants;
 import org.texai.kb.persistence.RDFEntity;
 import org.texai.kb.persistence.RDFPersistent;
 import org.texai.kb.persistence.RDFProperty;
+import org.texai.kb.persistence.RDFUtility;
 import org.texai.util.StringUtils;
 
 /**
@@ -34,12 +35,15 @@ public class TELogHeader implements RDFPersistent {
   // the default serial version uid
   private static final long serialVersionUID = 1L;
   // the name field predicate term
-  public static URI NAME_FIELD_PREDICATE_TERM = new URIImpl(Constants.TEXAI_NAMESPACE + "teLogHeader_name");
+  public static URI NAME_FIELD_PREDICATE_TERM = RDFUtility.getDefaultPropertyURI(
+          TELogHeader.class.getName(), // className
+          "name", // fieldName
+          String.class); // fieldType)
   // the id assigned by the persistence framework
   @Id
   private URI id;
   // the name of this log hash chain
-  @RDFProperty(predicate="teLogHeader_name")
+  @RDFProperty
   private final String name;
   // the head of the log item hash chain
   @RDFProperty
