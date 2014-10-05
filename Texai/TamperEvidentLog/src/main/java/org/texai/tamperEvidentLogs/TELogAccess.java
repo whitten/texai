@@ -12,9 +12,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
+import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.RepositoryException;
 import org.texai.kb.persistence.RDFEntityManager;
 import org.texai.tamperEvidentLogs.domainEntity.AbstractTELogEntry;
 import org.texai.tamperEvidentLogs.domainEntity.TEKeyedLogItemEntry;
@@ -193,9 +196,22 @@ public class TELogAccess {
         LOGGER.info("chaosValue:       " + teLogItemEntry.getChaosValue());
         LOGGER.info("digest:           " + teLogItemEntry.getEncodedDigest());
       }
+      final RepositoryConnection repositoryConnection =
+              rdfEntityManager.getConnectionToRepositoryContainingClass(TELogItemEntry.class);
+      try {
+        //repositoryConnection.setAutoCommit(false);
+        repositoryConnection.begin();
+      } catch (RepositoryException ex) {
+        throw new TexaiException(ex);
+      }
       rdfEntityManager.persist(teLogItemEntry);
       teLogHeader.setHeadTELogEntry(teLogItemEntry);
       rdfEntityManager.persist(teLogHeader);
+      try {
+        repositoryConnection.commit();
+      } catch (RepositoryException ex) {
+        throw new TexaiException(ex);
+      }
 
       //Postconditions
       assert teLogItemEntry.verifyDigest() : "teLogItemEntry invalid digest";
@@ -271,9 +287,21 @@ public class TELogAccess {
         LOGGER.info("chaosValue:       " + teKeyedLogItemEntry.getChaosValue());
         LOGGER.info("digest:           " + teKeyedLogItemEntry.getEncodedDigest());
       }
+      final RepositoryConnection repositoryConnection =
+              rdfEntityManager.getConnectionToRepositoryContainingClass(TEKeyedLogItemEntry.class);
+      try {
+        repositoryConnection.begin();
+      } catch (RepositoryException ex) {
+        throw new TexaiException(ex);
+      }
       rdfEntityManager.persist(teKeyedLogItemEntry);
       teLogHeader.setHeadTELogEntry(teKeyedLogItemEntry);
       rdfEntityManager.persist(teLogHeader);
+      try {
+        repositoryConnection.commit();
+      } catch (RepositoryException ex) {
+        throw new TexaiException(ex);
+      }
 
       //Postconditions
       assert teKeyedLogItemEntry.verifyDigest() : "teKeyedLogItemEntry invalid digest";
@@ -386,9 +414,21 @@ public class TELogAccess {
               timestamp,
               chaosValue,
               encodedDigest);
+      final RepositoryConnection repositoryConnection =
+              rdfEntityManager.getConnectionToRepositoryContainingClass(TELogAuthenticatorEntry.class);
+      try {
+        repositoryConnection.begin();
+      } catch (RepositoryException ex) {
+        throw new TexaiException(ex);
+      }
       rdfEntityManager.persist(teLogAuthenticatorEntry);
       teLogHeader.setHeadTELogEntry(teLogAuthenticatorEntry);
       rdfEntityManager.persist(teLogHeader);
+      try {
+        repositoryConnection.commit();
+      } catch (RepositoryException ex) {
+        throw new TexaiException(ex);
+      }
 
       //Postconditions
       assert teLogAuthenticatorEntry.verifyDigest() : "teLogAuthenticatorEntry invalid digest";

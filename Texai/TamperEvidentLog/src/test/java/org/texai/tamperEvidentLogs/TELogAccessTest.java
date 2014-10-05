@@ -12,9 +12,12 @@
  */
 package org.texai.tamperEvidentLogs;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
@@ -26,10 +29,8 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import net.sf.ehcache.CacheManager;
 import org.apache.log4j.Level;
@@ -78,7 +79,6 @@ public class TELogAccessTest {
   public static void setUpClass() {
     Logger.getLogger(RDFEntityPersister.class).setLevel(Level.WARN);
     Logger.getLogger(RDFEntityRemover.class).setLevel(Level.WARN);
-    JournalWriter.deleteJournalFiles();
     CacheInitializer.initializeCaches();
     DistributedRepositoryManager.addTestRepositoryPath(
             "TamperEvidentLogs",
@@ -91,6 +91,7 @@ public class TELogAccessTest {
     rdfEntityManager.close();
     DistributedRepositoryManager.shutDown();
     CacheManager.getInstance().shutdown();
+    JournalWriter.deleteJournalFiles();
   }
 
   @Before
@@ -567,6 +568,27 @@ public class TELogAccessTest {
     } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | CertificateParsingException | CertificateEncodingException | SignatureException | InvalidKeyException | IOException ex) {
       fail(ex.getMessage());
     }
+  }
+
+  /**
+   * Test of verifyAndSign method, of class TELogAccess.
+   */
+  @Test
+  public void benchmark() {
+    LOGGER.info("benchmark");
+    String name = TEST_LOG;
+    TELogAccess instance = new TELogAccess(rdfEntityManager);
+
+    instance.createTELogHeader(TEST_LOG);
+    final int nbrIterations = 10;
+    final long beginMillis = System.currentTimeMillis();
+    for (int i = 1; i < nbrIterations; i++) {
+      instance.appendTELogItemEntry(name, i, "test chaos value");
+    }
+    final long durationMillis = System.currentTimeMillis() - beginMillis;
+    LOGGER.info("duration milliseconds:  " + durationMillis);
+    LOGGER.info("log entries per second: " + 1000.0 * (float) nbrIterations /(float) durationMillis);
+
   }
 
 }
