@@ -18,13 +18,13 @@
  * You should have received a copy of the GNU General Public License along with this program;
  * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package org.texai.util;
 
 import java.util.UUID;
 import org.apache.log4j.Logger;
 
-/** Generates a UUID.
+/**
+ * Generates a UUID.
  *
  * @author reed
  */
@@ -33,18 +33,23 @@ public final class UUIDGenerator {
   // the logger
   private static final Logger LOGGER = Logger.getLogger(UUIDGenerator.class);
 
-  /** Creates a new instance of UUIDGenerator. */
+  /**
+   * Creates a new instance of UUIDGenerator.
+   */
   public UUIDGenerator() {
     super();
   }
 
-  /** Generates a UUID. */
+  /**
+   * Generates a UUID.
+   */
   public void generateUUID() {
     final UUID uuid = UUID.randomUUID();
     LOGGER.info("generated UUID: " + uuid);
   }
 
-  /** Executes this application.
+  /**
+   * Executes this application.
    *
    * @param args the command line arguments (unused)
    */

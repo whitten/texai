@@ -28,7 +28,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import net.jcip.annotations.ThreadSafe;
 
-/**  Provides a singleton one-way encryption service.  Adapted from James Shvarts' article "Password Encryption: Rationale and Java Example"
+/**
+ * Provides a singleton one-way encryption service. Adapted from James Shvarts' article "Password Encryption: Rationale and Java Example"
  * http://www.devarticles.com/c/a/Java/Password-Encryption-Rationale-and-Java-Example
  *
  * The Sun BASE64Encoder class has been replaced with an open source equivalent.
@@ -40,26 +41,33 @@ public final class OneWayEncryptionService {
 
   // the singleton one-way encryption service
   private static OneWayEncryptionService instance;
+  // the SHA-256 message digest
+  final MessageDigest messageDigest;
 
   // Privately constructs a new one-way encryption service instance.
   private OneWayEncryptionService() {
-  }
-
-  // 
-  // @param plaintext the plaintext
-  // @return the encrypted text
-  public synchronized String encrypt(final String plaintext) {
-    //Preconditions
-    assert plaintext != null : "plaintext must not be null";
-    assert !plaintext.isEmpty() : "plaintext must not be empty";
-
-    MessageDigest messageDigest = null;
     try {
-      messageDigest = MessageDigest.getInstance("SHA");
+      messageDigest = MessageDigest.getInstance("SHA-512");
+      messageDigest.reset();
     } catch (NoSuchAlgorithmException e) {
       throw new TexaiException(e);
     }
+  }
+
+  /**
+   * Encrypts the given plaintext.
+   *
+   * @param plaintext the plaintext
+   *
+   * @return the encrypted text
+   */
+  @Deprecated
+  public synchronized String encrypt(final String plaintext) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(plaintext) : "plaintext must not be empty";
+
     try {
+      messageDigest.reset();
       messageDigest.update(plaintext.getBytes("UTF-8"));
     } catch (UnsupportedEncodingException ex) {
       throw new TexaiException(ex);
@@ -68,31 +76,89 @@ public final class OneWayEncryptionService {
     return new String(Base64Coder.encode(raw));
   }
 
-  // 
-  // @param nbr the number to be encrypted
-  // @return the encrypted text
+  /**
+   * Encrypts the given plaintext with a given salt that prevents dictionary attacks.
+   *
+   * @param plaintext the plaintext
+   * @param salt the random value stored with the cipher text for subsequent verification
+   *
+   * @return the encrypted text
+   */
+  public synchronized String encrypt(final String plaintext, final String salt) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(plaintext) : "plaintext must not be empty";
+    assert StringUtils.isNonEmptyString(salt) : "salt must not be empty";
+
+    try {
+      messageDigest.reset();
+      messageDigest.update(plaintext.getBytes("UTF-8"));
+      messageDigest.update(salt.getBytes("UTF-8"));
+    } catch (UnsupportedEncodingException ex) {
+      throw new TexaiException(ex);
+    }
+    final byte[] raw = messageDigest.digest();
+    return new String(Base64Coder.encode(raw));
+  }
+
+  /**
+   * Encrypt the given number.
+   *
+   * @param nbr the number to be encrypted
+   *
+   * @return the encrypted text
+   */
+  @Deprecated
   public synchronized String encrypt(final long nbr) {
     final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
     final DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
     try {
-    dataOutputStream.writeLong(nbr);
-    dataOutputStream.flush();
+      dataOutputStream.writeLong(nbr);
+      dataOutputStream.flush();
     } catch (final IOException ex) {
       throw new TexaiException(ex);
     }
-    MessageDigest messageDigest = null;
-    try {
-      messageDigest = MessageDigest.getInstance("SHA");
-    } catch (NoSuchAlgorithmException e) {
-      throw new TexaiException(e);
-    }
+    messageDigest.reset();
     messageDigest.update(byteArrayOutputStream.toByteArray());
     final byte[] raw = messageDigest.digest();
     return new String(Base64Coder.encode(raw));
   }
 
-  // 
-  // @return the singleton one-way encryption service
+  /**
+   * Encrypt the given number with a given salt that prevents dictionary attacks.
+   *
+   * @param nbr the number to be encrypted
+   * @param salt the random value stored with the cipher text for subsequent verification
+   *
+   * @return the encrypted text
+   */
+  public synchronized String encrypt(final long nbr, final String salt) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(salt) : "salt must not be empty";
+
+    final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+    final DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
+    try {
+      dataOutputStream.writeLong(nbr);
+      dataOutputStream.flush();
+    } catch (final IOException ex) {
+      throw new TexaiException(ex);
+    }
+    try {
+      messageDigest.reset();
+      messageDigest.update(byteArrayOutputStream.toByteArray());
+      messageDigest.update(salt.getBytes("UTF-8"));
+      final byte[] raw = messageDigest.digest();
+      return new String(Base64Coder.encode(raw));
+    } catch (UnsupportedEncodingException e) {
+      throw new TexaiException(e);
+    }
+  }
+
+  /**
+   * Returns the static instance.
+   *
+   * @return the singleton one-way encryption service
+   */
   public static synchronized OneWayEncryptionService getInstance() {
     if (instance == null) {
       return new OneWayEncryptionService();

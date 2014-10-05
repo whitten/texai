@@ -39,11 +39,14 @@ public final class ThreadUtils {
   // the root JVM thread group
   private static ThreadGroup rootThreadGroup = null;
 
-  /** Prevents the instantiation of this utility class. */
+  /**
+   * Prevents the instantiation of this utility class.
+   */
   private ThreadUtils() {
   }
 
-  /** Returns a list of all threads.
+  /**
+   * Returns a list of all threads.
    *
    * @return a list of all threads
    */
@@ -68,7 +71,8 @@ public final class ThreadUtils {
     return threadList;
   }
 
-  /** Returns the root thread group.
+  /**
+   * Returns the root thread group.
    *
    * @return the root thread group
    */
@@ -83,7 +87,9 @@ public final class ThreadUtils {
     return rootThreadGroup;
   }
 
-  /** Logs all threads. */
+  /**
+   * Logs all threads.
+   */
   public static void logThreads() {
     LOGGER.info("all threads ...");
     for (final Thread thread : getAllThreads()) {

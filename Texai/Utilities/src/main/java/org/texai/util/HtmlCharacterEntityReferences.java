@@ -29,10 +29,11 @@ import java.util.Properties;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
 
-/** Represents a set of character entity references defined by the HTML 4.0 standard.
+/**
+ * Represents a set of character entity references defined by the HTML 4.0 standard.
  *
- * <p>A complete description of the HTML 4.0 character set can be found
- * at http://www.w3.org/TR/html4/charset.html.
+ * <p>
+ * A complete description of the HTML 4.0 character set can be found at http://www.w3.org/TR/html4/charset.html.
  *
  * @author Juergen Hoeller
  * @author Martin Kersten
@@ -52,7 +53,9 @@ public class HtmlCharacterEntityReferences {
   private final String[] characterToEntityReferenceMap = new String[3000];
   private final Map<String, Character> entityReferenceToCharacterMap = new HashMap<>(252);
 
-  /** Maps a new set of character entity references reflecting the HTML 4.0 character set. */
+  /**
+   * Maps a new set of character entity references reflecting the HTML 4.0 character set.
+   */
   public HtmlCharacterEntityReferences() {
     final Properties entityReferences = new Properties();
 
@@ -88,7 +91,8 @@ public class HtmlCharacterEntityReferences {
     }
   }
 
-  /** Returns the number of supported entity references.
+  /**
+   * Returns the number of supported entity references.
    *
    * @return the number of supported entity references
    */
@@ -96,18 +100,22 @@ public class HtmlCharacterEntityReferences {
     return this.entityReferenceToCharacterMap.size();
   }
 
-  /** Returns whether the given character is mapped to a supported entity reference.
+  /**
+   * Returns whether the given character is mapped to a supported entity reference.
    *
    * @param character the given character
+   *
    * @return whether the given character is mapped to a supported entity reference
    */
   public boolean isMappedToReference(final char character) {
     return (convertToReference(character) != null);
   }
 
-  /** Returns the reference mapped to the given character or <code>null</code>.
+  /**
+   * Returns the reference mapped to the given character or <code>null</code>.
    *
    * @param character the given character
+   *
    * @return the reference mapped to the given character or <code>null</code>
    */
   public String convertToReference(final char character) {
@@ -121,9 +129,11 @@ public class HtmlCharacterEntityReferences {
     return null;
   }
 
-  /** Returns the char mapped to the given entityReference or -1.
+  /**
+   * Returns the char mapped to the given entityReference or -1.
    *
    * @param entityReference the entity reference
+   *
    * @return the char mapped to the given entityReference or -1
    */
   public char convertToCharacter(final String entityReference) {

@@ -17,33 +17,28 @@ import java.util.concurrent.locks.ReentrantLock;
 import net.jcip.annotations.ThreadSafe;
 
 /**
- * A bounded {@linkplain BlockingQueue blocking queue} backed by an
- * array.  This queue orders elements FIFO (first-in-first-out).  The
- * <em>head</em> of the queue is that element that has been on the
- * queue the longest time.  The <em>tail</em> of the queue is that
- * element that has been on the queue the shortest time. New elements
- * are inserted at the tail of the queue, and the queue retrieval
- * operations obtain elements at the head of the queue.
+ * A bounded {@linkplain BlockingQueue blocking queue} backed by an array. This queue orders elements FIFO (first-in-first-out). The
+ * <em>head</em> of the queue is that element that has been on the queue the longest time. The <em>tail</em> of the queue is that element
+ * that has been on the queue the shortest time. New elements are inserted at the tail of the queue, and the queue retrieval operations
+ * obtain elements at the head of the queue.
  *
- * <p>This is a classic &quot;bounded buffer&quot;, in which a
- * fixed-sized array holds elements inserted by producers and
- * extracted by consumers.  Once created, the capacity cannot be
- * increased.  Attempts to <tt>put</tt> an element into a full queue
- * will result in the operation blocking; attempts to <tt>take</tt> an
- * element from an empty queue will similarly block.
+ * <p>
+ * This is a classic &quot;bounded buffer&quot;, in which a fixed-sized array holds elements inserted by producers and extracted by
+ * consumers. Once created, the capacity cannot be increased. Attempts to <tt>put</tt> an element into a full queue will result in the
+ * operation blocking; attempts to <tt>take</tt> an element from an empty queue will similarly block.
  *
- * <p> This class supports an optional fairness policy for ordering
- * waiting producer and consumer threads.  By default, this ordering
- * is not guaranteed. However, a queue constructed with fairness set
- * to <tt>true</tt> grants threads access in FIFO order. Fairness
- * generally decreases throughput but reduces variability and avoids
- * starvation.
+ * <p>
+ * This class supports an optional fairness policy for ordering waiting producer and consumer threads. By default, this ordering is not
+ * guaranteed. However, a queue constructed with fairness set to <tt>true</tt> grants threads access in FIFO order. Fairness generally
+ * decreases throughput but reduces variability and avoids starvation.
  *
- * <p>This class and its iterator implement all of the
+ * <p>
+ * This class and its iterator implement all of the
  * <em>optional</em> methods of the {@link Collection} and {@link
  * Iterator} interfaces.
  *
- * <p>This class is a member of the
+ * <p>
+ * This class is a member of the
  * <a href="{@docRoot}/../technotes/guides/collections/index.html">
  * Java Collections Framework</a>.
  *
@@ -78,10 +73,13 @@ public final class MyArrayBlockingQueue<E> extends AbstractQueue<E> implements B
   // Provides a holder for a mutable boolean value
   public static class BooleanHolder {
 
-    /** the mutable boolean value */
+    /**
+     * the mutable boolean value
+     */
     private boolean value = false;
 
-    /** Constructs a new BooleanHolder instance.
+    /**
+     * Constructs a new BooleanHolder instance.
      *
      * @param value the initial value
      */
@@ -89,7 +87,8 @@ public final class MyArrayBlockingQueue<E> extends AbstractQueue<E> implements B
       this.value = value;
     }
 
-    /** Gets the mutable boolean value.
+    /**
+     * Gets the mutable boolean value.
      *
      * @return the mutable boolean value
      */
@@ -97,7 +96,8 @@ public final class MyArrayBlockingQueue<E> extends AbstractQueue<E> implements B
       return value;
     }
 
-    /** Sets the mutable boolean value.
+    /**
+     * Sets the mutable boolean value.
      *
      * @param value the mutable boolean value
      */
@@ -107,7 +107,7 @@ public final class MyArrayBlockingQueue<E> extends AbstractQueue<E> implements B
   }
 
   // until an element becomes available.
-  // 
+  //
   // @param isBusy the indicator whether the consuming thread is busy processing the taken element
   // @return the head of this queue
   // @throws InterruptedException if interrupted while waiting
@@ -193,7 +193,7 @@ public final class MyArrayBlockingQueue<E> extends AbstractQueue<E> implements B
 
   // Creates an <tt>ArrayBlockingQueue</tt> with the given (fixed)
   // capacity and default access policy.
-  // 
+  //
   // @param capacity the capacity of this queue
   // @throws IllegalArgumentException if <tt>capacity</tt> is less than 1
   public MyArrayBlockingQueue(final int capacity) {
@@ -202,7 +202,7 @@ public final class MyArrayBlockingQueue<E> extends AbstractQueue<E> implements B
 
   // Creates an <tt>ArrayBlockingQueue</tt> with the given (fixed)
   // capacity and the specified access policy.
-  // 
+  //
   // @param capacity the capacity of this queue
   // @param fair if <tt>true</tt> then queue accesses for threads blocked
   // on insertion or removal, are processed in FIFO order;
@@ -223,7 +223,7 @@ public final class MyArrayBlockingQueue<E> extends AbstractQueue<E> implements B
   // capacity, the specified access policy and initially containing the
   // elements of the given collection,
   // added in traversal order of the collection's iterator.
-  // 
+  //
   // @param capacity the capacity of this queue
   // @param fair if <tt>true</tt> then queue accesses for threads blocked
   // on insertion or removal, are processed in FIFO order;
@@ -250,7 +250,7 @@ public final class MyArrayBlockingQueue<E> extends AbstractQueue<E> implements B
   // returning <tt>true</tt> upon success and <tt>false</tt> if this queue
   // is full.  This method is generally preferable to method {@link #add},
   // which can fail to insert an element only by throwing an exception.
-  // 
+  //
   // @throws NullPointerException if the specified element is null
   @Override
   public boolean offer(final E e) {
@@ -273,7 +273,7 @@ public final class MyArrayBlockingQueue<E> extends AbstractQueue<E> implements B
 
   // Inserts the specified element at the tail of this queue, waiting
   // for space to become available if the queue is full.
-  // 
+  //
   // @throws InterruptedException {@inheritDoc}
   // @throws NullPointerException {@inheritDoc}
   @Override
@@ -302,7 +302,7 @@ public final class MyArrayBlockingQueue<E> extends AbstractQueue<E> implements B
   // Inserts the specified element at the tail of this queue, waiting
   // up to the specified wait time for space to become available if
   // the queue is full.
-  // 
+  //
   // @throws InterruptedException {@inheritDoc}
   // @throws NullPointerException {@inheritDoc}
   @Override
@@ -412,7 +412,7 @@ public final class MyArrayBlockingQueue<E> extends AbstractQueue<E> implements B
   // this doc comment is overridden to remove the reference to collections
   // greater in size than Integer.MAX_VALUE
   // Returns the number of elements in this queue.
-  // 
+  //
   // @return the number of elements in this queue
   @Override
   public int size() {
@@ -431,7 +431,7 @@ public final class MyArrayBlockingQueue<E> extends AbstractQueue<E> implements B
   // (in the absence of memory or resource constraints) accept without
   // blocking. This is always equal to the initial capacity of this queue
   // less the current <tt>size</tt> of this queue.
-  // 
+  //
   // <p>Note that you <em>cannot</em> always tell if an attempt to insert
   // an element will succeed by inspecting <tt>remainingCapacity</tt>
   // because it may be the case that another thread is about to
@@ -453,7 +453,7 @@ public final class MyArrayBlockingQueue<E> extends AbstractQueue<E> implements B
   // elements.
   // Returns <tt>true</tt> if this queue contained the specified element
   // (or equivalently, if this queue changed as a result of the call).
-  // 
+  //
   // @param o element to be removed from this queue, if present
   // @return <tt>true</tt> if this queue changed as a result of the call
   @Override
@@ -486,7 +486,7 @@ public final class MyArrayBlockingQueue<E> extends AbstractQueue<E> implements B
   // Returns <tt>true</tt> if this queue contains the specified element.
   // More formally, returns <tt>true</tt> if and only if this queue contains
   // at least one element <tt>e</tt> such that <tt>o.equals(e)</tt>.
-  // 
+  //
   // @param o object to be checked for containment in this queue
   // @return <tt>true</tt> if this queue contains the specified element
   @Override
@@ -514,14 +514,14 @@ public final class MyArrayBlockingQueue<E> extends AbstractQueue<E> implements B
 
   // Returns an array containing all of the elements in this queue, in
   // proper sequence.
-  // 
+  //
   // <p>The returned array will be "safe" in that no references to it are
   // maintained by this queue.  (In other words, this method must allocate
   // a new array).  The caller is thus free to modify the returned array.
-  // 
+  //
   // <p>This method acts as bridge between array-based and collection-based
   // APIs.
-  // 
+  //
   // @return an array containing all of the elements in this queue
   @Override
   public Object[] toArray() {
@@ -547,27 +547,27 @@ public final class MyArrayBlockingQueue<E> extends AbstractQueue<E> implements B
   // the specified array.  If the queue fits in the specified array, it
   // is returned therein.  Otherwise, a new array is allocated with the
   // runtime type of the specified array and the size of this queue.
-  // 
+  //
   // <p>If this queue fits in the specified array with room to spare
   // (i.e., the array has more elements than this queue), the element in
   // the array immediately following the end of the queue is set to
   // <tt>null</tt>.
-  // 
+  //
   // <p>Like the {@link #toArray()} method, this method acts as bridge between
   // array-based and collection-based APIs.  Further, this method allows
   // precise control over the runtime type of the output array, and may,
   // under certain circumstances, be used to save allocation costs.
-  // 
+  //
   // <p>Suppose <tt>x</tt> is a queue known to contain only strings.
   // The following code can be used to dump the queue into a newly
   // allocated array of <tt>String</tt>:
-  // 
+  //
   // <pre>
   // String[] y = x.toArray(new String[0]);</pre>
-  // 
+  //
   // Note that <tt>toArray(new Object[0])</tt> is identical in function to
   // <tt>toArray()</tt>.
-  // 
+  //
   // @param <T> The array element type
   // @param a the array into which the elements of the queue are to
   // be stored, if it is big enough; otherwise, a new array of the
@@ -605,7 +605,7 @@ public final class MyArrayBlockingQueue<E> extends AbstractQueue<E> implements B
     }
   }
 
-  // 
+  //
   // @return a string representation of this object
   @Override
   public String toString() {
@@ -642,7 +642,7 @@ public final class MyArrayBlockingQueue<E> extends AbstractQueue<E> implements B
     }
   }
 
-  // 
+  //
   // @param c the given collection
   // @return the number of elements drained
   @Override
@@ -678,7 +678,7 @@ public final class MyArrayBlockingQueue<E> extends AbstractQueue<E> implements B
     }
   }
 
-  // 
+  //
   // @param c the given collection
   // @param maxElements the maximum number of elements to drain
   // @return the number of elements drained
@@ -723,7 +723,7 @@ public final class MyArrayBlockingQueue<E> extends AbstractQueue<E> implements B
   // and guarantees to traverse elements as they existed upon
   // construction of the iterator, and may (but is not guaranteed to)
   // reflect any modifications subsequent to construction.
-  // 
+  //
   // @return an iterator over the elements in this queue in proper sequence
   @Override
   public Iterator<E> iterator() {
@@ -740,24 +740,22 @@ public final class MyArrayBlockingQueue<E> extends AbstractQueue<E> implements B
   private class Itr implements Iterator<E> {
 
     /**
-     * Index of element to be returned by next,
-     * or a negative number if no such.
+     * Index of element to be returned by next, or a negative number if no such.
      */
     private int nextIndex;
     /**
-     * nextItem holds on to item fields because once we claim
-     * that an element exists in hasNext(), we must return it in
-     * the following next() call even if it was in the process of
-     * being removed when hasNext() was called.
+     * nextItem holds on to item fields because once we claim that an element exists in hasNext(), we must return it in the following next()
+     * call even if it was in the process of being removed when hasNext() was called.
      */
     private E nextItem;
     /**
-     * Index of element returned by most recent call to next.
-     * Reset to -1 if this element is deleted by a call to remove.
+     * Index of element returned by most recent call to next. Reset to -1 if this element is deleted by a call to remove.
      */
     private int lastRet;
 
-    /** Constructs a new Itr instance. */
+    /**
+     * Constructs a new Itr instance.
+     */
     Itr() {
       lastRet = -1;
       if (count == 0) {
@@ -779,8 +777,7 @@ public final class MyArrayBlockingQueue<E> extends AbstractQueue<E> implements B
     }
 
     /**
-     * Checks whether nextIndex is valid; if so setting nextItem.
-     * Stops iterator when either hits putIndex or sees null item.
+     * Checks whether nextIndex is valid; if so setting nextItem. Stops iterator when either hits putIndex or sees null item.
      */
     private void checkNext() {
       if (nextIndex == putIndex) {

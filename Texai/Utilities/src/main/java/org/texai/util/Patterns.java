@@ -20,7 +20,8 @@ import java.util.regex.Pattern;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
 
-/** Provides text-matching patterns.
+/**
+ * Provides text-matching patterns.
  *
  * @author reed
  */
@@ -36,14 +37,14 @@ public class Patterns {
   // the matcher
   private Matcher matchedMatcher;
 
-  /** Constructs a new Patterns instance. */
+  /**
+   * Constructs a new Patterns instance.
+   */
   public Patterns() {
   }
 
-  private void initialization() {
-  }
-
-  /** Creates a pattern from the the given pattern string and adds it to the patterns.
+  /**
+   * Creates a pattern from the the given pattern string and adds it to the patterns.
    *
    * @param operation the operation associated with the pattern
    * @param patternString the given pattern string
@@ -62,9 +63,11 @@ public class Patterns {
     }
   }
 
-  /** Returns whether the given input string was matched by a pattern.
+  /**
+   * Returns whether the given input string was matched by a pattern.
    *
    * @param input the given input string
+   *
    * @return whether the given input string was matched by a pattern
    */
   public boolean matches(final String input) {
@@ -87,7 +90,8 @@ public class Patterns {
     return false;
   }
 
-  /** Gets the matched operation.
+  /**
+   * Gets the matched operation.
    *
    * @return the matched operation
    */
@@ -95,7 +99,8 @@ public class Patterns {
     return matchedOperation;
   }
 
-  /** Gets the matched groups.
+  /**
+   * Gets the matched groups.
    *
    * @return the matched groups
    */

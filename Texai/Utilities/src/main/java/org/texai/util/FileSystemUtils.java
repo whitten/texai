@@ -38,16 +38,18 @@ public final class FileSystemUtils {
   // the logger
   public static final Logger LOGGER = Logger.getLogger(FileSystemUtils.class);
 
-  /** This class is never instantiated. */
+  /**
+   * This class is never instantiated.
+   */
   private FileSystemUtils() {
   }
 
-  /** Deletes the supplied {@link File} - for directories,
-   * recursively delete any nested directories or files as well.
+  /**
+   * Deletes the supplied {@link File} - for directories, recursively delete any nested directories or files as well.
    *
    * @param root the root <code>File</code> to delete
-   * @return <code>true</code> if the <code>File</code> was deleted,
-   * otherwise <code>false</code>
+   *
+   * @return <code>true</code> if the <code>File</code> was deleted, otherwise <code>false</code>
    */
   public static boolean deleteRecursively(final File root) {
     //Preconditions
@@ -69,7 +71,8 @@ public final class FileSystemUtils {
     return false;
   }
 
-  /** Archives the given source directory to the given destination directory, without overwriting unchanged files.
+  /**
+   * Archives the given source directory to the given destination directory, without overwriting unchanged files.
    *
    * @param sourceDirectory the source directory
    * @param destinationDirectory the destination directory

@@ -28,7 +28,8 @@ import java.util.Map;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
 
-/** Provides HTTP utilities.
+/**
+ * Provides HTTP utilities.
  *
  * @author reed
  */
@@ -40,15 +41,18 @@ public final class HTTPUtils {
   // the HTTP response buffer size
   public static final int HTTP_RESPONSE_BUFFER_SIZE = 2048;
 
-  /** Prevents the instantiation of this utility class. */
+  /**
+   * Prevents the instantiation of this utility class.
+   */
   private HTTPUtils() {
   }
 
-  /** Consumes bytes from the given pushback input stream and returns the HTTP message when the end of it is reached.  The
-   * input stream remains open for the next message in the pipeline.
-   * Per: http://www.w3.org/Protocols/rfc2616/rfc2616-sec6.html#sec6
+  /**
+   * Consumes bytes from the given pushback input stream and returns the HTTP message when the end of it is reached. The input stream
+   * remains open for the next message in the pipeline. Per: http://www.w3.org/Protocols/rfc2616/rfc2616-sec6.html#sec6
    *
    * @param pushbackInputStream the given pushback input stream
+   *
    * @return the HTTP message
    */
   public static byte[] consumeHTTPMessage(final PushbackInputStream pushbackInputStream) {
@@ -116,9 +120,11 @@ public final class HTTPUtils {
     return byteArrayOutputStream.toByteArray();
   }
 
-  /** Returns the parameter dictionary, parameter --> value, parsed from the given well-formed HTTP query.
+  /**
+   * Returns the parameter dictionary, parameter --> value, parsed from the given well-formed HTTP query.
    *
    * @param query the given well-formed HTTP query
+   *
    * @return the parameter dictionary, parameter --> value
    */
   public static Map<String, String> getQueryMap(final String query) {
@@ -136,10 +142,12 @@ public final class HTTPUtils {
     return parameterDictionary;
   }
 
-  /** Gets the version number from the given user-agent string.
+  /**
+   * Gets the version number from the given user-agent string.
    *
    * @param userAgent the user-agent string
    * @param position the position
+   *
    * @return the version number
    */
   @SuppressWarnings("fallthrough")
@@ -187,11 +195,13 @@ public final class HTTPUtils {
     return stringBuilder.toString().trim();
   }
 
-  /** Gets the first version number in the given user-agent string, truncated to the given number of digits
+  /**
+   * Gets the first version number in the given user-agent string, truncated to the given number of digits
    *
    * @param userAgent the user agent string
    * @param position the position
    * @param numDigits the number of digits to truncate
+   *
    * @return
    */
   private static String getFirstVersionNumber(final String userAgent, final int position, final int numDigits) {
@@ -208,11 +218,13 @@ public final class HTTPUtils {
     return truncatedVersionNumber;
   }
 
-  /** Returns a string array of the given three strings.
+  /**
+   * Returns a string array of the given three strings.
    *
    * @param string1 the first string
    * @param string2 the second string
    * @param string3 the third string
+   *
    * @return a string array of the given three strings
    */
   private static String[] getArray(final String string1, final String string2, final String string3) {
@@ -223,9 +235,11 @@ public final class HTTPUtils {
     return stringArray;
   }
 
-  /** Returns the name and version of the bot if the given user-agent is a bot.
+  /**
+   * Returns the name and version of the bot if the given user-agent is a bot.
    *
    * @param userAgent the given user-agent string
+   *
    * @return the name of the bot if the given user-agent is a bot, otherwise returns null
    */
   @SuppressWarnings("UnusedAssignment")
@@ -267,9 +281,11 @@ public final class HTTPUtils {
     return getArray(botName, botName, botName + getVersionNumber(userAgentLowerCase, position));
   }
 
-  /** Gets the client operating system from the given user-agent string.
+  /**
+   * Gets the client operating system from the given user-agent string.
    *
    * @param userAgent the given user-agent string
+   *
    * @return the client operating system
    */
   @SuppressWarnings("UnusedAssignment")
@@ -415,9 +431,11 @@ public final class HTTPUtils {
     return result;
   }
 
-  /** Gets the browser and version number from the given user-agent string.
+  /**
+   * Gets the browser and version number from the given user-agent string.
    *
    * @param userAgent the given user-agent string
+   *
    * @return the browser and version number
    */
   @SuppressWarnings("UnusedAssignment")

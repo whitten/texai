@@ -24,7 +24,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import net.jcip.annotations.NotThreadSafe;
 
-/** Provides executor utilities.
+/**
+ * Provides executor utilities.
  *
  * @author reed
  */
@@ -34,11 +35,15 @@ public final class ExecutorUtils {
   // the executor service
   private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
 
-  /** Prevents the instantiation of this utility class. */
+  /**
+   * Prevents the instantiation of this utility class.
+   */
   private ExecutorUtils() {
 
   }
-  /** Gets the executor service.
+
+  /**
+   * Gets the executor service.
    *
    * @return the executorService
    */

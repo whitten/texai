@@ -61,6 +61,18 @@ public class SingleLineCommentRewriterTest {
   }
 
   /**
+   * Test of formatAndRewrite method, of class SingleLineCommentRewriter.
+   */
+  @Test
+  public void testFormatAndRewrite3() {
+    LOGGER.info("formatAndRewrite3");
+    final File temporaryFile = new File("data/comment-rewrite-input-test3.java");
+    final File file = new File("data/comment-rewrite-output-test3.java");
+    SingleLineCommentRewriter instance = new SingleLineCommentRewriter();
+    instance.formatAndRewrite(temporaryFile, file);
+  }
+
+  /**
    * Test of main method, of class SingleLineCommentRewriter.
    */
   @Test

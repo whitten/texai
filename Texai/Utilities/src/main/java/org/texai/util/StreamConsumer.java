@@ -17,7 +17,8 @@ import java.io.InputStreamReader;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
 
-/** Provides a stream consumer that logs its consumed stream.
+/**
+ * Provides a stream consumer that logs its consumed stream.
  *
  * @author reed
  */
@@ -29,7 +30,8 @@ public class StreamConsumer extends Thread {
   // the logger
   private final Logger logger;
 
-  /** Constructs a new StreamConsumer instance.
+  /**
+   * Constructs a new StreamConsumer instance.
    *
    * @param inputStream the input stream
    * @param logger the logger
@@ -45,7 +47,9 @@ public class StreamConsumer extends Thread {
     this.logger = logger;
   }
 
-  /** Runs this stream consumer. */
+  /**
+   * Runs this stream consumer.
+   */
   @Override
   public void run() {
     try {

@@ -26,20 +26,25 @@ import org.w3c.dom.ls.LSSerializer;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-/** Provides XML utilities.
+/**
+ * Provides XML utilities.
  *
  * @author reed
  */
 @NotThreadSafe
 public class XMLUtils {
 
-  /** Prevents the construction of an XMLUtils instance. */
+  /**
+   * Prevents the construction of an XMLUtils instance.
+   */
   private XMLUtils() {
   }
 
-  /** Loads an XML document from the given XML string.
+  /**
+   * Loads an XML document from the given XML string.
    *
    * @param xmlString the given XML string
+   *
    * @return the XML document
    */
   public static Document loadXMLFromString(final String xmlString) {
@@ -56,9 +61,11 @@ public class XMLUtils {
     }
   }
 
-  /** Formats the given XML document.
+  /**
+   * Formats the given XML document.
    *
    * @param xmlString the given XML document
+   *
    * @return the formatted XML string
    */
   public static String prettyPrintWithDOM3LS(final String xmlString) {
@@ -68,9 +75,11 @@ public class XMLUtils {
     return prettyPrintWithDOM3LS(loadXMLFromString(xmlString));
   }
 
-  /** Formats the given XML document.
+  /**
+   * Formats the given XML document.
    *
    * @param document the given XML document
+   *
    * @return the formatted XML string
    */
   public static String prettyPrintWithDOM3LS(final Document document) {

@@ -51,7 +51,7 @@ public final class ByteUtils {
   }
 
   /**
-   * Hide constructor in this utility class.</p>
+   * Hide constructor in this utility class.
    */
   private ByteUtils() {
   }

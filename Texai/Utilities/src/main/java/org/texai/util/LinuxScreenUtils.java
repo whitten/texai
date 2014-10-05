@@ -14,7 +14,8 @@ import java.io.IOException;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
 
-/** Provides utility methods to manage Linux Screen sessions.
+/**
+ * Provides utility methods to manage Linux Screen sessions.
  *
  * @author reed
  */
@@ -24,11 +25,14 @@ public class LinuxScreenUtils {
   // the logger
   public static final Logger LOGGER = Logger.getLogger(LinuxScreenUtils.class);
 
-  /** Prevents the construction a new LinuxScreenUtils instance. */
+  /**
+   * Prevents the construction a new LinuxScreenUtils instance.
+   */
   private LinuxScreenUtils() {
   }
 
-  /** Launches a detached screen session with the given command.
+  /**
+   * Launches a detached screen session with the given command.
    *
    * @param workingDirectory the working directory
    * @param command the given command
@@ -90,7 +94,8 @@ public class LinuxScreenUtils {
 
   }
 
-  /** Tests the screen launching method.
+  /**
+   * Tests the screen launching method.
    *
    * @param args the command line arguments - unused
    */
@@ -110,7 +115,5 @@ public class LinuxScreenUtils {
     //  [screen is terminating]
     //  reed@mccarthy:~/svn/Texai/Utilities$ screen -ls
     //  No Sockets found in /var/run/screen/S-reed.
-
-
   }
 }

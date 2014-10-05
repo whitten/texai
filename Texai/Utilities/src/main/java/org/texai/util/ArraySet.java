@@ -43,14 +43,17 @@ public class ArraySet<E> extends AbstractSet<E> implements Cloneable, Serializab
   private final List<E> list;
 
   /**
-   * Creates a new instance of ArraySet.
+   * Constructs a new ArraySet instance.
    */
   public ArraySet() {
     list = new ArrayList<>();
   }
 
-  //
-  // @param collection the given collection
+  /**
+   * Constructs a new ArraySet instance.
+   *
+   * @param collection the given collection
+   */
   @SuppressWarnings("OverridableMethodCallInConstructor")
   public ArraySet(final Collection<? extends E> collection) {
     list = new ArrayList<>();
@@ -66,32 +69,44 @@ public class ArraySet<E> extends AbstractSet<E> implements Cloneable, Serializab
     }
   }
 
-  //
-  // @param size the given initial capacity
+  /**
+   * Constructs a new ArraySet instance.
+   *
+   * @param size the given initial capacity
+   */
   public ArraySet(final int size) {
     list = new ArrayList<>(size);
   }
 
-  //
-  // @return an iterator over the elements in this set
+  /**
+   * Returns an iterator over the elements contained in this collection.
+   *
+   * @return an iterator over the elements contained in this collection
+   */
   @Override
   public Iterator<E> iterator() {
     return list.iterator();
   }
 
-  // set contains more than <tt>Integer.MAX_VALUE</tt> elements, returns
-  // <tt>Integer.MAX_VALUE</tt>.
-  //
-  // @return the number of elements in this set (its cardinality)
+  /**
+   * Returns the number of elements in this set (its cardinality). If this set contains more than <tt>Integer.MAX_VALUE</tt> elements,
+   * returns
+   * <tt>Integer.MAX_VALUE</tt>.
+   *
+   * @return the number of elements in this set (its cardinality)
+   */
   @Override
   public int size() {
     return list.size();
   }
 
-  //
-  // @param element element to be added to this set
-  // @return <tt>true</tt> if this set did not already contain the specified
-  // element
+  /**
+   * Adds the specified element to this set if it is not already present (optional operation).
+   *
+   * @param element the specified element
+   *
+   * @return <tt>true</tt> if this set did not already contain the specified element
+   */
   @Override
   public boolean add(final E element) {
     final boolean isModified = !list.contains(element);
@@ -101,25 +116,36 @@ public class ArraySet<E> extends AbstractSet<E> implements Cloneable, Serializab
     return isModified;
   }
 
-  //
-  // @param element the element to be removed from this set, if present
-  // @return <tt>true</tt> if this set contained the specified element
+  /**
+   * Removes the specified element from this set if it is present.
+   *
+   * @param element the specified element
+   *
+   * @return <tt>true</tt> if this set contained the specified element
+   */
   @Override
   @SuppressWarnings("unchecked")
   public boolean remove(final Object element) {
     return list.remove((E) element);
   }
 
-  //
-  // @return <tt>true</tt> if this set contains no elements
+  /**
+   * Returns <tt>true</tt> if this set contains no elements.
+   *
+   * @return <tt>true</tt> if this set contains no elements
+   */
   @Override
   public boolean isEmpty() {
     return list.isEmpty();
   }
 
-  //
-  // @param element the element whose presence in this set is to be tested
-  // @return <tt>true</tt> if this set contains the specified element
+  /**
+   * Returns <tt>true</tt> if this set contains the specified element.
+   *
+   * @param element the specified element
+   *
+   * @return <tt>true</tt> if this set contains the specified element
+   */
   @Override
   @SuppressWarnings("unchecked")
   public boolean contains(final Object element) {
@@ -132,9 +158,12 @@ public class ArraySet<E> extends AbstractSet<E> implements Cloneable, Serializab
     list.clear();
   }
 
-  //
-  // @return a shallow copy of this set
-  // @throws CloneNotSupportedException if the clone operation is not supported by the element types of this set
+  /**
+   * Returns a shallow copy of this set.
+   *
+   * @return a shallow copy of this set
+   * @throws CloneNotSupportedException if the clone operation is not supported by the element types of this set
+   */
   @Override
   @SuppressWarnings("unchecked")
   public Object clone() throws CloneNotSupportedException {

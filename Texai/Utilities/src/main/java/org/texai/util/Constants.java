@@ -20,7 +20,8 @@
  */
 package org.texai.util;
 
-/** Provides utility constants.
+/**
+ * Provides utility constants.
  *
  * @author reed
  */
@@ -33,8 +34,9 @@ public final class Constants {
   // the highest IANA Dynamic and/or Private Port
   public static final int HIGHEST_DYNAMIC_OR_PRIVATE_PORT = 65535;
 
-
-  /** This class is never instantiated. */
+  /**
+   * This class is never instantiated.
+   */
   private Constants() {
   }
 }

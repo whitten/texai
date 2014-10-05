@@ -749,13 +749,6 @@ public final class StringUtils {
   /**
    * Returns whether the given CharSequence is neither <code>null</code> nor length 0. Note: Will return <code>true</code> for a
    * CharSequence that purely consists of whitespace.
-   * <p>
-   * <pre>
-   * StringUtils.hasLength(null) = false
-   * StringUtils.hasLength("") = false
-   * StringUtils.hasLength(" ") = true
-   * StringUtils.hasLength("Hello") = true
-   * </pre>
    *
    * @param str the CharSequence to check (may be <code>null</code>)
    *

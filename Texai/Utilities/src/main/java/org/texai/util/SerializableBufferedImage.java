@@ -14,7 +14,8 @@ import java.awt.image.BufferedImage;
 import java.io.Serializable;
 import net.jcip.annotations.NotThreadSafe;
 
-/** Provides a serializable buffered image.
+/**
+ * Provides a serializable buffered image.
  *
  * @author reed
  */
@@ -32,7 +33,8 @@ public class SerializableBufferedImage implements Serializable {
   // the height
   private final int height;
 
-  /** Constructs a new SerializableBufferedImage instance.
+  /**
+   * Constructs a new SerializableBufferedImage instance.
    *
    * @param bufferedImage the buffered image
    */
@@ -55,7 +57,8 @@ public class SerializableBufferedImage implements Serializable {
             width); // scansize
   }
 
-  /** returns a buffered image.
+  /**
+   * returns a buffered image.
    *
    * @return a buffered image
    */
@@ -75,7 +78,8 @@ public class SerializableBufferedImage implements Serializable {
     return bufferedImage;
   }
 
-  /** Returns a string representation of this object.
+  /**
+   * Returns a string representation of this object.
    *
    * @return a string representation of this object
    */

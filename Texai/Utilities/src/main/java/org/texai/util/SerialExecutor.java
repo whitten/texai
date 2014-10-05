@@ -27,7 +27,8 @@ import java.util.Queue;
 import java.util.concurrent.Executor;
 import net.jcip.annotations.NotThreadSafe;
 
-/** Provides a serial executor.
+/**
+ * Provides a serial executor.
  *
  * @author reed
  */
@@ -41,7 +42,8 @@ public class SerialExecutor implements Executor {
   // the active task
   Runnable activeTask;
 
-  /** Constructs a new SerialExecutor instance.
+  /**
+   * Constructs a new SerialExecutor instance.
    *
    * @param executor the executor that serially executes the tasks
    */
@@ -52,7 +54,8 @@ public class SerialExecutor implements Executor {
     this.executor = executor;
   }
 
-  /** Executes the given command at some time in the future.
+  /**
+   * Executes the given command at some time in the future.
    *
    * @param task the runnable task
    */
@@ -77,7 +80,9 @@ public class SerialExecutor implements Executor {
     }
   }
 
-  /** Schedules the next task. */
+  /**
+   * Schedules the next task.
+   */
   private synchronized void scheduleNext() {
     activeTask = tasks.poll();
     if (activeTask != null) {

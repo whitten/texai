@@ -40,7 +40,8 @@ import java.util.List;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
 
-/** NetworkUtils utilities.
+/**
+ * NetworkUtils utilities.
  *
  * @author reed
  */
@@ -62,11 +63,14 @@ public final class NetworkUtils {
   // the socket connection timeout
   public static final int CONNECTION_TIMEOUT = 10000;
 
-  /** Private constructor because this class is never instantiated. */
+  /**
+   * Private constructor because this class is never instantiated.
+   */
   private NetworkUtils() {
   }
 
-  /** Returns whether this set of nodes is running as a cloud service.
+  /**
+   * Returns whether this set of nodes is running as a cloud service.
    *
    * @return whether this set of nodes is running as a cloud service
    */
@@ -74,7 +78,8 @@ public final class NetworkUtils {
     return true;
   }
 
-  /** Returns whether this set of nodes is running as an Internet-distributed Texai instance.
+  /**
+   * Returns whether this set of nodes is running as an Internet-distributed Texai instance.
    *
    * @return whether this set of nodes is running as an Internet-distributed Texai instance
    */
@@ -82,7 +87,8 @@ public final class NetworkUtils {
     return !isCloudService();
   }
 
-  /** Gets the host name.
+  /**
+   * Gets the host name.
    *
    * @return the host name
    */
@@ -95,7 +101,8 @@ public final class NetworkUtils {
     }
   }
 
-  /** Obtains the local host address in situations where it cannot be obtained solely from the InetAddress class.
+  /**
+   * Obtains the local host address in situations where it cannot be obtained solely from the InetAddress class.
    *
    * @return the local host address
    */
@@ -125,9 +132,11 @@ public final class NetworkUtils {
     }
   }
 
-  /** Returns whether the given internet address is reserved for private networks, such as those behind a NAT router.
+  /**
+   * Returns whether the given internet address is reserved for private networks, such as those behind a NAT router.
    *
    * @param inetAddress the given internet address
+   *
    * @return whether the given internet address is reserved for private networks
    */
   public static boolean isPrivateNetworkAddress(final InetAddress inetAddress) {
@@ -140,7 +149,8 @@ public final class NetworkUtils {
             || inetAddressString.startsWith("172.");
   }
 
-  /** Return the MAC address of the current network interface for this computer.
+  /**
+   * Return the MAC address of the current network interface for this computer.
    *
    * @return the MAC address of the current network interface for this computer
    */
@@ -172,7 +182,8 @@ public final class NetworkUtils {
     return macAddress;
   }
 
-  /** Returns the string representation of the MAC address of the current network interface for this computer.
+  /**
+   * Returns the string representation of the MAC address of the current network interface for this computer.
    *
    * @return the string representation of the MAC address of the current network interface for this computer
    */
@@ -191,8 +202,8 @@ public final class NetworkUtils {
     return stringBuilder.toString();
   }
 
-  /** Returns the SSL server port number, which is allocated from the
-   * dynamic range: 49152–65535, as described in
+  /**
+   * Returns the SSL server port number, which is allocated from the dynamic range: 49152–65535, as described in
    * http://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers
    *
    * @return the SSL server port number
@@ -236,8 +247,8 @@ public final class NetworkUtils {
     return serverPort;
   }
 
-  /** Returns a dynamic server port number, which is allocated from the
-   * dynamic range: 49152–65535, as described in
+  /**
+   * Returns a dynamic server port number, which is allocated from the dynamic range: 49152–65535, as described in
    * http://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers
    *
    * @return the SSL server port number
@@ -246,10 +257,12 @@ public final class NetworkUtils {
     return (int) (LOWER_PORT_BOUND + Math.random() * (UPPER_PORT_BOUND - LOWER_PORT_BOUND));
   }
 
-  /** Returns whether the given host is accepting connections on the given port.
+  /**
+   * Returns whether the given host is accepting connections on the given port.
    *
    * @param host the given host
    * @param port the given port
+   *
    * @return whether the given host is accepting connections on the given port
    */
   public static boolean isHostAvailable(final String host, final int port) {
@@ -277,9 +290,11 @@ public final class NetworkUtils {
     return true;
   }
 
-  /** Returns a socket address formed from the given URL string.
+  /**
+   * Returns a socket address formed from the given URL string.
    *
    * @param urlString the given URL string
+   *
    * @return a socket address formed from the given URL string
    */
   public static InetSocketAddress makeInetSocketAddress(final String urlString) {

@@ -19,7 +19,7 @@ import org.texai.kb.Constants;
  * @author Stephen L. Reed
  */
 @NotThreadSafe
-public final class AHCSConstants {
+public final class AHCSConstants<E> {
 
   // comment 1
   // comment 2

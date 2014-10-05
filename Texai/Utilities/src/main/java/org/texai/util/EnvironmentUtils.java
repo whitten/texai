@@ -27,7 +27,8 @@ import java.util.Map.Entry;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
 
-/** Provides runtime and system property utilities.
+/**
+ * Provides runtime and system property utilities.
  *
  * @author reed
  */
@@ -37,11 +38,14 @@ public final class EnvironmentUtils {
   // the logger
   private static final Logger LOGGER = Logger.getLogger(EnvironmentUtils.class);
 
-  /** Private constructor to ensure non-instantiation. */
+  /**
+   * Private constructor to ensure non-instantiation.
+   */
   private EnvironmentUtils() {
   }
 
-  /** Returns whether this is the correct Java version to run the Texai application.
+  /**
+   * Returns whether this is the correct Java version to run the Texai application.
    *
    * @return whether this is the correct Java version to run the Texai application
    */
@@ -49,7 +53,8 @@ public final class EnvironmentUtils {
     return System.getProperty("java.specification.version").equals("1.8");
   }
 
-  /** Returns whether the operating system is a version of Windows.
+  /**
+   * Returns whether the operating system is a version of Windows.
    *
    * @return whether the operating system is a version of Windows.
    */
@@ -57,7 +62,8 @@ public final class EnvironmentUtils {
     return System.getProperty("os.name").toLowerCase().startsWith("windows");
   }
 
-  /** Returns whether the operating system is a version of Linux.
+  /**
+   * Returns whether the operating system is a version of Linux.
    *
    * @return whether the operating system is a version of Linux.
    */
@@ -65,7 +71,9 @@ public final class EnvironmentUtils {
     return System.getProperty("os.name").toLowerCase().startsWith("linux");
   }
 
-  /** Logs the runtime environment. */
+  /**
+   * Logs the runtime environment.
+   */
   public static void logRuntimeEnvironment() {
     LOGGER.info("Runtime environment:");
     final long megabyte = 1024 * 1024;
@@ -85,7 +93,9 @@ public final class EnvironmentUtils {
     }
   }
 
-  /** Logs the system properties. */
+  /**
+   * Logs the system properties.
+   */
   public static void logSystemProperties() {
     LOGGER.info("System properties:");
     for (final Entry<Object, Object> entry : System.getProperties().entrySet()) {
@@ -93,7 +103,9 @@ public final class EnvironmentUtils {
     }
   }
 
-  /** Logs the host system monitor. */
+  /**
+   * Logs the host system monitor.
+   */
   public static void logSystemMonitor() {
     final JavaSysMon javaSysMon = new JavaSysMon();
     final long giga = 1024 * 1024 * 1024;
@@ -106,7 +118,8 @@ public final class EnvironmentUtils {
     LOGGER.info("GB RAM: " + ((double) memoryStats.getTotalBytes()) / ((double) giga));
   }
 
-  /** Returns the X.509 certificate server host.
+  /**
+   * Returns the X.509 certificate server host.
    *
    * @return the X.509 certificate server host
    */

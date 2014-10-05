@@ -19,20 +19,21 @@
  * You should have received a copy of the GNU General Public License along with this program;
  * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package org.texai.util;
 
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 
-/** Provides a concise format for Java log records, consisting of only the log message.  Not used
- * with Log4J.
+/**
+ * Provides a concise format for Java log records, consisting of only the log message. Not used with Log4J.
  *
  * @author reed
  */
 public final class ConciseLoggingFormatter extends SimpleFormatter {
 
-  /** Creates a new instance of ConciseLoggingFormatter. */
+  /**
+   * Creates a new instance of ConciseLoggingFormatter.
+   */
   public ConciseLoggingFormatter() {
     super();
   }
@@ -41,6 +42,7 @@ public final class ConciseLoggingFormatter extends SimpleFormatter {
    * Formats the given log record.
    *
    * @param logRecord the log record
+   *
    * @return the formatted log record
    */
   @Override

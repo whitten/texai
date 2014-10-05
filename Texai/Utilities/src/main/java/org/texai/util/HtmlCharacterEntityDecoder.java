@@ -16,8 +16,7 @@
 package org.texai.util;
 
 /**
- * Helper for decoding HTML Strings by replacing character
- * entity references with the referred character.
+ * Helper for decoding HTML Strings by replacing character entity references with the referred character.
  *
  * @author Juergen Hoeller
  * @author Martin Kersten
@@ -54,16 +53,16 @@ class HtmlCharacterEntityDecoder {
     nextPotentialReferencePosition = Math.max(startPosition, nextSemicolonPosition - MAX_REFERENCE_SIZE);
 
     do {
-      nextPotentialReferencePosition =
-              originalMessage.indexOf('&', nextPotentialReferencePosition);
+      nextPotentialReferencePosition
+              = originalMessage.indexOf('&', nextPotentialReferencePosition);
 
       if (nextSemicolonPosition != -1
               && nextSemicolonPosition < nextPotentialReferencePosition) {
         nextSemicolonPosition = originalMessage.indexOf(';', nextPotentialReferencePosition + 1);
       }
 
-      boolean isPotentialReference =
-              nextPotentialReferencePosition != -1
+      boolean isPotentialReference
+              = nextPotentialReferencePosition != -1
               && nextSemicolonPosition != -1
               && nextPotentialReferencePosition - nextSemicolonPosition < MAX_REFERENCE_SIZE;
 
@@ -112,8 +111,8 @@ class HtmlCharacterEntityDecoder {
   }
 
   private boolean processNumberedReference() {
-    boolean isHexNumberedReference =
-            originalMessage.charAt(nextPotentialReferencePosition + 2) == 'x'
+    boolean isHexNumberedReference
+            = originalMessage.charAt(nextPotentialReferencePosition + 2) == 'x'
             || originalMessage.charAt(nextPotentialReferencePosition + 2) == 'X';
     try {
       int value = (!isHexNumberedReference)

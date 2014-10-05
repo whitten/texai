@@ -47,12 +47,16 @@ public final class LinesOfCodeCounter {
     "/home/reed/git/texai/Texai/X509Security/src/main"
   };
 
-  /** Creates a new instance of LinesOfCodeCounter. */
+  /**
+   * Creates a new instance of LinesOfCodeCounter.
+   */
   private LinesOfCodeCounter() {
     super();
   }
 
-  /** Counts the lines of code. */
+  /**
+   * Counts the lines of code.
+   */
   private void count() {
     try {
       int numberOfLines;
@@ -70,8 +74,8 @@ public final class LinesOfCodeCounter {
     }
   }
 
-
-  /** Executes this application.
+  /**
+   * Executes this application.
    *
    * @param args the command line arguments (unused)
    */
@@ -80,9 +84,11 @@ public final class LinesOfCodeCounter {
     linesOfCodeCounter.count();
   }
 
-  /** Returns the number of lines in the specified file.
+  /**
+   * Returns the number of lines in the specified file.
    *
    * @param filePath the specified file
+   *
    * @return the number of lines in the specified file
    * @throws java.io.IOException when an input/output error occurs
    */
@@ -118,9 +124,11 @@ public final class LinesOfCodeCounter {
     return numberOfLines;
   }
 
-  /** Returns the total number of lines of Java code in the specified directory and its subdirectories.
+  /**
+   * Returns the total number of lines of Java code in the specified directory and its subdirectories.
    *
    * @param directoryPath the specified directory
+   *
    * @return the total number of lines of Java code in the specified directory
    * @throws java.io.IOException when an input/output error occurs
    */
@@ -147,4 +155,3 @@ public final class LinesOfCodeCounter {
     return numberOfLines;
   }
 }
-

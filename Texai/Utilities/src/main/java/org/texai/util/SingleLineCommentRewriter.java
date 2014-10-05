@@ -111,6 +111,10 @@ public final class SingleLineCommentRewriter extends DirectoryWalker<String> {
           index = line.indexOf(" class ");
           if (index > -1) {
             className = line.substring(index + 7).split(" ")[0].trim();
+            index = className.indexOf("<");
+            if (index > -1) {
+              className = className.substring(0, index);
+            }
             if (StringUtils.isJavaClassName(className)) {
               isClass = true;
               LOGGER.debug("class name: '" + className + "'");

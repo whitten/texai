@@ -15,14 +15,16 @@
  * 2003-07-22 Christian d'Heureuse (chdh): Module created.<br>
  * 2005-08-11 chdh: License changed from GPL to LGPL.<br>
  * 2006-11-21 chdh:<br>
- *  &nbsp; Method encode(String) renamed to encodeString(String).<br>
- *  &nbsp; Method decode(String) renamed to decodeString(String).<br>
- *  &nbsp; New method encode(byte[],int) added.<br>
- *  &nbsp; New method decode(String) added.<br>
+ * &nbsp; Method encode(String) renamed to encodeString(String).<br>
+ * &nbsp; Method decode(String) renamed to decodeString(String).<br>
+ * &nbsp; New method encode(byte[],int) added.<br>
+ * &nbsp; New method decode(String) added.<br>
  */
 package org.texai.util;
 
-/** This class is used to encode and decode data in Base64 format as described in RFC 1521. */
+/**
+ * This class is used to encode and decode data in Base64 format as described in RFC 1521.
+ */
 @SuppressWarnings("PMD")
 public final class Base64Coder {
 
@@ -56,9 +58,19 @@ public final class Base64Coder {
     }
   }
 
-  // 
-  // @param s the given string
-  // @return the decoded string
+  /**
+   * Private constructor that prevents class instantiation.
+   */
+  private Base64Coder() {
+  }
+
+  /**
+   * Decodes the given string.
+   *
+   * @param s the given string
+   *
+   * @return the decoded string
+   */
   public static String decodeEntities(final String s) {
     final StringBuilder stringBuilder = new StringBuilder();
     int i = 0;
@@ -77,25 +89,36 @@ public final class Base64Coder {
     return stringBuilder.toString();
   }
 
-
-  // 
-  // @param s  a String to be encoded.
-  // @return   A String with the Base64 encoded data.
+  /**
+   * Encodes the given string.
+   *
+   * @param s a String to be encoded.
+   *
+   * @return A String with the Base64 encoded data.
+   */
   public static String encodeString(final String s) {
     return new String(encode(s.getBytes()));
   }
 
-  // 
-  // @param in  an array containing the data bytes to be encoded.
-  // @return    A character array with the Base64 encoded data.
+  /**
+   * Encodes the given byte array.
+   *
+   * @param in an array containing the data bytes to be encoded.
+   *
+   * @return A character array with the Base64 encoded data.
+   */
   public static char[] encode(final byte[] in) {
     return encode(in, in.length);
   }
 
-  // 
-  // @param in   an array containing the data bytes to be encoded.
-  // @param iLen number of bytes to process in <code>in</code>.
-  // @return     A character array with the Base64 encoded data.
+  /**
+   * Encodes the given number of bytes in the given byte array.
+   *
+   * @param in an array containing the data bytes to be encoded.
+   * @param iLen number of bytes to process in <code>in</code>.
+   *
+   * @return A character array with the Base64 encoded data.
+   */
   public static char[] encode(final byte[] in, final int iLen) {
     int oDataLen = (iLen * 4 + 2) / 3;       // output length without padding
     int oLen = ((iLen + 2) / 3) * 4;         // output length including padding
@@ -120,24 +143,35 @@ public final class Base64Coder {
     return out;
   }
 
-  // 
-  // @param s  a Base64 String to be decoded.
-  // @return   A String containing the decoded data.
+  /**
+   * Decodes the given base 64 string into a string.
+   *
+   * @param s a Base64 String to be decoded.
+   *
+   * @return A String containing the decoded data.
+   */
   public static String decodeString(final String s) {
     return new String(decode(s));
   }
 
-  // 
-  // @param s  a Base64 String to be decoded.
-  // @return   An array containing the decoded data bytes.
+  /**
+   * Decodes the given base 64 string into a byte array.
+   *
+   * @param s a Base64 String to be decoded.
+   *
+   * @return An array containing the decoded data bytes.
+   */
   public static byte[] decode(final String s) {
     return decode(s.toCharArray());
   }
 
-  // 
-  // No blanks or line breaks are allowed within the Base64 encoded data.
-  // @param in  a character array containing the Base64 encoded data.
-  // @return    An array containing the decoded data bytes.
+  /**
+   * Decodes the given character array into a byte array. No blanks or line breaks are allowed within the Base64 encoded data.
+   *
+   * @param in a character array containing the Base64 encoded data.
+   *
+   * @return An array containing the decoded data bytes.
+   */
   public static byte[] decode(final char[] in) {
     int iLen = in.length;
     if (iLen % 4 != 0) {
@@ -179,8 +213,5 @@ public final class Base64Coder {
     return out;
   }
 
-  // Private constructor that prevents class instantiation.
-  private Base64Coder() {
-  }
 } // end class Base64Coder
 
