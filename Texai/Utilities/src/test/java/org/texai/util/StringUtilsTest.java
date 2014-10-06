@@ -22,10 +22,27 @@ import org.junit.Test;
  */
 public class StringUtilsTest {
 
-  /** the logger */
+  /**
+   * the logger
+   */
   private static final Logger LOGGER = Logger.getLogger(StringUtilsTest.class);
 
   public StringUtilsTest() {
+  }
+
+  /**
+   * Test of toOneItemStringPerLine method, of class StringUtils.
+   */
+  @Test
+  public void testToOneItemStringPerLine() {
+    LOGGER.info("toOneItemStringPerLine");
+    final Collection<Object> items = new ArrayList<>();
+    items.add(1);
+    items.add(2);
+    items.add("abc");
+    assertEquals("1\n"
+            + "2\n"
+            + "abc\n", StringUtils.toOneItemStringPerLine(items));
   }
 
   /**
@@ -612,7 +629,5 @@ public class StringUtilsTest {
     strings2.add("cat");
     assertFalse(StringUtils.isOrderConsistent(strings1, strings2));
   }
-
-
 
 }

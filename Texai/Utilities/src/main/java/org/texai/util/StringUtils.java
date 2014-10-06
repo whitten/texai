@@ -48,6 +48,23 @@ public final class StringUtils {
   private StringUtils() {
   }
 
+  /** Returns a string having each item, of the given collection, represented as a string on a separate line.
+   *
+   * @param items the given collection
+   * @return the string representation of the given items, one per line
+   */
+  public static String toOneItemStringPerLine(final Collection<?> items) {
+    //Preconditions
+    assert items != null : "items must not be null";
+
+    final StringBuilder stringBuilder = new StringBuilder();
+    items.stream().forEach(item -> {
+      stringBuilder.append(item);
+      stringBuilder.append('\n');
+    });
+    return stringBuilder.toString();
+  }
+
   /**
    * Returns a sorted list of the strings corresponding to the given collection of objects.
    *
