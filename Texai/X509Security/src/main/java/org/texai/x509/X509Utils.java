@@ -108,10 +108,6 @@ public final class X509Utils {
   public static final String DIGITAL_SIGNATURE_ALGORITHM = "SHA512withRSA";
   // the indicator whether the JCE unlimited strength jurisdiction policy files are installed
   private static boolean isJCEUnlimitedStrenthPolicy;
-  // the installer keystore password
-  public static final char[] INSTALLER_KEYSTORE_PASSWORD = "installer-keystore-password".toCharArray();
-  // the installer certificate alias
-  public static final String INSTALLER_CERTIFICATE_ALIAS = "installer-certificate";
 
   static {
     try {
@@ -1167,58 +1163,6 @@ public final class X509Utils {
     } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | NoSuchProviderException ex) {
       throw new TexaiException(ex);
     }
-  }
-
-  /**
-   * Initializes the installer keystore.
-   */
-  public static synchronized void initializeInstallerKeyStore() {
-    String filePath = "data/installer-keystore.uber";
-    File file = new File(filePath);
-    if (file.exists()) {
-      // do not overwrite it
-      return;
-    }
-    try {
-      LOGGER.info("creating the installer keystores");
-      // the installer keystore consists of the single client X.509 certificate
-      final KeyPair installerKeyPair = X509Utils.generateRSAKeyPair3072();
-      final X509Certificate installerX509Certificate = generateSelfSignedEndEntityX509Certificate(
-              installerKeyPair,
-              UUID.randomUUID(), // uid
-              "installer"); // domainComponent
-      // proceed as though the JCE unlimited strength jurisdiction policy files are installed, which they will be on the
-      // trusted development system.
-      LOGGER.info("creating installer-keystore.uber");
-      assert X509Utils.isJCEUnlimitedStrengthPolicy();
-      KeyStore installerKeyStore = X509Utils.findOrCreateKeyStore(filePath, INSTALLER_KEYSTORE_PASSWORD);
-      installerKeyStore.setKeyEntry(
-              INSTALLER_CERTIFICATE_ALIAS, // certificateAlias,
-              installerKeyPair.getPrivate(),
-              INSTALLER_KEYSTORE_PASSWORD,
-              new Certificate[]{installerX509Certificate});
-      installerKeyStore.store(new FileOutputStream(filePath), INSTALLER_KEYSTORE_PASSWORD);
-
-      // then proceed after disabling the JCE unlimited strength jurisdiction policy files indicator
-      X509Utils.setIsJCEUnlimitedStrengthPolicy(false);
-      filePath = "data/installer-keystore.jceks";
-      LOGGER.info("creating installer-keystore.jceks");
-      installerKeyStore = X509Utils.findOrCreateKeyStore(filePath, INSTALLER_KEYSTORE_PASSWORD);
-      installerKeyStore.setKeyEntry(
-              INSTALLER_CERTIFICATE_ALIAS, // certificateAlias,
-              installerKeyPair.getPrivate(),
-              INSTALLER_KEYSTORE_PASSWORD,
-              new Certificate[]{installerX509Certificate});
-      installerKeyStore.store(new FileOutputStream(filePath), INSTALLER_KEYSTORE_PASSWORD);
-      // restore the JCE unlimited strength jurisdiction policy files indicator
-      X509Utils.setIsJCEUnlimitedStrengthPolicy(true);
-    } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | SignatureException | InvalidKeyException | IOException | KeyStoreException | CertificateException ex) {
-      LOGGER.error(StringUtils.getStackTraceAsString(ex));
-      throw new TexaiException(ex);
-    }
-
-    //Postconditions
-    assert X509Utils.isJCEUnlimitedStrengthPolicy() : "JCE unlimited strength policy must be in effect";
   }
 
   /**

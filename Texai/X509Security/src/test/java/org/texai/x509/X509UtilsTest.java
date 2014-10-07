@@ -79,7 +79,7 @@ public class X509UtilsTest {
     for (final Provider provider : Security.getProviders()) {
       X509Utils.logProviderCapabilities(provider.getName());
     }
-    X509Utils.initializeInstallerKeyStore();
+    //X509Utils.initializeInstallerKeyStore();
   }
 
   @AfterClass
