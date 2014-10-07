@@ -352,8 +352,8 @@ public final class X509Utils {
    * and for message signing.
    *
    * @param keyPair the root public/private key pair
-   * @param uid the subject UID
-   * @param domainComponent the domain component, e.g. TexaiLauncher or NodeRuntime
+   * @param uid the subject UID, or null if not used
+   * @param domainComponent the domain component, e.g. container-name.agent-name.role-name
    *
    * @return a self-signed end-use certificate
    *
@@ -379,16 +379,17 @@ public final class X509Utils {
           IOException {
     //Preconditions
     assert keyPair != null : "keyPair must not be null";
-    assert uid != null : "uid must not be null";
+    assert uid != null || StringUtils.isNonEmptyString(domainComponent) : "Either uid or domainComponent must be present";
 
-    final String x500PrincipalString;
-    // provide items to X500Principal in reverse order
-    if (domainComponent == null || domainComponent.isEmpty()) {
-      x500PrincipalString = "UID=" + uid + ", CN=texai.org";
-    } else {
-      x500PrincipalString = "UID=" + uid + ", DC=" + domainComponent + " ,CN=texai.org";
+    final StringBuilder stringBuilder = new StringBuilder();
+    if (uid != null) {
+      stringBuilder.append("UID=").append(uid).append(", ");
     }
-    final X500Principal x500Principal = new X500Principal(x500PrincipalString);
+    if (StringUtils.isNonEmptyString(domainComponent)) {
+      stringBuilder.append("DC=").append(domainComponent).append(", ");
+    }
+    stringBuilder.append("CN=texai.org");
+    final X500Principal x500Principal = new X500Principal(stringBuilder.toString());
 
     final X509v3CertificateBuilder x509v3CertificateBuilder = new X509v3CertificateBuilder(
             new X500Name(x500Principal.getName()), // issuer,
@@ -1103,7 +1104,6 @@ public final class X509Utils {
           final String certificateAlias) {
     //Preconditions
     assert keyPair != null : "keyPair must not be null";
-    assert uid != null : "uid must not be null";
     assert keystorePassword != null : "keystorePassword must not be null";
     assert StringUtils.isNonEmptyString(certificateAlias) : "certificateAlias must be a non-empty string";
 
