@@ -50,8 +50,6 @@ import org.texai.util.TexaiException;
 @Immutable
 public final class X509SecurityInfo {
 
-  // the certificate alias which identifies a self-signed certificate entry within the keystore
-  private final String certificateAlias;
   // the key manager factory
   private final KeyManagerFactory keyManagerFactory;
   // the key store
@@ -76,7 +74,6 @@ public final class X509SecurityInfo {
     assert StringUtils.isNonEmptyString(certificateAlias) : "certificateAlias must be a non-empty string";
 
     this.keyStore = keyStore;
-    this.certificateAlias = certificateAlias;
     try {
       keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
       keyManagerFactory.init(keyStore, keyStorePassword);

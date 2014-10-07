@@ -1166,6 +1166,33 @@ public final class X509Utils {
   }
 
   /**
+   * Returns whether the given keystore contains a private key entry for the given alias.
+   *
+   * @param keyStoreFilePath the file path to the keystore
+   * @param keyStorePassword the keystore password
+   * @param alias the private key entry alias
+   *
+   * @return the X509 security information for a test client
+   */
+  public static boolean keyStoreContains(
+          final String keyStoreFilePath,
+          final char[] keyStorePassword,
+          final String alias) {
+    //Preconditions
+    assert keyStoreFilePath != null : "keyStoreFilePath must not be null";
+    assert !keyStoreFilePath.isEmpty() : "keyStoreFilePath must not be empty";
+    assert keyStoreFilePath.endsWith(".uber") || keyStoreFilePath.endsWith(".jceks") : "keystore file extension must be .uber or .jceks";
+    assert keyStorePassword != null : "keyStorePassword must not be null";
+
+    try {
+      final KeyStore keyStore = findOrCreateKeyStore(keyStoreFilePath, keyStorePassword);
+      return keyStore.containsAlias(alias);
+    } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | NoSuchProviderException ex) {
+      throw new TexaiException(ex);
+    }
+  }
+
+  /**
    * Logs the aliases contained in the given keystore.
    *
    * @param keyStore the given keystore

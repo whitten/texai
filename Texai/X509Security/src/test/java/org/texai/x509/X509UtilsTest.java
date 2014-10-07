@@ -114,6 +114,71 @@ public class X509UtilsTest {
   }
 
   /**
+   * Test of keyStoreContains method, of class X509Utils.
+   */
+  @Test
+  public void testKeyStoreContains() {
+    LOGGER.info("keyStoreContains");
+    // delete an existing keystore
+    final String keyStoreFilePath;
+    if (X509Utils.isJCEUnlimitedStrengthPolicy()) {
+      keyStoreFilePath = "data/keystore.uber";
+    } else {
+      keyStoreFilePath = "data/keystore.jceks";
+    }
+    final File keyStoreFile = new File(keyStoreFilePath);
+    if (keyStoreFile.exists()) {
+      final boolean isFileDeleted = keyStoreFile.delete();
+      if (!isFileDeleted) {
+        fail("keystore file not deleted: " + keyStoreFilePath);
+      }
+    }
+    final char[] keyStorePassword = "password".toCharArray();
+    final String alias = "test-alias";
+    assertFalse(X509Utils.keyStoreContains(
+            keyStoreFilePath,
+            keyStorePassword,
+            alias));
+    try {
+      X509Utils.findOrCreateKeyStore(keyStoreFilePath, keyStorePassword);
+      assertFalse(X509Utils.keyStoreContains(
+              keyStoreFilePath,
+              keyStorePassword,
+              alias));
+
+      // create a certificate path
+      final KeyPair keyPair;
+      keyPair = X509Utils.generateRSAKeyPair3072();
+      final UUID uuid = UUID.randomUUID();
+      X509Certificate x509Certificate
+              = X509Utils.generateSelfSignedEndEntityX509Certificate(
+                      keyPair,
+                      uuid,
+                      "TestComponent");
+      final List<Certificate> certificateList = new ArrayList<>();
+      certificateList.add(x509Certificate);
+      CertPath certPath = X509Utils.generateCertPath(certificateList);
+
+      // add the certificate path entry to the keystore
+      X509Utils.addEntryToKeyStore(
+              keyStoreFilePath,
+              keyStorePassword,
+              alias,
+              certPath,
+              keyPair.getPrivate());
+
+      assertTrue(X509Utils.keyStoreContains(
+              keyStoreFilePath,
+              keyStorePassword,
+              alias));
+
+    } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | NoSuchProviderException | InvalidAlgorithmParameterException | SignatureException | InvalidKeyException ex) {
+      LOGGER.info(StringUtils.getStackTraceAsString(ex));
+      fail(ex.getMessage());
+    }
+  }
+
+  /**
    * Test of getMaxAllowedKeyLength method, of class X509Utils.
    */
   @Test
