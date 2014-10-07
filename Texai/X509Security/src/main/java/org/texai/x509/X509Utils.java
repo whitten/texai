@@ -68,7 +68,6 @@ import java.util.List;
 import java.util.UUID;
 import javax.crypto.Cipher;
 import javax.security.auth.x500.X500Principal;
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -86,7 +85,6 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
-import sun.security.x509.X509CertImpl;
 
 /**
  * X509 utilities adapted from "Beginning Cryptography With Java", David Hook, WROX.
@@ -537,11 +535,9 @@ public final class X509Utils {
     //Preconditions
     assert inputStream != null : "inputStream must not be null";
 
-    try {
-      return new X509CertImpl(IOUtils.toByteArray(inputStream));
-    } catch (IOException ex) {
-      throw new TexaiException(ex);
-    }
+    CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+    return (X509Certificate) certificateFactory.generateCertificate(inputStream);
+
   }
 
   /**
@@ -1093,8 +1089,6 @@ public final class X509Utils {
    * Generates the X.509 security information.
    *
    * @param keyPair the key pair for the generated certificate
-   * @param issuerPrivateKey the issuer's private key
-   * @param issuerCertificate the issuer's certificate
    * @param uid the generated certificate's subject UID
    * @param keystorePassword the keystore password
    * @param isJCEUnlimitedStrengthPolicy the indicator whether the generated X.509 security information will be hosted on a system with
