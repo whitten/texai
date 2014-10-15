@@ -28,7 +28,6 @@ import java.util.UUID;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.joda.time.Duration;
-import org.openrdf.model.URI;
 import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
@@ -40,28 +39,19 @@ import org.texai.util.TexaiException;
 @ThreadSafe
 public class SessionManagerSkill extends AbstractSkill {
 
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(SessionManagerSkill.class);
-  /** the class of the managed sub-skill */
+  // the class of the managed sub-skill
   private Class<?> skillClass;
-  /** the session dictionary, session handle --> managed skill instance */
+  // the session dictionary, session handle --> managed skill instance
   private final Map<String, SkillInfo> sessionDictionary = new HashMap<>();
-  /** the duration beyond which unused skill instances are garbage collected */
+  // the duration beyond which unused skill instances are garbage collected
   private long cleanupDurationTimeMillis = 1000 * 60 * 60 * 24; // defaults to one day
-  /** the dummy session handle */
+  // the dummy session handle
   private static final String DUMMY_SESSION_HANDLE = "dummy session handle";
 
   /** Constructs a new Skill instance. */
   public SessionManagerSkill() {
-  }
-
-  /** Returns the id of the containing role.
-   *
-   * @return the id of the containing role
-   */
-  @Override
-  public URI getRoleId() {
-    return getRole().getId();
   }
 
   /** Returns the class name of this skill.
@@ -110,7 +100,7 @@ public class SessionManagerSkill extends AbstractSkill {
     }
     assert operation.equals(AHCSConstants.REGISTER_SENSED_UTTERANCE_PROCESSOR_TASK)
             || getSkillState().equals(State.READY) : "must be in the ready state, but is " + stateDescription(getSkillState())
-            + "\nmessage: " + message.toString(getNodeRuntime());
+            + "\nmessage: " + message;
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.info("delegating " + message.getOperation() + " to " + getSkillInstance(getSessionHandle(message)));
@@ -163,18 +153,18 @@ public class SessionManagerSkill extends AbstractSkill {
         if (!sessionHandle.equals(DUMMY_SESSION_HANDLE)) {
           // initialize the skill instance
           Message message = new Message(
-                  getRoleId(), // senderRoleId
+                  getRole().getQualifiedName(), // senderQualifiedName
                   getClassName(), // senderService
-                  getRoleId(), // recipientRoleId
+                  getRole().getQualifiedName(), // recipientQualifiedName
                   skillClass.getName(), // service
                   AHCSConstants.AHCS_INITIALIZE_TASK); // operation
           skill.receiveMessage(message);
 
           // ready the skill instance
           message = new Message(
-                  getRoleId(), // senderRoleId
+                  getRole().getQualifiedName(), // senderQualifiedName
                   getClassName(), // senderService
-                  getRoleId(), // recipientRoleId
+                  getRole().getQualifiedName(), // recipientQualifiedName
                   skillClass.getName(), // service
                   AHCSConstants.AHCS_READY_TASK); // operation
           skill.receiveMessage(message);

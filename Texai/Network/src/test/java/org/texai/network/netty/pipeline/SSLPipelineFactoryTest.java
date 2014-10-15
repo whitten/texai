@@ -69,6 +69,7 @@ public class SSLPipelineFactoryTest {
     LOGGER.info("getPipeline");
     final boolean useClientMode = true;
     // test creation of new pipeline
+    KeyStoreTestUtils.initializeClientKeyStore();
     final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
     LOGGER.info("getting channelPipeline");
     ChannelPipeline channelPipeline = SSLPipelineFactory.getPipeline(

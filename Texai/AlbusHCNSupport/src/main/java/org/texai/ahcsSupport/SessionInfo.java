@@ -21,7 +21,7 @@ import org.texai.util.StringUtils;
 @NotThreadSafe
 public class SessionInfo {
 
-  /** the session handle */
+  // the session handle
   private final String sessionHandle;
 
   /** Constructs a new SessionInfo instance.

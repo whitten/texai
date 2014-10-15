@@ -5,6 +5,7 @@
 package org.texai.inference;
 
 import java.util.List;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -20,6 +21,7 @@ import org.texai.kb.Constants;
 import org.texai.kb.journal.JournalWriter;
 import org.texai.kb.persistence.DistributedRepositoryManager;
 import org.texai.kb.persistence.RDFEntityManager;
+import org.texai.kb.persistence.RDFEntityPersister;
 import org.texai.turtleStatementParser.TurtleStatementParser;
 
 /**
@@ -28,9 +30,13 @@ import org.texai.turtleStatementParser.TurtleStatementParser;
  */
 public class InferenceEngineTest {
 
-  /** the log4j logger */
+  /**
+   * the log4j logger
+   */
   private static final Logger LOGGER = Logger.getLogger(InferenceEngineTest.class.getName());
-  /** the knowledge base entity manager */
+  /**
+   * the knowledge base entity manager
+   */
   private static RDFEntityManager rdfEntityManager;
 
   public InferenceEngineTest() {
@@ -38,13 +44,14 @@ public class InferenceEngineTest {
 
   @BeforeClass
   public static void setUpClass() throws Exception {
+    Logger.getLogger(RDFEntityPersister.class).setLevel(Level.WARN);
     if (rdfEntityManager == null) {
       LOGGER.info("oneTimeSetup");
       JournalWriter.deleteJournalFiles();
       CacheInitializer.initializeCaches();
-    DistributedRepositoryManager.addRepositoryPath(
-            "Test",
-            System.getenv("REPOSITORIES_TMPFS") + "/Test");
+      DistributedRepositoryManager.addRepositoryPath(
+              "Test",
+              System.getenv("REPOSITORIES_TMPFS") + "/Test");
       DistributedRepositoryManager.clearNamedRepository("Test");
       rdfEntityManager = new RDFEntityManager();
     }
@@ -58,19 +65,20 @@ public class InferenceEngineTest {
 
   /**
    * Test of evaluate method, of class InferenceEngine.
+   *
    * @throws java.lang.Exception when an error occurs
    */
   @Test
   public void evaluate1() throws Exception {
     System.out.println("evaluate 1");
 
-    String queryString =
-            "PREFIX cyc: <" + Constants.CYC_NAMESPACE + ">\n" +
-            "\n" +
-            "SELECT ?LexicalWord1 ?CharacterString\n" +
-            "WHERE {\n" +
-            "  ?LexicalWord1 cyc:wordStrings ?CharacterString .\n" +
-            "}";
+    String queryString
+            = "PREFIX cyc: <" + Constants.CYC_NAMESPACE + ">\n"
+            + "\n"
+            + "SELECT ?LexicalWord1 ?CharacterString\n"
+            + "WHERE {\n"
+            + "  ?LexicalWord1 cyc:wordStrings ?CharacterString .\n"
+            + "}";
     SPARQLParser sparqlParser = new SPARQLParser();
     QueryContainer queryContainer = sparqlParser.parseQuery(queryString, "test1");
     queryContainer.cascadePersist(rdfEntityManager);
@@ -81,11 +89,10 @@ public class InferenceEngineTest {
     //  WHERE {
     //    ?LexicalWord1 cyc:wordStrings ?CharacterString .
     //  }
-
     assertEquals("PREFIX cyc: <http://sw.cyc.com/2006/07/27/cyc/>\n\nSELECT ?LexicalWord1 ?CharacterString\nWHERE {\n  ?LexicalWord1 cyc:wordStrings ?CharacterString .\n}", queryContainer.toString());
 
-    String statementsString =
-            "texai:LexicalWord1 cyc:wordStrings \"Buster\" .\n";
+    String statementsString
+            = "texai:LexicalWord1 cyc:wordStrings \"Buster\" .\n";
     TurtleStatementParser turtleStatementParser = TurtleStatementParser.makeTurtleStatementParser(statementsString);
     List<Statement> statements = turtleStatementParser.Statements();
     assertEquals(1, statements.size());
@@ -100,17 +107,17 @@ public class InferenceEngineTest {
     assertEquals("[CharacterString=\"Buster\";LexicalWord1=http://texai.org/texai/LexicalWord1]", bindingSet.toString());
     result.close();
 
-    queryString =
-            "PREFIX cyc: <" + Constants.CYC_NAMESPACE + ">\n" +
-            "PREFIX texai: <" + Constants.TEXAI_NAMESPACE + ">\n" +
-            "\n" +
-            "SELECT ?LexicalWord1 ?string\n" +
-            "WHERE {\n" +
-            "  ?LexicalWord1 cyc:wordStrings ?string .\n" +
-            "  ?LexicalWord1 texai:fcgStatus texai:SingleObject .\n" +
-            "  ?LexicalWord1 texai:typeOrSubClassOf cyc:LexicalWord .\n" +
-            "  ?LexicalWord1 texai:typeOrSubClassOf cyc:ProperCountNoun .\n" +
-            "}";
+    queryString
+            = "PREFIX cyc: <" + Constants.CYC_NAMESPACE + ">\n"
+            + "PREFIX texai: <" + Constants.TEXAI_NAMESPACE + ">\n"
+            + "\n"
+            + "SELECT ?LexicalWord1 ?string\n"
+            + "WHERE {\n"
+            + "  ?LexicalWord1 cyc:wordStrings ?string .\n"
+            + "  ?LexicalWord1 texai:fcgStatus texai:SingleObject .\n"
+            + "  ?LexicalWord1 texai:typeOrSubClassOf cyc:LexicalWord .\n"
+            + "  ?LexicalWord1 texai:typeOrSubClassOf cyc:ProperCountNoun .\n"
+            + "}";
     sparqlParser = new SPARQLParser();
     queryContainer = sparqlParser.parseQuery(queryString, "X_is_a_proper_noun");
     queryContainer.cascadePersist(rdfEntityManager);
@@ -125,20 +132,19 @@ public class InferenceEngineTest {
     //    ?LexicalWord1 texai:typeOrSubClassOf cyc:LexicalWord .
     //    ?LexicalWord1 texai:typeOrSubClassOf cyc:ProperCountNoun .
     //  }
-
     assertEquals("PREFIX cyc: <http://sw.cyc.com/2006/07/27/cyc/>\nPREFIX texai: <http://texai.org/texai/>\n\nSELECT ?LexicalWord1 ?string\nWHERE {\n  ?LexicalWord1 cyc:wordStrings ?string .\n  ?LexicalWord1 texai:fcgStatus texai:SingleObject .\n  ?LexicalWord1 texai:typeOrSubClassOf cyc:LexicalWord .\n  ?LexicalWord1 texai:typeOrSubClassOf cyc:ProperCountNoun .\n}", queryContainer.toString());
 
-    statementsString =
-            "texai:LexicalWord1 cyc:wordStrings \"Buster\" .\n" +
-            "texai:LexicalWord1 texai:fcgDiscourseRole texai:External .\n" +
-            "texai:LexicalWord1 texai:fcgStatus texai:SingleObject .\n" +
-            "texai:LexicalWord1 texai:typeOrSubClassOf cyc:LexicalWord .\n" +
-            "texai:LexicalWord1 texai:typeOrSubClassOf cyc:ProperCountNoun .\n" +
-            "texai:LexicalWord1 texai:typeOrSubClassOf texai:IndefiniteThingInThisDiscourse .\n" +
-            "texai:LexicalWord1 rdf:type texai:FCGClauseSubject .\n" +
-            "texai:Situation-Localized3 cyc:situationConstituents texai:LexicalWord1 .\n" +
-            "texai:Situation-Localized3 texai:situationHappeningOnDate cyc:Now .\n" +
-            "texai:Situation-Localized3 texai:typeOrSubClassOf cyc:Situation-Localized .";
+    statementsString
+            = "texai:LexicalWord1 cyc:wordStrings \"Buster\" .\n"
+            + "texai:LexicalWord1 texai:fcgDiscourseRole texai:External .\n"
+            + "texai:LexicalWord1 texai:fcgStatus texai:SingleObject .\n"
+            + "texai:LexicalWord1 texai:typeOrSubClassOf cyc:LexicalWord .\n"
+            + "texai:LexicalWord1 texai:typeOrSubClassOf cyc:ProperCountNoun .\n"
+            + "texai:LexicalWord1 texai:typeOrSubClassOf texai:IndefiniteThingInThisDiscourse .\n"
+            + "texai:LexicalWord1 rdf:type texai:FCGClauseSubject .\n"
+            + "texai:Situation-Localized3 cyc:situationConstituents texai:LexicalWord1 .\n"
+            + "texai:Situation-Localized3 texai:situationHappeningOnDate cyc:Now .\n"
+            + "texai:Situation-Localized3 texai:typeOrSubClassOf cyc:Situation-Localized .";
     turtleStatementParser = TurtleStatementParser.makeTurtleStatementParser(statementsString);
     statements = turtleStatementParser.Statements();
 
@@ -149,17 +155,17 @@ public class InferenceEngineTest {
     assertEquals("[string=\"Buster\";LexicalWord1=http://texai.org/texai/LexicalWord1]", bindingSet.toString());
     result.close();
 
-    statementsString =
-            "texai:LexicalWord1 cyc:wordStrings \"Taz\" .\n" +
-            "texai:LexicalWord1 texai:fcgDiscourseRole texai:External .\n" +
-            "texai:LexicalWord1 texai:fcgStatus texai:SingleObject .\n" +
-            "texai:LexicalWord1 texai:typeOrSubClassOf cyc:LexicalWord .\n" +
-            "texai:LexicalWord1 texai:typeOrSubClassOf cyc:ProperCountNoun .\n" +
-            "texai:LexicalWord1 texai:typeOrSubClassOf texai:IndefiniteThingInThisDiscourse .\n" +
-            "texai:LexicalWord1 rdf:type texai:FCGClauseSubject .\n" +
-            "texai:Situation-Localized3 cyc:situationConstituents texai:LexicalWord1 .\n" +
-            "texai:Situation-Localized3 texai:situationHappeningOnDate cyc:Now .\n" +
-            "texai:Situation-Localized3 texai:typeOrSubClassOf cyc:Situation-Localized .";
+    statementsString
+            = "texai:LexicalWord1 cyc:wordStrings \"Taz\" .\n"
+            + "texai:LexicalWord1 texai:fcgDiscourseRole texai:External .\n"
+            + "texai:LexicalWord1 texai:fcgStatus texai:SingleObject .\n"
+            + "texai:LexicalWord1 texai:typeOrSubClassOf cyc:LexicalWord .\n"
+            + "texai:LexicalWord1 texai:typeOrSubClassOf cyc:ProperCountNoun .\n"
+            + "texai:LexicalWord1 texai:typeOrSubClassOf texai:IndefiniteThingInThisDiscourse .\n"
+            + "texai:LexicalWord1 rdf:type texai:FCGClauseSubject .\n"
+            + "texai:Situation-Localized3 cyc:situationConstituents texai:LexicalWord1 .\n"
+            + "texai:Situation-Localized3 texai:situationHappeningOnDate cyc:Now .\n"
+            + "texai:Situation-Localized3 texai:typeOrSubClassOf cyc:Situation-Localized .";
     turtleStatementParser = TurtleStatementParser.makeTurtleStatementParser(statementsString);
     statements = turtleStatementParser.Statements();
 
@@ -173,24 +179,23 @@ public class InferenceEngineTest {
     assertEquals("{?string=\"Taz\", ?LexicalWord1=http://texai.org/texai/LexicalWord1}", instance.evaluateWithSingleResult(queryContainer, statements).toString());
 
     // test "X is a Y"
-
-    queryString =
-            "PREFIX rdf: <" + Constants.RDF_NAMESPACE + ">\n" +
-            "PREFIX owl: <" + Constants.OWL_NAMESPACE + ">\n" +
-            "PREFIX cyc: <" + Constants.CYC_NAMESPACE + ">\n" +
-            "PREFIX texai: <" + Constants.TEXAI_NAMESPACE + ">\n" +
-            "\n" +
-            "SELECT ?individual ?Thing\n" +
-            "WHERE {\n" +
-            "  ?individual owl:sameAs ?individual .\n" +
-            "  ?individual rdf:type ?Thing .\n" +
-            "  ?individual rdf:type texai:FCGClauseSubject .\n" +
-            "  ?individual rdf:type texai:IndefiniteThingInThisDiscourse .\n" +
-            "  _:Situation_Localized rdf:type cyc:Situation-Localized .\n" +
-            "  _:Situation_Localized cyc:situationConstituents ?individual .\n" +
-            "  _:Situation_Localized texai:situationHappeningOnDate cyc:Now .\n" +
-            "  FILTER (!sameTerm(?Thing, texai:FCGClauseSubject) && !sameTerm(?Thing, texai:IndefiniteThingInThisDiscourse))\n" +
-            "}";
+    queryString
+            = "PREFIX rdf: <" + Constants.RDF_NAMESPACE + ">\n"
+            + "PREFIX owl: <" + Constants.OWL_NAMESPACE + ">\n"
+            + "PREFIX cyc: <" + Constants.CYC_NAMESPACE + ">\n"
+            + "PREFIX texai: <" + Constants.TEXAI_NAMESPACE + ">\n"
+            + "\n"
+            + "SELECT ?individual ?Thing\n"
+            + "WHERE {\n"
+            + "  ?individual owl:sameAs ?individual .\n"
+            + "  ?individual rdf:type ?Thing .\n"
+            + "  ?individual rdf:type texai:FCGClauseSubject .\n"
+            + "  ?individual rdf:type texai:IndefiniteThingInThisDiscourse .\n"
+            + "  _:Situation_Localized rdf:type cyc:Situation-Localized .\n"
+            + "  _:Situation_Localized cyc:situationConstituents ?individual .\n"
+            + "  _:Situation_Localized texai:situationHappeningOnDate cyc:Now .\n"
+            + "  FILTER (!sameTerm(?Thing, texai:FCGClauseSubject) && !sameTerm(?Thing, texai:IndefiniteThingInThisDiscourse))\n"
+            + "}";
     sparqlParser = new SPARQLParser();
     queryContainer = sparqlParser.parseQuery(queryString, "X_is_a_Y");
     queryContainer.cascadePersist(rdfEntityManager);
@@ -211,17 +216,16 @@ public class InferenceEngineTest {
     //    _:Situation_Localized texai:situationHappeningOnDate cyc:Now .
     //    FILTER (!sameTerm(?Thing, texai:FCGClauseSubject) && !sameTerm(?Thing, texai:IndefiniteThingInThisDiscourse))
     //  }
-
     assertEquals("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX cyc: <http://sw.cyc.com/2006/07/27/cyc/>\nPREFIX texai: <http://texai.org/texai/>\n\nSELECT ?individual ?Thing\nWHERE {\n  ?individual owl:sameAs ?individual .\n  ?individual rdf:type ?Thing .\n  ?individual rdf:type texai:FCGClauseSubject .\n  ?individual rdf:type texai:IndefiniteThingInThisDiscourse .\n  _:Situation_Localized rdf:type cyc:Situation-Localized .\n  _:Situation_Localized cyc:situationConstituents ?individual .\n  _:Situation_Localized texai:situationHappeningOnDate cyc:Now .\n  FILTER (!sameTerm(?Thing, texai:FCGClauseSubject) && !sameTerm(?Thing, texai:IndefiniteThingInThisDiscourse))\n}", queryContainer.toString());
 
-    statementsString =
-            "texai:Buster rdf:type texai:FCGClauseSubject .\n" +
-            "texai:Buster rdf:type texai:IndefiniteThingInThisDiscourse .\n" +
-            "texai:Buster rdf:type cyc:DomesticCat .\n" +
-            "texai:Buster owl:sameAs texai:Buster .\n" +
-            "texai:Situation-Localized1 cyc:situationConstituents texai:Buster .\n" +
-            "texai:Situation-Localized1 texai:situationHappeningOnDate cyc:Now .\n" +
-            "texai:Situation-Localized1 rdf:type cyc:Situation-Localized .";
+    statementsString
+            = "texai:Buster rdf:type texai:FCGClauseSubject .\n"
+            + "texai:Buster rdf:type texai:IndefiniteThingInThisDiscourse .\n"
+            + "texai:Buster rdf:type cyc:DomesticCat .\n"
+            + "texai:Buster owl:sameAs texai:Buster .\n"
+            + "texai:Situation-Localized1 cyc:situationConstituents texai:Buster .\n"
+            + "texai:Situation-Localized1 texai:situationHappeningOnDate cyc:Now .\n"
+            + "texai:Situation-Localized1 rdf:type cyc:Situation-Localized .";
     turtleStatementParser = TurtleStatementParser.makeTurtleStatementParser(statementsString);
     statements = turtleStatementParser.Statements();
 

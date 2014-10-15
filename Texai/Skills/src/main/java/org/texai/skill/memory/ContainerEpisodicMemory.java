@@ -37,7 +37,7 @@ public class ContainerEpisodicMemory extends AbstractSkill {
   // the logger
   private static final Logger LOGGER = Logger.getLogger(ContainerEpisodicMemory.class);
 
-  /** Constructs a new EpisodicMemory instance. */
+  /** Constructs a new ContainerEpisodicMemory instance. */
   public ContainerEpisodicMemory() {
   }
 

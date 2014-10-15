@@ -19,7 +19,7 @@ import net.jcip.annotations.NotThreadSafe;
 @NotThreadSafe
 public abstract class AbstractUnsharedSubSkill extends AbstractSubSkill {
 
-  /** the parent skill */
+  // the parent skill
   private AbstractSkill parentSkill;
 
   /** Constructs a new AbstractUnsharedSubSkill instance. */

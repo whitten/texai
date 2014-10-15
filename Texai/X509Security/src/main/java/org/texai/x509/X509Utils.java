@@ -1085,21 +1085,20 @@ public final class X509Utils {
   /**
    * Generates the X.509 security information.
    *
-   * @param keyPair the key pair for the generated certificate
-   * @param uid the generated certificate's subject UID
+   * @param keyStore the keystore to which the generated certificate will be added
    * @param keystorePassword the keystore password
-   * @param isJCEUnlimitedStrengthPolicy the indicator whether the generated X.509 security information will be hosted on a system with
-   * unlimited strength policy
-   * @param domainComponent the domain component
+   * @param keyPair the key pair for the generated certificate
+   * @param uid the generated certificate's subject UID, or null if not used
+   * @param domainComponent the domain component, or null if not used
    * @param certificateAlias the X.509 certificate alias that indentifies the entry within the keystore
    *
    * @return the X509 security information
    */
   public static X509SecurityInfo generateX509SecurityInfo(
+          final KeyStore keyStore,
+          final char[] keystorePassword,
           final KeyPair keyPair,
           final UUID uid,
-          final char[] keystorePassword,
-          final boolean isJCEUnlimitedStrengthPolicy,
           final String domainComponent,
           final String certificateAlias) {
     //Preconditions
@@ -1107,6 +1106,7 @@ public final class X509Utils {
     assert keystorePassword != null : "keystorePassword must not be null";
     assert StringUtils.isNonEmptyString(certificateAlias) : "certificateAlias must be a non-empty string";
 
+    final X509SecurityInfo x509SecurityInfo;
     try {
       final X509Certificate x509Certificate = generateSelfSignedEndEntityX509Certificate(
               keyPair,
@@ -1114,55 +1114,58 @@ public final class X509Utils {
               domainComponent);
       assert X509Utils.isJCEUnlimitedStrengthPolicy();
 
-      final KeyStore keyStore;
-      if (isJCEUnlimitedStrengthPolicy) {
-        keyStore = KeyStore.getInstance("UBER", BOUNCY_CASTLE_PROVIDER);
-      } else {
-        keyStore = KeyStore.getInstance("JCEKS");
-      }
-      keyStore.load(null, null);
       keyStore.setKeyEntry(
               certificateAlias,
               keyPair.getPrivate(),
               keystorePassword,
               new Certificate[]{x509Certificate});
 
-      return new X509SecurityInfo(
+      x509SecurityInfo = new X509SecurityInfo(
               keyStore,
               keystorePassword,
               certificateAlias); // alias
+
+      //Postconditions
+      assert keyStore.containsAlias(certificateAlias);
+      assert keyStore.isKeyEntry(certificateAlias);
+
+      return x509SecurityInfo;
+
     } catch (NoSuchProviderException | NoSuchAlgorithmException | SignatureException | InvalidKeyException | IOException | KeyStoreException | CertificateException ex) {
       throw new TexaiException(ex);
     }
+
   }
 
   /**
    * Gets the X509 security information for the given keystore and private key alias.
    *
-   * @param keyStoreFilePath the file path to the keystore
+   * @param keyStore the keystore
    * @param keyStorePassword the keystore password
    * @param alias the private key entry alias
    *
-   * @return the X509 security information for a test client
+   * @return the X509 security information, which includes the keystore, certificate and private key
    */
   public static X509SecurityInfo getX509SecurityInfo(
-          final String keyStoreFilePath,
+          final KeyStore keyStore,
           final char[] keyStorePassword,
           final String alias) {
     //Preconditions
-    assert keyStoreFilePath != null : "keyStoreFilePath must not be null";
-    assert !keyStoreFilePath.isEmpty() : "keyStoreFilePath must not be empty";
-    assert keyStoreFilePath.endsWith(".uber") || keyStoreFilePath.endsWith(".jceks") : "keystore file extension must be .uber or .jceks";
+    assert keyStore != null : "keyStore must not be null";
     assert keyStorePassword != null : "keyStorePassword must not be null";
 
-    try {
-      return new X509SecurityInfo(
-              findOrCreateKeyStore(keyStoreFilePath, keyStorePassword), // keyStore
+    final X509SecurityInfo x509SecurityInfo = new X509SecurityInfo(
+              keyStore,
               keyStorePassword,
               alias);
-    } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | NoSuchProviderException ex) {
-      throw new TexaiException(ex);
-    }
+
+    //Postconditions
+    assert x509SecurityInfo.getKeyStore().equals(keyStore);
+    assert x509SecurityInfo.getPrivateKey() != null;
+    assert x509SecurityInfo.getCertificateChain().length == 1;
+    assert x509SecurityInfo.getX509Certificate() != null;
+
+    return x509SecurityInfo;
   }
 
   /**
@@ -1170,23 +1173,24 @@ public final class X509Utils {
    *
    * @param keyStoreFilePath the file path to the keystore
    * @param keyStorePassword the keystore password
-   * @param alias the private key entry alias
+   * @param certificateAlias the private key entry alias
    *
    * @return the X509 security information for a test client
    */
   public static boolean keyStoreContains(
           final String keyStoreFilePath,
           final char[] keyStorePassword,
-          final String alias) {
+          final String certificateAlias) {
     //Preconditions
     assert keyStoreFilePath != null : "keyStoreFilePath must not be null";
     assert !keyStoreFilePath.isEmpty() : "keyStoreFilePath must not be empty";
     assert keyStoreFilePath.endsWith(".uber") || keyStoreFilePath.endsWith(".jceks") : "keystore file extension must be .uber or .jceks";
     assert keyStorePassword != null : "keyStorePassword must not be null";
+    assert StringUtils.isNonEmptyString(certificateAlias) : "certificateAlias must not be empty";
 
     try {
       final KeyStore keyStore = findOrCreateKeyStore(keyStoreFilePath, keyStorePassword);
-      return keyStore.containsAlias(alias);
+      return keyStore.containsAlias(certificateAlias);
     } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | NoSuchProviderException ex) {
       throw new TexaiException(ex);
     }

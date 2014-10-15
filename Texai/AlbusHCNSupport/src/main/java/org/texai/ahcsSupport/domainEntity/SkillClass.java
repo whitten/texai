@@ -23,64 +23,80 @@ package org.texai.ahcsSupport.domainEntity;
 import javax.persistence.Id;
 import net.jcip.annotations.Immutable;
 import org.openrdf.model.URI;
+import org.texai.kb.persistence.CascadePersistence;
 import org.texai.kb.persistence.RDFEntity;
+import org.texai.kb.persistence.RDFEntityManager;
 import org.texai.kb.persistence.RDFPersistent;
 import org.texai.kb.persistence.RDFProperty;
 import org.texai.util.StringUtils;
 
-/** Contains information about a skill class use in the Albus hierarchical control system.
+/**
+ * Contains information about a skill class use in the Albus hierarchical control system.
  *
  * @author reed
  */
 @Immutable
 @RDFEntity(context = "texai:AlbusHierarchicalControlSystemContext")
-public class SkillClass implements RDFPersistent, Comparable<SkillClass> {
+public class SkillClass implements CascadePersistence, Comparable<SkillClass> {
 
-  /** the serial version UID */
+  // the serial version UID
   private static final long serialVersionUID = 1L;
-  /** the id assigned by the persistence framework */
+  // the id assigned by the persistence framework
   @Id
   private URI id;    // NOPMD
-  /** the skill class name */
+  // the skill class name
   @RDFProperty
   private final String skillClassName;
 
-  /** Constructs a new SkillClass instance. */
+  // Constructs a new SkillClass instance.
   public SkillClass() {
     skillClassName = null;
   }
 
-  /** Constructs a new SkillClass instance.
+  /**
+   * Constructs a new SkillClass instance.
    *
    * @param skillClassName the skill class name
+   * @param isClassExistsTested indicates whether the given skill class is tested for existence in the classpath - false
+   * for some unit tests.
    */
-  public SkillClass(final String skillClassName) {
+  public SkillClass(
+          final String skillClassName,
+          final boolean isClassExistsTested) {
     //Preconditions
-    assert skillClassName != null : "skillClassName must not be null";
-    assert !skillClassName.isEmpty() : "skillClassName must not be empty";
+    assert isValidSkillClassName(skillClassName, isClassExistsTested) : "skillClassName must be a valid class name";
 
     this.skillClassName = skillClassName;
   }
 
-  /** Returns whether the given skill class name actually names a valid class.
+  /**
+   * Returns whether the given skill class name actually names a valid class.
    *
    * @param skillClassName the given skill class name
+   * @param isClassExistsTested indicates whether the given skill class is tested for existence in the classpath - false
+   * for some unit tests.
+   *
    * @return whether the given skill class name actually names a valid class
    */
-  public static boolean isValidSkillClassName(final String skillClassName) {
+  public static boolean isValidSkillClassName(
+          final String skillClassName,
+          final boolean isClassExistsTested) {
     if (!StringUtils.isNonEmptyString(skillClassName)
             || !StringUtils.isJavaClassName(skillClassName)) {
       return false;
     }
-    try {
-      Class.forName(skillClassName);
-    } catch (ClassNotFoundException ex) {
-      return false;
+    if (isClassExistsTested) {
+      try {
+        Class.forName(skillClassName);
+      } catch (ClassNotFoundException ex) {
+        return false;
+      }
     }
     return true;
   }
 
-  /** Gets the id assigned by the persistence framework.
+  /**
+   * Gets the id assigned by the persistence framework.
    *
    * @return the id assigned by the persistence framework
    */
@@ -89,7 +105,8 @@ public class SkillClass implements RDFPersistent, Comparable<SkillClass> {
     return id;
   }
 
-  /** Gets the skill class name.
+  /**
+   * Gets the skill class name.
    *
    * @return the skill class name
    */
@@ -97,7 +114,8 @@ public class SkillClass implements RDFPersistent, Comparable<SkillClass> {
     return skillClassName;
   }
 
-  /** Gets the package name, e.g. org.texai.skill.dialog.bl .
+  /**
+   * Gets the package name, e.g. org.texai.skill.dialog.bl .
    *
    * @return the package name
    */
@@ -107,7 +125,8 @@ public class SkillClass implements RDFPersistent, Comparable<SkillClass> {
     return skillClassName.substring(0, index);
   }
 
-  /** Gets the unqualified class name.
+  /**
+   * Gets the unqualified class name.
    *
    * @return the unqualified class name
    */
@@ -117,7 +136,8 @@ public class SkillClass implements RDFPersistent, Comparable<SkillClass> {
     return skillClassName.substring(index + 1);
   }
 
-  /** Returns a string representation of this object.
+  /**
+   * Returns a string representation of this object.
    *
    * @return a string representation of this object
    */
@@ -126,9 +146,11 @@ public class SkillClass implements RDFPersistent, Comparable<SkillClass> {
     return "[" + skillClassName + "]";
   }
 
-  /** Returns whether some other object equals this one.
+  /**
+   * Returns whether some other object equals this one.
    *
    * @param obj the other object
+   *
    * @return whether some other object equals this one
    */
   @Override
@@ -143,7 +165,8 @@ public class SkillClass implements RDFPersistent, Comparable<SkillClass> {
     return !((this.skillClassName == null) ? (other.skillClassName != null) : !this.skillClassName.equals(other.skillClassName));
   }
 
-  /** Returns a hash code for this object.
+  /**
+   * Returns a hash code for this object.
    *
    * @return a hash code for this object
    */
@@ -154,9 +177,11 @@ public class SkillClass implements RDFPersistent, Comparable<SkillClass> {
     return hash;
   }
 
-  /** Returns an XML representation of this object.
+  /**
+   * Returns an XML representation of this object.
    *
    * @param indent the indentation amount
+   *
    * @return an XML representation of this object
    */
   public String toXML(final int indent) {
@@ -195,9 +220,11 @@ public class SkillClass implements RDFPersistent, Comparable<SkillClass> {
     return stringBuilder.toString();
   }
 
-  /** Compares this object with another.
+  /**
+   * Compares this object with another.
    *
    * @param that the other object
+   *
    * @return -1 if less than, 0 if equal, otherwise return +1
    */
   @Override
@@ -206,5 +233,46 @@ public class SkillClass implements RDFPersistent, Comparable<SkillClass> {
     assert that != null : "that must not be null";
 
     return this.skillClassName.compareTo(that.skillClassName);
+  }
+
+  /**
+   * Ensures that this persistent object is fully instantiated.
+   */
+  @Override
+  public void instantiate() {
+  }
+
+  /**
+   * Recursively persists this RDF entity and all its components.
+   *
+   * @param rootRDFEntity the root RDF entity
+   * @param rdfEntityManager the RDF entity manager
+   * @param overrideContext the user's belief context, or null to persist to each object's default context
+   */
+  @Override
+  public void cascadePersist(
+          final RDFPersistent rootRDFEntity,
+          final RDFEntityManager rdfEntityManager,
+          final URI overrideContext) {
+    //Preconditions
+    assert rdfEntityManager != null : "rdfEntityManager must not be null";
+
+    rdfEntityManager.persist(this, overrideContext);
+  }
+
+  /**
+   * Recursively removes this RDF entity and all its unshared components.
+   *
+   * @param rootRDFEntity the root RDF entity
+   * @param rdfEntityManager the RDF entity manager
+   */
+  @Override
+  public void cascadeRemove(
+          final RDFPersistent rootRDFEntity,
+          final RDFEntityManager rdfEntityManager) {
+    //Preconditions
+    assert rdfEntityManager != null : "rdfEntityManager must not be null";
+
+    rdfEntityManager.remove(this);
   }
 }

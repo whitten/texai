@@ -31,16 +31,16 @@ import javax.persistence.Id;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
-import org.texai.ahcsSupport.AHCSConstants;
-import org.texai.ahcsSupport.NodeAccess;
-import org.texai.ahcsSupport.NodeRuntime;
+import org.texai.ahcsSupport.BasicNodeRuntime;
 import org.texai.kb.persistence.CascadePersistence;
 import org.texai.kb.persistence.RDFEntity;
 import org.texai.kb.persistence.RDFEntityManager;
 import org.texai.kb.persistence.RDFPersistent;
 import org.texai.kb.persistence.RDFProperty;
+import org.texai.util.StringUtils;
 
-/** Provides a node in an Albus Hierarchical Control System.
+/**
+ * Provides a node in an Albus Hierarchical Control System.
  *
  * @author Stephen L. Reed
  */
@@ -48,64 +48,66 @@ import org.texai.kb.persistence.RDFProperty;
 @RDFEntity(context = "texai:AlbusHierarchicalControlSystemContext")
 public class Node implements CascadePersistence, Comparable<Node> {
 
-  /** the serial version UID */
+  // the serial version UID
   private static final long serialVersionUID = 1L;
-  /** the id assigned by the persistence framework */
+  // the id assigned by the persistence framework
   @Id
-  private URI id;    // NOPMD
-  /** the node type URI, note that NodeType is persisted in a different repository */
+  private URI id;
+  // the node name which must end in "Agent"
   @RDFProperty()
-  private final URI nodeTypeURI;
-  /** the node type name */
-  @RDFProperty()
-  private final String nodeTypeName;
-  /** the node nickname */
-  @RDFProperty()
-  private String nodeNickname;
-  /** the roles */
+  private final String name;
+  // the node's mission described in English
+  @RDFProperty
+  private final String missionDescription;
+  // the roles
   @RDFProperty(predicate = "texai:ahcsNode_role")
-  private final Set<Role> roles = new HashSet<>();
-  /** the state values */
+  private final Set<Role> roles;
+  // the persistent role state variables and their respective values
   @RDFProperty()
-  private final Set<StateValueBinding> stateValueBindings = new HashSet<>();
-  /** the node state variable dictionary, state variable name --> state value binding */
+  private final Set<StateValueBinding> stateValueBindings;
+  // the node state variable dictionary, state variable name --> state value binding
   private final Map<String, StateValueBinding> stateVariableDictionary = new HashMap<>();
-  /** the logger */
+  // the logger
   public static final Logger LOGGER = Logger.getLogger(Node.class);
-  /** the role id dictionary, role id --> role */
-  private final Map<URI, Role> roleIdDictionary = new HashMap<>();
-  /** the role type name dictionary, role type name --> role */
-  private final Map<String, Role> roleTypeNameDictionary = new HashMap<>();
-  /** the node runtime */
-  private transient NodeRuntime nodeRuntime;
+  // the node runtime
+  private transient BasicNodeRuntime nodeRuntime;
 
-  /** Constructs a new Node instance. */
+  /**
+   * Constructs a new Node instance. Used by the persistence framework.
+   */
   public Node() {
-    nodeTypeURI = null;
-    nodeTypeName = null;
-    nodeNickname = null;
+    name = null;
+    missionDescription = null;
+    roles = null;
+    stateValueBindings = null;
     nodeRuntime = null;
   }
 
-  /** Constructs a new Node instance.
+  /**
+   * Constructs a new Node instance.
    *
-   * @param nodeType the node
-   * @param nodeRuntime the node runtime
+   * @param name the node name which must end in "Agent"
+   * @param missionDescription the node's mission described in English
+   * @param roles the roles
    */
   public Node(
-          final NodeType nodeType,
-          final NodeRuntime nodeRuntime) {
+          final String name,
+          final String missionDescription,
+          final Set<Role> roles) {
     //Preconditions
-    assert nodeType != null : "nodeType must not be null";
-    assert nodeType.getId() != null : "node type id must not be null";
-    assert nodeType.getTypeName() != null : "node type name must not be null";
+    assert StringUtils.isNonEmptyString(name) : "name must be a non-null string";
+    assert StringUtils.isNonEmptyString(missionDescription) : "name must be a non-null missionDescription";
+    assert roles != null : "roles must not be null";
+    assert !roles.isEmpty() : "roles must not be empty";
 
-    this.nodeTypeURI = nodeType.getId();
-    this.nodeTypeName = nodeType.getTypeName();
-    this.nodeRuntime = nodeRuntime;
+    this.name = name;
+    this.missionDescription = missionDescription;
+    this.roles = roles;
+    this.stateValueBindings = new HashSet<>();
   }
 
-  /** Gets the id assigned by the persistence framework.
+  /**
+   * Gets the id assigned by the persistence framework.
    *
    * @return the id assigned by the persistence framework
    */
@@ -114,28 +116,14 @@ public class Node implements CascadePersistence, Comparable<Node> {
     return id;
   }
 
-  /** Gets the node type URI.
-   *
-   * @return the node type URI
-   */
-  public URI getNodeTypeURI() {
-    return nodeTypeURI;
-  }
-
-  /** Returns whether this is the top friendship node.
-   *
-   * @return whether this is the top friendship node
-   */
-  public boolean isTopFriendshipNode() {
-    return this.nodeTypeName.equals(AHCSConstants.TOP_FRIENDSHIP_NODE_TYPE);
-  }
-
-  /** Gets the node state value associated with the given variable name.
+  /**
+   * Gets the node state value associated with the given variable name.
    *
    * @param stateVariableName the given variable name
+   *
    * @return the state value associated with the given variable name
    */
-  public Object getNodeStateValue(final String stateVariableName) {
+  public Object getStateValue(final String stateVariableName) {
     //Preconditions
     assert stateVariableName != null : "stateVariableName must not be null";
     assert !stateVariableName.isEmpty() : "stateVariableName must not be empty";
@@ -143,9 +131,9 @@ public class Node implements CascadePersistence, Comparable<Node> {
     synchronized (stateVariableDictionary) {
       if (stateVariableDictionary.isEmpty() && !stateValueBindings.isEmpty()) {
         // lazy population of the state value dictionary from the persistent state value bindings
-        for (final StateValueBinding stateValueBinding : stateValueBindings) {
+        stateValueBindings.stream().forEach((stateValueBinding) -> {
           stateVariableDictionary.put(stateValueBinding.getVariableName(), stateValueBinding);
-        }
+        });
       }
       final StateValueBinding stateValueBinding = stateVariableDictionary.get(stateVariableName);
       if (stateValueBinding == null) {
@@ -156,12 +144,13 @@ public class Node implements CascadePersistence, Comparable<Node> {
     }
   }
 
-  /** Sets the node state value associated with the given variable name.
+  /**
+   * Sets the node state value associated with the given variable name.
    *
    * @param variableName the given variable name
    * @param value the state value
    */
-  public void setNodeStateValue(final String variableName, final Object value) {
+  public void setStateValue(final String variableName, final Object value) {
     //Preconditions
     assert variableName != null : "variableName must not be null";
     assert !variableName.isEmpty() : "variableName must not be empty";
@@ -169,9 +158,9 @@ public class Node implements CascadePersistence, Comparable<Node> {
     synchronized (stateVariableDictionary) {
       if (stateVariableDictionary.isEmpty() && !stateValueBindings.isEmpty()) {
         // lazy population of the state value dictionary from the persistent state value bindings
-        for (final StateValueBinding stateValueBinding : stateValueBindings) {
+        stateValueBindings.stream().forEach((stateValueBinding) -> {
           stateVariableDictionary.put(stateValueBinding.getVariableName(), stateValueBinding);
-        }
+        });
       }
       StateValueBinding stateValueBinding = stateVariableDictionary.get(variableName);
       if (stateValueBinding == null) {
@@ -184,11 +173,12 @@ public class Node implements CascadePersistence, Comparable<Node> {
     }
   }
 
-  /** Removes the node state value binding for the given variable.
+  /**
+   * Removes the node state value binding for the given variable.
    *
    * @param variableName the variable name
    */
-  public void removeNodeStateValueBinding(final String variableName) {
+  public void removeStateValueBinding(final String variableName) {
     //Preconditions
     assert variableName != null : "variableName must not be null";
     assert !variableName.isEmpty() : "variableName must not be empty";
@@ -196,9 +186,9 @@ public class Node implements CascadePersistence, Comparable<Node> {
     synchronized (stateVariableDictionary) {
       if (stateVariableDictionary.isEmpty() && !stateValueBindings.isEmpty()) {
         // lazy population of the state value dictionary from the persistent state value bindings
-        for (final StateValueBinding stateValueBinding : stateValueBindings) {
+        stateValueBindings.stream().forEach((stateValueBinding) -> {
           stateVariableDictionary.put(stateValueBinding.getVariableName(), stateValueBinding);
-        }
+        });
       }
       final StateValueBinding stateValueBinding = stateVariableDictionary.remove(variableName);
       if (stateValueBinding != null) {
@@ -208,169 +198,99 @@ public class Node implements CascadePersistence, Comparable<Node> {
     }
   }
 
-  /** Installs the roles for this node.
-   *
-   * @param nodeAccess the node access object
-   */
-  public void installRoles(final NodeAccess nodeAccess) {
-    //Preconditions
-    assert nodeAccess != null : "nodeAccess must not be null";
-
-    if (roles.isEmpty()) {
-      // this node has not yet been persisted
-      final NodeType nodeType = nodeAccess.getNodeType(this);
-      final Collection<RoleType> roleTypes = nodeType.getAllRoleTypes();
-      LOGGER.info(nodeNickname + ": installing " + roleTypes.size() + " roles from role types");
-      synchronized (roles) {
-        for (final RoleType roleType : roleTypes) {
-          final Role role = new Role(
-                  roleType,
-                  nodeRuntime);
-          role.setNode(this);
-          nodeRuntime.setX509SecurityInfoAndIdForRole(role);
-          nodeAccess.getRDFEntityManager().persist(role);
-          LOGGER.info(nodeNickname + ":   persisting role " + role);
-          roles.add(role);
-          installRole(role, nodeAccess);
-        }
-      }
-    } else {
-      // this node has already been persisted
-      LOGGER.info(nodeNickname + ": installing " + roles.size() + " roles");
-      synchronized (roles) {
-        for (final Role role : roles) {
-          installRole(role, nodeAccess);
-        }
-      }
-    }
-  }
-
-  /** Installs the given role.
-   *
-   * @param role the given role
-   * @param nodeAccess the node access object
-   */
-  private void installRole(final Role role, final NodeAccess nodeAccess) {
-    //Preconditions
-    assert role != null : "role must not be null";
-    assert nodeAccess != null : "nodeAccess must not be null";
-    assert !roleIdDictionary.containsKey(role.getId()) : "role must not already be installed " + role;
-
-    roleIdDictionary.put(role.getId(), role);
-    final RoleType roleType = nodeAccess.getRoleType(role);
-    assert roleType != null : "role type not found for " + role;
-    assert !roleTypeNameDictionary.containsKey(roleType.getTypeName()) : "role type must not already be installed " + role;
-    roleTypeNameDictionary.put(roleType.getTypeName(), role);
-    nodeRuntime.registerRole(role);
-    role.installSkills(nodeAccess);
-  }
-
-  /** Returns an unmodifiable view of the set of roles.
+  /**
+   * Returns an unmodifiable view of the set of roles.
    *
    * @return an unmodifiable view of the set of roles
    */
   public Collection<Role> getRoles() {
-    synchronized (roleIdDictionary) {
-      return Collections.unmodifiableCollection(roleIdDictionary.values());
-    }
+    return Collections.unmodifiableCollection(roles);
   }
 
-  /** Gets the role for the given role type name or null if not found.
-   *
-   * @param roleTypeName the given role type name
-   * @return the role or null if not found
-   */
-  public Role getRoleForTypeName(final String roleTypeName) {
-    //Preconditions
-    assert roleTypeName != null : "roleTypeName must not be null";
-    assert !roleTypeName.isEmpty() : "roleTypeName must not be empty";
-
-    return roleTypeNameDictionary.get(roleTypeName);
-  }
-
-  /** Returns a string representation of this object.
+  /**
+   * Returns a string representation of this object.
    *
    * @return a string representation of this object
    */
   @Override
   public String toString() {
-    if (nodeTypeName == null) {
-      return "[Node]";
-    } else {
-      return "[" + nodeNickname + ": " + nodeTypeName + "]";
-    }
+    return name;
   }
 
-  /** Gets the node runtime.
+  /**
+   * Gets the node runtime.
    *
    * @return the node runtime
    */
-  public NodeRuntime getNodeRuntime() {
+  public BasicNodeRuntime getNodeRuntime() {
     return nodeRuntime;
   }
 
-  /** Sets the node runtime.
+  /**
+   * Sets the node runtime.
    *
    * @param nodeRuntime the node runtime
    */
-  public void setNodeRuntime(NodeRuntime nodeRuntime) {
+  public void setNodeRuntime(final BasicNodeRuntime nodeRuntime) {
+    //Preconditions
+    assert nodeRuntime != null : "nodeRuntime must not be null";
+
     this.nodeRuntime = nodeRuntime;
   }
 
-  /** Gets the node type name.
+  /**
+   * Gets the node name.
    *
-   * @return the node type name
+   * @return the node name
    */
-  public String getNodeTypeName() {
-    return nodeTypeName;
+  public String getName() {
+    return name;
   }
 
-  /** Gets the node nickname.
+  /**
+   * Gets the mission description.
    *
-   * @return the node nickname
+   * @return the mission description
    */
-  public String getNodeNickname() {
-    return nodeNickname;
+  public String getMissionDescription() {
+    return missionDescription;
   }
 
-  /** Sets the node nickname.
+  /**
+   * Compares another node to this one.
    *
-   * @param nodeNickname the node nickname
+   * @param that the other node
+   *
+   * @return -1 if less than, 0 if equal, otherwise return +1
    */
-  public void setNodeNickname(final String nodeNickname) {
-    this.nodeNickname = nodeNickname;
+  @Override
+  public int compareTo(final Node that) {
+    //Preconditions
+    assert that != null : "that must not be null";
+
+    return this.name.compareTo(that.name);
   }
 
-  /** Returns whether some other object equals this one.
+  /**
+   * Returns whether some other object equals this one.
    *
    * @param obj the other object
+   *
    * @return whether the other object equals this one
    */
   @Override
-  public boolean equals(Object obj) {
+  public boolean equals(final Object obj) {
     if (obj == null) {
       return false;
     }
     if (getClass() != obj.getClass()) {
       return false;
     }
-    final Node other = (Node) obj;
-    if (Objects.equals(this.id, other.id)) {
-      assert (this.nodeNickname == null && other.nodeNickname == null) || (this.nodeNickname.equals(other.nodeNickname)) :
-              "nodes having equal ids must have equal nicknames: " + this + " " + other;
-      return true;
-    } else {
-      return false;
-    }
+    return Objects.equals(this.name, ((Node) obj).name);
   }
 
-  /** Returns whether some other object equals this one.
-   *
-   * @param obj the other object
-   * @return whether some other object equals this one
-   */
-
-  /** Returns a hash code for this object.
+  /**
+   * Returns a hash code for this object.
    *
    * @return a hash code for this object
    */
@@ -378,22 +298,29 @@ public class Node implements CascadePersistence, Comparable<Node> {
   public int hashCode() {
     int hash = 7;
     hash = 29 * hash + Objects.hashCode(this.id);
-    hash = 29 * hash + Objects.hashCode(this.nodeTypeURI);
+    hash = 29 * hash + Objects.hashCode(this.name);
     return hash;
   }
 
-  /** Ensures that this persistent object is fully instantiated. */
+  /**
+   * Ensures that this persistent object is fully instantiated.
+   */
   @Override
   public void instantiate() {
-    for (final StateValueBinding stateValueBinding : stateValueBindings) {
+    //Preconditions
+    assert roles != null : "roles must not be null";
+    assert !roles.isEmpty() : "roles must not be empty for node " + name;
+
+    stateValueBindings.stream().forEach((stateValueBinding) -> {
       stateValueBinding.instantiate();
-    }
-    for (final Role role : roles) {
+    });
+    roles.stream().forEach((role) -> {
       role.instantiate();
-    }
+    });
   }
 
-  /** Recursively persists this RDF entity and all its components.
+  /**
+   * Recursively persists this RDF entity and all its components.
    *
    * @param rdfEntityManager the RDF entity manager
    * @param overrideContext the user's belief context, or null to persist to each object's default context
@@ -407,7 +334,8 @@ public class Node implements CascadePersistence, Comparable<Node> {
     cascadePersist(this, rdfEntityManager, overrideContext);
   }
 
-  /** Recursively persists this RDF entity and all its components.
+  /**
+   * Recursively persists this RDF entity and all its components.
    *
    * @param rootRDFEntity the root RDF entity
    * @param rdfEntityManager the RDF entity manager
@@ -417,23 +345,26 @@ public class Node implements CascadePersistence, Comparable<Node> {
   public void cascadePersist(RDFPersistent rootRDFEntity, RDFEntityManager rdfEntityManager, URI overrideContext) {
     //Preconditions
     assert rdfEntityManager != null : "rdfEntityManager must not be null";
+    assert roles != null : "roles must not be null";
+    assert !roles.isEmpty() : "roles must not be empty for node " + name;
 
-    for (final StateValueBinding stateValueBinding : stateValueBindings) {
+    stateValueBindings.stream().forEach((stateValueBinding) -> {
       stateValueBinding.cascadePersist(
               rootRDFEntity,
               rdfEntityManager,
               overrideContext);
-    }
-    for (final Role role : roles) {
+    });
+    roles.stream().forEach((role) -> {
       role.cascadePersist(
               rootRDFEntity,
               rdfEntityManager,
               overrideContext);
-    }
+    });
     rdfEntityManager.persist(this, overrideContext);
   }
 
-  /** Recursively removes this RDF entity and all its unshared components.
+  /**
+   * Recursively removes this RDF entity and all its unshared components.
    *
    * @param rootRDFEntity the root RDF entity
    * @param rdfEntityManager the RDF entity manager
@@ -442,31 +373,20 @@ public class Node implements CascadePersistence, Comparable<Node> {
   public void cascadeRemove(RDFPersistent rootRDFEntity, RDFEntityManager rdfEntityManager) {
     //Preconditions
     assert rdfEntityManager != null : "rdfEntityManager must not be null";
+    assert roles != null : "roles must not be null";
+    assert !roles.isEmpty() : "roles must not be empty for node " + name;
 
-    for (final StateValueBinding stateValueBinding : stateValueBindings) {
+    stateValueBindings.stream().forEach((stateValueBinding) -> {
       stateValueBinding.cascadeRemove(
               rootRDFEntity,
               rdfEntityManager);
-    }
-    for (final Role role : roles) {
+    });
+    roles.stream().forEach((role) -> {
       role.cascadeRemove(
               rootRDFEntity,
               rdfEntityManager);
-    }
+    });
     rdfEntityManager.remove(this);
-  }
-
-  /** Compares another node to this one.
-   *
-   * @param that the other node
-   * @return -1 if less than, 0 if equal, otherwise return +1
-   */
-  @Override
-  public int compareTo(final Node that) {
-    //Preconditions
-    assert that != null : "that must not be null";
-
-    return this.nodeNickname.compareTo(that.nodeNickname);
   }
 
 }

@@ -23,6 +23,7 @@ package org.texai.inference.sparql.domainEntity;
 import java.util.Set;
 import javax.persistence.Id;
 import net.jcip.annotations.Immutable;
+import net.jcip.annotations.ThreadSafe;
 import org.openrdf.model.URI;
 import org.texai.kb.persistence.CascadePersistence;
 import org.texai.kb.persistence.RDFEntity;
@@ -36,6 +37,7 @@ import org.texai.kb.persistence.RDFProperty;
  */
 @RDFEntity(context = "texai:EnglishConstructionGrammarDomainContext")
 @Immutable
+@ThreadSafe
 public class QueryContainer implements Comparable<QueryContainer>, CascadePersistence {
 
   /** the serial version UID */

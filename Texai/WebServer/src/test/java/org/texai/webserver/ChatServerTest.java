@@ -73,6 +73,8 @@ public class ChatServerTest {
 
   @BeforeClass
   public static void setUpClass() throws Exception {
+    KeyStoreTestUtils.initializeClientKeyStore();
+    KeyStoreTestUtils.initializeServerKeyStore();
   }
 
   @AfterClass

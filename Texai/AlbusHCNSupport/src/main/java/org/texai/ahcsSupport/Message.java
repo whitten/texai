@@ -35,132 +35,134 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import net.jcip.annotations.Immutable;
 import org.joda.time.DateTime;
-import org.openrdf.model.URI;
-import org.texai.ahcsSupport.domainEntity.Role;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 import org.texai.x509.SerializableObjectSigner;
 
-/** Provides a message.  See the FIPA standard at
- * http://www.fipa.org/specs/fipa00061/SC00061G.html
+/**
+ * Provides a message. See the FIPA standard at http://www.fipa.org/specs/fipa00061/SC00061G.html
  *
  * @author Stephen L. Reed
  */
 @Immutable
 public class Message implements Serializable {
 
-  /** the serial version UID */
+  // the serial version UID
   private static final long serialVersionUID = 1L;
-  /** the sender role's id */
-  private final URI senderRoleId;
-  /** the sender's service, which is typically a skill interface name */
+  // the sender role's qualified name, container.nodename.rolename
+  private final String senderQualifiedName;
+  // the sender's recipientService, which is typically a skill interface name
   private final String senderService;
-  /** the sender's digital signature, which is populated when the message is sent between JVMs */
+  // the sender's digital signature, which is populated when the message is sent between containers
   private byte[] signatureBytes;
-  /** the recipient role's id */
-  private final URI recipientRoleId;
-  /** the conversation id */
+  // the recipient role's qualified name, container.nodename.rolename
+  private final String recipientQualifiedName;
+  // the conversation id
   private final UUID conversationId;
-  /** the reply-with UUID */
+  // the reply-with UUID
   private final UUID replyWith;
-  /** the in-reply-to UUID */
+  // the in-reply-to UUID
   private final UUID inReplyTo;
-  /** the date/time */
+  // the date/time
   private final DateTime dateTime = new DateTime();
-  /** the reply-by date/time, or null if not applicable */
+  // the reply-by date/time, or null if not applicable
   private final DateTime replyByDateTime;
-  /** the recipient service , which is typically a skill interface name */
-  private final String service;
-  /** the operation */
+  // the recipient recipientService , which is typically a skill interface name, commonly used to specifiy a subskill used within a role
+  // when the sending role is also the recipient role
+  private final String recipientService;
+  // the operation
   private final String operation;
-  /** the parameter name/value dictionary, name --> value */
+  // the parameter name/value dictionary, name --> value
   private final Map<String, Object> parameterDictionary = new HashMap<>();
-  /** the message service/operation version */
+  // the message recipientService/operation version
   private final String version;
-  /** the default version */
+  // the default version
   public static final String DEFAULT_VERSION = "1.0.0";
 
-  /** Constructs a new Message instance, tailored for sending to a sub-skill within the same role.
+  /**
+   * Constructs a new Message instance, tailored for sending to a sub-skill within the same role.
    *
    * @param sendingSkill the sending skill
-   * @param service the service
+   * @param recipientService the recipient service
    * @param operation the operation, which can be a task, sensation, or information
    */
   public Message(
           final AbstractSkill sendingSkill,
-          final String service,
+          final String recipientService,
           final String operation) {
     this(
-            sendingSkill.getRole().getId(), // senderRoleId
+            sendingSkill.getRole().getQualifiedName(), // senderQualifiedName
             sendingSkill.getClassName(), // senderService
-            sendingSkill.getRole().getId(), // recipientRoleId
-            service,
+            sendingSkill.getRole().getQualifiedName(), // recipientQualifiedName
+            recipientService,
             operation,
             new HashMap<>(),
             DEFAULT_VERSION);
   }
 
-  /** Constructs a new Message instance.
+  /**
+   * Constructs a new Message instance.
    *
-   * @param senderRoleId the sender role's id
-   * @param senderService the senders service
-   * @param recipientRoleId the recipient role's id
-   * @param service the service
+   * @param senderQualifiedName the sender role's id
+   * @param senderService the sender role's qualified name, container.nodename.rolename
+   * @param recipientQualifiedName the recipient role's qualified name, container.nodename.rolename
+   * @param recipientService the recipient service
    * @param operation the operation, which can be a task, sensation, or information
    */
   public Message(
-          final URI senderRoleId,
+          final String senderQualifiedName,
           final String senderService,
-          final URI recipientRoleId,
-          final String service,
+          final String recipientQualifiedName,
+          final String recipientService,
           final String operation) {
     this(
-            senderRoleId,
+            senderQualifiedName,
             senderService,
-            recipientRoleId,
-            service,
+            recipientQualifiedName,
+            recipientService,
             operation,
             new HashMap<>(),
             DEFAULT_VERSION);
   }
 
-  /** Constructs a new Message instance.
+  /**
+   * Constructs a new Message instance.
    *
-   * @param senderRoleId the sender role's id
-   * @param senderService the senders service
-   * @param recipientRoleId the recipient role's id
-   * @param service the service
+   * @param senderQualifiedName the sender role's qualified name, container.nodename.rolename
+   * @param senderService the sender recipientService
+   * @param recipientQualifiedName the recipient role's qualified name, container.nodename.rolename
+   * @param recipientService the recipient recipientService, commonly used to specifiy a subskill used within a role when the sending role
+   * is also the recipient role
    * @param operation the operation, which can be a task, sensation, or information
-   * @param parameterDictionary the operations parameter dictionary, name --> value
-   * @param version the message service/operation version
+   * @param parameterDictionary the operation parameter dictionary, name --> value
+   * @param version the message recipientService/operation version
    */
   public Message(
-          final URI senderRoleId,
+          final String senderQualifiedName,
           final String senderService,
-          final URI recipientRoleId,
-          final String service,
+          final String recipientQualifiedName,
+          final String recipientService,
           final String operation,
           final Map<String, Object> parameterDictionary,
           final String version) {
     //Preconditions
-    assert senderRoleId != null : "senderRoleId must not be null";
-    assert recipientRoleId != null : "recipientRoleId must not be null";
+    assert senderQualifiedName != null : "senderQualifiedName must not be null";
+    assert recipientQualifiedName != null : "recipientQualifiedName must not be null";
     assert operation != null : "operation must not be null";
     assert operation.endsWith("_Info")
             || operation.endsWith("_Sensation")
             || operation.endsWith("_Task") : "invalid performative name '" + operation + "' must end with _Info, _Sensation or _Task";
     assert parameterDictionary != null : "parameterDictionary must not be null";
-    assert version != null : "version must not be null";
-    assert !version.isEmpty() : "version must not be empty";
+    assert StringUtils.isNonEmptyString(version) : "version must be a non-empty string";
 
-    this.senderRoleId = senderRoleId;
+    this.senderQualifiedName = senderQualifiedName;
     this.senderService = senderService;
-    this.recipientRoleId = recipientRoleId;
+    this.recipientQualifiedName = recipientQualifiedName;
     this.conversationId = null;
     this.replyWith = null;
     this.inReplyTo = null;
     this.replyByDateTime = null;
-    this.service = service;
+    this.recipientService = recipientService;
     this.operation = operation;
     for (final Entry<String, Object> parameter : parameterDictionary.entrySet()) {
       final String name = parameter.getKey();
@@ -171,113 +173,116 @@ public class Message implements Serializable {
     this.version = version;
   }
 
-  /** Constructs a new Message instance.
+  /**
+   * Constructs a new Message instance.
    *
-   * @param senderRoleId the sender role's id
-   * @param senderService the sender service
-   * @param recipientRoleId the recipient role's id
+   * @param senderQualifiedName the sender role's qualified name, container.nodename.rolename
+   * @param senderService the sender recipientService
+   * @param recipientQualifiedName the recipient role's qualified name, container.nodename.rolename
    * @param conversationId the conversation id
    * @param replyWith the reply-with UUID
-   * @param service the service
+   * @param recipientService the recipient service
    * @param operation the operation, which can be a task, sensation, or information
    */
   public Message(
-          final URI senderRoleId,
+          final String senderQualifiedName,
           final String senderService,
-          final URI recipientRoleId,
+          final String recipientQualifiedName,
           final UUID conversationId,
           final UUID replyWith,
-          final String service,
+          final String recipientService,
           final String operation) {
     this(
-            senderRoleId,
+            senderQualifiedName,
             senderService,
-            recipientRoleId,
+            recipientQualifiedName,
             conversationId,
             replyWith,
             null, // inReplyTo
             null, // replyByDateTime
-            service,
+            recipientService,
             operation,
             new HashMap<>(), // parameterDictionary,
             Message.DEFAULT_VERSION);
   }
 
-  /** Constructs a new Message instance.
+  /**
+   * Constructs a new Message instance.
    *
-   * @param senderRoleId the sender role's id
-   * @param senderService the sender service
-   * @param recipientRoleId the recipient role's id
+   * @param senderQualifiedName the sender role's qualified name, container.nodename.rolename
+   * @param senderService the sender recipientService
+   * @param recipientQualifiedName the role's qualified name, container.nodename.rolename
    * @param conversationId the conversation id
-   * @param service the service
+   * @param recipientService the recipient service
    * @param operation the operation, which can be a task, sensation, or information
    * @param inReplyTo the in-reply-to UUID
    */
   public Message(
-          final URI senderRoleId,
+          final String senderQualifiedName,
           final String senderService,
-          final URI recipientRoleId,
+          final String recipientQualifiedName,
           final UUID conversationId,
-          final String service,
+          final String recipientService,
           final String operation,
           final UUID inReplyTo) {
     this(
-            senderRoleId,
+            senderQualifiedName,
             senderService,
-            recipientRoleId,
+            recipientQualifiedName,
             conversationId,
             null, // replyWith
             inReplyTo,
             null, // replyByDateTime
-            service,
+            recipientService,
             operation,
             new HashMap<>(), // parameterDictionary,
             Message.DEFAULT_VERSION);
   }
 
-  /** Constructs a new Message instance.
+  /**
+   * Constructs a new Message instance.
    *
-   * @param senderRoleId the sender role's id
-   * @param senderService the sender service
-   * @param recipientRoleId the recipient role's id
+   * @param senderQualifiedName the sender role's qualified name, container.nodename.rolename
+   * @param senderService the sender recipientService
+   * @param recipientQualifiedName the recipient role's qualified name, container.nodename.rolename
    * @param conversationId the conversation id
    * @param replyWith the reply-with UUID
    * @param inReplyTo in-reply-to UUID
    * @param replyByDateTime the reply-by date/time, or null if not applicable
-   * @param service the service
+   * @param recipientService the recipient service
    * @param operation the operation, which can be a task, sensation, or information
    * @param parameterDictionary the operations parameter dictionary, name --> value
-   * @param version the message service/operation version
+   * @param version the message recipientService/operation version
    */
   public Message(
-          final URI senderRoleId,
+          final String senderQualifiedName,
           final String senderService,
-          final URI recipientRoleId,
+          final String recipientQualifiedName,
           final UUID conversationId,
           final UUID replyWith,
           final UUID inReplyTo,
           final DateTime replyByDateTime,
-          final String service,
+          final String recipientService,
           final String operation,
           final Map<String, Object> parameterDictionary,
           final String version) {
     //Preconditions
-    assert senderRoleId != null : "senderRoleId must not be null";
-    assert recipientRoleId != null : "recipientRoleId must not be null";
+    assert senderQualifiedName != null : "senderQualifiedName must not be null";
+    assert recipientQualifiedName != null : "recipientQualifiedName must not be null";
     assert operation != null : "operation must not be null";
     assert operation.endsWith("_Info")
             || operation.endsWith("_Sensation")
             || operation.endsWith("_Task") : "invalid performative name " + operation;
     assert parameterDictionary != null : "parameterDictionary must not be null";
 
-    this.senderRoleId = senderRoleId;
+    this.senderQualifiedName = senderQualifiedName;
     this.senderService = senderService;
-    this.recipientRoleId = recipientRoleId;
+    this.recipientQualifiedName = recipientQualifiedName;
     this.conversationId = conversationId;
     this.replyWith = replyWith;
     this.inReplyTo = inReplyTo;
     this.replyByDateTime = replyByDateTime;
-    this.service = service;
+    this.recipientService = recipientService;
     this.operation = operation;
     for (final Entry<String, Object> parameter : parameterDictionary.entrySet()) {
       final String name = parameter.getKey();
@@ -288,39 +293,43 @@ public class Message implements Serializable {
     this.version = version;
   }
 
-  /** Returns a new message for forwarding to the given recipient.
+  /**
+   * Returns a new message for forwarding to the given recipient.
    *
    * @param message the given message
-   * @param recipientRoleId the given recipient
-   * @param service the service
+   * @param recipientQualifiedName the recipient role's qualified name, container.nodename.rolename
+   * @param recipientService the recipient service
+   *
    * @return a new message for forwarding to the given recipient
    */
   public static Message forward(
           final Message message,
-          final URI recipientRoleId,
-          final String service) {
+          final String recipientQualifiedName,
+          final String recipientService) {
     //Preconditions
     assert message != null : "message must not be null";
-    assert recipientRoleId != null : "recipientRoleId must not be null";
+    assert recipientQualifiedName != null : "recipientRoleId must not be null";
 
     return new Message(
-            message.recipientRoleId, // senderRoleId
-            message.service, // senderService,
-            recipientRoleId,
+            message.recipientQualifiedName, // senderRoleId
+            message.recipientService, // senderService,
+            recipientQualifiedName,
             message.conversationId,
             message.replyWith,
             message.inReplyTo,
             message.replyByDateTime,
-            service,
+            recipientService,
             message.operation,
             message.parameterDictionary,
             message.version);
   }
 
-  /** Returns a new message for replying to the given recipient.
+  /**
+   * Returns a new message for replying to the given recipient.
    *
    * @param message the given message
    * @param skill the skill that is sending the reply message
+   *
    * @return a new message for forwarding to the given recipient
    */
   public static Message reply(
@@ -332,14 +341,15 @@ public class Message implements Serializable {
     assert skill != null : "skill must not be null";
 
     return new Message(
-            skill.getRoleId(), // senderRoleId
+            skill.getRole().getQualifiedName(),
             skill.getClassName(), // senderService,
-            message.getSenderRoleId(), // recipientRoleId
-            message.getSenderService(), // service
+            message.getSenderQualifiedName(), // recipientRoleId
+            message.getSenderService(), // recipientService
             message.getOperation().replace("_Task", "_Info")); // operation
   }
 
-  /** Returns a clone of this object.
+  /**
+   * Returns a clone of this object.
    *
    * @return a clone of this object
    */
@@ -347,20 +357,21 @@ public class Message implements Serializable {
   @SuppressWarnings({"CloneDeclaresCloneNotSupported", "CloneDoesntCallSuperClone"})
   public Message clone() {
     return new Message(
-            recipientRoleId, // senderRoleId
-            service, // senderService,
-            recipientRoleId,
+            recipientQualifiedName, // senderRoleId
+            recipientService, // senderService,
+            recipientQualifiedName,
             conversationId,
             replyWith,
             inReplyTo,
             replyByDateTime,
-            service,
+            recipientService,
             operation,
             new HashMap<>(parameterDictionary),
             version);
   }
 
-  /** Returns whether the given message is an information message.
+  /**
+   * Returns whether the given message is an information message.
    *
    * @return whether the given message is an information message
    */
@@ -368,7 +379,8 @@ public class Message implements Serializable {
     return getOperation().endsWith("_Info");
   }
 
-  /** Returns whether the given message is a sensation message sent from a child node to its parent node.
+  /**
+   * Returns whether the given message is a sensation message sent from a child node to its parent node.
    *
    * @return whether the given message is a task message
    */
@@ -376,7 +388,8 @@ public class Message implements Serializable {
     return operation.endsWith("_Sensation");
   }
 
-  /** Returns whether the given message is a task message sent from a parent node to one of its child nodes.
+  /**
+   * Returns whether the given message is a task message sent from a parent node to one of its child nodes.
    *
    * @return whether the given message is a task message
    */
@@ -384,7 +397,17 @@ public class Message implements Serializable {
     return getOperation().endsWith("_Task");
   }
 
-  /** Gets the sender service.
+  /**
+   * Returns whether the given message has a sender in one container and the recipient in another container.
+   *
+   * @return whether the given message is sent between containers
+   */
+  public boolean isBetweenContainers() {
+    return getSenderContainerName().equals(getRecipientContainerName());
+  }
+
+  /**
+   * Gets the sender service.
    *
    * @return the sender service
    */
@@ -392,15 +415,27 @@ public class Message implements Serializable {
     return senderService;
   }
 
-  /** Gets the sender role's id.
+  /**
+   * Gets the sender role's qualified name, container-name.node-name.role-name.
    *
-   * @return the sender role's id
+   * @return the sender role's qualified nam
    */
-  public URI getSenderRoleId() {
-    return senderRoleId;
+  public String getSenderQualifiedName() {
+    return senderQualifiedName;
   }
 
-  /** Gets the senders digital signature, which is populated when the message is sent between JVMs.
+  /** Returns the name of the sender' container.
+   *
+   * @return the name of the sender' container
+   */
+  public String getSenderContainerName() {
+    int index = senderQualifiedName.indexOf('.');
+    assert index > -1;
+    return senderQualifiedName.substring(0, index);
+  }
+
+  /**
+   * Gets the senders digital signature, which is populated when the message is sent between JVMs.
    *
    * @return the senders digital signature
    */
@@ -408,15 +443,26 @@ public class Message implements Serializable {
     return Arrays.copyOf(signatureBytes, signatureBytes.length);
   }
 
-  /** Gets the recipient role's id.
+  /**
+   * Gets the recipient role's qualified name, container-name.node-name.role-name.
    *
-   * @return the recipient role's id
+   * @return the recipient role's qualified name
    */
-  public URI getRecipientRoleId() {
-    return recipientRoleId;
+  public String getRecipientQualifiedName() {
+    return recipientQualifiedName;
   }
 
-  /** Gets the conversation id.
+  /** Returns the name of the recipient's container.
+   *
+   * @return the name of the recipient's container
+   */
+  public String getRecipientContainerName() {
+    int index = recipientQualifiedName.indexOf('.');
+    return recipientQualifiedName.substring(0, index);
+  }
+
+  /**
+   * Gets the conversation id.
    *
    * @return the conversation id
    */
@@ -424,7 +470,8 @@ public class Message implements Serializable {
     return conversationId;
   }
 
-  /** Gets the reply-with UUID.
+  /**
+   * Gets the reply-with UUID.
    *
    * @return the reply-with UUID
    */
@@ -432,7 +479,8 @@ public class Message implements Serializable {
     return replyWith;
   }
 
-  /** Gets the in-reply-to UUID.
+  /**
+   * Gets the in-reply-to UUID.
    *
    * @return the in-reply-to UUID
    */
@@ -440,7 +488,8 @@ public class Message implements Serializable {
     return inReplyTo;
   }
 
-  /** Gets the reply-by date/time.
+  /**
+   * Gets the reply-by date/time.
    *
    * @return the reply-by date/time
    */
@@ -448,7 +497,8 @@ public class Message implements Serializable {
     return replyByDateTime;
   }
 
-  /** Gets the creation date/time.
+  /**
+   * Gets the creation date/time.
    *
    * @return the creation date/time
    */
@@ -456,15 +506,17 @@ public class Message implements Serializable {
     return dateTime;
   }
 
-  /** Gets the service.
+  /**
+   * Gets the recipient service.
    *
-   * @return the service
+   * @return the recipient service
    */
-  public String getService() {
-    return service;
+  public String getRecipientService() {
+    return recipientService;
   }
 
-  /** Gets the operation.
+  /**
+   * Gets the operation.
    *
    * @return the operation
    */
@@ -472,7 +524,8 @@ public class Message implements Serializable {
     return operation;
   }
 
-  /** Gets the parameter name/value dictionary, name --> value.
+  /**
+   * Gets the parameter name/value dictionary, name --> value.
    *
    * @return the parameter name/value dictionary
    */
@@ -480,34 +533,36 @@ public class Message implements Serializable {
     return Collections.unmodifiableMap(parameterDictionary);
   }
 
-  /** Gets the parameter value corresponding to the given parameter name, or null if not found.
+  /**
+   * Gets the parameter value corresponding to the given parameter name, or null if not found.
    *
    * @param parameterName the parameter name
+   *
    * @return the parameter value, or null if not found
    */
   public Object get(final String parameterName) {
     //Preconditions
-    assert parameterName != null : "parameterName must not be null";
-    assert !parameterName.isEmpty() : "parameterName must not be empty";
+    assert StringUtils.isNonEmptyString(parameterName) : "parameterName must be a non-empty string";
 
     return parameterDictionary.get(parameterName);
   }
 
-  /** Puts the parameter name and non-null value into the parameter dictionary.
+  /**
+   * Puts the parameter name and non-null value into the parameter dictionary.
    *
    * @param parameterName the parameter name
    * @param parameterValue the parameter value
    */
   public void put(final String parameterName, final Object parameterValue) {
     //Preconditions
-    assert parameterName != null : "parameterName must not be null";
-    assert !parameterName.isEmpty() : "parameterName must not be empty";
+    assert StringUtils.isNonEmptyString(parameterName) : "parameterName must be a non-empty string";
     assert parameterValue != null : "parameterValue must not be null";
 
     parameterDictionary.put(parameterName, parameterValue);
   }
 
-  /** Copies the given message's parameters into this message's parameter dictionary.
+  /**
+   * Copies the given message's parameters into this message's parameter dictionary.
    *
    * @param message the given message
    */
@@ -518,7 +573,8 @@ public class Message implements Serializable {
     parameterDictionary.putAll(message.getParameterDictionary());
   }
 
-  /** Copies the given message's parameter into this message's parameter dictionary.
+  /**
+   * Copies the given message's parameter into this message's parameter dictionary.
    *
    * @param parameterName the parameter name
    * @param message the given message
@@ -534,15 +590,17 @@ public class Message implements Serializable {
     }
   }
 
-  /** Gets the message service/operation version.
+  /**
+   * Gets the message recipientService/operation version.
    *
-   * @return the message service/operation version
+   * @return the message recipientService/operation version
    */
   public String getVersion() {
     return version;
   }
 
-  /** Returns a string representation of this object.
+  /**
+   * Returns a string representation of this object.
    *
    * @return a string representation of this object
    */
@@ -550,110 +608,7 @@ public class Message implements Serializable {
   public String toString() {
     final StringBuilder stringBuilder = new StringBuilder();
     stringBuilder.append("[");
-    int index = senderService.lastIndexOf('.');
-    if (index > -1) {
-      final String senderServiceName = senderService.substring(index + 1);
-      stringBuilder.append(senderServiceName);
-    } else {
-      stringBuilder.append(senderService);
-    }
-    stringBuilder.append(" (");
-    stringBuilder.append(operation);
-    stringBuilder.append(") --> ");
-    if (service != null) {
-      index = service.lastIndexOf('.');
-      if (index > -1) {
-        final String serviceName = service.substring(index + 1);
-        stringBuilder.append(serviceName);
-      } else {
-        stringBuilder.append(service);
-      }
-    }
-    stringBuilder.append('{');
-    boolean isFirst = true;
-    for (final Entry<String, Object> entry : parameterDictionary.entrySet()) {
-      if (isFirst) {
-        isFirst = false;
-      } else {
-        stringBuilder.append(", ");
-      }
-      stringBuilder.append(entry.getKey());
-      stringBuilder.append('=');
-      stringBuilder.append(entry.getValue().toString());
-    }
-    stringBuilder.append('}');
-    stringBuilder.append(" sender: ");
-    stringBuilder.append(senderRoleId);
-    stringBuilder.append(" recipient: ");
-    stringBuilder.append(recipientRoleId);
-    stringBuilder.append(']');
-    return stringBuilder.toString();
-  }
-
-  /** Returns a string representation of this object, in which sender and recipient nicknames are substituted for their
-   * respective role ids.
-   *
-   * @param nodeRuntime the node runtime
-   * @return a string representation of this object
-   */
-  public String toString(final NodeRuntime nodeRuntime) {
-    //Preconditions
-    assert nodeRuntime != null : "nodeRuntime must not be null";
-
-    final String senderNodeNickname;
-    final Role localSenderRole = nodeRuntime.getLocalRole(senderRoleId);
-    if (localSenderRole == null) {
-      senderNodeNickname = null;
-    } else {
-      senderNodeNickname = localSenderRole.getNode().getNodeNickname();
-    }
-
-    final String recipientNodeNickname;
-    final Role localRecipientRole = nodeRuntime.getLocalRole(recipientRoleId);
-    if (localRecipientRole == null) {
-      recipientNodeNickname = null;
-    } else {
-      recipientNodeNickname = localRecipientRole.getNode().getNodeNickname();
-    }
-    return toString(
-            senderNodeNickname,
-            recipientNodeNickname,
-            nodeRuntime.getNodeAccess());
-  }
-
-  /** Returns a string representation of this object.
-   *
-   *   [Governor:GovernanceManagementRoleType:GovernanceManagement --> Linguist:GovernanceRoleType:Governance (AHCS ready_Task) {}]
-   *
-   * @param senderNodeNickname the sender node nickname
-   * @param recipientNodeNickname the recipient node nickname
-   * @param nodeAccess the node access object
-   * @return a string representation of this object
-   */
-  private String toString(
-          final String senderNodeNickname,
-          final String recipientNodeNickname,
-          final NodeAccess nodeAccess) {
-
-    //Preconditions
-    assert nodeAccess != null : "nodeAccess must not be null";
-
-    final StringBuilder stringBuilder = new StringBuilder();
-    stringBuilder.append("[");
-    if (senderNodeNickname != null) {
-      stringBuilder.append(senderNodeNickname).append(':');
-    }
-
-    final String senderRoleTypeName;
-    if (senderRoleId.toString().startsWith("http://texai.org/texai/org.texai.texailauncher.domainEntity.TexaiLauncherInfo")) {
-      // the Sesame Launcher repository is locked by the Texai Launcher, so do not use nodeAccess
-      senderRoleTypeName = "Launcher";
-    } else if (senderRoleId.getLocalName().startsWith("NodeRuntime_")) {
-      senderRoleTypeName = "NodeRuntime";
-    } else {
-      senderRoleTypeName = nodeAccess.getRoleType(senderRoleId).getTypeName();
-    }
-    stringBuilder.append(senderRoleTypeName);
+    stringBuilder.append(senderQualifiedName);
     stringBuilder.append(':');
     if (senderService != null) {
       int index = senderService.lastIndexOf('.');
@@ -664,38 +619,27 @@ public class Message implements Serializable {
       }
     }
     stringBuilder.append(" --> ");
-    if (recipientNodeNickname != null) {
-      stringBuilder.append(recipientNodeNickname).append(':');
-    }
-    final String recipientRoleTypeName;
-    if (recipientRoleId.toString().startsWith("http://texai.org/texai/org.texai.texailauncher.domainEntity.TexaiLauncherInfo")) {
-      // the Sesame Launcher repository is locked by the Texai Launcher, so do not use nodeAccess
-      recipientRoleTypeName = "Launcher";
-    } else if (recipientRoleId.getLocalName().startsWith("NodeRuntime_")) {
-      recipientRoleTypeName = "NodeRuntime";
-    } else {
-      recipientRoleTypeName = nodeAccess.getRoleType(recipientRoleId).getTypeName();
-    }
-    stringBuilder.append(recipientRoleTypeName);
+    stringBuilder.append(recipientQualifiedName);
+
     stringBuilder.append(':');
-    if (service != null) {
-      int index = service.lastIndexOf('.');
+    if (recipientService != null) {
+      int index = recipientService.lastIndexOf('.');
       if (index > -1) {
-        stringBuilder.append(service.substring(index + 1));
+        stringBuilder.append(recipientService.substring(index + 1));
       } else {
-        stringBuilder.append(service);
+        stringBuilder.append(recipientService);
       }
     }
     stringBuilder.append(" (");
     stringBuilder.append(operation);
     stringBuilder.append(") {");
     if (conversationId != null) {
-        stringBuilder.append("\n  conversationId=");
-        stringBuilder.append(conversationId);
+      stringBuilder.append("\n  conversationId=");
+      stringBuilder.append(conversationId);
     }
     if (replyWith != null) {
-        stringBuilder.append("\n  replyWith=");
-        stringBuilder.append(replyWith);
+      stringBuilder.append("\n  replyWith=");
+      stringBuilder.append(replyWith);
     }
     if (!parameterDictionary.isEmpty()) {
       boolean isFirst = true;
@@ -713,19 +657,15 @@ public class Message implements Serializable {
       stringBuilder.append('\n');
     }
     stringBuilder.append('}');
-    if (senderNodeNickname == null && recipientNodeNickname == null) {
-      stringBuilder.append(" sender: ");
-      stringBuilder.append(senderRoleId);
-      stringBuilder.append(" recipient: ");
-      stringBuilder.append(recipientRoleId);
-    }
     stringBuilder.append(']');
     return stringBuilder.toString();
   }
 
-  /** Returns whether some other object equals this one.
+  /**
+   * Returns whether some other object equals this one.
    *
    * @param obj the other object
+   *
    * @return whether some other object equals this one
    */
   @Override
@@ -737,13 +677,13 @@ public class Message implements Serializable {
       return false;
     }
     final Message other = (Message) obj;
-    if (this.senderRoleId != other.senderRoleId && !this.senderRoleId.equals(other.senderRoleId)) {
+    if (this.senderQualifiedName.equals(senderQualifiedName)) {
       return false;
     }
     if (this.senderService != null && !this.senderService.equals(other.senderService)) {
       return false;
     }
-    if (this.recipientRoleId != other.recipientRoleId && !this.recipientRoleId.equals(other.recipientRoleId)) {
+    if (!this.recipientQualifiedName.equals(other.recipientQualifiedName)) {
       return false;
     }
     if (this.conversationId != other.conversationId && !this.conversationId.equals(other.conversationId)) {
@@ -761,7 +701,7 @@ public class Message implements Serializable {
     if (this.replyByDateTime != other.replyByDateTime && !this.replyByDateTime.equals(other.replyByDateTime)) {
       return false;
     }
-    if (!this.service.equals(other.service)) {
+    if (!this.recipientService.equals(other.recipientService)) {
       return false;
     }
     if (!this.operation.equals(other.operation)) {
@@ -773,16 +713,18 @@ public class Message implements Serializable {
     return this.version.equals(other.version);
   }
 
-  /** Returns a hash code for this object.
+  /**
+   * Returns a hash code for this object.
    *
    * @return a hash code for this object
    */
   @Override
   public int hashCode() {
-    return senderRoleId.hashCode() + recipientRoleId.hashCode();
+    return senderQualifiedName.hashCode() + recipientQualifiedName.hashCode();
   }
 
-  /** Returns whether this message has been signed.
+  /**
+   * Returns whether this message has been signed.
    *
    * @return whether this message has been signed
    */
@@ -790,7 +732,8 @@ public class Message implements Serializable {
     return signatureBytes == null;
   }
 
-  /** Signs this message.
+  /**
+   * Signs this message.
    *
    * @param privateKey the senders private key
    */
@@ -806,9 +749,11 @@ public class Message implements Serializable {
     }
   }
 
-  /** Returns whether the given signature verifies this message.
+  /**
+   * Returns whether the given signature verifies this message.
    *
    * @param x509Certificate the senders X.509 certificate, that contains the public key
+   *
    * @return whether the given signature verifies the given file
    */
   public boolean verify(final X509Certificate x509Certificate) {
@@ -829,11 +774,12 @@ public class Message implements Serializable {
     return result;
   }
 
-  /** Return whether this message is a Chord operation message, which is not signed.
+  /**
+   * Return whether this message is a Chord operation message, which is not signed.
    *
    * @return whether this message is a Chord operation message
    */
   public boolean isChordOperation() {
-    return senderRoleId.getLocalName().isEmpty();
+    return senderQualifiedName.isEmpty();
   }
 }

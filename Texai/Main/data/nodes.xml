@@ -1,0 +1,637 @@
+<nodes>
+  <node>
+    <name>UniversalRolesAgent</name>
+    <missionDescription>Prototype agent that contains universal roles.</missionDescription>
+    <isAbstract>true</isAbstract>
+    <prototypeNodeNames></prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>UniversalRolesAgent.GovernanceRole</qualifiedName>
+        <description>Ensures that this node complies with policy</description>
+        <isAbstract>false</isAbstract>
+        <parentQualifiedName>ContainerGovernanceAgent.ContainerGovernanceRole</parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.governance.Governance</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+      <role>
+        <qualifiedName>UniversalRolesAgent.HeartbeatRole</qualifiedName>
+        <description>Provides periodic heartbeat messages to indicate that this node is alive.</description>
+        <isAbstract>false</isAbstract>
+        <parentQualifiedName>ContainerHeartbeatAgent.ContainerHeartbeatRole</parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.heartbeat.Heartbeat</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>TopmostFriendshipAgent</name>
+    <missionDescription>Coordinates the top level agents to ensure friendly behavior.</missionDescription>
+    <isAbstract>false</isAbstract>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>TopmostFriendshipAgent.TopmostFriendshipRole</qualifiedName>
+        <description>Coordinates the top level agents to ensure friendly behavior.</description>
+        <isAbstract>false</isAbstract>
+        <parentQualifiedName></parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.governance.TopmostFriendship</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>TopLevelGovernanceAgent</name>
+    <missionDescription>Manages the container governance agents to ensure friendly behavior.</missionDescription>
+    <isAbstract>false</isAbstract>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>TopLevelGovernanceAgent.TopLevelGovernanceRole</qualifiedName>
+        <description>Manages the container governance agents to ensure friendly behavior.</description>
+        <isAbstract>false</isAbstract>
+        <parentQualifiedName>TopmostFriendshipAgent.TopmostFriendshipRole</parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.governance.TopLevelGovernance</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>ContainerGovernanceAgent</name>
+    <missionDescription>Manages a container's agents to ensure friendly behavior.</missionDescription>
+    <isAbstract>false</isAbstract>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>ContainerGovernanceAgent.ContainerGovernanceRole</qualifiedName>
+        <description>Manages a container's agents to ensure friendly behavior.</description>
+        <isAbstract>false</isAbstract>
+        <parentQualifiedName>TopLevelGovernanceAgent.TopLevelGovernanceRole</parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.governance.ContainerGovernance</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>TopLevelHeartbeatAgent</name>
+    <missionDescription>Manages the container heartbeat agents to ensure liveness.</missionDescription>
+    <isAbstract>false</isAbstract>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>TopLevelHeartbeatAgent.TopLevelHeartbeatRole</qualifiedName>
+        <description>Manages the container heartbeat agents to ensure liveness.</description>
+        <isAbstract>false</isAbstract>
+        <parentQualifiedName>TopmostFriendshipAgent.TopmostFriendshipRole</parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.heartbeat.TopLevelHeartbeat</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>ContainerHeartbeatAgent</name>
+    <missionDescription>Manages a container's agents to ensure liveness.</missionDescription>
+    <isAbstract>false</isAbstract>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>ContainerHeartbeatAgent.ContainerHeartbeatRole</qualifiedName>
+        <description>Manages a container's agents to ensure liveness.</description>
+        <isAbstract>false</isAbstract>
+        <parentQualifiedName>TopLevelHeartbeatAgent.TopLevelHeartbeatRole</parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.heartbeat.ContainerHeartbeat</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>NetworkOperationAgent</name>
+    <missionDescription>Manages the network, the containers, and the TexaiCoin agents within the containers. Interacts with human operators.</missionDescription>
+    <isAbstract>false</isAbstract>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>NetworkOperationAgent.NetworkOperationRole</qualifiedName>
+        <description>Manages the network and the containers. Interacts with human operators.</description>
+        <isAbstract>false</isAbstract>
+        <parentQualifiedName>TopmostFriendshipAgent.TopmostFriendshipRole</parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.network.NetworkOperation</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>ContainerOperationAgent</name>
+    <missionDescription>Manages a container and the TexaiCoin agent within the container. Interacts with the human container operator.</missionDescription>
+    <isAbstract>false</isAbstract>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>ContainerOperationAgent.ContainerOperationRole</qualifiedName>
+        <description>Manages the network, the containers, and the TexaiCoin agents within the containers. Interacts with human operators.</description>
+        <isAbstract>false</isAbstract>
+        <parentQualifiedName>NetworkOperationAgent.NetworkOperationRole</parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.network.ContainerOperation</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>XTCNetworkOperationAgent</name>
+    <missionDescription>Manages the TexaiCoin agent network. Interacts with human operators.</missionDescription>
+    <isAbstract>false</isAbstract>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</qualifiedName>
+        <description>Manages the TexaiCoin agent network. Interacts with human operators.</description>
+        <isAbstract>false</isAbstract>
+        <parentQualifiedName>NetworkOperationAgent.NetworkOperationRole</parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.texaicoin.XTCNetworkOperation</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>XTCOperationAgent</name>
+    <missionDescription>Manages a bitcoind instance.</missionDescription>
+    <isAbstract>false</isAbstract>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>XTCOperationAgent.XTCOperationRole</qualifiedName>
+        <description>Manages a bitcoind instance.</description>
+        <isAbstract>false</isAbstract>
+        <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.texaicoin.XTCOperation</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>XTCBlockchainArchiveAgent</name>
+    <missionDescription>Archives the TexaiCoin blockchain and pending transactions.</missionDescription>
+    <isAbstract>false</isAbstract>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>XTCBlockchainArchiveAgent.XTCBlockchainArchiveRole</qualifiedName>
+        <description>Archives the TexaiCoin blockchain and pending transactions.</description>
+        <isAbstract>false</isAbstract>
+        <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.texaicoin.XTCBlockchainArchive</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>XTCClientGatewayAgent</name>
+    <missionDescription>Provides a wallet and processor client gateway for the TexaiCoin network.</missionDescription>
+    <isAbstract>false</isAbstract>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>XTCClientGatewayAgent.XTCClientGatewayRole</qualifiedName>
+        <description>Provides a wallet and processor client gateway for the TexaiCoin network.</description>
+        <isAbstract>false</isAbstract>
+        <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.texaicoin.XTCClientGateway</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>XTCFinancialAccountingAndControlAgent</name>
+    <missionDescription>Provides financial accounting and control for the TexaiCoin network.</missionDescription>
+    <isAbstract>false</isAbstract>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>XTCFinancialAccountingAndControlAgent.XTCClientGatewayRole</qualifiedName>
+        <description>Provides financial accounting and control for the TexaiCoin network.</description>
+        <isAbstract>false</isAbstract>
+        <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.texaicoin.XTCFinancialAccountingAndControl</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>XTCMintAgent</name>
+    <missionDescription>Provides a mint the TexaiCoin network.</missionDescription>
+    <isAbstract>false</isAbstract>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>XTCMintAgent.XTCMintRole</qualifiedName>
+        <description>Provides a mint the TexaiCoin network.</description>
+        <isAbstract>false</isAbstract>
+        <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.texaicoin.XTCMint</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>XTCNetworkConfigurationAgent</name>
+    <missionDescription>Provides network configuration the TexaiCoin network. Maintains the assignment of
+      nomadic agents to particular containers.</missionDescription>
+    <isAbstract>false</isAbstract>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>XTCNetworkConfigurationAgent.XTCNetworkConfigurationRole</qualifiedName>
+        <description>Provides network configuration the TexaiCoin network. Maintains the assignment of
+          nomadic agents to particular containers.</description>
+        <isAbstract>false</isAbstract>
+        <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.texaicoin.XTCNetworkConfiguration</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>XTCNetworkSeedAgent</name>
+    <missionDescription>Provides a TexaiCoin network seed for wallet and processor clients. Maintains the mapping of client gateways
+      and their respective IP addresses.</missionDescription>
+    <isAbstract>false</isAbstract>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>XTCNetworkSeedAgent.XTCNetworkSeedRole</qualifiedName>
+        <description>Provides a TexaiCoin network seed for wallet and processor clients. Maintains the mapping of client gateways
+          and their respective IP addresses.</description>
+        <isAbstract>false</isAbstract>
+        <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.texaicoin.XTCNetworkSeed</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>XTCPrimaryAuditAgent</name>
+    <missionDescription>Provides the primary audit agent for the TexaiCoin network.</missionDescription>
+    <isAbstract>false</isAbstract>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>XTCPrimaryAuditAgent.XTCPrimaryAuditRole</qualifiedName>
+        <description>Provides the primary audit agent for the TexaiCoin network.</description>
+        <isAbstract>false</isAbstract>
+        <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.texaicoin.XTCPrimaryAudit</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>XTCRecoveryAgent</name>
+    <missionDescription>Provides fault recovery for the TexaiCoin network.</missionDescription>
+    <isAbstract>false</isAbstract>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>XTCRecoveryAgent.XTCRecoveryRole</qualifiedName>
+        <description>Provides fault recovery for the TexaiCoin network.</description>
+        <isAbstract>false</isAbstract>
+        <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.texaicoin.XTCRecovery</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>XTCRewardAllocationAgent</name>
+    <missionDescription>Allocates the rewards resulting from minting new blocks for the TexaiCoin network.</missionDescription>
+    <isAbstract>false</isAbstract>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>XTCRewardAllocationAgent.XTCRewardAllocationRole</qualifiedName>
+        <description>Allocates the rewards resulting from minting new blocks for the TexaiCoin network.</description>
+        <isAbstract>false</isAbstract>
+        <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.texaicoin.XTCRewardAllocation</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>XTCContainerAuditAgent</name>
+    <missionDescription>Provides a container audit agent for the TexaiCoin network.</missionDescription>
+    <isAbstract>false</isAbstract>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>XTCContainerAuditAgent.XTCContainerAuditRole</qualifiedName>
+        <description>Provides a container audit agent for the TexaiCoin network.</description>
+        <isAbstract>false</isAbstract>
+        <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.texaicoin.XTCContainerAudit</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>XTCContainerCertificateAuthorityAgent</name>
+    <missionDescription>Provides self-signed X.509 certificates for roles in a particular container in the TexaiCoin
+      network.</missionDescription>
+    <isAbstract>false</isAbstract>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>XTCContainerCertificateAuthorityAgent.XTCContainerCertificateAuthorityRole</qualifiedName>
+        <description>Provides a container audit agent for the TexaiCoin network.</description>
+        <isAbstract>false</isAbstract>
+        <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.misc.CertificateAuthority</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>XTCNetworkEpisodicMemoryAgent</name>
+    <missionDescription>Coordinates episodic memory for agents in the TexaiCoin network.</missionDescription>
+    <isAbstract>false</isAbstract>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>XTCNetworkEpisodicMemoryAgent.XTCNetworkEpisodicMemoryRole</qualifiedName>
+        <description>Coordinates episodic memory for agents in the TexaiCoin network.</description>
+        <isAbstract>false</isAbstract>
+        <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.memory.NetworkEpisodicMemory</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>XTCContainerEpisodicMemoryAgent</name>
+    <missionDescription>Provides episodic memory for agents in a particular container in the TexaiCoin network.</missionDescription>
+    <isAbstract>false</isAbstract>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>XTCContainerEpisodicMemoryAgent.XTCContainerEpisodicMemoryRole</qualifiedName>
+        <description>Provides episodic memory for agents in a particular container in the TexaiCoin network.</description>
+        <isAbstract>false</isAbstract>
+        <parentQualifiedName>XTCNetworkEpisodicMemoryAgent.XTCNetworkEpisodicMemoryRole</parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.memory.ContainerEpisodicMemory</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>XTCNetworkLogControlAgent</name>
+    <missionDescription>Coordinates Java logging for agents in the TexaiCoin network.</missionDescription>
+    <isAbstract>false</isAbstract>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>XTCNetworkLogControlAgent.XTCNetworkLogControlRole</qualifiedName>
+        <description>Coordinates Java logging for agents in the TexaiCoin network.</description>
+        <isAbstract>false</isAbstract>
+        <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.logging.NetworkLogControl</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>XTCContainerLogControlAgent</name>
+    <missionDescription>Coordinates Java logging for agents in the TexaiCoin network.</missionDescription>
+    <isAbstract>false</isAbstract>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>XTCContainerLogControlAgent.XTCContainerLogControlRole</qualifiedName>
+        <description>Coordinates Java logging for agents in the TexaiCoin network.</description>
+        <isAbstract>false</isAbstract>
+        <parentQualifiedName>XTCNetworkLogControlAgent.XTCNetworkLogControlRole</parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.logging.ContainerLogControl</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>XTCNetworkTorrentAgent</name>
+    <missionDescription>Coordinates bittorrent file transfers for agents in the TexaiCoin network.</missionDescription>
+    <isAbstract>false</isAbstract>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>XTCNetworkTorrentAgent.XTCNetworkTorrentRole</qualifiedName>
+        <description>Coordinates bittorrent file transfers for agents in the TexaiCoin network.</description>
+        <isAbstract>false</isAbstract>
+        <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.torrent.NetworkTorrent</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>XTCContainerTorrentAgent</name>
+    <missionDescription>Provides bittorrent file transfers for agents in a particular container in the TexaiCoin network.</missionDescription>
+    <isAbstract>false</isAbstract>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>XTCContainerTorrentAgent.XTCContainerTorrentRole</qualifiedName>
+        <description>Provides bittorrent file transfers for agents in a particular container in the TexaiCoin network.</description>
+        <isAbstract>false</isAbstract>
+        <parentQualifiedName>XTCNetworkTorrentAgent.XTCNetworkTorrentRole</parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.torrent.ContainerTorrent</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+</nodes>

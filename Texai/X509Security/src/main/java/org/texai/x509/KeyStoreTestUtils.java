@@ -66,10 +66,14 @@ public final class KeyStoreTestUtils {
    * Initializes the test server keystore.
    */
   public static synchronized void initializeServerKeyStore() {
+    //Preconditions
+    assert X509Utils.isJCEUnlimitedStrengthPolicy() : "JCE unlimited strength policy must be in effect";
+
+    final X509Certificate serverX509Certificate;
     try {
       // the test server keystore consists of the single test server X.509 certificate
       final KeyPair serverKeyPair = X509Utils.generateRSAKeyPair3072();
-      final X509Certificate serverX509Certificate = X509Utils.generateSelfSignedEndEntityX509Certificate(
+      serverX509Certificate = X509Utils.generateSelfSignedEndEntityX509Certificate(
               serverKeyPair,
               UUID.randomUUID(), // uid
               "test server"); // domainComponent
@@ -79,35 +83,17 @@ public final class KeyStoreTestUtils {
       String filePath = "data/test-server-keystore.uber";
       File file = new File(filePath);
       if (file.exists()) {
-        // do not overwrite it
-
-        //Postconditions
-        assert X509Utils.isJCEUnlimitedStrengthPolicy() : "JCE unlimited strength policy must be in effect";
-        return;
+        file.delete();
       }
       LOGGER.info("creating test-server-keystore.uber");
       assert X509Utils.isJCEUnlimitedStrengthPolicy();
-      KeyStore serverKeyStore = X509Utils.findOrCreateKeyStore(filePath, SERVER_KEYSTORE_PASSWORD);
-      serverKeyStore.setKeyEntry(
-              "certificate", // certificateAlias
-              serverKeyPair.getPrivate(),
-              SERVER_KEYSTORE_PASSWORD,
-              new Certificate[]{serverX509Certificate});
-      serverKeyStore.store(new FileOutputStream(filePath), SERVER_KEYSTORE_PASSWORD);
-
-      // then proceed after disabling the JCE unlimited strength jurisdiction policy files indicator
-      X509Utils.setIsJCEUnlimitedStrengthPolicy(false);
-      filePath = "data/test-server-keystore.jceks";
-      LOGGER.info("creating test-server-keystore.jceks");
-      serverKeyStore = X509Utils.findOrCreateKeyStore(filePath, SERVER_KEYSTORE_PASSWORD);
-      serverKeyStore.setKeyEntry(
+      final KeyStore serverKeyStoreUber = X509Utils.findOrCreateKeyStore(filePath, SERVER_KEYSTORE_PASSWORD);
+      serverKeyStoreUber.setKeyEntry(
               TEST_CERTIFICATE_ALIAS, // certificateAlias
               serverKeyPair.getPrivate(),
               SERVER_KEYSTORE_PASSWORD,
               new Certificate[]{serverX509Certificate});
-      serverKeyStore.store(new FileOutputStream(filePath), SERVER_KEYSTORE_PASSWORD);
-      // restore the JCE unlimited strength jurisdiction policy files indicator
-      X509Utils.setIsJCEUnlimitedStrengthPolicy(true);
+      serverKeyStoreUber.store(new FileOutputStream(filePath), SERVER_KEYSTORE_PASSWORD);
 
     } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | SignatureException | InvalidKeyException | IOException | KeyStoreException | CertificateException ex) {
       throw new TexaiException(ex);
@@ -115,17 +101,24 @@ public final class KeyStoreTestUtils {
 
     //Postconditions
     assert X509Utils.isJCEUnlimitedStrengthPolicy() : "JCE unlimited strength policy must be in effect";
+    final X509SecurityInfo x509SecurityInfo = getServerX509SecurityInfo();
+    assert x509SecurityInfo != null;
+    assert x509SecurityInfo.getX509Certificate().equals(serverX509Certificate);
   }
 
   /**
    * Initializes the test client keystore on the trusted development system, from where it is copied into the distributed code.
    */
   public static synchronized void initializeClientKeyStore() {
+    //Preconditions
+    assert X509Utils.isJCEUnlimitedStrengthPolicy() : "JCE unlimited strength policy must be in effect";
+
+    final X509Certificate clientX509Certificate;
     try {
       // the test client keystore consists of the single test client X.509 certificate, which is generated and signed by
       // the Texai root certificate on the developement system that has the root private key.
       final KeyPair clientKeyPair = X509Utils.generateRSAKeyPair3072();
-      final X509Certificate clientX509Certificate = X509Utils.generateSelfSignedEndEntityX509Certificate(
+      clientX509Certificate = X509Utils.generateSelfSignedEndEntityX509Certificate(
               clientKeyPair,
               UUID.randomUUID(), // uid
               "test client"); // domainComponent
@@ -139,29 +132,14 @@ public final class KeyStoreTestUtils {
       }
       LOGGER.info("creating test-client-keystore.uber");
       assert X509Utils.isJCEUnlimitedStrengthPolicy();
-      KeyStore clientKeyStore = X509Utils.findOrCreateKeyStore(filePath, CLIENT_KEYSTORE_PASSWORD);
-      clientKeyStore.setKeyEntry(
+      final KeyStore clientKeyStoreUber = X509Utils.findOrCreateKeyStore(filePath, CLIENT_KEYSTORE_PASSWORD);
+      clientKeyStoreUber.setKeyEntry(
               TEST_CERTIFICATE_ALIAS, // certificateAlias
               clientKeyPair.getPrivate(),
               CLIENT_KEYSTORE_PASSWORD,
               new Certificate[]{clientX509Certificate});
-      clientKeyStore.store(new FileOutputStream(filePath), CLIENT_KEYSTORE_PASSWORD);
-      assert "UBER".equals(clientKeyStore.getType());
-
-      // then proceed after disabling the JCE unlimited strength jurisdiction policy files indicator
-      X509Utils.setIsJCEUnlimitedStrengthPolicy(false);
-      filePath = "data/test-client-keystore.jceks";
-      LOGGER.info("creating test-client-keystore.jceks");
-      clientKeyStore = X509Utils.findOrCreateKeyStore(filePath, CLIENT_KEYSTORE_PASSWORD);
-      clientKeyStore.setKeyEntry(
-              "certificate", // certificateAlias
-              clientKeyPair.getPrivate(),
-              CLIENT_KEYSTORE_PASSWORD,
-              new Certificate[]{clientX509Certificate});
-      clientKeyStore.store(new FileOutputStream(filePath), CLIENT_KEYSTORE_PASSWORD);
-      assert "JCEKS".equals(clientKeyStore.getType());
-      // restore the JCE unlimited strength jurisdiction policy files indicator
-      X509Utils.setIsJCEUnlimitedStrengthPolicy(true);
+      clientKeyStoreUber.store(new FileOutputStream(filePath), CLIENT_KEYSTORE_PASSWORD);
+      assert "UBER".equals(clientKeyStoreUber.getType());
 
     } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | SignatureException | InvalidKeyException | IOException | KeyStoreException | CertificateException ex) {
       throw new TexaiException(ex);
@@ -169,6 +147,9 @@ public final class KeyStoreTestUtils {
 
     //Postconditions
     assert X509Utils.isJCEUnlimitedStrengthPolicy() : "JCE unlimited strength policy must be in effect";
+    final X509SecurityInfo x509SecurityInfo = getClientX509SecurityInfo();
+    assert x509SecurityInfo != null;
+    assert x509SecurityInfo.getX509Certificate().equals(clientX509Certificate);
   }
 
   /**
@@ -177,31 +158,11 @@ public final class KeyStoreTestUtils {
    * @return the test server keystore
    */
   public static KeyStore getServerKeyStore() {
+    //Preconditions
+    assert X509Utils.isJCEUnlimitedStrengthPolicy() : "JCE unlimited strength policy must be in effect";
+
     // create server keystore
-    String filePath;
-    if (X509Utils.isJCEUnlimitedStrengthPolicy()) {
-      filePath = "../X509Security/data/test-server-keystore.uber";
-      File file = new File(filePath);
-      if (!file.exists()) {
-        filePath = "../Texai/X509Security/data/test-server-keystore.uber";
-      }
-      file = new File(filePath);
-      if (!file.exists()) {
-        // for MessageRouter
-        filePath = "data/test-server-keystore.uber";
-      }
-    } else {
-      filePath = "../X509Security/data/test-server-keystore.jceks";
-      File file = new File(filePath);
-      if (!file.exists()) {
-        filePath = "../Texai/X509Security/data/test-server-keystore.jceks";
-      }
-      file = new File(filePath);
-      if (!file.exists()) {
-        // for MessageRouter
-        filePath = "data/test-server-keystore.jceks";
-      }
-    }
+    String filePath = "data/test-server-keystore.uber";
     try {
       return X509Utils.findOrCreateKeyStore(filePath, SERVER_KEYSTORE_PASSWORD);
     } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | NoSuchProviderException ex) {
@@ -215,29 +176,15 @@ public final class KeyStoreTestUtils {
    * @return the test client keystore
    */
   public static KeyStore getClientKeyStore() {
-    String filePath;
-    if (X509Utils.isJCEUnlimitedStrengthPolicy()) {
-      filePath = "data/test-client-keystore.uber";
-    } else {
-      filePath = "data/test-client-keystore.jceks";
-    }
-    LOGGER.debug("test-client-keystore path: " + filePath);
+    //Preconditions
+    assert X509Utils.isJCEUnlimitedStrengthPolicy() : "JCE unlimited strength policy must be in effect";
+
+    String filePath = "data/test-client-keystore.uber";
     try {
-      final KeyStore clientKeyStore = X509Utils.findOrCreateKeyStore(filePath, CLIENT_KEYSTORE_PASSWORD);
-      if (LOGGER.isDebugEnabled()) {
-        X509Utils.logAliases(clientKeyStore);
-      }
-
-      //Postconditions
-      assert !filePath.endsWith("uber") || clientKeyStore.getType().equals("UBER") :
-              "keystore type is " + clientKeyStore.getType() + ", must be UBER";
-
-      return clientKeyStore;
-
+      return X509Utils.findOrCreateKeyStore(filePath, CLIENT_KEYSTORE_PASSWORD);
     } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | NoSuchProviderException ex) {
       throw new TexaiException(ex);
     }
-
   }
 
   /**

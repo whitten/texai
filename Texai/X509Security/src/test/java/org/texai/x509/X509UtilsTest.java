@@ -34,6 +34,7 @@ import org.texai.util.StringUtils;
 import java.security.SecureRandom;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.KeyPair;
@@ -58,6 +59,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 //import sun.security.x509.X509CertImpl;
 import static org.junit.Assert.*;
+import org.texai.util.TexaiException;
 
 /**
  *
@@ -92,6 +94,58 @@ public class X509UtilsTest {
 
   @After
   public void tearDown() {
+  }
+
+  /**
+   * Test of generateX509SecurityInfo method of class X509Utils.
+   */
+  @Test
+  public void testGenerateX509SecurityInfo() {
+    LOGGER.info("generateX509SecurityInfo");
+    try {
+      final String keyStoreFilePath;
+      if (X509Utils.isJCEUnlimitedStrengthPolicy()) {
+        keyStoreFilePath = "data/keystore.uber";
+      } else {
+        keyStoreFilePath = "data/keystore.jceks";
+      }
+      final File keyStoreFile = new File(keyStoreFilePath);
+      if (keyStoreFile.exists()) {
+        final boolean isFileDeleted = keyStoreFile.delete();
+        if (!isFileDeleted) {
+          fail("keystore file not deleted: " + keyStoreFilePath);
+        }
+      }
+      KeyStore keyStore;
+      final KeyPair keyPair = X509Utils.generateRSAKeyPair3072();
+      final UUID uid = UUID.randomUUID();
+      final char[] keyStorePassword = "my-password".toCharArray();
+      keyStore = X509Utils.findOrCreateKeyStore(keyStoreFilePath, keyStorePassword);
+      X509SecurityInfo x509SecurityInfo = X509Utils.generateX509SecurityInfo(
+              keyStore,
+              keyStorePassword,
+              keyPair,
+              uid,
+              null, // domainComponent
+              KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS); // certificateAlias
+      assertNotNull(x509SecurityInfo.getCertPath());
+      assertNotNull(x509SecurityInfo.getKeyManagers());
+      assertNotNull(x509SecurityInfo.getKeyStore());
+      assertNotNull(x509SecurityInfo.getPrivateKey());
+      assertNotNull(x509SecurityInfo.getX509Certificate());
+
+      LOGGER.info("aliases" + keyStore.aliases());
+      keyStore.store(new FileOutputStream(keyStoreFilePath), keyStorePassword);
+      assertTrue(keyStore.containsAlias(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS));
+      assertTrue(keyStore.isKeyEntry(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS));
+
+      final KeyStore keyStore2 = X509Utils.findOrCreateKeyStore(keyStoreFilePath, keyStorePassword);
+      assertTrue(keyStore2.containsAlias(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS));
+      assertTrue(keyStore2.isKeyEntry(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS));
+
+    } catch (CertificateException | IOException | KeyStoreException | NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException ex) {
+      fail(ex.getMessage());
+    }
   }
 
   /**
@@ -363,8 +417,15 @@ public class X509UtilsTest {
     } else {
       keyStoreFilePath = "data/test-client-keystore.jceks";
     }
+    final char[] keyStorePassword = KeyStoreTestUtils.getClientKeyStorePassword();
+    KeyStore keyStore = null;
+    try {
+      keyStore = X509Utils.findOrCreateKeyStore(keyStoreFilePath, keyStorePassword);
+    } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | NoSuchProviderException ex) {
+      fail(ex.getMessage());
+    }
     X509SecurityInfo x509SecurityInfo = X509Utils.getX509SecurityInfo(
-            keyStoreFilePath,
+            keyStore,
             KeyStoreTestUtils.getClientKeyStorePassword(),
             KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS); // alias
     assertTrue(x509SecurityInfo.getKeyManagers().length > 0);
@@ -546,34 +607,6 @@ public class X509UtilsTest {
               keyStorePassword);
     } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | NoSuchProviderException | UnrecoverableEntryException ex) {
       LOGGER.info(StringUtils.getStackTraceAsString(ex));
-      fail(ex.getMessage());
-    }
-  }
-
-  /**
-   * Test of generateX509SecurityInfo method of class X509Utils.
-   */
-  @Test
-  public void testGenerateX509SecurityInfo() {
-    LOGGER.info("generateX509SecurityInfo");
-    try {
-      final KeyPair keyPair = X509Utils.generateRSAKeyPair3072();
-      final UUID uid = UUID.randomUUID();
-      final char[] keystorePassword = "my-password".toCharArray();
-      final boolean isJCEUnlimitedStrengthPolicy = true;
-      X509SecurityInfo x509SecurityInfo = X509Utils.generateX509SecurityInfo(
-              keyPair,
-              uid,
-              keystorePassword,
-              isJCEUnlimitedStrengthPolicy,
-              null, // domainComponent
-              KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS); // certificateAlias
-      assertNotNull(x509SecurityInfo.getCertPath());
-      assertNotNull(x509SecurityInfo.getKeyManagers());
-      assertNotNull(x509SecurityInfo.getKeyStore());
-      assertNotNull(x509SecurityInfo.getPrivateKey());
-      assertNotNull(x509SecurityInfo.getX509Certificate());
-    } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException ex) {
       fail(ex.getMessage());
     }
   }

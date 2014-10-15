@@ -21,17 +21,11 @@
 package org.texai.ahcsSupport;
 
 import java.io.Serializable;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.SignatureException;
-import java.security.cert.CertificateException;
+import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import javax.net.ssl.X509KeyManager;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.junit.After;
@@ -43,8 +37,6 @@ import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.texai.kb.Constants;
 import org.texai.util.ByteUtils;
-import org.texai.x509.KeyStoreTestUtils;
-import org.texai.x509.X509SecurityInfo;
 import org.texai.x509.X509Utils;
 import static org.junit.Assert.*;
 
@@ -86,8 +78,8 @@ public class MessageTest {
   @Test
   public void testGetOperation() {
     LOGGER.info("getOperation");
-    final URI senderRoleId = randomURI();
-    final URI recipientRoleId = randomURI();
+    final String senderQualifiedName = "container1.agent1.role1";
+    final String recipientQualifiedName = "container2.agent2.role2";
     final UUID conversationId = UUID.randomUUID();
     final UUID replyWith = UUID.randomUUID();
     final UUID inReplyTo = UUID.randomUUID();
@@ -96,9 +88,9 @@ public class MessageTest {
     final String operation = "ABC_Task";
     final Map<String, Object> parameterDictionary = new HashMap<>();
     Message instance = new Message(
-            senderRoleId,
+            senderQualifiedName,
             "SenderService", // senderService
-            recipientRoleId,
+            recipientQualifiedName,
             conversationId,
             replyWith,
             inReplyTo,
@@ -113,13 +105,91 @@ public class MessageTest {
   }
 
   /**
+   * Test of getSenderContainerName, getRecipientContainerName methods, of class Message.
+   */
+  @Test
+  public void testGetSenderContainerName() {
+    LOGGER.info("getSenderContainerName");
+    final String senderQualifiedName = "container1.agent1.role1";
+    final String recipientQualifiedName = "container2.agent2.role2";
+    final UUID conversationId = UUID.randomUUID();
+    final UUID replyWith = UUID.randomUUID();
+    final UUID inReplyTo = UUID.randomUUID();
+    final DateTime replyByDateTime = null;
+    final String service = "MyService";
+    final String operation = "ABC_Task";
+    final Map<String, Object> parameterDictionary = new HashMap<>();
+    Message instance = new Message(
+            senderQualifiedName,
+            "SenderService", // senderService
+            recipientQualifiedName,
+            conversationId,
+            replyWith,
+            inReplyTo,
+            replyByDateTime,
+            service,
+            operation,
+            parameterDictionary,
+            "1.0.0");
+
+    assertEquals("container1", instance.getSenderContainerName());
+    assertEquals("container2", instance.getRecipientContainerName());
+  }
+
+  /**
+   * Test of isBetweenContainers method, of class Message.
+   */
+  @Test
+  public void testIsBetweenContainers() {
+    LOGGER.info("isBetweenContainers");
+    final String senderQualifiedName = "container1.agent1.role1";
+    final String recipientQualifiedName = "container2.agent2.role2";
+    final UUID conversationId = UUID.randomUUID();
+    final UUID replyWith = UUID.randomUUID();
+    final UUID inReplyTo = UUID.randomUUID();
+    final DateTime replyByDateTime = null;
+    final String service = "MyService";
+    final String operation = "ABC_Task";
+    final Map<String, Object> parameterDictionary = new HashMap<>();
+    Message instance = new Message(
+            senderQualifiedName,
+            "SenderService", // senderService
+            recipientQualifiedName,
+            conversationId,
+            replyWith,
+            inReplyTo,
+            replyByDateTime,
+            service,
+            operation,
+            parameterDictionary,
+            "1.0.0");
+
+    assertFalse(instance.isBetweenContainers());
+
+    final String senderQualifiedName2 = "container2.agent1.role1";
+    Message instance2 = new Message(
+            senderQualifiedName2,
+            "SenderService", // senderService
+            recipientQualifiedName,
+            conversationId,
+            replyWith,
+            inReplyTo,
+            replyByDateTime,
+            service,
+            operation,
+            parameterDictionary,
+            "1.0.0");
+    assertTrue(instance2.isBetweenContainers());
+}
+
+  /**
    * Test of isInfo method, of class Message.
    */
   @Test
   public void testIsInfo() {
     LOGGER.info("isInfo");
-    final URI senderRoleId = randomURI();
-    final URI recipientRoleId = randomURI();
+    final String senderQualifiedName = "container1.agent1.role1";
+    final String recipientQualifiedName = "container2.agent2.role2";
     final UUID conversationId = UUID.randomUUID();
     final UUID replyWith = UUID.randomUUID();
     final UUID inReplyTo = UUID.randomUUID();
@@ -127,9 +197,9 @@ public class MessageTest {
     final String service = "MyService";
     final Map<String, Object> parameterDictionary = new HashMap<>();
     Message instance = new Message(
-            senderRoleId,
+            senderQualifiedName,
             "SenderService", // senderService
-            recipientRoleId,
+            recipientQualifiedName,
             conversationId,
             replyWith,
             inReplyTo,
@@ -141,9 +211,9 @@ public class MessageTest {
     assertEquals(false, instance.isInfo());
 
     instance = new Message(
-            senderRoleId,
+            senderQualifiedName,
             "SenderService", // senderService
-            recipientRoleId,
+            recipientQualifiedName,
             conversationId,
             replyWith,
             inReplyTo,
@@ -155,9 +225,9 @@ public class MessageTest {
     assertEquals(true, instance.isInfo());
 
     instance = new Message(
-            senderRoleId,
+            senderQualifiedName,
             "SenderService", // senderService
-            recipientRoleId,
+            recipientQualifiedName,
             conversationId,
             replyWith,
             inReplyTo,
@@ -175,8 +245,8 @@ public class MessageTest {
   @Test
   public void testIsSensation() {
     LOGGER.info("isSensation");
-    final URI senderRoleId = randomURI();
-    final URI recipientRoleId = randomURI();
+    final String senderQualifiedName = "container1.agent1.role1";
+    final String recipientQualifiedName = "container2.agent2.role2";
     final UUID conversationId = UUID.randomUUID();
     final UUID replyWith = UUID.randomUUID();
     final UUID inReplyTo = UUID.randomUUID();
@@ -184,9 +254,9 @@ public class MessageTest {
     final String service = "MyService";
     final Map<String, Object> parameterDictionary = new HashMap<>();
     Message instance = new Message(
-            senderRoleId,
+            senderQualifiedName,
             "SenderService", // senderService
-            recipientRoleId,
+            recipientQualifiedName,
             conversationId,
             replyWith,
             inReplyTo,
@@ -198,9 +268,9 @@ public class MessageTest {
     assertEquals(false, instance.isInfo());
 
     instance = new Message(
-            senderRoleId,
+            senderQualifiedName,
             "SenderService", // senderService
-            recipientRoleId,
+            recipientQualifiedName,
             conversationId,
             replyWith,
             inReplyTo,
@@ -212,9 +282,9 @@ public class MessageTest {
     assertEquals(true, instance.isInfo());
 
     instance = new Message(
-            senderRoleId,
+            senderQualifiedName,
             "SenderService", // senderService
-            recipientRoleId,
+            recipientQualifiedName,
             conversationId,
             replyWith,
             inReplyTo,
@@ -232,8 +302,8 @@ public class MessageTest {
   @Test
   public void testIsTask() {
     LOGGER.info("isTask");
-    final URI senderRoleId = randomURI();
-    final URI recipientRoleId = randomURI();
+    final String senderQualifiedName = "container1.agent1.role1";
+    final String recipientQualifiedName = "container2.agent2.role2";
     final UUID conversationId = UUID.randomUUID();
     final UUID replyWith = UUID.randomUUID();
     final UUID inReplyTo = UUID.randomUUID();
@@ -241,9 +311,9 @@ public class MessageTest {
     final String service = "MyService";
     final Map<String, Object> parameterDictionary = new HashMap<>();
     Message instance = new Message(
-            senderRoleId,
+            senderQualifiedName,
             "SenderService", // senderService
-            recipientRoleId,
+            recipientQualifiedName,
             conversationId,
             replyWith,
             inReplyTo,
@@ -255,9 +325,9 @@ public class MessageTest {
     assertEquals(true, instance.isTask());
 
     instance = new Message(
-            senderRoleId,
+            senderQualifiedName,
             "SenderService", // senderService
-            recipientRoleId,
+            recipientQualifiedName,
             conversationId,
             replyWith,
             inReplyTo,
@@ -269,9 +339,9 @@ public class MessageTest {
     assertEquals(false, instance.isTask());
 
     instance = new Message(
-            senderRoleId,
+            senderQualifiedName,
             "SenderService", // senderService
-            recipientRoleId,
+            recipientQualifiedName,
             conversationId,
             replyWith,
             inReplyTo,
@@ -289,8 +359,8 @@ public class MessageTest {
   @Test
   public void testGet() {
     LOGGER.info("get");
-    final URI senderRoleId = randomURI();
-    final URI recipientRoleId = randomURI();
+    final String senderQualifiedName = "container1.agent1.role1";
+    final String recipientQualifiedName = "container2.agent2.role2";
     final UUID conversationId = UUID.randomUUID();
     final UUID replyWith = UUID.randomUUID();
     final UUID inReplyTo = UUID.randomUUID();
@@ -301,9 +371,9 @@ public class MessageTest {
     final String service = "MyService";
     parameterDictionary.put(parameterName, parameterValue);
     Message instance = new Message(
-            senderRoleId,
+            senderQualifiedName,
             "SenderService", // senderService
-            recipientRoleId,
+            recipientQualifiedName,
             conversationId,
             replyWith,
             inReplyTo,
@@ -321,8 +391,8 @@ public class MessageTest {
   @Test
   public void testToString() {
     LOGGER.info("toString");
-    final URI senderRoleId = randomURI();
-    final URI recipientRoleId = randomURI();
+    final String senderQualifiedName = "container1.agent1.role1";
+    final String recipientQualifiedName = "container2.agent2.role2";
     final UUID conversationId = UUID.randomUUID();
     final UUID replyWith = UUID.randomUUID();
     final UUID inReplyTo = UUID.randomUUID();
@@ -333,9 +403,9 @@ public class MessageTest {
     Serializable parameterValue = 10;
     parameterDictionary.put(parameterName, parameterValue);
     Message instance = new Message(
-            senderRoleId,
+            senderQualifiedName,
             "SenderService", // senderService
-            recipientRoleId,
+            recipientQualifiedName,
             conversationId,
             replyWith,
             inReplyTo,
@@ -344,7 +414,8 @@ public class MessageTest {
             "ABC_Task", // operation
             parameterDictionary,
             "1.0.0");
-    assertTrue(instance.toString().startsWith("[SenderService (ABC_Task) --> MyService{my-parm=10} sender: http://texai.org/texai/"));
+    LOGGER.info(instance);
+    assertTrue(instance.toString().startsWith("[container1.agent1.role1:SenderService --> container2.agent2.role2:MyService (ABC_Task) {"));
   }
 
   /**
@@ -353,8 +424,8 @@ public class MessageTest {
   @Test
   public void testEquals() {
     LOGGER.info("equals");
-    final URI senderRoleId = randomURI();
-    final URI recipientRoleId = randomURI();
+    final String senderQualifiedName = "container1.agent1.role1";
+    final String recipientQualifiedName = "container2.agent2.role2";
     final UUID conversationId = UUID.randomUUID();
     final UUID replyWith = UUID.randomUUID();
     final UUID inReplyTo = UUID.randomUUID();
@@ -365,9 +436,9 @@ public class MessageTest {
     Serializable parameterValue = 10;
     parameterDictionary1.put(parameterName, parameterValue);
     Message instance1 = new Message(
-            senderRoleId,
+            senderQualifiedName,
             "SenderService", // senderService
-            recipientRoleId,
+            recipientQualifiedName,
             conversationId,
             replyWith,
             inReplyTo,
@@ -379,9 +450,9 @@ public class MessageTest {
     final Map<String, Object> parameterDictionary2 = new HashMap<>();
     parameterDictionary2.put(parameterName, parameterValue);
     Message instance2 = new Message(
-            senderRoleId,
+            senderQualifiedName,
             "SenderService", // senderService
-            recipientRoleId,
+            recipientQualifiedName,
             conversationId,
             replyWith,
             inReplyTo,
@@ -392,9 +463,9 @@ public class MessageTest {
             "1.0.0");
     //assertTrue(instance1.equals(instance2));  only true if both instances are created at the same time
     Message instance3 = new Message(
-            new URIImpl("http://texai.org/texai/be357af5-d270-4642-8d42-d9b17db87b0b"), // senderRoleId
+            "container1.agent1.role1", // senderQualifiedName
             "SenderService", // senderService
-            new URIImpl("http://texai.org/texai/8383dbb8-6158-4275-aff3-c94d5af9d733"), // recipientRoleId
+            "container2.agent2.role2", // recipientQualifiedName
             conversationId,
             replyWith,
             inReplyTo,
@@ -412,9 +483,9 @@ public class MessageTest {
   @Test
   public void testHashCode() {
     LOGGER.info("hashCode");
-    final URI senderRoleId = new URIImpl("http://texai.org/texai/be357af5-d270-4642-8d42-d9b17db87b0b");
-    final URI recipientRoleId = new URIImpl("http://texai.org/texai/8383dbb8-6158-4275-aff3-c94d5af9d733");
-    LOGGER.info("recipientRoleId " + recipientRoleId);
+    final String senderQualifiedName = "container1.agent1.role1";
+    final String recipientQualifiedName = "container2.agent2.role2";
+    LOGGER.info("recipientQualifiedName " + recipientQualifiedName);
     final UUID conversationId = UUID.randomUUID();
     final UUID replyWith = UUID.randomUUID();
     final UUID inReplyTo = UUID.randomUUID();
@@ -425,9 +496,9 @@ public class MessageTest {
     Serializable parameterValue = 10;
     parameterDictionary.put(parameterName, parameterValue);
     Message instance = new Message(
-            senderRoleId,
+            senderQualifiedName,
             "SenderService", // senderService
-            recipientRoleId,
+            recipientQualifiedName,
             conversationId,
             replyWith,
             inReplyTo,
@@ -437,7 +508,7 @@ public class MessageTest {
             parameterDictionary,
             "1.0.0");
     int result = instance.hashCode();
-    assertEquals(281141015, result);
+    assertEquals(1577801551, result);
   }
 
   /**
@@ -446,9 +517,9 @@ public class MessageTest {
   @Test
   public void testGetters() {
     LOGGER.info("getters");
-    final URI senderRoleId = randomURI();
+    final String senderQualifiedName = "container1.agent1.role1";
+    final String recipientQualifiedName = "container2.agent2.role2";
     final String senderService = "MySenderService";
-    final URI recipientRoleId = randomURI();
     final UUID conversationId = UUID.randomUUID();
     final UUID replyWith = UUID.randomUUID();
     final UUID inReplyTo = UUID.randomUUID();
@@ -459,9 +530,9 @@ public class MessageTest {
     Serializable parameterValue = 10;
     parameterDictionary.put(parameterName, parameterValue);
     Message instance = new Message(
-            senderRoleId,
+            senderQualifiedName,
             senderService,
-            recipientRoleId,
+            recipientQualifiedName,
             conversationId,
             replyWith,
             inReplyTo,
@@ -470,9 +541,9 @@ public class MessageTest {
             "ABC_Task", // operation
             parameterDictionary,
             "1.0.0");
-    assertEquals(senderRoleId, instance.getSenderRoleId());
+    assertEquals(senderQualifiedName, instance.getSenderQualifiedName());
     assertEquals(senderService, instance.getSenderService());
-    assertEquals(recipientRoleId, instance.getRecipientRoleId());
+    assertEquals(recipientQualifiedName, instance.getRecipientQualifiedName());
     assertEquals(conversationId, instance.getConversationId());
     assertEquals(replyWith, instance.getReplyWith());
     assertEquals(inReplyTo, instance.getInReplyTo());
@@ -487,8 +558,8 @@ public class MessageTest {
   @Test
   public void testDigitalSignature() {
     LOGGER.info("digital signature");
-    final URI senderRoleId = randomURI();
-    final URI recipientRoleId = randomURI();
+    final String senderQualifiedName = "container1.agent1.role1";
+    final String recipientQualifiedName = "container2.agent2.role2";
     final UUID conversationId = UUID.randomUUID();
     final UUID replyWith = UUID.randomUUID();
     final UUID inReplyTo = UUID.randomUUID();
@@ -499,9 +570,9 @@ public class MessageTest {
     Serializable parameterValue = 10;
     parameterDictionary.put(parameterName, parameterValue);
     Message instance = new Message(
-            senderRoleId,
+            senderQualifiedName,
             "SenderService", // senderService
-            recipientRoleId,
+            recipientQualifiedName,
             conversationId,
             replyWith,
             inReplyTo,
@@ -510,32 +581,29 @@ public class MessageTest {
             "ABC_Task", // operation
             parameterDictionary,
             "1.0.0");
-    assertTrue(instance.toString().startsWith("[SenderService (ABC_Task) --> MyService{my-parm=10} sender: http://texai.org/texai/"));
+    LOGGER.info(instance);
+    assertTrue(instance.toString().startsWith("[container1.agent1.role1:SenderService --> container2.agent2.role2:MyService (ABC_Task) {"));
     try {
-      final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
-      final X509KeyManager x509KeyManager = (X509KeyManager) x509SecurityInfo.getKeyManagers()[0];
-      final X509Certificate[] certificateChain = x509KeyManager.getCertificateChain(X509Utils.ENTRY_ALIAS);
-      assertNotNull(certificateChain);
-      LOGGER.info("certificate chain length:\n" + certificateChain.length);
-      assertEquals(2, certificateChain.length);
-      final X509Certificate x509Certificate = certificateChain[0];
+      final KeyPair keyPair = X509Utils.generateRSAKeyPair3072();
+      final X509Certificate x509Certificate = X509Utils.generateSelfSignedEndEntityX509Certificate(
+              keyPair,
+              UUID.randomUUID(), // uid
+              "container1.agent1.role1"); // domainComponent
       LOGGER.info("certificate: " + x509Certificate);
-      final PrivateKey privateKey = x509KeyManager.getPrivateKey(X509Utils.ENTRY_ALIAS);
-      assertNotNull(privateKey);
-      LOGGER.info("private key: " + privateKey);
+      LOGGER.info("private key: " + keyPair.getPrivate());
       x509Certificate.checkValidity();
       // validate the certificate with the issuer's public key
-      x509Certificate.verify(certificateChain[1].getPublicKey());
+      x509Certificate.verify(keyPair.getPublic());
 
       LOGGER.info("signing message");
-      instance.sign(privateKey);
+      instance.sign(keyPair.getPrivate());
       LOGGER.info("Signature(in hex):: " + ByteUtils.toHex(instance.getSignatureBytes()));
 
       LOGGER.info("verifying message");
       boolean result = instance.verify(x509Certificate);
       LOGGER.info("Signature Verification Result = " + x509Certificate);
       assertTrue(result);
-    } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchProviderException | SignatureException | CertificateException ex) {
+    } catch (Exception ex) {
       ex.printStackTrace();
       fail(ex.getMessage());
     }

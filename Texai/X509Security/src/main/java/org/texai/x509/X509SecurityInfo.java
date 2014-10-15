@@ -78,10 +78,14 @@ public final class X509SecurityInfo {
       keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
       keyManagerFactory.init(keyStore, keyStorePassword);
       privateKeyEntry = (PrivateKeyEntry) keyStore.getEntry(certificateAlias, new PasswordProtection(keyStorePassword));
-      assert privateKeyEntry != null : "privateKeyEntry not found for alias " + certificateAlias;
     } catch (NoSuchAlgorithmException | KeyStoreException | UnrecoverableEntryException ex) {
       throw new TexaiException(ex);
     }
+
+    //Postconditions
+    assert privateKeyEntry != null : "privateKeyEntry not found for alias " + certificateAlias;
+//    int length = ((X509Certificate[]) privateKeyEntry.getCertificateChain()).length;
+//    assert length == 1 : "X.509 certificate chain should have length 1, but was " + length;
   }
 
   /**
@@ -122,7 +126,7 @@ public final class X509SecurityInfo {
 
     //Postconditions
     assert certificateChain != null;
-    assert certificateChain.length == 1;
+    //assert certificateChain.length == 1 : "X.509 certificate chain should have length 1, but was " + certificateChain.length;
 
     return certificateChain;
   }

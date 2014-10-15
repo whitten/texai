@@ -42,9 +42,9 @@ import org.texai.util.TexaiException;
 @NotThreadSafe
 public class AlbusHCSAccess {
 
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(AlbusHCSAccess.class);
-  /** the RDF entity manager */
+  // the RDF entity manager
   private final RDFEntityManager rdfEntityManager;
 
 

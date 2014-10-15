@@ -57,7 +57,7 @@ public final class TopLevelGovernance extends AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
 
-    LOGGER.info("receiveMessage " + message.toString(getNodeRuntime()));
+    LOGGER.info("receiveMessage " + message.toString());
     final String operation = message.getOperation();
     switch (operation) {
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:

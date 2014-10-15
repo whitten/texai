@@ -90,12 +90,9 @@ public class KeyStoreTestUtilsTest {
       final X509Certificate serverX509Certificate = (X509Certificate) result.getCertificate(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS);
       assertTrue(serverX509Certificate.getSubjectX500Principal().toString().contains("CN=texai.org"));
       Certificate[] certificateChain = result.getCertificateChain(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS);
-      assertEquals(2, certificateChain.length);
+      assertEquals(1, certificateChain.length);
       assertEquals(serverX509Certificate, certificateChain[0]);
-      final Certificate rootX509Certificate = certificateChain[1];
-      assertTrue(rootX509Certificate instanceof X509Certificate);
-      assertEquals("CN=texai.org, O=Texai Certification Authority, UID=ed6d6718-80de-4848-af43-fed7bdba3c36", ((X509Certificate) rootX509Certificate).getSubjectX500Principal().toString());
-      serverX509Certificate.verify(rootX509Certificate.getPublicKey());
+      serverX509Certificate.verify(serverX509Certificate.getPublicKey());
     } catch (InvalidKeyException | KeyStoreException | NoSuchAlgorithmException | NoSuchProviderException | SignatureException | CertificateException ex) {
       fail(ex.getMessage());
     }
@@ -126,6 +123,26 @@ public class KeyStoreTestUtilsTest {
       ex.printStackTrace();
       fail(ex.getMessage());
     }
+  }
+
+  /**
+   * Test of getClientX509SecurityInfo() method, of class KeyStoreTestUtils.
+   */
+  @Test
+  public void testGetClientX509SecurityInfo() {
+    LOGGER.info("getClientX509SecurityInfo()");
+    final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
+    LOGGER.info("client x509SecurityInfo...\n" + x509SecurityInfo);
+  }
+
+  /**
+   * Test of getServerX509SecurityInfo() method, of class KeyStoreTestUtils.
+   */
+  @Test
+  public void testGetServerX509SecurityInfo() {
+    LOGGER.info("getServerX509SecurityInfo()");
+    final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getServerX509SecurityInfo();
+    LOGGER.info("server x509SecurityInfo...\n" + x509SecurityInfo);
   }
 
 }

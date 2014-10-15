@@ -112,8 +112,7 @@ public class NetworkLogControl extends AbstractSkill {
 
     // initialize child JVM logger management roles
     LOGGER.info("initializing");
-    propagateOperationToChildRoles(
-            ContainerLogControl.class.getName(), // service
+    propagateOperationToChildRoles(ContainerLogControl.class.getName(), // service
             AHCSConstants.AHCS_INITIALIZE_TASK); // operation
     setSkillState(State.INITIALIZED);
   }
@@ -125,8 +124,7 @@ public class NetworkLogControl extends AbstractSkill {
     assert this.getSkillState().equals(State.INITIALIZED) : "prior state must be initialized";
 
     // ready child JVM logger management roles
-    propagateOperationToChildRoles(
-            ContainerLogControl.class.getName(), // service
+    propagateOperationToChildRoles(ContainerLogControl.class.getName(), // service
             AHCSConstants.AHCS_READY_TASK); // operation
     setSkillState(State.READY);
   }

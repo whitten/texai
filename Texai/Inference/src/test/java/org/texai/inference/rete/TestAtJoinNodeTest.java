@@ -20,6 +20,7 @@
  */
 package org.texai.inference.rete;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -28,6 +29,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.texai.inference.rete.TestAtJoinNode.FieldType;
+import org.texai.kb.persistence.RDFEntityPersister;
 
 /**
  *
@@ -43,6 +45,7 @@ public class TestAtJoinNodeTest {
 
   @BeforeClass
   public static void setUpClass() throws Exception {
+    Logger.getLogger(RDFEntityPersister.class).setLevel(Level.WARN);
   }
 
   @AfterClass

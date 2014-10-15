@@ -1,0 +1,70 @@
+(
+ (Benchmark
+  (indices: "spoc,posc,opsc")
+  (className: org.texai.kb.persistence.benchmark.RDFTestEntity))
+
+ (InferenceRules
+  (indices: "spoc,posc")
+  (className: org.texai.inference.composition.domainEntity.StatementComposer)
+  (className: org.texai.inference.domainEntity.Rule)
+  (className: org.texai.inference.domainEntity.Statement)
+  (className: org.texai.inference.sparql.composition.domainEntity.AndOperatorComposer)
+  (className: org.texai.inference.sparql.composition.domainEntity.BaseDeclarationComposer)
+  (className: org.texai.inference.sparql.composition.domainEntity.ConstraintComposer)
+  (className: org.texai.inference.sparql.composition.domainEntity.NotOperatorComposer)
+  (className: org.texai.inference.sparql.composition.domainEntity.PrefixDeclarationComposer)
+  (className: org.texai.inference.sparql.composition.domainEntity.QueryContainerComposer)
+  (className: org.texai.inference.sparql.composition.domainEntity.SameTermOperatorComposer)
+  (className: org.texai.inference.sparql.composition.domainEntity.SelectComposer)
+  (className: org.texai.inference.sparql.composition.domainEntity.SelectQueryComposer)
+  (className: org.texai.inference.sparql.composition.domainEntity.WhereClauseComposer)
+  (className: org.texai.inference.sparql.domainEntity.AndOperator)
+  (className: org.texai.inference.sparql.domainEntity.BaseDeclaration)
+  (className: org.texai.inference.sparql.domainEntity.Constraint)
+  (className: org.texai.inference.sparql.domainEntity.NotOperator)
+  (className: org.texai.inference.sparql.domainEntity.PrefixDeclaration)
+  (className: org.texai.inference.sparql.domainEntity.QueryContainer)
+  (className: org.texai.inference.sparql.domainEntity.SameTermOperator)
+  (className: org.texai.inference.sparql.domainEntity.Select)
+  (className: org.texai.inference.sparql.domainEntity.SelectQuery)
+  (className: org.texai.inference.sparql.domainEntity.Variable)
+  (className: org.texai.inference.sparql.domainEntity.WhereClause))
+
+ (Launcher
+  (indices: "spoc,posc")
+  (className: org.texai.texaiLauncher.domainEntity.NodeRuntimeInfo)
+  (className: org.texai.texaiLauncher.domainEntity.TexaiLauncherInfo))
+
+ (Nodes
+  (indices: "spoc,posc")
+  (className: org.texai.ahcsSupport.domainEntity.ConversationStateInfo)
+  (className: org.texai.ahcsSupport.domainEntity.Node)
+  (className: org.texai.ahcsSupport.domainEntity.NodeRuntimeConfiguration)
+  (className: org.texai.ahcsSupport.domainEntity.Role)
+  (className: org.texai.ahcsSupport.domainEntity.SkillClass)
+  (className: org.texai.ahcsSupport.domainEntity.StateValueBinding))
+
+ (OpenCyc
+  (indices: "spoc,posc,opsc,cosp"))
+
+ (RepositoryContentDescriptions
+  (indices: "spoc,posc")
+  (className: org.texai.kb.persistence.domainEntity.RepositoryContentDescription)
+  (className: org.texai.kb.persistence.domainEntity.RepositoryContentDescriptionInfo))
+
+ (TamperEvidentLogs
+  (indices: "spoc,posc")
+  (className: org.texai.tamperEvidentLogs.domainEntity.TEKeyedLogItemEntry)
+  (className: org.texai.tamperEvidentLogs.domainEntity.TELogAuthenticatorEntry)
+  (className: org.texai.tamperEvidentLogs.domainEntity.TELogHeader)
+  (className: org.texai.tamperEvidentLogs.domainEntity.TELogItemEntry))
+
+ (Test
+  (indices: "spoc,posc")
+  (className: org.texai.kb.persistence.sample.Agent)
+  (className: org.texai.kb.persistence.sample.Friend)
+  (className: org.texai.kb.persistence.sample.Person)
+  (className: org.texai.kb.persistence.RDFTestEntity))
+
+ )
+

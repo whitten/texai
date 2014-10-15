@@ -86,9 +86,9 @@ public final class MockAlbusHCSMessageHandler extends AbstractAlbusHCSMessageHan
     if (message.getOperation().equals("Echo_Task")) {
       // increment the count and send a repsonse message back to the sender
       final Message responseMessage = new Message(
-            message.getSenderRoleId(),
+            message.getSenderQualifiedName(),
             "TestSenderService",
-            message.getRecipientRoleId(),
+            message.getRecipientQualifiedName(),
             message.getConversationId(),
             UUID.randomUUID(), // replyWith
             message.getReplyWith(),
@@ -111,9 +111,9 @@ public final class MockAlbusHCSMessageHandler extends AbstractAlbusHCSMessageHan
       } else {
         // send another request message
       final Message echoMessage = new Message(
-            message.getSenderRoleId(),
+            message.getSenderQualifiedName(),
             "TestSenderService",
-            message.getRecipientRoleId(),
+            message.getRecipientQualifiedName(),
             message.getConversationId(),
             UUID.randomUUID(), // replyWith
             message.getReplyWith(),

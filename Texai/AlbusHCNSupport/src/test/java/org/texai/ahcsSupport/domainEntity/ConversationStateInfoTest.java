@@ -23,18 +23,20 @@ package org.texai.ahcsSupport.domainEntity;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import net.sf.ehcache.CacheManager;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.openrdf.model.URI;
-import org.texai.ahcsSupport.AHCSConstants;
-import org.texai.ahcsSupport.NodeRuntime;
 import org.texai.kb.CacheInitializer;
 import org.texai.kb.journal.JournalWriter;
 import org.texai.kb.persistence.DistributedRepositoryManager;
@@ -59,9 +61,6 @@ public class ConversationStateInfoTest {
   public static void setUpClass() throws Exception {
     JournalWriter.deleteJournalFiles();
     CacheInitializer.initializeCaches();
-    DistributedRepositoryManager.addTestRepositoryPath(
-            "NodeRoleTypes",
-            true); // isRepositoryDirectoryCleaned
     DistributedRepositoryManager.addTestRepositoryPath(
             "Nodes",
             true); // isRepositoryDirectoryCleaned
@@ -88,37 +87,16 @@ public class ConversationStateInfoTest {
   @Test
   public void testGetId() {
     LOGGER.info("getId");
-    NodeType nodeType = new NodeType();
-    nodeType.setTypeName("MyTypeName");
-    NodeType inheritedNodeType = new NodeType();
-    inheritedNodeType.setTypeName("MyInheritedNodeType");
-    nodeType.addInheritedNodeType(inheritedNodeType);
-    RoleType roleType = new RoleType();
-    roleType.setTypeName("MyRoleType");
-    nodeType.addRoleType(roleType);
-    nodeType.setMissionDescription("my mission description");
-    rdfEntityManager.persist(nodeType);
-    Node node = new Node(
-            nodeType, null);
-    roleType.setTypeName("MyRoleType");
-    roleType.addSkillUse(new SkillClass("org.texai.skill.impl.HeartbeatImpl"));
-    final RoleType parentRoleType = new RoleType();
-    parentRoleType.setTypeName("MyParentRoleType");
-    final RoleType childRoleType = new RoleType();
-    childRoleType.setTypeName("MyChildRoleType");
-    roleType.setDescription("my description");
-    roleType.setAlbusHCSGranularityLevel(AHCSConstants.ALBUS_HCS_1_DAY_GRANULARITY_LEVEL);
-    final NodeRuntime nodeRuntime = null;
-    rdfEntityManager.persist(roleType);
-    Role role = new Role(
-            roleType,
-            nodeRuntime);
+    Node testNode = NodeTest.makeTestNode();
+    Optional<Role> optional = testNode.getRoles().stream().findFirst();
+    assertNotNull(optional);
+    Role testRole = optional.get();
     final UUID conversationId = UUID.randomUUID();
     final Map<String, Serializable> stateVariableDictionary = new HashMap<>();
     stateVariableDictionary.put("aVariable", "abc");
     ConversationStateInfo instance = new ConversationStateInfo(
-            node,
-            role,
+            testNode,
+            testRole,
             "MySkill",
             conversationId,
             stateVariableDictionary);
@@ -138,38 +116,16 @@ public class ConversationStateInfoTest {
   @Test
   public void testGetNode() {
     LOGGER.info("getNode");
-    NodeType nodeType = new NodeType();
-    nodeType.setTypeName("MyTypeName");
-    NodeType inheritedNodeType = new NodeType();
-    inheritedNodeType.setTypeName("MyInheritedNodeType");
-    nodeType.addInheritedNodeType(inheritedNodeType);
-    RoleType roleType = new RoleType();
-    roleType.setTypeName("MyRoleType");
-    nodeType.addRoleType(roleType);
-    nodeType.setMissionDescription("my mission description");
-    rdfEntityManager.persist(nodeType);
-    Node node = new Node(
-            nodeType, null);
-    roleType.setTypeName("MyRoleType");
-    roleType.addSkillUse(new SkillClass("org.texai.skill.impl.HeartbeatImpl"));
-    final RoleType parentRoleType = new RoleType();
-    parentRoleType.setTypeName("MyParentRoleType");
-    final RoleType childRoleType = new RoleType();
-    childRoleType.setTypeName("MyChildRoleType");
-    roleType.setDescription("my description");
-    roleType.setAlbusHCSGranularityLevel(AHCSConstants.ALBUS_HCS_1_DAY_GRANULARITY_LEVEL);
-    final NodeRuntime nodeRuntime = null;
-    rdfEntityManager.persist(roleType);
-    Role role = new Role(
-            roleType,
-            nodeRuntime);
-    rdfEntityManager.persist(role);
+    Node testNode = NodeTest.makeTestNode();
+    Optional<Role> optional = testNode.getRoles().stream().findFirst();
+    assertNotNull(optional);
+    Role testRole = optional.get();
     final UUID conversationId = UUID.randomUUID();
     final Map<String, Serializable> stateVariableDictionary = new HashMap<>();
     stateVariableDictionary.put("aVariable", "abc");
     ConversationStateInfo instance = new ConversationStateInfo(
-            node,
-            role,
+            testNode,
+            testRole,
             "MySkill",
             conversationId,
             stateVariableDictionary);
@@ -180,8 +136,8 @@ public class ConversationStateInfoTest {
     assertNotNull(id);
     final ConversationStateInfo loadedInstance = rdfEntityManager.find(ConversationStateInfo.class, id);
     assertNotNull(loadedInstance);
-    assertEquals(node.getId(), loadedInstance.getNode().getId());
-    assertEquals(node.toString(), loadedInstance.getNode().toString());
+    assertEquals(testNode.getId(), loadedInstance.getNode().getId());
+    assertEquals(testNode.toString(), loadedInstance.getNode().toString());
   }
 
   /**
@@ -190,38 +146,16 @@ public class ConversationStateInfoTest {
   @Test
   public void testGetRole() {
     LOGGER.info("getRole");
-    NodeType nodeType = new NodeType();
-    nodeType.setTypeName("MyTypeName");
-    NodeType inheritedNodeType = new NodeType();
-    inheritedNodeType.setTypeName("MyInheritedNodeType");
-    nodeType.addInheritedNodeType(inheritedNodeType);
-    RoleType roleType = new RoleType();
-    roleType.setTypeName("MyRoleType");
-    nodeType.addRoleType(roleType);
-    nodeType.setMissionDescription("my mission description");
-    rdfEntityManager.persist(nodeType);
-    Node node = new Node(
-            nodeType, null);
-    roleType.setTypeName("MyRoleType");
-    roleType.addSkillUse(new SkillClass("org.texai.skill.impl.HeartbeatImpl"));
-    final RoleType parentRoleType = new RoleType();
-    parentRoleType.setTypeName("MyParentRoleType");
-    final RoleType childRoleType = new RoleType();
-    childRoleType.setTypeName("MyChildRoleType");
-    roleType.setDescription("my description");
-    roleType.setAlbusHCSGranularityLevel(AHCSConstants.ALBUS_HCS_1_DAY_GRANULARITY_LEVEL);
-    final NodeRuntime nodeRuntime = null;
-    rdfEntityManager.persist(roleType);
-    Role role = new Role(
-            roleType,
-            nodeRuntime);
-    rdfEntityManager.persist(role);
+    Node testNode = NodeTest.makeTestNode();
+    Optional<Role> optional = testNode.getRoles().stream().findFirst();
+    assertNotNull(optional);
+    Role testRole = optional.get();
     final UUID conversationId = UUID.randomUUID();
     final Map<String, Serializable> stateVariableDictionary = new HashMap<>();
     stateVariableDictionary.put("aVariable", "abc");
     ConversationStateInfo instance = new ConversationStateInfo(
-            node,
-            role,
+            testNode,
+            testRole,
             "MySkill",
             conversationId,
             stateVariableDictionary);
@@ -232,8 +166,8 @@ public class ConversationStateInfoTest {
     assertNotNull(id);
     final ConversationStateInfo loadedInstance = rdfEntityManager.find(ConversationStateInfo.class, id);
     assertNotNull(loadedInstance);
-    assertEquals(role.getId(), loadedInstance.getRole().getId());
-    assertEquals(role.toString(), loadedInstance.getRole().toString());
+    assertEquals(testRole.getId(), loadedInstance.getRole().getId());
+    assertEquals(testRole.toString(), loadedInstance.getRole().toString());
   }
 
   /**
@@ -242,38 +176,16 @@ public class ConversationStateInfoTest {
   @Test
   public void testGetSkillClassName() {
     LOGGER.info("getSkillClassName");
-    NodeType nodeType = new NodeType();
-    nodeType.setTypeName("MyTypeName");
-    NodeType inheritedNodeType = new NodeType();
-    inheritedNodeType.setTypeName("MyInheritedNodeType");
-    nodeType.addInheritedNodeType(inheritedNodeType);
-    RoleType roleType = new RoleType();
-    roleType.setTypeName("MyRoleType");
-    nodeType.addRoleType(roleType);
-    nodeType.setMissionDescription("my mission description");
-    rdfEntityManager.persist(nodeType);
-    Node node = new Node(
-            nodeType, null);
-    roleType.setTypeName("MyRoleType");
-    roleType.addSkillUse(new SkillClass("org.texai.skill.impl.HeartbeatImpl"));
-    final RoleType parentRoleType = new RoleType();
-    parentRoleType.setTypeName("MyParentRoleType");
-    final RoleType childRoleType = new RoleType();
-    childRoleType.setTypeName("MyChildRoleType");
-    roleType.setDescription("my description");
-    roleType.setAlbusHCSGranularityLevel(AHCSConstants.ALBUS_HCS_1_DAY_GRANULARITY_LEVEL);
-    final NodeRuntime nodeRuntime = null;
-    rdfEntityManager.persist(roleType);
-    Role role = new Role(
-            roleType,
-            nodeRuntime);
-    rdfEntityManager.persist(role);
+    Node testNode = NodeTest.makeTestNode();
+    Optional<Role> optional = testNode.getRoles().stream().findFirst();
+    assertNotNull(optional);
+    Role testRole = optional.get();
     final UUID conversationId = UUID.randomUUID();
     final Map<String, Serializable> stateVariableDictionary = new HashMap<>();
     stateVariableDictionary.put("aVariable", "abc");
     ConversationStateInfo instance = new ConversationStateInfo(
-            node,
-            role,
+            testNode,
+            testRole,
             "MySkill",
             conversationId,
             stateVariableDictionary);
@@ -293,38 +205,16 @@ public class ConversationStateInfoTest {
   @Test
   public void testGetConversationId() {
     LOGGER.info("getConversationID");
-    NodeType nodeType = new NodeType();
-    nodeType.setTypeName("MyTypeName");
-    NodeType inheritedNodeType = new NodeType();
-    inheritedNodeType.setTypeName("MyInheritedNodeType");
-    nodeType.addInheritedNodeType(inheritedNodeType);
-    RoleType roleType = new RoleType();
-    roleType.setTypeName("MyRoleType");
-    nodeType.addRoleType(roleType);
-    nodeType.setMissionDescription("my mission description");
-    rdfEntityManager.persist(nodeType);
-    Node node = new Node(
-            nodeType, null);
-    roleType.setTypeName("MyRoleType");
-    roleType.addSkillUse(new SkillClass("org.texai.skill.impl.HeartbeatImpl"));
-    final RoleType parentRoleType = new RoleType();
-    parentRoleType.setTypeName("MyParentRoleType");
-    final RoleType childRoleType = new RoleType();
-    childRoleType.setTypeName("MyChildRoleType");
-    roleType.setDescription("my description");
-    roleType.setAlbusHCSGranularityLevel(AHCSConstants.ALBUS_HCS_1_DAY_GRANULARITY_LEVEL);
-    final NodeRuntime nodeRuntime = null;
-    rdfEntityManager.persist(roleType);
-    Role role = new Role(
-            roleType,
-            nodeRuntime);
-    rdfEntityManager.persist(role);
+    Node testNode = NodeTest.makeTestNode();
+    Optional<Role> optional = testNode.getRoles().stream().findFirst();
+    assertNotNull(optional);
+    Role testRole = optional.get();
     final UUID conversationId = UUID.randomUUID();
     final Map<String, Serializable> stateVariableDictionary = new HashMap<>();
     stateVariableDictionary.put("aVariable", "abc");
     ConversationStateInfo instance = new ConversationStateInfo(
-            node,
-            role,
+            testNode,
+            testRole,
             "MySkill",
             conversationId,
             stateVariableDictionary);
@@ -344,38 +234,16 @@ public class ConversationStateInfoTest {
   @Test
   public void testGetValue() {
     LOGGER.info("getValue");
-    NodeType nodeType = new NodeType();
-    nodeType.setTypeName("MyTypeName");
-    NodeType inheritedNodeType = new NodeType();
-    inheritedNodeType.setTypeName("MyInheritedNodeType");
-    nodeType.addInheritedNodeType(inheritedNodeType);
-    RoleType roleType = new RoleType();
-    roleType.setTypeName("MyRoleType");
-    nodeType.addRoleType(roleType);
-    nodeType.setMissionDescription("my mission description");
-    rdfEntityManager.persist(nodeType);
-    Node node = new Node(
-            nodeType, null);
-    roleType.setTypeName("MyRoleType");
-    roleType.addSkillUse(new SkillClass("org.texai.skill.impl.HeartbeatImpl"));
-    final RoleType parentRoleType = new RoleType();
-    parentRoleType.setTypeName("MyParentRoleType");
-    final RoleType childRoleType = new RoleType();
-    childRoleType.setTypeName("MyChildRoleType");
-    roleType.setDescription("my description");
-    roleType.setAlbusHCSGranularityLevel(AHCSConstants.ALBUS_HCS_1_DAY_GRANULARITY_LEVEL);
-    final NodeRuntime nodeRuntime = null;
-    rdfEntityManager.persist(roleType);
-    Role role = new Role(
-            roleType,
-            nodeRuntime);
-    rdfEntityManager.persist(role);
+    Node testNode = NodeTest.makeTestNode();
+    Optional<Role> optional = testNode.getRoles().stream().findFirst();
+    assertNotNull(optional);
+    Role testRole = optional.get();
     final UUID conversationId = UUID.randomUUID();
     final Map<String, Serializable> stateVariableDictionary = new HashMap<>();
     stateVariableDictionary.put("aVariable", "abc");
     ConversationStateInfo instance = new ConversationStateInfo(
-            node,
-            role,
+            testNode,
+            testRole,
             "MySkill",
             conversationId,
             stateVariableDictionary);
@@ -399,40 +267,18 @@ public class ConversationStateInfoTest {
   @Test
   public void testPutAll() {
     LOGGER.info("putAll");
-    NodeType nodeType = new NodeType();
-    nodeType.setTypeName("MyTypeName");
-    NodeType inheritedNodeType = new NodeType();
-    inheritedNodeType.setTypeName("MyInheritedNodeType");
-    nodeType.addInheritedNodeType(inheritedNodeType);
-    RoleType roleType = new RoleType();
-    roleType.setTypeName("MyRoleType");
-    nodeType.addRoleType(roleType);
-    nodeType.setMissionDescription("my mission description");
-    rdfEntityManager.persist(nodeType);
-    Node node = new Node(
-            nodeType, null);
-    roleType.setTypeName("MyRoleType");
-    roleType.addSkillUse(new SkillClass("org.texai.skill.impl.HeartbeatImpl"));
-    final RoleType parentRoleType = new RoleType();
-    parentRoleType.setTypeName("MyParentRoleType");
-    final RoleType childRoleType = new RoleType();
-    childRoleType.setTypeName("MyChildRoleType");
-    roleType.setDescription("my description");
-    roleType.setAlbusHCSGranularityLevel(AHCSConstants.ALBUS_HCS_1_DAY_GRANULARITY_LEVEL);
-    final NodeRuntime nodeRuntime = null;
-    rdfEntityManager.persist(roleType);
-    Role role = new Role(
-            roleType,
-            nodeRuntime);
-    rdfEntityManager.persist(role);
+    Node testNode = NodeTest.makeTestNode();
+    Optional<Role> optional = testNode.getRoles().stream().findFirst();
+    assertNotNull(optional);
+    Role testRole = optional.get();
     final UUID conversationId = UUID.randomUUID();
     final Map<String, Serializable> stateVariableDictionary = new HashMap<>();
     stateVariableDictionary.put("aVariable1", "abc");
     final Map<String, Serializable> stateVariableDictionary1 = new HashMap<>();
     stateVariableDictionary1.put("aVariable2", "def");
     ConversationStateInfo instance = new ConversationStateInfo(
-            node,
-            role,
+            testNode,
+            testRole,
             "MySkill",
             conversationId,
             stateVariableDictionary);
@@ -459,38 +305,16 @@ public class ConversationStateInfoTest {
   @Test
   public void testToString() {
     LOGGER.info("toString");
-    NodeType nodeType = new NodeType();
-    nodeType.setTypeName("MyTypeName");
-    NodeType inheritedNodeType = new NodeType();
-    inheritedNodeType.setTypeName("MyInheritedNodeType");
-    nodeType.addInheritedNodeType(inheritedNodeType);
-    RoleType roleType = new RoleType();
-    roleType.setTypeName("MyRoleType");
-    nodeType.addRoleType(roleType);
-    nodeType.setMissionDescription("my mission description");
-    rdfEntityManager.persist(nodeType);
-    Node node = new Node(
-            nodeType, null);
-    roleType.setTypeName("MyRoleType");
-    roleType.addSkillUse(new SkillClass("org.texai.skill.impl.HeartbeatImpl"));
-    final RoleType parentRoleType = new RoleType();
-    parentRoleType.setTypeName("MyParentRoleType");
-    final RoleType childRoleType = new RoleType();
-    childRoleType.setTypeName("MyChildRoleType");
-    roleType.setDescription("my description");
-    roleType.setAlbusHCSGranularityLevel(AHCSConstants.ALBUS_HCS_1_DAY_GRANULARITY_LEVEL);
-    final NodeRuntime nodeRuntime = null;
-    rdfEntityManager.persist(roleType);
-    Role role = new Role(
-            roleType,
-            nodeRuntime);
-    rdfEntityManager.persist(role);
+    Node testNode = NodeTest.makeTestNode();
+    Optional<Role> optional = testNode.getRoles().stream().findFirst();
+    assertNotNull(optional);
+    Role testRole = optional.get();
     final UUID conversationId = UUID.randomUUID();
     final Map<String, Serializable> stateVariableDictionary = new HashMap<>();
     stateVariableDictionary.put("aVariable", "abc");
     ConversationStateInfo instance = new ConversationStateInfo(
-            node,
-            role,
+            testNode,
+            testRole,
             "MySkill",
             conversationId,
             stateVariableDictionary);

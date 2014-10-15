@@ -85,6 +85,8 @@ public final class TrackerTest {
 
   @BeforeClass
   public static void setUpClass() throws Exception {
+    KeyStoreTestUtils.initializeClientKeyStore();
+    KeyStoreTestUtils.initializeServerKeyStore();
   }
 
   @AfterClass

@@ -25,7 +25,6 @@ package org.texai.skill.heartbeat;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
-import org.texai.ahcsSupport.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 
 /**
@@ -34,7 +33,7 @@ import org.texai.ahcsSupport.Message;
  * @author reed
  */
 @ThreadSafe
-public final class ContainerHeartbeat extends AbstractSkill {
+public final class ContainerHeartbeat extends Heartbeat {
 
   // the logger
   private static final Logger LOGGER = Logger.getLogger(ContainerHeartbeat.class);
@@ -46,8 +45,8 @@ public final class ContainerHeartbeat extends AbstractSkill {
   }
 
   /**
-   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries
-   * are single threaded with regard to the conversation.
+   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
+   * with regard to the conversation.
    *
    * @param message the given message
    *
@@ -66,7 +65,8 @@ public final class ContainerHeartbeat extends AbstractSkill {
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
-        // initialize child governance roles
+        initialization(message);
+        // initialize child heartbeat roles
         propagateOperationToChildRoles(
                 getClassName(), // service
                 operation);
@@ -75,7 +75,7 @@ public final class ContainerHeartbeat extends AbstractSkill {
 
       case AHCSConstants.AHCS_READY_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.INITIALIZED) : "prior state must be initialized";
-        // ready child governance roles
+        // ready child heartbeat roles
         propagateOperationToChildRoles(
                 getClassName(), // service
                 operation);
@@ -91,8 +91,8 @@ public final class ContainerHeartbeat extends AbstractSkill {
   }
 
   /**
-   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single
-   * threaded with regard to the conversation.
+   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single threaded with regard
+   * to the conversation.
    *
    * @param message the given message
    *
@@ -119,5 +119,24 @@ public final class ContainerHeartbeat extends AbstractSkill {
       AHCSConstants.AHCS_INITIALIZE_TASK,
       AHCSConstants.AHCS_READY_TASK,};
   }
+
+  /**
+   * Initializes this skill.
+   *
+   * @param message the initialization message
+   */
+  @Override
+  protected void initialization(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
+
+    LOGGER.info("initializing " + toString() + " in role " + getRole());
+
+  }
+
+  //TODO receive a message from the TopLevelHeartBeat to initiate heartbeats from the container back to the
+  // top level
+
 
 }

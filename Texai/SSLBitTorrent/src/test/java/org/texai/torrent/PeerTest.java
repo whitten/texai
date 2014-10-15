@@ -55,23 +55,32 @@ import static org.junit.Assert.*;
  */
 public final class PeerTest {
 
-  /** the logger */
+  /**
+   * the logger
+   */
   private static final Logger LOGGER = Logger.getLogger(PeerTest.class);
-  /** the seed and tracker connection-accepting port */
+  /**
+   * the seed and tracker connection-accepting port
+   */
   private static final int SEED_SERVER_PORT = 8088;
-  /** the downloader connection-accepting port */
+  /**
+   * the downloader connection-accepting port
+   */
   private static final int DOWNLOADER_SERVER_PORT = 8089;
 
-  /** sets debugging */
+  /**
+   * sets debugging
+   */
 //  static {
 //    System.setProperty("javax.net.debug", "all");
 //  }
-
   public PeerTest() {
   }
 
   @BeforeClass
   public static void setUpClass() throws Exception {
+    KeyStoreTestUtils.initializeClientKeyStore();
+    KeyStoreTestUtils.initializeServerKeyStore();
   }
 
   @AfterClass
@@ -111,10 +120,10 @@ public final class PeerTest {
     httpRequestHandler.register(tracker);
 
     // seed peer SSL torrent
-      final X509SecurityInfo clientX509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
-      final SSLTorrent sslTorrent = new SSLTorrent(
-              SEED_SERVER_PORT,
-              clientX509SecurityInfo);
+    final X509SecurityInfo clientX509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
+    final SSLTorrent sslTorrent = new SSLTorrent(
+            SEED_SERVER_PORT,
+            clientX509SecurityInfo);
 
     // configure the server channel pipeline factory
     final AbstractBitTorrentHandlerFactory bitTorrentHandlerFactory = new BitTorrentHandlerFactory(sslTorrent);
@@ -201,19 +210,30 @@ public final class PeerTest {
     timer.cancel();
   }
 
-  /** Provides a process to run the seeding peer at 127.0.0.1:8088. */
+  /**
+   * Provides a process to run the seeding peer at 127.0.0.1:8088.
+   */
   private static final class SeedPeer implements Runnable {
 
-    /** the indicator that the beginSeeding peer should be halted */
+    /**
+     * the indicator that the beginSeeding peer should be halted
+     */
     private final AtomicBoolean isQuit = new AtomicBoolean(false);
-    /** the metainfo */
+    /**
+     * the metainfo
+     */
     private final MetaInfo metaInfo;
-    /** the torrent file/directory storage */
+    /**
+     * the torrent file/directory storage
+     */
     private final Storage storage;
-    /** the SSL torrent */
+    /**
+     * the SSL torrent
+     */
     private final SSLTorrent sslTorrent;
 
-    /** Constructs a new SeedPeer instance.
+    /**
+     * Constructs a new SeedPeer instance.
      *
      * @param metaInfo the metainfo
      * @param storage the storage
@@ -228,7 +248,9 @@ public final class PeerTest {
       this.sslTorrent = sslTorrent;
     }
 
-    /** Runs the seeding peer. */
+    /**
+     * Runs the seeding peer.
+     */
     @Override
     @SuppressWarnings("SleepWhileInLoop")
     public void run() {
@@ -248,21 +270,30 @@ public final class PeerTest {
       LOGGER.info("seed peer completed");
     }
 
-    /** Quits the seeding peer. */
+    /**
+     * Quits the seeding peer.
+     */
     void quit() {
       isQuit.set(true);
     }
   }
 
-  /** Provides a process to run the download peer at 127.0.0.1:8089. */
+  /**
+   * Provides a process to run the download peer at 127.0.0.1:8089.
+   */
   private static final class DownloadPeer implements Runnable, DownloadListener {
 
-    /** the metainfo */
+    /**
+     * the metainfo
+     */
     private final MetaInfo metaInfo;
-    /** the lock upon which the main thread will await test completion */
+    /**
+     * the lock upon which the main thread will await test completion
+     */
     private final Object testDone_lock;
 
-    /** Constructs a new LeechPeer instance.
+    /**
+     * Constructs a new LeechPeer instance.
      *
      * @param metaInfo
      * @param testDone_lock the lock upon which the main thread will await test completion
@@ -272,7 +303,9 @@ public final class PeerTest {
       this.testDone_lock = testDone_lock;
     }
 
-    /** Runs the download peer. */
+    /**
+     * Runs the download peer.
+     */
     @Override
     public void run() {
       Thread.currentThread().setName("download peer");
@@ -295,7 +328,8 @@ public final class PeerTest {
       }
     }
 
-    /** Receives notification that the associated download has completed.
+    /**
+     * Receives notification that the associated download has completed.
      *
      * @param metaInfo the meta info
      */
@@ -305,10 +339,14 @@ public final class PeerTest {
     }
   }
 
-  /** Provides a task to run when the external resources cannot be released. */
+  /**
+   * Provides a task to run when the external resources cannot be released.
+   */
   private static final class ShutdownTimerTask extends TimerTask {
 
-    /** Runs the timer task. */
+    /**
+     * Runs the timer task.
+     */
     @Override
     public void run() {
       LOGGER.info("server resources not released");

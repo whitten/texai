@@ -45,16 +45,16 @@ public class ContainerLogControl extends AbstractSkill {
 
   // Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
   // with regard to the conversation.
-  // 
+  //
   // @param message the given message
-  // 
+  //
   // @return whether the message was successfully processed
   @Override
   public boolean receiveMessage(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
 
-    LOGGER.info("receiveMessage " + message.toString(getNodeRuntime()));
+    LOGGER.info("receiveMessage " + message.toString());
     final String operation = message.getOperation();
     switch (operation) {
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
@@ -70,8 +70,7 @@ public class ContainerLogControl extends AbstractSkill {
         return true;
 
       case AHCSConstants.SET_LOGGING_LEVEL:
-        setLoggingLevel(
-                (String) message.get(AHCSConstants.MSG_PARM_CLASS_NAME), // className
+        setLoggingLevel((String) message.get(AHCSConstants.MSG_PARM_CLASS_NAME), // className
                 (String) message.get(AHCSConstants.MSG_PARM_LOGGING_LEVEL)); // loggingLevel
         return true;
 
@@ -91,7 +90,7 @@ public class ContainerLogControl extends AbstractSkill {
   }
 
   // Sets the logging level for the given class.
-  // 
+  //
   // @param className the class name
   // @param loggingLevel the logging level
   private void setLoggingLevel(
@@ -137,9 +136,9 @@ public class ContainerLogControl extends AbstractSkill {
 
   // Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single threaded with regard
   // to the conversation.
-  // 
+  //
   // @param message the given message
-  // 
+  //
   // @return the response message or null if not applicable
   @Override
   public Message converseMessage(final Message message) {
@@ -151,7 +150,7 @@ public class ContainerLogControl extends AbstractSkill {
   }
 
   // Returns the understood operations.
-  // 
+  //
   // @return the understood operations
   @Override
   public String[] getUnderstoodOperations() {
@@ -164,7 +163,7 @@ public class ContainerLogControl extends AbstractSkill {
   }
 
   // Performs the initialization operation.
-  // 
+  //
   // @param message the received initialization message
   private void initialization(final Message message) {
     //Preconditions
@@ -185,7 +184,7 @@ public class ContainerLogControl extends AbstractSkill {
   }
 
   // Records the operation for message logging.
-  // 
+  //
   // @param message the message containing the operation to be logged
   private void logOperation(final Message message) {
     //Preconditions
@@ -196,7 +195,7 @@ public class ContainerLogControl extends AbstractSkill {
   }
 
   // Records the operation for message logging.
-  // 
+  //
   // @param loggedOperation the operation to be logged
   private void logOperation(final String loggedOperation) {
     //Preconditions
@@ -209,7 +208,7 @@ public class ContainerLogControl extends AbstractSkill {
   }
 
   // Removes the operation for message logging.
-  // 
+  //
   // @param message the message containing the operation to be unlogged
   private void unlogOperation(final Message message) {
     //Preconditions
@@ -220,7 +219,7 @@ public class ContainerLogControl extends AbstractSkill {
   }
 
   // Removes the operation for message logging.
-  // 
+  //
   // @param unloggedOperation the operation to be unlogged
   private void unlogOperation(final String unloggedOperation) {
     //Preconditions
@@ -233,7 +232,7 @@ public class ContainerLogControl extends AbstractSkill {
   }
 
   // Gets the logger.
-  // 
+  //
   // @return the logger
   protected Logger getLogger() {
     return LOGGER;

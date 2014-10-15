@@ -4,6 +4,7 @@
  */
 package org.texai.inference;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -16,6 +17,7 @@ import org.texai.kb.Constants;
 import org.texai.kb.journal.JournalWriter;
 import org.texai.kb.persistence.DistributedRepositoryManager;
 import org.texai.kb.persistence.RDFEntityManager;
+import org.texai.kb.persistence.RDFEntityPersister;
 
 /**
  *
@@ -36,6 +38,7 @@ public class InferenceAccessTest {
     if (rdfEntityManager == null) {
       rdfEntityManager = new RDFEntityManager();
       LOGGER.info("oneTimeSetup");
+      Logger.getLogger(RDFEntityPersister.class).setLevel(Level.WARN);
       JournalWriter.deleteJournalFiles();
       CacheInitializer.initializeCaches();
       DistributedRepositoryManager.addRepositoryPath(

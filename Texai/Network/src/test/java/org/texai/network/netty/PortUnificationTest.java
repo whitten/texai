@@ -105,6 +105,8 @@ public final class PortUnificationTest {
 
   @BeforeClass
   public static void setUpClass() throws Exception {
+    KeyStoreTestUtils.initializeClientKeyStore();
+    KeyStoreTestUtils.initializeServerKeyStore();
   }
 
   @AfterClass
@@ -185,8 +187,8 @@ public final class PortUnificationTest {
     LOGGER.info("Albus client connected");
 
     // send a message
-    final org.openrdf.model.URI senderRoleId = randomURI();
-    final org.openrdf.model.URI recipientRoleId = randomURI();
+    final String senderQualifiedName = "test-container1.test-agent1.test-role1";
+    final String recipientQualifiedName = "test-container2.test-agent2.test-role2";
     final UUID conversationId = UUID.randomUUID();
     final UUID replyWith = UUID.randomUUID();
     final UUID inReplyTo = UUID.randomUUID();
@@ -195,9 +197,9 @@ public final class PortUnificationTest {
     final Map<String, Object> parameterDictionary = new HashMap<>();
 
     Message message = new Message(
-            senderRoleId,
+            senderQualifiedName,
             "TestSenderService",
-            recipientRoleId,
+            recipientQualifiedName,
             conversationId,
             replyWith,
             inReplyTo,

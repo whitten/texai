@@ -15,6 +15,7 @@ import java.util.List;
 import org.junit.Test;
 import junit.framework.TestCase;
 import net.sf.ehcache.CacheManager;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -25,6 +26,7 @@ import org.texai.kb.CacheInitializer;
 import org.texai.kb.Constants;
 import org.texai.kb.persistence.DistributedRepositoryManager;
 import org.texai.kb.persistence.RDFEntityManager;
+import org.texai.kb.persistence.RDFEntityPersister;
 import org.texai.kb.persistence.RDFUtility;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
@@ -50,6 +52,7 @@ public class RuleParserTest extends TestCase {
 
   @BeforeClass
   public static void setUpClass() throws Exception {
+    Logger.getLogger(RDFEntityPersister.class).setLevel(Level.WARN);
   }
 
   @AfterClass

@@ -33,106 +33,143 @@ import javax.persistence.Id;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
-import org.openrdf.model.impl.URIImpl;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.AbstractSubSkill;
-import org.texai.ahcsSupport.AlbusMessageDispatcher;
+import org.texai.ahcsSupport.MessageDispatcher;
 import org.texai.ahcsSupport.ManagedSessionSkill;
 import org.texai.ahcsSupport.Message;
-import org.texai.ahcsSupport.NodeAccess;
-import org.texai.ahcsSupport.NodeRuntime;
-import org.texai.ahcsSupport.RoleInfo;
+import org.texai.ahcsSupport.BasicNodeRuntime;
 import org.texai.ahcsSupport.SessionManagerSkill;
 import org.texai.kb.persistence.CascadePersistence;
 import org.texai.kb.persistence.RDFEntity;
 import org.texai.kb.persistence.RDFEntityManager;
 import org.texai.kb.persistence.RDFPersistent;
 import org.texai.kb.persistence.RDFProperty;
-import org.texai.kb.persistence.RDFUtility;
-import org.texai.kb.util.UUIDUtils;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 import org.texai.x509.X509SecurityInfo;
-import org.texai.x509.X509Utils;
 
-/** Provides a role in an Albus Hierarchical Control System node.
+/**
+ * Provides a role in an Albus Hierarchical Control System node.
  *
  * @author reed
  */
 @ThreadSafe
 @RDFEntity(context = "texai:AlbusHierarchicalControlSystemContext")
-public class Role implements CascadePersistence, AlbusMessageDispatcher, Comparable<Role> {
+public class Role implements CascadePersistence, MessageDispatcher, Comparable<Role> {
 
-  /** the serial version UID */
+  // the serial version UID
   private static final long serialVersionUID = 1L;
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(Role.class);
-  /** the id assigned by the persistence framework */
+  // the id assigned by the persistence framework
   @Id
-  private URI id;    // NOPMD
-  /** the role type URI, note that the role type is persisted into a different repository */
+  private URI id;
+  // the qualified role name, i.e. container.nodename.rolename
   @RDFProperty()
-  private final URI roleTypeURI;
-  /** the role type name */
-  @RDFProperty()
-  private final String roleTypeName;
-  /** the containing node */
+  private final String qualifiedName;
+  // the role's description in English
+  @RDFProperty
+  private final String description;
+  // the containing node, or null if no node is associated with an abstract role
   @RDFProperty(predicate = "texai:ahcsNode_role", inverse = true)
   private Node node;
-  /** the parent role id string */
+  // the parent qualified role name, i.e. container.nodename.rolename, which is null if this is a top level role
   @RDFProperty()
-  private String parentRoleIdString;
-  /** the child role id strings */
+  private final String parentQualifiedName;
+  // the qualified child role names, i.e. container.nodename.rolename, which are empty if this is a lowest level role.
   @RDFProperty()
-  private final Set<String> childRoleIdStrings = new HashSet<>();
-  /** the state values */
-  @RDFProperty()
-  private final Set<StateValueBinding> stateValueBindings = new HashSet<>();
-  /** the role X509 certificate alias */
+  private final Set<String> childQualifiedNames;
+  // the skill class names, which are objects that verify and format the class names
   @RDFProperty
-  private String roleAlias;
-  /** the node state variable dictionary, state variable name --> state value binding */
-  private final Map<String, StateValueBinding> stateVariableDictionary = new HashMap<>();
-  /** the node runtime */
-  private transient NodeRuntime nodeRuntime;
-  /** the X.509 security information for this role */
-  private transient X509SecurityInfo x509SecurityInfo;
-  /** the role's skill dictionary, service (skill class name) --> skill */
+  private final Set<SkillClass> skillClasses;
+  // the state variable names
+  @RDFProperty()
+  private final Set<String> variableNames;
+  // the indicator whether this role is permitted to send a message to a recipient in another container, which requires
+  // an X.509 certificate
+  @RDFProperty()
+  private final boolean areRemoteCommunicationsPermitted;
+  // the cached X.509 certificate information used to authenticate, sign and encrypt remote communications, or null if this
+  // role performs only communications local to the container.
+  private X509SecurityInfo x509SecurityInfo;
+  // the node runtime
+  private transient BasicNodeRuntime nodeRuntime;
+  // the role's skill dictionary, service (skill class name) --> skill
   private transient final Map<String, AbstractSkill> skillDictionary = new HashMap<>();
-  /** the role state */
+  // the role state
   private final AtomicReference<State> roleState = new AtomicReference<>(State.UNINITIALIZED);
-  /** the subskills dictionary, subskill class name --> subskill shared instance */
+  // the subskills dictionary, subskill class name --> subskill shared instance
   private final Map<String, AbstractSubSkill> subSkillsDictionary = new HashMap<>();
 
-  /** Constructs a new Role instance. */
+  /**
+   * Constructs a new Role instance. Used by the persistence framework.
+   */
   public Role() {
-    roleTypeURI = null;
-    roleTypeName = null;
-    nodeRuntime = null;
+    qualifiedName = null;
+    description = null;
+    node = null;
+    parentQualifiedName = null;
+    childQualifiedNames = null;
+    skillClasses = null;
+    variableNames = null;
+    areRemoteCommunicationsPermitted = false;
   }
 
-  /** Constructs a new Role instance.
+  /**
+   * Constructs a new Role instance.
    *
-   * @param roleType the role type
-   * @param nodeRuntime the node runtime
+   * @param qualifiedName the role qualified name
+   * @param description the role's description in English
+   * @param parentQualifiedName the parent qualified role name, i.e. container.nodename.rolename, which is null if this is a top level role
+   * @param childQualifiedNames the qualified child role names, i.e. container.nodename.rolename, which are empty if this is a lowest
+   * level role.
+   * @param skillClasses the skill class names, which are objects that contain, verify and format the class names
+   * @param variableNames the state variable names
+   * @param areRemoteCommunicationsPermitted the indicator whether this role is permitted to send a message to a recipient in another
+   * container, which requires an X.509 certificate
    */
   public Role(
-          RoleType roleType,
-          final NodeRuntime nodeRuntime) {
+          final String qualifiedName,
+          final String description,
+          final String parentQualifiedName,
+          final Set<String> childQualifiedNames,
+          final Set<SkillClass> skillClasses,
+          final Set<String> variableNames,
+          final boolean areRemoteCommunicationsPermitted) {
     //Preconditions
-    assert roleType != null : "roleType must not be null";
-    assert roleType.getId() != null : "roleType id must not be null";
-    assert roleType.getTypeName() != null : "role type name must not be null";
-    assert !roleType.getTypeName().isEmpty() : "role type name must not be empty";
-    // nodeRuntime and nodeRuntimeRoleId may be null only for unit testing
+    assert StringUtils.isNonEmptyString(qualifiedName) : "qualifiedName must be a non-empty string";
+    assert StringUtils.isNonEmptyString(description) : "description must be a non-empty string";
+    assert childQualifiedNames != null : "childQualifiedNames must not be null";
+    assert skillClasses != null : "skillClasses must not be null";
+    assert variableNames != null : "variableNames must not be null";
 
-    this.roleTypeURI = roleType.getId();
-    this.roleTypeName = roleType.getTypeName();
-    this.nodeRuntime = nodeRuntime;
+    this.qualifiedName = qualifiedName;
+    this.description = description;
+    this.parentQualifiedName = parentQualifiedName;
+    this.childQualifiedNames = childQualifiedNames;
+    this.skillClasses = skillClasses;
+    this.variableNames = variableNames;
+    this.areRemoteCommunicationsPermitted = areRemoteCommunicationsPermitted;
   }
 
-  /** Gets the id assigned by the persistence framework.
+  /**
+   * Initializes a role object retrieved from the quad store.
+   *
+   * @param nodeRuntime the node runtime
+   */
+  public void initialize(final BasicNodeRuntime nodeRuntime) {
+    //Preconditions
+    assert nodeRuntime != null : "nodeRuntime must not be null";
+    assert node != null : "node must not be null";
+
+    this.nodeRuntime = nodeRuntime;
+    installSkills();
+  }
+
+  /**
+   * Gets the id assigned by the persistence framework.
    *
    * @return the id assigned by the persistence framework
    */
@@ -141,26 +178,17 @@ public class Role implements CascadePersistence, AlbusMessageDispatcher, Compara
     return id;
   }
 
-  /** Sets the id for the persistence framework.
+  /**
+   * Gets the qualified name, i.e. container.nodename.rolename.
    *
-   * @param id the id for the persistence framework
+   * @return the qualified name
    */
-  public void setId(final URI id) {
-    //Preconditions
-    assert id != null : "id must not be null";
-
-    this.id = id;
+  public String getQualifiedName() {
+    return qualifiedName;
   }
 
-  /** Gets the role type URI.
-   *
-   * @return the role type URI
-   */
-  public URI getRoleTypeURI() {
-    return roleTypeURI;
-  }
-
-  /** Gets the containing node.
+  /**
+   * Gets the containing node.
    *
    * @return the containing node
    */
@@ -168,15 +196,18 @@ public class Role implements CascadePersistence, AlbusMessageDispatcher, Compara
     return node;
   }
 
-  /** Sets the containing node.
-   *
-   * @param node the containing node
-   */
+
   public synchronized void setNode(final Node node) {
+    //Preconditions
+    assert node != null : "node must not be null";
+
     this.node = node;
   }
 
-  /** Gets the role state.
+
+
+  /**
+   * Gets the role state.
    *
    * @return the role state
    */
@@ -184,15 +215,11 @@ public class Role implements CascadePersistence, AlbusMessageDispatcher, Compara
     return roleState.get();
   }
 
-  /** Installs the skills for this role.
+  /**
+   * Installs the skills for this role.
    *
-   * @param nodeAccess the node access object
    */
-  public void installSkills(final NodeAccess nodeAccess) {
-    //Preconditions
-    assert nodeAccess != null : "nodeAccess must not be null";
-
-    final Set<SkillClass> skillClasses = nodeAccess.getAllSkillClasses(this);
+  private void installSkills() {
     synchronized (skillDictionary) {
       for (final SkillClass skillClass : skillClasses) {
 
@@ -218,19 +245,20 @@ public class Role implements CascadePersistence, AlbusMessageDispatcher, Compara
           sessionManagerSkill.setRole(this);
           sessionManagerSkill.setSkillClass(clazz);
           skillDictionary.put(skillClassName, sessionManagerSkill);
-          LOGGER.info(getNode().getNodeNickname() + ": " + this + " constructed managed session skill: " + skill);
+          LOGGER.info("      " + this + " constructed managed session skill: " + skill);
 
         } else {
           // ordinary skill that does not need sessions managed
           skill.setRole(this);
           skillDictionary.put(skillClassName, skill);
-          LOGGER.info(getNode().getNodeNickname() + ": " + this + " constructed skill: " + skill);
+          LOGGER.info("      " + this + " constructed skill: " + skill);
         }
       }
     }
   }
 
-  /** Gets an unmodifiable copy of the role's skills.
+  /**
+   * Gets an unmodifiable copy of the role's skills.
    *
    * @return the the role's skills
    */
@@ -242,9 +270,11 @@ public class Role implements CascadePersistence, AlbusMessageDispatcher, Compara
     }
   }
 
-  /** Finds the role's skill instance having the specified class name (service).
+  /**
+   * Finds the role's skill instance having the specified class name (service).
    *
    * @param subSkillClassName the specified class name (service)
+   *
    * @return the skill
    */
   public AbstractSkill getSkill(final String subSkillClassName) {
@@ -256,245 +286,86 @@ public class Role implements CascadePersistence, AlbusMessageDispatcher, Compara
     }
   }
 
-  /** Gets the parent role id string.
-   *
-   * @return the parent role id string
-   */
-  public String getParentRoleIdString() {
-    return parentRoleIdString;
-  }
-
-  /** Sets the parent role id string.
-   *
-   * @param parentRoleIdString the parent role id string
-   */
-  public void setParentRoleIdString(final String parentRoleIdString) {
-    //Preconditions
-    assert parentRoleIdString != null : "parentRoleIdString must not be null";
-    assert !parentRoleIdString.isEmpty() : "parentRoleIdString must not be empty";
-
-    this.parentRoleIdString = parentRoleIdString;
-  }
-
-  /** Gets the parent role id.
-   *
-   * @return the parent role id
-   */
-  public URI getParentRoleId() {
-    if (parentRoleIdString == null) {
-      return null;
-    } else {
-      return new URIImpl(parentRoleIdString);
-    }
-  }
-
-  /** Gets an unmodifiable copy of the child role id strings.
-   *
-   * @return the child role id strings
-   */
-  public Set<String> getChildRoleIdStrings() {
-    synchronized (childRoleIdStrings) {
-      return Collections.unmodifiableSet(childRoleIdStrings);
-    }
-  }
-
-  /** Adds a child role.
-   *
-   * @param childRoleIdString the child role id string
-   */
-  public void addChildRole(final String childRoleIdString) {
-    //Preconditions
-    assert childRoleIdString != null : "childRoleIdString must not be null";
-    assert !childRoleIdString.isEmpty() : "childRoleIdString must not be empty";
-
-    synchronized (childRoleIdStrings) {
-      childRoleIdStrings.add(childRoleIdString);
-    }
-    final String childRoleClassName = RDFUtility.getDefaultClassFromIdString(childRoleIdString);
-    assert childRoleIdString != null;
-  }
-
-  /** Removes the given child role.
-   *
-   * @param childRoleIdString the given child role id string
-   */
-  public void removeChildRole(final String childRoleIdString) {
-    //Preconditions
-    assert childRoleIdString != null : "childRoleIdString must not be null";
-    assert !childRoleIdString.isEmpty() : "childRoleIdString must not be empty";
-
-    synchronized (childRoleIdStrings) {
-      childRoleIdStrings.remove(childRoleIdString);
-    }
-  }
-
-  /** Gets the node runtime.
+  /**
+   * Gets the node runtime.
    *
    * @return the node runtime
    */
-  public NodeRuntime getNodeRuntime() {
+  public BasicNodeRuntime getNodeRuntime() {
     return nodeRuntime;
   }
 
-  /** Sets the node runtime.
+  /**
+   * Gets whether this role is permitted to send a message to a recipient in another container, which requires an X.509 certificate.
    *
-   * @param nodeRuntime the node runtime
+   * @return whether this role is permitted to send a message to a recipient in another container
    */
-  public void setNodeRuntime(final NodeRuntime nodeRuntime) {
-    //Preconditions
-    assert nodeRuntime != null : "nodeRuntime must not be null";
-
-    this.nodeRuntime = nodeRuntime;
+  public boolean areRemoteCommunicationsPermitted() {
+    return areRemoteCommunicationsPermitted;
   }
 
-  /** Gets the X.509 security information.
-   *
-   * @return the X.509 security information
-   */
-  public X509SecurityInfo getX509SecurityInfo() {
-    return x509SecurityInfo;
-  }
-
-  /** Sets the X.509 security information.
-   *
-   * @param x509SecurityInfo the X.509 security information
-   */
-  public void setX509SecurityInfo(final X509SecurityInfo x509SecurityInfo) {
-    //Preconditions
-    assert x509SecurityInfo != null : "x509SecurityInfo must not be null";
-    assert id != null : "id must not be null";
-    assert X509Utils.getUUID(x509SecurityInfo.getX509Certificate()).equals(UUIDUtils.uriToUUID(id)) :
-            "X.509 certificate subject's UID must match this role id";
-
-    this.x509SecurityInfo = x509SecurityInfo;
-  }
-
-  /** Returns the X.509 certificate belonging to this role.
+  /**
+   * Returns the X.509 certificate belonging to this role, or null if this role is not permitted to communicate with another container.
    *
    * @return the X.509 certificate belonging to this role
    */
   public X509Certificate getX509Certificate() {
     if (x509SecurityInfo == null) {
+      assert !areRemoteCommunicationsPermitted;
       return null;
     } else {
+      assert areRemoteCommunicationsPermitted;
       return x509SecurityInfo.getX509Certificate();
     }
   }
 
-  /** Gets the role state value associated with the given variable name.
+  /**
+   * Gets the state value associated with the given variable name.
    *
    * @param stateVariableName the given variable name
+   *
    * @return the state value associated with the given variable name
    */
-  public Object getRoleStateValue(final String stateVariableName) {
+  public Object getStateValue(final String stateVariableName) {
     //Preconditions
     assert stateVariableName != null : "stateVariableName must not be null";
     assert !stateVariableName.isEmpty() : "stateVariableName must not be empty";
 
-    synchronized (stateVariableDictionary) {
-      final StateValueBinding stateValueBinding = stateVariableDictionary.get(stateVariableName);
-      if (stateValueBinding == null) {
-        return null;
-      } else {
-        return stateValueBinding.getValue();
-      }
-    }
+    return node.getStateValue(stateVariableName);
   }
 
-  /** Sets the role state value associated with the given variable name.
+  /**
+   * Sets the state value associated with the given variable name.
    *
    * @param variableName the given variable name
    * @param value the state value
    */
-  public void setRoleStateValue(final String variableName, final Object value) {
+  public void setStateValue(final String variableName, final Object value) {
     //Preconditions
     assert variableName != null : "variableName must not be null";
     assert !variableName.isEmpty() : "variableName must not be empty";
 
-    synchronized (stateVariableDictionary) {
-      StateValueBinding stateValueBinding = stateVariableDictionary.get(variableName);
-      if (stateValueBinding == null) {
-        stateValueBinding = new StateValueBinding(variableName, value);
-        stateVariableDictionary.put(variableName, stateValueBinding);
-        stateValueBindings.add(stateValueBinding);
-      } else {
-        stateValueBinding.setValue(value);
-      }
-    }
+    node.setStateValue(variableName, value);
   }
 
-  /** Removes the role state value binding for the given variable.
+  /**
+   * Removes the role state value binding for the given variable.
    *
    * @param variableName the variable name
    */
-  public void removeRoleStateValueBinding(final String variableName) {
+  public void removeStateValueBinding(final String variableName) {
     //Preconditions
     assert variableName != null : "variableName must not be null";
     assert !variableName.isEmpty() : "variableName must not be empty";
 
-    synchronized (stateVariableDictionary) {
-      if (stateVariableDictionary.isEmpty() && !stateValueBindings.isEmpty()) {
-        // lazy population of the state value dictionary from the persistent state value bindings
-        for (final StateValueBinding stateValueBinding : stateValueBindings) {
-          stateVariableDictionary.put(stateValueBinding.getVariableName(), stateValueBinding);
-        }
-      }
-      final StateValueBinding stateValueBinding = stateVariableDictionary.remove(variableName);
-      if (stateValueBinding != null) {
-        final boolean isRemoved = stateValueBindings.remove(stateValueBinding);
-        assert isRemoved;
-      }
-    }
+    node.removeStateValueBinding(variableName);
   }
 
-  /** Gets the node state value associated with the given variable name.
-   *
-   * @param stateVariableName the given variable name
-   * @return the state value associated with the given variable name
-   */
-  public Object getNodeStateValue(final String stateVariableName) {
-    //Preconditions
-    assert stateVariableName != null : "stateVariableName must not be null";
-    assert !stateVariableName.isEmpty() : "stateVariableName must not be empty";
-
-    return node.getNodeStateValue(stateVariableName);
-  }
-
-  /** Sets the node state value associated with the given variable name.
-   *
-   * @param variableName the given variable name
-   * @param value the state value
-   */
-  public void setNodeStateValue(final String variableName, final Object value) {
-    //Preconditions
-    assert variableName != null : "variableName must not be null";
-    assert !variableName.isEmpty() : "variableName must not be empty";
-
-    node.setNodeStateValue(variableName, value);
-  }
-
-  /** Removes the node state value binding for the given variable.
-   *
-   * @param variableName the variable name
-   */
-  public void removeNodeStateValueBinding(final String variableName) {
-    //Preconditions
-    assert variableName != null : "variableName must not be null";
-    assert !variableName.isEmpty() : "variableName must not be empty";
-
-    node.removeNodeStateValueBinding(variableName);
-  }
-
-  /** Gets the role type name.
-   * @return the role type name
-   */
-  public String getRoleTypeName() {
-    return roleTypeName;
-  }
-
-  /** Sends the given message to the addressed sub-skill and returns the response message.
+  /**
+   * Sends the given message to the addressed sub-skill and returns the response message.
    *
    * @param message the message for the addressed sub-skill
+   *
    * @return the response message
    */
   public Message converseMessageWithSubSkill(final Message message) {
@@ -503,29 +374,30 @@ public class Role implements CascadePersistence, AlbusMessageDispatcher, Compara
 
     AbstractSkill skill;
     synchronized (skillDictionary) {
-      skill = skillDictionary.get(message.getService());
+      skill = skillDictionary.get(message.getRecipientService());
     }
     if (skill == null) {
-      LOGGER.info(getNode().getNodeNickname() + ": subskill not found for service: " + message.getService() + ", constructing it");
+      LOGGER.info(getNode().getName() + ": subskill not found for service: " + message.getRecipientService() + ", constructing it");
       // ordinary skill that does not need sessions managed
       try {
-        skill = (AbstractSkill) Class.forName(message.getService()).newInstance();
+        skill = (AbstractSkill) Class.forName(message.getRecipientService()).newInstance();
       } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
         throw new TexaiException(ex);
       }
       skill.setRole(this);
-      skillDictionary.put(message.getService(), skill);
-      LOGGER.info(getNode().getNodeNickname() + ": " + this + " constructed skill: " + skill);
+      skillDictionary.put(message.getRecipientService(), skill);
+      LOGGER.info(getNode().getName() + ": " + this + " constructed skill: " + skill);
     }
     return skill.converseMessage(message);
   }
 
-  /** Receives an inbound message for this role.
+  /**
+   * Receives an inbound message for this role.
    *
    * @param message the Albus message
    */
   @Override
-  public void dispatchAlbusMessage(final Message message) {
+  public void dispatchMessage(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
 
@@ -537,14 +409,14 @@ public class Role implements CascadePersistence, AlbusMessageDispatcher, Compara
 
     // the message service field optionally names a skill interface
     AbstractSkill skill = null;
-    if (message.getService() != null) {
+    if (message.getRecipientService() != null) {
       synchronized (skillDictionary) {
-        skill = skillDictionary.get(message.getService());
+        skill = skillDictionary.get(message.getRecipientService());
         if (skill == null) {
           // not a primary skill for this role, try the shared subskill dictionary
-          skill = findSubSkill(message.getService());
+          skill = findSubSkill(message.getRecipientService());
         }
-        assert skill != null : "service not found " + message.getService() + "\n" + message.toString(getNodeRuntime()) + "\n skillDictionary: " + skillDictionary;
+        assert skill != null : "service not found " + message.getRecipientService() + "\n" + message + "\n skillDictionary: " + skillDictionary;
       }
     }
     if (skill == null) {
@@ -558,13 +430,13 @@ public class Role implements CascadePersistence, AlbusMessageDispatcher, Compara
         }
       }
       if (!isSkillFound) {
-        LOGGER.info(getNode().getNodeNickname() + ": skill not found for service: " + message.toString(getNodeRuntime()));
-        LOGGER.info(getNode().getNodeNickname() + ": skillDictionary:\n  " + skillDictionary);
+        LOGGER.info(getNode().getName() + ": skill not found for service: " + message);
+        LOGGER.info(getNode().getName() + ": skillDictionary:\n  " + skillDictionary);
         // not understood
         final Message message1 = new Message(
-                id, // senderRoleId
+                qualifiedName, // senderQualifiedName
                 getClass().getName(), // senderService,
-                message.getSenderRoleId(), // recipientRoleId
+                message.getSenderQualifiedName(), // recipientQualifiedName
                 message.getSenderService(), // service
                 AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO); // operation
         message1.put(AHCSConstants.AHCS_ORIGINAL_MESSAGE, message);
@@ -575,7 +447,8 @@ public class Role implements CascadePersistence, AlbusMessageDispatcher, Compara
     }
   }
 
-  /** Sends the given message via the node runtime.
+  /**
+   * Sends the given message via the node runtime.
    *
    * @param message the given message
    */
@@ -584,24 +457,24 @@ public class Role implements CascadePersistence, AlbusMessageDispatcher, Compara
     assert message != null : "message must not be null";
     assert nodeRuntime != null : "nodeRuntime must not be null";
 
-    final URI recipientRoleId = message.getRecipientRoleId();
-    if (!message.getSenderRoleId().equals(id)) {
+    if (!message.getSenderQualifiedName().equals(qualifiedName)) {
       LOGGER.warn("cannot send message for which this role is not the sender role " + message);
       throw new TexaiException("cannot send message for which this role is not the sender " + message);
     }
 
-    if (!getNodeRuntime().isLocalRole(recipientRoleId)) {
-      // sign messages sent between non-local roles
+    if (areRemoteCommunicationsPermitted && message.isBetweenContainers()) {
+      // sign messages sent between containers
       message.sign(x509SecurityInfo.getPrivateKey());
     }
 
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug(getNode().getNodeNickname() + ": sending message: " + message.toString(nodeRuntime));
+      LOGGER.debug(getNode().getName() + ": sending message: " + message);
     }
-    nodeRuntime.dispatchAlbusMessage(message);
+    nodeRuntime.dispatchMessage(message);
   }
 
-  /** Propagates the given operation to the child roles.
+  /**
+   * Propagates the given operation to the child roles.
    *
    * @param operation the given operation
    * @param senderService the sender service
@@ -619,7 +492,7 @@ public class Role implements CascadePersistence, AlbusMessageDispatcher, Compara
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         if (roleState.get().equals(State.UNINITIALIZED)) {
-          LOGGER.info(getRoleTypeName() + " propagating initialize task to child roles");
+          LOGGER.info(qualifiedName + " propagating initialize task to child roles");
         } else {
           // the child roles are already initialized
           return;
@@ -627,7 +500,7 @@ public class Role implements CascadePersistence, AlbusMessageDispatcher, Compara
         break;
       case AHCSConstants.AHCS_READY_TASK:
         if (roleState.get().equals(State.INITIALIZED)) {
-          LOGGER.info(getRoleTypeName() + " propagating ready task to child roles");
+          LOGGER.info(qualifiedName + " propagating ready task to child roles");
         } else {
           // the child roles are already ready
           return;
@@ -635,15 +508,14 @@ public class Role implements CascadePersistence, AlbusMessageDispatcher, Compara
         break;
     }
 
-    for (final String childRoleIdString : getChildRoleIdStrings()) {
-      assert !childRoleIdString.equals(id.toString()) : "role " + this + " has itself as a child role";
+    childQualifiedNames.stream().forEach((childQualifiedName) -> {
       sendMessage(new Message(
-              id, // senderRoleId
+              qualifiedName, // senderQualifiedName
               senderService,
-              new URIImpl(childRoleIdString), // recipientRoleId
+              childQualifiedName, // recipientQualifiedName
               null, // service
               operation)); // operation
-    }
+    });
 
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
@@ -656,52 +528,11 @@ public class Role implements CascadePersistence, AlbusMessageDispatcher, Compara
     }
   }
 
-  /** When implemented by a message router, registers the given SSL proxy.
-   *
-   * @param sslProxy the given SSL proxy
-   */
-  @Override
-  public void registerSSLProxy(Object sslProxy) {
-    throw new UnsupportedOperationException("Not implemented.");
-  }
-
-  /** Enables this role for messaging with remote roles via the local message router. */
-  public void enableRemoteComunications() {
-    final RoleInfo roleInfo = new RoleInfo(
-            id, // roleId
-            x509SecurityInfo.getCertPath(),
-            x509SecurityInfo.getPrivateKey(),
-            nodeRuntime.getLocalAreaNetworkID(),
-            nodeRuntime.getExternalHostName(),
-            nodeRuntime.getExternalPort(),
-            nodeRuntime.getInternalHostName(),
-            nodeRuntime.getInternalPort());
-    nodeRuntime.registerRoleForRemoteCommunications(roleInfo);
-  }
-
-  /** Gets the role X509 certificate alias.
-   *
-   * @return the role X509 certificate alias
-   */
-  public String getRoleAlias() {
-    return roleAlias;
-  }
-
-  /** Sets the role X509 certificate alias.
-   *
-   * @param roleAlias the roleAlias to set
-   */
-  public void setRoleAlias(final String roleAlias) {
-    //Preconditions
-    assert roleAlias != null : "roleAlias must not be null";
-    assert !roleAlias.isEmpty() : "roleAlias must not be empty";
-
-    this.roleAlias = roleAlias;
-  }
-
-  /** Finds or creates a sharable subskill instance.
+  /**
+   * Finds or creates a sharable subskill instance.
    *
    * @param subSkillClassName the class name of the sharable subskill
+   *
    * @return a sharable subskill instance
    */
   public AbstractSubSkill findOrCreateSubSkill(final String subSkillClassName) {
@@ -728,9 +559,11 @@ public class Role implements CascadePersistence, AlbusMessageDispatcher, Compara
     return subSkill;
   }
 
-  /** Returns an instance of the given subskill class.
+  /**
+   * Returns an instance of the given subskill class.
    *
    * @param clazz the given subskill class
+   *
    * @return an instance of the given subskill class
    */
   private AbstractSubSkill instantiateSubSkill(final Class<?> clazz) {
@@ -746,9 +579,11 @@ public class Role implements CascadePersistence, AlbusMessageDispatcher, Compara
     }
   }
 
-  /** Finds a sharable subskill instance.
+  /**
+   * Finds a sharable subskill instance.
    *
    * @param subSkillClassName the class name of the sharable subskill
+   *
    * @return a sharable subskill instance, or null if not found
    */
   public AbstractSubSkill findSubSkill(final String subSkillClassName) {
@@ -760,9 +595,74 @@ public class Role implements CascadePersistence, AlbusMessageDispatcher, Compara
     }
   }
 
-  /** Returns whether the other object equals this one.
+  /**
+   * Gets the role's description in English.
+   *
+   * @return the role's description in English
+   */
+  public String getDescription() {
+    return description;
+  }
+
+  /**
+   * Gets the parent qualified role name, i.e. container.nodename.rolename, which is null if this is a top level role.
+   *
+   * @return the parent qualified role name
+   */
+  public String getParentQualifiedName() {
+    return parentQualifiedName;
+  }
+
+  /**
+   * Gets the qualified child role names, i.e. container.nodename.rolename, which are empty if this is a lowest level role.
+   *
+   * @return the qualified child role names
+   */
+  public Set<String> getChildQualifiedNames() {
+    return childQualifiedNames;
+  }
+
+  /**
+   * Gets the skill class names, which are objects that verify and format the class names.
+   *
+   * @return the skill class names
+   */
+  public Set<SkillClass> getSkillClasses() {
+    return skillClasses;
+  }
+
+  /**
+   * Gets the state variable names.
+   *
+   * @return the state variable names
+   */
+  public Set<String> getVariableNames() {
+    return variableNames;
+  }
+
+  /**
+   * Gets the role's skill dictionary, service (skill class name) --> skill.
+   *
+   * @return the role's skill dictionary
+   */
+  public Map<String, AbstractSkill> getSkillDictionary() {
+    return skillDictionary;
+  }
+
+  /**
+   * Gets the subskills dictionary, subskill class name --> subskill shared instance.
+   *
+   * @return the subskills dictionary
+   */
+  public Map<String, AbstractSubSkill> getSubSkillsDictionary() {
+    return subSkillsDictionary;
+  }
+
+  /**
+   * Returns whether the other object equals this one.
    *
    * @param obj the other object
+   *
    * @return whether the other object equals this one
    */
   @Override
@@ -774,54 +674,48 @@ public class Role implements CascadePersistence, AlbusMessageDispatcher, Compara
       return false;
     }
     final Role other = (Role) obj;
-    return Objects.equals(this.id, other.id);
+    return Objects.equals(this.qualifiedName, other.qualifiedName);
   }
 
-  /** Returns a hash code for this object.
+  /**
+   * Returns a hash code for this object.
    *
    * @return a hash code for this object
    */
   @Override
   public int hashCode() {
-    int hash = 7;
-    hash = 71 * hash + Objects.hashCode(this.id);
-    return hash;
+    return Objects.hashCode(this.qualifiedName);
   }
 
-  /** Returns a string representation of this object.
+  /**
+   * Returns a string representation of this object.
    *
    * @return a string representation of this object
    */
   @Override
   public String toString() {
     //Preconditions
-    assert roleTypeName != null : "role type name must not be null";
+    assert StringUtils.isNonEmptyString(qualifiedName) : "name must be a non empty string";
 
     final StringBuilder stringBuilder = new StringBuilder();
-    stringBuilder.append('[');
-    if (node != null) {
-      stringBuilder.append(node.getNodeNickname()).append(':');
-    }
-    stringBuilder.append(roleTypeName).append("]");
+    stringBuilder.append('[').append(qualifiedName).append("]");
     return stringBuilder.toString();
   }
 
-  /** Ensures that this persistent object is fully instantiated. */
+  /**
+   * Ensures that this persistent object is fully instantiated.
+   */
   @Override
   public void instantiate() {
-    for (final StateValueBinding stateValueBinding : stateValueBindings) {
-      stateValueBinding.instantiate();
-    }
+    node.getId(); // force instantiation of the Node object.
 
-    for (final StateValueBinding stateValueBinding : stateValueBindings) {
-      LOGGER.info(this + " state value: " + stateValueBinding);
-      stateVariableDictionary.put(
-              stateValueBinding.getVariableName(),
-              stateValueBinding);
-    }
+    skillClasses.stream().forEach((skillClass) -> {
+      skillClass.instantiate();
+    });
   }
 
-  /** Recursively persists this RDF entity and all its components.
+  /**
+   * Recursively persists this RDF entity and all its components.
    *
    * @param rdfEntityManager the RDF entity manager
    * @param overrideContext the user's belief context, or null to persist to each object's default context
@@ -835,7 +729,8 @@ public class Role implements CascadePersistence, AlbusMessageDispatcher, Compara
     cascadePersist(this, rdfEntityManager, overrideContext);
   }
 
-  /** Recursively persists this RDF entity and all its components.
+  /**
+   * Recursively persists this RDF entity and all its components.
    *
    * @param rootRDFEntity the root RDF entity
    * @param rdfEntityManager the RDF entity manager
@@ -846,16 +741,17 @@ public class Role implements CascadePersistence, AlbusMessageDispatcher, Compara
     //Preconditions
     assert rdfEntityManager != null : "rdfEntityManager must not be null";
 
-    for (final StateValueBinding stateValueBinding : stateValueBindings) {
-      stateValueBinding.cascadePersist(
+    skillClasses.stream().forEach((skillClass) -> {
+      skillClass.cascadePersist(
               rootRDFEntity,
               rdfEntityManager,
               overrideContext);
-    }
+    });
     rdfEntityManager.persist(this, overrideContext);
   }
 
-  /** Recursively removes this RDF entity and all its unshared components.
+  /**
+   * Recursively removes this RDF entity and all its unshared components.
    *
    * @param rootRDFEntity the root RDF entity
    * @param rdfEntityManager the RDF entity manager
@@ -865,17 +761,19 @@ public class Role implements CascadePersistence, AlbusMessageDispatcher, Compara
     //Preconditions
     assert rdfEntityManager != null : "rdfEntityManager must not be null";
 
-    for (final StateValueBinding stateValueBinding : stateValueBindings) {
-      stateValueBinding.cascadeRemove(
+    skillClasses.stream().forEach((skillClass) -> {
+      skillClass.cascadeRemove(
               rootRDFEntity,
               rdfEntityManager);
-    }
+    });
     rdfEntityManager.remove(this);
   }
 
-  /** Compares another role with this one.
+  /**
+   * Compares another role with this one, collating by qualified role name, i.e. container.nodename.rolename.
    *
    * @param that the other role
+   *
    * @return -1 if less than, 0 if equal, otherwise return +1
    */
   @Override
@@ -883,6 +781,7 @@ public class Role implements CascadePersistence, AlbusMessageDispatcher, Compara
     //Preconditions
     assert that != null : "that must not be null";
 
-    return this.roleTypeName.compareTo(that.roleTypeName);
+    return this.qualifiedName.compareTo(that.qualifiedName);
   }
+
 }

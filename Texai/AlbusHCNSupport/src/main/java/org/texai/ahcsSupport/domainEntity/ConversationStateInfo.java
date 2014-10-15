@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.UUID;
 import javax.persistence.Id;
 import net.jcip.annotations.ThreadSafe;
@@ -42,30 +41,30 @@ import org.texai.kb.persistence.RDFProperty;
 @RDFEntity(context = "texai:AlbusHierarchicalControlSystemContext")
 public class ConversationStateInfo implements RDFPersistent {
 
-  /** the serial version UID */
+  // the serial version UID
   private static final long serialVersionUID = 1L;
-  /** the id assigned by the persistence framework */
+  // the id assigned by the persistence framework
   @Id
   private URI id;    // NOPMD
-  /** the node */
+  // the node
   @RDFProperty(predicate = "texai:ahcsConversationStateInfo_node")
   private final Node node;
-  /** the role */
+  // the role
   @RDFProperty(predicate = "texai:ahcsConversationStateInfo_role")
   private final Role role;
-  /** the skill class name */
+  // the skill class name
   @RDFProperty(predicate = "texai:ahcsConversationStateInfo_skillClassName")
   private final String skillClassName;
-  /** the conversation id */
+  // the conversation id
   @RDFProperty(predicate = "texai:ahcsConversationStateInfo_conversationId")
   private final UUID conversationId;
-  /** the state variable name list */
+  // the state variable name list
   @RDFProperty(predicate = "texai:ahcsConversationStateInfo_stateVariableNameList")
   private List<String> stateVariableNames;
-  /** the state value list */
+  // the state value list
   @RDFProperty(predicate = "texai:ahcsConversationStateInfo_stateValueList")
   private List<Serializable> stateValues;
-  /** the transient state variable dictionary, state variable name --> value */
+  // the transient state variable dictionary, state variable name --> value
   private final Map<String, Serializable> stateVariableDictionary = new HashMap<>();
 
   /** Constructs a new ConversationStateInfo instance. */
@@ -188,10 +187,12 @@ public class ConversationStateInfo implements RDFPersistent {
       stateVariableNames = new ArrayList<>(stateVariableDictionary_size);
       stateValues = new ArrayList<>(stateVariableDictionary_size);
     }
-    for (final Entry<String, Serializable> entry : stateVariableDictionary.entrySet()) {
+    stateVariableDictionary.entrySet().stream().map((entry) -> {
       stateVariableNames.add(entry.getKey());
+      return entry;
+    }).forEach((entry) -> {
       stateValues.add(entry.getValue());
-    }
+    });
   }
 
   /** Returns a string representation of this object.

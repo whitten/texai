@@ -28,15 +28,15 @@ import org.texai.kb.persistence.RDFProperty;
 @RDFEntity(context = "texai:AlbusHierarchicalControlSystemContext")
 public class StateValueBinding implements CascadePersistence {
 
-  /** the serial version UID */
+  // the serial version UID
   private static final long serialVersionUID = 1L;
-  /** the id assigned by the persistence framework */
+  // the id assigned by the persistence framework
   @Id
   private URI id;
-  /** the variable name */
+  // the variable name
   @RDFProperty()
   private final String variableName;
-  /** the value */
+  // the value
   @RDFProperty()
   private Object value;
 

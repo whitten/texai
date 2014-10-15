@@ -20,13 +20,7 @@
  */
 package org.texai.ahcsSupport.domainEntity;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.cert.X509Certificate;
-import java.util.UUID;
+import java.util.Optional;
 import net.sf.ehcache.CacheManager;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -36,21 +30,12 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.openrdf.model.URI;
-import org.openrdf.model.impl.URIImpl;
-import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
-import org.texai.ahcsSupport.NodeAccess;
-import org.texai.ahcsSupport.NodeRuntime;
 import org.texai.kb.CacheInitializer;
 import org.texai.kb.journal.JournalWriter;
 import org.texai.kb.persistence.DistributedRepositoryManager;
 import org.texai.kb.persistence.RDFEntityManager;
 import org.texai.kb.persistence.RDFEntityPersister;
-import org.texai.kb.Constants;
-import org.texai.kb.util.UUIDUtils;
-import org.texai.x509.X509SecurityInfo;
-import org.texai.x509.X509Utils;
 
 /**
  *
@@ -58,9 +43,13 @@ import org.texai.x509.X509Utils;
  */
 public class RoleTest {
 
-  /** the logger */
+  /**
+   * the logger
+   */
   private static final Logger LOGGER = Logger.getLogger(RoleTest.class);
-  /** the RDF entity manager */
+  /**
+   * the RDF entity manager
+   */
   private static final RDFEntityManager rdfEntityManager = new RDFEntityManager();
 
   public RoleTest() {
@@ -71,9 +60,6 @@ public class RoleTest {
     Logger.getLogger(RDFEntityPersister.class).setLevel(Level.WARN);
     JournalWriter.deleteJournalFiles();
     CacheInitializer.initializeCaches();
-    DistributedRepositoryManager.addTestRepositoryPath(
-            "NodeRoleTypes",
-            true); // isRepositoryDirectoryCleaned
     DistributedRepositoryManager.addTestRepositoryPath(
             "Nodes",
             true); // isRepositoryDirectoryCleaned
@@ -100,51 +86,12 @@ public class RoleTest {
   @Test
   public void testGetId() {
     LOGGER.info("getId");
-    RoleType roleType = new RoleType();
-    roleType.setTypeName("MyRoleType");
-    roleType.addSkillUse(new SkillClass("org.texai.skill.impl.HeartbeatImpl"));
-    final RoleType parentRoleType = new RoleType();
-    parentRoleType.setTypeName("MyParentRoleType");
-    final RoleType childRoleType = new RoleType();
-    childRoleType.setTypeName("MyChildRoleType");
-    roleType.setDescription("my description");
-    roleType.setAlbusHCSGranularityLevel(AHCSConstants.ALBUS_HCS_1_DAY_GRANULARITY_LEVEL);
-    final NodeRuntime nodeRuntime = null;
-    rdfEntityManager.persist(roleType);
-    Role instance = new Role(
-
-            roleType,
-            nodeRuntime);
+    Role instance = makeTestRole();
     assertNull(instance.getId());
     rdfEntityManager.persist(instance);
     assertNotNull(instance.getId());
-  }
-
-  /**
-   * Test of getRoleType method, of class Role.
-   */
-  @Test
-  public void testGetRoleType() {
-    LOGGER.info("getRoleType");
-    RoleType roleType = new RoleType();
-    roleType.setTypeName("MyRoleType");
-    roleType.addSkillUse(new SkillClass("org.texai.skill.impl.HeartbeatImpl"));
-    final RoleType parentRoleType = new RoleType();
-    parentRoleType.setTypeName("MyParentRoleType");
-    final RoleType childRoleType = new RoleType();
-    childRoleType.setTypeName("MyChildRoleType");
-    roleType.setDescription("my description");
-    roleType.setAlbusHCSGranularityLevel(AHCSConstants.ALBUS_HCS_1_DAY_GRANULARITY_LEVEL);
-    final NodeRuntime nodeRuntime = null;
-    rdfEntityManager.persist(roleType);
-    Role instance = new Role(
-            roleType,
-            nodeRuntime);
-    final NodeAccess nodeAccess = new NodeAccess(rdfEntityManager);
-    assertEquals("[RoleType MyRoleType]", nodeAccess.getRoleType(instance).toString());
-    rdfEntityManager.persist(instance);
-    Role loadedInstance = rdfEntityManager.find(Role.class, instance.getId());
-    assertEquals("[RoleType MyRoleType]", nodeAccess.getRoleType(loadedInstance).toString());
+    Role loadedRole = rdfEntityManager.find(Role.class, instance.getId());
+    assertEquals(instance, loadedRole);
   }
 
   /**
@@ -153,39 +100,12 @@ public class RoleTest {
   @Test
   public void testGetNode() {
     LOGGER.info("getNode");
-    NodeType nodeType = new NodeType();
-    nodeType.setTypeName("MyTypeName");
-    NodeType inheritedNodeType = new NodeType();
-    inheritedNodeType.setTypeName("MyInheritedNodeType");
-    nodeType.addInheritedNodeType(inheritedNodeType);
-    RoleType roleType = new RoleType();
-    roleType.setTypeName("MyRoleType");
-    nodeType.addRoleType(roleType);
-    nodeType.setMissionDescription("my mission description");
-    rdfEntityManager.persist(nodeType);
-    Node node = new Node(
-            nodeType,
-            null);
-    node.setNodeNickname("MyNodeNickname");
-    roleType.setTypeName("MyRoleType");
-    roleType.addSkillUse(new SkillClass("org.texai.skill.impl.HeartbeatImpl"));
-    final RoleType parentRoleType = new RoleType();
-    parentRoleType.setTypeName("MyParentRoleType");
-    final RoleType childRoleType = new RoleType();
-    childRoleType.setTypeName("MyChildRoleType");
-    roleType.setDescription("my description");
-    roleType.setAlbusHCSGranularityLevel(AHCSConstants.ALBUS_HCS_1_DAY_GRANULARITY_LEVEL);
-    final NodeRuntime nodeRuntime = null;
-    rdfEntityManager.persist(roleType);
-    Role instance = new Role(
-            roleType,
-            nodeRuntime);
-    assertNull(instance.getNode());
-    instance.setNode(node);
-    assertEquals("[MyNodeNickname: MyTypeName]", instance.getNode().toString());
+    Role instance = makeTestRole();
+    assertNotNull(instance.getNode());
+    assertEquals("TestNode", instance.getNode().toString());
     rdfEntityManager.persist(instance);
     Role loadedInstance = rdfEntityManager.find(Role.class, instance.getId());
-    assertEquals("[MyNodeNickname: MyTypeName]", loadedInstance.getNode().toString());
+    assertEquals("TestNode", loadedInstance.getNode().toString());
   }
 
   /**
@@ -194,21 +114,7 @@ public class RoleTest {
   @Test
   public void testGetRoleState() {
     LOGGER.info("getRoleState");
-    RoleType roleType = new RoleType();
-    roleType.setTypeName("MyRoleType");
-    roleType.addSkillUse(new SkillClass("org.texai.skill.impl.HeartbeatImpl"));
-    final RoleType parentRoleType = new RoleType();
-    parentRoleType.setTypeName("MyParentRoleType");
-    final RoleType childRoleType = new RoleType();
-    childRoleType.setTypeName("MyChildRoleType");
-    roleType.setDescription("my description");
-    roleType.setAlbusHCSGranularityLevel(AHCSConstants.ALBUS_HCS_1_DAY_GRANULARITY_LEVEL);
-    final NodeRuntime nodeRuntime = null;
-    rdfEntityManager.persist(roleType);
-    Role instance = new Role(
-
-            roleType,
-            nodeRuntime);
+    Role instance = makeTestRole();
     assertEquals(State.UNINITIALIZED, instance.getRoleState());
     rdfEntityManager.persist(instance);
     Role loadedInstance = rdfEntityManager.find(Role.class, instance.getId());
@@ -221,21 +127,7 @@ public class RoleTest {
   @Test
   public void testGetSkills() {
     LOGGER.info("getSkills");
-    RoleType roleType = new RoleType();
-    roleType.setTypeName("MyRoleType");
-    roleType.addSkillUse(new SkillClass("org.texai.skill.impl.HeartbeatImpl"));
-    final RoleType parentRoleType = new RoleType();
-    parentRoleType.setTypeName("MyParentRoleType");
-    final RoleType childRoleType = new RoleType();
-    childRoleType.setTypeName("MyChildRoleType");
-    roleType.setDescription("my description");
-    roleType.setAlbusHCSGranularityLevel(AHCSConstants.ALBUS_HCS_1_DAY_GRANULARITY_LEVEL);
-    final NodeRuntime nodeRuntime = null;
-    final URI nodeRuntimeRoleId = new URIImpl(Constants.TEXAI_NAMESPACE + "NodeRuntime_001");
-    rdfEntityManager.persist(roleType);
-    Role instance = new Role(
-            roleType,
-            nodeRuntime);
+    Role instance = makeTestRole();
     assertEquals("[]", instance.getSkills().toString());
     rdfEntityManager.persist(instance);
     Role loadedInstance = rdfEntityManager.find(Role.class, instance.getId());
@@ -243,107 +135,27 @@ public class RoleTest {
   }
 
   /**
-   * Test of getParentRoleIdString & setParentRoleIdString method, of class Role.
+   * Test of getParentQualifiedName method, of class Role.
    */
   @Test
-  public void testGetParentRoleIdString() {
-    LOGGER.info("getParentRoleIdString");
-    RoleType roleType = new RoleType();
-    roleType.setTypeName("MyRoleType");
-    roleType.addSkillUse(new SkillClass("org.texai.skill.impl.HeartbeatImpl"));
-    final RoleType parentRoleType = new RoleType();
-    parentRoleType.setTypeName("MyParentRoleType");
-    final RoleType childRoleType = new RoleType();
-    childRoleType.setTypeName("MyChildRoleType");
-    roleType.setDescription("my description");
-    roleType.setAlbusHCSGranularityLevel(AHCSConstants.ALBUS_HCS_1_DAY_GRANULARITY_LEVEL);
-    final NodeRuntime nodeRuntime = null;
-    rdfEntityManager.persist(roleType);
-    Role instance = new Role(
-
-            roleType,
-            nodeRuntime);
-    assertNull(instance.getParentRoleIdString());
-    instance.setParentRoleIdString((new URIImpl(Constants.TEXAI_NAMESPACE + "MyParentRole")).toString());
-    assertEquals("http://texai.org/texai/MyParentRole", instance.getParentRoleIdString());
+  public void testGetParentQualifiedName() {
+    LOGGER.info("getParentQualifiedName");
+    Role instance = makeTestRole();
+    assertNotNull(instance.getParentQualifiedName());
+    assertEquals("TestContainer.TestParentAgent.TestParentRole", instance.getParentQualifiedName());
     rdfEntityManager.persist(instance);
     Role loadedInstance = rdfEntityManager.find(Role.class, instance.getId());
-    assertEquals("http://texai.org/texai/MyParentRole", loadedInstance.getParentRoleIdString());
+    assertEquals("TestContainer.TestParentAgent.TestParentRole", loadedInstance.getParentQualifiedName());
   }
 
   /**
-   * Test of getChildRoleIdStrings method, of class Role.
+   * Test of getChildQualifiedNames method, of class Role.
    */
   @Test
-  public void testGetChildRoleIdStrings() {
-    LOGGER.info("getChildRoleIdStrings");
-    RoleType roleType = new RoleType();
-    roleType.setTypeName("MyRoleType");
-    roleType.addSkillUse(new SkillClass("org.texai.skill.impl.HeartbeatImpl"));
-    final RoleType parentRoleType = new RoleType();
-    parentRoleType.setTypeName("MyParentRoleType");
-    final RoleType childRoleType = new RoleType();
-    childRoleType.setTypeName("MyChildRoleType");
-    roleType.setDescription("my description");
-    roleType.setAlbusHCSGranularityLevel(AHCSConstants.ALBUS_HCS_1_DAY_GRANULARITY_LEVEL);
-    final NodeRuntime nodeRuntime = null;
-    rdfEntityManager.persist(roleType);
-    Role instance = new Role(
-            roleType,
-            nodeRuntime);
-    assertEquals("[]", instance.getChildRoleIdStrings().toString());
-  }
-
-  /**
-   * Test of setX509SecurityInfo & getX509Certificate method, of class Role.
-   */
-  @Test
-  public void testSetX509SecurityInfo() {
-    LOGGER.info("setX509SecurityInfo");
-    RoleType roleType = new RoleType();
-    roleType.setTypeName("MyRoleType");
-    roleType.addSkillUse(new SkillClass("org.texai.skill.impl.HeartbeatImpl"));
-    final RoleType parentRoleType = new RoleType();
-    parentRoleType.setTypeName("MyParentRoleType");
-    final RoleType childRoleType = new RoleType();
-    childRoleType.setTypeName("MyChildRoleType");
-    roleType.setDescription("my description");
-    roleType.setAlbusHCSGranularityLevel(AHCSConstants.ALBUS_HCS_1_DAY_GRANULARITY_LEVEL);
-    final NodeRuntime nodeRuntime = null;
-    rdfEntityManager.persist(roleType);
-    Role instance = new Role(
-
-            roleType,
-            nodeRuntime);
-    assertNull(instance.getX509Certificate());
-    rdfEntityManager.persist(instance);
-    if (!X509Utils.isTrustedDevelopmentSystem()) {
-      return;
-    }
-    X509SecurityInfo x509SecurityInfo = null;
-    try {
-      X509Certificate rootX509Certificate = X509Utils.getRootX509Certificate();
-      KeyPair keyPair = X509Utils.generateRSAKeyPair2048();
-      PrivateKey certificateAuthorityPrivateKey = X509Utils.getRootPrivateKey();
-      final UUID uid = UUIDUtils.uriToUUID(instance.getId());
-      final char[] keystorePassword = "my-password".toCharArray();
-      x509SecurityInfo = X509Utils.generateX509SecurityInfo(
-          keyPair,
-          certificateAuthorityPrivateKey,
-          rootX509Certificate,
-          uid,
-          keystorePassword,
-          false, null); // isJCEUnlimitedStrengthPolicy
-
-    } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException ex) {
-      fail(ex.getMessage());
-    }
-    assertNotNull(x509SecurityInfo);
-    instance.setX509SecurityInfo(x509SecurityInfo);
-    assertNotNull(instance.getX509Certificate());
-    rdfEntityManager.persist(instance);
-    Role loadedInstance = rdfEntityManager.find(Role.class, instance.getId());
-    assertNull(loadedInstance.getX509Certificate());
+  public void testGetChildQualifiedNames() {
+    LOGGER.info("getChildQualifiedNames");
+    Role instance = makeTestRole();
+    assertEquals("[]", instance.getChildQualifiedNames().toString());
   }
 
   /**
@@ -352,24 +164,23 @@ public class RoleTest {
   @Test
   public void testToString() {
     LOGGER.info("toString");
-    RoleType roleType = new RoleType();
-    roleType.setTypeName("MyRoleType");
-    roleType.addSkillUse(new SkillClass("org.texai.skill.impl.HeartbeatImpl"));
-    final RoleType parentRoleType = new RoleType();
-    parentRoleType.setTypeName("MyParentRoleType");
-    final RoleType childRoleType = new RoleType();
-    childRoleType.setTypeName("MyChildRoleType");
-    roleType.setDescription("my description");
-    roleType.setAlbusHCSGranularityLevel(AHCSConstants.ALBUS_HCS_1_DAY_GRANULARITY_LEVEL);
-    final NodeRuntime nodeRuntime = null;
-    rdfEntityManager.persist(roleType);
-    Role instance = new Role(
-
-            roleType,
-            nodeRuntime);
-    assertEquals("[MyRoleType]", instance.toString());
+    Role instance = makeTestRole();
+    assertEquals("[TestContainer.TestAgent.TestRole]", instance.toString());
     rdfEntityManager.persist(instance);
     Role loadedInstance = rdfEntityManager.find(Role.class, instance.getId());
-    assertEquals("[MyRoleType]", loadedInstance.toString());
+    assertEquals("[TestContainer.TestAgent.TestRole]", loadedInstance.toString());
   }
+
+  /**
+   * Makes a test role.
+   *
+   * @return a test role
+   */
+  public static Role makeTestRole() {
+    final Node testNode = NodeTest.makeTestNode();
+    final Optional<Role> optional = testNode.getRoles().stream().findFirst();
+    assertNotNull(optional);
+    return optional.get();
+  }
+
 }

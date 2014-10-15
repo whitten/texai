@@ -29,7 +29,7 @@ import net.jcip.annotations.NotThreadSafe;
 @NotThreadSafe
 public abstract class AbstractLibrary {
 
-  /** the containing skill */
+  // the containing skill
   private final AbstractSkill skill;
 
   /** Constructs a new AbstractLibrary instance.

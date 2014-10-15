@@ -44,6 +44,7 @@ import org.texai.kb.CacheInitializer;
 import org.texai.kb.Constants;
 import org.texai.kb.persistence.DistributedRepositoryManager;
 import org.texai.kb.persistence.RDFEntityManager;
+import org.texai.kb.persistence.RDFEntityPersister;
 
 /**
  *
@@ -67,6 +68,7 @@ public class ReteEngineTest {
 
   @BeforeClass
   public static void setUpClass() throws Exception {
+    Logger.getLogger(RDFEntityPersister.class).setLevel(Level.WARN);
     CacheInitializer.initializeCaches();
     DistributedRepositoryManager.addRepositoryPath(
             "InferenceRules",

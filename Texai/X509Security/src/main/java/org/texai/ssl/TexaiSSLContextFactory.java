@@ -22,8 +22,6 @@ package org.texai.ssl;
 
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import javax.net.ssl.SSLContext;
@@ -154,80 +152,5 @@ public final class TexaiSSLContextFactory {
       }
       sslEngine.setEnabledCipherSuites(enabledCipherSuites);
     }
-  }
-
-  /**
-   * Provides a trust manager for Texai self-signed certificates.
-   */
-  static class TexaiTrustManager implements X509TrustManager {
-
-    /**
-     * Given the partial or complete certificate chain provided by the peer, build a certificate path to a trusted root and return if it can
-     * be validated and is trusted for client SSL authentication based on the authentication type.
-     *
-     * The authentication type is the key exchange algorithm portion of the cipher suites represented as a String, such as "RSA", "DHE_DSS".
-     * Note: for some exportable cipher suites, the key exchange algorithm is determined at run time during the handshake. For instance, for
-     * TLS_RSA_EXPORT_WITH_RC4_40_MD5, the authType should be RSA_EXPORT when an ephemeral RSA key is used for the key exchange, and RSA
-     * when the key from the server certificate is used. Checking is case-sensitive.
-     *
-     * @param certificateChain the X.509 certificate chain, which is expected to be a single certificate
-     * @param authType the key exchange algorithm portion of the cipher suites represented as a String, e.g. "RSA"
-     *
-     * @throws java.security.cert.CertificateException
-     */
-    @Override
-    public void checkClientTrusted(
-            final X509Certificate[] certificateChain,
-            final String authType) throws CertificateException {
-      //Preconditions
-      assert certificateChain != null : "certificateChain must not be null";
-
-      if (certificateChain.length != 1) {
-        throw new CertificateException("Expected client certificate chain length 1, received length " + certificateChain.length);
-      }
-      if (!authType.equals("RSA")) {
-        throw new CertificateException("Expected server authType RSA, received " + authType);
-      }
-      //TODO validate the subject info
-    }
-
-    /**
-     * Given the partial or complete certificate chain provided by the peer, build a certificate path to a trusted root and return if it can
-     * be validated and is trusted for server SSL authentication based on the authentication type.
-     *
-     * The authentication type is the key exchange algorithm portion of the cipher suites represented as a String, such as "RSA", "DHE_DSS".
-     * Note: for some exportable cipher suites, the key exchange algorithm is determined at run time during the handshake. For instance, for
-     * TLS_RSA_EXPORT_WITH_RC4_40_MD5, the authType should be RSA_EXPORT when an ephemeral RSA key is used for the key exchange, and RSA
-     * when the key from the server certificate is used. Checking is case-sensitive.
-     *
-     * @param certificateChain the X.509 certificate chain, which is expected to be a single certificate
-     * @param authType the key exchange algorithm portion of the cipher suites represented as a String, e.g. "RSA"
-     *
-     * @throws java.security.cert.CertificateException
-     */
-    @Override
-    public void checkServerTrusted(
-            final X509Certificate[] certificateChain,
-            final String authType) throws CertificateException {
-      //Preconditions
-      assert certificateChain != null : "certificateChain must not be null";
-
-      if (certificateChain.length != 1) {
-        throw new CertificateException("Expected client certificate chain length 1, received length " + certificateChain.length);
-      }
-      if (!authType.equals("RSA")) {
-        throw new CertificateException("Expected server authType RSA, received " + authType);
-      }
-      //TODO validate the subject info
-    }
-
-    /**
-     * Return an array of certificate authority certificates which are trusted for authenticating peers.
-     */
-    @Override
-    public X509Certificate[] getAcceptedIssuers() {
-      return null;
-    }
-
   }
 }

@@ -58,7 +58,13 @@
   <dependencies>
     <dependency>
       <groupId>org.texai</groupId>
-      <artifactId>Skills</artifactId>
+      <artifactId>CoinSkills</artifactId>
+      <version>1.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.texai</groupId>
+      <artifactId>AlbusHCNSupport</artifactId>
       <version>1.0</version>
     </dependency>
   </dependencies>

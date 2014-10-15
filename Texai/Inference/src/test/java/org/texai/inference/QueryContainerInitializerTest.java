@@ -21,6 +21,7 @@
 package org.texai.inference;
 
 import net.sf.ehcache.CacheManager;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -31,6 +32,7 @@ import org.texai.inference.rete.ReteEngine;
 import org.texai.kb.CacheInitializer;
 import org.texai.kb.persistence.DistributedRepositoryManager;
 import org.texai.kb.persistence.RDFEntityManager;
+import org.texai.kb.persistence.RDFEntityPersister;
 
 /**
  *
@@ -48,6 +50,7 @@ public class QueryContainerInitializerTest {
 
   @BeforeClass
   public static void setUpClass() throws Exception {
+    Logger.getLogger(RDFEntityPersister.class).setLevel(Level.WARN);
     CacheInitializer.initializeCaches();
     DistributedRepositoryManager.addRepositoryPath(
             "InferenceRules",
