@@ -32,9 +32,9 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.jezhumble</groupId>
-      <artifactId>Javasysmon</artifactId>
-      <version>1.0</version>
+      <groupId>com.outr.javasysmon</groupId>
+      <artifactId>javasysmon_2.10</artifactId>
+      <version>0.3.4</version>
     </dependency>
   </dependencies>
 </project>
