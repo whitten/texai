@@ -187,6 +187,9 @@
           <skill-class>
             <skill-class-name>org.texai.skill.network.ContainerOperation</skill-class-name>
           </skill-class>
+          <skill-class>
+            <skill-class-name>org.texai.skill.support.NodeRuntimeSkill</skill-class-name>
+          </skill-class>
         </skill-classes>
         <variableNames></variableNames>
       </role>

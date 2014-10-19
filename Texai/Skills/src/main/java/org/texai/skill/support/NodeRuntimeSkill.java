@@ -52,6 +52,8 @@ public class NodeRuntimeSkill extends AbstractSkill {
     super.setRole(role);
     
     nodeRuntime = (NodeRuntime) role.getNodeRuntime();
+    assert nodeRuntime != null;
+    nodeRuntime.setNodeRuntimeSkill(this);
   }
 
   /** Constructs a new NodeRuntimeSkill instance. */

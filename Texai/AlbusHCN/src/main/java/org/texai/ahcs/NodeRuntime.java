@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import net.jcip.annotations.NotThreadSafe;
 import net.sf.ehcache.CacheManager;
 import org.apache.log4j.Logger;
+import org.texai.ahcsSupport.AbstractSkill;
 import org.texai.ahcsSupport.BasicNodeRuntime;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.NodesInitializer;
@@ -106,9 +107,11 @@ public class NodeRuntime extends BasicNodeRuntime {
   final String nodesPath = "data/nodes.xml";
   // the tamper-evident hash of the nodes path file
   final String nodesFileHashString = "";
-
+  // The NodeRuntimeSkill instance which is used to send and receive messages on behalf of this node runtime
+  private AbstractSkill nodeRuntimeSkill;
+  
   /**
-   * Constructs a new singleton BasicNodeRuntime instance.
+   * Constructs a new singleton NodeRuntime instance.
    *
    * @param containerName the container name
    */
@@ -218,6 +221,17 @@ public class NodeRuntime extends BasicNodeRuntime {
 
   public String getExternalHostName() {
     throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  /** Sets the NodeRuntimeSkill instance which is used to send and receive messages on behalf of this node runtime.
+   * 
+   * @param nodeRuntimeSkill the NodeRuntimeSkill instance
+   */
+  public void setNodeRuntimeSkill(AbstractSkill nodeRuntimeSkill) {
+    //Preconditions
+    assert nodeRuntimeSkill != null : "nodeRuntimeSkill must not be null";
+    
+    this.nodeRuntimeSkill = nodeRuntimeSkill;
   }
 
   /**
