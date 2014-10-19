@@ -465,7 +465,7 @@ public final class NodesInitializer {
         }
       });
       repositoryConnection.commit();
-    } catch (Exception ex) {
+    } catch (RepositoryException ex) {
       throw new TexaiException(ex);
     }
   }
