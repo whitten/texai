@@ -34,6 +34,7 @@ import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
 import org.openrdf.model.BNode;
 import org.openrdf.model.Resource;
+import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.texai.inference.rete.TestAtJoinNode.FieldType;
@@ -44,7 +45,6 @@ import org.texai.inference.sparql.domainEntity.NotOperator;
 import org.texai.inference.sparql.domainEntity.QueryContainer;
 import org.texai.inference.sparql.domainEntity.SameTermOperator;
 import org.texai.inference.sparql.domainEntity.SelectQuery;
-import org.texai.inference.sparql.domainEntity.Variable;
 import org.texai.kb.persistence.RDFUtility;
 import org.texai.util.ArraySet;
 import org.texai.util.StringUtils;
@@ -85,7 +85,7 @@ public class ReteEngine {
   /** the node id for graphing */
   private int nodeId = 0;
   /** the statements */
-  private Set<org.openrdf.model.Statement> addedStatements = new HashSet<>();
+  private final Set<org.openrdf.model.Statement> addedStatements = new HashSet<>();
   /** the scored query container informations */
   private final List<ScoredQueryContainerInfo> scoredQueryContainerInfos = new ArrayList<>();
 
@@ -118,25 +118,25 @@ public class ReteEngine {
 
     final Map<String, Map<String, Value>> resultsDictionary = new HashMap<>();
     reset();
-    for (final org.openrdf.model.Statement statement : statements) {
+    statements.stream().forEach((statement) -> {
       addStatement(statement);
-    }
-    for (final ProductionNode productionNode : satisfiedProductionNodeDictionary.values()) {
+    });
+    satisfiedProductionNodeDictionary.values().stream().forEach((productionNode) -> {
       resultsDictionary.put(productionNode.getQueryContainer().getName(), getBindings(productionNode));
-    }
+    });
     return new ReteResults(resultsDictionary);
   }
 
   /** Resets the Rete network by clearing the mutated alpha and beta memories from the last execution. */
   public void reset() {
     satisfiedProductionNodeDictionary.clear();
-    for (final AlphaMemory alphaMemory : mutatedAlphaMemories) {
+    mutatedAlphaMemories.stream().forEach((alphaMemory) -> {
       alphaMemory.getStatements().clear();
-    }
+    });
     mutatedAlphaMemories.clear();
-    for (final TokenMemory mutatedTokenMemory : mutatedTokenMemories) {
+    mutatedTokenMemories.stream().forEach((mutatedTokenMemory) -> {
       mutatedTokenMemory.getTokens().clear();
-    }
+    });
     mutatedTokenMemories.clear();
     addedStatements.clear();
   }
@@ -294,9 +294,9 @@ public class ReteEngine {
 
     if (!isAlphaMemoryActivated) {
       if (LOGGER.isDebugEnabled()) {
-        for (final String pattern1 : alphaMemoryDictionary.keySet()) {
+        alphaMemoryDictionary.keySet().stream().forEach((pattern1) -> {
           LOGGER.debug("'" + pattern1 + "'");
-        }
+        });
       }
       LOGGER.info("no pattern matches statement: " + statement);
     }
@@ -322,9 +322,9 @@ public class ReteEngine {
     }
     alphaMemory.getStatements().addFirst(statement);
     LOGGER.debug("  statements: " + RDFUtility.formatStatements(alphaMemory.getStatements()));
-    for (final JoinNode joinNode : alphaMemory.getSuccessors()) {
+    alphaMemory.getSuccessors().stream().forEach((joinNode) -> {
       joinNodeRightActivation(joinNode, statement);
-    }
+    });
   }
 
   /** Performs activation of the given join node when a new statement is added to the corresponding alpha memory.
@@ -356,19 +356,14 @@ public class ReteEngine {
       }
       tokens = betaMemoryNode.getTokens();
     }
-    for (final Token token : tokens) {
-      if (performJoinTests(joinNode.getTests(), token, statement)) {
-        for (final AbstractReteNode childNode : joinNode.getChildren()) {
-          if (childNode instanceof TokenMemory) {
-            betaMemoryLeftActivation((TokenMemory) childNode, token, statement, joinNode.getCondition());
-            if (childNode instanceof ProductionNode) {
-              // done!
-              satisfiedProductionNode((ProductionNode) childNode);
-            }
-          }
-        }
-      }
-    }
+    tokens.stream().filter((token) -> (performJoinTests(joinNode.getTests(), token, statement))).forEach((Token token) -> {
+      joinNode.getChildren().stream().filter((childNode) -> (childNode instanceof TokenMemory)).map((childNode) -> {
+        betaMemoryLeftActivation((TokenMemory) childNode, token, statement, joinNode.getCondition());
+        return childNode;
+      }).filter((childNode) -> (childNode instanceof ProductionNode)).forEach((childNode) -> {
+        satisfiedProductionNode((ProductionNode) childNode);
+      });
+    });
   }
 
   /** Performs left activation for the given join node.
@@ -386,19 +381,14 @@ public class ReteEngine {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("joinNodeLeftActivation " + joinNode);
     }
-    for (final org.openrdf.model.Statement statement : joinNode.getAlphaMemory().getStatements()) {
-      if (performJoinTests(joinNode.getTests(), token, statement)) {
-        for (final AbstractReteNode childNode : joinNode.getChildren()) {
-          if (childNode instanceof TokenMemory) {
-            betaMemoryLeftActivation((TokenMemory) childNode, token, statement, joinNode.getCondition());
-            if (childNode instanceof ProductionNode) {
-              // done!
-              satisfiedProductionNode((ProductionNode) childNode);
-            }
-          }
-        }
-      }
-    }
+    joinNode.getAlphaMemory().getStatements().stream().filter((statement) -> (performJoinTests(joinNode.getTests(), token, statement))).forEach((Statement statement) -> {
+      joinNode.getChildren().stream().filter((childNode) -> (childNode instanceof TokenMemory)).map((childNode) -> {
+        betaMemoryLeftActivation((TokenMemory) childNode, token, statement, joinNode.getCondition());
+        return childNode;
+      }).filter((childNode) -> (childNode instanceof ProductionNode)).forEach((childNode) -> {
+        satisfiedProductionNode((ProductionNode) childNode);
+      });
+    });
   }
 
   /** Records that the given production node has been satisfied.
@@ -571,9 +561,9 @@ public class ReteEngine {
     }
     tokenMemory.getTokens().addFirst(newToken);
     if (tokenMemory instanceof BetaMemoryNode) {
-      for (final AbstractReteNode childNode : ((BetaMemoryNode) tokenMemory).getChildren()) {
+      ((BetaMemoryNode) tokenMemory).getChildren().stream().forEach((childNode) -> {
         joinNodeLeftActivation((JoinNode) childNode, newToken);
-      }
+      });
     }
   }
 
@@ -734,8 +724,8 @@ public class ReteEngine {
   /** Derives a pattern for matching the given predicate and object.
    *
    * @param predicate the given predicate
-   * @param predicate the given object
-   * @returna pattern for matching the given condition
+   * @param object the given object
+   * @return a pattern for matching the given condition
    */
   public static String derivePattern(final URI predicate, final Value object) {
     //Preconditions
@@ -939,11 +929,11 @@ public class ReteEngine {
       return ((ProductionNode) satisfiedProductionNodeDictionary.values().toArray()[0]).getQueryContainer().getName();
     }
     scoredQueryContainerInfos.clear();
-    for (final ProductionNode productionNode : satisfiedProductionNodeDictionary.values()) {
+    satisfiedProductionNodeDictionary.values().stream().forEach((productionNode) -> {
       scoredQueryContainerInfos.add(new ScoredQueryContainerInfo(
               productionNode.getQueryContainer().getName(),
               countMatchedStatements(productionNode)));
-    }
+    });
     Collections.sort(scoredQueryContainerInfos);
     LOGGER.info("scored production nodes: " + scoredQueryContainerInfos);
     final ScoredQueryContainerInfo firstScoredQueryContainerInfo = scoredQueryContainerInfos.get(0);
@@ -1046,9 +1036,9 @@ public class ReteEngine {
     assert productionNode != null : "productionNode must not be null";
     final Set<String> selectedVariableNames = new ArraySet<>();
     final SelectQuery selectQuery = (SelectQuery) productionNode.getQueryContainer().getQuery();
-    for (final Variable variable : selectQuery.getSelect().getVariables()) {
+    selectQuery.getSelect().getVariables().stream().forEach((variable) -> {
       selectedVariableNames.add(variable.getName());
-    }
+    });
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("selected variable names: " + selectedVariableNames);
@@ -1275,10 +1265,10 @@ public class ReteEngine {
         stringBuilder.append("pattern '");
         stringBuilder.append(alphaMemory.getPattern());
         stringBuilder.append('\'');
-        for (final org.openrdf.model.Statement statement : alphaMemory.getStatements()) {
+        alphaMemory.getStatements().stream().forEach((statement) -> {
           stringBuilder.append("\\n");
           stringBuilder.append(RDFUtility.formatStatement(statement));
-        }
+        });
         graphBufferedWriter.append(stringBuilder.toString());
         graphBufferedWriter.append("\" ];\n");
 
@@ -1396,10 +1386,10 @@ public class ReteEngine {
         stringBuilder.setLength(0);
         stringBuilder.append("BetaMemory");
         stringBuilder.append(++betaMemoryLabelSerialNumber);
-        for (final Token token : ((BetaMemoryNode) node).getTokens()) {
+        ((BetaMemoryNode) node).getTokens().stream().forEach((token) -> {
           stringBuilder.append("\\n");
           stringBuilder.append(token.graphLabel());
-        }
+        });
         nodeLabel = stringBuilder.toString();
         shape = "";
 
@@ -1419,10 +1409,10 @@ public class ReteEngine {
         stringBuilder.setLength(0);
         stringBuilder.append("Production ");
         stringBuilder.append(((ProductionNode) node).getQueryContainer().getName());
-        for (final Token token : ((ProductionNode) node).getTokens()) {
+        ((ProductionNode) node).getTokens().stream().forEach((token) -> {
           stringBuilder.append("\\n");
           stringBuilder.append(token.graphLabel());
-        }
+        });
         nodeLabel = stringBuilder.toString();
         shape = "\n    shape = box";
 

@@ -126,7 +126,6 @@ public final class TopmostFriendship extends AbstractSkill {
     LOGGER.info("readying child roles");
     propagateOperationToChildRoles(AHCSConstants.AHCS_READY_TASK); // operation
 
-    //TODO destroy the bootstrap role
     setSkillState(State.READY);
   }
 
