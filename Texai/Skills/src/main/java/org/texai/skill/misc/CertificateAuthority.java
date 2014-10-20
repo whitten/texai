@@ -57,6 +57,10 @@ public class CertificateAuthority extends AbstractSkill {
     assert message != null : "message must not be null";
 
     final String operation = message.getOperation();
+    if (operation.equals(AHCSConstants.AHCS_INITIALIZE_TASK)) {
+      initialization(message);
+      return true;
+    }
     if (operation.equals(AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO)) {
       LOGGER.warn(message);
       return true;
@@ -84,15 +88,30 @@ public class CertificateAuthority extends AbstractSkill {
     return notUnderstoodMessage(message);
   }
 
+  /**
+   * Performs the initialization operation.
+   *
+   * @param message the received initialization message
+   */
+  private void initialization(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
+
+    // no child roles to initialize
+    
+    setSkillState(AHCSConstants.State.INITIALIZED);
+  }
+
   /** Returns the understood operations.
    *
    * @return the understood operations
    */
   @Override
   public String[] getUnderstoodOperations() {
-    return new String[] {
+    return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.AHCS_INITIALIZE_TASK
     };
   }
-
 }

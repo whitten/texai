@@ -403,7 +403,7 @@ public class Message implements Serializable {
    * @return whether the given message is sent between containers
    */
   public boolean isBetweenContainers() {
-    return getSenderContainerName().equals(getRecipientContainerName());
+    return !getSenderContainerName().equals(getRecipientContainerName());
   }
 
   /**

@@ -430,7 +430,7 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
         }
       }
       if (!isSkillFound) {
-        LOGGER.info(getNode().getName() + ": skill not found for service: " + message);
+        LOGGER.info(getNode().getName() + ": skill not found for service: " + message + "\nservice: " + message.getRecipientService());
         LOGGER.info(getNode().getName() + ": skillDictionary:\n  " + skillDictionary);
         // not understood
         final Message message1 = new Message(

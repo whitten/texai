@@ -24,10 +24,10 @@
 package org.texai.skill.support;
 
 import org.apache.log4j.Logger;
-import org.texai.ahcs.NodeRuntime;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.AbstractSkill;
+import org.texai.ahcsSupport.BasicNodeRuntime;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.Role;
 
@@ -40,7 +40,7 @@ public class NodeRuntimeSkill extends AbstractSkill {
   // the logger
   private static final Logger LOGGER = Logger.getLogger(NodeRuntimeSkill.class);
   // the node runtime
-  private NodeRuntime nodeRuntime;
+  private BasicNodeRuntime nodeRuntime;
   
   /**
    * Sets the role containing this skill.
@@ -51,7 +51,7 @@ public class NodeRuntimeSkill extends AbstractSkill {
   public void setRole(final Role role) {
     super.setRole(role);
     
-    nodeRuntime = (NodeRuntime) role.getNodeRuntime();
+    nodeRuntime = role.getNodeRuntime();
     assert nodeRuntime != null;
     nodeRuntime.setNodeRuntimeSkill(this);
   }

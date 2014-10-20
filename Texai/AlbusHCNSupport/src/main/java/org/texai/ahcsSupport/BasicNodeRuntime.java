@@ -59,6 +59,8 @@ public class BasicNodeRuntime implements MessageDispatcher {
   private final Timer timer = new Timer();
   // the operations to be logged
   private final Set<String> loggedOperations = new HashSet<>();
+  // The NodeRuntimeSkill instance which is used to send and receive messages on behalf of this node runtime
+  private AbstractSkill nodeRuntimeSkill;
 
   /**
    * Constructs a new BasicNodeRuntime instance.
@@ -211,6 +213,29 @@ public class BasicNodeRuntime implements MessageDispatcher {
   @Override
   public void dispatchMessage(final Message message) {
     throw new TexaiException("subclasses must implement this method");
+  }
+
+  /**
+   * Sets the NodeRuntimeSkill instance which is used to send and receive
+   * messages on behalf of this node runtime.
+   *
+   * @param nodeRuntimeSkill the NodeRuntimeSkill instance
+   */
+  public void setNodeRuntimeSkill(AbstractSkill nodeRuntimeSkill) {
+    //Preconditions
+    assert nodeRuntimeSkill != null : "nodeRuntimeSkill must not be null";
+
+    this.nodeRuntimeSkill = nodeRuntimeSkill;
+  }
+
+  /**
+   * Returns the NodeRuntimeSkill instance which is used to send and receive
+   * messages on behalf of this node runtime.
+   * 
+   * @return the NodeRuntimeSkill instance
+   */
+  public AbstractSkill getNodeRuntimeSkill() {
+    return nodeRuntimeSkill;
   }
 
 }

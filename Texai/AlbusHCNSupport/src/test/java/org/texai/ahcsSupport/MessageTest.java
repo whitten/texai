@@ -164,7 +164,7 @@ public class MessageTest {
             parameterDictionary,
             "1.0.0");
 
-    assertFalse(instance.isBetweenContainers());
+    assertTrue(instance.isBetweenContainers());
 
     final String senderQualifiedName2 = "container2.agent1.role1";
     Message instance2 = new Message(
@@ -179,7 +179,7 @@ public class MessageTest {
             operation,
             parameterDictionary,
             "1.0.0");
-    assertTrue(instance2.isBetweenContainers());
+    assertFalse(instance2.isBetweenContainers());
 }
 
   /**

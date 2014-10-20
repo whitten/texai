@@ -82,7 +82,7 @@ public class NodeAccessTest {
                     nodeRuntime);
     nodesInitializer.process(
             "data/nodes-test.xml", // nodesPath
-            "FFUIgFTZZIDjHYj2GOSFN1xsOmk8gMQZxIEP8V3/CawryXQpGXfoawHHCuTKEEHpS1QTP+6apKghVjbnfen6dg=="); // nodesFileHashString
+            "80da14JIcHPLP+WrsN6zmnnQej6SIEojd80Ai9mXuRfFj2O2nKhPx9q9yqLrUl0bThUg8kHcktXQ0Q4Do9z9gA=="); // nodesFileHashString
   }
 
   @AfterClass
