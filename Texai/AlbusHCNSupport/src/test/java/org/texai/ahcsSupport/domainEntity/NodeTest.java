@@ -64,9 +64,6 @@ public class NodeTest {
     DistributedRepositoryManager.addTestRepositoryPath(
             "Nodes",
             true); // isRepositoryDirectoryCleaned
-    DistributedRepositoryManager.addTestRepositoryPath(
-            "NodeRoleTypes",
-            true); // isRepositoryDirectoryCleaned
   }
 
   @AfterClass
@@ -99,6 +96,15 @@ public class NodeTest {
   }
 
   /**
+   * Test of extractAgentName method, of class Node.
+   */
+  @Test
+  public void testExtractAgentName() {
+    LOGGER.info("extractAgentName");
+    assertEquals("agent", Node.extractAgentName("container.agent.role"));
+  }
+
+  /**
    * Test of toString method, of class Node.
    */
   @Test
@@ -106,7 +112,7 @@ public class NodeTest {
     LOGGER.info("toString");
     Node instance = makeTestNode();
     String result = instance.toString();
-    assertEquals("TestNode", result);
+    assertEquals("TestContainer.TestAgent", result);
   }
 
   /**
@@ -157,7 +163,17 @@ public class NodeTest {
   public void testGetName() {
     LOGGER.info("getName");
     Node instance = makeTestNode();
-    assertEquals("TestNode", instance.getName());
+    assertEquals("TestContainer.TestAgent", instance.getName());
+  }
+
+  /**
+   * Test of extractAgentName method, of class Node.
+   */
+  @Test
+  public void testExtractAgentName2() {
+    LOGGER.info("extractAgentName");
+    Node instance = makeTestNode();
+    assertEquals("TestAgent", instance.extractAgentName());
   }
 
   /**
@@ -178,9 +194,9 @@ public class NodeTest {
     LOGGER.info("compareTo");
     Node instance = makeTestNode();
     Node instance2 = makeTestNode2();
-    assertEquals(-1, instance.compareTo(instance2));
-    assertEquals(0, instance.compareTo(instance));
-    assertEquals(1, instance2.compareTo(instance));
+    assertTrue(instance.compareTo(instance2) < 0);
+    assertTrue(instance.compareTo(instance) == 0);
+    assertTrue(instance2.compareTo(instance) > 0);
   }
 
   /**
@@ -190,9 +206,9 @@ public class NodeTest {
   public void testHashCode() {
     LOGGER.info("hashCode");
     Node instance = makeTestNode();
-    assertEquals(-1082308397, instance.hashCode());
+    assertEquals(-1896275661, instance.hashCode());
     Node instance2 = makeTestNode2();
-    assertEquals(808001501, instance2.hashCode());
+    assertEquals(-536158921, instance2.hashCode());
   }
 
   /**
@@ -201,7 +217,7 @@ public class NodeTest {
    * @return a test node
    */
   public static Node makeTestNode() {
-    final String name = "TestNode";
+    final String name = "TestContainer.TestAgent";
     final String missionDescription = "a test node";
     final Set<Role> roles = new HashSet<>();
     Role testRole = makeTestRole();
@@ -221,8 +237,8 @@ public class NodeTest {
    * @return a test node
    */
   public static Node makeTestNode2() {
-    final String name = "TestNode2";
-    final String missionDescription = "a test node";
+    final String name = "TestContainer.XestAgent";
+    final String missionDescription = "a 2nd test node";
     final Set<Role> roles = new HashSet<>();
     Role testRole = makeTestRole();
     roles.add(testRole);

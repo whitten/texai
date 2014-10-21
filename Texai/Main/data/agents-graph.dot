@@ -1,0 +1,115 @@
+digraph "agents-graph" {
+  ratio = "auto" ;
+  mincross = 2.0 ;
+subgraph cluster_agents {
+  label = "nodes"
+  NContainerGovernanceAgent [
+    shape = box
+    label = "ContainerGovernanceAgent" ];
+  NContainerHeartbeatAgent [
+    shape = box
+    label = "ContainerHeartbeatAgent" ];
+  NContainerOperationAgent [
+    shape = box
+    label = "ContainerOperationAgent" ];
+  NNetworkOperationAgent [
+    shape = box
+    label = "NetworkOperationAgent" ];
+  NTopLevelGovernanceAgent [
+    shape = box
+    label = "TopLevelGovernanceAgent" ];
+  NTopLevelHeartbeatAgent [
+    shape = box
+    label = "TopLevelHeartbeatAgent" ];
+  NTopmostFriendshipAgent [
+    shape = box
+    label = "TopmostFriendshipAgent" ];
+  NUniversalRolesAgent [
+    shape = box
+    label = "UniversalRolesAgent" ];
+  NXTCBlockchainArchiveAgent [
+    shape = box
+    label = "XTCBlockchainArchiveAgent" ];
+  NXTCClientGatewayAgent [
+    shape = box
+    label = "XTCClientGatewayAgent" ];
+  NXTCContainerAuditAgent [
+    shape = box
+    label = "XTCContainerAuditAgent" ];
+  NXTCContainerCertificateAuthorityAgent [
+    shape = box
+    label = "XTCContainerCertificateAuthorityAgent" ];
+  NXTCContainerEpisodicMemoryAgent [
+    shape = box
+    label = "XTCContainerEpisodicMemoryAgent" ];
+  NXTCContainerLogControlAgent [
+    shape = box
+    label = "XTCContainerLogControlAgent" ];
+  NXTCContainerTorrentAgent [
+    shape = box
+    label = "XTCContainerTorrentAgent" ];
+  NXTCFinancialAccountingAndControlAgent [
+    shape = box
+    label = "XTCFinancialAccountingAndControlAgent" ];
+  NXTCMintAgent [
+    shape = box
+    label = "XTCMintAgent" ];
+  NXTCNetworkConfigurationAgent [
+    shape = box
+    label = "XTCNetworkConfigurationAgent" ];
+  NXTCNetworkEpisodicMemoryAgent [
+    shape = box
+    label = "XTCNetworkEpisodicMemoryAgent" ];
+  NXTCNetworkLogControlAgent [
+    shape = box
+    label = "XTCNetworkLogControlAgent" ];
+  NXTCNetworkOperationAgent [
+    shape = box
+    label = "XTCNetworkOperationAgent" ];
+  NXTCNetworkSeedAgent [
+    shape = box
+    label = "XTCNetworkSeedAgent" ];
+  NXTCNetworkTorrentAgent [
+    shape = box
+    label = "XTCNetworkTorrentAgent" ];
+  NXTCOperationAgent [
+    shape = box
+    label = "XTCOperationAgent" ];
+  NXTCPrimaryAuditAgent [
+    shape = box
+    label = "XTCPrimaryAuditAgent" ];
+  NXTCRecoveryAgent [
+    shape = box
+    label = "XTCRecoveryAgent" ];
+  NXTCRewardAllocationAgent [
+    shape = box
+    label = "XTCRewardAllocationAgent" ];
+  }  NNetworkOperationAgent -> NXTCNetworkOperationAgent;
+  NTopmostFriendshipAgent -> NTopLevelGovernanceAgent;
+  NTopmostFriendshipAgent -> NTopLevelHeartbeatAgent;
+  NXTCNetworkLogControlAgent -> NXTCContainerLogControlAgent;
+  NXTCNetworkOperationAgent -> NXTCRewardAllocationAgent;
+  NXTCNetworkOperationAgent -> NXTCNetworkConfigurationAgent;
+  NXTCNetworkOperationAgent -> NXTCFinancialAccountingAndControlAgent;
+  NXTCNetworkOperationAgent -> NXTCRecoveryAgent;
+  NXTCNetworkOperationAgent -> NXTCContainerAuditAgent;
+  NXTCNetworkOperationAgent -> NXTCOperationAgent;
+  NXTCNetworkTorrentAgent -> NXTCContainerTorrentAgent;
+  NTopLevelHeartbeatAgent -> NContainerHeartbeatAgent;
+  NXTCNetworkEpisodicMemoryAgent -> NXTCContainerEpisodicMemoryAgent;
+  NTopmostFriendshipAgent -> NNetworkOperationAgent;
+  NContainerHeartbeatAgent -> NUniversalRolesAgent;
+  NXTCNetworkOperationAgent -> NXTCClientGatewayAgent;
+  NXTCNetworkOperationAgent -> NXTCPrimaryAuditAgent;
+  NXTCNetworkOperationAgent -> NXTCBlockchainArchiveAgent;
+  NNetworkOperationAgent -> NContainerOperationAgent;
+  NXTCNetworkOperationAgent -> NXTCNetworkEpisodicMemoryAgent;
+  NXTCNetworkOperationAgent -> NXTCMintAgent;
+  NXTCNetworkOperationAgent -> NXTCNetworkLogControlAgent;
+  NTopLevelGovernanceAgent -> NContainerGovernanceAgent;
+  NXTCNetworkOperationAgent -> NXTCNetworkTorrentAgent;
+  NContainerGovernanceAgent -> NUniversalRolesAgent;
+  NXTCNetworkOperationAgent -> NXTCNetworkSeedAgent;
+  NXTCNetworkOperationAgent -> NXTCContainerCertificateAuthorityAgent;
+
+}

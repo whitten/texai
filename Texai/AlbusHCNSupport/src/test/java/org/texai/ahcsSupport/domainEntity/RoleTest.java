@@ -102,10 +102,10 @@ public class RoleTest {
     LOGGER.info("getNode");
     Role instance = makeTestRole();
     assertNotNull(instance.getNode());
-    assertEquals("TestNode", instance.getNode().toString());
+    assertEquals("TestContainer.TestAgent", instance.getNode().toString());
     rdfEntityManager.persist(instance);
     Role loadedInstance = rdfEntityManager.find(Role.class, instance.getId());
-    assertEquals("TestNode", loadedInstance.getNode().toString());
+    assertEquals("TestContainer.TestAgent", loadedInstance.getNode().toString());
   }
 
   /**

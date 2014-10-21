@@ -19,10 +19,12 @@
 package org.texai.ahcsSupport;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
@@ -34,6 +36,7 @@ import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -101,8 +104,8 @@ public final class NodesInitializer {
   /**
    * Constructs a new NodeInitializer instance.
    *
-   * @param isClassExistsTested indicates whether the given skill class is tested for existence in the classpath - false for some unit
-   * tests.
+   * @param isClassExistsTested indicates whether the given skill class is
+   * tested for existence in the classpath - false for some unit tests.
    * @param keyStorePassword the keystore password, which is not persisted
    * @param nodeRuntime the node runtime
    */
@@ -126,7 +129,8 @@ public final class NodesInitializer {
    * Verifies the expected SHA-512 hash of the nodes file.
    *
    * @param nodesPath the nodes XML file path
-   * @param nodesFileHashString the nodes file SHA-512 hash encoded as a base 64 string, used to detect tampering
+   * @param nodesFileHashString the nodes file SHA-512 hash encoded as a base 64
+   * string, used to detect tampering
    */
   private void verifyNodesFileHash(
           final String nodesPath,
@@ -161,7 +165,8 @@ public final class NodesInitializer {
    * Reads the nodes XML file and records the node and role fields.
    *
    * @param nodesPath the nodes XML file path
-   * @param nodesFileHashString the nodes file SHA-512 hash encoded as a base 64 string, used to detect tampering
+   * @param nodesFileHashString the nodes file SHA-512 hash encoded as a base 64
+   * string, used to detect tampering
    */
   public void process(
           final String nodesPath,
@@ -203,6 +208,9 @@ public final class NodesInitializer {
     generateX509CertificatesForRoles();
     persistNodes();
     loadNodesAndInjectDependencies();
+    toGraphViz(
+            "data", // graphPath
+            "agents-graph"); // raphName
 
     try {
       final RepositoryConnection repositoryConnection
@@ -234,8 +242,8 @@ public final class NodesInitializer {
   }
 
   /**
-   * Recursively ascend the tree of prototype nodes, starting with the given prototype node holder, adding its roles to the given target
-   * node holder.
+   * Recursively ascend the tree of prototype nodes, starting with the given
+   * prototype node holder, adding its roles to the given target node holder.
    *
    * @param targetNodeFieldsHolder the given target node holder
    * @param prototypeNodeFieldsHolder
@@ -308,7 +316,8 @@ public final class NodesInitializer {
   }
 
   /**
-   * Verifies that the specified child role exists for each declaring parent role.
+   * Verifies that the specified child role exists for each declaring parent
+   * role.
    */
   private void verifyChildRoles() {
     LOGGER.info("verifying child roles ...");
@@ -396,7 +405,7 @@ public final class NodesInitializer {
         try {
           LOGGER.info("    deleting unwanted certificate from the keystore: " + roleFieldsHolder1.qualifiedName);
           keyStore.deleteEntry(roleFieldsHolder1.qualifiedName); // alias
-        } catch (Exception ex) {
+        } catch (KeyStoreException ex) {
           throw new TexaiException(ex);
         }
       }
@@ -493,6 +502,143 @@ public final class NodesInitializer {
   }
 
   /**
+   * Generates a GraphViz input file that depicts an agent graph.
+   *
+   * @param graphPath the graph directory
+   * @param graphName the output graph name
+   */
+  public void toGraphViz(
+          final String graphPath,
+          final String graphName) {
+    //Preconditions
+    assert graphPath != null : "graphPath must not be null";
+    assert !graphPath.isEmpty() : "graphPath must not be empty";
+    assert graphName != null : "graphName must not be null";
+    assert !graphName.isEmpty() : "graphName must not be empty";
+    assert !graphName.contains(" ") : "graphName must not contain whitespace";
+
+    final StringBuilder stringBuilder = new StringBuilder();
+    final String graphDataPath = graphPath + "/" + graphName + ".dot";
+    final String keyDataPath = graphPath + "/" + graphName + "-key.txt";
+    BufferedWriter graphBufferedWriter = null;
+    BufferedWriter keyBufferedWriter = null;
+    try {
+      LOGGER.info("graphDataPath: " + graphDataPath);
+      graphBufferedWriter = new BufferedWriter(new FileWriter(graphDataPath));
+      keyBufferedWriter = new BufferedWriter(new FileWriter(keyDataPath));
+      graphBufferedWriter.append("digraph \"");
+      graphBufferedWriter.append(graphName);
+      graphBufferedWriter.append("\" {\n");
+      graphBufferedWriter.append("  ratio = \"auto\" ;\n");
+      graphBufferedWriter.append("  mincross = 2.0 ;\n");
+
+      // see http://www.graphviz.org/doc/info/colors.html
+      graphNodes(
+              graphBufferedWriter,
+              keyBufferedWriter);
+
+      graphBufferedWriter.append("}");
+      graphBufferedWriter.close();
+      keyBufferedWriter.close();
+    } catch (final IOException ex) {
+      try {
+        if (graphBufferedWriter != null) {
+          graphBufferedWriter.close();
+        }
+
+        if (keyBufferedWriter != null) {
+          keyBufferedWriter.close();
+        }
+        throw new TexaiException(ex);
+      } catch (final IOException ex1) {
+        throw new TexaiException(ex1);    // NOPMD
+      }
+    }
+  }
+
+  /**
+   * Graphs the agents by major role parent-child relationships.
+   *
+   * @param graphBufferedWriter the graph buffered writer
+   * @param keyBufferedWriter the graph key buffered writer
+   * @throws IOException if an input/output exception occurs
+   */
+  private void graphNodes(
+          final BufferedWriter graphBufferedWriter,
+          final BufferedWriter keyBufferedWriter) {
+    //Preconditions
+    assert graphBufferedWriter != null : "graphBufferedWriter must not be null";
+    assert keyBufferedWriter != null : "keyBufferedWriter must not be null";
+
+    try {
+      graphBufferedWriter.append("subgraph cluster_agents");
+      graphBufferedWriter.append(" {\n");
+      graphBufferedWriter.append("  label = \"nodes\"\n");
+
+      // emit a graph node for each agent node.
+      nodeAccess.getNodes().stream().sorted().forEach(node -> {
+        final String fillColor = "cornflowerblue";
+        final String nodeLabel = node.extractAgentName();
+        final String shape = "    shape = box";
+
+        try {
+          // describe the node
+          keyBufferedWriter.append(nodeLabel);
+          keyBufferedWriter.append("\n  ");
+          keyBufferedWriter.append(node.getMissionDescription());
+          keyBufferedWriter.append("\n\n");
+
+          // graph the node
+          graphBufferedWriter.append("  ");
+          graphBufferedWriter.append("N");
+          graphBufferedWriter.append(nodeLabel);
+          graphBufferedWriter.append(" [\n");
+          graphBufferedWriter.append(shape);
+//          graphBufferedWriter.append("\n    style = filled\n    fillcolor = ");
+//          graphBufferedWriter.append(fillColor);
+          graphBufferedWriter.append("\n    label = \"");
+          graphBufferedWriter.append(nodeLabel);
+          graphBufferedWriter.append("\" ];\n");
+        } catch (IOException ex) {
+          throw new TexaiException(ex);
+        }
+      });
+      graphBufferedWriter.append("  }");
+      
+      // emit a graph edge between agents having connecting parent and child roles
+      // the dictionary of graphed parent-child edges: parent node --> child node
+      final Set<String> parentChilddEdges = new HashSet<>();
+      nodeAccess.getNodes().stream().sorted().forEach(node -> {
+        node.getRoles().stream().forEach(role -> {
+          role.getChildQualifiedNames().stream().forEach(childQualifiedName -> {
+            final String childAgentName = Node.extractAgentName(childQualifiedName);
+            final StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("  ");
+            stringBuilder.append("N");
+            stringBuilder.append(node.extractAgentName());
+            stringBuilder.append(" -> ");
+            stringBuilder.append("N");
+            stringBuilder.append(childAgentName);
+            stringBuilder.append(";\n");
+            parentChilddEdges.add(stringBuilder.toString());
+          });
+        });
+      });
+      parentChilddEdges.stream().forEach(string -> {
+        // link the node to its children
+        try {
+          graphBufferedWriter.append(string);
+        } catch (IOException ex) {
+          throw new TexaiException(ex);
+        }
+      });
+      graphBufferedWriter.append("\n");
+    } catch (IOException ex) {
+      throw new TexaiException(ex);
+    }
+  }
+
+  /**
    * Contains the fields required to construct a node instance.
    */
   class NodeFieldsHolder implements Comparable<NodeFieldsHolder> {
@@ -511,7 +657,8 @@ public final class NodesInitializer {
     final Set<StateValueBinding> stateValueBindings = new ArraySet<>();
 
     /**
-     * Compares the given node field holder with this one. Collates by node qualifiedName.
+     * Compares the given node field holder with this one. Collates by node
+     * qualifiedName.
      *
      * @param other the given node field holder
      *
@@ -575,7 +722,8 @@ public final class NodesInitializer {
     X509SecurityInfo x509SecurityInfo;
 
     /**
-     * Compares the given role field holder with this one. Collates by qualified role name.
+     * Compares the given role field holder with this one. Collates by qualified
+     * role name.
      *
      * @param other the given role field holder
      *
