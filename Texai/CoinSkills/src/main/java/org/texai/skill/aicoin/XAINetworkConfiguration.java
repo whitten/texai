@@ -1,4 +1,4 @@
-package org.texai.skill.texaicoin;
+package org.texai.skill.aicoin;
 
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
@@ -28,15 +28,15 @@ import org.texai.ahcsSupport.Message;
  * <http://www.gnu.org/licenses/>.
  */
 @ThreadSafe
-public final class XTCNetworkConfiguration extends AbstractSkill {
+public final class XAINetworkConfiguration extends AbstractSkill {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(XTCNetworkConfiguration.class);
+  private static final Logger LOGGER = Logger.getLogger(XAINetworkConfiguration.class);
 
   /**
    * Constructs a new XTCNetworkConfiguration instance.
    */
-  public XTCNetworkConfiguration() {
+  public XAINetworkConfiguration() {
   }
 
   /**

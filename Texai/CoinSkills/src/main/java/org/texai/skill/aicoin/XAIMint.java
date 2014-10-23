@@ -1,4 +1,4 @@
-package org.texai.skill.texaicoin;
+package org.texai.skill.aicoin;
 
 import java.io.IOException;
 import java.util.Timer;
@@ -31,17 +31,17 @@ import org.texai.util.TexaiException;
  * You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 @ThreadSafe
-public final class XTCMint extends AbstractSkill {
+public final class XAIMint extends AbstractSkill {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(XTCMint.class);
+  private static final Logger LOGGER = Logger.getLogger(XAIMint.class);
   // the timer
   private final Timer mintTimer;
 
   /**
    * Constructs a new XTCMint instance.
    */
-  public XTCMint() {
+  public XAIMint() {
     mintTimer = new Timer(
             "mint timer", // name
             true); // isDaemon

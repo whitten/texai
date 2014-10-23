@@ -19,63 +19,63 @@ TopLevelHeartbeatAgent
 TopmostFriendshipAgent
   Coordinates the top level agents to ensure friendly behavior.
 
-XTCBlockchainArchiveAgent
+XAIBlockchainArchiveAgent
   Archives the TexaiCoin blockchain and pending transactions.
 
-XTCClientGatewayAgent
+XAIClientGatewayAgent
   Provides a wallet and processor client gateway for the TexaiCoin network.
 
-XTCContainerAuditAgent
+XAIContainerAuditAgent
   Provides a container audit agent for the TexaiCoin network.
 
-XTCContainerCertificateAuthorityAgent
+XAIContainerCertificateAuthorityAgent
   Provides self-signed X.509 certificates for roles in a particular container in the TexaiCoin
       network.
 
-XTCContainerEpisodicMemoryAgent
+XAIContainerEpisodicMemoryAgent
   Provides episodic memory for agents in a particular container in the TexaiCoin network.
 
-XTCContainerLogControlAgent
+XAIContainerLogControlAgent
   Coordinates Java logging for agents in the TexaiCoin network.
 
-XTCContainerTorrentAgent
+XAIContainerTorrentAgent
   Provides bittorrent file transfers for agents in a particular container in the TexaiCoin network.
 
-XTCFinancialAccountingAndControlAgent
+XAIFinancialAccountingAndControlAgent
   Provides financial accounting and control for the TexaiCoin network.
 
-XTCMintAgent
+XAIMintAgent
   Provides a mint the TexaiCoin network.
 
-XTCNetworkConfigurationAgent
+XAINetworkConfigurationAgent
   Provides network configuration the TexaiCoin network. Maintains the assignment of
       nomadic agents to particular containers.
 
-XTCNetworkEpisodicMemoryAgent
+XAINetworkEpisodicMemoryAgent
   Coordinates episodic memory for agents in the TexaiCoin network.
 
-XTCNetworkLogControlAgent
+XAINetworkLogControlAgent
   Coordinates Java logging for agents in the TexaiCoin network.
 
-XTCNetworkOperationAgent
+XAINetworkOperationAgent
   Manages the TexaiCoin agent network. Interacts with human operators.
 
-XTCNetworkSeedAgent
+XAINetworkSeedAgent
   Provides a TexaiCoin network seed for wallet and processor clients. Maintains the mapping of client gateways
       and their respective IP addresses.
 
-XTCNetworkTorrentAgent
+XAINetworkTorrentAgent
   Coordinates bittorrent file transfers for agents in the TexaiCoin network.
 
-XTCOperationAgent
+XAIOperationAgent
   Manages a bitcoind instance.
 
-XTCPrimaryAuditAgent
+XAIPrimaryAuditAgent
   Provides the primary audit agent for the TexaiCoin network.
 
-XTCRecoveryAgent
+XAIRecoveryAgent
   Provides fault recovery for the TexaiCoin network.
 
-XTCRewardAllocationAgent
+XAIRewardAllocationAgent
   Allocates the rewards resulting from minting new blocks for the TexaiCoin network.
 

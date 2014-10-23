@@ -1,4 +1,26 @@
-package org.texai.skill.texaicoin;
+/*
+ * XAINetworkOperation.java
+ *
+ * Created on Sep 18, 2014, 8:10:02 AM
+ *
+ * Description: Manages the network, the containers, and the TexaiCoin agents within the containers. Interacts with human operators.
+ *
+ * Copyright (C) 2014 Stephen L. Reed
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.texai.skill.aicoin;
 
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
@@ -7,36 +29,20 @@ import org.texai.ahcsSupport.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 
 /**
- * Created on Aug 29, 2014, 6:48:25 PM.
- *
- * Description: Provides a wallet and processor client gateway for the TexaiCoin network.
- *
- * Copyright (C) Aug 29, 2014, Stephen L. Reed, Texai.org.
+ * Manages the network, the containers, and the TexaiCoin agents within the containers. Interacts with human operators.
  *
  * @author reed
- *
- * Copyright (C) 2014 Texai
- *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
- * version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with this program. If not, see
- * <http://www.gnu.org/licenses/>.
  */
 @ThreadSafe
-public final class XTCClientGateway extends AbstractSkill {
+public final class XAINetworkOperation extends AbstractSkill {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(XTCClientGateway.class);
+  private static final Logger LOGGER = Logger.getLogger(XAIBlockchainArchive.class);
 
   /**
-   * Constructs a new XTCClientGateway instance.
+   * Constructs a new XTCNetworkOperation instance.
    */
-  public XTCClientGateway() {
+  public XAINetworkOperation() {
   }
 
   /**

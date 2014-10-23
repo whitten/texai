@@ -1,4 +1,4 @@
-package org.texai.skill.texaicoin.support;
+package org.texai.skill.aicoin.support;
 
 import com.google.bitcoin.core.Block;
 import com.google.bitcoin.core.FilteredBlock;
@@ -39,14 +39,14 @@ import org.texai.util.TexaiException;
  * You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 @NotThreadSafe
-public class XTCSlavedBitcoindAdapter implements PeerEventListener {
+public class XAISlavedBitcoindAdapter implements PeerEventListener {
 
   // the logger
-  public static final Logger LOGGER = Logger.getLogger(XTCSlavedBitcoindAdapter.class);
+  public static final Logger LOGGER = Logger.getLogger(XAISlavedBitcoindAdapter.class);
   // the bitcoind slave
   private Peer slavePeer;
   // the bitcoin message receiver, which is the skill that handles outbound bitcoin messages from the slave peer
-  private final XTCBitcoinMessageReceiver bitcoinMessageReceiver;
+  private final XAIBitcoinMessageReceiver bitcoinMessageReceiver;
   // the client connection manager
   private final ClientConnectionManager clientConnectionManager;
   // the version message to use for the bitcoind connection
@@ -72,9 +72,9 @@ public class XTCSlavedBitcoindAdapter implements PeerEventListener {
    * @param bitcoinMessageReceiver the bitcoin message receiver, which is the skill that handles outbound bitcoin messages from the
    * slave peer
    */
-  public XTCSlavedBitcoindAdapter(
+  public XAISlavedBitcoindAdapter(
           final NetworkParameters networkParameters,
-          final XTCBitcoinMessageReceiver bitcoinMessageReceiver) {
+          final XAIBitcoinMessageReceiver bitcoinMessageReceiver) {
     // Preconditions
     assert networkParameters != null : "networkParameters must not be null";
     assert bitcoinMessageReceiver != null : "bitcoinMessageReceiver must not be null";

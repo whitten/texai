@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.texai.skill.texaicoin.support;
+package org.texai.skill.aicoin.support;
 
 import com.google.bitcoin.core.Block;
 import com.google.bitcoin.params.TestNet2Params;
@@ -23,7 +23,7 @@ import java.math.BigInteger;
 /**
  * Network parameters for the regression test mode of bitcoind in which all blocks are trivially solvable.
  */
-public class XTCRegTestParams extends TestNet2Params {
+public class XAIRegTestParams extends TestNet2Params {
 
   private static final BigInteger PROOF_OF_WORK_LIMIT = new BigInteger("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16);
   private static final long serialVersionUID = 1L;
@@ -31,7 +31,7 @@ public class XTCRegTestParams extends TestNet2Params {
   /**
    * Constructs a new XTCRegTestParams instance.
    */
-  public XTCRegTestParams() {
+  public XAIRegTestParams() {
     super();
     interval = 10000;
     proofOfWorkLimit = PROOF_OF_WORK_LIMIT;
@@ -48,7 +48,7 @@ public class XTCRegTestParams extends TestNet2Params {
 
   @Override
   public Block getGenesisBlock() {
-    synchronized (XTCRegTestParams.class) {
+    synchronized (XAIRegTestParams.class) {
       if (genesis == null) {
         genesis = super.getGenesisBlock();
         genesis.setNonce(2);
@@ -60,11 +60,11 @@ public class XTCRegTestParams extends TestNet2Params {
     }
   }
 
-  private static XTCRegTestParams instance;
+  private static XAIRegTestParams instance;
 
-  public static synchronized XTCRegTestParams get() {
+  public static synchronized XAIRegTestParams get() {
     if (instance == null) {
-      instance = new XTCRegTestParams();
+      instance = new XAIRegTestParams();
     }
     return instance;
   }

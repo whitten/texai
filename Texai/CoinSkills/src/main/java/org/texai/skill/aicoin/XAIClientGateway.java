@@ -1,4 +1,4 @@
-package org.texai.skill.texaicoin;
+package org.texai.skill.aicoin;
 
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
@@ -7,9 +7,9 @@ import org.texai.ahcsSupport.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 
 /**
- * Created on Aug 29, 2014, 6:46:05 PM.
+ * Created on Aug 29, 2014, 6:48:25 PM.
  *
- * Description: Provides a container audit skill for the TexaiCoin network.
+ * Description: Provides a wallet and processor client gateway for the TexaiCoin network.
  *
  * Copyright (C) Aug 29, 2014, Stephen L. Reed, Texai.org.
  *
@@ -28,15 +28,15 @@ import org.texai.ahcsSupport.Message;
  * <http://www.gnu.org/licenses/>.
  */
 @ThreadSafe
-public final class XTCContainerAudit extends AbstractSkill {
+public final class XAIClientGateway extends AbstractSkill {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(XTCContainerAudit.class);
+  private static final Logger LOGGER = Logger.getLogger(XAIClientGateway.class);
 
   /**
-   * Constructs a new XTCContainerAudit instance.
+   * Constructs a new XTCClientGateway instance.
    */
-  public XTCContainerAudit() {
+  public XAIClientGateway() {
   }
 
   /**

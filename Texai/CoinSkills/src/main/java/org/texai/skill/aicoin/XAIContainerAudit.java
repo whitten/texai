@@ -1,4 +1,4 @@
-package org.texai.skill.texaicoin;
+package org.texai.skill.aicoin;
 
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
@@ -7,11 +7,9 @@ import org.texai.ahcsSupport.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 
 /**
- * Created on Aug 29, 2014, 6:45:48 PM.
+ * Created on Aug 29, 2014, 6:46:05 PM.
  *
- * Description: The primary audit agent is a nomadic singleton having the responsibility of passive and active auditor.
- * It receives reports of inconsistencies from any other node, e.g. some disagreement with consensus, and performs an
- * investigation.
+ * Description: Provides a container audit skill for the TexaiCoin network.
  *
  * Copyright (C) Aug 29, 2014, Stephen L. Reed, Texai.org.
  *
@@ -30,15 +28,15 @@ import org.texai.ahcsSupport.Message;
  * <http://www.gnu.org/licenses/>.
  */
 @ThreadSafe
-public final class XTCPrimaryAudit extends AbstractSkill {
+public final class XAIContainerAudit extends AbstractSkill {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(XTCPrimaryAudit.class);
+  private static final Logger LOGGER = Logger.getLogger(XAIContainerAudit.class);
 
   /**
-   * Constructs a new XTCPrimaryAudit instance.
+   * Constructs a new XTCContainerAudit instance.
    */
-  public XTCPrimaryAudit() {
+  public XAIContainerAudit() {
   }
 
   /**

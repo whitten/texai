@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.texai.skill.texaicoin.support;
+package org.texai.skill.aicoin.support;
 
 import com.google.bitcoin.core.NetworkParameters;
 import com.google.bitcoin.core.Sha256Hash;
@@ -23,14 +23,14 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * Parameters for the main production network on which people trade goods and services.
  */
-public class XTCMainNetParams extends NetworkParameters {
+public class XAIMainNetParams extends NetworkParameters {
 
   private static final long serialVersionUID = 1L;
 
   /**
    * Constructs a new XTCMainNetParams instance.
    */
-  public XTCMainNetParams() {
+  public XAIMainNetParams() {
     super();
     interval = INTERVAL;
     targetTimespan = TARGET_TIMESPAN;
@@ -70,11 +70,11 @@ public class XTCMainNetParams extends NetworkParameters {
     };
   }
 
-  private static XTCMainNetParams instance;
+  private static XAIMainNetParams instance;
 
-  public static synchronized XTCMainNetParams get() {
+  public static synchronized XAIMainNetParams get() {
     if (instance == null) {
-      instance = new XTCMainNetParams();
+      instance = new XAIMainNetParams();
     }
     return instance;
   }

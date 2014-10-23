@@ -1,17 +1,23 @@
-package org.texai.skill.texaicoin;
+package org.texai.skill.aicoin;
 
+import java.io.IOException;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.skill.aicoin.support.XAIBitcoinMessageReceiver;
+import org.texai.util.EnvironmentUtils;
+import org.texai.util.StreamConsumer;
+import org.texai.util.StringUtils;
+import org.texai.util.TexaiException;
 
 /**
- * Created on Aug 29, 2014, 6:44:58 PM.
+ * Created on Aug 30, 2014, 11:31:08 PM.
  *
- * Description: Archives the TexaiCoin blockchain and pending transactions.
+ * Description: Operates a Cooperative Coin C++ instance that runs in a separate process in the same container.
  *
- * Copyright (C) Aug 29, 2014, Stephen L. Reed, Texai.org.
+ * Copyright (C) Aug 30, 2014, Stephen L. Reed, Texai.org.
  *
  * @author reed
  *
@@ -28,15 +34,15 @@ import org.texai.ahcsSupport.Message;
  * <http://www.gnu.org/licenses/>.
  */
 @ThreadSafe
-public final class XTCBlockchainArchive extends AbstractSkill {
+public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessageReceiver {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(XTCBlockchainArchive.class);
+  private static final Logger LOGGER = Logger.getLogger(XAIOperation.class);
 
   /**
-   * Constructs a new XTCBlockchainArchive instance.
+   * Constructs a new XTCOperation instance.
    */
-  public XTCBlockchainArchive() {
+  public XAIOperation() {
   }
 
   /**
@@ -112,6 +118,77 @@ public final class XTCBlockchainArchive extends AbstractSkill {
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
       AHCSConstants.AHCS_READY_TASK,};
+  }
+
+  /**
+   * Starts the bitcoind instance.
+   */
+  private void startBitcoind() {
+    sendCommandToBitcoind("");
+  }
+
+  /**
+   * Shuts down the bitcoind instance.
+   */
+  private void shutdownBitcoind() {
+    sendCommandToBitcoind("");
+  }
+
+  /**
+   * Perform a remote procedure call to the bitcoind instance with the given command string.
+   *
+   * @param command the bitcoind command
+   */
+  private void sendCommandToBitcoind(final String command) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(command) : "message must be a non-empty string";
+    if (!EnvironmentUtils.isLinux()) {
+      throw new TexaiException("must be running on Linux");
+    }
+
+    String[] cmdArray = {
+      "sh",
+      "-c",
+      ""
+    };
+    final StringBuilder stringBuilder = new StringBuilder();
+    stringBuilder.append("bitcoind-cli ");
+    cmdArray[2] = stringBuilder.toString();
+    LOGGER.info("shell cmd: " + cmdArray[2]);
+    try {
+      final Process process = Runtime.getRuntime().exec(cmdArray);
+      final StreamConsumer errorConsumer = new StreamConsumer(process.getErrorStream(), LOGGER);
+      final StreamConsumer outputConsumer = new StreamConsumer(process.getInputStream(), LOGGER);
+      errorConsumer.setName("errorConsumer");
+      errorConsumer.start();
+      outputConsumer.setName("outputConsumer");
+      outputConsumer.start();
+      int exitVal = process.waitFor();
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("exitVal: " + exitVal);
+      }
+
+      process.getInputStream().close();
+      process.getOutputStream().close();
+    } catch (InterruptedException ex) {
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("interrupted");
+      }
+    } catch (final IOException ex) {
+      throw new TexaiException(ex);
+    }
+
+  }
+
+  @Override
+  /**
+   * Receives an outbound bitcoin message from the slave peer.
+   *
+   * @param message the given bitcoin protocol message
+   */
+  public void receiveBitcoinMessageFromSlave(final com.google.bitcoin.core.Message message) {
+    // send the outbound bitcoin message from the slave peer to the Texai network recipient.
+
   }
 
 }

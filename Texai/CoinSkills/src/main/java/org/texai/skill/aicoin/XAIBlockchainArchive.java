@@ -1,4 +1,4 @@
-package org.texai.skill.texaicoin;
+package org.texai.skill.aicoin;
 
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
@@ -7,9 +7,9 @@ import org.texai.ahcsSupport.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 
 /**
- * Created on Aug 29, 2014, 6:45:14 PM.
+ * Created on Aug 29, 2014, 6:44:58 PM.
  *
- * Description: Allocates the current block reward according to system policy.
+ * Description: Archives the TexaiCoin blockchain and pending transactions.
  *
  * Copyright (C) Aug 29, 2014, Stephen L. Reed, Texai.org.
  *
@@ -28,15 +28,15 @@ import org.texai.ahcsSupport.Message;
  * <http://www.gnu.org/licenses/>.
  */
 @ThreadSafe
-public final class XTCRewardAllocation extends AbstractSkill {
+public final class XAIBlockchainArchive extends AbstractSkill {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(XTCRewardAllocation.class);
+  private static final Logger LOGGER = Logger.getLogger(XAIBlockchainArchive.class);
 
   /**
-   * Constructs a new XTCRewardAllocation instance.
+   * Constructs a new XTCBlockchainArchive instance.
    */
-  public XTCRewardAllocation() {
+  public XAIBlockchainArchive() {
   }
 
   /**

@@ -1,4 +1,4 @@
-package org.texai.skill.texaicoin;
+package org.texai.skill.aicoin;
 
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
@@ -27,15 +27,15 @@ import org.texai.ahcsSupport.Message;
  * You should have received a copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-public class XTCFinancialAccountingAndControl extends AbstractSkill {
+public class XAIFinancialAccountingAndControl extends AbstractSkill {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(XTCFinancialAccountingAndControl.class);
+  private static final Logger LOGGER = Logger.getLogger(XAIFinancialAccountingAndControl.class);
 
   /**
    * Constructs a new XTCFinancialAccountingAndControl instance.
    */
-  public XTCFinancialAccountingAndControl() {
+  public XAIFinancialAccountingAndControl() {
   }
 
   /**

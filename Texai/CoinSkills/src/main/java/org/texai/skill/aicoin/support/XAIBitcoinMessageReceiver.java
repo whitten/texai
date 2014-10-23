@@ -1,4 +1,4 @@
-package org.texai.skill.texaicoin.support;
+package org.texai.skill.aicoin.support;
 
 import com.google.bitcoin.core.Message;
 
@@ -20,7 +20,7 @@ import com.google.bitcoin.core.Message;
  *
  * You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-public interface XTCBitcoinMessageReceiver {
+public interface XAIBitcoinMessageReceiver {
 
   /** Receives an outbound bitcoin message from the slave peer.
    *

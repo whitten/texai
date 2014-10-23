@@ -24,139 +24,139 @@ subgraph cluster_agents {
   NTopmostFriendshipAgent [
     shape = box
     label = "TopmostFriendshipAgent" ];
-  NXTCBlockchainArchiveAgent [
+  NXAIBlockchainArchiveAgent [
     shape = box
-    label = "XTCBlockchainArchiveAgent" ];
-  NXTCClientGatewayAgent [
+    label = "XAIBlockchainArchiveAgent" ];
+  NXAIClientGatewayAgent [
     shape = box
-    label = "XTCClientGatewayAgent" ];
-  NXTCContainerAuditAgent [
+    label = "XAIClientGatewayAgent" ];
+  NXAIContainerAuditAgent [
     shape = box
-    label = "XTCContainerAuditAgent" ];
-  NXTCContainerCertificateAuthorityAgent [
+    label = "XAIContainerAuditAgent" ];
+  NXAIContainerCertificateAuthorityAgent [
     shape = box
-    label = "XTCContainerCertificateAuthorityAgent" ];
-  NXTCContainerEpisodicMemoryAgent [
+    label = "XAIContainerCertificateAuthorityAgent" ];
+  NXAIContainerEpisodicMemoryAgent [
     shape = box
-    label = "XTCContainerEpisodicMemoryAgent" ];
-  NXTCContainerLogControlAgent [
+    label = "XAIContainerEpisodicMemoryAgent" ];
+  NXAIContainerLogControlAgent [
     shape = box
-    label = "XTCContainerLogControlAgent" ];
-  NXTCContainerTorrentAgent [
+    label = "XAIContainerLogControlAgent" ];
+  NXAIContainerTorrentAgent [
     shape = box
-    label = "XTCContainerTorrentAgent" ];
-  NXTCFinancialAccountingAndControlAgent [
+    label = "XAIContainerTorrentAgent" ];
+  NXAIFinancialAccountingAndControlAgent [
     shape = box
-    label = "XTCFinancialAccountingAndControlAgent" ];
-  NXTCMintAgent [
+    label = "XAIFinancialAccountingAndControlAgent" ];
+  NXAIMintAgent [
     shape = box
-    label = "XTCMintAgent" ];
-  NXTCNetworkConfigurationAgent [
+    label = "XAIMintAgent" ];
+  NXAINetworkConfigurationAgent [
     shape = box
-    label = "XTCNetworkConfigurationAgent" ];
-  NXTCNetworkEpisodicMemoryAgent [
+    label = "XAINetworkConfigurationAgent" ];
+  NXAINetworkEpisodicMemoryAgent [
     shape = box
-    label = "XTCNetworkEpisodicMemoryAgent" ];
-  NXTCNetworkLogControlAgent [
+    label = "XAINetworkEpisodicMemoryAgent" ];
+  NXAINetworkLogControlAgent [
     shape = box
-    label = "XTCNetworkLogControlAgent" ];
-  NXTCNetworkOperationAgent [
+    label = "XAINetworkLogControlAgent" ];
+  NXAINetworkOperationAgent [
     shape = box
-    label = "XTCNetworkOperationAgent" ];
-  NXTCNetworkSeedAgent [
+    label = "XAINetworkOperationAgent" ];
+  NXAINetworkSeedAgent [
     shape = box
-    label = "XTCNetworkSeedAgent" ];
-  NXTCNetworkTorrentAgent [
+    label = "XAINetworkSeedAgent" ];
+  NXAINetworkTorrentAgent [
     shape = box
-    label = "XTCNetworkTorrentAgent" ];
-  NXTCOperationAgent [
+    label = "XAINetworkTorrentAgent" ];
+  NXAIOperationAgent [
     shape = box
-    label = "XTCOperationAgent" ];
-  NXTCPrimaryAuditAgent [
+    label = "XAIOperationAgent" ];
+  NXAIPrimaryAuditAgent [
     shape = box
-    label = "XTCPrimaryAuditAgent" ];
-  NXTCRecoveryAgent [
+    label = "XAIPrimaryAuditAgent" ];
+  NXAIRecoveryAgent [
     shape = box
-    label = "XTCRecoveryAgent" ];
-  NXTCRewardAllocationAgent [
+    label = "XAIRecoveryAgent" ];
+  NXAIRewardAllocationAgent [
     shape = box
-    label = "XTCRewardAllocationAgent" ];
-  }  NContainerGovernanceAgent -> NXTCNetworkConfigurationAgent;
-  NContainerGovernanceAgent -> NXTCRecoveryAgent;
-  NNetworkOperationAgent -> NXTCNetworkOperationAgent;
-  NContainerGovernanceAgent -> NXTCMintAgent;
-  NContainerHeartbeatAgent -> NXTCNetworkConfigurationAgent;
-  NContainerHeartbeatAgent -> NXTCContainerAuditAgent;
-  NXTCNetworkOperationAgent -> NXTCRewardAllocationAgent;
-  NContainerHeartbeatAgent -> NXTCContainerEpisodicMemoryAgent;
+    label = "XAIRewardAllocationAgent" ];
+  }  NContainerGovernanceAgent -> NXAIPrimaryAuditAgent;
   NContainerGovernanceAgent -> NContainerOperationAgent;
-  NXTCNetworkOperationAgent -> NXTCFinancialAccountingAndControlAgent;
   NContainerHeartbeatAgent -> NTopLevelGovernanceAgent;
-  NXTCNetworkOperationAgent -> NXTCRecoveryAgent;
-  NContainerHeartbeatAgent -> NXTCOperationAgent;
-  NXTCNetworkOperationAgent -> NXTCContainerAuditAgent;
+  NContainerHeartbeatAgent -> NXAIOperationAgent;
   NContainerHeartbeatAgent -> NContainerHeartbeatAgent;
+  NContainerGovernanceAgent -> NXAINetworkLogControlAgent;
   NContainerGovernanceAgent -> NTopmostFriendshipAgent;
-  NContainerHeartbeatAgent -> NXTCContainerCertificateAuthorityAgent;
-  NXTCNetworkOperationAgent -> NXTCOperationAgent;
+  NContainerHeartbeatAgent -> NXAINetworkOperationAgent;
+  NXAINetworkOperationAgent -> NXAIPrimaryAuditAgent;
   NTopLevelHeartbeatAgent -> NContainerHeartbeatAgent;
-  NXTCNetworkEpisodicMemoryAgent -> NXTCContainerEpisodicMemoryAgent;
-  NContainerHeartbeatAgent -> NXTCClientGatewayAgent;
-  NContainerGovernanceAgent -> NXTCContainerLogControlAgent;
-  NContainerGovernanceAgent -> NXTCContainerCertificateAuthorityAgent;
-  NContainerHeartbeatAgent -> NXTCNetworkEpisodicMemoryAgent;
-  NXTCNetworkOperationAgent -> NXTCClientGatewayAgent;
-  NXTCNetworkOperationAgent -> NXTCPrimaryAuditAgent;
+  NContainerGovernanceAgent -> NXAIContainerCertificateAuthorityAgent;
+  NContainerHeartbeatAgent -> NXAINetworkEpisodicMemoryAgent;
+  NContainerGovernanceAgent -> NXAIContainerAuditAgent;
+  NContainerGovernanceAgent -> NXAIBlockchainArchiveAgent;
   NContainerHeartbeatAgent -> NContainerOperationAgent;
+  NContainerHeartbeatAgent -> NXAIContainerCertificateAuthorityAgent;
   NContainerGovernanceAgent -> NTopLevelGovernanceAgent;
-  NContainerGovernanceAgent -> NXTCContainerTorrentAgent;
-  NContainerGovernanceAgent -> NXTCNetworkTorrentAgent;
-  NContainerHeartbeatAgent -> NXTCMintAgent;
-  NContainerGovernanceAgent -> NXTCOperationAgent;
+  NContainerGovernanceAgent -> NXAIContainerLogControlAgent;
+  NXAINetworkOperationAgent -> NXAIContainerCertificateAuthorityAgent;
   NContainerHeartbeatAgent -> NTopLevelHeartbeatAgent;
-  NXTCNetworkOperationAgent -> NXTCBlockchainArchiveAgent;
-  NContainerGovernanceAgent -> NXTCContainerEpisodicMemoryAgent;
+  NContainerGovernanceAgent -> NXAINetworkTorrentAgent;
+  NContainerHeartbeatAgent -> NXAINetworkConfigurationAgent;
   NNetworkOperationAgent -> NContainerOperationAgent;
   NContainerHeartbeatAgent -> NNetworkOperationAgent;
-  NXTCNetworkOperationAgent -> NXTCNetworkEpisodicMemoryAgent;
-  NContainerGovernanceAgent -> NXTCNetworkSeedAgent;
-  NContainerGovernanceAgent -> NXTCNetworkEpisodicMemoryAgent;
-  NContainerHeartbeatAgent -> NXTCBlockchainArchiveAgent;
-  NContainerGovernanceAgent -> NXTCPrimaryAuditAgent;
+  NXAINetworkOperationAgent -> NXAIClientGatewayAgent;
+  NContainerHeartbeatAgent -> NXAIMintAgent;
+  NXAINetworkOperationAgent -> NXAIBlockchainArchiveAgent;
+  NContainerHeartbeatAgent -> NXAIContainerEpisodicMemoryAgent;
+  NContainerHeartbeatAgent -> NXAINetworkLogControlAgent;
+  NContainerGovernanceAgent -> NXAINetworkSeedAgent;
+  NNetworkOperationAgent -> NXAINetworkOperationAgent;
+  NContainerHeartbeatAgent -> NXAIRewardAllocationAgent;
+  NContainerGovernanceAgent -> NXAIRecoveryAgent;
   NTopLevelGovernanceAgent -> NContainerGovernanceAgent;
-  NXTCNetworkOperationAgent -> NXTCNetworkSeedAgent;
+  NContainerHeartbeatAgent -> NXAIContainerLogControlAgent;
   NContainerGovernanceAgent -> NNetworkOperationAgent;
+  NXAINetworkOperationAgent -> NXAINetworkSeedAgent;
   NTopmostFriendshipAgent -> NTopLevelGovernanceAgent;
   NTopmostFriendshipAgent -> NTopLevelHeartbeatAgent;
-  NXTCNetworkLogControlAgent -> NXTCContainerLogControlAgent;
-  NContainerHeartbeatAgent -> NXTCNetworkSeedAgent;
-  NXTCNetworkOperationAgent -> NXTCNetworkConfigurationAgent;
-  NContainerGovernanceAgent -> NXTCClientGatewayAgent;
-  NContainerHeartbeatAgent -> NXTCFinancialAccountingAndControlAgent;
-  NXTCNetworkTorrentAgent -> NXTCContainerTorrentAgent;
-  NContainerGovernanceAgent -> NXTCBlockchainArchiveAgent;
-  NContainerHeartbeatAgent -> NXTCContainerLogControlAgent;
+  NContainerGovernanceAgent -> NXAIMintAgent;
+  NContainerGovernanceAgent -> NXAIClientGatewayAgent;
+  NXAINetworkOperationAgent -> NXAIContainerAuditAgent;
+  NContainerGovernanceAgent -> NXAIContainerTorrentAgent;
+  NContainerGovernanceAgent -> NXAIRewardAllocationAgent;
+  NContainerHeartbeatAgent -> NXAINetworkTorrentAgent;
+  NXAINetworkOperationAgent -> NXAIOperationAgent;
+  NXAINetworkOperationAgent -> NXAIRecoveryAgent;
   NTopmostFriendshipAgent -> NNetworkOperationAgent;
+  NXAINetworkTorrentAgent -> NXAIContainerTorrentAgent;
+  NContainerHeartbeatAgent -> NXAIPrimaryAuditAgent;
   NContainerGovernanceAgent -> NContainerHeartbeatAgent;
-  NContainerHeartbeatAgent -> NXTCRewardAllocationAgent;
-  NContainerHeartbeatAgent -> NXTCContainerTorrentAgent;
-  NContainerHeartbeatAgent -> NXTCNetworkTorrentAgent;
-  NContainerGovernanceAgent -> NXTCRewardAllocationAgent;
-  NContainerHeartbeatAgent -> NXTCPrimaryAuditAgent;
+  NContainerHeartbeatAgent -> NXAINetworkSeedAgent;
+  NXAINetworkOperationAgent -> NXAINetworkConfigurationAgent;
+  NXAINetworkEpisodicMemoryAgent -> NXAIContainerEpisodicMemoryAgent;
+  NContainerHeartbeatAgent -> NXAIFinancialAccountingAndControlAgent;
+  NXAINetworkOperationAgent -> NXAIFinancialAccountingAndControlAgent;
   NContainerGovernanceAgent -> NContainerGovernanceAgent;
   NContainerHeartbeatAgent -> NContainerGovernanceAgent;
-  NContainerGovernanceAgent -> NXTCNetworkOperationAgent;
-  NContainerGovernanceAgent -> NXTCNetworkLogControlAgent;
-  NContainerHeartbeatAgent -> NXTCNetworkLogControlAgent;
-  NContainerGovernanceAgent -> NXTCFinancialAccountingAndControlAgent;
-  NContainerHeartbeatAgent -> NXTCNetworkOperationAgent;
-  NXTCNetworkOperationAgent -> NXTCMintAgent;
-  NContainerHeartbeatAgent -> NXTCRecoveryAgent;
-  NXTCNetworkOperationAgent -> NXTCNetworkLogControlAgent;
-  NXTCNetworkOperationAgent -> NXTCNetworkTorrentAgent;
+  NXAINetworkLogControlAgent -> NXAIContainerLogControlAgent;
+  NContainerGovernanceAgent -> NXAIOperationAgent;
+  NXAINetworkOperationAgent -> NXAINetworkEpisodicMemoryAgent;
+  NContainerHeartbeatAgent -> NXAIRecoveryAgent;
+  NContainerGovernanceAgent -> NXAIFinancialAccountingAndControlAgent;
+  NContainerGovernanceAgent -> NXAINetworkOperationAgent;
+  NContainerGovernanceAgent -> NXAIContainerEpisodicMemoryAgent;
+  NContainerHeartbeatAgent -> NXAIClientGatewayAgent;
+  NContainerGovernanceAgent -> NXAINetworkConfigurationAgent;
+  NContainerHeartbeatAgent -> NXAIBlockchainArchiveAgent;
+  NContainerHeartbeatAgent -> NXAIContainerTorrentAgent;
+  NXAINetworkOperationAgent -> NXAINetworkTorrentAgent;
+  NXAINetworkOperationAgent -> NXAIMintAgent;
+  NContainerHeartbeatAgent -> NXAIContainerAuditAgent;
+  NXAINetworkOperationAgent -> NXAIRewardAllocationAgent;
   NContainerGovernanceAgent -> NTopLevelHeartbeatAgent;
+  NContainerGovernanceAgent -> NXAINetworkEpisodicMemoryAgent;
   NContainerHeartbeatAgent -> NTopmostFriendshipAgent;
-  NContainerGovernanceAgent -> NXTCContainerAuditAgent;
-  NXTCNetworkOperationAgent -> NXTCContainerCertificateAuthorityAgent;
+  NXAINetworkOperationAgent -> NXAINetworkLogControlAgent;
 
 }
