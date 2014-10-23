@@ -100,6 +100,8 @@ public final class NodesInitializer {
   final BasicNodeRuntime nodeRuntime;
   // the loaded nodes
   final List<Node> nodes = new ArrayList<>();
+  // the count of </node> tags
+  int nbrNodeTags = 0;
 
   /**
    * Constructs a new NodeInitializer instance.
@@ -117,7 +119,7 @@ public final class NodesInitializer {
     assert keyStorePassword != null : "keyStorePassword must not be null";
     assert keyStorePassword.length > 0 : "keyStorePassword must not be empty";
     assert nodeRuntime != null : "nodeRuntime must not be null";
-
+    
     this.isClassExistsTested = isClassExistsTested;
     this.keyStorePassword = keyStorePassword;
     this.nodeRuntime = nodeRuntime;
@@ -138,7 +140,7 @@ public final class NodesInitializer {
     //Preconditions
     assert StringUtils.isNonEmptyString(nodesPath) : "nodesPath must not be empty";
     assert StringUtils.isNonEmptyString(nodesFileHashString) : "nodesFileHashString must not be empty";
-
+    
     final byte[] hashBytes;
     try {
       X509Utils.addBouncyCastleSecurityProvider();
@@ -158,7 +160,7 @@ public final class NodesInitializer {
     } catch (NoSuchAlgorithmException | NoSuchProviderException | IOException ex) {
       throw new TexaiException(ex);
     }
-
+    
   }
 
   /**
@@ -177,9 +179,9 @@ public final class NodesInitializer {
     if (!X509Utils.isJCEUnlimitedStrengthPolicy()) {
       throw new TexaiException("JCE Unlimited Strength Policy files are not installed");
     }
-
+    
     verifyNodesFileHash(nodesPath, nodesFileHashString);
-
+    
     CacheInitializer.initializeCaches();
     DistributedRepositoryManager.clearNamedRepository("Nodes");
     final BufferedInputStream bufferedInputStream;
@@ -195,13 +197,16 @@ public final class NodesInitializer {
       final SAXParser saxParser = saxParserFactory.newSAXParser();
       final SAXHandler myHandler = new SAXHandler();
       saxParser.parse(bufferedInputStream, myHandler);
-
+      
     } catch (final ParserConfigurationException | SAXException | IOException ex) {
       LOGGER.fatal(StringUtils.getStackTraceAsString(ex));
       throw new TexaiException(ex);
     }
-
+    
+    assert nbrNodeTags == nodeFieldsHolderDictionary.size();
+    displayNodes();
     populateNodeRolesFromPrototytpeNodes();
+    removeAbstractAgents();
     displayNodes();
     verifyParentRoles();
     verifyChildRoles();
@@ -254,11 +259,11 @@ public final class NodesInitializer {
     //Preconditions
     assert targetNodeFieldsHolder != null : "targetNodeFieldsHolder must not be null";
     assert prototypeNodeFieldsHolder != null : "prototypeNodeFieldsHolder must not be null";
-
+    
     LOGGER.info("");
     LOGGER.info("    prototypeNodeFieldsHolder: " + prototypeNodeFieldsHolder);
     prototypeNodeFieldsHolder.roleFieldsHolders.stream().forEach(new Consumer<RoleFieldsHolder>() {
-
+      
       @Override
       public void accept(final RoleFieldsHolder roleFieldsHolder1) {
         final RoleFieldsHolder clonedRoleFieldsHolder = new RoleFieldsHolder();
@@ -272,14 +277,14 @@ public final class NodesInitializer {
         clonedRoleFieldsHolder.qualifiedName = targetNodeFieldsHolder.name + "." + nameParts[2];
         LOGGER.info("    cloned role: " + clonedRoleFieldsHolder.qualifiedName);
         clonedRoleFieldsHolder.description = roleFieldsHolder1.description;
-        clonedRoleFieldsHolder.isAbstract = roleFieldsHolder1.isAbstract;
         clonedRoleFieldsHolder.parentQualifiedName = roleFieldsHolder1.parentQualifiedName;
         clonedRoleFieldsHolder.skillClasses.addAll(roleFieldsHolder1.skillClasses);
         clonedRoleFieldsHolder.variableNames.addAll(roleFieldsHolder1.variableNames);
         targetNodeFieldsHolder.roleFieldsHolders.add(clonedRoleFieldsHolder);
+        roleFieldsHolderDictionary.put(clonedRoleFieldsHolder.qualifiedName, clonedRoleFieldsHolder);
       }
     });
-
+    
     prototypeNodeFieldsHolder.prototypeNodeNames.stream().forEach(prototypeNodeName -> {
       final NodeFieldsHolder prototypeNodeFieldsHolder1 = nodeFieldsHolderDictionary.get(prototypeNodeName);
       if (prototypeNodeFieldsHolder1 == null) {
@@ -291,6 +296,29 @@ public final class NodesInitializer {
       if (targetNodeFieldsHolder.roleFieldsHolders.isEmpty()) {
         throw new TexaiException("node " + targetNodeFieldsHolder.name + " has no roles");
       }
+    });
+  }
+  
+  private void removeAbstractAgents() {
+    final Set<String> nodeNamesToRemove = new HashSet<>();
+    nodeFieldsHolderDictionary.entrySet().stream().forEach(entry -> {
+      if (entry.getValue().isAbstract) {
+        nodeNamesToRemove.add(entry.getKey());
+      }
+    });
+    nodeNamesToRemove.stream().sorted().forEach(key -> {
+      final NodeFieldsHolder nodeFieldsHolder1 = nodeFieldsHolderDictionary.get(key);
+      LOGGER.info("removing abstract agent: " + nodeFieldsHolder1);
+      nodeFieldsHolderDictionary.remove(key);
+      LOGGER.info("removing abstract agent's roles...");
+      final Set<String> roleNamesToRemove = new HashSet<>();
+      nodeFieldsHolder1.roleFieldsHolders.stream().forEach(roleFieldsHolder1 -> {
+        roleNamesToRemove.add(roleFieldsHolder1.qualifiedName);
+      });
+      roleNamesToRemove.stream().forEach(roleName -> {
+        LOGGER.info("  removed " + roleFieldsHolderDictionary.get(roleName));
+        roleFieldsHolderDictionary.remove(roleName);
+      });
     });
   }
 
@@ -307,7 +335,7 @@ public final class NodesInitializer {
           throw new TexaiException("cannot find parent role: " + parentQualifiedName + "\n for role "
                   + roleFieldsHolder1.qualifiedName);
         }
-        LOGGER.info("  verified parent role for " + roleFieldsHolder1.qualifiedName);
+        LOGGER.info("  " + roleFieldsHolder1.qualifiedName + " has parent " + parentQualifiedName);
         parentRoleFieldsHolder.childQualifiedNames.add(roleFieldsHolder1.qualifiedName);
       } else {
         LOGGER.info("  no parent role for " + roleFieldsHolder1.qualifiedName);
@@ -332,6 +360,8 @@ public final class NodesInitializer {
           throw new TexaiException(" child role mismatch, parent: " + roleFieldsHolder1.qualifiedName
                   + ", child: " + childQualifiedName);
         }
+        LOGGER.info("  " + roleFieldsHolder1.qualifiedName + " has child " + childQualifiedName);
+
       });
     });
   }
@@ -356,7 +386,7 @@ public final class NodesInitializer {
    * Generates a self-signed X509 certificate for each role.
    */
   private void generateX509CertificatesForRoles() {
-
+    
     final KeyStore keyStore;
     String keyStoreFilePath = "data/keystore.uber";
     try {
@@ -369,7 +399,7 @@ public final class NodesInitializer {
       LOGGER.error(StringUtils.getStackTraceAsString(ex));
       throw new TexaiException(ex);
     }
-
+    
     LOGGER.info("getting self-signed X.509 certificates for roles ...");
     roleFieldsHolderDictionary.values().stream().sorted().forEach(roleFieldsHolder1 -> {
       LOGGER.info("  " + roleFieldsHolder1.qualifiedName);
@@ -460,6 +490,9 @@ public final class NodesInitializer {
                     roleFieldsHolder1.areRemoteCommunicationsPermitted);
             nodeAccess.persistRole(role);
             roles.add(role);
+            role.getChildQualifiedNames().stream().forEach(childQualifiedName -> {
+              LOGGER.info("      child: " + childQualifiedName);
+            });
           });
           assert !roles.isEmpty();
           final Node node = new Node(
@@ -516,8 +549,7 @@ public final class NodesInitializer {
     assert graphName != null : "graphName must not be null";
     assert !graphName.isEmpty() : "graphName must not be empty";
     assert !graphName.contains(" ") : "graphName must not contain whitespace";
-
-    final StringBuilder stringBuilder = new StringBuilder();
+    
     final String graphDataPath = graphPath + "/" + graphName + ".dot";
     final String keyDataPath = graphPath + "/" + graphName + "-key.txt";
     BufferedWriter graphBufferedWriter = null;
@@ -536,7 +568,7 @@ public final class NodesInitializer {
       graphNodes(
               graphBufferedWriter,
               keyBufferedWriter);
-
+      
       graphBufferedWriter.append("}");
       graphBufferedWriter.close();
       keyBufferedWriter.close();
@@ -545,7 +577,7 @@ public final class NodesInitializer {
         if (graphBufferedWriter != null) {
           graphBufferedWriter.close();
         }
-
+        
         if (keyBufferedWriter != null) {
           keyBufferedWriter.close();
         }
@@ -569,7 +601,7 @@ public final class NodesInitializer {
     //Preconditions
     assert graphBufferedWriter != null : "graphBufferedWriter must not be null";
     assert keyBufferedWriter != null : "keyBufferedWriter must not be null";
-
+    
     try {
       graphBufferedWriter.append("subgraph cluster_agents");
       graphBufferedWriter.append(" {\n");
@@ -577,10 +609,9 @@ public final class NodesInitializer {
 
       // emit a graph node for each agent node.
       nodeAccess.getNodes().stream().sorted().forEach(node -> {
-        final String fillColor = "cornflowerblue";
         final String nodeLabel = node.extractAgentName();
         final String shape = "    shape = box";
-
+        
         try {
           // describe the node
           keyBufferedWriter.append(nodeLabel);
@@ -594,8 +625,6 @@ public final class NodesInitializer {
           graphBufferedWriter.append(nodeLabel);
           graphBufferedWriter.append(" [\n");
           graphBufferedWriter.append(shape);
-//          graphBufferedWriter.append("\n    style = filled\n    fillcolor = ");
-//          graphBufferedWriter.append(fillColor);
           graphBufferedWriter.append("\n    label = \"");
           graphBufferedWriter.append(nodeLabel);
           graphBufferedWriter.append("\" ];\n");
@@ -604,10 +633,10 @@ public final class NodesInitializer {
         }
       });
       graphBufferedWriter.append("  }");
-      
+
       // emit a graph edge between agents having connecting parent and child roles
       // the dictionary of graphed parent-child edges: parent node --> child node
-      final Set<String> parentChilddEdges = new HashSet<>();
+      final Set<String> parentChildEdges = new HashSet<>();
       nodeAccess.getNodes().stream().sorted().forEach(node -> {
         node.getRoles().stream().forEach(role -> {
           role.getChildQualifiedNames().stream().forEach(childQualifiedName -> {
@@ -620,11 +649,11 @@ public final class NodesInitializer {
             stringBuilder.append("N");
             stringBuilder.append(childAgentName);
             stringBuilder.append(";\n");
-            parentChilddEdges.add(stringBuilder.toString());
+            parentChildEdges.add(stringBuilder.toString());
           });
         });
       });
-      parentChilddEdges.stream().forEach(string -> {
+      parentChildEdges.stream().forEach(string -> {
         // link the node to its children
         try {
           graphBufferedWriter.append(string);
@@ -648,7 +677,7 @@ public final class NodesInitializer {
     // the node's mission described in English
     String missionDescription;
     // the indicator whether this is an abstract node, which is a non-instantiated prototype
-    boolean isAbstract;
+    boolean isAbstract = false;
     // the prototype node names, if any, from which roles and uninitialized state variables are copied
     final Set<String> prototypeNodeNames = new ArraySet<>();
     // the role field holders
@@ -704,8 +733,6 @@ public final class NodesInitializer {
     String qualifiedName;
     // the role's description in English
     String description;
-    // the indicator whether this is an abstract role, which is a non-instantiated ancestor
-    boolean isAbstract = false;
     // the parent qualified role name, i.e. container.nodename.rolename, which is null if this is a top level role
     String parentQualifiedName;
     // the qualified child role names, i.e. container.nodename.rolename, which are empty if this is a lowest level role.
@@ -716,7 +743,7 @@ public final class NodesInitializer {
     final Set<String> variableNames = new ArraySet<>();
     // the indicator whether this role is permitted to send a message to a recipient in another container, which requires
     // an X.509 certificate
-    boolean areRemoteCommunicationsPermitted = true;
+    boolean areRemoteCommunicationsPermitted = false;
     // the X.509 security information for this role, which includes the self-signed certificate identifying this role
     // during remote communication
     X509SecurityInfo x509SecurityInfo;
@@ -735,7 +762,7 @@ public final class NodesInitializer {
       assert other != null : "other must not be null";
       assert StringUtils.isNonEmptyString(other.qualifiedName) : "other.qualifiedName must be a non empty string";
       assert StringUtils.isNonEmptyString(this.qualifiedName) : "qualifiedName must be a non empty string";
-
+      
       return this.qualifiedName.compareTo(other.qualifiedName);
     }
 
@@ -786,7 +813,7 @@ public final class NodesInitializer {
             final Attributes attributes) {
       //Preconditions
       assert StringUtils.isNonEmptyString(qName) : "qName must be a non-empty string";
-
+      
       if (IS_DEBUG_LOGGING_ENABLED) {
         LOGGER.debug("startElement qName: " + qName);
       }
@@ -835,12 +862,12 @@ public final class NodesInitializer {
       //Preconditions
       assert StringUtils.isNonEmptyString(qName) : "qName must be a non-empty string";
       assert nodeAccess != null : "nodeAccess must not be null";
-
+      
       if (IS_DEBUG_LOGGING_ENABLED) {
         LOGGER.debug("endElement qName: " + qName);
         LOGGER.debug("stringBuilder: " + stringBuilder.toString());
       }
-
+      
       switch (qName) {
         case "name":
           nodeFieldsHolder.name = containerName + "." + stringBuilder.toString();
@@ -884,6 +911,7 @@ public final class NodesInitializer {
           break;
         case "node":
           nodeFieldsHolderDictionary.put(nodeFieldsHolder.name, nodeFieldsHolder);
+          nbrNodeTags++;
           break;
       }
     }

@@ -19,9 +19,6 @@ TopLevelHeartbeatAgent
 TopmostFriendshipAgent
   Coordinates the top level agents to ensure friendly behavior.
 
-UniversalRolesAgent
-  Prototype agent that contains universal roles.
-
 XTCBlockchainArchiveAgent
   Archives the TexaiCoin blockchain and pending transactions.
 

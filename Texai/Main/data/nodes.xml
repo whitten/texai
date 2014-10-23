@@ -8,7 +8,6 @@
       <role>
         <qualifiedName>UniversalRolesAgent.GovernanceRole</qualifiedName>
         <description>Ensures that this node complies with policy</description>
-        <isAbstract>false</isAbstract>
         <parentQualifiedName>ContainerGovernanceAgent.ContainerGovernanceRole</parentQualifiedName>
         <skill-classes>
           <skill-class>
@@ -20,7 +19,6 @@
       <role>
         <qualifiedName>UniversalRolesAgent.HeartbeatRole</qualifiedName>
         <description>Provides periodic heartbeat messages to indicate that this node is alive.</description>
-        <isAbstract>false</isAbstract>
         <parentQualifiedName>ContainerHeartbeatAgent.ContainerHeartbeatRole</parentQualifiedName>
         <skill-classes>
           <skill-class>
@@ -35,7 +33,6 @@
   <node>
     <name>TopmostFriendshipAgent</name>
     <missionDescription>Coordinates the top level agents to ensure friendly behavior.</missionDescription>
-    <isAbstract>false</isAbstract>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -43,8 +40,8 @@
       <role>
         <qualifiedName>TopmostFriendshipAgent.TopmostFriendshipRole</qualifiedName>
         <description>Coordinates the top level agents to ensure friendly behavior.</description>
-        <isAbstract>false</isAbstract>
         <parentQualifiedName></parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.governance.TopmostFriendship</skill-class-name>
@@ -58,7 +55,6 @@
   <node>
     <name>TopLevelGovernanceAgent</name>
     <missionDescription>Manages the container governance agents to ensure friendly behavior.</missionDescription>
-    <isAbstract>false</isAbstract>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -66,8 +62,8 @@
       <role>
         <qualifiedName>TopLevelGovernanceAgent.TopLevelGovernanceRole</qualifiedName>
         <description>Manages the container governance agents to ensure friendly behavior.</description>
-        <isAbstract>false</isAbstract>
         <parentQualifiedName>TopmostFriendshipAgent.TopmostFriendshipRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.governance.TopLevelGovernance</skill-class-name>
@@ -81,7 +77,6 @@
   <node>
     <name>ContainerGovernanceAgent</name>
     <missionDescription>Manages a container's agents to ensure friendly behavior.</missionDescription>
-    <isAbstract>false</isAbstract>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -89,8 +84,8 @@
       <role>
         <qualifiedName>ContainerGovernanceAgent.ContainerGovernanceRole</qualifiedName>
         <description>Manages a container's agents to ensure friendly behavior.</description>
-        <isAbstract>false</isAbstract>
         <parentQualifiedName>TopLevelGovernanceAgent.TopLevelGovernanceRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.governance.ContainerGovernance</skill-class-name>
@@ -104,7 +99,6 @@
   <node>
     <name>TopLevelHeartbeatAgent</name>
     <missionDescription>Manages the container heartbeat agents to ensure liveness.</missionDescription>
-    <isAbstract>false</isAbstract>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -112,8 +106,8 @@
       <role>
         <qualifiedName>TopLevelHeartbeatAgent.TopLevelHeartbeatRole</qualifiedName>
         <description>Manages the container heartbeat agents to ensure liveness.</description>
-        <isAbstract>false</isAbstract>
         <parentQualifiedName>TopmostFriendshipAgent.TopmostFriendshipRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.heartbeat.TopLevelHeartbeat</skill-class-name>
@@ -127,7 +121,6 @@
   <node>
     <name>ContainerHeartbeatAgent</name>
     <missionDescription>Manages a container's agents to ensure liveness.</missionDescription>
-    <isAbstract>false</isAbstract>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -135,8 +128,8 @@
       <role>
         <qualifiedName>ContainerHeartbeatAgent.ContainerHeartbeatRole</qualifiedName>
         <description>Manages a container's agents to ensure liveness.</description>
-        <isAbstract>false</isAbstract>
         <parentQualifiedName>TopLevelHeartbeatAgent.TopLevelHeartbeatRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.heartbeat.ContainerHeartbeat</skill-class-name>
@@ -150,7 +143,6 @@
   <node>
     <name>NetworkOperationAgent</name>
     <missionDescription>Manages the network, the containers, and the TexaiCoin agents within the containers. Interacts with human operators.</missionDescription>
-    <isAbstract>false</isAbstract>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -158,8 +150,8 @@
       <role>
         <qualifiedName>NetworkOperationAgent.NetworkOperationRole</qualifiedName>
         <description>Manages the network and the containers. Interacts with human operators.</description>
-        <isAbstract>false</isAbstract>
         <parentQualifiedName>TopmostFriendshipAgent.TopmostFriendshipRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.network.NetworkOperation</skill-class-name>
@@ -173,7 +165,6 @@
   <node>
     <name>ContainerOperationAgent</name>
     <missionDescription>Manages a container and the TexaiCoin agent within the container. Interacts with the human container operator.</missionDescription>
-    <isAbstract>false</isAbstract>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -181,8 +172,8 @@
       <role>
         <qualifiedName>ContainerOperationAgent.ContainerOperationRole</qualifiedName>
         <description>Manages the network, the containers, and the TexaiCoin agents within the containers. Interacts with human operators.</description>
-        <isAbstract>false</isAbstract>
         <parentQualifiedName>NetworkOperationAgent.NetworkOperationRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.network.ContainerOperation</skill-class-name>
@@ -199,7 +190,6 @@
   <node>
     <name>XTCNetworkOperationAgent</name>
     <missionDescription>Manages the TexaiCoin agent network. Interacts with human operators.</missionDescription>
-    <isAbstract>false</isAbstract>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -207,8 +197,8 @@
       <role>
         <qualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</qualifiedName>
         <description>Manages the TexaiCoin agent network. Interacts with human operators.</description>
-        <isAbstract>false</isAbstract>
         <parentQualifiedName>NetworkOperationAgent.NetworkOperationRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.texaicoin.XTCNetworkOperation</skill-class-name>
@@ -222,7 +212,6 @@
   <node>
     <name>XTCOperationAgent</name>
     <missionDescription>Manages a bitcoind instance.</missionDescription>
-    <isAbstract>false</isAbstract>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -230,8 +219,8 @@
       <role>
         <qualifiedName>XTCOperationAgent.XTCOperationRole</qualifiedName>
         <description>Manages a bitcoind instance.</description>
-        <isAbstract>false</isAbstract>
         <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.texaicoin.XTCOperation</skill-class-name>
@@ -245,7 +234,6 @@
   <node>
     <name>XTCBlockchainArchiveAgent</name>
     <missionDescription>Archives the TexaiCoin blockchain and pending transactions.</missionDescription>
-    <isAbstract>false</isAbstract>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -253,9 +241,9 @@
       <role>
         <qualifiedName>XTCBlockchainArchiveAgent.XTCBlockchainArchiveRole</qualifiedName>
         <description>Archives the TexaiCoin blockchain and pending transactions.</description>
-        <isAbstract>false</isAbstract>
         <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
-        <skill-classes>
+         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
+       <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.texaicoin.XTCBlockchainArchive</skill-class-name>
           </skill-class>
@@ -268,7 +256,6 @@
   <node>
     <name>XTCClientGatewayAgent</name>
     <missionDescription>Provides a wallet and processor client gateway for the TexaiCoin network.</missionDescription>
-    <isAbstract>false</isAbstract>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -276,8 +263,8 @@
       <role>
         <qualifiedName>XTCClientGatewayAgent.XTCClientGatewayRole</qualifiedName>
         <description>Provides a wallet and processor client gateway for the TexaiCoin network.</description>
-        <isAbstract>false</isAbstract>
         <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.texaicoin.XTCClientGateway</skill-class-name>
@@ -291,7 +278,6 @@
   <node>
     <name>XTCFinancialAccountingAndControlAgent</name>
     <missionDescription>Provides financial accounting and control for the TexaiCoin network.</missionDescription>
-    <isAbstract>false</isAbstract>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -299,8 +285,8 @@
       <role>
         <qualifiedName>XTCFinancialAccountingAndControlAgent.XTCClientGatewayRole</qualifiedName>
         <description>Provides financial accounting and control for the TexaiCoin network.</description>
-        <isAbstract>false</isAbstract>
         <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.texaicoin.XTCFinancialAccountingAndControl</skill-class-name>
@@ -314,7 +300,6 @@
   <node>
     <name>XTCMintAgent</name>
     <missionDescription>Provides a mint the TexaiCoin network.</missionDescription>
-    <isAbstract>false</isAbstract>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -322,8 +307,8 @@
       <role>
         <qualifiedName>XTCMintAgent.XTCMintRole</qualifiedName>
         <description>Provides a mint the TexaiCoin network.</description>
-        <isAbstract>false</isAbstract>
         <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.texaicoin.XTCMint</skill-class-name>
@@ -338,7 +323,6 @@
     <name>XTCNetworkConfigurationAgent</name>
     <missionDescription>Provides network configuration the TexaiCoin network. Maintains the assignment of
       nomadic agents to particular containers.</missionDescription>
-    <isAbstract>false</isAbstract>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -347,8 +331,8 @@
         <qualifiedName>XTCNetworkConfigurationAgent.XTCNetworkConfigurationRole</qualifiedName>
         <description>Provides network configuration the TexaiCoin network. Maintains the assignment of
           nomadic agents to particular containers.</description>
-        <isAbstract>false</isAbstract>
         <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.texaicoin.XTCNetworkConfiguration</skill-class-name>
@@ -363,7 +347,6 @@
     <name>XTCNetworkSeedAgent</name>
     <missionDescription>Provides a TexaiCoin network seed for wallet and processor clients. Maintains the mapping of client gateways
       and their respective IP addresses.</missionDescription>
-    <isAbstract>false</isAbstract>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -372,8 +355,8 @@
         <qualifiedName>XTCNetworkSeedAgent.XTCNetworkSeedRole</qualifiedName>
         <description>Provides a TexaiCoin network seed for wallet and processor clients. Maintains the mapping of client gateways
           and their respective IP addresses.</description>
-        <isAbstract>false</isAbstract>
         <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.texaicoin.XTCNetworkSeed</skill-class-name>
@@ -387,7 +370,6 @@
   <node>
     <name>XTCPrimaryAuditAgent</name>
     <missionDescription>Provides the primary audit agent for the TexaiCoin network.</missionDescription>
-    <isAbstract>false</isAbstract>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -395,8 +377,8 @@
       <role>
         <qualifiedName>XTCPrimaryAuditAgent.XTCPrimaryAuditRole</qualifiedName>
         <description>Provides the primary audit agent for the TexaiCoin network.</description>
-        <isAbstract>false</isAbstract>
         <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.texaicoin.XTCPrimaryAudit</skill-class-name>
@@ -410,7 +392,6 @@
   <node>
     <name>XTCRecoveryAgent</name>
     <missionDescription>Provides fault recovery for the TexaiCoin network.</missionDescription>
-    <isAbstract>false</isAbstract>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -418,8 +399,8 @@
       <role>
         <qualifiedName>XTCRecoveryAgent.XTCRecoveryRole</qualifiedName>
         <description>Provides fault recovery for the TexaiCoin network.</description>
-        <isAbstract>false</isAbstract>
         <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.texaicoin.XTCRecovery</skill-class-name>
@@ -433,7 +414,6 @@
   <node>
     <name>XTCRewardAllocationAgent</name>
     <missionDescription>Allocates the rewards resulting from minting new blocks for the TexaiCoin network.</missionDescription>
-    <isAbstract>false</isAbstract>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -441,8 +421,8 @@
       <role>
         <qualifiedName>XTCRewardAllocationAgent.XTCRewardAllocationRole</qualifiedName>
         <description>Allocates the rewards resulting from minting new blocks for the TexaiCoin network.</description>
-        <isAbstract>false</isAbstract>
         <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.texaicoin.XTCRewardAllocation</skill-class-name>
@@ -456,7 +436,6 @@
   <node>
     <name>XTCContainerAuditAgent</name>
     <missionDescription>Provides a container audit agent for the TexaiCoin network.</missionDescription>
-    <isAbstract>false</isAbstract>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -464,8 +443,8 @@
       <role>
         <qualifiedName>XTCContainerAuditAgent.XTCContainerAuditRole</qualifiedName>
         <description>Provides a container audit agent for the TexaiCoin network.</description>
-        <isAbstract>false</isAbstract>
         <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.texaicoin.XTCContainerAudit</skill-class-name>
@@ -480,7 +459,6 @@
     <name>XTCContainerCertificateAuthorityAgent</name>
     <missionDescription>Provides self-signed X.509 certificates for roles in a particular container in the TexaiCoin
       network.</missionDescription>
-    <isAbstract>false</isAbstract>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -488,8 +466,8 @@
       <role>
         <qualifiedName>XTCContainerCertificateAuthorityAgent.XTCContainerCertificateAuthorityRole</qualifiedName>
         <description>Provides a container audit agent for the TexaiCoin network.</description>
-        <isAbstract>false</isAbstract>
         <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.misc.CertificateAuthority</skill-class-name>
@@ -503,7 +481,6 @@
   <node>
     <name>XTCNetworkEpisodicMemoryAgent</name>
     <missionDescription>Coordinates episodic memory for agents in the TexaiCoin network.</missionDescription>
-    <isAbstract>false</isAbstract>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -511,8 +488,8 @@
       <role>
         <qualifiedName>XTCNetworkEpisodicMemoryAgent.XTCNetworkEpisodicMemoryRole</qualifiedName>
         <description>Coordinates episodic memory for agents in the TexaiCoin network.</description>
-        <isAbstract>false</isAbstract>
         <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.memory.NetworkEpisodicMemory</skill-class-name>
@@ -526,7 +503,6 @@
   <node>
     <name>XTCContainerEpisodicMemoryAgent</name>
     <missionDescription>Provides episodic memory for agents in a particular container in the TexaiCoin network.</missionDescription>
-    <isAbstract>false</isAbstract>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -534,8 +510,8 @@
       <role>
         <qualifiedName>XTCContainerEpisodicMemoryAgent.XTCContainerEpisodicMemoryRole</qualifiedName>
         <description>Provides episodic memory for agents in a particular container in the TexaiCoin network.</description>
-        <isAbstract>false</isAbstract>
         <parentQualifiedName>XTCNetworkEpisodicMemoryAgent.XTCNetworkEpisodicMemoryRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.memory.ContainerEpisodicMemory</skill-class-name>
@@ -549,7 +525,6 @@
   <node>
     <name>XTCNetworkLogControlAgent</name>
     <missionDescription>Coordinates Java logging for agents in the TexaiCoin network.</missionDescription>
-    <isAbstract>false</isAbstract>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -557,8 +532,8 @@
       <role>
         <qualifiedName>XTCNetworkLogControlAgent.XTCNetworkLogControlRole</qualifiedName>
         <description>Coordinates Java logging for agents in the TexaiCoin network.</description>
-        <isAbstract>false</isAbstract>
         <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.logging.NetworkLogControl</skill-class-name>
@@ -572,7 +547,6 @@
   <node>
     <name>XTCContainerLogControlAgent</name>
     <missionDescription>Coordinates Java logging for agents in the TexaiCoin network.</missionDescription>
-    <isAbstract>false</isAbstract>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -580,8 +554,8 @@
       <role>
         <qualifiedName>XTCContainerLogControlAgent.XTCContainerLogControlRole</qualifiedName>
         <description>Coordinates Java logging for agents in the TexaiCoin network.</description>
-        <isAbstract>false</isAbstract>
         <parentQualifiedName>XTCNetworkLogControlAgent.XTCNetworkLogControlRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.logging.ContainerLogControl</skill-class-name>
@@ -595,7 +569,6 @@
   <node>
     <name>XTCNetworkTorrentAgent</name>
     <missionDescription>Coordinates bittorrent file transfers for agents in the TexaiCoin network.</missionDescription>
-    <isAbstract>false</isAbstract>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -603,8 +576,8 @@
       <role>
         <qualifiedName>XTCNetworkTorrentAgent.XTCNetworkTorrentRole</qualifiedName>
         <description>Coordinates bittorrent file transfers for agents in the TexaiCoin network.</description>
-        <isAbstract>false</isAbstract>
         <parentQualifiedName>XTCNetworkOperationAgent.XTCNetworkOperationRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.torrent.NetworkTorrent</skill-class-name>
@@ -618,7 +591,6 @@
   <node>
     <name>XTCContainerTorrentAgent</name>
     <missionDescription>Provides bittorrent file transfers for agents in a particular container in the TexaiCoin network.</missionDescription>
-    <isAbstract>false</isAbstract>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -626,8 +598,8 @@
       <role>
         <qualifiedName>XTCContainerTorrentAgent.XTCContainerTorrentRole</qualifiedName>
         <description>Provides bittorrent file transfers for agents in a particular container in the TexaiCoin network.</description>
-        <isAbstract>false</isAbstract>
         <parentQualifiedName>XTCNetworkTorrentAgent.XTCNetworkTorrentRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.torrent.ContainerTorrent</skill-class-name>
