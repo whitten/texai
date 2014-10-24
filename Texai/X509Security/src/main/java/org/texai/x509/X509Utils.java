@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.UTFDataFormatException;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -699,6 +700,8 @@ public final class X509Utils {
     if (keyStoreFile.exists()) {
       try (final FileInputStream keyStoreInputStream = new FileInputStream(keyStoreFile)) {
         keyStore.load(keyStoreInputStream, password);
+      } catch (UTFDataFormatException ex) {
+        LOGGER.error("filePath: " + filePath);
       }
     } else {
       keyStore.load(null, null);
