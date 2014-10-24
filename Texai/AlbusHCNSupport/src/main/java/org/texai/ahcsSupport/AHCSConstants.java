@@ -234,6 +234,10 @@ public final class AHCSConstants {
   // the want_the_dialog_initiative_Task operation
   public static final String WANT_THE_DIALOG_INITIATIVE_TASK = "want_the_dialog_initiative_Task";
   //
+  //
+  // the want_the_dialog_initiative_Task operation
+  public static final String WRITE_CONFIGURATION_FILE_TASK = "writeConfigurationFile_Task";
+  //
   // the writeFormFillTextToUser_Task operation
   public static final String WRITE_FORM_FILL_TEXT_TO_USER_TASK = "writeFormFillTextToUser_Task";
   // the text parameter of the the writeFormFillTextToUser_Task

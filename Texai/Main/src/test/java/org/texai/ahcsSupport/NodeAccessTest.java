@@ -82,7 +82,7 @@ public class NodeAccessTest {
                     nodeRuntime);
     nodesInitializer.process(
             "data/nodes-test.xml", // nodesPath
-            "80da14JIcHPLP+WrsN6zmnnQej6SIEojd80Ai9mXuRfFj2O2nKhPx9q9yqLrUl0bThUg8kHcktXQ0Q4Do9z9gA=="); // nodesFileHashString
+            "KCIIW8SeONcxmh9lRVKyDokiBTe+875QA2aYiNm8jJG2TdtDMcvLQxAnbi1J3npFbGcC4VEaiadvY7amHL4SEA=="); // nodesFileHashString
   }
 
   @AfterClass
@@ -108,7 +108,7 @@ public class NodeAccessTest {
     NodeAccess instance = new NodeAccess(rdfEntityManager);
     List<Node> result = instance.getNodes();
     Collections.sort(result);
-    assertEquals("[TestContainer.ContainerGovernanceAgent, TestContainer.ContainerHeartbeatAgent, TestContainer.ContainerOperationAgent, TestContainer.NetworkOperationAgent, TestContainer.TopLevelGovernanceAgent, TestContainer.TopLevelHeartbeatAgent, TestContainer.TopmostFriendshipAgent, TestContainer.UniversalRolesAgent, TestContainer.XTCBlockchainArchiveAgent, TestContainer.XTCClientGatewayAgent, TestContainer.XTCContainerAuditAgent, TestContainer.XTCContainerCertificateAuthorityAgent, TestContainer.XTCContainerEpisodicMemoryAgent, TestContainer.XTCContainerLogControlAgent, TestContainer.XTCContainerTorrentAgent, TestContainer.XTCFinancialAccountingAndControlAgent, TestContainer.XTCMintAgent, TestContainer.XTCNetworkConfigurationAgent, TestContainer.XTCNetworkEpisodicMemoryAgent, TestContainer.XTCNetworkLogControlAgent, TestContainer.XTCNetworkOperationAgent, TestContainer.XTCNetworkSeedAgent, TestContainer.XTCNetworkTorrentAgent, TestContainer.XTCOperationAgent, TestContainer.XTCPrimaryAuditAgent, TestContainer.XTCRecoveryAgent, TestContainer.XTCRewardAllocationAgent]", result.toString());
+    assertEquals("[TestContainer.ContainerGovernanceAgent, TestContainer.ContainerHeartbeatAgent, TestContainer.ContainerOperationAgent, TestContainer.NetworkOperationAgent, TestContainer.TopLevelGovernanceAgent, TestContainer.TopLevelHeartbeatAgent, TestContainer.TopmostFriendshipAgent, TestContainer.XAIBlockchainArchiveAgent, TestContainer.XAIClientGatewayAgent, TestContainer.XAIContainerAuditAgent, TestContainer.XAIContainerCertificateAuthorityAgent, TestContainer.XAIContainerEpisodicMemoryAgent, TestContainer.XAIContainerLogControlAgent, TestContainer.XAIContainerTorrentAgent, TestContainer.XAIFinancialAccountingAndControlAgent, TestContainer.XAIMintAgent, TestContainer.XAINetworkConfigurationAgent, TestContainer.XAINetworkEpisodicMemoryAgent, TestContainer.XAINetworkLogControlAgent, TestContainer.XAINetworkOperationAgent, TestContainer.XAINetworkSeedAgent, TestContainer.XAINetworkTorrentAgent, TestContainer.XAIOperationAgent, TestContainer.XAIPrimaryAuditAgent, TestContainer.XAIRecoveryAgent, TestContainer.XAIRewardAllocationAgent]", result.toString());
   }
 
   /**

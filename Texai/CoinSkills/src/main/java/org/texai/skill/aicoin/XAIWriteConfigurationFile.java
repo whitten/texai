@@ -1,17 +1,9 @@
-package org.texai.skill.aicoin;
-
-import net.jcip.annotations.ThreadSafe;
-import org.apache.log4j.Logger;
-import org.texai.ahcsSupport.AHCSConstants;
-import org.texai.ahcsSupport.AbstractSkill;
-import org.texai.ahcsSupport.Message;
-
 /**
- * Created on Aug 29, 2014, 6:48:25 PM.
+ * Created on Aug 30, 2014, 11:31:08 PM.
  *
- * Description: Provides a wallet and processor client gateway for the TexaiCoin network.
+ * Description: Writes the configuration file for the slave bitcoind instance.
  *
- * Copyright (C) Aug 29, 2014, Stephen L. Reed, Texai.org.
+ * Copyright (C) Aug 30, 2014, Stephen L. Reed, Texai.org.
  *
  * @author reed
  *
@@ -27,16 +19,28 @@ import org.texai.ahcsSupport.Message;
  * You should have received a copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-@ThreadSafe
-public final class XAIClientGateway extends AbstractSkill {
 
+package org.texai.skill.aicoin;
+
+import net.jcip.annotations.ThreadSafe;
+import org.apache.log4j.Logger;
+import org.texai.ahcsSupport.AHCSConstants;
+import org.texai.ahcsSupport.AbstractSkill;
+import org.texai.ahcsSupport.Message;
+
+/**
+ *
+ * @author reed
+ */
+@ThreadSafe
+public class XAIWriteConfigurationFile extends AbstractSkill {
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(XAIClientGateway.class);
+  private static final Logger LOGGER = Logger.getLogger(XAIWriteConfigurationFile.class);
 
   /**
-   * Constructs a new XTCClientGateway instance.
+   * Constructs a new XAIWriteConfigurationFile instance.
    */
-  public XAIClientGateway() {
+  public XAIWriteConfigurationFile() {
   }
 
   /**
@@ -59,12 +63,12 @@ public final class XAIClientGateway extends AbstractSkill {
     }
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
-        assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
+        assert getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
         setSkillState(AHCSConstants.State.INITIALIZED);
         return true;
 
       case AHCSConstants.AHCS_READY_TASK:
-        assert this.getSkillState().equals(AHCSConstants.State.INITIALIZED) : "prior state must be initialized";
+        assert getSkillState().equals(AHCSConstants.State.INITIALIZED) : "prior state must be initialized";
         setSkillState(AHCSConstants.State.READY);
         return true;
     }
@@ -103,7 +107,8 @@ public final class XAIClientGateway extends AbstractSkill {
     return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.AHCS_READY_TASK,};
+      AHCSConstants.AHCS_READY_TASK,
+      AHCSConstants.WRITE_CONFIGURATION_FILE_TASK };
   }
 
 }

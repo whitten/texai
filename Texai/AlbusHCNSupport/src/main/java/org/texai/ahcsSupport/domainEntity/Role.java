@@ -489,6 +489,8 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
     assert !operation.isEmpty() : "operation must not be empty";
     assert senderService != null : "senderService must not be null";
     assert !senderService.isEmpty() : "senderService must not be empty";
+    assert !childQualifiedNames.isEmpty() : "childQualifiedNames must not be empty";
+    
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         if (roleState.get().equals(State.UNINITIALIZED)) {

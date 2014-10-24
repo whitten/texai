@@ -15,7 +15,7 @@ import org.texai.util.TexaiException;
 /**
  * Created on Aug 30, 2014, 11:31:08 PM.
  *
- * Description: Operates a Cooperative Coin C++ instance that runs in a separate process in the same container.
+ * Description: Operates a slave bitcoind instance that runs in a separate process in the same container.
  *
  * Copyright (C) Aug 30, 2014, Stephen L. Reed, Texai.org.
  *
@@ -65,20 +65,11 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
     }
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
-        assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
-        // initialize child governance roles
-        propagateOperationToChildRoles(
-                getClassName(), // service
-                operation);
-        setSkillState(AHCSConstants.State.INITIALIZED);
+        assert getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
         return true;
 
       case AHCSConstants.AHCS_READY_TASK:
-        assert this.getSkillState().equals(AHCSConstants.State.INITIALIZED) : "prior state must be initialized";
-        // ready child governance roles
-        propagateOperationToChildRoles(
-                getClassName(), // service
-                operation);
+        assert getSkillState().equals(AHCSConstants.State.INITIALIZED) : "prior state must be initialized";
         setSkillState(AHCSConstants.State.READY);
         return true;
     }
