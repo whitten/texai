@@ -29,7 +29,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.logging.Level;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
@@ -117,7 +116,10 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
     }
 
     // create the .bitcoin directory if not already present
-    final File directory = new File(homeDirectory + ".bitcoin");
+    final
+            
+            
+            File directory = new File(homeDirectory + ".bitcoin");
     if (!directory.isDirectory()) {
       directory.mkdir();
       assert directory.isDirectory();

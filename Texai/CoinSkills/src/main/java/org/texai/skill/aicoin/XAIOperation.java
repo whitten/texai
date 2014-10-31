@@ -1,6 +1,7 @@
 package org.texai.skill.aicoin;
 
 import java.io.IOException;
+import java.util.UUID;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
@@ -15,7 +16,8 @@ import org.texai.util.TexaiException;
 /**
  * Created on Aug 30, 2014, 11:31:08 PM.
  *
- * Description: Operates a slave bitcoind instance that runs in a separate process in the same container.
+ * Description: Operates a slave bitcoind instance that runs in a separate
+ * process in the same container.
  *
  * Copyright (C) Aug 30, 2014, Stephen L. Reed, Texai.org.
  *
@@ -23,14 +25,18 @@ import org.texai.util.TexaiException;
  *
  * Copyright (C) 2014 Texai
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
  * version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  *
- * You should have received a copy of the GNU General Public License along with this program. If not, see
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
 @ThreadSafe
@@ -38,6 +44,10 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
 
   // the logger
   private static final Logger LOGGER = Logger.getLogger(XAIOperation.class);
+  // the conversationId state variable
+  private static final String CONVERSATION_ID = "conversationId";
+  // the replyWith state variable
+  private static final String REPLY_WITH = "replyWith";
 
   /**
    * Constructs a new XTCOperation instance.
@@ -46,8 +56,9 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
   }
 
   /**
-   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries
-   * are single threaded with regard to the conversation.
+   * Receives and attempts to process the given message. The skill is thread
+   * safe, given that any contained libraries are single threaded with regard to
+   * the conversation.
    *
    * @param message the given message
    *
@@ -72,6 +83,11 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
         assert getSkillState().equals(AHCSConstants.State.INITIALIZED) : "prior state must be initialized";
         setSkillState(AHCSConstants.State.READY);
         return true;
+
+      case AHCSConstants.TASK_ACCOMPLISHED_INFO:
+         assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
+        process(message);
+        return true;
     }
 
     assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
@@ -82,8 +98,9 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
   }
 
   /**
-   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single
-   * threaded with regard to the conversation.
+   * Synchronously processes the given message. The skill is thread safe, given
+   * that any contained libraries are single threaded with regard to the
+   * conversation.
    *
    * @param message the given message
    *
@@ -108,14 +125,60 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
     return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.AHCS_READY_TASK,};
+      AHCSConstants.AHCS_READY_TASK,
+      AHCSConstants.TASK_ACCOMPLISHED_INFO};
   }
 
   /**
-   * Starts the bitcoind instance.
+   * Writes the configuration file and launches bitcoind.
    */
-  private void startBitcoind() {
-    sendCommandToBitcoind("");
+  private synchronized void process(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+
+    UUID conversationId = (UUID) getStateValue(CONVERSATION_ID);
+    if (conversationId == null) {
+      // uninitialized
+      conversationId = UUID.randomUUID();
+      setStateValue(CONVERSATION_ID, conversationId);
+      assert getStateValue(REPLY_WITH) == null;
+      final UUID replyWith = UUID.randomUUID();
+      setStateValue(REPLY_WITH, replyWith);
+      writeConfigurationFile(conversationId, replyWith);
+      return;
+    }
+    
+  }
+
+  /**
+   * Asynchronously invokes the XAIWriteConfigurationFile skill to write the
+   * configuration file for bitcoind.
+   * 
+   * @param conversationId the conversation id message parameter
+   * @param replyWith the reply-with message parameter
+   */
+  private void writeConfigurationFile(
+          final UUID conversationId,
+          final UUID replyWith) {
+    //Preconditions
+    assert conversationId != null : "conversationId must not be null";
+    assert replyWith != null : "replyWith must not be null";
+
+    final Message message = new Message(
+            getRole().getQualifiedName(), // senderQualifiedName
+            getClass().getName(), // senderService
+            getRole().getQualifiedName(), // recipientQualifiedName
+            conversationId,
+            replyWith,
+            XAIWriteConfigurationFile.class.getName(), // recipientService
+            AHCSConstants.WRITE_CONFIGURATION_FILE_TASK); // operation
+    sendMessage(message);
+    // set timeout
+    setMessageReplyTimeout(
+            message,
+            10000, // timeoutMillis
+            false, // isRecoverable
+            null); // recoveryAction
   }
 
   /**
@@ -126,7 +189,8 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
   }
 
   /**
-   * Perform a remote procedure call to the bitcoind instance with the given command string.
+   * Perform a remote procedure call to the bitcoind instance with the given
+   * command string.
    *
    * @param command the bitcoind command
    */

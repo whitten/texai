@@ -20,7 +20,11 @@
  */
 package org.texai.ahcsSupport;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.TimerTask;
+import java.util.UUID;
 import net.jcip.annotations.ThreadSafe;
 import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.domainEntity.Role;
@@ -41,6 +45,8 @@ public abstract class AbstractSkill {
   private State skillState = State.UNINITIALIZED;
   // the session manager skill, populated only for managed session skills so that they can notify the manager of disconnected sessions
   private SessionManagerSkill sessionManagerSkill;
+  // the message timeout information dictionary, message reply-with --> message timeout info
+  private final Map<UUID, MessageTimeOutInfo> messageTimeOutInfoDictionary = new HashMap<>();
 
   /**
    * Constructs a new Skill instance.
@@ -94,8 +100,9 @@ public abstract class AbstractSkill {
   }
 
   /**
-   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
-   * with regard to the conversation.
+   * Receives and attempts to process the given message. The skill is thread
+   * safe, given that any contained libraries are single threaded with regard to
+   * the conversation.
    *
    * @param message the given message
    *
@@ -104,8 +111,9 @@ public abstract class AbstractSkill {
   public abstract boolean receiveMessage(final Message message);
 
   /**
-   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single threaded with regard
-   * to the conversation.
+   * Synchronously processes the given message. The skill is thread safe, given
+   * that any contained libraries are single threaded with regard to the
+   * conversation.
    *
    * @param message the given message
    *
@@ -194,7 +202,8 @@ public abstract class AbstractSkill {
   }
 
   /**
-   * Propagates the given operation to the child roles, and to any service that understands the operation.
+   * Propagates the given operation to the child roles, and to any service that
+   * understands the operation.
    *
    * @param operation the given operation
    */
@@ -212,7 +221,8 @@ public abstract class AbstractSkill {
   /**
    * Propagates the given operation to the child roles.
    *
-   * @param service the recipient service, which if null indicates that any service that understands the operation will receive the message
+   * @param service the recipient service, which if null indicates that any
+   * service that understands the operation will receive the message
    * @param operation the given operation
    */
   public void propagateOperationToChildRoles(
@@ -241,11 +251,13 @@ public abstract class AbstractSkill {
   }
 
   /**
-   * Returns a not-understood message for replying to the sender of the given message.
+   * Returns a not-understood message for replying to the sender of the given
+   * message.
    *
    * @param receivedMessage the given message
    *
-   * @return a not-understood message for replying to the sender of the given message
+   * @return a not-understood message for replying to the sender of the given
+   * message
    */
   protected Message notUnderstoodMessage(final Message receivedMessage) {
     //Preconditions
@@ -260,6 +272,143 @@ public abstract class AbstractSkill {
             AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO); // operation
     message.put(AHCSConstants.AHCS_ORIGINAL_MESSAGE, receivedMessage);
     return message;
+  }
+
+  /**
+   * Sets a message reply timeout for the given sent message. Usually the reply
+   * is received before the timeout has elapsed, and cancels the timer which is
+   * looked up by message reply-with.
+   *
+   * @param message the given sent message
+   * @param timeoutMillis the number of milliseconds to wait before
+   * @param isRecoverable the indicator whether to send a timeout status message
+   * back to the message sender.
+   * @param recoveryAction an optional tag which indicates the recovery action
+   */
+  protected void setMessageReplyTimeout(
+          final Message message,
+          final long timeoutMillis,
+          final boolean isRecoverable,
+          final String recoveryAction) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert timeoutMillis >= 0 : "timeoutMillis must not be negative";
+
+    final MessageTimeoutTask messageTimeoutTask = new MessageTimeoutTask(this);
+    role.getNodeRuntime().getTimer().schedule(
+            messageTimeoutTask, 
+            0L); // delay
+    final MessageTimeOutInfo messageTimeOutInfo = new MessageTimeOutInfo(
+            message,
+            timeoutMillis,
+            isRecoverable,
+            recoveryAction,
+            messageTimeoutTask);
+    messageTimeoutTask.messageTimeOutInfo = messageTimeOutInfo;
+    synchronized (messageTimeOutInfoDictionary) {
+      messageTimeOutInfoDictionary.put(message.getReplyWith(), messageTimeOutInfo);
+    }
+  }
+
+  /**
+   * Removes a previously set message timeout.
+   *
+   * @param message the given set message
+   */
+  protected void removeMessageTimeOut(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+
+    synchronized (messageTimeOutInfoDictionary) {
+      messageTimeOutInfoDictionary.remove(message.getReplyWith());
+    }
+  }
+
+  /**
+   * Provides a message timeout task which executes unless this task is canceled
+   * beforehand.
+   */
+  class MessageTimeoutTask extends TimerTask {
+
+    // the message timeout info
+    private MessageTimeOutInfo messageTimeOutInfo;
+    // the skill
+    private final AbstractSkill skill;
+
+
+    /** Constructs a new MessageTimeoutTask instance.
+     * 
+     * @param skill the skill
+     */
+    MessageTimeoutTask(final AbstractSkill skill) {
+      //Preconditions
+      assert skill != null : "skill must not be null";
+      
+      this.skill = skill;
+    }
+    
+    /**
+     * Runs the message timeout task.
+     */
+    @Override
+    public void run() {
+      //Preconditions
+      assert messageTimeOutInfo != null : "messageTimeOutInfo must not be null";
+
+      skill.removeMessageTimeOut(messageTimeOutInfo.message);
+      if (messageTimeOutInfo.isRecoverable) {
+        // send MESSAGE_TIMEOUT_INFO message to self
+      } else {
+        // send MESSAGE_TIMEOUT_ERROR_INFO to parent role
+        
+      }
+    }
+
+  }
+
+  /**
+   * Provides a container for message timeout information, indexed by the
+   * reply-with UUID.
+   */
+  class MessageTimeOutInfo {
+
+    // the sent message
+    private final Message message;
+    // the timeout milliseconds
+    private final long timeoutMillis;
+    // the indicator whether the skill can attempt recovery 
+    private final boolean isRecoverable;
+    // the recovery action
+    private final String recoveryAction;
+    // the message timeout task
+    private final MessageTimeoutTask messageTimeoutTask;
+
+    MessageTimeOutInfo(
+            final Message message,
+            final long timeoutMillis,
+            final boolean isRecoverable,
+            final String recoveryAction,
+            final MessageTimeoutTask messageTimeoutTask) {
+      //Preconditions
+      assert message != null : "message must not be null";
+      assert timeoutMillis >= 0 : "timeoutMillis must not be negative";
+      assert message != null : "message must not be null";
+
+      this.message = message;
+      this.timeoutMillis = timeoutMillis;
+      this.isRecoverable = isRecoverable;
+      this.recoveryAction = recoveryAction;
+      this.messageTimeoutTask = messageTimeoutTask;
+    }
+
+    /** Returns a string representation of this object.
+     * 
+     * @return a string representation of this object
+     */
+    @Override
+    public String toString() {
+      return "[MessageTimeOutInfo " + message + "]";
+    }
   }
 
   /**
@@ -351,7 +500,7 @@ public abstract class AbstractSkill {
    * @param stateVariableName the given variable name
    * @param value the state value
    */
-  public void setNodeStateValue(final String stateVariableName, final Object value) {
+  public void setStateValue(final String stateVariableName, final Object value) {
     //Preconditions
     assert StringUtils.isNonEmptyString(stateVariableName) : "stateVariableName must be a non-empty string";
     assert role != null : "role must not be null for " + this;
@@ -364,7 +513,7 @@ public abstract class AbstractSkill {
    *
    * @param stateVariableName the variable name
    */
-  public void removeNodeStateValueBinding(final String stateVariableName) {
+  public void removeStateValueBinding(final String stateVariableName) {
     //Preconditions
     assert StringUtils.isNonEmptyString(stateVariableName) : "stateVariableName must be a non-empty string";
     assert role != null : "role must not be null for " + this;

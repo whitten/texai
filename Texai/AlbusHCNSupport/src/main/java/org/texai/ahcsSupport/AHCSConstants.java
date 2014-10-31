@@ -258,6 +258,8 @@ public final class AHCSConstants {
   //
   // the keep-alive operation
   public static final String KEEP_ALIVE_INFO = "keepAlive_Info";
+  // the keep-alive operation
+  public static final String TASK_ACCOMPLISHED_INFO = "taskAccomplished_Info";
   //
   // the messageNotUnderstood_Info operation
   public static final String MESSAGE_NOT_UNDERSTOOD_INFO = "messageNotUnderstood_Info";

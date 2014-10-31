@@ -225,6 +225,9 @@
           <skill-class>
             <skill-class-name>org.texai.skill.aicoin.XAIOperation</skill-class-name>
           </skill-class>
+          <skill-class>
+            <skill-class-name>org.texai.skill.aicoin.XAIWriteConfigurationFile</skill-class-name>
+          </skill-class>
         </skill-classes>
         <variableNames></variableNames>
       </role>
