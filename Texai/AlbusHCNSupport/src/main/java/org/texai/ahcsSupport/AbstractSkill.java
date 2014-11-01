@@ -356,12 +356,26 @@ public abstract class AbstractSkill {
       assert messageTimeOutInfo != null : "messageTimeOutInfo must not be null";
 
       skill.removeMessageTimeOut(messageTimeOutInfo.message);
+      final Message timeoutMessage;
       if (messageTimeOutInfo.isRecoverable) {
         // send MESSAGE_TIMEOUT_INFO message to self
+        timeoutMessage = new Message(
+          messageTimeOutInfo.message.getRecipientQualifiedName(), // senderQualifiedName
+          messageTimeOutInfo.message.getRecipientService(), // senderService
+          messageTimeOutInfo.message.getRecipientQualifiedName(), // recipientQualifiedName
+          messageTimeOutInfo.message.getRecipientService(), // recipientService
+          AHCSConstants.MESSAGE_TIMEOUT_INFO);
+        
       } else {
         // send MESSAGE_TIMEOUT_ERROR_INFO to parent role
-        
+        timeoutMessage = new Message(
+          messageTimeOutInfo.message.getRecipientQualifiedName(), // senderQualifiedName
+          messageTimeOutInfo.message.getRecipientService(), // senderService
+          skill.role.getParentQualifiedName(),  // recipientQualifiedName
+          null, // recipientService
+          AHCSConstants.MESSAGE_TIMEOUT_ERROR_INFO);
       }
+      skill.sendMessageViaSeparateThread(timeoutMessage);
     }
 
   }

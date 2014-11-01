@@ -256,10 +256,14 @@ public final class AHCSConstants {
   //
   // information messages - end with _Info
   //
-  // the keep-alive operation
+  // the keep-alive information operation
   public static final String KEEP_ALIVE_INFO = "keepAlive_Info";
-  // the keep-alive operation
+  // the task accomplished information operation
   public static final String TASK_ACCOMPLISHED_INFO = "taskAccomplished_Info";
+  // the message timeout information operation
+  public static final String MESSAGE_TIMEOUT_INFO = "messageTimeout_Info";
+  // the message timeout error information operation
+  public static final String MESSAGE_TIMEOUT_ERROR_INFO = "messageTimeoutError_Info";
   //
   // the messageNotUnderstood_Info operation
   public static final String MESSAGE_NOT_UNDERSTOOD_INFO = "messageNotUnderstood_Info";
