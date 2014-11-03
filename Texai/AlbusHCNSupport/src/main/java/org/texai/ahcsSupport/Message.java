@@ -164,12 +164,12 @@ public class Message implements Serializable {
     this.replyByDateTime = null;
     this.recipientService = recipientService;
     this.operation = operation;
-    for (final Entry<String, Object> parameter : parameterDictionary.entrySet()) {
+    parameterDictionary.entrySet().stream().forEach((parameter) -> {
       final String name = parameter.getKey();
       final Object value = parameter.getValue();
       assert value instanceof Serializable : "parameter value must be marked serializable: " + value;
       this.parameterDictionary.put(name, value);
-    }
+    });
     this.version = version;
   }
 
@@ -284,12 +284,12 @@ public class Message implements Serializable {
     this.replyByDateTime = replyByDateTime;
     this.recipientService = recipientService;
     this.operation = operation;
-    for (final Entry<String, Object> parameter : parameterDictionary.entrySet()) {
+    parameterDictionary.entrySet().stream().forEach((parameter) -> {
       final String name = parameter.getKey();
       final Object value = parameter.getValue();
       assert value instanceof Serializable : "parameter value must be marked serializable: " + value;
       this.parameterDictionary.put(name, value);
-    }
+    });
     this.version = version;
   }
 

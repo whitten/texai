@@ -21,16 +21,17 @@
 package org.texai.ahcsSupport.domainEntity;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import net.sf.ehcache.CacheManager;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.texai.ahcsSupport.BasicNodeRuntime;
 import org.texai.kb.CacheInitializer;
 import org.texai.kb.journal.JournalWriter;
@@ -258,6 +259,81 @@ public class NodeTest {
    */
   private static Role makeTestRole() {
     final String qualifiedName = "TestContainer.TestAgent.TestRole";
+    final String description = "a test role";
+    final String parentQualifiedName = "TestContainer.TestParentAgent.TestParentRole";
+    final Set<String> childQualifiedNames = new HashSet<>();
+    final Set<SkillClass> skillClasses = new HashSet<>();
+    skillClasses.add(SkillClassTest.makeTestSkillClass());
+    final Set<String> variableNames = new HashSet<>();
+    variableNames.add("testVariable");
+    final boolean areRemoteCommunicationsPermitted = false;
+    return new Role(
+            qualifiedName,
+            description,
+            parentQualifiedName,
+            childQualifiedNames,
+            skillClasses,
+            variableNames,
+            areRemoteCommunicationsPermitted);
+  }
+
+  /**
+   * Makes a test node with a child role.
+   *
+   * @return a test node
+   */
+  public static Node makeTestNodeWithChild() {
+    final String name = "TestContainer.TestAgent";
+    final String missionDescription = "a test node";
+    final Set<Role> roles = new HashSet<>();
+    Role testRole = makeTestRole();
+    roles.add(testRole);
+    Node testNode = new Node(
+            name,
+            missionDescription,
+            roles);
+    testRole.setNode(testNode);
+    testNode.setStateValue("testVariable", 1);
+    
+    final Node testChildNode =  makeTestChildNode();
+    final Optional<Role> optional = testChildNode.getRoles().stream().findFirst();
+    if (optional.isPresent()) {
+       testRole.getChildQualifiedNames().add(optional.get().getQualifiedName());
+    } else {
+      fail();
+    }
+   
+    
+    return testNode;
+  }
+
+  /**
+   * Makes a test child node.
+   *
+   * @return a test child node
+   */
+  public static Node makeTestChildNode() {
+    final String name = "TestContainer.TestChildAgent";
+    final String missionDescription = "a child test node";
+    final Set<Role> roles = new HashSet<>();
+    Role testRole = makeTestChildRole();
+    roles.add(testRole);
+    Node testNode = new Node(
+            name,
+            missionDescription,
+            roles);
+    testRole.setNode(testNode);
+    testNode.setStateValue("testVariable", 1);
+    return testNode;
+  }
+
+  /**
+   * Makes a test child role.
+   *
+   * @return a test child role
+   */
+  private static Role makeTestChildRole() {
+    final String qualifiedName = "TestContainer.TestChildAgent.TestChildRole";
     final String description = "a test role";
     final String parentQualifiedName = "TestContainer.TestParentAgent.TestParentRole";
     final Set<String> childQualifiedNames = new HashSet<>();

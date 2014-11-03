@@ -85,14 +85,19 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
         return true;
 
       case AHCSConstants.TASK_ACCOMPLISHED_INFO:
-         assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
+        assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
         process(message);
         return true;
+
+      case AHCSConstants.PERFORM_MISSION_TASK:
+        performMission(message);
+        return true;
+
+      // handle other operations ...
     }
 
     assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
 
-    // other operations ...
     sendMessage(notUnderstoodMessage(message));
     return true;
   }
@@ -129,6 +134,18 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
       AHCSConstants.TASK_ACCOMPLISHED_INFO};
   }
 
+  /** Perform this role's mission, which is to manage the containers.
+   * 
+   * @param message the received perform mission task message
+   */
+  private void performMission(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+
+    //TODO
+  }
+
   /**
    * Writes the configuration file and launches bitcoind.
    */
@@ -147,7 +164,7 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
       writeConfigurationFile(conversationId, replyWith);
       return;
     }
-    
+    //TODO
   }
 
   /**

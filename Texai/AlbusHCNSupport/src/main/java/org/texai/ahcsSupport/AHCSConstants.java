@@ -177,11 +177,13 @@ public final class AHCSConstants {
   // the logUserWord_Task_word parameter
   public static final String LOG_USER_WORD_SKILL_WORD = "logUserWord_Skill_word";
   //
-  // the registerSensedUtterance_Task operation
-  public static final String REGISTER_SENSED_UTTERANCE_PROCESSOR_TASK = "registerSensedUtterance_Task";
   // the mintNewBlocks_Task operation
   public static final String MINT_NEW_BLOCKS_TASK = "mintNewBlocks_Task";
-  // understoodUtteranceTemplate message parameter
+  // the performMission_Task operation
+  public static final String PERFORM_MISSION_TASK = "performMission_Task";
+  // the registerSensedUtterance_Task operation
+  public static final String REGISTER_SENSED_UTTERANCE_PROCESSOR_TASK = "registerSensedUtterance_Task";
+  // the understoodUtteranceTemplate message parameter
   public static final String REGISTER_SENSED_UTTERANCE_PROCESSOR_TASK_UNDERSTOOD_UTTERANCE_TEMPLATE = "registerSensedUtterance_Task_understoodUtteranceTemplate";
   //
   // the removeRoleType_Task operation

@@ -7,12 +7,12 @@ import org.texai.ahcsSupport.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 
 /**
- * Created on Aug 30, 2014, 11:30:19 PM.
+ * Created on Sep 1, 2014, 1:48:49 PM.
  *
- * Description: Manages the network, the containers, and the TexaiCoin agents within the containers. Interacts with
+ * Description: Manages the network, the containers, and the coin agents within the containers. Interacts with
  * human operators.
  *
- * Copyright (C) Aug 30, 2014, Stephen L. Reed, Texai.org.
+ * Copyright (C) Sep 1, 2014, Stephen L. Reed, Texai.org.
  *
  * @author reed
  *
@@ -29,15 +29,15 @@ import org.texai.ahcsSupport.Message;
  * <http://www.gnu.org/licenses/>.
  */
 @ThreadSafe
-public final class NetworkOperation extends AbstractSkill {
+public final class ContainerOperation extends AbstractSkill {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(NetworkOperation.class);
+  private static final Logger LOGGER = Logger.getLogger(ContainerOperation.class);
 
   /**
-   * Constructs a new NetworkOperation instance.
+   * Constructs a new ContainerOperation instance.
    */
-  public NetworkOperation() {
+  public ContainerOperation() {
   }
 
   /**
@@ -61,7 +61,6 @@ public final class NetworkOperation extends AbstractSkill {
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
-        // initialize child governance roles
         propagateOperationToChildRoles(
                 getClassName(), // service
                 operation);
@@ -70,17 +69,21 @@ public final class NetworkOperation extends AbstractSkill {
 
       case AHCSConstants.AHCS_READY_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.INITIALIZED) : "prior state must be initialized";
-        // ready child governance roles
         propagateOperationToChildRoles(
                 getClassName(), // service
                 operation);
         setSkillState(AHCSConstants.State.READY);
         return true;
+
+      case AHCSConstants.PERFORM_MISSION_TASK:
+        performMission(message);
+        return true;
+
+      // handle other operations ...
     }
 
     assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
 
-    // other operations ...
     sendMessage(notUnderstoodMessage(message));
     return true;
   }
@@ -112,7 +115,21 @@ public final class NetworkOperation extends AbstractSkill {
     return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.AHCS_READY_TASK,};
+      AHCSConstants.AHCS_READY_TASK,
+      AHCSConstants.PERFORM_MISSION_TASK
+    };
   }
 
+  /** Perform this role's mission, which is to manage the containers.
+   * 
+   * @param message the received perform mission task message
+   */
+  private void performMission(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+
+    //TODO
+  }
+  
 }

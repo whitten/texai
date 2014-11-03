@@ -159,6 +159,53 @@ public class RoleTest {
   }
 
   /**
+   * Test of getChildQualifiedNames method, of class Role.
+   */
+  @Test
+  public void testGetChildQualifiedNames2() {
+    LOGGER.info("getChildQualifiedNames");
+    Node node = NodeTest.makeTestNodeWithChild();
+    Optional<Role> optional = node.getRoles().stream().findFirst();
+    if (optional.isPresent()) {
+      assertEquals("[TestContainer.TestChildAgent.TestChildRole]", optional.get().getChildQualifiedNames().toString());
+    } else {
+      fail();
+    }
+  }
+
+  /**
+   * Test of getChildQualifiedNameForAgent method, of class Role.
+   */
+  @Test
+  public void testGetChildQualifiedNameForAgent() {
+    LOGGER.info("getChildQualifiedNameForAgent");
+    Node node = NodeTest.makeTestNodeWithChild();
+    Optional<Role> optional = node.getRoles().stream().findFirst();
+    if (optional.isPresent()) {
+      assertEquals("TestContainer.TestChildAgent.TestChildRole", optional.get().getChildQualifiedNameForAgent("TestChildAgent"));
+      assertNull(optional.get().getChildQualifiedNameForAgent("ABCAgent"));
+    } else {
+      fail();
+    }
+  }
+
+  /**
+   * Test of getChildQualifiedNamesForAgent method, of class Role.
+   */
+  @Test
+  public void testGetChildQualifiedNamesForAgent() {
+    LOGGER.info("getChildQualifiedNamesForAgents");
+    Node node = NodeTest.makeTestNodeWithChild();
+    Optional<Role> optional = node.getRoles().stream().findFirst();
+    if (optional.isPresent()) {
+      assertEquals("[TestContainer.TestChildAgent.TestChildRole]", optional.get().getChildQualifiedNamesForAgent("TestChildAgent").toString());
+      assertEquals("[]", optional.get().getChildQualifiedNamesForAgent("ABCAgent").toString());
+    } else {
+      fail();
+    }
+  }
+
+ /**
    * Test of toString method, of class Role.
    */
   @Test

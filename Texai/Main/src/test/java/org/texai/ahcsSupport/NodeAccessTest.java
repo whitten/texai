@@ -192,6 +192,7 @@ public class NodeAccessTest {
     assertEquals(rdfEntityManager, result);
   }
 
+  
 
   /**
    * Makes a test skill class.

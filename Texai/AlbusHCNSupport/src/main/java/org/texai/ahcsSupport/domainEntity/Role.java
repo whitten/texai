@@ -625,6 +625,44 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   }
 
   /**
+   * Gets the first qualified child role name, i.e. container.nodename.rolename, which matches the given nodename.
+   *
+   * @param nodeName the given child nodename, e.g. XAIOperationAgent
+   * @return the qualified child role name, or null if not found
+   */
+  public String getChildQualifiedNameForAgent(final String nodeName) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(nodeName) : "nodeName must be a non-empty string";
+
+    final String target = "." + nodeName + ".";
+    for (final String childQualifiedName : childQualifiedNames) {
+      if (childQualifiedName.contains(target)) {
+        //TODO role and message should validate the qualified name
+        return childQualifiedName;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Gets the first qualified child role name, i.e. container.nodename.rolename, which matches the given nodename.
+   *
+   * @param nodeName the given child nodename, e.g. XAIOperationAgent
+   * @return the qualified child role name, or null if not found
+   */
+  public Set<String> getChildQualifiedNamesForAgent(final String nodeName) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(nodeName) : "nodeName must be a non-empty string";
+
+    final Set<String> childQualifiedNamesForAgent = new HashSet<>();
+    final String target = "." + nodeName + ".";
+    childQualifiedNames.stream().filter((childQualifiedName) -> (childQualifiedName.contains(target))).forEach((childQualifiedName) -> {
+      childQualifiedNamesForAgent.add(childQualifiedName);
+    });
+    return childQualifiedNamesForAgent;
+  }
+
+  /**
    * Gets the skill class names, which are objects that verify and format the class names.
    *
    * @return the skill class names

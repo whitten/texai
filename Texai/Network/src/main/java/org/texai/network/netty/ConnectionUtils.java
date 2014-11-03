@@ -24,6 +24,7 @@ import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Semaphore;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
 import org.jboss.netty.bootstrap.ClientBootstrap;
@@ -48,33 +49,46 @@ import org.texai.network.netty.pipeline.PortUnificationChannelPipelineFactory;
 import org.texai.util.TexaiException;
 import org.texai.x509.X509SecurityInfo;
 
-/** Provides convenient static methods to establish server and client Netty SSL channels.
+/**
+ * Provides convenient static methods to establish server and client Netty SSL
+ * channels.
  *
  * @author reed
  */
 @NotThreadSafe
 public final class ConnectionUtils {
 
-  /** the logger */
+  /**
+   * the logger
+   */
   private static final Logger LOGGER = Logger.getLogger(ConnectionUtils.class);
-  /** the connected channel dictionary, channel latch --> channel */
+  /**
+   * the connected channel dictionary, channel latch --> channel
+   */
   private final static Map<Object, Channel> connectedChannelDictionary = new HashMap<>();
 
-  /** Prevents the instantiation of this utility class. */
+  /**
+   * Prevents the instantiation of this utility class.
+   */
   private ConnectionUtils() {
   }
 
-  /** Creates a port unification server, handling Albus hierarchical control system messages, bit torrent messages,
-   * and HTTP requests, using a single shared socket with SSL encryption.
+  /**
+   * Creates a port unification server, handling Albus hierarchical control
+   * system messages, bit torrent messages, and HTTP requests, using a single
+   * shared socket with SSL encryption.
    *
    * @param port the server port
    * @param x509SecurityInfo the X.509 security information
-   * @param albusHCSMessageHandlerFactory the Albus hierarchical control system message handler factory
+   * @param albusHCSMessageHandlerFactory the Albus hierarchical control system
+   * message handler factory
    * @param bitTorrentHandlerFactory the bit torrent message handler factory
    * @param httpRequestHandlerFactory the HTTP request message handler factory
    * @param bossExecutor the Executor which will execute the boss threads
-   * @param workerExecutor the Executor which will execute the I/O worker threads
-   * @return the server bootstrap, which contains a new server-side channel and accepts incoming connections
+   * @param workerExecutor the Executor which will execute the I/O worker
+   * threads
+   * @return the server bootstrap, which contains a new server-side channel and
+   * accepts incoming connections
    */
   public static ServerBootstrap createPortUnificationServer(
           final int port,
@@ -109,7 +123,9 @@ public final class ConnectionUtils {
     return serverBootstrap;
   }
 
-  /** Releases the resources held by the port unification server, and closes its associated thread pools.
+  /**
+   * Releases the resources held by the port unification server, and closes its
+   * associated thread pools.
    *
    * @param serverBootstrap the server bootstrap
    */
@@ -117,13 +133,17 @@ public final class ConnectionUtils {
     serverBootstrap.releaseExternalResources();
   }
 
-  /** Opens an Albus hierarchical control system message connection using SSL encryption.
+  /**
+   * Opens an Albus hierarchical control system message connection using SSL
+   * encryption.
    *
    * @param inetSocketAddress the IP socket address, host & port
    * @param x509SecurityInfo the X.509 security information
-   * @param albusHCSMessageHandler the Albus hierarchical control system message handler
+   * @param albusHCSMessageHandler the Albus hierarchical control system message
+   * handler
    * @param bossExecutor the Executor which will execute the boss threads
-   * @param workerExecutor the Executor which will execute the I/O worker threads
+   * @param workerExecutor the Executor which will execute the I/O worker
+   * threads
    * @return the communication channel
    */
   public static Channel openAlbusHCSConnection(
@@ -139,7 +159,6 @@ public final class ConnectionUtils {
     assert bossExecutor != null : "bossExecutor must not be null";
     assert workerExecutor != null : "workerExecutor must not be null";
 
-
     LOGGER.info("creating Albus client bootstrap");
     final ClientBootstrap clientBootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(
             bossExecutor,
@@ -153,19 +172,19 @@ public final class ConnectionUtils {
     clientBootstrap.setPipeline(channelPipeline);
 
     // start the connection attempt
-    final Object channelConnection_lock = new Object();
+    final Semaphore channelConnection_lock = new Semaphore(
+            0); // permits
     bossExecutor.execute(new ChannelConnector(
             clientBootstrap,
             inetSocketAddress,
             channelConnection_lock));
 
-    synchronized (channelConnection_lock) {
-      LOGGER.info("waiting for connection");
-      try {
-        channelConnection_lock.wait();
-      } catch (InterruptedException ex) {
-        // ignore
-      }
+    LOGGER.info("waiting for connection " + channelConnection_lock);
+    try {
+      channelConnection_lock.acquire();
+      LOGGER.info("completed opening the channel" + channelConnection_lock);
+    } catch (InterruptedException ex) {
+      // ignore
     }
     final Channel channel;
     synchronized (connectedChannelDictionary) {
@@ -176,17 +195,26 @@ public final class ConnectionUtils {
     return channel;
   }
 
-  /** Provides a channel connector. */
+  /**
+   * Provides a channel connector.
+   */
   static class ChannelConnector implements Runnable {
 
-    /** the client bootstrap */
+    /**
+     * the client bootstrap
+     */
     final ClientBootstrap clientBootstrap;
-    /** the IP socket address, host & port */
+    /**
+     * the IP socket address, host & port
+     */
     final InetSocketAddress inetSocketAddress;
-    /** the channel connection synchronization lock */
-    final Object channelConnection_lock;
+    /**
+     * the channel connection synchronization lock
+     */
+    final Semaphore channelConnection_lock;
 
-    /** Constructs a new ChannelConnector instance.
+    /**
+     * Constructs a new ChannelConnector instance.
      *
      * @param clientBootstrap the client bootstrap
      * @param inetSocketAddress the IP socket address, host & port
@@ -195,7 +223,7 @@ public final class ConnectionUtils {
     ChannelConnector(
             final ClientBootstrap clientBootstrap,
             final InetSocketAddress inetSocketAddress,
-            final Object channelConnection_lock) {
+            final Semaphore channelConnection_lock) {
       //Preconditions
       assert clientBootstrap != null : "clientBootstrap must not be null";
       assert inetSocketAddress != null : "inetSocketAddress must not be null";
@@ -206,7 +234,9 @@ public final class ConnectionUtils {
       this.channelConnection_lock = channelConnection_lock;
     }
 
-    /** Connects to a channel. */
+    /**
+     * Connects to a channel.
+     */
     @Override
     public void run() {
       // start the connection attempt
@@ -217,21 +247,29 @@ public final class ConnectionUtils {
     }
   }
 
-  /** Provides a channel future listener that resumes the thread waiting for the channel connection event. */
+  /**
+   * Provides a channel future listener that resumes the thread waiting for the
+   * channel connection event.
+   */
   static class MyChannelFutureListener implements ChannelFutureListener {
 
-    /** the channel connection synchronization lock */
-    final Object channelConnection_lock;
-    /** the IP socket address, host & port */
+    /**
+     * the channel connection synchronization lock
+     */
+    final Semaphore channelConnection_lock;
+    /**
+     * the IP socket address, host & port
+     */
     final InetSocketAddress inetSocketAddress;
 
-    /** Constructs a new MyChannelFutureListener instance.
+    /**
+     * Constructs a new MyChannelFutureListener instance.
      *
      * @param channelConnection_lock the channel connection synchronization lock
      * @param inetSocketAddress the IP socket address, host & port
      */
     MyChannelFutureListener(
-            final Object channelConnection_lock,
+            final Semaphore channelConnection_lock,
             final InetSocketAddress inetSocketAddress) {
       //Preconditions
       assert channelConnection_lock != null : "channelConnection_lock must not be null";
@@ -241,11 +279,12 @@ public final class ConnectionUtils {
       this.inetSocketAddress = inetSocketAddress;
     }
 
-    /** Invoked when the I/O operation associated with the {@link ChannelFuture}
+    /**
+     * Invoked when the I/O operation associated with the {@link ChannelFuture}
      * has been completed.
      *
-     * @param channelFuture  The source {@link ChannelFuture} which called this
-     *                callback.
+     * @param channelFuture The source {@link ChannelFuture} which called this
+     * callback.
      * @throws java.lang.Exception
      */
     @Override
@@ -260,21 +299,24 @@ public final class ConnectionUtils {
       }
       LOGGER.info("Albus client connected");
       synchronized (connectedChannelDictionary) {
+        LOGGER.info("obtained lock on the connectedChannelDictionary");
         connectedChannelDictionary.put(channelConnection_lock, channelFuture.getChannel());
       }
-      synchronized (channelConnection_lock) {
-        channelConnection_lock.notify();
-      }
+      LOGGER.info("releasing the channel connection lock" + channelConnection_lock);
+      channelConnection_lock.release(); // release the lock
+      LOGGER.info("released the channel connection lock" + channelConnection_lock);
     }
   }
 
-  /** Opens bit torrent message connection using SSL encryption.
+  /**
+   * Opens bit torrent message connection using SSL encryption.
    *
    * @param inetSocketAddress the IP socket address, host & port
    * @param x509SecurityInfo the X.509 security information
    * @param bitTorrentHandler the bit torrent message handler
    * @param bossExecutor the Executor which will execute the boss threads
-   * @param workerExecutor the Executor which will execute the I/O worker threads
+   * @param workerExecutor the Executor which will execute the I/O worker
+   * threads
    * @return the communication channel
    */
   @SuppressWarnings("ThrowableResultIgnored")
@@ -290,7 +332,6 @@ public final class ConnectionUtils {
     assert bitTorrentHandler != null : "bitTorrentHandler must not be null";
     assert bossExecutor != null : "bossExecutor must not be null";
     assert workerExecutor != null : "workerExecutor must not be null";
-
 
     final ClientBootstrap clientBootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(
             bossExecutor,
@@ -314,13 +355,15 @@ public final class ConnectionUtils {
     return channel;
   }
 
-  /** Opens an HTTP message connection using SSL encryption.
+  /**
+   * Opens an HTTP message connection using SSL encryption.
    *
    * @param inetSocketAddress the IP socket address, host & port
    * @param x509SecurityInfo the X.509 security information
    * @param httpResponseHandler the HTTP response message handler
    * @param bossExecutor the Executor which will execute the boss threads
-   * @param workerExecutor the Executor which will execute the I/O worker threads
+   * @param workerExecutor the Executor which will execute the I/O worker
+   * threads
    * @return the communication channel
    */
   @SuppressWarnings("ThrowableResultIgnored")
@@ -336,7 +379,6 @@ public final class ConnectionUtils {
     assert httpResponseHandler != null : "httpResponseHandler must not be null";
     assert bossExecutor != null : "bossExecutor must not be null";
     assert workerExecutor != null : "workerExecutor must not be null";
-
 
     final ClientBootstrap clientBootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(
             bossExecutor,

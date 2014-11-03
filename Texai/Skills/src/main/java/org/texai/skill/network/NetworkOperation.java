@@ -1,26 +1,4 @@
-/*
- * XAINetworkOperation.java
- *
- * Created on Sep 18, 2014, 8:10:02 AM
- *
- * Description: Manages the network, the containers, and the TexaiCoin agents within the containers. Interacts with human operators.
- *
- * Copyright (C) 2014 Stephen L. Reed
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-package org.texai.skill.aicoin;
+package org.texai.skill.network;
 
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
@@ -29,21 +7,41 @@ import org.texai.ahcsSupport.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 
 /**
- * Manages the network, the containers, and the TexaiCoin agents within the
- * containers. Interacts with human operators.
+ * Created on Aug 30, 2014, 11:30:19 PM.
+ *
+ * Description: Manages the network, the containers, and the TexaiCoin agents
+ * within the containers. Interacts with human operators.
+ *
+ * Copyright (C) Aug 30, 2014, Stephen L. Reed, Texai.org.
  *
  * @author reed
+ *
+ * Copyright (C) 2014 Texai
+ *
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 @ThreadSafe
-public final class XAINetworkOperation extends AbstractSkill {
+public final class NetworkOperation extends AbstractSkill {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(XAIBlockchainArchive.class);
+  private static final Logger LOGGER = Logger.getLogger(NetworkOperation.class);
 
   /**
-   * Constructs a new XTCNetworkOperation instance.
+   * Constructs a new NetworkOperation instance.
    */
-  public XAINetworkOperation() {
+  public NetworkOperation() {
   }
 
   /**
@@ -68,11 +66,17 @@ public final class XAINetworkOperation extends AbstractSkill {
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
+        propagateOperationToChildRoles(
+                getClassName(), // service
+                operation);
         setSkillState(AHCSConstants.State.INITIALIZED);
         return true;
 
       case AHCSConstants.AHCS_READY_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.INITIALIZED) : "prior state must be initialized";
+        propagateOperationToChildRoles(
+                getClassName(), // service
+                operation);
         setSkillState(AHCSConstants.State.READY);
         return true;
 
@@ -122,8 +126,10 @@ public final class XAINetworkOperation extends AbstractSkill {
     };
   }
 
-  /** Perform this role's mission, which is to manage the containers.
-   * 
+  /**
+   * Perform this role's mission, which is to manage the network, the
+   * containers, and the TexaiCoin agents within the containers.
+   *
    * @param message the received perform mission task message
    */
   private void performMission(final Message message) {
@@ -131,15 +137,13 @@ public final class XAINetworkOperation extends AbstractSkill {
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
-    getRole().getChildQualifiedNamesForAgent("XAIOperationAgent").stream().forEach(operationAgent -> {
-      final Message performMissionMessage = new Message(
-              getRole().getQualifiedName(), // senderQualifiedName
-              getClassName(), // senderService,
-              operationAgent, // recipientQualifiedName,
-              "org.texai.skill.aicoin.XAIOperation", // recipientService
-              AHCSConstants.PERFORM_MISSION_TASK); // operation
-      sendMessage(performMissionMessage);
-    });
+final Message performMissionMessage = new Message(
+          getRole().getQualifiedName(), // senderQualifiedName
+          getClassName(), // senderService,
+          getRole().getChildQualifiedNameForAgent("XAINetworkOperationAgent"), // recipientQualifiedName,
+          "org.texai.skill.aicoin.XAINetworkOperation", // recipientService
+          AHCSConstants.PERFORM_MISSION_TASK); // operation
+    sendMessage(performMissionMessage);
   }
 
 }

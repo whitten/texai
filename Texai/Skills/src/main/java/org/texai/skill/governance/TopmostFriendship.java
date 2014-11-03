@@ -26,6 +26,7 @@ import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.skill.network.NetworkOperation;
 
 /**
  * Provides topmost perception and friendship behavior.
@@ -65,10 +66,15 @@ public final class TopmostFriendship extends AbstractSkill {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         initialization(message);
         return true;
+
+      case AHCSConstants.PERFORM_MISSION_TASK:
+        performMission(message);
+        return true;
+        
+    // handle other operations ...
     }
 
     assert getSkillState().equals(State.READY) : "must be in the ready state";
-    // handle other operations ...
 
     // not understood
     sendMessage(notUnderstoodMessage(message));
@@ -103,14 +109,14 @@ public final class TopmostFriendship extends AbstractSkill {
     return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.UTTERANCE_MEANING_SENSATION
+      AHCSConstants.PERFORM_MISSION_TASK
     };
   }
 
   /**
    * Performs the initialization operation.
    *
-   * @param message the received initialization message
+   * @param message the received initialization task message
    */
   private void initialization(final Message message) {
     //Preconditions
@@ -122,13 +128,34 @@ public final class TopmostFriendship extends AbstractSkill {
     propagateOperationToChildRoles(message.getOperation());
     setSkillState(State.INITIALIZED);
 
+    //TODO wait for child roles to be initialized
+    
     // ready the child roles
     LOGGER.info("readying child roles");
     propagateOperationToChildRoles(AHCSConstants.AHCS_READY_TASK); // operation
-
     setSkillState(State.READY);
+    
+    //TODO wait for child roles to be ready
   }
 
+  /** Perform this role's mission, which is to provide topmost perception and friendship behavior.
+   * 
+   * @param message the received perform mission task message
+   */
+  private void performMission(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(State.READY) : "state must be ready";
+
+    final Message performMissionMessage = new Message(
+          getRole().getQualifiedName(), // senderQualifiedName
+          getClassName(), // senderService,
+          getRole().getChildQualifiedNameForAgent("NetworkOperationAgent"), // recipientQualifiedName,
+          NetworkOperation.class.getName(), // recipientService
+          AHCSConstants.PERFORM_MISSION_TASK); // operation
+    sendMessage(performMissionMessage);
+  }
+  
   /**
    * Gets the logger.
    *
