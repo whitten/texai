@@ -54,6 +54,15 @@ public class Heartbeat extends AbstractSkill {
   public Heartbeat() {
   }
 
+  /** Gets the logger.
+   * 
+   * @return  the logger
+   */
+  @Override
+  protected Logger getLogger() {
+    return LOGGER;
+  }
+  
   /**
    * Receives and attempts to process the given message. The skill is thread
    * safe, given that any contained libraries are single threaded with regard to
@@ -69,6 +78,10 @@ public class Heartbeat extends AbstractSkill {
     assert message != null : "message must not be null";
 
     final String operation = message.getOperation();
+    if (!isOperationPermitted(message)) {
+      sendMessage(operationNotPermittedMessage(message));
+      return true;
+    }
     switch (operation) {
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);

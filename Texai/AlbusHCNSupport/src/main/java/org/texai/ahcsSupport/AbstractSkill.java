@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.TimerTask;
 import java.util.UUID;
 import net.jcip.annotations.ThreadSafe;
+import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.domainEntity.Role;
 import org.texai.kb.persistence.RDFEntityManager;
@@ -162,8 +163,8 @@ public abstract class AbstractSkill {
   public void sendMessage(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
-    //Preconditions
     assert role != null : "role must not be null for " + this;
+    assert message.getSenderQualifiedName().equals(getRole().getQualifiedName()) : "message sender must match this role " + message + "\nrole: " + getRole();
 
     role.sendMessage(message);
   }
@@ -177,6 +178,7 @@ public abstract class AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
     assert getRole() != null : "role must not be null";
+    assert message.getSenderQualifiedName().equals(getRole().getQualifiedName()) : "message sender must match this role " + message + "\nrole: " + getRole();
 
     getNodeRuntime().getExecutor().execute(new MessageSendingRunnable(
             message,
@@ -351,6 +353,7 @@ public abstract class AbstractSkill {
           final String recoveryAction) {
     //Preconditions
     assert message != null : "message must not be null";
+    assert message.getSenderQualifiedName().equals(getRole().getQualifiedName()) : "message sender must match this role " + message + "\nrole: " + getRole();
     assert timeoutMillis >= 0 : "timeoutMillis must not be negative";
 
     final MessageTimeoutTask messageTimeoutTask = new MessageTimeoutTask(this);
@@ -370,19 +373,27 @@ public abstract class AbstractSkill {
   }
   
   /**
-   * Removes a previously set message timeout.
+   * Removes a previously set replyMessage timeout using the in-reply-to value of the reply replyMessage.
    *
-   * @param message the given set message
+   * @param replyMessage the given set replyMessage
    */
-  protected void removeMessageTimeOut(final Message message) {
+  protected void removeMessageTimeOut(final Message replyMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert replyMessage != null : "message must not be null";
 
     synchronized (messageTimeOutInfoDictionary) {
-      messageTimeOutInfoDictionary.remove(message.getReplyWith());
+      final MessageTimeOutInfo messageTimeOutInfo = messageTimeOutInfoDictionary.remove(replyMessage.getInReplyTo());
+      assert messageTimeOutInfo != null;
+      getLogger().info("removed message timeout for ");
     }
   }
 
+  /** Gets the logger.
+   * 
+   * @return  the logger
+   */
+  abstract protected Logger getLogger();
+  
   /**
    * Provides a message timeout task which executes unless this task is canceled
    * beforehand.

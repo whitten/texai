@@ -20,7 +20,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.texai.skill.support;
 
 import org.apache.log4j.Logger;
@@ -36,12 +35,12 @@ import org.texai.ahcsSupport.domainEntity.Role;
  * @author reed
  */
 public class NodeRuntimeSkill extends AbstractSkill {
-  
+
   // the logger
   private static final Logger LOGGER = Logger.getLogger(NodeRuntimeSkill.class);
   // the node runtime
   private BasicNodeRuntime nodeRuntime;
-  
+
   /**
    * Sets the role containing this skill.
    *
@@ -50,18 +49,32 @@ public class NodeRuntimeSkill extends AbstractSkill {
   @Override
   public void setRole(final Role role) {
     super.setRole(role);
-    
+
     nodeRuntime = role.getNodeRuntime();
     assert nodeRuntime != null;
     nodeRuntime.setNodeRuntimeSkill(this);
   }
 
-  /** Constructs a new NodeRuntimeSkill instance. */
+  /**
+   * Constructs a new NodeRuntimeSkill instance.
+   */
   public NodeRuntimeSkill() {
   }
 
-  /** Receives and attempts to process the given message.  The skill is thread safe, given that any contained libraries are single threaded
-   * with regard to the conversation.
+  /**
+   * Gets the logger.
+   *
+   * @return the logger
+   */
+  @Override
+  protected Logger getLogger() {
+    return LOGGER;
+  }
+
+  /**
+   * Receives and attempts to process the given message. The skill is thread
+   * safe, given that any contained libraries are single threaded with regard to
+   * the conversation.
    *
    * @param message the given message
    * @return whether the message was successfully processed
@@ -72,7 +85,15 @@ public class NodeRuntimeSkill extends AbstractSkill {
     assert message != null : "message must not be null";
 
     final String operation = message.getOperation();
+    if (!isOperationPermitted(message)) {
+      sendMessage(operationNotPermittedMessage(message));
+      return true;
+    }
     switch (operation) {
+      case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
+        LOGGER.warn(message);
+        return true;
+
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
         setSkillState(State.INITIALIZED);
@@ -83,21 +104,14 @@ public class NodeRuntimeSkill extends AbstractSkill {
         setSkillState(State.READY);
         return true;
     }
-
-    assert getSkillState().equals(State.READY) : "must be in the ready state";
-    if (operation.equals(AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO)) {
-      LOGGER.warn(message);
-      return true;
-    }
-
-    //TODO handle operations
-
     sendMessage(notUnderstoodMessage(message));
     return true;
   }
 
-  /** Synchronously processes the given message.  The skill is thread safe, given that any contained libraries are single threaded
-   * with regard to the conversation.
+  /**
+   * Synchronously processes the given message. The skill is thread safe, given
+   * that any contained libraries are single threaded with regard to the
+   * conversation.
    *
    * @param message the given message
    * @return the response message or null if not applicable
@@ -108,19 +122,18 @@ public class NodeRuntimeSkill extends AbstractSkill {
     assert message != null : "message must not be null";
 
     //TODO handle operations
-
     return notUnderstoodMessage(message);
   }
 
-  /** Returns the understood operations.
+  /**
+   * Returns the understood operations.
    *
    * @return the understood operations
    */
   @Override
   public String[] getUnderstoodOperations() {
-    return new String[] {
-      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
-    };
+    return new String[]{
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,};
   }
 
 }

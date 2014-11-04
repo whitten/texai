@@ -17,9 +17,9 @@ import org.texai.util.TexaiException;
  * Created on Aug 30, 2014, 11:31:08 PM.
  *
  * Description: Operates a slave bitcoind instance that runs in a separate
- * process in the same container.
- *
- * Copyright (C) Aug 30, 2014, Stephen L. Reed, Texai.org.
+ continueConversation in the same container.
+
+ Copyright (C) Aug 30, 2014, Stephen L. Reed, Texai.org.
  *
  * @author reed
  *
@@ -55,8 +55,17 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
   public XAIOperation() {
   }
 
+  /** Gets the logger.
+   * 
+   * @return  the logger
+   */
+  @Override
+  protected Logger getLogger() {
+    return LOGGER;
+  }
+  
   /**
-   * Receives and attempts to process the given message. The skill is thread
+   * Receives and attempts to continueConversation the given message. The skill is thread
    * safe, given that any contained libraries are single threaded with regard to
    * the conversation.
    *
@@ -70,8 +79,6 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
     assert message != null : "message must not be null";
 
     final String operation = message.getOperation();
-    
-    //TODO replicate this test to all other skills
     if (!isOperationPermitted(message)) {
       sendMessage(operationNotPermittedMessage(message));
       return true;
@@ -94,7 +101,7 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
 
       case AHCSConstants.TASK_ACCOMPLISHED_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
-        process(message);
+        continueConversation(message);
         return true;
 
       case AHCSConstants.PERFORM_MISSION_TASK:
@@ -159,37 +166,7 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
     assert getStateValue(REPLY_WITH) == null;
     final UUID replyWith = UUID.randomUUID();
     setStateValue(REPLY_WITH, replyWith);
-    writeConfigurationFile(conversationId, replyWith);
-
-    //TODO code an ideal handling of a trivial conversation
-    
-  }
-
-  /**
-   * Writes the configuration file and launches bitcoind.
-   */
-  private synchronized void process(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-
-    //TODO
-  }
-
-  /**
-   * Asynchronously invokes the XAIWriteConfigurationFile skill to write the
-   * configuration file for bitcoind.
-   *
-   * @param conversationId the conversation id message parameter
-   * @param replyWith the reply-with message parameter
-   */
-  private void writeConfigurationFile(
-          final UUID conversationId,
-          final UUID replyWith) {
-    //Preconditions
-    assert conversationId != null : "conversationId must not be null";
-    assert replyWith != null : "replyWith must not be null";
-
-    final Message message = new Message(
+    final Message writeConfigurationFileTaskmessage = new Message(
             getRole().getQualifiedName(), // senderQualifiedName
             getClass().getName(), // senderService
             getRole().getQualifiedName(), // recipientQualifiedName
@@ -197,13 +174,24 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
             replyWith,
             XAIWriteConfigurationFile.class.getName(), // recipientService
             AHCSConstants.WRITE_CONFIGURATION_FILE_TASK); // operation
-    sendMessage(message);
     // set timeout
     setMessageReplyTimeout(
-            message,
+            writeConfigurationFileTaskmessage,
             10000, // timeoutMillis
             false, // isRecoverable
             null); // recoveryAction
+    sendMessageViaSeparateThread(writeConfigurationFileTaskmessage);
+  }
+
+  /**
+  /**
+   * Continues the conversation with the 
+   */
+  private synchronized void continueConversation(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+
+    //TODO
   }
 
   /**

@@ -42,10 +42,11 @@ public class SkillTemplate extends AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
 
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("receiveMessage: " + message);
-    }
     final String operation = message.getOperation();
+    if (!isOperationPermitted(message)) {
+      sendMessage(operationNotPermittedMessage(message));
+      return true;
+    }
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
@@ -60,6 +61,12 @@ public class SkillTemplate extends AbstractSkill {
         propagateOperationToChildRoles(operation);
         setSkillState(State.READY);
         return true;
+        
+      case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
+        LOGGER.warn(message);
+        return true;
+
+      // handle other operations ...
     }
     // otherwise, the message is not understood
     sendMessage(notUnderstoodMessage(message));
@@ -93,4 +100,14 @@ public class SkillTemplate extends AbstractSkill {
               AHCSConstants.AHCS_READY_TASK,
             };
   }
+  
+  /** Gets the logger.
+   * 
+   * @return  the logger
+   */
+  @Override
+  protected Logger getLogger() {
+    return LOGGER;
+  }
+  
 }

@@ -54,6 +54,15 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
   public XAIWriteConfigurationFile() {
   }
 
+  /** Gets the logger.
+   * 
+   * @return  the logger
+   */
+  @Override
+  protected Logger getLogger() {
+    return LOGGER;
+  }
+  
   /**
    * Receives and attempts to process the given message. The skill is thread
    * safe, given that any contained libraries are single threaded with regard to
@@ -69,8 +78,8 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
     assert message != null : "message must not be null";
 
     final String operation = message.getOperation();
-    if (operation.equals(AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO)) {
-      LOGGER.warn(message);
+    if (!isOperationPermitted(message)) {
+      sendMessage(operationNotPermittedMessage(message));
       return true;
     }
     switch (operation) {
@@ -87,11 +96,12 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
       case AHCSConstants.WRITE_CONFIGURATION_FILE_TASK:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
         return writeConfigurationFile(message);
+        
+      case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
+        LOGGER.warn(message);
+        return true;
     }
 
-    assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
-
-    // other operations ...
     sendMessage(notUnderstoodMessage(message));
     return true;
   }
@@ -124,23 +134,32 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
       assert directory.isDirectory();
     }
     
-    //TODO get the rpc credentials from the environment
-    
+    final String rpcuser = System.getenv("RPC_USER");
+    if (!StringUtils.isNonEmptyString(rpcuser)) {
+      throw new TexaiException("the RPC_USER environment variable must be assigned a value");
+    }
+    final String rpcpassword = System.getenv("RPC_PASSWORD");
+    if (!StringUtils.isNonEmptyString(rpcpassword)) {
+      throw new TexaiException("the RPC_PASSWORD environment variable must be assigned a value");
+    }
     // emit the configuration file line by line
     try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(confFile))) {
       bufferedWriter.write("testnet=1\n");
       bufferedWriter.write("server=1\n");
       bufferedWriter.write("rpcuser=");
+      bufferedWriter.write(rpcuser);
       bufferedWriter.write("\n");
       bufferedWriter.write("rpcpassword=");
+      bufferedWriter.write(rpcpassword);      
       bufferedWriter.write("\n");
       bufferedWriter.write("\n");
     } catch (IOException ex) {
       throw new TexaiException(ex);
     }
 
-    //TODO send TASK_ACCOMPLISHED_INFO
-    
+    // send a task accomplished info message back to the XAIOperation role
+    final Message replyMessage = Message.replyTaskAccomplished(message);
+    sendMessageViaSeparateThread(replyMessage);
     return true;
   }
 

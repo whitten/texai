@@ -56,6 +56,10 @@ public class ContainerLogControl extends AbstractSkill {
 
     LOGGER.info("receiveMessage " + message.toString());
     final String operation = message.getOperation();
+    if (!isOperationPermitted(message)) {
+      sendMessage(operationNotPermittedMessage(message));
+      return true;
+    }
     switch (operation) {
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
@@ -231,10 +235,13 @@ public class ContainerLogControl extends AbstractSkill {
     getNodeRuntime().removeLoggedOperation(unloggedOperation);
   }
 
-  // Gets the logger.
-  //
-  // @return the logger
+  /** Gets the logger.
+   * 
+   * @return  the logger
+   */
+  @Override
   protected Logger getLogger() {
     return LOGGER;
   }
+  
 }

@@ -310,10 +310,10 @@ public class Message implements Serializable {
           final String recipientService) {
     //Preconditions
     assert message != null : "message must not be null";
-    assert recipientQualifiedName != null : "recipientRoleId must not be null";
+    assert recipientQualifiedName != null : "recipientQualifiedName must not be null";
 
     return new Message(
-            message.recipientQualifiedName, // senderRoleId
+            message.recipientQualifiedName, // senderQualifiedName
             message.recipientService, // senderService,
             recipientQualifiedName,
             message.conversationId,
@@ -345,9 +345,29 @@ public class Message implements Serializable {
     return new Message(
             skill.getRole().getQualifiedName(),
             skill.getClassName(), // senderService,
-            message.getSenderQualifiedName(), // recipientRoleId
+            message.getSenderQualifiedName(), // recipientQualifiedName
             message.getSenderService(), // recipientService
             message.getOperation().replace("_Task", "_Info")); // operation
+  }
+
+  /**
+   * Returns a new taskAccomplished info message for replying to the given received task message.
+   *
+   * @param message the given message
+   *
+   * @return a new message for forwarding to the given recipient
+   */
+  public static Message replyTaskAccomplished(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert message.isTask() : "message must be a task";
+
+    return new Message(
+            message.recipientQualifiedName, // senderQualifiedName
+            message.recipientService, // senderService,
+            message.getSenderQualifiedName(), // recipientQualifiedName
+            message.getSenderService(), // recipientService
+            AHCSConstants.TASK_ACCOMPLISHED_INFO); // operation
   }
 
   /**
@@ -359,7 +379,7 @@ public class Message implements Serializable {
   @SuppressWarnings({"CloneDeclaresCloneNotSupported", "CloneDoesntCallSuperClone"})
   public Message clone() {
     return new Message(
-            recipientQualifiedName, // senderRoleId
+            recipientQualifiedName, // senderQualifiedName
             recipientService, // senderService,
             recipientQualifiedName,
             conversationId,

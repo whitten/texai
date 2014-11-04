@@ -45,6 +45,15 @@ public class CertificateAuthority extends AbstractSkill {
   public CertificateAuthority() {
   }
 
+  /** Gets the logger.
+   * 
+   * @return  the logger
+   */
+  @Override
+  protected Logger getLogger() {
+    return LOGGER;
+  }
+  
   /** Receives and attempts to process the given message.  The skill is thread safe, given that any contained libraries are single threaded
    * with regard to the conversation.
    *
@@ -57,6 +66,10 @@ public class CertificateAuthority extends AbstractSkill {
     assert message != null : "message must not be null";
 
     final String operation = message.getOperation();
+    if (!isOperationPermitted(message)) {
+      sendMessage(operationNotPermittedMessage(message));
+      return true;
+    }
     if (operation.equals(AHCSConstants.AHCS_INITIALIZE_TASK)) {
       initialization(message);
       return true;

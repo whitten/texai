@@ -39,6 +39,15 @@ public final class XAIContainerAudit extends AbstractSkill {
   public XAIContainerAudit() {
   }
 
+  /** Gets the logger.
+   * 
+   * @return  the logger
+   */
+  @Override
+  protected Logger getLogger() {
+    return LOGGER;
+  }
+  
   /**
    * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries
    * are single threaded with regard to the conversation.
@@ -53,8 +62,8 @@ public final class XAIContainerAudit extends AbstractSkill {
     assert message != null : "message must not be null";
 
     final String operation = message.getOperation();
-    if (operation.equals(AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO)) {
-      LOGGER.warn(message);
+    if (!isOperationPermitted(message)) {
+      sendMessage(operationNotPermittedMessage(message));
       return true;
     }
     switch (operation) {
@@ -66,11 +75,12 @@ public final class XAIContainerAudit extends AbstractSkill {
       case AHCSConstants.AHCS_READY_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.INITIALIZED) : "prior state must be initialized";
         return true;
+        
+      case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
+        LOGGER.warn(message);
+        return true;
     }
 
-    assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
-
-    // other operations ...
     sendMessage(notUnderstoodMessage(message));
     return true;
   }

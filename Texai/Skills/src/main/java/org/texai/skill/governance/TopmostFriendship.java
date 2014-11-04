@@ -58,6 +58,10 @@ public final class TopmostFriendship extends AbstractSkill {
     assert message != null : "message must not be null";
 
     final String operation = message.getOperation();
+    if (!isOperationPermitted(message)) {
+      sendMessage(operationNotPermittedMessage(message));
+      return true;
+    }
     switch (operation) {
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
@@ -69,8 +73,6 @@ public final class TopmostFriendship extends AbstractSkill {
 
     // handle other operations ...
     }
-
-    assert getSkillState().equals(State.READY) : "must be in the ready state";
 
     // not understood
     sendMessage(notUnderstoodMessage(message));
@@ -159,12 +161,13 @@ public final class TopmostFriendship extends AbstractSkill {
     //TODO same for the remaining child agent roles
   }
   
-  /**
-   * Gets the logger.
-   *
-   * @return the logger
+  /** Gets the logger.
+   * 
+   * @return  the logger
    */
+  @Override
   protected Logger getLogger() {
     return LOGGER;
   }
+  
 }

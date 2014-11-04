@@ -28,7 +28,7 @@ import org.texai.ahcsSupport.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 
 /**
- * Manages the container governorance agents to ensure friendly behavior.
+ * Manages the container governance agents to ensure friendly behavior.
  *
  * @author reed
  */
@@ -59,6 +59,10 @@ public final class TopLevelGovernance extends AbstractSkill {
 
     LOGGER.info("receiveMessage " + message.toString());
     final String operation = message.getOperation();
+    if (!isOperationPermitted(message)) {
+      sendMessage(operationNotPermittedMessage(message));
+      return true;
+    }
     switch (operation) {
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
@@ -152,6 +156,7 @@ public final class TopLevelGovernance extends AbstractSkill {
    *
    * @return the logger
    */
+  @Override
   protected Logger getLogger() {
     return LOGGER;
   }

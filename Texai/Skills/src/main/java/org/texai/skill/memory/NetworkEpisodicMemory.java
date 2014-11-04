@@ -42,6 +42,15 @@ public class NetworkEpisodicMemory extends AbstractSkill {
   public NetworkEpisodicMemory() {
   }
 
+  /** Gets the logger.
+   * 
+   * @return  the logger
+   */
+  @Override
+  protected Logger getLogger() {
+    return LOGGER;
+  }
+  
   /** Receives and attempts to process the given message.  The skill is thread safe, given that any contained libraries are single threaded
    * with regard to the conversation.
    *
@@ -54,6 +63,10 @@ public class NetworkEpisodicMemory extends AbstractSkill {
     assert message != null : "message must not be null";
 
     final String operation = message.getOperation();
+    if (!isOperationPermitted(message)) {
+      sendMessage(operationNotPermittedMessage(message));
+      return true;
+    }
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
@@ -64,15 +77,11 @@ public class NetworkEpisodicMemory extends AbstractSkill {
         assert getSkillState().equals(State.INITIALIZED) : "prior state must be initialized";
         setSkillState(State.READY);
         return true;
+        
+      case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
+        LOGGER.warn(message);
+        return true;
     }
-
-    assert getSkillState().equals(State.READY) : "must be in the ready state";
-    if (operation.equals(AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO)) {
-      LOGGER.warn(message);
-      return true;
-    }
-
-    //TODO handle operations
 
     sendMessage(notUnderstoodMessage(message));
     return true;

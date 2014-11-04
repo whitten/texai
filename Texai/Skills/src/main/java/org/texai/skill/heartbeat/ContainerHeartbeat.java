@@ -59,6 +59,15 @@ public final class ContainerHeartbeat extends AbstractSkill {
   public ContainerHeartbeat() {
   }
 
+  /** Gets the logger.
+   * 
+   * @return  the logger
+   */
+  @Override
+  protected Logger getLogger() {
+    return LOGGER;
+  }
+  
   /**
    * Receives and attempts to process the given message. The skill is thread
    * safe, given that any contained libraries are single threaded with regard to
@@ -74,6 +83,10 @@ public final class ContainerHeartbeat extends AbstractSkill {
     assert message != null : "message must not be null";
 
     final String operation = message.getOperation();
+    if (!isOperationPermitted(message)) {
+      sendMessage(operationNotPermittedMessage(message));
+      return true;
+    }
     if (operation.equals(AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO)) {
       LOGGER.warn(message);
       return true;
@@ -105,9 +118,11 @@ public final class ContainerHeartbeat extends AbstractSkill {
       case AHCSConstants.KEEP_ALIVE_INFO:
         recordKeepAlive(message);
         return true;
+        
+      case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
+        LOGGER.warn(message);
+        return true;
     }
-
-    assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
 
     // other operations ...
     sendMessage(notUnderstoodMessage(message));

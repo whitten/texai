@@ -40,6 +40,15 @@ public final class ContainerOperation extends AbstractSkill {
   public ContainerOperation() {
   }
 
+  /** Gets the logger.
+   * 
+   * @return  the logger
+   */
+  @Override
+  protected Logger getLogger() {
+    return LOGGER;
+  }
+  
   /**
    * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries
    * are single threaded with regard to the conversation.
@@ -54,8 +63,8 @@ public final class ContainerOperation extends AbstractSkill {
     assert message != null : "message must not be null";
 
     final String operation = message.getOperation();
-    if (operation.equals(AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO)) {
-      LOGGER.warn(message);
+    if (!isOperationPermitted(message)) {
+      sendMessage(operationNotPermittedMessage(message));
       return true;
     }
     switch (operation) {
@@ -77,6 +86,10 @@ public final class ContainerOperation extends AbstractSkill {
 
       case AHCSConstants.PERFORM_MISSION_TASK:
         performMission(message);
+        return true;
+
+      case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
+        LOGGER.warn(message);
         return true;
 
       // handle other operations ...

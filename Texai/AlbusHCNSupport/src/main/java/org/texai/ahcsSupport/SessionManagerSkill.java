@@ -54,6 +54,15 @@ public class SessionManagerSkill extends AbstractSkill {
   public SessionManagerSkill() {
   }
 
+  /** Gets the logger.
+   * 
+   * @return  the logger
+   */
+  @Override
+  protected Logger getLogger() {
+    return LOGGER;
+  }
+  
   /** Returns the class name of this skill.
    *
    * @return the class name of this skill
@@ -75,6 +84,10 @@ public class SessionManagerSkill extends AbstractSkill {
     assert message != null : "message must not be null";
 
     final String operation = message.getOperation();
+    if (!isOperationPermitted(message)) {
+      sendMessage(operationNotPermittedMessage(message));
+      return true;
+    }
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
@@ -96,6 +109,10 @@ public class SessionManagerSkill extends AbstractSkill {
         // ready child roles
         propagateOperationToChildRoles(operation);
         setSkillState(State.READY);
+        return true;
+        
+      case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
+        LOGGER.warn(message);
         return true;
     }
     assert operation.equals(AHCSConstants.REGISTER_SENSED_UTTERANCE_PROCESSOR_TASK)
