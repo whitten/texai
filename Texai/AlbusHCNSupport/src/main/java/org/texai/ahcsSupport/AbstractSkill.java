@@ -354,9 +354,6 @@ public abstract class AbstractSkill {
     assert timeoutMillis >= 0 : "timeoutMillis must not be negative";
 
     final MessageTimeoutTask messageTimeoutTask = new MessageTimeoutTask(this);
-    role.getNodeRuntime().getTimer().schedule(
-            messageTimeoutTask,
-            0L); // delay
     final MessageTimeOutInfo messageTimeOutInfo = new MessageTimeOutInfo(
             message,
             timeoutMillis,
@@ -367,8 +364,11 @@ public abstract class AbstractSkill {
     synchronized (messageTimeOutInfoDictionary) {
       messageTimeOutInfoDictionary.put(message.getReplyWith(), messageTimeOutInfo);
     }
+    role.getNodeRuntime().getTimer().schedule(
+            messageTimeoutTask,
+            timeoutMillis); // delay
   }
-
+  
   /**
    * Removes a previously set message timeout.
    *

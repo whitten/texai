@@ -123,7 +123,9 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
       directory.mkdir();
       assert directory.isDirectory();
     }
-
+    
+    //TODO get the rpc credentials from the environment
+    
     // emit the configuration file line by line
     try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(confFile))) {
       bufferedWriter.write("testnet=1\n");
@@ -138,6 +140,7 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
     }
 
     //TODO send TASK_ACCOMPLISHED_INFO
+    
     return true;
   }
 
