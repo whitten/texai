@@ -195,6 +195,8 @@ public final class PortUnificationTest {
     final DateTime replyByDateTime = null;
     final String operation = "Echo_Task";
     final Map<String, Object> parameterDictionary = new HashMap<>();
+    // the test service is a valid class with a no-argument constructor, the Skills defining module is dependent on this so an actual skill class cannot be used here
+    final String service = "org.texai.kb.persistence.domainEntity.RepositoryContentDescription";
 
     Message message = new Message(
             senderQualifiedName,
@@ -204,7 +206,7 @@ public final class PortUnificationTest {
             replyWith,
             inReplyTo,
             replyByDateTime,
-            "TestService",
+            service,
             operation,
             parameterDictionary,
             "1.0.0"); // version

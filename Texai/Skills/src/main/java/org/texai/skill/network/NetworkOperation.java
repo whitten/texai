@@ -137,12 +137,13 @@ public final class NetworkOperation extends AbstractSkill {
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
-final Message performMissionMessage = new Message(
-          getRole().getQualifiedName(), // senderQualifiedName
-          getClassName(), // senderService,
-          getRole().getChildQualifiedNameForAgent("XAINetworkOperationAgent"), // recipientQualifiedName,
-          "org.texai.skill.aicoin.XAINetworkOperation", // recipientService
-          AHCSConstants.PERFORM_MISSION_TASK); // operation
+    LOGGER.info("performing the mission");
+    final Message performMissionMessage = new Message(
+            getRole().getQualifiedName(), // senderQualifiedName
+            getClassName(), // senderService,
+            getRole().getChildQualifiedNameForAgent("XAINetworkOperationAgent"), // recipientQualifiedName,
+            "org.texai.skill.aicoin.XAINetworkOperation", // recipientService
+            AHCSConstants.PERFORM_MISSION_TASK); // operation
     sendMessage(performMissionMessage);
   }
 

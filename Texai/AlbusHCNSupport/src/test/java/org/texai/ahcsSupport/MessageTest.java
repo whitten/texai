@@ -20,8 +20,15 @@
  */
 package org.texai.ahcsSupport;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
@@ -84,7 +91,8 @@ public class MessageTest {
     final UUID replyWith = UUID.randomUUID();
     final UUID inReplyTo = UUID.randomUUID();
     final DateTime replyByDateTime = null;
-    final String service = "MyService";
+    // the test service is a valid class with a no-argument constructor, the Skills defining module is dependent on this so an actual skill class cannot be used here
+    final String service = "org.texai.kb.persistence.domainEntity.RepositoryContentDescription";
     final String operation = "ABC_Task";
     final Map<String, Object> parameterDictionary = new HashMap<>();
     Message instance = new Message(
@@ -116,7 +124,8 @@ public class MessageTest {
     final UUID replyWith = UUID.randomUUID();
     final UUID inReplyTo = UUID.randomUUID();
     final DateTime replyByDateTime = null;
-    final String service = "MyService";
+    // the test service is a valid class with a no-argument constructor, the Skills defining module is dependent on this so an actual skill class cannot be used here
+    final String service = "org.texai.kb.persistence.domainEntity.RepositoryContentDescription";
     final String operation = "ABC_Task";
     final Map<String, Object> parameterDictionary = new HashMap<>();
     Message instance = new Message(
@@ -148,7 +157,8 @@ public class MessageTest {
     final UUID replyWith = UUID.randomUUID();
     final UUID inReplyTo = UUID.randomUUID();
     final DateTime replyByDateTime = null;
-    final String service = "MyService";
+    // the test service is a valid class with a no-argument constructor, the Skills defining module is dependent on this so an actual skill class cannot be used here
+    final String service = "org.texai.kb.persistence.domainEntity.RepositoryContentDescription";
     final String operation = "ABC_Task";
     final Map<String, Object> parameterDictionary = new HashMap<>();
     Message instance = new Message(
@@ -194,7 +204,8 @@ public class MessageTest {
     final UUID replyWith = UUID.randomUUID();
     final UUID inReplyTo = UUID.randomUUID();
     final DateTime replyByDateTime = null;
-    final String service = "MyService";
+    // the test service is a valid class with a no-argument constructor, the Skills defining module is dependent on this so an actual skill class cannot be used here
+    final String service = "org.texai.kb.persistence.domainEntity.RepositoryContentDescription";
     final Map<String, Object> parameterDictionary = new HashMap<>();
     Message instance = new Message(
             senderQualifiedName,
@@ -251,7 +262,8 @@ public class MessageTest {
     final UUID replyWith = UUID.randomUUID();
     final UUID inReplyTo = UUID.randomUUID();
     final DateTime replyByDateTime = null;
-    final String service = "MyService";
+    // the test service is a valid class with a no-argument constructor, the Skills defining module is dependent on this so an actual skill class cannot be used here
+    final String service = "org.texai.kb.persistence.domainEntity.RepositoryContentDescription";
     final Map<String, Object> parameterDictionary = new HashMap<>();
     Message instance = new Message(
             senderQualifiedName,
@@ -308,7 +320,8 @@ public class MessageTest {
     final UUID replyWith = UUID.randomUUID();
     final UUID inReplyTo = UUID.randomUUID();
     final DateTime replyByDateTime = null;
-    final String service = "MyService";
+    // the test service is a valid class with a no-argument constructor, the Skills defining module is dependent on this so an actual skill class cannot be used here
+    final String service = "org.texai.kb.persistence.domainEntity.RepositoryContentDescription";
     final Map<String, Object> parameterDictionary = new HashMap<>();
     Message instance = new Message(
             senderQualifiedName,
@@ -368,7 +381,8 @@ public class MessageTest {
     final Map<String, Object> parameterDictionary = new HashMap<>();
     String parameterName = "my-parm";
     Serializable parameterValue = 10;
-    final String service = "MyService";
+    // the test service is a valid class with a no-argument constructor, the Skills defining module is dependent on this so an actual skill class cannot be used here
+    final String service = "org.texai.kb.persistence.domainEntity.RepositoryContentDescription";
     parameterDictionary.put(parameterName, parameterValue);
     Message instance = new Message(
             senderQualifiedName,
@@ -397,7 +411,8 @@ public class MessageTest {
     final UUID replyWith = UUID.randomUUID();
     final UUID inReplyTo = UUID.randomUUID();
     final DateTime replyByDateTime = null;
-    final String service = "MyService";
+    // the test service is a valid class with a no-argument constructor, the Skills defining module is dependent on this so an actual skill class cannot be used here
+    final String service = "org.texai.kb.persistence.domainEntity.RepositoryContentDescription";
     final Map<String, Object> parameterDictionary = new HashMap<>();
     String parameterName = "my-parm";
     Serializable parameterValue = 10;
@@ -415,7 +430,7 @@ public class MessageTest {
             parameterDictionary,
             "1.0.0");
     LOGGER.info(instance);
-    assertTrue(instance.toString().startsWith("[container1.agent1.role1:SenderService --> container2.agent2.role2:MyService (ABC_Task) {"));
+    assertTrue(instance.toString().startsWith("[container1.agent1.role1:SenderService --> container2.agent2.role2:RepositoryContentDescription (ABC_Task) {"));
   }
 
   /**
@@ -430,7 +445,8 @@ public class MessageTest {
     final UUID replyWith = UUID.randomUUID();
     final UUID inReplyTo = UUID.randomUUID();
     final DateTime replyByDateTime = null;
-    final String service = "MyService";
+    // the test service is a valid class with a no-argument constructor, the Skills defining module is dependent on this so an actual skill class cannot be used here
+    final String service = "org.texai.kb.persistence.domainEntity.RepositoryContentDescription";
     final Map<String, Object> parameterDictionary1 = new HashMap<>();
     String parameterName = "my-parm";
     Serializable parameterValue = 10;
@@ -490,7 +506,8 @@ public class MessageTest {
     final UUID replyWith = UUID.randomUUID();
     final UUID inReplyTo = UUID.randomUUID();
     final DateTime replyByDateTime = null;
-    final String service = "MyService";
+    // the test service is a valid class with a no-argument constructor, the Skills defining module is dependent on this so an actual skill class cannot be used here
+    final String service = "org.texai.kb.persistence.domainEntity.RepositoryContentDescription";
     final Map<String, Object> parameterDictionary = new HashMap<>();
     String parameterName = "my-parm";
     Serializable parameterValue = 10;
@@ -525,7 +542,8 @@ public class MessageTest {
     final UUID inReplyTo = UUID.randomUUID();
     final DateTime replyByDateTime = null;
     final Map<String, Object> parameterDictionary = new HashMap<>();
-    final String service = "MyService";
+    // the test service is a valid class with a no-argument constructor, the Skills defining module is dependent on this so an actual skill class cannot be used here
+    final String service = "org.texai.kb.persistence.domainEntity.RepositoryContentDescription";
     String parameterName = "my-parm";
     Serializable parameterValue = 10;
     parameterDictionary.put(parameterName, parameterValue);
@@ -564,7 +582,8 @@ public class MessageTest {
     final UUID replyWith = UUID.randomUUID();
     final UUID inReplyTo = UUID.randomUUID();
     final DateTime replyByDateTime = null;
-    final String service = "MyService";
+    // the test service is a valid class with a no-argument constructor, the Skills defining module is dependent on this so an actual skill class cannot be used here
+    final String service = "org.texai.kb.persistence.domainEntity.RepositoryContentDescription";
     final Map<String, Object> parameterDictionary = new HashMap<>();
     String parameterName = "my-parm";
     Serializable parameterValue = 10;
@@ -582,7 +601,7 @@ public class MessageTest {
             parameterDictionary,
             "1.0.0");
     LOGGER.info(instance);
-    assertTrue(instance.toString().startsWith("[container1.agent1.role1:SenderService --> container2.agent2.role2:MyService (ABC_Task) {"));
+    assertTrue(instance.toString().startsWith("[container1.agent1.role1:SenderService --> container2.agent2.role2:RepositoryContentDescription (ABC_Task) {"));
     try {
       final KeyPair keyPair = X509Utils.generateRSAKeyPair3072();
       final X509Certificate x509Certificate = X509Utils.generateSelfSignedEndEntityX509Certificate(
@@ -603,7 +622,7 @@ public class MessageTest {
       boolean result = instance.verify(x509Certificate);
       LOGGER.info("Signature Verification Result = " + x509Certificate);
       assertTrue(result);
-    } catch (Exception ex) {
+    } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | SignatureException | InvalidKeyException | IOException | CertificateException ex) {
       ex.printStackTrace();
       fail(ex.getMessage());
     }

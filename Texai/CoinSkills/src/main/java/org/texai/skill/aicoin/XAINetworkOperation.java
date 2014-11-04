@@ -38,7 +38,7 @@ import org.texai.ahcsSupport.Message;
 public final class XAINetworkOperation extends AbstractSkill {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(XAIBlockchainArchive.class);
+  private static final Logger LOGGER = Logger.getLogger(XAINetworkOperation.class);
 
   /**
    * Constructs a new XTCNetworkOperation instance.
@@ -68,11 +68,17 @@ public final class XAINetworkOperation extends AbstractSkill {
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
+        propagateOperationToChildRoles(
+                getClassName(), // service
+                operation);
         setSkillState(AHCSConstants.State.INITIALIZED);
         return true;
 
       case AHCSConstants.AHCS_READY_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.INITIALIZED) : "prior state must be initialized";
+        propagateOperationToChildRoles(
+                getClassName(), // service
+                operation);
         setSkillState(AHCSConstants.State.READY);
         return true;
 
@@ -131,6 +137,7 @@ public final class XAINetworkOperation extends AbstractSkill {
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
+    LOGGER.info("performing the mission");    
     getRole().getChildQualifiedNamesForAgent("XAIOperationAgent").stream().forEach(operationAgent -> {
       final Message performMissionMessage = new Message(
               getRole().getQualifiedName(), // senderQualifiedName

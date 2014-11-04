@@ -122,13 +122,17 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
    *
    * @param qualifiedName the role qualified name
    * @param description the role's description in English
-   * @param parentQualifiedName the parent qualified role name, i.e. container.nodename.rolename, which is null if this is a top level role
-   * @param childQualifiedNames the qualified child role names, i.e. container.nodename.rolename, which are empty if this is a lowest
-   * level role.
-   * @param skillClasses the skill class names, which are objects that contain, verify and format the class names
+   * @param parentQualifiedName the parent qualified role name, i.e.
+   * container.nodename.rolename, which is null if this is a top level role
+   * @param childQualifiedNames the qualified child role names, i.e.
+   * container.nodename.rolename, which are empty if this is a lowest level
+   * role.
+   * @param skillClasses the skill class names, which are objects that contain,
+   * verify and format the class names
    * @param variableNames the state variable names
-   * @param areRemoteCommunicationsPermitted the indicator whether this role is permitted to send a message to a recipient in another
-   * container, which requires an X.509 certificate
+   * @param areRemoteCommunicationsPermitted the indicator whether this role is
+   * permitted to send a message to a recipient in another container, which
+   * requires an X.509 certificate
    */
   public Role(
           final String qualifiedName,
@@ -196,15 +200,12 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
     return node;
   }
 
-
   public synchronized void setNode(final Node node) {
     //Preconditions
     assert node != null : "node must not be null";
 
     this.node = node;
   }
-
-
 
   /**
    * Gets the role state.
@@ -252,6 +253,9 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
           skill.setRole(this);
           skillDictionary.put(skillClassName, skill);
           LOGGER.info("      " + this + " constructed skill: " + skill);
+//          if (LOGGER.isDebugEnabled()) {
+//            LOGGER.debug("      " + this + " constructed skill: " + skill);
+//          }
         }
       }
     }
@@ -296,16 +300,19 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   }
 
   /**
-   * Gets whether this role is permitted to send a message to a recipient in another container, which requires an X.509 certificate.
+   * Gets whether this role is permitted to send a message to a recipient in
+   * another container, which requires an X.509 certificate.
    *
-   * @return whether this role is permitted to send a message to a recipient in another container
+   * @return whether this role is permitted to send a message to a recipient in
+   * another container
    */
   public boolean areRemoteCommunicationsPermitted() {
     return areRemoteCommunicationsPermitted;
   }
 
   /**
-   * Returns the X.509 certificate belonging to this role, or null if this role is not permitted to communicate with another container.
+   * Returns the X.509 certificate belonging to this role, or null if this role
+   * is not permitted to communicate with another container.
    *
    * @return the X.509 certificate belonging to this role
    */
@@ -362,7 +369,8 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   }
 
   /**
-   * Sends the given message to the addressed sub-skill and returns the response message.
+   * Sends the given message to the addressed sub-skill and returns the response
+   * message.
    *
    * @param message the message for the addressed sub-skill
    *
@@ -425,7 +433,9 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
       for (final AbstractSkill skill1 : getSkills()) {
         if (skill1.isOperationUnderstood(message.getOperation())) {
           isSkillFound = true;
-          LOGGER.info(this + ", skill " + skill1.toString() + " understands " + message.getOperation());
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(this + ", skill " + skill1.toString() + " understands " + message.getOperation());
+          }
           skill1.receiveMessage(message);
         }
       }
@@ -478,7 +488,8 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
    *
    * @param operation the given operation
    * @param senderService the sender service
-   * @param service the recipient service, which if null indicates that any service that understands the operation will receive the message
+   * @param service the recipient service, which if null indicates that any
+   * service that understands the operation will receive the message
    */
   public void propagateOperationToChildRoles(
           final String operation,
@@ -490,11 +501,13 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
     assert senderService != null : "senderService must not be null";
     assert !senderService.isEmpty() : "senderService must not be empty";
     assert !childQualifiedNames.isEmpty() : "childQualifiedNames must not be empty";
-    
+
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         if (roleState.get().equals(State.UNINITIALIZED)) {
-          LOGGER.info(qualifiedName + " propagating initialize task to child roles");
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(qualifiedName + " propagating initialize task to child roles");
+          }
         } else {
           // the child roles are already initialized
           return;
@@ -502,7 +515,9 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
         break;
       case AHCSConstants.AHCS_READY_TASK:
         if (roleState.get().equals(State.INITIALIZED)) {
-          LOGGER.info(qualifiedName + " propagating ready task to child roles");
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(qualifiedName + " propagating ready task to child roles");
+          }
         } else {
           // the child roles are already ready
           return;
@@ -607,7 +622,8 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   }
 
   /**
-   * Gets the parent qualified role name, i.e. container.nodename.rolename, which is null if this is a top level role.
+   * Gets the parent qualified role name, i.e. container.nodename.rolename,
+   * which is null if this is a top level role.
    *
    * @return the parent qualified role name
    */
@@ -616,7 +632,8 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   }
 
   /**
-   * Gets the qualified child role names, i.e. container.nodename.rolename, which are empty if this is a lowest level role.
+   * Gets the qualified child role names, i.e. container.nodename.rolename,
+   * which are empty if this is a lowest level role.
    *
    * @return the qualified child role names
    */
@@ -625,7 +642,8 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   }
 
   /**
-   * Gets the first qualified child role name, i.e. container.nodename.rolename, which matches the given nodename.
+   * Gets the first qualified child role name, i.e. container.nodename.rolename,
+   * which matches the given nodename.
    *
    * @param nodeName the given child nodename, e.g. XAIOperationAgent
    * @return the qualified child role name, or null if not found
@@ -645,7 +663,8 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   }
 
   /**
-   * Gets the first qualified child role name, i.e. container.nodename.rolename, which matches the given nodename.
+   * Gets the first qualified child role name, i.e. container.nodename.rolename,
+   * which matches the given nodename.
    *
    * @param nodeName the given child nodename, e.g. XAIOperationAgent
    * @return the qualified child role name, or null if not found
@@ -663,7 +682,8 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   }
 
   /**
-   * Gets the skill class names, which are objects that verify and format the class names.
+   * Gets the skill class names, which are objects that verify and format the
+   * class names.
    *
    * @return the skill class names
    */
@@ -690,7 +710,8 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   }
 
   /**
-   * Gets the subskills dictionary, subskill class name --> subskill shared instance.
+   * Gets the subskills dictionary, subskill class name --> subskill shared
+   * instance.
    *
    * @return the subskills dictionary
    */
@@ -758,7 +779,8 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
    * Recursively persists this RDF entity and all its components.
    *
    * @param rdfEntityManager the RDF entity manager
-   * @param overrideContext the user's belief context, or null to persist to each object's default context
+   * @param overrideContext the user's belief context, or null to persist to
+   * each object's default context
    */
   public void cascadePersist(
           final RDFEntityManager rdfEntityManager,
@@ -774,7 +796,8 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
    *
    * @param rootRDFEntity the root RDF entity
    * @param rdfEntityManager the RDF entity manager
-   * @param overrideContext the user's belief context, or null to persist to each object's default context
+   * @param overrideContext the user's belief context, or null to persist to
+   * each object's default context
    */
   @Override
   public void cascadePersist(RDFPersistent rootRDFEntity, RDFEntityManager rdfEntityManager, URI overrideContext) {
@@ -810,7 +833,8 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   }
 
   /**
-   * Compares another role with this one, collating by qualified role name, i.e. container.nodename.rolename.
+   * Compares another role with this one, collating by qualified role name, i.e.
+   * container.nodename.rolename.
    *
    * @param that the other role
    *

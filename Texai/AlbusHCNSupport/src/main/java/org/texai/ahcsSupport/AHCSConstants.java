@@ -270,6 +270,9 @@ public final class AHCSConstants {
   // the messageNotUnderstood_Info operation
   public static final String MESSAGE_NOT_UNDERSTOOD_INFO = "messageNotUnderstood_Info";
   //
+  // the operationNotPermitted_Info operation
+  public static final String OPERATION_NOT_PERMITTED_INFO = "operationNotPermitted_Info";
+  //
   // the returnFromConverseYesNoQueryWithUser_Info operation
   public static final String RETURN_FROM_CONVERSE_YES_NO_QUERY_WITH_USER_INFO = "returnFromConverseYesNoQueryWithUser_Info";
   public static final String RETURN_FROM_CONVERSE_YES_NO_QUERY_WITH_USER_INFO_RESPONSE = "returnFromConverseYesNoQueryWithUser_Info_response";

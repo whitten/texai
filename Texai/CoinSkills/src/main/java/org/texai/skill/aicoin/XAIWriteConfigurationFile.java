@@ -107,19 +107,18 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
     assert message != null : "message must not be null";
 
     // delete the old version of the configuration file
-    final String homeDirectory = System.getProperty("HOME.DIR");
+    final String homeDirectory = System.getProperty("user.home");
     assert StringUtils.isNonEmptyString(homeDirectory);
     final File confFile = new File(homeDirectory + "/.bitcoin/bitcoin.conf");
+    LOGGER.info("confFile: " + confFile);
     if (confFile.exists()) {
       LOGGER.info("deleting existing " + confFile);
       confFile.delete();
     }
 
     // create the .bitcoin directory if not already present
-    final
-            
-            
-            File directory = new File(homeDirectory + ".bitcoin");
+    final File directory = new File(homeDirectory + "/.bitcoin");
+    LOGGER.info("directory: " + directory);
     if (!directory.isDirectory()) {
       directory.mkdir();
       assert directory.isDirectory();
@@ -130,14 +129,15 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
       bufferedWriter.write("testnet=1\n");
       bufferedWriter.write("server=1\n");
       bufferedWriter.write("rpcuser=");
-      bufferedWriter.write("");
+      bufferedWriter.write("\n");
       bufferedWriter.write("rpcpassword=");
-      bufferedWriter.write("");
+      bufferedWriter.write("\n");
       bufferedWriter.write("\n");
     } catch (IOException ex) {
       throw new TexaiException(ex);
     }
 
+    //TODO send TASK_ACCOMPLISHED_INFO
     return true;
   }
 

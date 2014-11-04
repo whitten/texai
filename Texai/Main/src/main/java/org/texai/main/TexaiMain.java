@@ -10,9 +10,11 @@
  */
 package org.texai.main;
 
+import java.util.Timer;
 import java.util.concurrent.atomic.AtomicBoolean;
 import net.jcip.annotations.NotThreadSafe;
 import net.sf.ehcache.CacheManager;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.texai.ahcs.NodeRuntime;
 import static org.texai.ahcs.NodeRuntime.CACHE_X509_CERTIFICATES;
@@ -21,12 +23,14 @@ import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.NodesInitializer;
 import org.texai.kb.CacheInitializer;
 import org.texai.kb.persistence.DistributedRepositoryManager;
+import org.texai.kb.persistence.KBAccess;
 import org.texai.kb.persistence.RDFEntityPersister;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 import org.texai.x509.X509Utils;
 
-/** Executes the Texai node runtime for a certain JVM.
+/**
+ * Executes the Texai node runtime for a certain JVM.
  *
  * @author reed
  */
@@ -37,7 +41,9 @@ public class TexaiMain {
     // explicitly set the default assertion status because NetBeans ignores -ea when running an application.
     TexaiMain.class.getClassLoader().setDefaultAssertionStatus(true);
   }
-  /** the logger */
+  /**
+   * the logger
+   */
   public static final Logger LOGGER = Logger.getLogger(TexaiMain.class);
   // the node runtime
   private NodeRuntime nodeRuntime;
@@ -63,21 +69,25 @@ public class TexaiMain {
   // the path to the XML file which defines the nodes, roles and skills
   final String nodesPath = "data/nodes.xml";
   // the tamper-evident hash of the nodes path file, use "1234" after revsing the nodes.xml file
-  final String nodesFileHashString = "KCIIW8SeONcxmh9lRVKyDokiBTe+875QA2aYiNm8jJG2TdtDMcvLQxAnbi1J3npFbGcC4VEaiadvY7amHL4SEA==";
+  final String nodesFileHashString = "5O5k7A9LseTYPuhitv/sndqt3TcLM3R9qpPLmzbrXf6tJi8xDmH0hWCoOtWTQH7/XixG/k5pxMiYchOGigT2jQ==";
   /**
    * the node runtime application thread
    */
   private Thread nodeRuntimeApplicationThread;
   /**
-   * the indicator that initialization has completed, and that the node runtime should be persisted upon shutdown
+   * the indicator that initialization has completed, and that the node runtime
+   * should be persisted upon shutdown
    */
   private final AtomicBoolean isInitialized = new AtomicBoolean(false);
 
-  /** Constructs a new TexaiMain instance. */
+  /**
+   * Constructs a new TexaiMain instance.
+   */
   public TexaiMain() {
   }
 
-  /** Processes this application.
+  /**
+   * Processes this application.
    *
    * @param containerName the container name
    */
@@ -86,6 +96,10 @@ public class TexaiMain {
     //Preconditions
     assert StringUtils.isNonEmptyString(containerName) : "containerName must be a non-empty string";
 
+    Logger.getLogger(KBAccess.class).setLevel(Level.WARN);
+    Logger.getLogger(NodesInitializer.class).setLevel(Level.WARN);
+    Logger.getLogger(RDFEntityPersister.class).setLevel(Level.WARN);
+    
     LOGGER.info("starting the node runtime in the " + containerName + " container");
     nodeRuntime = new NodeRuntime(containerName);
     // configure a shutdown hook to run the finalization method in case the JVM is abnormally ended
@@ -107,17 +121,22 @@ public class TexaiMain {
             nodesFileHashString);
     nodesInitializer.finalization();
 
-      // start up
+    // start up
     isInitialized.set(true);
     nodeRuntimeApplicationThread = new Thread(new RunApplication(nodeRuntime));
     nodeRuntimeApplicationThread.start();
-}
-  
+  }
+
   /**
    * Finalizes this application.
    */
   private void finalization() {
     LOGGER.info("shutting down the node runtime");
+    final Timer timer = nodeRuntime.getTimer();
+    synchronized (timer) {
+      timer.cancel();
+    }
+
     if (nodeRuntime.getRdfEntityManager() != null) {
       nodeRuntime.getRdfEntityManager().close();
     }
@@ -135,12 +154,12 @@ public class TexaiMain {
     if (!Thread.currentThread().equals(shutdownHook)) {
       System.exit(0);
     }
-    
+
   }
 
   /**
-   * Provides a thread to run the node runtime application, by initializing it and thereafter sleeping to keep the it from otherwise
-   * terminating.
+   * Provides a thread to run the node runtime application, by initializing it
+   * and thereafter sleeping to keep the it from otherwise terminating.
    */
   static class RunApplication implements Runnable {
 
@@ -173,13 +192,13 @@ public class TexaiMain {
       // send the initialize message to the <container>.TopmostFriendshipAgent.TopmostFriendshipRole
       final String recipientQualifiedName = nodeRuntime.getContainerName() + ".TopmostFriendshipAgent.TopmostFriendshipRole";
       final Message initializeMessage = new Message(
-                  nodeRuntime.getNodeRuntimeSkill().getRole().getQualifiedName(), // senderQualifiedName
-                  nodeRuntime.getNodeRuntimeSkill().getClassName(), // senderService
-                  recipientQualifiedName,
-                  null, // service
-                  AHCSConstants.AHCS_INITIALIZE_TASK); // operation
+              nodeRuntime.getNodeRuntimeSkill().getRole().getQualifiedName(), // senderQualifiedName
+              nodeRuntime.getNodeRuntimeSkill().getClassName(), // senderService
+              recipientQualifiedName,
+              null, // service
+              AHCSConstants.AHCS_INITIALIZE_TASK); // operation
       nodeRuntime.dispatchMessage(initializeMessage);
-      
+
       while (!nodeRuntime.isQuit.get()) {
         try {
           // wait here until the runtime quits
@@ -190,9 +209,10 @@ public class TexaiMain {
       nodeRuntime.finalization();
     }
   }
-  
+
   /**
-   * Provides a shutdown hook to finalize resources when the JVM is unexpectedly shutdown.
+   * Provides a shutdown hook to finalize resources when the JVM is unexpectedly
+   * shutdown.
    */
   class ShutdownHook extends Thread {
 
@@ -206,7 +226,8 @@ public class TexaiMain {
     }
   }
 
-  /** Executes this application.
+  /**
+   * Executes this application.
    *
    * @param args the command line arguments - unused
    */

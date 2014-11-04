@@ -70,6 +70,13 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
     assert message != null : "message must not be null";
 
     final String operation = message.getOperation();
+    
+    //TODO replicate this test to all other skills
+    if (!isOperationPermitted(message)) {
+      sendMessage(operationNotPermittedMessage(message));
+      return true;
+    }
+    
     if (operation.equals(AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO)) {
       LOGGER.warn(message);
       return true;
@@ -77,6 +84,7 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
+        setSkillState(AHCSConstants.State.INITIALIZED);
         return true;
 
       case AHCSConstants.AHCS_READY_TASK:
@@ -134,8 +142,9 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
       AHCSConstants.TASK_ACCOMPLISHED_INFO};
   }
 
-  /** Perform this role's mission, which is to manage the containers.
-   * 
+  /**
+   * Perform this role's mission, which is to manage the containers.
+   *
    * @param message the received perform mission task message
    */
   private void performMission(final Message message) {
@@ -143,7 +152,17 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
-    //TODO
+    LOGGER.info("performing the mission");
+    // write the bitcoind configuration file
+    final UUID conversationId = UUID.randomUUID();
+    setStateValue(CONVERSATION_ID, conversationId);
+    assert getStateValue(REPLY_WITH) == null;
+    final UUID replyWith = UUID.randomUUID();
+    setStateValue(REPLY_WITH, replyWith);
+    writeConfigurationFile(conversationId, replyWith);
+
+    //TODO code an ideal handling of a trivial conversation
+    
   }
 
   /**
@@ -153,24 +172,13 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
     //Preconditions
     assert message != null : "message must not be null";
 
-    UUID conversationId = (UUID) getStateValue(CONVERSATION_ID);
-    if (conversationId == null) {
-      // uninitialized
-      conversationId = UUID.randomUUID();
-      setStateValue(CONVERSATION_ID, conversationId);
-      assert getStateValue(REPLY_WITH) == null;
-      final UUID replyWith = UUID.randomUUID();
-      setStateValue(REPLY_WITH, replyWith);
-      writeConfigurationFile(conversationId, replyWith);
-      return;
-    }
     //TODO
   }
 
   /**
    * Asynchronously invokes the XAIWriteConfigurationFile skill to write the
    * configuration file for bitcoind.
-   * 
+   *
    * @param conversationId the conversation id message parameter
    * @param replyWith the reply-with message parameter
    */

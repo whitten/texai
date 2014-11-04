@@ -67,10 +67,6 @@ public final class TopmostFriendship extends AbstractSkill {
         initialization(message);
         return true;
 
-      case AHCSConstants.PERFORM_MISSION_TASK:
-        performMission(message);
-        return true;
-        
     // handle other operations ...
     }
 
@@ -108,8 +104,7 @@ public final class TopmostFriendship extends AbstractSkill {
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
-      AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.PERFORM_MISSION_TASK
+      AHCSConstants.AHCS_INITIALIZE_TASK
     };
   }
 
@@ -136,17 +131,23 @@ public final class TopmostFriendship extends AbstractSkill {
     setSkillState(State.READY);
     
     //TODO wait for child roles to be ready
+    
+    try {
+      Thread.sleep(1000);
+    } catch (InterruptedException ex) {
+    }
+    performMission();
   }
 
   /** Perform this role's mission, which is to provide topmost perception and friendship behavior.
    * 
    * @param message the received perform mission task message
    */
-  private void performMission(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
+  private void performMission() {
     assert getSkillState().equals(State.READY) : "state must be ready";
 
+    LOGGER.info("performing the mission");    
+    // send a performMission task message to the NetworkOperationAgent
     final Message performMissionMessage = new Message(
           getRole().getQualifiedName(), // senderQualifiedName
           getClassName(), // senderService,
@@ -154,6 +155,8 @@ public final class TopmostFriendship extends AbstractSkill {
           NetworkOperation.class.getName(), // recipientService
           AHCSConstants.PERFORM_MISSION_TASK); // operation
     sendMessage(performMissionMessage);
+    
+    //TODO same for the remaining child agent roles
   }
   
   /**

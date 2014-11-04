@@ -31,24 +31,33 @@ import org.joda.time.DateTime;
 import org.texai.ahcsSupport.Message;
 import org.texai.util.TexaiException;
 
-/** A channel handler that transports messages from node to node in an Albus hierarchical control network.
+/**
+ * A channel handler that transports messages from node to node in an Albus
+ * hierarchical control network.
  *
  * @author reed
  */
 @NotThreadSafe
 public final class MockAlbusHCSMessageHandler extends AbstractAlbusHCSMessageHandler {
 
-  /** the logger */
+  /**
+   * the logger
+   */
   private static final Logger LOGGER = Logger.getLogger(MockAlbusHCSMessageHandler.class);
-  /** the lock that allows the client to resume when the messaging is done */
+  /**
+   * the lock that allows the client to resume when the messaging is done
+   */
   final Object clientResume_lock;
-  /** the test iteration limit */
+  /**
+   * the test iteration limit
+   */
   final int iterationLimit;
 
-  /** Constructs a new MockAlbusHCSMessageHandler instance.
+  /**
+   * Constructs a new MockAlbusHCSMessageHandler instance.
    *
-   * @param clientResume_lock the lock that allows the client to resume when the messaging is done, or
-   * null if this is the client side handler
+   * @param clientResume_lock the lock that allows the client to resume when the
+   * messaging is done, or null if this is the client side handler
    * @param iterationLimit the test iteration limit
    */
   public MockAlbusHCSMessageHandler(final Object clientResume_lock, final int iterationLimit) {
@@ -59,7 +68,8 @@ public final class MockAlbusHCSMessageHandler extends AbstractAlbusHCSMessageHan
     this.iterationLimit = iterationLimit;
   }
 
-  /** Receives a message object from a remote peer.
+  /**
+   * Receives a message object from a remote peer.
    *
    * @param channelHandlerContext the channel handler context
    * @param messageEvent the message event
@@ -83,20 +93,23 @@ public final class MockAlbusHCSMessageHandler extends AbstractAlbusHCSMessageHan
     final Message message = (Message) messageEvent.getMessage();
     int count = (Integer) message.get("count");
     LOGGER.info("count: " + count);
+    // the test service is a valid class with a no-argument constructor, the Skills defining module is dependent on this so an actual skill class cannot be used here
+    final String service = "org.texai.kb.persistence.domainEntity.RepositoryContentDescription";
     if (message.getOperation().equals("Echo_Task")) {
       // increment the count and send a repsonse message back to the sender
+
       final Message responseMessage = new Message(
-            message.getSenderQualifiedName(),
-            "TestSenderService",
-            message.getRecipientQualifiedName(),
-            message.getConversationId(),
-            UUID.randomUUID(), // replyWith
-            message.getReplyWith(),
-            new DateTime(), // replyByDateTime
-            "TestService",
-            "Response_Task",
-            message.getParameterDictionary(),
-            "1.0.0"); // version
+              message.getSenderQualifiedName(),
+              service,
+              message.getRecipientQualifiedName(),
+              message.getConversationId(),
+              UUID.randomUUID(), // replyWith
+              message.getReplyWith(),
+              new DateTime(), // replyByDateTime
+              service,
+              "Response_Task",
+              message.getParameterDictionary(),
+              "1.0.0"); // version
       count++;
       responseMessage.put("count", count);
       LOGGER.info("about to write message " + responseMessage + "\nto channel pipeline" + channel.getPipeline());
@@ -110,24 +123,25 @@ public final class MockAlbusHCSMessageHandler extends AbstractAlbusHCSMessageHan
         }
       } else {
         // send another request message
-      final Message echoMessage = new Message(
-            message.getSenderQualifiedName(),
-            "TestSenderService",
-            message.getRecipientQualifiedName(),
-            message.getConversationId(),
-            UUID.randomUUID(), // replyWith
-            message.getReplyWith(),
-            new DateTime(), // replyByDateTime
-            message.getSenderService(),
-            "Echo_Task",
-            message.getParameterDictionary(),
-            "1.0.0"); // version
+        final Message echoMessage = new Message(
+                message.getSenderQualifiedName(),
+                service,
+                message.getRecipientQualifiedName(),
+                message.getConversationId(),
+                UUID.randomUUID(), // replyWith
+                message.getReplyWith(),
+                new DateTime(), // replyByDateTime
+                message.getSenderService(),
+                "Echo_Task",
+                message.getParameterDictionary(),
+                "1.0.0"); // version
         channel.write(echoMessage);
       }
     }
   }
 
-  /** Writes a message object to a remote peer.
+  /**
+   * Writes a message object to a remote peer.
    *
    * @param channelHandlerContext the channel handler context
    * @param messageEvent the message event
@@ -145,7 +159,8 @@ public final class MockAlbusHCSMessageHandler extends AbstractAlbusHCSMessageHan
     channelHandlerContext.sendDownstream(messageEvent);
   }
 
-  /** Handles a caught exception.
+  /**
+   * Handles a caught exception.
    *
    * @param channelHandlerContext the channel handler event
    * @param exceptionEvent the exception event

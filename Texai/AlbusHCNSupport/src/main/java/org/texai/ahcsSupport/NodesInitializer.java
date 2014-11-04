@@ -75,8 +75,6 @@ public final class NodesInitializer {
 
   // the log4j logger
   private static final Logger LOGGER = Logger.getLogger(NodesInitializer.class);
-  // the indicator whether debug logging is enabled
-  private static final boolean IS_DEBUG_LOGGING_ENABLED = LOGGER.isDebugEnabled();
   // the node access
   private final NodeAccess nodeAccess;
   // the node field holder dictionary, qualifiedName --> NodeFieldsHolder
@@ -814,7 +812,7 @@ public final class NodesInitializer {
       //Preconditions
       assert StringUtils.isNonEmptyString(qName) : "qName must be a non-empty string";
       
-      if (IS_DEBUG_LOGGING_ENABLED) {
+      if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("startElement qName: " + qName);
       }
       stringBuilder.setLength(0);
@@ -863,7 +861,7 @@ public final class NodesInitializer {
       assert StringUtils.isNonEmptyString(qName) : "qName must be a non-empty string";
       assert nodeAccess != null : "nodeAccess must not be null";
       
-      if (IS_DEBUG_LOGGING_ENABLED) {
+      if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("endElement qName: " + qName);
         LOGGER.debug("stringBuilder: " + stringBuilder.toString());
       }

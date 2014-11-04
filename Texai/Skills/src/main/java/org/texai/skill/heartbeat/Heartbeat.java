@@ -21,14 +21,11 @@
  */
 package org.texai.skill.heartbeat;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
-import org.joda.time.DateTime;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.AbstractSkill;
@@ -36,7 +33,8 @@ import org.texai.ahcsSupport.Message;
 import org.texai.util.StringUtils;
 
 /**
- * Provides heartbeat behavior, in which remote role communication leases are periodically renewed.
+ * Provides heartbeat behavior, in which remote role communication leases are
+ * periodically renewed.
  *
  * @author reed
  */
@@ -45,14 +43,10 @@ public class Heartbeat extends AbstractSkill {
 
   // the logger
   private static final Logger LOGGER = Logger.getLogger(Heartbeat.class);
-  // heartbeat roles to which keep-alive messages are periodically sent
-  protected final Map<String, InboundHeartbeatInfo> inboundHeartbeatInfos = new HashMap<>();
-  // heartbeat roles from which keep-alive messages are periodically expected
-  protected final Map<String, OutboundHeartbeatInfo> outboundHeartbeatInfos = new HashMap<>();
+  // the outbound parent heartbeat information
+  private OutboundHeartbeatInfo outboundParentHeartbeatInfo;
   // the outbound heartbeat period milliseconds, which indicates how often to send
-  protected final static long OUTBOUND_HEARTBEAT_PERIOD_MILLIS = 30_000;
-  // the inbound heartbeat period milliseconds, which indicates the duration beyond which the expected heartbeat is considered missing
-  protected final static long INBOUND_HEARTBEAT_PERIOD_MILLIS = 300_000;
+  private final static long OUTBOUND_HEARTBEAT_PERIOD_MILLIS = 60_000;
 
   /**
    * Constructs a new Heartbeat instance.
@@ -61,8 +55,9 @@ public class Heartbeat extends AbstractSkill {
   }
 
   /**
-   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
-   * with regard to the conversation.
+   * Receives and attempts to process the given message. The skill is thread
+   * safe, given that any contained libraries are single threaded with regard to
+   * the conversation.
    *
    * @param message the given message
    *
@@ -81,18 +76,20 @@ public class Heartbeat extends AbstractSkill {
 
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         initialization(message);
+        setSkillState(AHCSConstants.State.INITIALIZED);
         return true;
 
       case AHCSConstants.AHCS_READY_TASK:
         ready();
+        setSkillState(AHCSConstants.State.READY);
+        return true;
+
+      case AHCSConstants.PERFORM_MISSION_TASK:
+        performMission(message);
         return true;
 
       case AHCSConstants.AHCS_SHUTDOWN_TASK:
         finalization();
-        return true;
-
-      case AHCSConstants.KEEP_ALIVE_INFO:
-        recordKeepAlive(message);
         return true;
     }
 
@@ -102,8 +99,9 @@ public class Heartbeat extends AbstractSkill {
   }
 
   /**
-   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single threaded with regard
-   * to the conversation.
+   * Synchronously processes the given message. The skill is thread safe, given
+   * that any contained libraries are single threaded with regard to the
+   * conversation.
    *
    * @param message the given message
    *
@@ -130,8 +128,8 @@ public class Heartbeat extends AbstractSkill {
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
       AHCSConstants.AHCS_READY_TASK,
-      AHCSConstants.AHCS_SHUTDOWN_TASK,
-      AHCSConstants.KEEP_ALIVE_INFO
+      AHCSConstants.PERFORM_MISSION_TASK,
+      AHCSConstants.AHCS_SHUTDOWN_TASK
     };
   }
 
@@ -145,19 +143,15 @@ public class Heartbeat extends AbstractSkill {
     assert message != null : "message must not be null";
     assert this.getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
 
-    LOGGER.info("initializing " + toString() + " in role " + getRole());
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("initializing " + toString() + " in role " + getRole());
+    }
 
-    // all nodes except the topmost send a heartbeat to the parent heartbeat role
-    final OutboundHeartbeatInfo outboundHeartbeatInfo = new OutboundHeartbeatInfo(
+    // all nodes send a heartbeat to the parent heartbeat role, 
+    outboundParentHeartbeatInfo = new OutboundHeartbeatInfo(
             getRole().getParentQualifiedName(), // recipientQualifiedName
-            getClassName(), // service
+            "org.texai.skill.heartbeat.ContainerHeartbeat", // service
             this); // heartbeat
-    outboundHeartbeatInfos.put(outboundHeartbeatInfo.recipentQualifiedName, outboundHeartbeatInfo);
-
-    // initialize child heartbeat roles
-    propagateOperationToChildRoles(getClassName(), // service,
-            AHCSConstants.AHCS_INITIALIZE_TASK); // operation
-    setSkillState(State.INITIALIZED);
   }
 
   /**
@@ -167,9 +161,11 @@ public class Heartbeat extends AbstractSkill {
     //Preconditions
     assert this.getSkillState().equals(State.INITIALIZED) : "prior state must be initialized";
 
-    LOGGER.info("ready " + this);
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.info("ready " + this);
+    }
 
-    // create a timer that periodically reviews the inbound and outbound heartbeat information objects
+    // create a timer that periodically reviews the outbound heartbeat information objects
     final Timer timer = getNodeRuntime().getTimer();
     synchronized (timer) {
       timer.scheduleAtFixedRate(
@@ -184,45 +180,35 @@ public class Heartbeat extends AbstractSkill {
   }
 
   /**
+   * Perform this role's mission, which is to manage the network, the
+   * containers, and the TexaiCoin agents within the containers.
+   *
+   * @param message the received perform mission task message
+   */
+  private void performMission(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+
+    LOGGER.info("performing the mission");
+    final Message performMissionMessage = new Message(
+            getRole().getQualifiedName(), // senderQualifiedName
+            getClassName(), // senderService,
+            getRole().getChildQualifiedNameForAgent("XAINetworkOperationAgent"), // recipientQualifiedName,
+            "org.texai.skill.aicoin.XAINetworkOperation", // recipientService
+            AHCSConstants.PERFORM_MISSION_TASK); // operation
+    sendMessage(performMissionMessage);
+  }
+
+  /**
    * Finalizes this skill and releases its resources.
    */
   private void finalization() {
-    LOGGER.info("finalizing " + this);
-    final Timer timer = getNodeRuntime().getTimer();
-    synchronized (timer) {
-      timer.cancel();
-    }
   }
 
   /**
-   * Records a keep-alive message sent from a role.
-   *
-   * @param message the keep-alive message
-   */
-  protected void recordKeepAlive(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-    assert getSkillState().equals(State.READY) : "must be in the ready state";
-
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("recording keep-alive " + message);
-    }
-    final String senderQualifiedName = message.getSenderQualifiedName();
-    InboundHeartbeatInfo inboundHeartBeatInfo = inboundHeartbeatInfos.get(senderQualifiedName);
-    if (inboundHeartBeatInfo == null) {
-      inboundHeartBeatInfo = new InboundHeartbeatInfo(senderQualifiedName);
-      inboundHeartbeatInfos.put(senderQualifiedName, inboundHeartBeatInfo);
-    }
-    inboundHeartBeatInfo.heartbeatReceivedMillis = System.currentTimeMillis();
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("  received keep-alive message " + (new DateTime()).toString("MM/dd/yyyy hh:mm a"));
-      LOGGER.debug("    from " + senderQualifiedName);
-      LOGGER.debug("    to " + getRole().getQualifiedName());
-    }
-  }
-
-  /**
-   * Periodically processes the outbound and inbound heartbeat information objects.
+   * Periodically processes the outbound and inbound heartbeat information
+   * objects.
    */
   protected class HeartbeatProcessor extends TimerTask {
 
@@ -244,7 +230,7 @@ public class Heartbeat extends AbstractSkill {
     }
 
     /**
-     * Processes the outbound and inbound heartbeat information objects.
+     * Processes the outbound information objects.
      */
     @Override
     public void run() {
@@ -253,43 +239,14 @@ public class Heartbeat extends AbstractSkill {
         LOGGER.debug(heartbeat + " HeartbeatProcessor ...");
       }
 
-      // notice if any expected heartbeats are timed-out
-      final long inboundHeartbeatReceivedThresholdMillis = currentTimeMillis - INBOUND_HEARTBEAT_PERIOD_MILLIS;
-      synchronized (inboundHeartbeatInfos) {
-        for (final InboundHeartbeatInfo inboundHeartbeatInfo : inboundHeartbeatInfos.values()) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("  " + inboundHeartbeatInfo);
-          }
-          if (inboundHeartbeatInfo.heartbeatReceivedMillis < inboundHeartbeatReceivedThresholdMillis) {
-            missingHeartbeat(inboundHeartbeatInfo);
-          }
-        }
-      }
-
       // send heartbeats after waiting at least the specified duration
       final long outboundHeartbeatReceivedThresholdMillis = currentTimeMillis - OUTBOUND_HEARTBEAT_PERIOD_MILLIS;
-      synchronized (outboundHeartbeatInfos) {
-        for (final OutboundHeartbeatInfo outboundHeartbeatInfo : outboundHeartbeatInfos.values()) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("  " + outboundHeartbeatInfo);
-          }
-          if (outboundHeartbeatInfo.heartbeatSentMillis < outboundHeartbeatReceivedThresholdMillis) {
-            sendHeartbeat(outboundHeartbeatInfo, heartbeat);
-          }
-        }
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("  " + outboundParentHeartbeatInfo);
       }
-    }
-
-    /**
-     * Notices that an expected heartbeat message has not yet been received from the given role.
-     *
-     * @param inboundHeartbeatInfo the given role heartbeat information
-     */
-    protected void missingHeartbeat(final InboundHeartbeatInfo inboundHeartbeatInfo) {
-      //Preconditions
-      assert inboundHeartbeatInfo != null : "inboundHeartbeatInfo must not be null";
-
-      LOGGER.warn("heartbeat missing for " + inboundHeartbeatInfo);
+      if (outboundParentHeartbeatInfo.heartbeatSentMillis < outboundHeartbeatReceivedThresholdMillis) {
+        sendHeartbeat(outboundParentHeartbeatInfo, heartbeat);
+      }
     }
 
     /**
@@ -323,83 +280,6 @@ public class Heartbeat extends AbstractSkill {
   }
 
   /**
-   * Provides a container for inbound heartbeat information.
-   */
-  protected static class InboundHeartbeatInfo {
-
-    /**
-     * the heartbeat sender's qualified name
-     */
-    protected final String senderQualifiedName;
-    /**
-     * the millisecond time at which the most recent heartbeat was received
-     */
-    protected long heartbeatReceivedMillis;
-
-    /**
-     * Constructs a new InboundHeartbeatInfo instance.
-     *
-     * @param senderQualifiedName the heartbeat sender's qualified name
-     */
-    InboundHeartbeatInfo(final String senderQualifiedName) {
-      //Preconditions
-      assert StringUtils.isNonEmptyString(senderQualifiedName) : "senderQualifiedName must be a non-empty string";
-
-      this.senderQualifiedName = senderQualifiedName;
-    }
-
-    /**
-     * Returns whether some other object equals this one.
-     *
-     * @param obj the other object
-     *
-     * @return whether some other object equals this one
-     */
-    @Override
-    public boolean equals(final Object obj) {
-      if (obj == null) {
-        return false;
-      }
-      if (getClass() != obj.getClass()) {
-        return false;
-      }
-      final InboundHeartbeatInfo other = (InboundHeartbeatInfo) obj;
-      return Objects.equals(this.senderQualifiedName, other.senderQualifiedName);
-    }
-
-    /**
-     * Returns a hash code for this object.
-     *
-     * @return a hash code for this object
-     */
-    @Override
-    public int hashCode() {
-      int hash = 7;
-      hash = 83 * hash + Objects.hashCode(this.senderQualifiedName);
-      return hash;
-    }
-
-    /**
-     * Returns a string representation of this object.
-     *
-     * @return a string representation of this object
-     */
-    @Override
-    public String toString() {
-      final StringBuilder stringBuilder = new StringBuilder();
-      stringBuilder.append("[Inbound heartbeat, role: ");
-      stringBuilder.append(senderQualifiedName);
-      if (heartbeatReceivedMillis > 0) {
-        stringBuilder.append(", last received ");
-        final long secondsAgo = (System.currentTimeMillis() - heartbeatReceivedMillis) / 1000;
-        stringBuilder.append(secondsAgo);
-        stringBuilder.append(" seconds ago]");
-      }
-      return stringBuilder.toString();
-    }
-  }
-
-  /**
    * Provides a container for outbound heartbeat information.
    */
   protected static class OutboundHeartbeatInfo {
@@ -426,7 +306,7 @@ public class Heartbeat extends AbstractSkill {
      *
      * @param recipentQualifiedName the heartbeat recipient's qualified name
      * @param service the service, or null if not specified
-     * @param heartbeat the hearbeat skill instance
+     * @param heartbeat the heartbeat skill instance
      */
     OutboundHeartbeatInfo(
             final String recipentQualifiedName,

@@ -148,6 +148,7 @@ public class Message implements Serializable {
     //Preconditions
     assert senderQualifiedName != null : "senderQualifiedName must not be null";
     assert recipientQualifiedName != null : "recipientQualifiedName must not be null";
+    assert recipientService == null || isValidService(recipientService) : "the recipient service is not a found Java class " + recipientService;
     assert operation != null : "operation must not be null";
     assert operation.endsWith("_Info")
             || operation.endsWith("_Sensation")
@@ -269,6 +270,7 @@ public class Message implements Serializable {
     //Preconditions
     assert senderQualifiedName != null : "senderQualifiedName must not be null";
     assert recipientQualifiedName != null : "recipientQualifiedName must not be null";
+    assert recipientService == null || isValidService(recipientService) : "the recipient service is not a found Java class: " + recipientService;
     assert operation != null : "operation must not be null";
     assert operation.endsWith("_Info")
             || operation.endsWith("_Sensation")
@@ -781,5 +783,22 @@ public class Message implements Serializable {
    */
   public boolean isChordOperation() {
     return senderQualifiedName.isEmpty();
+  }
+  
+  /** Returns whether the given service names a valid Java class.
+   * 
+   * @param service the given service name
+   * @return whether the given service names a valid Java class
+   */
+  private boolean isValidService(final String service) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(service) : "service must be a non-empty string";
+    
+      try {
+        Class.forName(service).newInstance();
+        return true;
+      } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+        return false;
+      }
   }
 }
