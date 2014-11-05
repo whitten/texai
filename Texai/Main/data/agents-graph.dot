@@ -36,6 +36,9 @@ subgraph cluster_agents {
   NXAIContainerCertificateAuthorityAgent [
     shape = box
     label = "XAIContainerCertificateAuthorityAgent" ];
+  NXAIContainerConfigurationAgent [
+    shape = box
+    label = "XAIContainerConfigurationAgent" ];
   NXAIContainerEpisodicMemoryAgent [
     shape = box
     label = "XAIContainerEpisodicMemoryAgent" ];
@@ -99,10 +102,12 @@ subgraph cluster_agents {
   NContainerHeartbeatAgent -> NXAIContainerCertificateAuthorityAgent;
   NContainerGovernanceAgent -> NTopLevelGovernanceAgent;
   NContainerGovernanceAgent -> NXAIContainerLogControlAgent;
+  NXAINetworkConfigurationAgent -> NXAIContainerConfigurationAgent;
   NXAINetworkOperationAgent -> NXAIContainerCertificateAuthorityAgent;
   NContainerHeartbeatAgent -> NTopLevelHeartbeatAgent;
   NContainerGovernanceAgent -> NXAINetworkTorrentAgent;
   NContainerHeartbeatAgent -> NXAINetworkConfigurationAgent;
+  NContainerGovernanceAgent -> NXAIContainerConfigurationAgent;
   NNetworkOperationAgent -> NContainerOperationAgent;
   NContainerHeartbeatAgent -> NNetworkOperationAgent;
   NXAINetworkOperationAgent -> NXAIClientGatewayAgent;
@@ -121,6 +126,7 @@ subgraph cluster_agents {
   NTopmostFriendshipAgent -> NTopLevelGovernanceAgent;
   NTopmostFriendshipAgent -> NTopLevelHeartbeatAgent;
   NContainerGovernanceAgent -> NXAIMintAgent;
+  NContainerHeartbeatAgent -> NXAIContainerConfigurationAgent;
   NContainerGovernanceAgent -> NXAIClientGatewayAgent;
   NXAINetworkOperationAgent -> NXAIContainerAuditAgent;
   NContainerGovernanceAgent -> NXAIContainerTorrentAgent;

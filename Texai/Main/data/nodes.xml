@@ -347,6 +347,30 @@
   </node>
 
   <node>
+    <name>XAIContainerConfigurationAgent</name>
+    <missionDescription>Provides network configuration the AICoin network. Maintains the assignment of
+      nomadic agents to particular containers.</missionDescription>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>XAIContainerConfigurationAgent.XAIContainerConfigurationRole</qualifiedName>
+        <description>Provides network configuration the AICoin network. Maintains the assignment of
+          nomadic agents to particular containers.</description>
+        <parentQualifiedName>XAINetworkConfigurationAgent.XAINetworkConfigurationRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.aicoin.XAIContainerConfiguration</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
     <name>XAINetworkSeedAgent</name>
     <missionDescription>Provides a AICoin network seed for wallet and processor clients. Maintains the mapping of client gateways
       and their respective IP addresses.</missionDescription>

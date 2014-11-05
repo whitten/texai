@@ -1,14 +1,15 @@
 /*
- * SkillTemplate.java
+ * XAIContainerConfiguration.java
  *
  * Created on Mar 14, 2012, 10:49:55 PM
  *
- * Description: .
+ * Description: Configures the roles in this container whose parents are nomadic singleton roles hosted
+ * on a probably remote super-peer.
  *
  * Copyright (C) Mar 14, 2012, Stephen L. Reed, Texai.org.
  *
  */
-package org.texai.skill.misc;
+package org.texai.skill.aicoin;
 
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
@@ -22,13 +23,13 @@ import org.texai.ahcsSupport.Message;
  * @author reed
  */
 @NotThreadSafe
-public class SkillTemplate extends AbstractSkill {
+public class XAIContainerConfiguration extends AbstractSkill {
 
   // the log4j logger
-  private static final Logger LOGGER = Logger.getLogger(SkillTemplate.class);
+  private static final Logger LOGGER = Logger.getLogger(XAIContainerConfiguration.class);
 
   /** Constructs a new SkillTemplate instance. */
-  public SkillTemplate() {
+  public XAIContainerConfiguration() {
   }
   
   /** Receives and attempts to process the given message.  The skill is thread safe, given that any contained libraries are single threaded
@@ -50,21 +51,11 @@ public class SkillTemplate extends AbstractSkill {
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
-        
-        // OPTIONAL
-        // initialize child roles
-        propagateOperationToChildRoles(operation);
-        
         setSkillState(State.INITIALIZED);
         return true;
 
       case AHCSConstants.AHCS_READY_TASK:
         assert getSkillState().equals(State.INITIALIZED) : "prior state must be initialized";
-        
-        // OPTIONAL
-        // ready child roles
-        propagateOperationToChildRoles(operation);
-        
         setSkillState(State.READY);
         return true;
         
@@ -72,6 +63,10 @@ public class SkillTemplate extends AbstractSkill {
         LOGGER.warn(message);
         return true;
 
+      //TODO REQUEST_CONFIGURATON_TASK  
+        // seed another peer who requests the locations of the nomadic singleton agents.
+        
+        
       // handle other operations ...
     }
     // otherwise, the message is not understood
@@ -102,9 +97,9 @@ public class SkillTemplate extends AbstractSkill {
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
+              AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
               AHCSConstants.AHCS_INITIALIZE_TASK,
               AHCSConstants.AHCS_READY_TASK,
-              AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
             };
   }
   

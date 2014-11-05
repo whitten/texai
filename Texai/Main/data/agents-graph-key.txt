@@ -32,6 +32,10 @@ XAIContainerCertificateAuthorityAgent
   Provides self-signed X.509 certificates for roles in a particular container in the AICoin
       network.
 
+XAIContainerConfigurationAgent
+  Provides network configuration the AICoin network. Maintains the assignment of
+      nomadic agents to particular containers.
+
 XAIContainerEpisodicMemoryAgent
   Provides episodic memory for agents in a particular container in the AICoin network.
 
