@@ -1,5 +1,5 @@
 /*
- * ContainerTorrent.java
+ * XAIContainerTorrent.java
  *
  * Created on Jun 24, 2010, 6:38:08 PM
  *
@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License along with this program;
  * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-package org.texai.skill.torrent;
+package org.texai.skill.aicoin;
 
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
@@ -31,13 +31,13 @@ import org.texai.ahcsSupport.Message;
  * @author reed
  */
 @NotThreadSafe
-public class ContainerTorrent extends AbstractSkill {
+public class XAIContainerTorrent extends AbstractSkill {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(ContainerTorrent.class);
+  private static final Logger LOGGER = Logger.getLogger(XAIContainerTorrent.class);
 
   /** Constructs a new TorrentEffector instance. */
-  public ContainerTorrent() {
+  public XAIContainerTorrent() {
   }
 
   /** Gets the logger.
@@ -92,15 +92,16 @@ public class ContainerTorrent extends AbstractSkill {
     return notUnderstoodMessage(message);
   }
 
-  /** Returns the understood operations.
+  /**
+   * Returns the understood operations.
    *
    * @return the understood operations
    */
   @Override
   public String[] getUnderstoodOperations() {
-    return new String[] {
+    return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
-    };
+      AHCSConstants.AHCS_INITIALIZE_TASK,
+      AHCSConstants.AHCS_READY_TASK};
   }
-
 }

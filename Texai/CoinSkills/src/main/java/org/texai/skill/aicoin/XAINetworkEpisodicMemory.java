@@ -103,15 +103,17 @@ public class XAINetworkEpisodicMemory extends AbstractSkill {
     return notUnderstoodMessage(message);
   }
 
-  /** Returns the understood operations.
+  /**
+   * Returns the understood operations.
    *
    * @return the understood operations
    */
   @Override
   public String[] getUnderstoodOperations() {
-    return new String[] {
+    return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.AHCS_INITIALIZE_TASK,
+      AHCSConstants.AHCS_READY_TASK
     };
   }
-
 }

@@ -1,5 +1,5 @@
 /*
- * CertificateAuthority.java
+ * XAIContainerCertificateAuthority.java
  *
  * Created on May 5, 2010, 1:42:22 PM
  *
@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU General Public License along with this program;
  * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-package org.texai.skill.misc;
+package org.texai.skill.aicoin;
 
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
@@ -35,14 +35,14 @@ import org.texai.ahcsSupport.Message;
  * @author reed
  */
 @ThreadSafe
-public class CertificateAuthority extends AbstractSkill {
+public class XAIContainerCertificateAuthority extends AbstractSkill {
 
   //TODO rename according to Albus HCS granularity level
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(CertificateAuthority.class);
+  private static final Logger LOGGER = Logger.getLogger(XAIContainerCertificateAuthority.class);
 
   /** Constructs a new CertificateAuthority instance. */
-  public CertificateAuthority() {
+  public XAIContainerCertificateAuthority() {
   }
 
   /** Gets the logger.
@@ -61,7 +61,7 @@ public class CertificateAuthority extends AbstractSkill {
    * @return whether the message was successfully processed
    */
   @Override
-  public boolean receiveMessage(final Message message) {
+  public boolean receiveMessage(Message message) {
     //Preconditions
     assert message != null : "message must not be null";
 
@@ -70,16 +70,20 @@ public class CertificateAuthority extends AbstractSkill {
       sendMessage(operationNotPermittedMessage(message));
       return true;
     }
-    if (operation.equals(AHCSConstants.AHCS_INITIALIZE_TASK)) {
-      initialization(message);
-      return true;
-    }
-    if (operation.equals(AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO)) {
-      LOGGER.warn(message);
-      return true;
-    }
+    switch (operation) {
+      case AHCSConstants.AHCS_INITIALIZE_TASK:
+        assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
+        setSkillState(AHCSConstants.State.INITIALIZED);
+        return true;
 
-    //TODO handle operations
+      case AHCSConstants.AHCS_READY_TASK:
+        assert this.getSkillState().equals(AHCSConstants.State.INITIALIZED) : "prior state must be initialized";
+        return true;
+        
+      case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
+        LOGGER.warn(message);
+        return true;
+    }
 
     sendMessage(notUnderstoodMessage(message));
     return true;
@@ -101,21 +105,6 @@ public class CertificateAuthority extends AbstractSkill {
     return notUnderstoodMessage(message);
   }
 
-  /**
-   * Performs the initialization operation.
-   *
-   * @param message the received initialization message
-   */
-  private void initialization(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-    assert getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
-
-    // no child roles to initialize
-    
-    setSkillState(AHCSConstants.State.INITIALIZED);
-  }
-
   /** Returns the understood operations.
    *
    * @return the understood operations
@@ -124,7 +113,7 @@ public class CertificateAuthority extends AbstractSkill {
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
-      AHCSConstants.AHCS_INITIALIZE_TASK
-    };
+      AHCSConstants.AHCS_INITIALIZE_TASK,
+      AHCSConstants.AHCS_READY_TASK,};
   }
 }

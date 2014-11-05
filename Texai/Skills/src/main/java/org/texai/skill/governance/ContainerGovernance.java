@@ -75,18 +75,14 @@ public final class ContainerGovernance extends AbstractSkill {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
         // initialize child governance roles
-        propagateOperationToChildRoles(
-                getClassName(), // service
-                operation);
+        propagateOperationToChildRoles(operation);
         setSkillState(AHCSConstants.State.INITIALIZED);
         return true;
 
       case AHCSConstants.AHCS_READY_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.INITIALIZED) : "prior state must be initialized";
         // ready child governance roles
-        propagateOperationToChildRoles(
-                getClassName(), // service
-                operation);
+        propagateOperationToChildRoles(operation);
         setSkillState(AHCSConstants.State.READY);
         return true;
 

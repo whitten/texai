@@ -96,18 +96,14 @@ public final class ContainerHeartbeat extends AbstractSkill {
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
         initialization(message);
         // initialize child heartbeat roles
-        propagateOperationToChildRoles(
-                getClassName(), // service
-                operation);
+        propagateOperationToChildRoles(operation);
         setSkillState(AHCSConstants.State.INITIALIZED);
         return true;
 
       case AHCSConstants.AHCS_READY_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.INITIALIZED) : "prior state must be initialized";
         // ready child heartbeat roles
-        propagateOperationToChildRoles(
-                getClassName(), // service
-                operation);
+        propagateOperationToChildRoles(operation);
         setSkillState(AHCSConstants.State.READY);
         return true;
 

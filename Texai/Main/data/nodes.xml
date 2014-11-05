@@ -473,7 +473,7 @@
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
-            <skill-class-name>org.texai.skill.misc.CertificateAuthority</skill-class-name>
+            <skill-class-name>org.texai.skill.aicoin.XAIContainerCertificateAuthority</skill-class-name>
           </skill-class>
         </skill-classes>
         <variableNames></variableNames>
@@ -583,7 +583,7 @@
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
-            <skill-class-name>org.texai.skill.torrent.NetworkTorrent</skill-class-name>
+            <skill-class-name>org.texai.skill.aicoin.XAINetworkTorrent</skill-class-name>
           </skill-class>
         </skill-classes>
         <variableNames></variableNames>
@@ -605,7 +605,7 @@
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
-            <skill-class-name>org.texai.skill.torrent.ContainerTorrent</skill-class-name>
+            <skill-class-name>org.texai.skill.aicoin.XAIContainerTorrent</skill-class-name>
           </skill-class>
         </skill-classes>
         <variableNames></variableNames>

@@ -73,19 +73,11 @@ public final class Governance extends AbstractSkill {
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert this.getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
-        // initialize child governance roles
-        propagateOperationToChildRoles(
-                getClassName(), // service
-                operation);
         setSkillState(State.INITIALIZED);
         return true;
 
       case AHCSConstants.AHCS_READY_TASK:
         assert this.getSkillState().equals(State.INITIALIZED) : "prior state must be initialized";
-        // ready child governance roles
-        propagateOperationToChildRoles(
-                getClassName(), // service
-                operation);
         setSkillState(State.READY);
         return true;
 

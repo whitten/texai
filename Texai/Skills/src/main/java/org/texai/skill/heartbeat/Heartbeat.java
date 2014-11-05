@@ -186,9 +186,6 @@ public class Heartbeat extends AbstractSkill {
               OUTBOUND_HEARTBEAT_PERIOD_MILLIS, // delay
               OUTBOUND_HEARTBEAT_PERIOD_MILLIS); // period
     }
-    // ready child heartbeat roles
-    propagateOperationToChildRoles(getClassName(), // service,
-            AHCSConstants.AHCS_READY_TASK); // operation
     setSkillState(State.READY);
   }
 

@@ -135,7 +135,7 @@ public final class TopmostFriendship extends AbstractSkill {
     //TODO wait for child roles to be ready
     
     try {
-      Thread.sleep(1000);
+      Thread.sleep(2000);
     } catch (InterruptedException ex) {
     }
     performMission();

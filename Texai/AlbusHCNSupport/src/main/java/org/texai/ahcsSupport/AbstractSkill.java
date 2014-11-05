@@ -249,30 +249,7 @@ public abstract class AbstractSkill {
 
     role.propagateOperationToChildRoles(
             operation,
-            getClassName(), // senderService
-            null); // service
-  }
-
-  /**
-   * Propagates the given operation to the child roles.
-   *
-   * @param service the recipient service, which if null indicates that any
-   * service that understands the operation will receive the message
-   * @param operation the given operation
-   */
-  public void propagateOperationToChildRoles(
-          final String service,
-          final String operation) {
-    //Preconditions
-    assert StringUtils.isNonEmptyString(operation) : "operation must be a non-empty string";
-    assert role != null : "role must not be null for " + this;
-
-    if (!role.getChildQualifiedNames().isEmpty()) {
-      role.propagateOperationToChildRoles(
-              operation,
-              getClassName(), // senderService
-              service);
-    }
+            getClassName()); // senderService
   }
 
   /**

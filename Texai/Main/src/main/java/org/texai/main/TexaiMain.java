@@ -70,7 +70,7 @@ public class TexaiMain {
   // the path to the XML file which defines the nodes, roles and skills
   final String nodesPath = "data/nodes.xml";
   // the tamper-evident hash of the nodes path file, use "1234" after revsing the nodes.xml file
-  final String nodesFileHashString = "9gfgl9ji7yY8acRVQeslqWgHIRyFCGwhT60TqTQkdYYneLsfEFaPOqQKUCF5Ip8ff+Hv8+a0saYbaoagUj4PEQ==";
+  final String nodesFileHashString = "kyrwl3wt1LVBysG4oMLlETmRDfViriEvb94r2b6IDq3yTD/GLhCvqmRwxs3iZyGuV1+SbOaW/R8aXICjvE3ZPA==";
   /**
    * the node runtime application thread
    */

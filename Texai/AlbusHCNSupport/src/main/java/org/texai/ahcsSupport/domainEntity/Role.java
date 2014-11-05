@@ -425,9 +425,10 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
           // not a primary skill for this role, try the shared subskill dictionary
           skill = findSubSkill(message.getRecipientService());
         }
-        assert skill != null : "service not found " + message.getRecipientService() + "\n" + message + "\n skillDictionary: " + skillDictionary;
+        assert skill != null : "service not found " + message.getRecipientService() + "\n" + message.toDetailedString() + "\n skillDictionary: " + skillDictionary;
       }
     }
+    
     if (skill == null) {
       // dispatch the message to any skill that understands the operation
       boolean isSkillFound = false;
@@ -441,8 +442,12 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
         }
       }
       if (!isSkillFound) {
-        LOGGER.info(getNode().getName() + ": skill not found for service: " + message + "\nservice: " + message.getRecipientService());
-        LOGGER.info(getNode().getName() + ": skillDictionary:\n  " + skillDictionary);
+        if (message.getRecipientService() == null) {
+          LOGGER.info("no skill understands the opeation " + message.toDetailedString());
+        } else {
+          LOGGER.info(getNode().getName() + ": skill not found for service: " + message.toDetailedString() + "\nservice: " + message.getRecipientService());
+          LOGGER.info(getNode().getName() + ": skillDictionary:\n  " + skillDictionary);
+        }
         // not understood
         final Message message1 = new Message(
                 qualifiedName, // senderQualifiedName
@@ -453,7 +458,9 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
         message1.put(AHCSConstants.AHCS_ORIGINAL_MESSAGE, message);
         sendMessage(message1);
       }
+      
     } else {
+      // the recipientService was found
       skill.receiveMessage(message);
     }
   }
@@ -469,8 +476,8 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
     assert nodeRuntime != null : "nodeRuntime must not be null";
 
     if (!message.getSenderQualifiedName().equals(qualifiedName)) {
-      LOGGER.warn("cannot send message for which this role is not the sender role " + message);
-      throw new TexaiException("cannot send message for which this role is not the sender " + message);
+      LOGGER.warn("cannot send message for which this role is not the sender role " + message.toDetailedString());
+      throw new TexaiException("cannot send message for which this role is not the sender " + message.toDetailedString());
     }
 
     if (areRemoteCommunicationsPermitted && message.isBetweenContainers()) {
@@ -479,7 +486,7 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
     }
 
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug(getNode().getName() + ": sending message: " + message);
+      LOGGER.debug(getNode().getName() + ": sending message: " + message.toDetailedString());
     }
     nodeRuntime.dispatchMessage(message);
   }
@@ -489,42 +496,16 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
    *
    * @param operation the given operation
    * @param senderService the sender service
-   * @param service the recipient service, which if null indicates that any
-   * service that understands the operation will receive the message
    */
   public void propagateOperationToChildRoles(
           final String operation,
-          final String senderService,
-          final String service) {
+          final String senderService) {
     //Preconditions
     assert operation != null : "operation must not be null";
     assert !operation.isEmpty() : "operation must not be empty";
     assert senderService != null : "senderService must not be null";
     assert !senderService.isEmpty() : "senderService must not be empty";
     assert !childQualifiedNames.isEmpty() : "childQualifiedNames must not be empty";
-
-    switch (operation) {
-      case AHCSConstants.AHCS_INITIALIZE_TASK:
-        if (roleState.get().equals(State.UNINITIALIZED)) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(qualifiedName + " propagating initialize task to child roles");
-          }
-        } else {
-          // the child roles are already initialized
-          return;
-        }
-        break;
-      case AHCSConstants.AHCS_READY_TASK:
-        if (roleState.get().equals(State.INITIALIZED)) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(qualifiedName + " propagating ready task to child roles");
-          }
-        } else {
-          // the child roles are already ready
-          return;
-        }
-        break;
-    }
 
     childQualifiedNames.stream().forEach((childQualifiedName) -> {
       sendMessage(new Message(
@@ -534,16 +515,6 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
               null, // service
               operation)); // operation
     });
-
-    switch (operation) {
-      case AHCSConstants.AHCS_INITIALIZE_TASK:
-        roleState.set(State.INITIALIZED);
-        break;
-
-      case AHCSConstants.AHCS_READY_TASK:
-        roleState.set(State.READY);
-        break;
-    }
   }
 
   /**

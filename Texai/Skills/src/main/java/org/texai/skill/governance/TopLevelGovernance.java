@@ -127,9 +127,7 @@ public final class TopLevelGovernance extends AbstractSkill {
     LOGGER.info("initializing");
 
     // initialize child governance roles
-    propagateOperationToChildRoles(
-            Governance.class.getName(), // service
-            message.getOperation()); // operation
+    propagateOperationToChildRoles( message.getOperation());
     setSkillState(State.INITIALIZED);
   }
 
@@ -144,9 +142,7 @@ public final class TopLevelGovernance extends AbstractSkill {
     assert this.getSkillState().equals(State.INITIALIZED) : "prior state must be initialized";
 
     // ready child node logger roles
-    propagateOperationToChildRoles(
-            Governance.class.getName(), // service
-            message.getOperation()); // operation
+    propagateOperationToChildRoles(message.getOperation());
     setSkillState(State.READY);
   }
 

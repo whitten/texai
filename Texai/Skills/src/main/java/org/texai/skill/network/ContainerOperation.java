@@ -70,17 +70,11 @@ public final class ContainerOperation extends AbstractSkill {
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
-        propagateOperationToChildRoles(
-                getClassName(), // service
-                operation);
         setSkillState(AHCSConstants.State.INITIALIZED);
         return true;
 
       case AHCSConstants.AHCS_READY_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.INITIALIZED) : "prior state must be initialized";
-        propagateOperationToChildRoles(
-                getClassName(), // service
-                operation);
         setSkillState(AHCSConstants.State.READY);
         return true;
 

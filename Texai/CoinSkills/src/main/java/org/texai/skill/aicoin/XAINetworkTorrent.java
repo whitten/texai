@@ -1,5 +1,5 @@
 /*
- * NetworkTorrent.java
+ * XAINetworkTorrent.java
  *
  * Created on Jun 24, 2010, 5:53:02 PM
  *
@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License along with this program;
  * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-package org.texai.skill.torrent;
+package org.texai.skill.aicoin;
 
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
@@ -32,13 +32,13 @@ import org.texai.ahcsSupport.Message;
  * @author reed
  */
 @NotThreadSafe
-public class NetworkTorrent extends AbstractSkill {
+public class XAINetworkTorrent extends AbstractSkill {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(NetworkTorrent.class);
+  private static final Logger LOGGER = Logger.getLogger(XAINetworkTorrent.class);
 
   /** Constructs a new TopTorrent instance. */
-  public NetworkTorrent() {
+  public XAINetworkTorrent() {
   }
 
   /** Gets the logger.
@@ -109,15 +109,17 @@ public class NetworkTorrent extends AbstractSkill {
     return notUnderstoodMessage(message);
   }
 
-  /** Returns the understood operations.
+  /**
+   * Returns the understood operations.
    *
    * @return the understood operations
    */
   @Override
   public String[] getUnderstoodOperations() {
-    return new String[] {
+    return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
-    };
+      AHCSConstants.AHCS_INITIALIZE_TASK,
+      AHCSConstants.AHCS_READY_TASK};
   }
 
 }
