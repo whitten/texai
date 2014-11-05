@@ -142,7 +142,7 @@
 
   <node>
     <name>NetworkOperationAgent</name>
-    <missionDescription>Manages the network, the containers, and the TexaiCoin agents within the containers. Interacts with human operators.</missionDescription>
+    <missionDescription>Manages the network, the containers, and the AICoin agents within the containers. Interacts with human operators.</missionDescription>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -164,14 +164,14 @@
 
   <node>
     <name>ContainerOperationAgent</name>
-    <missionDescription>Manages a container and the TexaiCoin agent within the container. Interacts with the human container operator.</missionDescription>
+    <missionDescription>Manages a container and the AICoin agent within the container. Interacts with the human container operator.</missionDescription>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
     <roles>
       <role>
         <qualifiedName>ContainerOperationAgent.ContainerOperationRole</qualifiedName>
-        <description>Manages the network, the containers, and the TexaiCoin agents within the containers. Interacts with human operators.</description>
+        <description>Manages the network, the containers, and the AICoin agents within the containers. Interacts with human operators.</description>
         <parentQualifiedName>NetworkOperationAgent.NetworkOperationRole</parentQualifiedName>
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
@@ -189,14 +189,14 @@
 
   <node>
     <name>XAINetworkOperationAgent</name>
-    <missionDescription>Manages the TexaiCoin agent network. Interacts with human operators.</missionDescription>
+    <missionDescription>Manages the AICoin agent network. Interacts with human operators.</missionDescription>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
     <roles>
       <role>
         <qualifiedName>XAINetworkOperationAgent.XAINetworkOperationRole</qualifiedName>
-        <description>Manages the TexaiCoin agent network. Interacts with human operators.</description>
+        <description>Manages the AICoin agent network. Interacts with human operators.</description>
         <parentQualifiedName>NetworkOperationAgent.NetworkOperationRole</parentQualifiedName>
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
@@ -236,14 +236,14 @@
 
   <node>
     <name>XAIBlockchainArchiveAgent</name>
-    <missionDescription>Archives the TexaiCoin blockchain and pending transactions.</missionDescription>
+    <missionDescription>Archives the AICoin blockchain and pending transactions.</missionDescription>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
     <roles>
       <role>
         <qualifiedName>XAIBlockchainArchiveAgent.XAIBlockchainArchiveRole</qualifiedName>
-        <description>Archives the TexaiCoin blockchain and pending transactions.</description>
+        <description>Archives the AICoin blockchain and pending transactions.</description>
         <parentQualifiedName>XAINetworkOperationAgent.XAINetworkOperationRole</parentQualifiedName>
          <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
        <skill-classes>
@@ -258,14 +258,14 @@
 
   <node>
     <name>XAIClientGatewayAgent</name>
-    <missionDescription>Provides a wallet and processor client gateway for the TexaiCoin network.</missionDescription>
+    <missionDescription>Provides a wallet and processor client gateway for the AICoin network.</missionDescription>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
     <roles>
       <role>
         <qualifiedName>XAIClientGatewayAgent.XAIClientGatewayRole</qualifiedName>
-        <description>Provides a wallet and processor client gateway for the TexaiCoin network.</description>
+        <description>Provides a wallet and processor client gateway for the AICoin network.</description>
         <parentQualifiedName>XAINetworkOperationAgent.XAINetworkOperationRole</parentQualifiedName>
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
@@ -280,14 +280,14 @@
 
   <node>
     <name>XAIFinancialAccountingAndControlAgent</name>
-    <missionDescription>Provides financial accounting and control for the TexaiCoin network.</missionDescription>
+    <missionDescription>Provides financial accounting and control for the AICoin network.</missionDescription>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
     <roles>
       <role>
         <qualifiedName>XAIFinancialAccountingAndControlAgent.XAIClientGatewayRole</qualifiedName>
-        <description>Provides financial accounting and control for the TexaiCoin network.</description>
+        <description>Provides financial accounting and control for the AICoin network.</description>
         <parentQualifiedName>XAINetworkOperationAgent.XAINetworkOperationRole</parentQualifiedName>
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
@@ -302,14 +302,14 @@
 
   <node>
     <name>XAIMintAgent</name>
-    <missionDescription>Provides a mint the TexaiCoin network.</missionDescription>
+    <missionDescription>Provides a mint the AICoin network.</missionDescription>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
     <roles>
       <role>
         <qualifiedName>XAIMintAgent.XAIMintRole</qualifiedName>
-        <description>Provides a mint the TexaiCoin network.</description>
+        <description>Provides a mint the AICoin network.</description>
         <parentQualifiedName>XAINetworkOperationAgent.XAINetworkOperationRole</parentQualifiedName>
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
@@ -324,7 +324,7 @@
 
   <node>
     <name>XAINetworkConfigurationAgent</name>
-    <missionDescription>Provides network configuration the TexaiCoin network. Maintains the assignment of
+    <missionDescription>Provides network configuration the AICoin network. Maintains the assignment of
       nomadic agents to particular containers.</missionDescription>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
@@ -332,7 +332,7 @@
     <roles>
       <role>
         <qualifiedName>XAINetworkConfigurationAgent.XAINetworkConfigurationRole</qualifiedName>
-        <description>Provides network configuration the TexaiCoin network. Maintains the assignment of
+        <description>Provides network configuration the AICoin network. Maintains the assignment of
           nomadic agents to particular containers.</description>
         <parentQualifiedName>XAINetworkOperationAgent.XAINetworkOperationRole</parentQualifiedName>
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
@@ -348,7 +348,7 @@
 
   <node>
     <name>XAINetworkSeedAgent</name>
-    <missionDescription>Provides a TexaiCoin network seed for wallet and processor clients. Maintains the mapping of client gateways
+    <missionDescription>Provides a AICoin network seed for wallet and processor clients. Maintains the mapping of client gateways
       and their respective IP addresses.</missionDescription>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
@@ -356,7 +356,7 @@
     <roles>
       <role>
         <qualifiedName>XAINetworkSeedAgent.XAINetworkSeedRole</qualifiedName>
-        <description>Provides a TexaiCoin network seed for wallet and processor clients. Maintains the mapping of client gateways
+        <description>Provides a AICoin network seed for wallet and processor clients. Maintains the mapping of client gateways
           and their respective IP addresses.</description>
         <parentQualifiedName>XAINetworkOperationAgent.XAINetworkOperationRole</parentQualifiedName>
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
@@ -372,14 +372,14 @@
 
   <node>
     <name>XAIPrimaryAuditAgent</name>
-    <missionDescription>Provides the primary audit agent for the TexaiCoin network.</missionDescription>
+    <missionDescription>Provides the primary audit agent for the AICoin network.</missionDescription>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
     <roles>
       <role>
         <qualifiedName>XAIPrimaryAuditAgent.XAIPrimaryAuditRole</qualifiedName>
-        <description>Provides the primary audit agent for the TexaiCoin network.</description>
+        <description>Provides the primary audit agent for the AICoin network.</description>
         <parentQualifiedName>XAINetworkOperationAgent.XAINetworkOperationRole</parentQualifiedName>
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
@@ -394,14 +394,14 @@
 
   <node>
     <name>XAIRecoveryAgent</name>
-    <missionDescription>Provides fault recovery for the TexaiCoin network.</missionDescription>
+    <missionDescription>Provides fault recovery for the AICoin network.</missionDescription>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
     <roles>
       <role>
         <qualifiedName>XAIRecoveryAgent.XAIRecoveryRole</qualifiedName>
-        <description>Provides fault recovery for the TexaiCoin network.</description>
+        <description>Provides fault recovery for the AICoin network.</description>
         <parentQualifiedName>XAINetworkOperationAgent.XAINetworkOperationRole</parentQualifiedName>
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
@@ -416,14 +416,14 @@
 
   <node>
     <name>XAIRewardAllocationAgent</name>
-    <missionDescription>Allocates the rewards resulting from minting new blocks for the TexaiCoin network.</missionDescription>
+    <missionDescription>Allocates the rewards resulting from minting new blocks for the AICoin network.</missionDescription>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
     <roles>
       <role>
         <qualifiedName>XAIRewardAllocationAgent.XAIRewardAllocationRole</qualifiedName>
-        <description>Allocates the rewards resulting from minting new blocks for the TexaiCoin network.</description>
+        <description>Allocates the rewards resulting from minting new blocks for the AICoin network.</description>
         <parentQualifiedName>XAINetworkOperationAgent.XAINetworkOperationRole</parentQualifiedName>
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
@@ -438,14 +438,14 @@
 
   <node>
     <name>XAIContainerAuditAgent</name>
-    <missionDescription>Provides a container audit agent for the TexaiCoin network.</missionDescription>
+    <missionDescription>Provides a container audit agent for the AICoin network.</missionDescription>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
     <roles>
       <role>
         <qualifiedName>XAIContainerAuditAgent.XAIContainerAuditRole</qualifiedName>
-        <description>Provides a container audit agent for the TexaiCoin network.</description>
+        <description>Provides a container audit agent for the AICoin network.</description>
         <parentQualifiedName>XAINetworkOperationAgent.XAINetworkOperationRole</parentQualifiedName>
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
@@ -460,7 +460,7 @@
 
   <node>
     <name>XAIContainerCertificateAuthorityAgent</name>
-    <missionDescription>Provides self-signed X.509 certificates for roles in a particular container in the TexaiCoin
+    <missionDescription>Provides self-signed X.509 certificates for roles in a particular container in the AICoin
       network.</missionDescription>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
@@ -468,7 +468,7 @@
     <roles>
       <role>
         <qualifiedName>XAIContainerCertificateAuthorityAgent.XAIContainerCertificateAuthorityRole</qualifiedName>
-        <description>Provides a container audit agent for the TexaiCoin network.</description>
+        <description>Provides a container audit agent for the AICoin network.</description>
         <parentQualifiedName>XAINetworkOperationAgent.XAINetworkOperationRole</parentQualifiedName>
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
@@ -483,19 +483,19 @@
 
   <node>
     <name>XAINetworkEpisodicMemoryAgent</name>
-    <missionDescription>Coordinates episodic memory for agents in the TexaiCoin network.</missionDescription>
+    <missionDescription>Coordinates episodic memory for agents in the AICoin network.</missionDescription>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
     <roles>
       <role>
         <qualifiedName>XAINetworkEpisodicMemoryAgent.XAINetworkEpisodicMemoryRole</qualifiedName>
-        <description>Coordinates episodic memory for agents in the TexaiCoin network.</description>
+        <description>Coordinates episodic memory for agents in the AICoin network.</description>
         <parentQualifiedName>XAINetworkOperationAgent.XAINetworkOperationRole</parentQualifiedName>
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
-            <skill-class-name>org.texai.skill.memory.NetworkEpisodicMemory</skill-class-name>
+            <skill-class-name>org.texai.skill.aicoin.XAINetworkEpisodicMemory</skill-class-name>
           </skill-class>
         </skill-classes>
         <variableNames></variableNames>
@@ -505,19 +505,19 @@
 
   <node>
     <name>XAIContainerEpisodicMemoryAgent</name>
-    <missionDescription>Provides episodic memory for agents in a particular container in the TexaiCoin network.</missionDescription>
+    <missionDescription>Provides episodic memory for agents in a particular container in the AICoin network.</missionDescription>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
     <roles>
       <role>
         <qualifiedName>XAIContainerEpisodicMemoryAgent.XAIContainerEpisodicMemoryRole</qualifiedName>
-        <description>Provides episodic memory for agents in a particular container in the TexaiCoin network.</description>
+        <description>Provides episodic memory for agents in a particular container in the AICoin network.</description>
         <parentQualifiedName>XAINetworkEpisodicMemoryAgent.XAINetworkEpisodicMemoryRole</parentQualifiedName>
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
-            <skill-class-name>org.texai.skill.memory.ContainerEpisodicMemory</skill-class-name>
+            <skill-class-name>org.texai.skill.aicoin.XAIContainerEpisodicMemory</skill-class-name>
           </skill-class>
         </skill-classes>
         <variableNames></variableNames>
@@ -527,14 +527,14 @@
 
   <node>
     <name>XAINetworkLogControlAgent</name>
-    <missionDescription>Coordinates Java logging for agents in the TexaiCoin network.</missionDescription>
+    <missionDescription>Coordinates Java logging for agents in the AICoin network.</missionDescription>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
     <roles>
       <role>
         <qualifiedName>XAINetworkLogControlAgent.XAINetworkLogControlRole</qualifiedName>
-        <description>Coordinates Java logging for agents in the TexaiCoin network.</description>
+        <description>Coordinates Java logging for agents in the AICoin network.</description>
         <parentQualifiedName>XAINetworkOperationAgent.XAINetworkOperationRole</parentQualifiedName>
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
@@ -549,14 +549,14 @@
 
   <node>
     <name>XAIContainerLogControlAgent</name>
-    <missionDescription>Coordinates Java logging for agents in the TexaiCoin network.</missionDescription>
+    <missionDescription>Coordinates Java logging for agents in the AICoin network.</missionDescription>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
     <roles>
       <role>
         <qualifiedName>XAIContainerLogControlAgent.XAIContainerLogControlRole</qualifiedName>
-        <description>Coordinates Java logging for agents in the TexaiCoin network.</description>
+        <description>Coordinates Java logging for agents in the AICoin network.</description>
         <parentQualifiedName>XAINetworkLogControlAgent.XAINetworkLogControlRole</parentQualifiedName>
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
@@ -571,14 +571,14 @@
 
   <node>
     <name>XAINetworkTorrentAgent</name>
-    <missionDescription>Coordinates bittorrent file transfers for agents in the TexaiCoin network.</missionDescription>
+    <missionDescription>Coordinates bittorrent file transfers for agents in the AICoin network.</missionDescription>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
     <roles>
       <role>
         <qualifiedName>XAINetworkTorrentAgent.XAINetworkTorrentRole</qualifiedName>
-        <description>Coordinates bittorrent file transfers for agents in the TexaiCoin network.</description>
+        <description>Coordinates bittorrent file transfers for agents in the AICoin network.</description>
         <parentQualifiedName>XAINetworkOperationAgent.XAINetworkOperationRole</parentQualifiedName>
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
@@ -593,14 +593,14 @@
 
   <node>
     <name>XAIContainerTorrentAgent</name>
-    <missionDescription>Provides bittorrent file transfers for agents in a particular container in the TexaiCoin network.</missionDescription>
+    <missionDescription>Provides bittorrent file transfers for agents in a particular container in the AICoin network.</missionDescription>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
     <roles>
       <role>
         <qualifiedName>XAIContainerTorrentAgent.XAIContainerTorrentRole</qualifiedName>
-        <description>Provides bittorrent file transfers for agents in a particular container in the TexaiCoin network.</description>
+        <description>Provides bittorrent file transfers for agents in a particular container in the AICoin network.</description>
         <parentQualifiedName>XAINetworkTorrentAgent.XAINetworkTorrentRole</parentQualifiedName>
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>

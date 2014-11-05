@@ -5,10 +5,10 @@ ContainerHeartbeatAgent
   Manages a container's agents to ensure liveness.
 
 ContainerOperationAgent
-  Manages a container and the TexaiCoin agent within the container. Interacts with the human container operator.
+  Manages a container and the AICoin agent within the container. Interacts with the human container operator.
 
 NetworkOperationAgent
-  Manages the network, the containers, and the TexaiCoin agents within the containers. Interacts with human operators.
+  Manages the network, the containers, and the AICoin agents within the containers. Interacts with human operators.
 
 TopLevelGovernanceAgent
   Manages the container governance agents to ensure friendly behavior.
@@ -20,62 +20,62 @@ TopmostFriendshipAgent
   Coordinates the top level agents to ensure friendly behavior.
 
 XAIBlockchainArchiveAgent
-  Archives the TexaiCoin blockchain and pending transactions.
+  Archives the AICoin blockchain and pending transactions.
 
 XAIClientGatewayAgent
-  Provides a wallet and processor client gateway for the TexaiCoin network.
+  Provides a wallet and processor client gateway for the AICoin network.
 
 XAIContainerAuditAgent
-  Provides a container audit agent for the TexaiCoin network.
+  Provides a container audit agent for the AICoin network.
 
 XAIContainerCertificateAuthorityAgent
-  Provides self-signed X.509 certificates for roles in a particular container in the TexaiCoin
+  Provides self-signed X.509 certificates for roles in a particular container in the AICoin
       network.
 
 XAIContainerEpisodicMemoryAgent
-  Provides episodic memory for agents in a particular container in the TexaiCoin network.
+  Provides episodic memory for agents in a particular container in the AICoin network.
 
 XAIContainerLogControlAgent
-  Coordinates Java logging for agents in the TexaiCoin network.
+  Coordinates Java logging for agents in the AICoin network.
 
 XAIContainerTorrentAgent
-  Provides bittorrent file transfers for agents in a particular container in the TexaiCoin network.
+  Provides bittorrent file transfers for agents in a particular container in the AICoin network.
 
 XAIFinancialAccountingAndControlAgent
-  Provides financial accounting and control for the TexaiCoin network.
+  Provides financial accounting and control for the AICoin network.
 
 XAIMintAgent
-  Provides a mint the TexaiCoin network.
+  Provides a mint the AICoin network.
 
 XAINetworkConfigurationAgent
-  Provides network configuration the TexaiCoin network. Maintains the assignment of
+  Provides network configuration the AICoin network. Maintains the assignment of
       nomadic agents to particular containers.
 
 XAINetworkEpisodicMemoryAgent
-  Coordinates episodic memory for agents in the TexaiCoin network.
+  Coordinates episodic memory for agents in the AICoin network.
 
 XAINetworkLogControlAgent
-  Coordinates Java logging for agents in the TexaiCoin network.
+  Coordinates Java logging for agents in the AICoin network.
 
 XAINetworkOperationAgent
-  Manages the TexaiCoin agent network. Interacts with human operators.
+  Manages the AICoin agent network. Interacts with human operators.
 
 XAINetworkSeedAgent
-  Provides a TexaiCoin network seed for wallet and processor clients. Maintains the mapping of client gateways
+  Provides a AICoin network seed for wallet and processor clients. Maintains the mapping of client gateways
       and their respective IP addresses.
 
 XAINetworkTorrentAgent
-  Coordinates bittorrent file transfers for agents in the TexaiCoin network.
+  Coordinates bittorrent file transfers for agents in the AICoin network.
 
 XAIOperationAgent
   Manages a bitcoind instance.
 
 XAIPrimaryAuditAgent
-  Provides the primary audit agent for the TexaiCoin network.
+  Provides the primary audit agent for the AICoin network.
 
 XAIRecoveryAgent
-  Provides fault recovery for the TexaiCoin network.
+  Provides fault recovery for the AICoin network.
 
 XAIRewardAllocationAgent
-  Allocates the rewards resulting from minting new blocks for the TexaiCoin network.
+  Allocates the rewards resulting from minting new blocks for the AICoin network.
 

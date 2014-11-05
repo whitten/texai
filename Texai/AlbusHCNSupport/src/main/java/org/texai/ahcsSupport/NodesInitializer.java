@@ -152,7 +152,7 @@ public final class NodesInitializer {
       hashBytes = messageDigest.digest();
       final byte[] expectedHashBytes = Base64Coder.decode(nodesFileHashString);
       if (!ByteUtils.areEqual(expectedHashBytes, hashBytes)) {
-        LOGGER.info("actual encoded hash bytes:\n" + new String(Base64Coder.encode(hashBytes)));
+        LOGGER.warn("actual encoded hash bytes:\n" + new String(Base64Coder.encode(hashBytes)));
         throw new TexaiException("nodes file: " + nodesPath + " fails expected hash checksum");
       }
     } catch (NoSuchAlgorithmException | NoSuchProviderException | IOException ex) {

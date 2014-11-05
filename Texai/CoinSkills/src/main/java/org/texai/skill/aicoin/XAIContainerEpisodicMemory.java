@@ -1,9 +1,9 @@
 /*
- * ContainerEpisodicMemory.java
+ * XAIContainerEpisodicMemory.java
  *
  * Created on May 5, 2010, 1:46:51 PM
  *
- * Description: Coordinates episodic memory for agents in the TexaiCoin network.
+ * Description: Manages episodic memory for an A.I. Coin container.
  *
  * Copyright (C) May 5, 2010, Stephen L. Reed.
  *
@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License along with this program;
  * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-package org.texai.skill.memory;
+package org.texai.skill.aicoin;
 
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
@@ -28,18 +28,17 @@ import org.texai.ahcsSupport.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 
 /**
- * Coordinates episodic memory for agents in the TexaiCoin network.
  *
  * @author reed
  */
 @ThreadSafe
-public class NetworkEpisodicMemory extends AbstractSkill {
+public class XAIContainerEpisodicMemory extends AbstractSkill {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(NetworkEpisodicMemory.class);
+  private static final Logger LOGGER = Logger.getLogger(XAIContainerEpisodicMemory.class);
 
-  /** Constructs a new NetworkEpisodicMemory instance. */
-  public NetworkEpisodicMemory() {
+  /** Constructs a new ContainerEpisodicMemory instance. */
+  public XAIContainerEpisodicMemory() {
   }
 
   /** Gets the logger.
@@ -83,6 +82,7 @@ public class NetworkEpisodicMemory extends AbstractSkill {
         return true;
     }
 
+    
     sendMessage(notUnderstoodMessage(message));
     return true;
   }

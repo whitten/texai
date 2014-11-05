@@ -116,8 +116,6 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
 
-    LOGGER.info("received message: " + message.toDetailedString());
-    
     // delete the old version of the configuration file
     final String homeDirectory = System.getProperty("user.home");
     assert StringUtils.isNonEmptyString(homeDirectory);
@@ -161,7 +159,6 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
 
     // send a task accomplished info message back to the XAIOperation role
     final Message replyMessage = Message.replyTaskAccomplished(message);
-    LOGGER.info("replyMessage " + replyMessage.toDetailedString());
     sendMessageViaSeparateThread(replyMessage);
     return true;
   }

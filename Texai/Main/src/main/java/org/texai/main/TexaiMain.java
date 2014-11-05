@@ -64,12 +64,13 @@ public class TexaiMain {
   /**
    * the key store password
    */
-  //TODO substitute user-specified password
+  //TODO substitute user-specified password from the environment
+  
   private final char[] keyStorePassword = "node-runtime-keystore-password".toCharArray();
   // the path to the XML file which defines the nodes, roles and skills
   final String nodesPath = "data/nodes.xml";
   // the tamper-evident hash of the nodes path file, use "1234" after revsing the nodes.xml file
-  final String nodesFileHashString = "5O5k7A9LseTYPuhitv/sndqt3TcLM3R9qpPLmzbrXf6tJi8xDmH0hWCoOtWTQH7/XixG/k5pxMiYchOGigT2jQ==";
+  final String nodesFileHashString = "9gfgl9ji7yY8acRVQeslqWgHIRyFCGwhT60TqTQkdYYneLsfEFaPOqQKUCF5Ip8ff+Hv8+a0saYbaoagUj4PEQ==";
   /**
    * the node runtime application thread
    */
