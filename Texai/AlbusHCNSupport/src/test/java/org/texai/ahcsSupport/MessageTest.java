@@ -46,6 +46,7 @@ import org.texai.kb.Constants;
 import org.texai.util.ByteUtils;
 import org.texai.x509.X509Utils;
 import static org.junit.Assert.*;
+import org.texai.util.StringUtils;
 
 /**
  *
@@ -430,7 +431,41 @@ public class MessageTest {
             parameterDictionary,
             "1.0.0");
     LOGGER.info(instance);
-    assertTrue(instance.toString().startsWith("[container1.agent1.role1:SenderService --> container2.agent2.role2:RepositoryContentDescription (ABC_Task) {"));
+    assertTrue(instance.toString().contains("container1.agent1.role1:SenderService --> container2.agent2.role2:RepositoryContentDescription (ABC_Task)"));
+  }
+
+  /**
+   * Test of toString method, of class Message.
+   */
+  @Test
+  public void testToDetailedString() {
+    LOGGER.info("toString");
+    final String senderQualifiedName = "container1.agent1.role1";
+    final String recipientQualifiedName = "container2.agent2.role2";
+    final UUID conversationId = UUID.randomUUID();
+    final UUID replyWith = UUID.randomUUID();
+    final UUID inReplyTo = UUID.randomUUID();
+    final DateTime replyByDateTime = null;
+    // the test service is a valid class with a no-argument constructor, the Skills defining module is dependent on this so an actual skill class cannot be used here
+    final String service = "org.texai.kb.persistence.domainEntity.RepositoryContentDescription";
+    final Map<String, Object> parameterDictionary = new HashMap<>();
+    String parameterName = "my-parm";
+    Serializable parameterValue = 10;
+    parameterDictionary.put(parameterName, parameterValue);
+    Message instance = new Message(
+            senderQualifiedName,
+            "SenderService", // senderService
+            recipientQualifiedName,
+            conversationId,
+            replyWith,
+            inReplyTo,
+            replyByDateTime,
+            service,
+            "ABC_Task", // operation
+            parameterDictionary,
+            "1.0.0");
+    LOGGER.info(instance.toDetailedString());
+    //assertTrue(instance.toDetailedString().contains(""));
   }
 
   /**
@@ -601,7 +636,7 @@ public class MessageTest {
             parameterDictionary,
             "1.0.0");
     LOGGER.info(instance);
-    assertTrue(instance.toString().startsWith("[container1.agent1.role1:SenderService --> container2.agent2.role2:RepositoryContentDescription (ABC_Task) {"));
+    assertTrue(instance.toString().contains("container1.agent1.role1:SenderService --> container2.agent2.role2:RepositoryContentDescription (ABC_Task)"));
     try {
       final KeyPair keyPair = X509Utils.generateRSAKeyPair3072();
       final X509Certificate x509Certificate = X509Utils.generateSelfSignedEndEntityX509Certificate(
@@ -623,7 +658,7 @@ public class MessageTest {
       LOGGER.info("Signature Verification Result = " + x509Certificate);
       assertTrue(result);
     } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | SignatureException | InvalidKeyException | IOException | CertificateException ex) {
-      ex.printStackTrace();
+      LOGGER.info(StringUtils.getStackTraceAsString(ex));
       fail(ex.getMessage());
     }
   }

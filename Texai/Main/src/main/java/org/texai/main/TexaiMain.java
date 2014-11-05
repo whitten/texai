@@ -96,9 +96,11 @@ public class TexaiMain {
     //Preconditions
     assert StringUtils.isNonEmptyString(containerName) : "containerName must be a non-empty string";
 
+    Logger.getLogger(DistributedRepositoryManager.class).setLevel(Level.WARN);
     Logger.getLogger(KBAccess.class).setLevel(Level.WARN);
     Logger.getLogger(NodesInitializer.class).setLevel(Level.WARN);
     Logger.getLogger(RDFEntityPersister.class).setLevel(Level.WARN);
+    Logger.getLogger(X509Utils.class).setLevel(Level.WARN);
     
     LOGGER.info("starting the node runtime in the " + containerName + " container");
     nodeRuntime = new NodeRuntime(containerName);

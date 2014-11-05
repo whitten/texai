@@ -383,8 +383,10 @@ public abstract class AbstractSkill {
 
     synchronized (messageTimeOutInfoDictionary) {
       final MessageTimeOutInfo messageTimeOutInfo = messageTimeOutInfoDictionary.remove(replyMessage.getInReplyTo());
-      assert messageTimeOutInfo != null;
-      getLogger().info("removed message timeout for ");
+      assert messageTimeOutInfo != null : "inReplyTo: " + replyMessage.getInReplyTo() + 
+              "\nmessageTimeOutInfoDictionary: " + messageTimeOutInfoDictionary;
+      getLogger().info("removed message timeout for " + messageTimeOutInfo);
+      messageTimeOutInfo.messageTimeoutTask.cancel();
     }
   }
 

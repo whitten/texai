@@ -40,7 +40,8 @@ import org.texai.util.TexaiException;
 import org.texai.x509.SerializableObjectSigner;
 
 /**
- * Provides a message. See the FIPA standard at http://www.fipa.org/specs/fipa00061/SC00061G.html
+ * Provides a message. See the FIPA standard at
+ * http://www.fipa.org/specs/fipa00061/SC00061G.html
  *
  * @author Stephen L. Reed
  */
@@ -80,11 +81,13 @@ public class Message implements Serializable {
   public static final String DEFAULT_VERSION = "1.0.0";
 
   /**
-   * Constructs a new Message instance, tailored for sending to a sub-skill within the same role.
+   * Constructs a new Message instance, tailored for sending to a sub-skill
+   * within the same role.
    *
    * @param sendingSkill the sending skill
    * @param recipientService the recipient service
-   * @param operation the operation, which can be a task, sensation, or information
+   * @param operation the operation, which can be a task, sensation, or
+   * information
    */
   public Message(
           final AbstractSkill sendingSkill,
@@ -104,10 +107,13 @@ public class Message implements Serializable {
    * Constructs a new Message instance.
    *
    * @param senderQualifiedName the sender role's id
-   * @param senderService the sender role's qualified name, container.nodename.rolename
-   * @param recipientQualifiedName the recipient role's qualified name, container.nodename.rolename
+   * @param senderService the sender role's qualified name,
+   * container.nodename.rolename
+   * @param recipientQualifiedName the recipient role's qualified name,
+   * container.nodename.rolename
    * @param recipientService the recipient service
-   * @param operation the operation, which can be a task, sensation, or information
+   * @param operation the operation, which can be a task, sensation, or
+   * information
    */
   public Message(
           final String senderQualifiedName,
@@ -128,13 +134,18 @@ public class Message implements Serializable {
   /**
    * Constructs a new Message instance.
    *
-   * @param senderQualifiedName the sender role's qualified name, container.nodename.rolename
+   * @param senderQualifiedName the sender role's qualified name,
+   * container.nodename.rolename
    * @param senderService the sender recipientService
-   * @param recipientQualifiedName the recipient role's qualified name, container.nodename.rolename
-   * @param recipientService the recipient recipientService, commonly used to specifiy a subskill used within a role when the sending role
-   * is also the recipient role
-   * @param operation the operation, which can be a task, sensation, or information
-   * @param parameterDictionary the operation parameter dictionary, name --> value
+   * @param recipientQualifiedName the recipient role's qualified name,
+   * container.nodename.rolename
+   * @param recipientService the recipient recipientService, commonly used to
+   * specifiy a subskill used within a role when the sending role is also the
+   * recipient role
+   * @param operation the operation, which can be a task, sensation, or
+   * information
+   * @param parameterDictionary the operation parameter dictionary, name -->
+   * value
    * @param version the message recipientService/operation version
    */
   public Message(
@@ -175,15 +186,18 @@ public class Message implements Serializable {
   }
 
   /**
-   * Constructs a new Message instance.
+   * Constructs a new Message instance reply-with
    *
-   * @param senderQualifiedName the sender role's qualified name, container.nodename.rolename
+   * @param senderQualifiedName the sender role's qualified name,
+   * container.nodename.rolename
    * @param senderService the sender recipientService
-   * @param recipientQualifiedName the recipient role's qualified name, container.nodename.rolename
+   * @param recipientQualifiedName the recipient role's qualified name,
+   * container.nodename.rolename
    * @param conversationId the conversation id
    * @param replyWith the reply-with UUID
    * @param recipientService the recipient service
-   * @param operation the operation, which can be a task, sensation, or information
+   * @param operation the operation, which can be a task, sensation, or
+   * information
    */
   public Message(
           final String senderQualifiedName,
@@ -208,14 +222,17 @@ public class Message implements Serializable {
   }
 
   /**
-   * Constructs a new Message instance.
+   * Constructs a new Message instance in-reply-to.
    *
-   * @param senderQualifiedName the sender role's qualified name, container.nodename.rolename
+   * @param senderQualifiedName the sender role's qualified name,
+   * container.nodename.rolename
    * @param senderService the sender recipientService
-   * @param recipientQualifiedName the role's qualified name, container.nodename.rolename
+   * @param recipientQualifiedName the role's qualified name,
+   * container.nodename.rolename
    * @param conversationId the conversation id
    * @param recipientService the recipient service
-   * @param operation the operation, which can be a task, sensation, or information
+   * @param operation the operation, which can be a task, sensation, or
+   * information
    * @param inReplyTo the in-reply-to UUID
    */
   public Message(
@@ -243,16 +260,20 @@ public class Message implements Serializable {
   /**
    * Constructs a new Message instance.
    *
-   * @param senderQualifiedName the sender role's qualified name, container.nodename.rolename
+   * @param senderQualifiedName the sender role's qualified name,
+   * container.nodename.rolename
    * @param senderService the sender recipientService
-   * @param recipientQualifiedName the recipient role's qualified name, container.nodename.rolename
+   * @param recipientQualifiedName the recipient role's qualified name,
+   * container.nodename.rolename
    * @param conversationId the conversation id
    * @param replyWith the reply-with UUID
    * @param inReplyTo in-reply-to UUID
    * @param replyByDateTime the reply-by date/time, or null if not applicable
    * @param recipientService the recipient service
-   * @param operation the operation, which can be a task, sensation, or information
-   * @param parameterDictionary the operations parameter dictionary, name --> value
+   * @param operation the operation, which can be a task, sensation, or
+   * information
+   * @param parameterDictionary the operations parameter dictionary, name -->
+   * value
    * @param version the message recipientService/operation version
    */
   public Message(
@@ -299,7 +320,8 @@ public class Message implements Serializable {
    * Returns a new message for forwarding to the given recipient.
    *
    * @param message the given message
-   * @param recipientQualifiedName the recipient role's qualified name, container.nodename.rolename
+   * @param recipientQualifiedName the recipient role's qualified name,
+   * container.nodename.rolename
    * @param recipientService the recipient service
    *
    * @return a new message for forwarding to the given recipient
@@ -351,7 +373,8 @@ public class Message implements Serializable {
   }
 
   /**
-   * Returns a new taskAccomplished info message for replying to the given received task message.
+   * Returns a new taskAccomplished info message for replying to the given
+   * received task message.
    *
    * @param message the given message
    *
@@ -366,8 +389,10 @@ public class Message implements Serializable {
             message.recipientQualifiedName, // senderQualifiedName
             message.recipientService, // senderService,
             message.getSenderQualifiedName(), // recipientQualifiedName
+            message.conversationId,
             message.getSenderService(), // recipientService
-            AHCSConstants.TASK_ACCOMPLISHED_INFO); // operation
+            AHCSConstants.TASK_ACCOMPLISHED_INFO, // operation
+            message.replyWith); // inReplyTo
   }
 
   /**
@@ -402,7 +427,8 @@ public class Message implements Serializable {
   }
 
   /**
-   * Returns whether the given message is a sensation message sent from a child node to its parent node.
+   * Returns whether the given message is a sensation message sent from a child
+   * node to its parent node.
    *
    * @return whether the given message is a task message
    */
@@ -411,7 +437,8 @@ public class Message implements Serializable {
   }
 
   /**
-   * Returns whether the given message is a task message sent from a parent node to one of its child nodes.
+   * Returns whether the given message is a task message sent from a parent node
+   * to one of its child nodes.
    *
    * @return whether the given message is a task message
    */
@@ -420,7 +447,8 @@ public class Message implements Serializable {
   }
 
   /**
-   * Returns whether the given message has a sender in one container and the recipient in another container.
+   * Returns whether the given message has a sender in one container and the
+   * recipient in another container.
    *
    * @return whether the given message is sent between containers
    */
@@ -446,7 +474,8 @@ public class Message implements Serializable {
     return senderQualifiedName;
   }
 
-  /** Returns the name of the sender' container.
+  /**
+   * Returns the name of the sender' container.
    *
    * @return the name of the sender' container
    */
@@ -457,7 +486,8 @@ public class Message implements Serializable {
   }
 
   /**
-   * Gets the senders digital signature, which is populated when the message is sent between JVMs.
+   * Gets the senders digital signature, which is populated when the message is
+   * sent between JVMs.
    *
    * @return the senders digital signature
    */
@@ -466,7 +496,8 @@ public class Message implements Serializable {
   }
 
   /**
-   * Gets the recipient role's qualified name, container-name.node-name.role-name.
+   * Gets the recipient role's qualified name,
+   * container-name.node-name.role-name.
    *
    * @return the recipient role's qualified name
    */
@@ -474,7 +505,8 @@ public class Message implements Serializable {
     return recipientQualifiedName;
   }
 
-  /** Returns the name of the recipient's container.
+  /**
+   * Returns the name of the recipient's container.
    *
    * @return the name of the recipient's container
    */
@@ -556,7 +588,8 @@ public class Message implements Serializable {
   }
 
   /**
-   * Gets the parameter value corresponding to the given parameter name, or null if not found.
+   * Gets the parameter value corresponding to the given parameter name, or null
+   * if not found.
    *
    * @param parameterName the parameter name
    *
@@ -584,7 +617,8 @@ public class Message implements Serializable {
   }
 
   /**
-   * Copies the given message's parameters into this message's parameter dictionary.
+   * Copies the given message's parameters into this message's parameter
+   * dictionary.
    *
    * @param message the given message
    */
@@ -596,7 +630,8 @@ public class Message implements Serializable {
   }
 
   /**
-   * Copies the given message's parameter into this message's parameter dictionary.
+   * Copies the given message's parameter into this message's parameter
+   * dictionary.
    *
    * @param parameterName the parameter name
    * @param message the given message
@@ -630,6 +665,8 @@ public class Message implements Serializable {
   public String toString() {
     final StringBuilder stringBuilder = new StringBuilder();
     stringBuilder.append("[");
+    stringBuilder.append(dateTime);
+    stringBuilder.append(' ');
     stringBuilder.append(senderQualifiedName);
     stringBuilder.append(':');
     if (senderService != null) {
@@ -642,7 +679,7 @@ public class Message implements Serializable {
     }
     stringBuilder.append(" --> ");
     stringBuilder.append(recipientQualifiedName);
-
+    
     stringBuilder.append(':');
     if (recipientService != null) {
       int index = recipientService.lastIndexOf('.');
@@ -654,7 +691,7 @@ public class Message implements Serializable {
     }
     stringBuilder.append(" (");
     stringBuilder.append(operation);
-    stringBuilder.append(") {");
+    stringBuilder.append(") ");
     if (conversationId != null) {
       stringBuilder.append("\n  conversationId=");
       stringBuilder.append(conversationId);
@@ -678,7 +715,57 @@ public class Message implements Serializable {
       }
       stringBuilder.append('\n');
     }
-    stringBuilder.append('}');
+    stringBuilder.append(']');
+    return stringBuilder.toString();
+  }
+
+  /**
+   * Returns a detailed string representation of this object.
+   *
+   * @return a detailed string representation of this object
+   */
+  public String toDetailedString() {
+    final StringBuilder stringBuilder = new StringBuilder();
+    stringBuilder
+            .append("[Message ...\n  senderQualifiedName:    ")
+            .append(senderQualifiedName)
+            .append("\n  senderService:          ")
+            .append(senderService)
+            .append("\n  signatureBytes:         ")
+            .append(signatureBytes)
+            .append("\n  recipientQualifiedName: ")
+            .append(recipientQualifiedName)
+            .append("\n  conversationId:         ")
+            .append(conversationId)
+            .append("\n  replyWith:              ")
+            .append(replyWith)
+            .append("\n  inReplyTo:              ")
+            .append(inReplyTo)
+            .append("\n  dateTime:               ")
+            .append(dateTime)
+            .append("\n  replyByDateTime:        ")
+            .append(replyByDateTime)
+            .append("\n  recipientService:       ")
+            .append(recipientService)
+            .append("\n  operation:              ")
+            .append(operation);
+
+    if (!parameterDictionary.isEmpty()) {
+      boolean isFirst = true;
+      for (final Entry<String, Object> entry : parameterDictionary.entrySet()) {
+        if (isFirst) {
+          isFirst = false;
+        } else {
+          stringBuilder.append(',');
+        }
+        stringBuilder
+                .append("\n    parameter: ")
+                .append(entry.getKey())
+                .append('=')
+                .append(entry.getValue().toString());
+      }
+      stringBuilder.append('\n');
+    }
     stringBuilder.append(']');
     return stringBuilder.toString();
   }
@@ -774,7 +861,8 @@ public class Message implements Serializable {
   /**
    * Returns whether the given signature verifies this message.
    *
-   * @param x509Certificate the senders X.509 certificate, that contains the public key
+   * @param x509Certificate the senders X.509 certificate, that contains the
+   * public key
    *
    * @return whether the given signature verifies the given file
    */
@@ -797,28 +885,30 @@ public class Message implements Serializable {
   }
 
   /**
-   * Return whether this message is a Chord operation message, which is not signed.
+   * Return whether this message is a Chord operation message, which is not
+   * signed.
    *
    * @return whether this message is a Chord operation message
    */
   public boolean isChordOperation() {
     return senderQualifiedName.isEmpty();
   }
-  
-  /** Returns whether the given service names a valid Java class.
-   * 
+
+  /**
+   * Returns whether the given service names a valid Java class.
+   *
    * @param service the given service name
    * @return whether the given service names a valid Java class
    */
   private boolean isValidService(final String service) {
     //Preconditions
     assert StringUtils.isNonEmptyString(service) : "service must be a non-empty string";
-    
-      try {
-        Class.forName(service).newInstance();
-        return true;
-      } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
-        return false;
-      }
+
+    try {
+      Class.forName(service).newInstance();
+      return true;
+    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+      return false;
+    }
   }
 }
