@@ -373,17 +373,17 @@ public abstract class AbstractSkill {
   }
   
   /**
-   * Removes a previously set replyMessage timeout using the in-reply-to value of the reply replyMessage.
+   * Removes a previously set replyMessage timeout using the given replyTo value of the sent message.
    *
-   * @param replyMessage the given set replyMessage
+   * @param replyWith the given replyTo value of the sent message
    */
-  protected void removeMessageTimeOut(final Message replyMessage) {
+  protected void removeMessageTimeOut(final UUID replyWith) {
     //Preconditions
-    assert replyMessage != null : "message must not be null";
+    assert replyWith != null : "replyWith must not be null" ;
 
     synchronized (messageTimeOutInfoDictionary) {
-      final MessageTimeOutInfo messageTimeOutInfo = messageTimeOutInfoDictionary.remove(replyMessage.getInReplyTo());
-      assert messageTimeOutInfo != null : "inReplyTo: " + replyMessage.getInReplyTo() + 
+      final MessageTimeOutInfo messageTimeOutInfo = messageTimeOutInfoDictionary.remove(replyWith);
+      assert messageTimeOutInfo != null : "inReplyTo: " + replyWith + 
               "\nmessageTimeOutInfoDictionary: " + messageTimeOutInfoDictionary;
       getLogger().info("removed message timeout for " + messageTimeOutInfo);
       messageTimeOutInfo.messageTimeoutTask.cancel();
@@ -427,7 +427,7 @@ public abstract class AbstractSkill {
       //Preconditions
       assert messageTimeOutInfo != null : "messageTimeOutInfo must not be null";
 
-      skill.removeMessageTimeOut(messageTimeOutInfo.message);
+      skill.removeMessageTimeOut(messageTimeOutInfo.message.getReplyWith());
       final Message timeoutMessage;
       if (messageTimeOutInfo.isRecoverable) {
         // send MESSAGE_TIMEOUT_INFO message to self

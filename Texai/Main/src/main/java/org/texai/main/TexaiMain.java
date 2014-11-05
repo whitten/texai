@@ -102,7 +102,7 @@ public class TexaiMain {
     Logger.getLogger(RDFEntityPersister.class).setLevel(Level.WARN);
     Logger.getLogger(X509Utils.class).setLevel(Level.WARN);
     
-    LOGGER.info("starting the node runtime in the " + containerName + " container");
+    LOGGER.info("starting the node runtime in the container named " + containerName);
     nodeRuntime = new NodeRuntime(containerName);
     // configure a shutdown hook to run the finalization method in case the JVM is abnormally ended
     shutdownHook = new ShutdownHook();
@@ -113,7 +113,7 @@ public class TexaiMain {
     assert !Logger.getLogger(RDFEntityPersister.class).isInfoEnabled();
 
     // load the repositories with the node and role types
-    LOGGER.info("loading nodes, roles and skills ...");
+    LOGGER.info("loading nodes and their roles, and installing skills for each role ...");
     final NodesInitializer nodesInitializer = new NodesInitializer(
             true, // isClassExistsTested,
             keyStorePassword,

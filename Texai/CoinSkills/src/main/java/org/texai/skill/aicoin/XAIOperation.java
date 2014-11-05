@@ -184,14 +184,15 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
   }
 
   /**
-  /**
-   * Continues the conversation with the 
+   * Continues the conversation with the XAIWriteConfigurationFile skill.
    */
   private synchronized void continueConversation(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
+    assert message.getInReplyTo() != null : "message must have inReplyTo value " + message.toDetailedString();
 
-    //TODO
+    removeMessageTimeOut(message.getInReplyTo());
+    LOGGER.info("the bitcoind configuration file has been written");
   }
 
   /**

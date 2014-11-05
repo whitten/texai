@@ -252,10 +252,9 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
           // ordinary skill that does not need sessions managed
           skill.setRole(this);
           skillDictionary.put(skillClassName, skill);
-          LOGGER.info("      " + this + " constructed skill: " + skill);
-//          if (LOGGER.isDebugEnabled()) {
-//            LOGGER.debug("      " + this + " constructed skill: " + skill);
-//          }
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("      " + this + " constructed skill: " + skill);
+          }
         }
       }
     }
@@ -394,7 +393,9 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
       }
       skill.setRole(this);
       skillDictionary.put(message.getRecipientService(), skill);
-      LOGGER.info(getNode().getName() + ": " + this + " constructed skill: " + skill);
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.info(getNode().getName() + ": " + this + " constructed skill: " + skill);
+      }
     }
     return skill.converseMessage(message);
   }
