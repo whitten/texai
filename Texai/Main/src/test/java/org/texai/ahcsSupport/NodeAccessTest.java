@@ -82,7 +82,7 @@ public class NodeAccessTest {
                     nodeRuntime);
     nodesInitializer.process(
             "data/nodes-test.xml", // nodesPath
-            "KCIIW8SeONcxmh9lRVKyDokiBTe+875QA2aYiNm8jJG2TdtDMcvLQxAnbi1J3npFbGcC4VEaiadvY7amHL4SEA=="); // nodesFileHashString
+            "8PveX99SCnPbvixNUF2YbUJ/jtA9Cwvf9TBaPVZHHB476WctTQ2Z7Odw6KKp3PCiBEPctnxH3o9lig83japHfQ=="); // nodesFileHashString
   }
 
   @AfterClass
@@ -108,7 +108,7 @@ public class NodeAccessTest {
     NodeAccess instance = new NodeAccess(rdfEntityManager);
     List<Node> result = instance.getNodes();
     Collections.sort(result);
-    assertEquals("[TestContainer.ContainerGovernanceAgent, TestContainer.ContainerHeartbeatAgent, TestContainer.ContainerOperationAgent, TestContainer.NetworkOperationAgent, TestContainer.TopLevelGovernanceAgent, TestContainer.TopLevelHeartbeatAgent, TestContainer.TopmostFriendshipAgent, TestContainer.XAIBlockchainArchiveAgent, TestContainer.XAIClientGatewayAgent, TestContainer.XAIContainerAuditAgent, TestContainer.XAIContainerCertificateAuthorityAgent, TestContainer.XAIContainerEpisodicMemoryAgent, TestContainer.XAIContainerLogControlAgent, TestContainer.XAIContainerTorrentAgent, TestContainer.XAIFinancialAccountingAndControlAgent, TestContainer.XAIMintAgent, TestContainer.XAINetworkConfigurationAgent, TestContainer.XAINetworkEpisodicMemoryAgent, TestContainer.XAINetworkLogControlAgent, TestContainer.XAINetworkOperationAgent, TestContainer.XAINetworkSeedAgent, TestContainer.XAINetworkTorrentAgent, TestContainer.XAIOperationAgent, TestContainer.XAIPrimaryAuditAgent, TestContainer.XAIRecoveryAgent, TestContainer.XAIRewardAllocationAgent]", result.toString());
+    assertEquals("[TestContainer.ContainerGovernanceAgent, TestContainer.ContainerHeartbeatAgent, TestContainer.ContainerOperationAgent, TestContainer.NetworkOperationAgent, TestContainer.TopLevelGovernanceAgent, TestContainer.TopLevelHeartbeatAgent, TestContainer.TopmostFriendshipAgent, TestContainer.XAIBlockchainArchiveAgent, TestContainer.XAIClientGatewayAgent, TestContainer.XAIContainerAuditAgent, TestContainer.XAIContainerCertificateAuthorityAgent, TestContainer.XAIContainerConfigurationAgent, TestContainer.XAIContainerEpisodicMemoryAgent, TestContainer.XAIContainerLogControlAgent, TestContainer.XAIContainerTorrentAgent, TestContainer.XAIFinancialAccountingAndControlAgent, TestContainer.XAIMintAgent, TestContainer.XAINetworkConfigurationAgent, TestContainer.XAINetworkEpisodicMemoryAgent, TestContainer.XAINetworkLogControlAgent, TestContainer.XAINetworkOperationAgent, TestContainer.XAINetworkSeedAgent, TestContainer.XAINetworkTorrentAgent, TestContainer.XAIOperationAgent, TestContainer.XAIPrimaryAuditAgent, TestContainer.XAIRecoveryAgent, TestContainer.XAIRewardAllocationAgent]", result.toString());
   }
 
   /**
@@ -192,7 +192,7 @@ public class NodeAccessTest {
     assertEquals(rdfEntityManager, result);
   }
 
-  
+
 
   /**
    * Makes a test skill class.

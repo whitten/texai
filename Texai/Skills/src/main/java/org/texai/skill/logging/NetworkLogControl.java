@@ -42,14 +42,14 @@ public class NetworkLogControl extends AbstractSkill {
   }
 
   /** Gets the logger.
-   * 
+   *
    * @return  the logger
    */
   @Override
   protected Logger getLogger() {
     return LOGGER;
   }
-  
+
   /** Receives and attempts to process the given message.  The skill is thread safe, given that any contained libraries are single threaded
    * with regard to the conversation.
    *
@@ -74,12 +74,12 @@ public class NetworkLogControl extends AbstractSkill {
       case AHCSConstants.AHCS_READY_TASK:
         ready(message);
         return true;
-        
+
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
         return true;
     }
-    
+
     // not understood
     sendMessage(notUnderstoodMessage(message));
     return true;
@@ -114,7 +114,10 @@ public class NetworkLogControl extends AbstractSkill {
             };
   }
 
-  /** Performs the initialization operation. */
+  /** Performs the initialization operation.
+   *
+   * @param message the message
+   */
   private void initialization(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
@@ -126,7 +129,10 @@ public class NetworkLogControl extends AbstractSkill {
     setSkillState(State.INITIALIZED);
   }
 
-  /** Performs the ready operation. */
+  /** Performs the ready operation.
+   *
+   * @param message the message
+   */
   private void ready(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";

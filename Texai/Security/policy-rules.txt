@@ -1,1 +1,1 @@
-grant codeBase "file:/home/reed/.m2/repository/org/apache/maven/surefire/surefire-booter/2.17/surefire-booter-2.17.jar" {permission  java.lang.RuntimePermission "exitVM.0", "";};
+grant codeBase "file:/home/reed/git/maven-local-repository/repository/org/apache/maven/surefire/surefire-booter/2.17/surefire-booter-2.17.jar" {permission  java.lang.RuntimePermission "exitVM.0", "";};
