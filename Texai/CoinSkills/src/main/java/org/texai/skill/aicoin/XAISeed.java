@@ -9,8 +9,8 @@ import org.texai.ahcsSupport.Message;
 /**
  * Created on Aug 29, 2014, 6:44:41 PM.
  *
- * Description: Coordinates the bittorrent seeding of large blockchain and data files to new full nodes
-      when they join the network.
+ * Description: Provides a AICoin network seed for wallet and processor clients. Maintains the mapping of client gateways
+ *     and their respective IP addresses.
  *
  * Copyright (C) Aug 29, 2014, Stephen L. Reed, Texai.org.
  *
@@ -29,15 +29,15 @@ import org.texai.ahcsSupport.Message;
  * <http://www.gnu.org/licenses/>.
  */
 @ThreadSafe
-public final class XAINetworkSeed extends AbstractSkill {
+public final class XAISeed extends AbstractSkill {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(XAINetworkSeed.class);
+  private static final Logger LOGGER = Logger.getLogger(XAISeed.class);
 
   /**
    * Constructs a new XTCNetworkSeed instance.
    */
-  public XAINetworkSeed() {
+  public XAISeed() {
   }
 
   /** Gets the logger.

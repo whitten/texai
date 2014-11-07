@@ -33,6 +33,7 @@
   <node>
     <name>TopmostFriendshipAgent</name>
     <missionDescription>Coordinates the top level agents to ensure friendly behavior.</missionDescription>
+    <isNetworkSingleton>true</isNetworkSingleton>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -55,6 +56,7 @@
   <node>
     <name>TopLevelGovernanceAgent</name>
     <missionDescription>Manages the container governance agents to ensure friendly behavior.</missionDescription>
+    <isNetworkSingleton>true</isNetworkSingleton>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -99,6 +101,7 @@
   <node>
     <name>TopLevelHeartbeatAgent</name>
     <missionDescription>Manages the container heartbeat agents to ensure liveness.</missionDescription>
+    <isNetworkSingleton>true</isNetworkSingleton>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -143,6 +146,7 @@
   <node>
     <name>NetworkOperationAgent</name>
     <missionDescription>Manages the network, the containers, and the AICoin agents within the containers. Interacts with human operators.</missionDescription>
+    <isNetworkSingleton>true</isNetworkSingleton>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -190,6 +194,7 @@
   <node>
     <name>XAINetworkOperationAgent</name>
     <missionDescription>Manages the AICoin agent network. Interacts with human operators.</missionDescription>
+    <isNetworkSingleton>true</isNetworkSingleton>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -281,6 +286,7 @@
   <node>
     <name>XAIFinancialAccountingAndControlAgent</name>
     <missionDescription>Provides financial accounting and control for the AICoin network.</missionDescription>
+    <isNetworkSingleton>true</isNetworkSingleton>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -303,6 +309,7 @@
   <node>
     <name>XAIMintAgent</name>
     <missionDescription>Provides a mint the AICoin network.</missionDescription>
+    <isNetworkSingleton>true</isNetworkSingleton>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -326,6 +333,7 @@
     <name>XAINetworkConfigurationAgent</name>
     <missionDescription>Provides network configuration the AICoin network. Maintains the assignment of
       nomadic agents to particular containers.</missionDescription>
+    <isNetworkSingleton>true</isNetworkSingleton>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -348,16 +356,16 @@
 
   <node>
     <name>XAIContainerConfigurationAgent</name>
-    <missionDescription>Provides network configuration the AICoin network. Maintains the assignment of
-      nomadic agents to particular containers.</missionDescription>
+    <missionDescription>Configures the container role, for a container's agent/role having a network singleton parent role,
+      to refer to the singleton parent role at whichever container is currently hosting it.</missionDescription>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
     <roles>
       <role>
         <qualifiedName>XAIContainerConfigurationAgent.XAIContainerConfigurationRole</qualifiedName>
-        <description>Provides network configuration the AICoin network. Maintains the assignment of
-          nomadic agents to particular containers.</description>
+        <description>Configures the container role, for a container's agent/role having a network singleton parent role,
+      to refer to the singleton parent role at whichever container is currently hosting it.</description>
         <parentQualifiedName>XAINetworkConfigurationAgent.XAINetworkConfigurationRole</parentQualifiedName>
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
@@ -372,16 +380,17 @@
 
   <node>
     <name>XAINetworkSeedAgent</name>
-    <missionDescription>Provides a AICoin network seed for wallet and processor clients. Maintains the mapping of client gateways
-      and their respective IP addresses.</missionDescription>
+    <missionDescription>Coordinates the bittorrent seeding of large blockchain and data files to new full nodes
+      when they join the network.</missionDescription>
+    <isNetworkSingleton>true</isNetworkSingleton>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
     <roles>
       <role>
         <qualifiedName>XAINetworkSeedAgent.XAINetworkSeedRole</qualifiedName>
-        <description>Provides a AICoin network seed for wallet and processor clients. Maintains the mapping of client gateways
-          and their respective IP addresses.</description>
+        <description>Coordinates the bittorrent seeding of large blockchain and data files to new full nodes
+      when they join the network.</description>
         <parentQualifiedName>XAINetworkOperationAgent.XAINetworkOperationRole</parentQualifiedName>
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
@@ -395,8 +404,33 @@
   </node>
 
   <node>
+    <name>XAISeedAgent</name>
+    <missionDescription>Provides a AICoin network seed for wallet and processor clients. Maintains the mapping of client gateways
+      and their respective IP addresses.</missionDescription>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>XAINetworkSeedAgent.XAINetworkSeedRole</qualifiedName>
+        <description>Provides a AICoin network seed for wallet and processor clients. Maintains the mapping of client gateways
+          and their respective IP addresses.</description>
+        <parentQualifiedName>XAINetworkSeedAgent.XAINetworkSeedRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.aicoin.XAISeed</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
     <name>XAIPrimaryAuditAgent</name>
     <missionDescription>Provides the primary audit agent for the AICoin network.</missionDescription>
+    <isNetworkSingleton>true</isNetworkSingleton>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -419,6 +453,7 @@
   <node>
     <name>XAIRecoveryAgent</name>
     <missionDescription>Provides fault recovery for the AICoin network.</missionDescription>
+    <isNetworkSingleton>true</isNetworkSingleton>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -441,6 +476,7 @@
   <node>
     <name>XAIRewardAllocationAgent</name>
     <missionDescription>Allocates the rewards resulting from minting new blocks for the AICoin network.</missionDescription>
+    <isNetworkSingleton>true</isNetworkSingleton>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -508,6 +544,7 @@
   <node>
     <name>XAINetworkEpisodicMemoryAgent</name>
     <missionDescription>Coordinates episodic memory for agents in the AICoin network.</missionDescription>
+    <isNetworkSingleton>true</isNetworkSingleton>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -552,6 +589,7 @@
   <node>
     <name>XAINetworkLogControlAgent</name>
     <missionDescription>Coordinates Java logging for agents in the AICoin network.</missionDescription>
+    <isNetworkSingleton>true</isNetworkSingleton>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
@@ -593,47 +631,4 @@
     </roles>
   </node>
 
-  <node>
-    <name>XAINetworkTorrentAgent</name>
-    <missionDescription>Coordinates bittorrent file transfers for agents in the AICoin network.</missionDescription>
-    <prototypeNodeNames>
-      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
-    </prototypeNodeNames>
-    <roles>
-      <role>
-        <qualifiedName>XAINetworkTorrentAgent.XAINetworkTorrentRole</qualifiedName>
-        <description>Coordinates bittorrent file transfers for agents in the AICoin network.</description>
-        <parentQualifiedName>XAINetworkOperationAgent.XAINetworkOperationRole</parentQualifiedName>
-        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
-        <skill-classes>
-          <skill-class>
-            <skill-class-name>org.texai.skill.aicoin.XAINetworkTorrent</skill-class-name>
-          </skill-class>
-        </skill-classes>
-        <variableNames></variableNames>
-      </role>
-    </roles>
-  </node>
-
-  <node>
-    <name>XAIContainerTorrentAgent</name>
-    <missionDescription>Provides bittorrent file transfers for agents in a particular container in the AICoin network.</missionDescription>
-    <prototypeNodeNames>
-      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
-    </prototypeNodeNames>
-    <roles>
-      <role>
-        <qualifiedName>XAIContainerTorrentAgent.XAIContainerTorrentRole</qualifiedName>
-        <description>Provides bittorrent file transfers for agents in a particular container in the AICoin network.</description>
-        <parentQualifiedName>XAINetworkTorrentAgent.XAINetworkTorrentRole</parentQualifiedName>
-        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
-        <skill-classes>
-          <skill-class>
-            <skill-class-name>org.texai.skill.aicoin.XAIContainerTorrent</skill-class-name>
-          </skill-class>
-        </skill-classes>
-        <variableNames></variableNames>
-      </role>
-    </roles>
-  </node>
 </nodes>

@@ -226,7 +226,8 @@ public class NodeTest {
     Node testNode = new Node(
             name,
             missionDescription,
-            roles);
+            roles,
+            false); // isNetworkSingleton
     testRole.setNode(testNode);
     testNode.setStateValue("testVariable", 1);
     return testNode;
@@ -246,7 +247,8 @@ public class NodeTest {
     Node testNode = new Node(
             name,
             missionDescription,
-            roles);
+            roles,
+            false); // isNetworkSingleton
     testRole.setNode(testNode);
     testNode.setStateValue("testVariable", 1);
     return testNode;
@@ -291,10 +293,11 @@ public class NodeTest {
     Node testNode = new Node(
             name,
             missionDescription,
-            roles);
+            roles,
+            true); // isNetworkSingleton
     testRole.setNode(testNode);
     testNode.setStateValue("testVariable", 1);
-    
+
     final Node testChildNode =  makeTestChildNode();
     final Optional<Role> optional = testChildNode.getRoles().stream().findFirst();
     if (optional.isPresent()) {
@@ -302,8 +305,8 @@ public class NodeTest {
     } else {
       fail();
     }
-   
-    
+
+
     return testNode;
   }
 
@@ -321,7 +324,8 @@ public class NodeTest {
     Node testNode = new Node(
             name,
             missionDescription,
-            roles);
+            roles,
+            false); // isNetworkSingleton
     testRole.setNode(testNode);
     testNode.setStateValue("testVariable", 1);
     return testNode;

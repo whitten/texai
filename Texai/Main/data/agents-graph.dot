@@ -13,16 +13,16 @@ subgraph cluster_agents {
     shape = box
     label = "ContainerOperationAgent" ];
   NNetworkOperationAgent [
-    shape = box
+    shape = oval
     label = "NetworkOperationAgent" ];
   NTopLevelGovernanceAgent [
-    shape = box
+    shape = oval
     label = "TopLevelGovernanceAgent" ];
   NTopLevelHeartbeatAgent [
-    shape = box
+    shape = oval
     label = "TopLevelHeartbeatAgent" ];
   NTopmostFriendshipAgent [
-    shape = box
+    shape = oval
     label = "TopmostFriendshipAgent" ];
   NXAIBlockchainArchiveAgent [
     shape = box
@@ -45,58 +45,58 @@ subgraph cluster_agents {
   NXAIContainerLogControlAgent [
     shape = box
     label = "XAIContainerLogControlAgent" ];
-  NXAIContainerTorrentAgent [
-    shape = box
-    label = "XAIContainerTorrentAgent" ];
   NXAIFinancialAccountingAndControlAgent [
-    shape = box
+    shape = oval
     label = "XAIFinancialAccountingAndControlAgent" ];
   NXAIMintAgent [
-    shape = box
+    shape = oval
     label = "XAIMintAgent" ];
   NXAINetworkConfigurationAgent [
-    shape = box
+    shape = oval
     label = "XAINetworkConfigurationAgent" ];
   NXAINetworkEpisodicMemoryAgent [
-    shape = box
+    shape = oval
     label = "XAINetworkEpisodicMemoryAgent" ];
   NXAINetworkLogControlAgent [
-    shape = box
+    shape = oval
     label = "XAINetworkLogControlAgent" ];
   NXAINetworkOperationAgent [
-    shape = box
+    shape = oval
     label = "XAINetworkOperationAgent" ];
   NXAINetworkSeedAgent [
-    shape = box
+    shape = oval
     label = "XAINetworkSeedAgent" ];
-  NXAINetworkTorrentAgent [
-    shape = box
-    label = "XAINetworkTorrentAgent" ];
   NXAIOperationAgent [
     shape = box
     label = "XAIOperationAgent" ];
   NXAIPrimaryAuditAgent [
-    shape = box
+    shape = oval
     label = "XAIPrimaryAuditAgent" ];
   NXAIRecoveryAgent [
-    shape = box
+    shape = oval
     label = "XAIRecoveryAgent" ];
   NXAIRewardAllocationAgent [
-    shape = box
+    shape = oval
     label = "XAIRewardAllocationAgent" ];
+  NXAISeedAgent [
+    shape = box
+    label = "XAISeedAgent" ];
   }  NContainerGovernanceAgent -> NXAIPrimaryAuditAgent;
   NContainerGovernanceAgent -> NContainerOperationAgent;
   NContainerHeartbeatAgent -> NTopLevelGovernanceAgent;
   NContainerHeartbeatAgent -> NXAIOperationAgent;
   NContainerHeartbeatAgent -> NContainerHeartbeatAgent;
+  NContainerHeartbeatAgent -> NXAISeedAgent;
   NContainerGovernanceAgent -> NXAINetworkLogControlAgent;
   NContainerGovernanceAgent -> NTopmostFriendshipAgent;
   NContainerHeartbeatAgent -> NXAINetworkOperationAgent;
   NXAINetworkOperationAgent -> NXAIPrimaryAuditAgent;
   NTopLevelHeartbeatAgent -> NContainerHeartbeatAgent;
   NContainerGovernanceAgent -> NXAIContainerCertificateAuthorityAgent;
+  NContainerGovernanceAgent -> NXAISeedAgent;
   NContainerHeartbeatAgent -> NXAINetworkEpisodicMemoryAgent;
   NContainerGovernanceAgent -> NXAIContainerAuditAgent;
+  NXAISeedAgent -> NXAINetworkSeedAgent;
   NContainerGovernanceAgent -> NXAIBlockchainArchiveAgent;
   NContainerHeartbeatAgent -> NContainerOperationAgent;
   NContainerHeartbeatAgent -> NXAIContainerCertificateAuthorityAgent;
@@ -105,7 +105,6 @@ subgraph cluster_agents {
   NXAINetworkConfigurationAgent -> NXAIContainerConfigurationAgent;
   NXAINetworkOperationAgent -> NXAIContainerCertificateAuthorityAgent;
   NContainerHeartbeatAgent -> NTopLevelHeartbeatAgent;
-  NContainerGovernanceAgent -> NXAINetworkTorrentAgent;
   NContainerHeartbeatAgent -> NXAINetworkConfigurationAgent;
   NContainerGovernanceAgent -> NXAIContainerConfigurationAgent;
   NNetworkOperationAgent -> NContainerOperationAgent;
@@ -122,20 +121,16 @@ subgraph cluster_agents {
   NTopLevelGovernanceAgent -> NContainerGovernanceAgent;
   NContainerHeartbeatAgent -> NXAIContainerLogControlAgent;
   NContainerGovernanceAgent -> NNetworkOperationAgent;
-  NXAINetworkOperationAgent -> NXAINetworkSeedAgent;
   NTopmostFriendshipAgent -> NTopLevelGovernanceAgent;
   NTopmostFriendshipAgent -> NTopLevelHeartbeatAgent;
   NContainerGovernanceAgent -> NXAIMintAgent;
   NContainerHeartbeatAgent -> NXAIContainerConfigurationAgent;
   NContainerGovernanceAgent -> NXAIClientGatewayAgent;
   NXAINetworkOperationAgent -> NXAIContainerAuditAgent;
-  NContainerGovernanceAgent -> NXAIContainerTorrentAgent;
   NContainerGovernanceAgent -> NXAIRewardAllocationAgent;
-  NContainerHeartbeatAgent -> NXAINetworkTorrentAgent;
   NXAINetworkOperationAgent -> NXAIOperationAgent;
   NXAINetworkOperationAgent -> NXAIRecoveryAgent;
   NTopmostFriendshipAgent -> NNetworkOperationAgent;
-  NXAINetworkTorrentAgent -> NXAIContainerTorrentAgent;
   NContainerHeartbeatAgent -> NXAIPrimaryAuditAgent;
   NContainerGovernanceAgent -> NContainerHeartbeatAgent;
   NContainerHeartbeatAgent -> NXAINetworkSeedAgent;
@@ -155,8 +150,6 @@ subgraph cluster_agents {
   NContainerHeartbeatAgent -> NXAIClientGatewayAgent;
   NContainerGovernanceAgent -> NXAINetworkConfigurationAgent;
   NContainerHeartbeatAgent -> NXAIBlockchainArchiveAgent;
-  NContainerHeartbeatAgent -> NXAIContainerTorrentAgent;
-  NXAINetworkOperationAgent -> NXAINetworkTorrentAgent;
   NXAINetworkOperationAgent -> NXAIMintAgent;
   NContainerHeartbeatAgent -> NXAIContainerAuditAgent;
   NXAINetworkOperationAgent -> NXAIRewardAllocationAgent;

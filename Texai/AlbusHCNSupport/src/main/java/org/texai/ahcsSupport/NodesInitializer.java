@@ -104,8 +104,8 @@ public final class NodesInitializer {
   /**
    * Constructs a new NodeInitializer instance.
    *
-   * @param isClassExistsTested indicates whether the given skill class is
-   * tested for existence in the classpath - false for some unit tests.
+   * @param isClassExistsTested indicates whether the given skill class is tested for existence in the classpath - false for some unit
+   * tests.
    * @param keyStorePassword the keystore password, which is not persisted
    * @param nodeRuntime the node runtime
    */
@@ -117,7 +117,7 @@ public final class NodesInitializer {
     assert keyStorePassword != null : "keyStorePassword must not be null";
     assert keyStorePassword.length > 0 : "keyStorePassword must not be empty";
     assert nodeRuntime != null : "nodeRuntime must not be null";
-    
+
     this.isClassExistsTested = isClassExistsTested;
     this.keyStorePassword = keyStorePassword;
     this.nodeRuntime = nodeRuntime;
@@ -129,8 +129,7 @@ public final class NodesInitializer {
    * Verifies the expected SHA-512 hash of the nodes file.
    *
    * @param nodesPath the nodes XML file path
-   * @param nodesFileHashString the nodes file SHA-512 hash encoded as a base 64
-   * string, used to detect tampering
+   * @param nodesFileHashString the nodes file SHA-512 hash encoded as a base 64 string, used to detect tampering
    */
   private void verifyNodesFileHash(
           final String nodesPath,
@@ -138,7 +137,7 @@ public final class NodesInitializer {
     //Preconditions
     assert StringUtils.isNonEmptyString(nodesPath) : "nodesPath must not be empty";
     assert StringUtils.isNonEmptyString(nodesFileHashString) : "nodesFileHashString must not be empty";
-    
+
     final byte[] hashBytes;
     try {
       X509Utils.addBouncyCastleSecurityProvider();
@@ -158,15 +157,14 @@ public final class NodesInitializer {
     } catch (NoSuchAlgorithmException | NoSuchProviderException | IOException ex) {
       throw new TexaiException(ex);
     }
-    
+
   }
 
   /**
    * Reads the nodes XML file and records the node and role fields.
    *
    * @param nodesPath the nodes XML file path
-   * @param nodesFileHashString the nodes file SHA-512 hash encoded as a base 64
-   * string, used to detect tampering
+   * @param nodesFileHashString the nodes file SHA-512 hash encoded as a base 64 string, used to detect tampering
    */
   public void process(
           final String nodesPath,
@@ -177,9 +175,9 @@ public final class NodesInitializer {
     if (!X509Utils.isJCEUnlimitedStrengthPolicy()) {
       throw new TexaiException("JCE Unlimited Strength Policy files are not installed");
     }
-    
+
     verifyNodesFileHash(nodesPath, nodesFileHashString);
-    
+
     CacheInitializer.initializeCaches();
     DistributedRepositoryManager.clearNamedRepository("Nodes");
     final BufferedInputStream bufferedInputStream;
@@ -195,12 +193,12 @@ public final class NodesInitializer {
       final SAXParser saxParser = saxParserFactory.newSAXParser();
       final SAXHandler myHandler = new SAXHandler();
       saxParser.parse(bufferedInputStream, myHandler);
-      
+
     } catch (final ParserConfigurationException | SAXException | IOException ex) {
       LOGGER.fatal(StringUtils.getStackTraceAsString(ex));
       throw new TexaiException(ex);
     }
-    
+
     assert nbrNodeTags == nodeFieldsHolderDictionary.size();
     displayNodes();
     populateNodeRolesFromPrototytpeNodes();
@@ -211,6 +209,7 @@ public final class NodesInitializer {
     generateX509CertificatesForRoles();
     persistNodes();
     loadNodesAndInjectDependencies();
+    displayNetworkSingletonNodes();
     toGraphViz(
             "data", // graphPath
             "agents-graph"); // raphName
@@ -245,8 +244,8 @@ public final class NodesInitializer {
   }
 
   /**
-   * Recursively ascend the tree of prototype nodes, starting with the given
-   * prototype node holder, adding its roles to the given target node holder.
+   * Recursively ascend the tree of prototype nodes, starting with the given prototype node holder, adding its roles to the given target
+   * node holder.
    *
    * @param targetNodeFieldsHolder the given target node holder
    * @param prototypeNodeFieldsHolder
@@ -257,11 +256,11 @@ public final class NodesInitializer {
     //Preconditions
     assert targetNodeFieldsHolder != null : "targetNodeFieldsHolder must not be null";
     assert prototypeNodeFieldsHolder != null : "prototypeNodeFieldsHolder must not be null";
-    
+
     LOGGER.info("");
     LOGGER.info("    prototypeNodeFieldsHolder: " + prototypeNodeFieldsHolder);
     prototypeNodeFieldsHolder.roleFieldsHolders.stream().forEach(new Consumer<RoleFieldsHolder>() {
-      
+
       @Override
       public void accept(final RoleFieldsHolder roleFieldsHolder1) {
         final RoleFieldsHolder clonedRoleFieldsHolder = new RoleFieldsHolder();
@@ -282,7 +281,7 @@ public final class NodesInitializer {
         roleFieldsHolderDictionary.put(clonedRoleFieldsHolder.qualifiedName, clonedRoleFieldsHolder);
       }
     });
-    
+
     prototypeNodeFieldsHolder.prototypeNodeNames.stream().forEach(prototypeNodeName -> {
       final NodeFieldsHolder prototypeNodeFieldsHolder1 = nodeFieldsHolderDictionary.get(prototypeNodeName);
       if (prototypeNodeFieldsHolder1 == null) {
@@ -296,7 +295,7 @@ public final class NodesInitializer {
       }
     });
   }
-  
+
   private void removeAbstractAgents() {
     final Set<String> nodeNamesToRemove = new HashSet<>();
     nodeFieldsHolderDictionary.entrySet().stream().forEach(entry -> {
@@ -342,8 +341,7 @@ public final class NodesInitializer {
   }
 
   /**
-   * Verifies that the specified child role exists for each declaring parent
-   * role.
+   * Verifies that the specified child role exists for each declaring parent role.
    */
   private void verifyChildRoles() {
     LOGGER.info("verifying child roles ...");
@@ -384,7 +382,7 @@ public final class NodesInitializer {
    * Generates a self-signed X509 certificate for each role.
    */
   private void generateX509CertificatesForRoles() {
-    
+
     final KeyStore keyStore;
     String keyStoreFilePath = "data/keystore.uber";
     try {
@@ -397,7 +395,7 @@ public final class NodesInitializer {
       LOGGER.error(StringUtils.getStackTraceAsString(ex));
       throw new TexaiException(ex);
     }
-    
+
     LOGGER.info("getting self-signed X.509 certificates for roles ...");
     roleFieldsHolderDictionary.values().stream().sorted().forEach(roleFieldsHolder1 -> {
       LOGGER.info("  " + roleFieldsHolder1.qualifiedName);
@@ -496,7 +494,8 @@ public final class NodesInitializer {
           final Node node = new Node(
                   nodeFieldsHolder1.name,
                   nodeFieldsHolder1.missionDescription,
-                  roles);
+                  roles,
+                  nodeFieldsHolder1.isNetworkSingleton);
           nodeAccess.persistNode(node);
           node.getRoles().stream().forEach(role -> {
             role.setNode(node);
@@ -533,7 +532,22 @@ public final class NodesInitializer {
   }
 
   /**
+   * Displays the network singleton nodes.
+   */
+  private void displayNetworkSingletonNodes() {
+    LOGGER.info("");
+    LOGGER.info("the network singleton nodes (nomadic agents) ...");
+    nodeAccess.getNodes().stream().filter(Node.isNetworkSingletonNode()).sorted().forEach(node -> {
+      LOGGER.info("  " + node);
+    });
+  }
+
+  /**
    * Generates a GraphViz input file that depicts an agent graph.
+   *
+   * <code>
+   * $ dot -Tpng agents-graph.dot -o agents-graph.png
+   * </code>
    *
    * @param graphPath the graph directory
    * @param graphName the output graph name
@@ -547,13 +561,14 @@ public final class NodesInitializer {
     assert graphName != null : "graphName must not be null";
     assert !graphName.isEmpty() : "graphName must not be empty";
     assert !graphName.contains(" ") : "graphName must not contain whitespace";
-    
+
     final String graphDataPath = graphPath + "/" + graphName + ".dot";
     final String keyDataPath = graphPath + "/" + graphName + "-key.txt";
     BufferedWriter graphBufferedWriter = null;
     BufferedWriter keyBufferedWriter = null;
+    LOGGER.info("");
+    LOGGER.info("graphDataPath: " + graphDataPath);
     try {
-      LOGGER.info("graphDataPath: " + graphDataPath);
       graphBufferedWriter = new BufferedWriter(new FileWriter(graphDataPath));
       keyBufferedWriter = new BufferedWriter(new FileWriter(keyDataPath));
       graphBufferedWriter.append("digraph \"");
@@ -562,11 +577,10 @@ public final class NodesInitializer {
       graphBufferedWriter.append("  ratio = \"auto\" ;\n");
       graphBufferedWriter.append("  mincross = 2.0 ;\n");
 
-      // see http://www.graphviz.org/doc/info/colors.html
       graphNodes(
               graphBufferedWriter,
               keyBufferedWriter);
-      
+
       graphBufferedWriter.append("}");
       graphBufferedWriter.close();
       keyBufferedWriter.close();
@@ -575,7 +589,7 @@ public final class NodesInitializer {
         if (graphBufferedWriter != null) {
           graphBufferedWriter.close();
         }
-        
+
         if (keyBufferedWriter != null) {
           keyBufferedWriter.close();
         }
@@ -591,7 +605,6 @@ public final class NodesInitializer {
    *
    * @param graphBufferedWriter the graph buffered writer
    * @param keyBufferedWriter the graph key buffered writer
-   * @throws IOException if an input/output exception occurs
    */
   private void graphNodes(
           final BufferedWriter graphBufferedWriter,
@@ -599,7 +612,7 @@ public final class NodesInitializer {
     //Preconditions
     assert graphBufferedWriter != null : "graphBufferedWriter must not be null";
     assert keyBufferedWriter != null : "keyBufferedWriter must not be null";
-    
+
     try {
       graphBufferedWriter.append("subgraph cluster_agents");
       graphBufferedWriter.append(" {\n");
@@ -608,8 +621,13 @@ public final class NodesInitializer {
       // emit a graph node for each agent node.
       nodeAccess.getNodes().stream().sorted().forEach(node -> {
         final String nodeLabel = node.extractAgentName();
-        final String shape = "    shape = box";
-        
+        final String shape;
+        if (node.isNetworkSingleton()) {
+          shape = "    shape = oval";
+        } else {
+          shape = "    shape = box";
+        }
+
         try {
           // describe the node
           keyBufferedWriter.append(nodeLabel);
@@ -682,10 +700,12 @@ public final class NodesInitializer {
     final Set<RoleFieldsHolder> roleFieldsHolders = new ArraySet<>();
     // the persistent role state variables and their respective values
     final Set<StateValueBinding> stateValueBindings = new ArraySet<>();
+    // the indicator whether this node is a singleton nomadic agent, in which case only one container in the network hosts
+    // the active node and all other nodes having the same name are inactive
+    boolean isNetworkSingleton;
 
     /**
-     * Compares the given node field holder with this one. Collates by node
-     * qualifiedName.
+     * Compares the given node field holder with this one. Collates by node qualifiedName.
      *
      * @param other the given node field holder
      *
@@ -747,8 +767,7 @@ public final class NodesInitializer {
     X509SecurityInfo x509SecurityInfo;
 
     /**
-     * Compares the given role field holder with this one. Collates by qualified
-     * role name.
+     * Compares the given role field holder with this one. Collates by qualified role name.
      *
      * @param other the given role field holder
      *
@@ -760,7 +779,7 @@ public final class NodesInitializer {
       assert other != null : "other must not be null";
       assert StringUtils.isNonEmptyString(other.qualifiedName) : "other.qualifiedName must be a non empty string";
       assert StringUtils.isNonEmptyString(this.qualifiedName) : "qualifiedName must be a non empty string";
-      
+
       return this.qualifiedName.compareTo(other.qualifiedName);
     }
 
@@ -811,7 +830,7 @@ public final class NodesInitializer {
             final Attributes attributes) {
       //Preconditions
       assert StringUtils.isNonEmptyString(qName) : "qName must be a non-empty string";
-      
+
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("startElement qName: " + qName);
       }
@@ -860,12 +879,12 @@ public final class NodesInitializer {
       //Preconditions
       assert StringUtils.isNonEmptyString(qName) : "qName must be a non-empty string";
       assert nodeAccess != null : "nodeAccess must not be null";
-      
+
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("endElement qName: " + qName);
         LOGGER.debug("stringBuilder: " + stringBuilder.toString());
       }
-      
+
       switch (qName) {
         case "name":
           nodeFieldsHolder.name = containerName + "." + stringBuilder.toString();
@@ -878,6 +897,9 @@ public final class NodesInitializer {
           break;
         case "isAbstract":
           nodeFieldsHolder.isAbstract = Boolean.parseBoolean(stringBuilder.toString());
+          break;
+        case "isNetworkSingleton":
+          nodeFieldsHolder.isNetworkSingleton = Boolean.parseBoolean(stringBuilder.toString());
           break;
         case "areRemoteCommunicationsPermitted":
           roleFieldsHolder.areRemoteCommunicationsPermitted = Boolean.parseBoolean(stringBuilder.toString());

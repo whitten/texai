@@ -106,6 +106,7 @@ public class RoleTest {
     rdfEntityManager.persist(instance);
     Role loadedInstance = rdfEntityManager.find(Role.class, instance.getId());
     assertEquals("TestContainer.TestAgent", loadedInstance.getNode().toString());
+    assertTrue(!loadedInstance.getNode().isNetworkSingleton());
   }
 
   /**
@@ -165,6 +166,7 @@ public class RoleTest {
   public void testGetChildQualifiedNames2() {
     LOGGER.info("getChildQualifiedNames");
     Node node = NodeTest.makeTestNodeWithChild();
+    assertTrue(node.isNetworkSingleton());
     Optional<Role> optional = node.getRoles().stream().findFirst();
     if (optional.isPresent()) {
       assertEquals("[TestContainer.TestChildAgent.TestChildRole]", optional.get().getChildQualifiedNames().toString());

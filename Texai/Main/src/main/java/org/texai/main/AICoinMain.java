@@ -1,9 +1,9 @@
 /*
- * TexaiMain.java
+ * AICoinMain.java
  *
  * Created on Sep 21, 2011, 6:23:02 PM
  *
- * Description: Executes the Texai node runtime for a certain JVM.
+ * Description: The main program which executes an A.I. Coin cryptocurrency network node.
  *
  * Copyright (C) Sep 21, 2011, Stephen L. Reed, Texai.org.
  *
@@ -35,16 +35,16 @@ import org.texai.x509.X509Utils;
  * @author reed
  */
 @NotThreadSafe
-public class TexaiMain {
+public class AICoinMain {
 
   static {
     // explicitly set the default assertion status because NetBeans ignores -ea when running an application.
-    TexaiMain.class.getClassLoader().setDefaultAssertionStatus(true);
+    AICoinMain.class.getClassLoader().setDefaultAssertionStatus(true);
   }
   /**
    * the logger
    */
-  public static final Logger LOGGER = Logger.getLogger(TexaiMain.class);
+  public static final Logger LOGGER = Logger.getLogger(AICoinMain.class);
   // the node runtime
   private NodeRuntime nodeRuntime;
   /**
@@ -65,12 +65,12 @@ public class TexaiMain {
    * the key store password
    */
   //TODO substitute user-specified password from the environment
-  
+
   private final char[] keyStorePassword = "node-runtime-keystore-password".toCharArray();
   // the path to the XML file which defines the nodes, roles and skills
   final String nodesPath = "data/nodes.xml";
   // the tamper-evident hash of the nodes path file, use "1234" after revsing the nodes.xml file
-  final String nodesFileHashString = "8PveX99SCnPbvixNUF2YbUJ/jtA9Cwvf9TBaPVZHHB476WctTQ2Z7Odw6KKp3PCiBEPctnxH3o9lig83japHfQ==";
+  final String nodesFileHashString = "hAqefm3tV4toNryN+y99FgPqBPtZ/W6rohWqXSE4fNSuzl+Xa7H4b/+az5oOkU3uP1LRTMAve8ksWrbVoCD2hA==";
   /**
    * the node runtime application thread
    */
@@ -84,7 +84,7 @@ public class TexaiMain {
   /**
    * Constructs a new TexaiMain instance.
    */
-  public TexaiMain() {
+  public AICoinMain() {
   }
 
   /**
@@ -102,7 +102,7 @@ public class TexaiMain {
     Logger.getLogger(NodesInitializer.class).setLevel(Level.WARN);
     Logger.getLogger(RDFEntityPersister.class).setLevel(Level.WARN);
     Logger.getLogger(X509Utils.class).setLevel(Level.WARN);
-    
+
     LOGGER.info("starting the node runtime in the container named " + containerName);
     nodeRuntime = new NodeRuntime(containerName);
     // configure a shutdown hook to run the finalization method in case the JVM is abnormally ended
@@ -243,7 +243,7 @@ public class TexaiMain {
     } else {
       throw new TexaiException("command line argument must specify the container name - found " + args.length + " argument(s)");
     }
-    final TexaiMain texaiMain = new TexaiMain();
+    final AICoinMain texaiMain = new AICoinMain();
     if (!StringUtils.isNonEmptyString(containerName)) {
       throw new TexaiException("command line argument must specify the container name");
     }

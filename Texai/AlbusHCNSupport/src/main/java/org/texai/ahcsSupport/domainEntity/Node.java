@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 import javax.persistence.Id;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
@@ -65,6 +66,10 @@ public class Node implements CascadePersistence, Comparable<Node> {
   // the persistent role state variables and their respective values
   @RDFProperty()
   private final Set<StateValueBinding> stateValueBindings;
+  // the indicator whether this node is a singleton nomadic agent, in which case only one container in the network hosts
+  // the active node and all other nodes having the same name are inactive
+  @RDFProperty()
+  private final boolean isNetworkSingleton;
   // the node state variable dictionary, state variable name --> state value binding
   private final Map<String, StateValueBinding> stateVariableDictionary = new HashMap<>();
   // the logger
@@ -81,6 +86,7 @@ public class Node implements CascadePersistence, Comparable<Node> {
     roles = null;
     stateValueBindings = null;
     nodeRuntime = null;
+    isNetworkSingleton = false;
   }
 
   /**
@@ -89,11 +95,14 @@ public class Node implements CascadePersistence, Comparable<Node> {
    * @param name the node name which must end in "Agent"
    * @param missionDescription the node's mission described in English
    * @param roles the roles
+   * @param isNetworkSingleton the indicator whether this node is a singleton nomadic agent, in which case only one container in the network
+   * hosts the active node and all other nodes having the same name are inactive
    */
   public Node(
           final String name,
           final String missionDescription,
-          final Set<Role> roles) {
+          final Set<Role> roles,
+          final boolean isNetworkSingleton) {
     //Preconditions
     assert StringUtils.isNonEmptyString(name) : "name must be a non-null string";
     assert StringUtils.isNonEmptyString(missionDescription) : "name must be a non-null missionDescription";
@@ -103,6 +112,7 @@ public class Node implements CascadePersistence, Comparable<Node> {
     this.name = name;
     this.missionDescription = missionDescription;
     this.roles = roles;
+    this.isNetworkSingleton = isNetworkSingleton;
     this.stateValueBindings = new HashSet<>();
   }
 
@@ -208,6 +218,24 @@ public class Node implements CascadePersistence, Comparable<Node> {
   }
 
   /**
+   * Returns whether this node is a singleton nomadic agent, in which case only one container in the network hosts the active node and all
+   * other nodes having the same name are inactive.
+   *
+   * @return whether this node is a singleton nomadic agent
+   */
+  public boolean isNetworkSingleton() {
+    return isNetworkSingleton;
+  }
+
+  /** Returns a predicate for whether this node is a singleton nomadic agent.
+   *
+   * @return a predicate for whether this node is a singleton nomadic agent
+   */
+  public static Predicate<Node> isNetworkSingletonNode() {
+    return node -> node.isNetworkSingleton();
+  }
+
+  /**
    * Returns a string representation of this object.
    *
    * @return a string representation of this object
@@ -217,34 +245,36 @@ public class Node implements CascadePersistence, Comparable<Node> {
     return name;
   }
 
-  /** Extracts the agent name from this agent's qualified name string, container-name.agent-name .
-   * 
-   * @param qualifiedName the given qualified name string, container-name.agent-name.role-name
+  /**
+   * Extracts the agent name from this agent's qualified name string, container-nar-name.agent-name.role-name.
+   *
    * @return the agent name
    */
   public String extractAgentName() {
-    
-    final String[] names= name.split("\\.");
+
+    final String[] names = name.split("\\.");
     assert names.length == 2;
-    
+
     return names[1];
   }
-  
-  /** Extracts the agent name from the given qualified name string, container-name.agent-name.role-name .
-   * 
+
+  /**
+   * Extracts the agent name from the given qualified name string, container-name.agent-name.role-name .
+   *
    * @param qualifiedName the given qualified name string, container-name.agent-name.role-name
+   *
    * @return the agent name
    */
   public static String extractAgentName(final String qualifiedName) {
     //Preconditions
     assert StringUtils.isNonEmptyString(qualifiedName) : "qualifiedName must be a non empty string";
-    
-    final String[] names= qualifiedName.split("\\.");
+
+    final String[] names = qualifiedName.split("\\.");
     assert names.length == 3;
-    
+
     return names[1];
   }
-  
+
   /**
    * Gets the node runtime.
    *

@@ -33,17 +33,14 @@ XAIContainerCertificateAuthorityAgent
       network.
 
 XAIContainerConfigurationAgent
-  Provides network configuration the AICoin network. Maintains the assignment of
-      nomadic agents to particular containers.
+  Configures the container role, for a container's agent/role having a network singleton parent role,
+      to refer to the singleton parent role at whichever container is currently hosting it.
 
 XAIContainerEpisodicMemoryAgent
   Provides episodic memory for agents in a particular container in the AICoin network.
 
 XAIContainerLogControlAgent
   Coordinates Java logging for agents in the AICoin network.
-
-XAIContainerTorrentAgent
-  Provides bittorrent file transfers for agents in a particular container in the AICoin network.
 
 XAIFinancialAccountingAndControlAgent
   Provides financial accounting and control for the AICoin network.
@@ -65,11 +62,8 @@ XAINetworkOperationAgent
   Manages the AICoin agent network. Interacts with human operators.
 
 XAINetworkSeedAgent
-  Provides a AICoin network seed for wallet and processor clients. Maintains the mapping of client gateways
-      and their respective IP addresses.
-
-XAINetworkTorrentAgent
-  Coordinates bittorrent file transfers for agents in the AICoin network.
+  Coordinates the bittorrent seeding of large blockchain and data files to new full nodes
+      when they join the network.
 
 XAIOperationAgent
   Manages a bitcoind instance.
@@ -82,4 +76,8 @@ XAIRecoveryAgent
 
 XAIRewardAllocationAgent
   Allocates the rewards resulting from minting new blocks for the AICoin network.
+
+XAISeedAgent
+  Provides a AICoin network seed for wallet and processor clients. Maintains the mapping of client gateways
+      and their respective IP addresses.
 
