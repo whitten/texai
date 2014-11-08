@@ -54,7 +54,6 @@ public class ContainerLogControl extends AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
 
-    LOGGER.info("receiveMessage " + message.toString());
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
       sendMessage(operationNotPermittedMessage(message));
@@ -236,12 +235,12 @@ public class ContainerLogControl extends AbstractSkill {
   }
 
   /** Gets the logger.
-   * 
+   *
    * @return  the logger
    */
   @Override
   protected Logger getLogger() {
     return LOGGER;
   }
-  
+
 }

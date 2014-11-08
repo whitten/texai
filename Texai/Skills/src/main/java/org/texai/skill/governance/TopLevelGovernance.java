@@ -57,7 +57,6 @@ public final class TopLevelGovernance extends AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
 
-    LOGGER.info("receiveMessage " + message.toString());
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
       sendMessage(operationNotPermittedMessage(message));
@@ -123,8 +122,6 @@ public final class TopLevelGovernance extends AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
     assert this.getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
-
-    LOGGER.info("initializing");
 
     // initialize child governance roles
     propagateOperationToChildRoles( message.getOperation());

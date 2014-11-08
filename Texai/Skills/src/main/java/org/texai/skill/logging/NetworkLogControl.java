@@ -124,7 +124,6 @@ public class NetworkLogControl extends AbstractSkill {
     assert this.getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
 
     // initialize child JVM logger management roles
-    LOGGER.info("initializing");
     propagateOperationToChildRoles(AHCSConstants.AHCS_INITIALIZE_TASK); // operation
     setSkillState(State.INITIALIZED);
   }

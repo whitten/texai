@@ -51,6 +51,8 @@ public class NodesInitializerTest {
    * the RDF entity manager
    */
   private static RDFEntityManager rdfEntityManager;
+  // the test keystore path
+  private final static String KEY_STORE_FILE_NAME = "data/keystore.uber";
 
   public NodesInitializerTest() {
   }
@@ -65,9 +67,8 @@ public class NodesInitializerTest {
             "Nodes",
             true); // isRepositoryDirectoryCleaned
     rdfEntityManager = new RDFEntityManager();
-    final String keyStoreFileName = "data/keystore.uber";
-    LOGGER.info("deleting " + keyStoreFileName);
-    (new File(keyStoreFileName)).delete();
+    LOGGER.info("deleting " + KEY_STORE_FILE_NAME);
+    (new File(KEY_STORE_FILE_NAME)).delete();
   }
 
   @AfterClass
@@ -98,7 +99,8 @@ public class NodesInitializerTest {
             = new NodesInitializer(
                     false, // isClassExistsTested
                     keystorePassword,
-                    nodeRuntime);
+            nodeRuntime,
+            "data/test-keystore.uber"); // keyStoreFilePath
     nodesInitializer.process(
             "data/nodes-test.xml", // nodesPath
             "hAqefm3tV4toNryN+y99FgPqBPtZ/W6rohWqXSE4fNSuzl+Xa7H4b/+az5oOkU3uP1LRTMAve8ksWrbVoCD2hA=="); // nodesFileHashString
@@ -126,7 +128,8 @@ public class NodesInitializerTest {
             = new NodesInitializer(
                     false, // isClassExistsTested
                     keystorePassword,
-                    nodeRuntime);
+            nodeRuntime,
+            "data/test-keystore.uber"); // keyStoreFilePath
     nodesInitializer.process(
             "data/nodes-test.xml", // nodesPath
             "hAqefm3tV4toNryN+y99FgPqBPtZ/W6rohWqXSE4fNSuzl+Xa7H4b/+az5oOkU3uP1LRTMAve8ksWrbVoCD2hA=="); // nodesFileHashString

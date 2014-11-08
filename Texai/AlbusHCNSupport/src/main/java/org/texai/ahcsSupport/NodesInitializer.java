@@ -87,19 +87,22 @@ public final class NodesInitializer {
   private RoleFieldsHolder roleFieldsHolder;
   // indicates whether the given skill class is tested for existence in the classpath - false
   // for some unit tests
-  final boolean isClassExistsTested;
+  private final boolean isClassExistsTested;
   // the container name, which is unique in the network
-  final String containerName;
+  private final String containerName;
   // the nodes file SHA-512 hash encoded as a base 64 string, used to detect tampering
-  String nodesFileHashString;
+  private String nodesFileHashString;
   // the keystore password, which is not persisted
-  char[] keyStorePassword;
+  private char[] keyStorePassword;
   // the node runtime
-  final BasicNodeRuntime nodeRuntime;
+  private final BasicNodeRuntime nodeRuntime;
   // the loaded nodes
-  final List<Node> nodes = new ArrayList<>();
+  private final List<Node> nodes = new ArrayList<>();
   // the count of </node> tags
-  int nbrNodeTags = 0;
+  private int nbrNodeTags = 0;
+  // the keystore path, which is different for test vs production
+  private final String keyStoreFilePath;
+
 
   /**
    * Constructs a new NodeInitializer instance.
@@ -108,19 +111,23 @@ public final class NodesInitializer {
    * tests.
    * @param keyStorePassword the keystore password, which is not persisted
    * @param nodeRuntime the node runtime
+   * @param keyStoreFilePath the keystore path, which is different for test vs production
    */
   public NodesInitializer(
           final boolean isClassExistsTested,
           final char[] keyStorePassword,
-          final BasicNodeRuntime nodeRuntime) {
+          final BasicNodeRuntime nodeRuntime,
+          final String keyStoreFilePath) {
     //Preconditions
     assert keyStorePassword != null : "keyStorePassword must not be null";
     assert keyStorePassword.length > 0 : "keyStorePassword must not be empty";
     assert nodeRuntime != null : "nodeRuntime must not be null";
+    assert StringUtils.isNonEmptyString(keyStoreFilePath) : "keyStoreFilePath must be a non-empty string";
 
     this.isClassExistsTested = isClassExistsTested;
     this.keyStorePassword = keyStorePassword;
     this.nodeRuntime = nodeRuntime;
+    this.keyStoreFilePath = keyStoreFilePath;
     containerName = nodeRuntime.getContainerName();
     nodeAccess = nodeRuntime.getNodeAccess();
   }
@@ -383,8 +390,10 @@ public final class NodesInitializer {
    */
   private void generateX509CertificatesForRoles() {
 
+
+    //TODO create a write-only keystore
+
     final KeyStore keyStore;
-    String keyStoreFilePath = "data/keystore.uber";
     try {
       LOGGER.info("getting the keystore");
       keyStore = X509Utils.findOrCreateUberKeyStore(keyStoreFilePath, keyStorePassword);

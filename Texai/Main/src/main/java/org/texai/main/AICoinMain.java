@@ -118,7 +118,8 @@ public class AICoinMain {
     final NodesInitializer nodesInitializer = new NodesInitializer(
             true, // isClassExistsTested,
             keyStorePassword,
-            nodeRuntime);
+            nodeRuntime,
+            "data/keystore.uber"); // keyStoreFilePath
     nodesInitializer.process(
             nodesPath,
             nodesFileHashString);

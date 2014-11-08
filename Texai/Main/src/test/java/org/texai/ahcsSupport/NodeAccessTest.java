@@ -53,6 +53,8 @@ public class NodeAccessTest {
   private static final Logger LOGGER = Logger.getLogger(NodeAccessTest.class);
   /** the RDF entity manager */
   private static RDFEntityManager rdfEntityManager;
+  // the test keystore path
+  private final static String KEY_STORE_FILE_NAME = "data/keystore.uber";
 
   public NodeAccessTest() {
   }
@@ -69,9 +71,8 @@ public class NodeAccessTest {
     rdfEntityManager = new RDFEntityManager();
     CacheInitializer.resetCaches();
     CacheInitializer.initializeCaches();
-    final String keyStoreFileName = "data/keystore.uber";
-    LOGGER.info("deleting " + keyStoreFileName);
-    (new File(keyStoreFileName)).delete();
+    LOGGER.info("deleting " + KEY_STORE_FILE_NAME);
+    (new File(KEY_STORE_FILE_NAME)).delete();
     final String containerName = "TestContainer";
     final BasicNodeRuntime nodeRuntime = new BasicNodeRuntime(containerName);
     final char[] keystorePassword = "test-password".toCharArray();
@@ -79,10 +80,11 @@ public class NodeAccessTest {
             = new NodesInitializer(
                     false, // isClassExistsTested
                     keystorePassword,
-                    nodeRuntime);
+            nodeRuntime,
+            KEY_STORE_FILE_NAME); // keyStoreFilePath
     nodesInitializer.process(
             "data/nodes-test.xml", // nodesPath
-            "8PveX99SCnPbvixNUF2YbUJ/jtA9Cwvf9TBaPVZHHB476WctTQ2Z7Odw6KKp3PCiBEPctnxH3o9lig83japHfQ=="); // nodesFileHashString
+            "hAqefm3tV4toNryN+y99FgPqBPtZ/W6rohWqXSE4fNSuzl+Xa7H4b/+az5oOkU3uP1LRTMAve8ksWrbVoCD2hA=="); // nodesFileHashString
   }
 
   @AfterClass
@@ -108,7 +110,7 @@ public class NodeAccessTest {
     NodeAccess instance = new NodeAccess(rdfEntityManager);
     List<Node> result = instance.getNodes();
     Collections.sort(result);
-    assertEquals("[TestContainer.ContainerGovernanceAgent, TestContainer.ContainerHeartbeatAgent, TestContainer.ContainerOperationAgent, TestContainer.NetworkOperationAgent, TestContainer.TopLevelGovernanceAgent, TestContainer.TopLevelHeartbeatAgent, TestContainer.TopmostFriendshipAgent, TestContainer.XAIBlockchainArchiveAgent, TestContainer.XAIClientGatewayAgent, TestContainer.XAIContainerAuditAgent, TestContainer.XAIContainerCertificateAuthorityAgent, TestContainer.XAIContainerConfigurationAgent, TestContainer.XAIContainerEpisodicMemoryAgent, TestContainer.XAIContainerLogControlAgent, TestContainer.XAIContainerTorrentAgent, TestContainer.XAIFinancialAccountingAndControlAgent, TestContainer.XAIMintAgent, TestContainer.XAINetworkConfigurationAgent, TestContainer.XAINetworkEpisodicMemoryAgent, TestContainer.XAINetworkLogControlAgent, TestContainer.XAINetworkOperationAgent, TestContainer.XAINetworkSeedAgent, TestContainer.XAINetworkTorrentAgent, TestContainer.XAIOperationAgent, TestContainer.XAIPrimaryAuditAgent, TestContainer.XAIRecoveryAgent, TestContainer.XAIRewardAllocationAgent]", result.toString());
+    assertEquals("[TestContainer.ContainerGovernanceAgent, TestContainer.ContainerHeartbeatAgent, TestContainer.ContainerOperationAgent, TestContainer.NetworkOperationAgent, TestContainer.TopLevelGovernanceAgent, TestContainer.TopLevelHeartbeatAgent, TestContainer.TopmostFriendshipAgent, TestContainer.XAIBlockchainArchiveAgent, TestContainer.XAIClientGatewayAgent, TestContainer.XAIContainerAuditAgent, TestContainer.XAIContainerCertificateAuthorityAgent, TestContainer.XAIContainerConfigurationAgent, TestContainer.XAIContainerEpisodicMemoryAgent, TestContainer.XAIContainerLogControlAgent, TestContainer.XAIFinancialAccountingAndControlAgent, TestContainer.XAIMintAgent, TestContainer.XAINetworkConfigurationAgent, TestContainer.XAINetworkEpisodicMemoryAgent, TestContainer.XAINetworkLogControlAgent, TestContainer.XAINetworkOperationAgent, TestContainer.XAINetworkSeedAgent, TestContainer.XAIOperationAgent, TestContainer.XAIPrimaryAuditAgent, TestContainer.XAIRecoveryAgent, TestContainer.XAIRewardAllocationAgent, TestContainer.XAISeedAgent]", result.toString());
   }
 
   /**
