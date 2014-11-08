@@ -330,7 +330,7 @@
   </node>
 
   <node>
-    <name>XAINetworkConfigurationAgent</name>
+    <name>NetworkSingletonConfigurationAgent</name>
     <missionDescription>Provides network configuration the AICoin network. Maintains the assignment of
       nomadic agents to particular containers.</missionDescription>
     <isNetworkSingleton>true</isNetworkSingleton>
@@ -339,14 +339,14 @@
     </prototypeNodeNames>
     <roles>
       <role>
-        <qualifiedName>XAINetworkConfigurationAgent.XAINetworkConfigurationRole</qualifiedName>
+        <qualifiedName>NetworkSingletonConfigurationAgent.NetworkSingletonConfigurationRole</qualifiedName>
         <description>Provides network configuration the AICoin network. Maintains the assignment of
           nomadic agents to particular containers.</description>
         <parentQualifiedName>XAINetworkOperationAgent.XAINetworkOperationRole</parentQualifiedName>
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
-            <skill-class-name>org.texai.skill.aicoin.XAINetworkConfiguration</skill-class-name>
+            <skill-class-name>org.texai.skill.singletonConfiguration.NetworkSingletonConfiguration</skill-class-name>
           </skill-class>
         </skill-classes>
         <variableNames></variableNames>
@@ -355,7 +355,7 @@
   </node>
 
   <node>
-    <name>XAIContainerConfigurationAgent</name>
+    <name>ContainerSingletonConfigurationAgent</name>
     <missionDescription>Configures the container role, for a container's agent/role having a network singleton parent role,
       to refer to the singleton parent role at whichever container is currently hosting it.</missionDescription>
     <prototypeNodeNames>
@@ -363,14 +363,14 @@
     </prototypeNodeNames>
     <roles>
       <role>
-        <qualifiedName>XAIContainerConfigurationAgent.XAIContainerConfigurationRole</qualifiedName>
+        <qualifiedName>ContainerSingletonConfigurationAgent.ContainerSingletonConfigurationRole</qualifiedName>
         <description>Configures the container role, for a container's agent/role having a network singleton parent role,
       to refer to the singleton parent role at whichever container is currently hosting it.</description>
-        <parentQualifiedName>XAINetworkConfigurationAgent.XAINetworkConfigurationRole</parentQualifiedName>
+        <parentQualifiedName>NetworkSingletonConfigurationAgent.NetworkSingletonConfigurationRole</parentQualifiedName>
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
-            <skill-class-name>org.texai.skill.aicoin.XAIContainerConfiguration</skill-class-name>
+            <skill-class-name>org.texai.skill.singletonConfiguration.ContainerSingletonConfiguration</skill-class-name>
           </skill-class>
         </skill-classes>
         <variableNames></variableNames>

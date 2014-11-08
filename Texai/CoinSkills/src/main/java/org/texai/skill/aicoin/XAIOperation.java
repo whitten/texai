@@ -56,14 +56,14 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
   }
 
   /** Gets the logger.
-   * 
+   *
    * @return  the logger
    */
   @Override
   protected Logger getLogger() {
     return LOGGER;
   }
-  
+
   /**
    * Receives and attempts to continueConversation the given message. The skill is thread
    * safe, given that any contained libraries are single threaded with regard to
@@ -83,7 +83,7 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
       sendMessage(operationNotPermittedMessage(message));
       return true;
     }
-    
+
     if (operation.equals(AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO)) {
       LOGGER.warn(message);
       return true;
@@ -146,6 +146,7 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
       AHCSConstants.AHCS_READY_TASK,
+      AHCSConstants.PERFORM_MISSION_TASK,
       AHCSConstants.TASK_ACCOMPLISHED_INFO};
   }
 
@@ -185,6 +186,8 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
 
   /**
    * Continues the conversation with the XAIWriteConfigurationFile skill.
+   *
+   * @param message the received message
    */
   private synchronized void continueConversation(final Message message) {
     //Preconditions

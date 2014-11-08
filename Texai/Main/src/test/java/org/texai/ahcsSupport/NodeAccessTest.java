@@ -84,7 +84,7 @@ public class NodeAccessTest {
             KEY_STORE_FILE_NAME); // keyStoreFilePath
     nodesInitializer.process(
             "data/nodes-test.xml", // nodesPath
-            "hAqefm3tV4toNryN+y99FgPqBPtZ/W6rohWqXSE4fNSuzl+Xa7H4b/+az5oOkU3uP1LRTMAve8ksWrbVoCD2hA=="); // nodesFileHashString
+            "qqYwj2MH8bNf0T6mS5eQNar3b00y+WAJzhc81RfcSy2+PiVczKwI5g3BffRNJdw9M3dUPh0yapqdbaegWjnurw=="); // nodesFileHashString
   }
 
   @AfterClass
@@ -110,7 +110,7 @@ public class NodeAccessTest {
     NodeAccess instance = new NodeAccess(rdfEntityManager);
     List<Node> result = instance.getNodes();
     Collections.sort(result);
-    assertEquals("[TestContainer.ContainerGovernanceAgent, TestContainer.ContainerHeartbeatAgent, TestContainer.ContainerOperationAgent, TestContainer.NetworkOperationAgent, TestContainer.TopLevelGovernanceAgent, TestContainer.TopLevelHeartbeatAgent, TestContainer.TopmostFriendshipAgent, TestContainer.XAIBlockchainArchiveAgent, TestContainer.XAIClientGatewayAgent, TestContainer.XAIContainerAuditAgent, TestContainer.XAIContainerCertificateAuthorityAgent, TestContainer.XAIContainerConfigurationAgent, TestContainer.XAIContainerEpisodicMemoryAgent, TestContainer.XAIContainerLogControlAgent, TestContainer.XAIFinancialAccountingAndControlAgent, TestContainer.XAIMintAgent, TestContainer.XAINetworkConfigurationAgent, TestContainer.XAINetworkEpisodicMemoryAgent, TestContainer.XAINetworkLogControlAgent, TestContainer.XAINetworkOperationAgent, TestContainer.XAINetworkSeedAgent, TestContainer.XAIOperationAgent, TestContainer.XAIPrimaryAuditAgent, TestContainer.XAIRecoveryAgent, TestContainer.XAIRewardAllocationAgent, TestContainer.XAISeedAgent]", result.toString());
+    assertEquals("[TestContainer.ContainerGovernanceAgent, TestContainer.ContainerHeartbeatAgent, TestContainer.ContainerOperationAgent, TestContainer.ContainerSingletonConfigurationAgent, TestContainer.NetworkOperationAgent, TestContainer.NetworkSingletonConfigurationAgent, TestContainer.TopLevelGovernanceAgent, TestContainer.TopLevelHeartbeatAgent, TestContainer.TopmostFriendshipAgent, TestContainer.XAIBlockchainArchiveAgent, TestContainer.XAIClientGatewayAgent, TestContainer.XAIContainerAuditAgent, TestContainer.XAIContainerCertificateAuthorityAgent, TestContainer.XAIContainerEpisodicMemoryAgent, TestContainer.XAIContainerLogControlAgent, TestContainer.XAIFinancialAccountingAndControlAgent, TestContainer.XAIMintAgent, TestContainer.XAINetworkEpisodicMemoryAgent, TestContainer.XAINetworkLogControlAgent, TestContainer.XAINetworkOperationAgent, TestContainer.XAINetworkSeedAgent, TestContainer.XAIOperationAgent, TestContainer.XAIPrimaryAuditAgent, TestContainer.XAIRecoveryAgent, TestContainer.XAIRewardAllocationAgent, TestContainer.XAISeedAgent]", result.toString());
   }
 
   /**

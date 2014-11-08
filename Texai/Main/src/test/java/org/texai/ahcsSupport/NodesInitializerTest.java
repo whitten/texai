@@ -103,7 +103,7 @@ public class NodesInitializerTest {
             "data/test-keystore.uber"); // keyStoreFilePath
     nodesInitializer.process(
             "data/nodes-test.xml", // nodesPath
-            "hAqefm3tV4toNryN+y99FgPqBPtZ/W6rohWqXSE4fNSuzl+Xa7H4b/+az5oOkU3uP1LRTMAve8ksWrbVoCD2hA=="); // nodesFileHashString
+            "qqYwj2MH8bNf0T6mS5eQNar3b00y+WAJzhc81RfcSy2+PiVczKwI5g3BffRNJdw9M3dUPh0yapqdbaegWjnurw=="); // nodesFileHashString
     try {
       nodesInitializer.process(
               "data/nodes-test.xml", // nodesPath
@@ -132,7 +132,7 @@ public class NodesInitializerTest {
             "data/test-keystore.uber"); // keyStoreFilePath
     nodesInitializer.process(
             "data/nodes-test.xml", // nodesPath
-            "hAqefm3tV4toNryN+y99FgPqBPtZ/W6rohWqXSE4fNSuzl+Xa7H4b/+az5oOkU3uP1LRTMAve8ksWrbVoCD2hA=="); // nodesFileHashString
+            "qqYwj2MH8bNf0T6mS5eQNar3b00y+WAJzhc81RfcSy2+PiVczKwI5g3BffRNJdw9M3dUPh0yapqdbaegWjnurw=="); // nodesFileHashString
     nodesInitializer.finalization();
   }
 

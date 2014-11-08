@@ -93,7 +93,7 @@ public final class NodesInitializer {
   // the nodes file SHA-512 hash encoded as a base 64 string, used to detect tampering
   private String nodesFileHashString;
   // the keystore password, which is not persisted
-  private char[] keyStorePassword;
+  private final char[] keyStorePassword;
   // the node runtime
   private final BasicNodeRuntime nodeRuntime;
   // the loaded nodes

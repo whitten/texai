@@ -70,7 +70,7 @@ public class AICoinMain {
   // the path to the XML file which defines the nodes, roles and skills
   final String nodesPath = "data/nodes.xml";
   // the tamper-evident hash of the nodes path file, use "1234" after revsing the nodes.xml file
-  final String nodesFileHashString = "hAqefm3tV4toNryN+y99FgPqBPtZ/W6rohWqXSE4fNSuzl+Xa7H4b/+az5oOkU3uP1LRTMAve8ksWrbVoCD2hA==";
+  final String nodesFileHashString = "qqYwj2MH8bNf0T6mS5eQNar3b00y+WAJzhc81RfcSy2+PiVczKwI5g3BffRNJdw9M3dUPh0yapqdbaegWjnurw==";
   /**
    * the node runtime application thread
    */

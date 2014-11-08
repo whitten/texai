@@ -1,5 +1,5 @@
 /*
- * XAIContainerConfiguration.java
+ * ContainerSingletonConfiguration.java
  *
  * Created on Mar 14, 2012, 10:49:55 PM
  *
@@ -9,7 +9,7 @@
  * Copyright (C) Mar 14, 2012, Stephen L. Reed, Texai.org.
  *
  */
-package org.texai.skill.aicoin;
+package org.texai.skill.singletonConfiguration;
 
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
@@ -23,15 +23,15 @@ import org.texai.ahcsSupport.Message;
  * @author reed
  */
 @NotThreadSafe
-public class XAIContainerConfiguration extends AbstractSkill {
+public class ContainerSingletonConfiguration extends AbstractSkill {
 
   // the log4j logger
-  private static final Logger LOGGER = Logger.getLogger(XAIContainerConfiguration.class);
+  private static final Logger LOGGER = Logger.getLogger(ContainerSingletonConfiguration.class);
 
   /** Constructs a new SkillTemplate instance. */
-  public XAIContainerConfiguration() {
+  public ContainerSingletonConfiguration() {
   }
-  
+
   /** Receives and attempts to process the given message.  The skill is thread safe, given that any contained libraries are single threaded
    * with regard to the conversation.
    *
@@ -58,15 +58,24 @@ public class XAIContainerConfiguration extends AbstractSkill {
         assert getSkillState().equals(State.INITIALIZED) : "prior state must be initialized";
         setSkillState(State.READY);
         return true;
-        
+
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
         return true;
 
-      //TODO REQUEST_CONFIGURATON_TASK  
+      case AHCSConstants.TASK_ACCOMPLISHED_INFO:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
+        //TODO
+        return true;
+
+      case AHCSConstants.PERFORM_MISSION_TASK:
+        performMission(message);
+        return true;
+
+      //TODO REQUEST_CONFIGURATON_TASK
         // seed another peer who requests the locations of the nomadic singleton agents.
-        
-        
+
+
       // handle other operations ...
     }
     // otherwise, the message is not understood
@@ -90,26 +99,42 @@ public class XAIContainerConfiguration extends AbstractSkill {
     return (notUnderstoodMessage(message));
   }
 
-  /** Returns the understood operations.
+  /**
+   * Returns the understood operations.
    *
    * @return the understood operations
    */
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
-              AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
-              AHCSConstants.AHCS_INITIALIZE_TASK,
-              AHCSConstants.AHCS_READY_TASK,
-            };
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.AHCS_INITIALIZE_TASK,
+      AHCSConstants.AHCS_READY_TASK,
+      AHCSConstants.PERFORM_MISSION_TASK,
+      AHCSConstants.TASK_ACCOMPLISHED_INFO};
   }
-  
+
   /** Gets the logger.
-   * 
+   *
    * @return  the logger
    */
   @Override
   protected Logger getLogger() {
     return LOGGER;
   }
-  
+
+  /**
+   * Perform this role's mission, which is to configure the roles in this container whose parents are nomadic singleton roles hosted
+   * on a probably remote super-peer.
+   *
+   * @param message the received perform mission task message
+   */
+  private void performMission(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+
+    LOGGER.info("performing the mission");
+
+  }
 }
