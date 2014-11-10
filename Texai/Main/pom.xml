@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -51,6 +51,83 @@
           <forkMode>always</forkMode>
           <argLine></argLine>
         </configuration>
+      </plugin>
+
+      <!--
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.2-beta-2</version>
+        <executions>
+          <execution>
+            <id>create-executable-jar</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptorRefs>
+                <descriptorRef>
+                  jar-with-dependencies
+                </descriptorRef>
+              </descriptorRefs>
+              <archive>
+                <manifest>
+                  <mainClass>org.texai.main.AICoinMain</mainClass>
+                </manifest>
+              </archive>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      -->
+
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>create-executable-jar</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/all-dependencies.xml</descriptor>
+                <!-- <descriptor>/home/reed/git/texai/Texai/Main/sample.xml</descriptor> -->
+              </descriptors>
+              <archive>
+                <manifest>
+                  <mainClass>org.texai.main.AICoinMain</mainClass>
+                </manifest>
+              </archive>
+              <archiverConfig>
+                <duplicateBehavior>skip</duplicateBehavior>
+              </archiverConfig>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+
+      <plugin>
+        <!-- TODO -->
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>install-to-production</id>
+            <phase>install</phase>
+            <configuration>
+              <tasks>
+                <exec dir="scripts" executable="sh" spawn="false">
+                  <arg value="install.sh"/>
+                </exec>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

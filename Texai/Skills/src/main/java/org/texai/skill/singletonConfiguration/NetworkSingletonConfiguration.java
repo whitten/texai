@@ -9,7 +9,7 @@ import org.texai.ahcsSupport.Message;
 /**
  * Created on Aug 29, 2014, 6:44:08 PM.
  *
- * Description: Schedules the various nomadic agents itinerary with regard to the Texai network nodes.
+ * Description: Configures the various singleton nomadic agents on containers.
  *
  * Copyright (C) Aug 29, 2014, Stephen L. Reed, Texai.org.
  *
@@ -40,14 +40,14 @@ public final class NetworkSingletonConfiguration extends AbstractSkill {
   }
 
   /** Gets the logger.
-   * 
+   *
    * @return  the logger
    */
   @Override
   protected Logger getLogger() {
     return LOGGER;
   }
-  
+
   /**
    * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries
    * are single threaded with regard to the conversation.
@@ -78,10 +78,22 @@ public final class NetworkSingletonConfiguration extends AbstractSkill {
         propagateOperationToChildRoles(operation);
         setSkillState(AHCSConstants.State.READY);
         return true;
-        
+
+      case AHCSConstants.TASK_ACCOMPLISHED_INFO:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
+        //TODO or remove
+        return true;
+
+      case AHCSConstants.PERFORM_MISSION_TASK:
+        performMission(message);
+        return true;
+
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
         return true;
+
+
+        // REQUEST_TO_JOIN_INFO message from new node wanting to join the network.
     }
 
     sendMessage(notUnderstoodMessage(message));
@@ -115,7 +127,23 @@ public final class NetworkSingletonConfiguration extends AbstractSkill {
     return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.AHCS_READY_TASK,};
+      AHCSConstants.AHCS_READY_TASK,
+      AHCSConstants.PERFORM_MISSION_TASK,
+      AHCSConstants.TASK_ACCOMPLISHED_INFO};
   }
 
+
+  /**
+   * Perform this role's mission, which is to configure the various singleton nomadic agents on containers.
+   *
+   * @param message the received perform mission task message
+   */
+  private void performMission(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+
+    LOGGER.info("performing the mission");
+
+  }
 }

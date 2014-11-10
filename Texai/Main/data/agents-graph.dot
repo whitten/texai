@@ -143,15 +143,15 @@ subgraph cluster_agents {
   NContainerGovernanceAgent -> NXAIOperationAgent;
   NXAINetworkOperationAgent -> NXAINetworkEpisodicMemoryAgent;
   NContainerHeartbeatAgent -> NXAIRecoveryAgent;
-  NContainerGovernanceAgent -> NXAIFinancialAccountingAndControlAgent;
   NContainerGovernanceAgent -> NNetworkSingletonConfigurationAgent;
+  NContainerGovernanceAgent -> NXAIFinancialAccountingAndControlAgent;
   NContainerGovernanceAgent -> NXAINetworkOperationAgent;
   NContainerGovernanceAgent -> NXAIContainerEpisodicMemoryAgent;
   NContainerHeartbeatAgent -> NXAIClientGatewayAgent;
   NContainerHeartbeatAgent -> NXAIBlockchainArchiveAgent;
   NXAINetworkOperationAgent -> NXAIMintAgent;
-  NContainerHeartbeatAgent -> NXAIContainerAuditAgent;
   NContainerHeartbeatAgent -> NContainerSingletonConfigurationAgent;
+  NContainerHeartbeatAgent -> NXAIContainerAuditAgent;
   NXAINetworkOperationAgent -> NXAIRewardAllocationAgent;
   NContainerGovernanceAgent -> NTopLevelHeartbeatAgent;
   NContainerGovernanceAgent -> NXAINetworkEpisodicMemoryAgent;

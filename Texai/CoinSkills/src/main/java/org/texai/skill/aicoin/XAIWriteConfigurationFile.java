@@ -55,14 +55,14 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
   }
 
   /** Gets the logger.
-   * 
+   *
    * @return  the logger
    */
   @Override
   protected Logger getLogger() {
     return LOGGER;
   }
-  
+
   /**
    * Receives and attempts to process the given message. The skill is thread
    * safe, given that any contained libraries are single threaded with regard to
@@ -96,7 +96,7 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
       case AHCSConstants.WRITE_CONFIGURATION_FILE_TASK:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
         return writeConfigurationFile(message);
-        
+
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
         return true;
@@ -133,7 +133,10 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
       directory.mkdir();
       assert directory.isDirectory();
     }
-    
+
+    //TODO implement a skill for XAIOperation that that verifies that each user is unique and that each password is unique.
+    //TODO implement a parent skill that maintains a tamper-evident log of hashed/salted user and password pairs.
+
     final String rpcuser = System.getenv("RPC_USER");
     if (!StringUtils.isNonEmptyString(rpcuser)) {
       throw new TexaiException("the RPC_USER environment variable must be assigned a value");
@@ -150,7 +153,7 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
       bufferedWriter.write(rpcuser);
       bufferedWriter.write("\n");
       bufferedWriter.write("rpcpassword=");
-      bufferedWriter.write(rpcpassword);      
+      bufferedWriter.write(rpcpassword);
       bufferedWriter.write("\n");
       bufferedWriter.write("\n");
     } catch (IOException ex) {

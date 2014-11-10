@@ -71,8 +71,8 @@ public class NodeAccessTest {
     rdfEntityManager = new RDFEntityManager();
     CacheInitializer.resetCaches();
     CacheInitializer.initializeCaches();
-    LOGGER.info("deleting " + KEY_STORE_FILE_NAME);
-    (new File(KEY_STORE_FILE_NAME)).delete();
+//    LOGGER.info("deleting " + KEY_STORE_FILE_NAME);
+//    (new File(KEY_STORE_FILE_NAME)).delete();
     final String containerName = "TestContainer";
     final BasicNodeRuntime nodeRuntime = new BasicNodeRuntime(containerName);
     final char[] keystorePassword = "test-password".toCharArray();

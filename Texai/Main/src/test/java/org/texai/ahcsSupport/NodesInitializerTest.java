@@ -67,8 +67,9 @@ public class NodesInitializerTest {
             "Nodes",
             true); // isRepositoryDirectoryCleaned
     rdfEntityManager = new RDFEntityManager();
-    LOGGER.info("deleting " + KEY_STORE_FILE_NAME);
-    (new File(KEY_STORE_FILE_NAME)).delete();
+    //TODO figure out maven assembly error when skipping tests then enable this longer test below
+//    LOGGER.info("deleting " + KEY_STORE_FILE_NAME);
+//    (new File(KEY_STORE_FILE_NAME)).delete();
   }
 
   @AfterClass
