@@ -1,0 +1,36 @@
+# Pull base image.
+FROM dockerfile/ubuntu
+
+# Install Java.
+RUN \
+  echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
+  add-apt-repository -y ppa:webupd8team/java && \
+  apt-get update && \
+  apt-get install -y oracle-java8-installer && \
+  rm -rf /var/lib/apt/lists/* && \
+  rm -rf /var/cache/oracle-jdk8-installer
+
+# Define working directory.
+WORKDIR /aicoin
+
+# user
+RUN groupadd -r aicoin -g 433 && \
+useradd -u 431 -r -g aicoin -d /work -s /sbin/nologin -c "aicoin user" aicoin && \
+chown -R aicoin:aicoin /aicoin
+
+# variables
+ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
+ENV REPOSITORIES ../repositories
+ENV SECURITY_DIR /aicoin
+
+# -----------------------------------------
+# change to unique values of your choosing
+ENV CONTAINER Alice
+ENV RPC_USER rpctestuser
+ENV RPC_PASSWORD rpctestpassword
+# -----------------------------------------
+
+EXPOSE 5048
+
+# Define default command.
+CMD ["bash"]

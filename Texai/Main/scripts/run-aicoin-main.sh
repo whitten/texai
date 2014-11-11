@@ -3,14 +3,15 @@
 # Launch AIMain - an instance in the A.I. Coin cyptocurrency network.
 # Each instance should execute in a separate Docker container.
 
-export REPOSITORIES=../repositories
-export SECURITY_DIR=/home/reed
+# ensure that the JCE security policy files are installed
+cp ../UnlimitedJCEPolicyJDK8/*.jar /usr/lib/jvm/java-8-oracle/jre/lib/security
 
-# change to a unique value of your choosing
-export RPC_USER=rpctestuser
-
-# change to a unique value of your choosing
-export RPC_PASSWORD=rpctestpassword
+# variables are defined in the dockerfile ...
+#export CONTAINER=test01
+#export REPOSITORIES=../repositories
+#export SECURITY_DIR=/home/reed
+#export RPC_USER=rpctestuser
+#export RPC_PASSWORD=rpctestpassword
 
 CLASSPATH=lib/activation-1.1.jar
 CLASSPATH=$CLASSPATH:lib/aduna-commons-collections-2.7.0.jar

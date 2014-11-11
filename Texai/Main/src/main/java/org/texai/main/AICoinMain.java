@@ -236,18 +236,10 @@ public class AICoinMain {
    * @param args the command line arguments - unused
    */
   public static void main(final String[] args) {
-    final String containerName;
-    if (args.length == 0) {
-      containerName = "turing";
-    } else if (args.length == 1) {
-      containerName = args[0];
-    } else {
-      throw new TexaiException("command line argument must specify the container name - found " + args.length + " argument(s)");
-    }
-    final AICoinMain texaiMain = new AICoinMain();
+    final String containerName = System.getenv("CONTAINER");
     if (!StringUtils.isNonEmptyString(containerName)) {
-      throw new TexaiException("command line argument must specify the container name");
+      throw new TexaiException("the environment variable CONTAINER must specify the container name");
     }
-    texaiMain.process(containerName);
+    (new AICoinMain()).process(containerName);
   }
 }
