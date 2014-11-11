@@ -25,11 +25,10 @@
   </files>
   <fileSets>
     <fileSet>
-      <directory>../Main/data</directory>
+      <directory>data</directory>
       <includes>
         <include>bootstrap-queries.xml</include>
-        <include>node-types.xml</include>
-        <include>repository.rcd</include>
+        <include>kb-statements.txt</include>
         <include>nodes.xml</include>
       </includes>
       <outputDirectory>data</outputDirectory>

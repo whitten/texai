@@ -3,7 +3,7 @@
 # Launch AIMain - an instance in the A.I. Coin cyptocurrency network.
 # Each instance should execute in a separate Docker container.
 
-export REPOSITORIES=/home/reed/repositories
+export REPOSITORIES=../repositories
 export SECURITY_DIR=/home/reed
 
 # change to a unique value of your choosing

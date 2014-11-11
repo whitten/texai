@@ -43,28 +43,4 @@
                 <exec.executable>java</exec.executable>
             </properties>
         </action>
-        <action>
-            <actionName>CUSTOM-assembly</actionName>
-            <displayName>assembly</displayName>
-            <goals>
-                <goal>assembly:single</goal>
-            </goals>
-        </action>
-        <action>
-            <actionName>CUSTOM-jar-with-dependencies</actionName>
-            <displayName>jar-with-dependencies</displayName>
-            <goals>
-                <goal>assembly:single</goal>
-            </goals>
-        </action>
-        <action>
-            <actionName>CUSTOM-install-no-tests</actionName>
-            <displayName>install-no-tests</displayName>
-            <goals>
-                <goal>install:install</goal>
-            </goals>
-            <activatedProfiles>
-                <activatedProfile>-Dmaven.test.skip=true</activatedProfile>
-            </activatedProfiles>
-        </action>
     </actions>
