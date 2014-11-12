@@ -1,5 +1,5 @@
 /*
- * ContainerSingletonConfiguration.java
+ * SingletonConfiguration.java
  *
  * Created on Mar 14, 2012, 10:49:55 PM
  *
@@ -23,13 +23,13 @@ import org.texai.ahcsSupport.Message;
  * @author reed
  */
 @NotThreadSafe
-public class ContainerSingletonConfiguration extends AbstractSkill {
+public class SingletonConfiguration extends AbstractSkill {
 
   // the log4j logger
-  private static final Logger LOGGER = Logger.getLogger(ContainerSingletonConfiguration.class);
+  private static final Logger LOGGER = Logger.getLogger(SingletonConfiguration.class);
 
-  /** Constructs a new SkillTemplate instance. */
-  public ContainerSingletonConfiguration() {
+  /** Constructs a new SingletonConfiguration instance. */
+  public SingletonConfiguration() {
   }
 
   /** Receives and attempts to process the given message.  The skill is thread safe, given that any contained libraries are single threaded

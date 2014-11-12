@@ -167,6 +167,51 @@
   </node>
 
   <node>
+    <name>NetworkLogControlAgent</name>
+    <missionDescription>Coordinates Java logging for agents in the AICoin network.</missionDescription>
+    <isNetworkSingleton>true</isNetworkSingleton>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>NetworkLogControlAgent.NetworkLogControlRole</qualifiedName>
+        <description>Coordinates Java logging at the network level for agents in the AICoin network.</description>
+        <parentQualifiedName>NetworkOperationAgent.NetworkOperationRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.logging.NetworkLogControl</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>ContainerLogControlAgent</name>
+    <missionDescription>Coordinates Java logging at the container level for agents in the AICoin network.</missionDescription>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>ContainerLogControlAgent.ContainerLogControlRole</qualifiedName>
+        <description>Coordinates Java logging for agents in the AICoin network.</description>
+        <parentQualifiedName>NetworkLogControlAgent.NetworkLogControlRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.logging.ContainerLogControl</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
     <name>ContainerOperationAgent</name>
     <missionDescription>Manages a container and the AICoin agent within the container. Interacts with the human container operator.</missionDescription>
     <prototypeNodeNames>
@@ -355,22 +400,20 @@
   </node>
 
   <node>
-    <name>ContainerSingletonConfigurationAgent</name>
-    <missionDescription>Configures the container role, for a container's agent/role having a network singleton parent role,
-      to refer to the singleton parent role at whichever container is currently hosting it.</missionDescription>
+    <name>SingletonConfigurationAgent</name>
+    <missionDescription>Configures this container's agents to refer to singleton parent roles, which can be hosted on other containers.</missionDescription>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
     <roles>
       <role>
-        <qualifiedName>ContainerSingletonConfigurationAgent.ContainerSingletonConfigurationRole</qualifiedName>
-        <description>Configures the container role, for a container's agent/role having a network singleton parent role,
-      to refer to the singleton parent role at whichever container is currently hosting it.</description>
+        <qualifiedName>SingletonConfigurationAgent.SingletonConfigurationRole</qualifiedName>
+        <description>Configures this container's agents to refer to singleton parent roles, which can be hosted on other containers.</description>
         <parentQualifiedName>NetworkSingletonConfigurationAgent.NetworkSingletonConfigurationRole</parentQualifiedName>
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
-            <skill-class-name>org.texai.skill.singletonConfiguration.ContainerSingletonConfiguration</skill-class-name>
+            <skill-class-name>org.texai.skill.singletonConfiguration.SingletonConfiguration</skill-class-name>
           </skill-class>
         </skill-classes>
         <variableNames></variableNames>
@@ -579,51 +622,6 @@
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.aicoin.XAIContainerEpisodicMemory</skill-class-name>
-          </skill-class>
-        </skill-classes>
-        <variableNames></variableNames>
-      </role>
-    </roles>
-  </node>
-
-  <node>
-    <name>XAINetworkLogControlAgent</name>
-    <missionDescription>Coordinates Java logging for agents in the AICoin network.</missionDescription>
-    <isNetworkSingleton>true</isNetworkSingleton>
-    <prototypeNodeNames>
-      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
-    </prototypeNodeNames>
-    <roles>
-      <role>
-        <qualifiedName>XAINetworkLogControlAgent.XAINetworkLogControlRole</qualifiedName>
-        <description>Coordinates Java logging for agents in the AICoin network.</description>
-        <parentQualifiedName>XAINetworkOperationAgent.XAINetworkOperationRole</parentQualifiedName>
-        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
-        <skill-classes>
-          <skill-class>
-            <skill-class-name>org.texai.skill.logging.NetworkLogControl</skill-class-name>
-          </skill-class>
-        </skill-classes>
-        <variableNames></variableNames>
-      </role>
-    </roles>
-  </node>
-
-  <node>
-    <name>XAIContainerLogControlAgent</name>
-    <missionDescription>Coordinates Java logging for agents in the AICoin network.</missionDescription>
-    <prototypeNodeNames>
-      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
-    </prototypeNodeNames>
-    <roles>
-      <role>
-        <qualifiedName>XAIContainerLogControlAgent.XAIContainerLogControlRole</qualifiedName>
-        <description>Coordinates Java logging for agents in the AICoin network.</description>
-        <parentQualifiedName>XAINetworkLogControlAgent.XAINetworkLogControlRole</parentQualifiedName>
-        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
-        <skill-classes>
-          <skill-class>
-            <skill-class-name>org.texai.skill.logging.ContainerLogControl</skill-class-name>
           </skill-class>
         </skill-classes>
         <variableNames></variableNames>

@@ -68,9 +68,10 @@ public class AICoinMain {
 
   private final char[] keyStorePassword = "node-runtime-keystore-password".toCharArray();
   // the path to the XML file which defines the nodes, roles and skills
-  final String nodesPath = "data/nodes.xml";
+  private final String nodesPath = "data/nodes.xml";
   // the tamper-evident hash of the nodes path file, use "1234" after revsing the nodes.xml file
-  final String nodesFileHashString = "qqYwj2MH8bNf0T6mS5eQNar3b00y+WAJzhc81RfcSy2+PiVczKwI5g3BffRNJdw9M3dUPh0yapqdbaegWjnurw==";
+  private final String NODES_FILE_HASH =
+          "za/WLROet9/zocKvuR0WJku9ut2x26hpQmIEOe7UVo+gJgtxmpmlt7SYaiCtKAeybIdevm2NNN448mmt9CZEvA==";
   /**
    * the node runtime application thread
    */
@@ -80,6 +81,8 @@ public class AICoinMain {
    * should be persisted upon shutdown
    */
   private final AtomicBoolean isInitialized = new AtomicBoolean(false);
+  // the configuration certificate path
+  private final static String SINGLETON_CONFIGURATION_FILE_PATH = "data/SingletonConfiguration.crt";
 
   /**
    * Constructs a new TexaiMain instance.
@@ -119,10 +122,11 @@ public class AICoinMain {
             true, // isClassExistsTested,
             keyStorePassword,
             nodeRuntime,
-            "data/keystore.uber"); // keyStoreFilePath
+            "data/keystore.uber", // keyStoreFilePath
+            SINGLETON_CONFIGURATION_FILE_PATH); // configurationCertificateFilePath
     nodesInitializer.process(
             nodesPath,
-            nodesFileHashString);
+            NODES_FILE_HASH); // nodesFileHashString
     nodesInitializer.finalization();
 
     // start up

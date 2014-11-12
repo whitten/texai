@@ -95,6 +95,15 @@ public class RoleTest {
   }
 
   /**
+   * Test of extractRoleName method, of class Node.
+   */
+  @Test
+  public void testExtractAgentName() {
+    LOGGER.info("extractRoleName");
+    assertEquals("role", Role.extractRoleName("container.agent.role"));
+  }
+
+  /**
    * Test of getNode & setNode method, of class Role.
    */
   @Test

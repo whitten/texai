@@ -246,7 +246,7 @@ public class Node implements CascadePersistence, Comparable<Node> {
   }
 
   /**
-   * Extracts the agent name from this agent's qualified name string, container-nar-name.agent-name.role-name.
+   * Extracts the agent name from this agent's qualified name string, container-name.agent-name.role-name.
    *
    * @return the agent name
    */
@@ -273,6 +273,23 @@ public class Node implements CascadePersistence, Comparable<Node> {
     assert names.length == 3;
 
     return names[1];
+  }
+
+  /**
+   * Extracts the container name from the given qualified name string, container-name.agent-name.role-name .
+   *
+   * @param qualifiedName the given qualified name string, container-name.agent-name.role-name
+   *
+   * @return the container name
+   */
+  public static String extractContainerName(final String qualifiedName) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(qualifiedName) : "qualifiedName must be a non empty string";
+
+    final String[] names = qualifiedName.split("\\.");
+    assert names.length == 3;
+
+    return names[0];
   }
 
   /**

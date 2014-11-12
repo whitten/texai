@@ -33,7 +33,9 @@ import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -102,7 +104,10 @@ public final class NodesInitializer {
   private int nbrNodeTags = 0;
   // the keystore path, which is different for test vs production
   private final String keyStoreFilePath;
-
+  // the output path for the configuration role's certificate, which is different for test vs production
+  private final String configurationCertificateFilePath;
+  // the X.509 certificate for the SingletonConfiguration role
+  private X509Certificate singletonConfigurationCertificate;
 
   /**
    * Constructs a new NodeInitializer instance.
@@ -112,22 +117,26 @@ public final class NodesInitializer {
    * @param keyStorePassword the keystore password, which is not persisted
    * @param nodeRuntime the node runtime
    * @param keyStoreFilePath the keystore path, which is different for test vs production
+   * @param configurationCertificateFilePath the output path for the configuration role's certificate, which is different for test vs production
    */
   public NodesInitializer(
           final boolean isClassExistsTested,
           final char[] keyStorePassword,
           final BasicNodeRuntime nodeRuntime,
-          final String keyStoreFilePath) {
+          final String keyStoreFilePath,
+          final String configurationCertificateFilePath) {
     //Preconditions
     assert keyStorePassword != null : "keyStorePassword must not be null";
     assert keyStorePassword.length > 0 : "keyStorePassword must not be empty";
     assert nodeRuntime != null : "nodeRuntime must not be null";
     assert StringUtils.isNonEmptyString(keyStoreFilePath) : "keyStoreFilePath must be a non-empty string";
+    assert StringUtils.isNonEmptyString(configurationCertificateFilePath) : "configurationCertificateFilePath must be a non-empty string";
 
     this.isClassExistsTested = isClassExistsTested;
     this.keyStorePassword = keyStorePassword;
     this.nodeRuntime = nodeRuntime;
     this.keyStoreFilePath = keyStoreFilePath;
+    this.configurationCertificateFilePath = configurationCertificateFilePath;
     containerName = nodeRuntime.getContainerName();
     nodeAccess = nodeRuntime.getNodeAccess();
   }
@@ -214,6 +223,7 @@ public final class NodesInitializer {
     verifyParentRoles();
     verifyChildRoles();
     generateX509CertificatesForRoles();
+    emitConfigurationCertificate();
     persistNodes();
     loadNodesAndInjectDependencies();
     displayNetworkSingletonNodes();
@@ -390,12 +400,10 @@ public final class NodesInitializer {
    */
   private void generateX509CertificatesForRoles() {
 
-
     //TODO create a write-only keystore
-
     final KeyStore keyStore;
     try {
-      LOGGER.info("getting the keystore");
+      LOGGER.info("getting the keystore " + keyStoreFilePath);
       keyStore = X509Utils.findOrCreateUberKeyStore(keyStoreFilePath, keyStorePassword);
       try (final FileOutputStream keyStoreOutputStream = new FileOutputStream(new File(keyStoreFilePath))) {
         keyStore.store(keyStoreOutputStream, keyStorePassword);
@@ -409,6 +417,8 @@ public final class NodesInitializer {
     roleFieldsHolderDictionary.values().stream().sorted().forEach(roleFieldsHolder1 -> {
       LOGGER.info("  " + roleFieldsHolder1.qualifiedName);
       if (roleFieldsHolder1.areRemoteCommunicationsPermitted) {
+
+        boolean isFound = false;
         if (X509Utils.keyStoreContains(keyStoreFilePath,
                 keyStorePassword,
                 roleFieldsHolder1.qualifiedName)) {  // alias
@@ -418,7 +428,12 @@ public final class NodesInitializer {
                           keyStore,
                           keyStorePassword,
                           roleFieldsHolder1.qualifiedName); // alias
-        } else {
+          if (roleFieldsHolder1.x509SecurityInfo != null) {
+            isFound = true;
+          }
+        }
+
+        if (!isFound) {
           LOGGER.info("    generating a new certificate");
           final KeyPair keyPair;
           try {
@@ -465,6 +480,29 @@ public final class NodesInitializer {
         }
       }
     });
+  }
+
+  /**
+   * Populates node roles from prototype nodes.
+   */
+  private void emitConfigurationCertificate() {
+    final String singletonConfigurationRoleName = "SingletonConfigurationRole";
+    roleFieldsHolderDictionary.values().stream().forEach(roleFieldsHolder1 -> {
+      // save the configuration role's certificate
+      if (Role.extractRoleName(roleFieldsHolder1.qualifiedName).equals(singletonConfigurationRoleName)) {
+        singletonConfigurationCertificate = roleFieldsHolder1.x509SecurityInfo.getCertificateChain()[0];
+      }
+    });
+    if (singletonConfigurationCertificate == null) {
+      throw new TexaiException("missing " +  singletonConfigurationRoleName);
+    }
+    LOGGER.info("emitting the configuration role's certificate");
+    try {
+      X509Utils.writeX509Certificate(singletonConfigurationCertificate,
+              configurationCertificateFilePath); // filePath
+    } catch (CertificateEncodingException | IOException ex) {
+      throw new TexaiException(ex);
+    }
   }
 
   /**

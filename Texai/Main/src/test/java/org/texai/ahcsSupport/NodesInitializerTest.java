@@ -26,6 +26,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -52,7 +53,12 @@ public class NodesInitializerTest {
    */
   private static RDFEntityManager rdfEntityManager;
   // the test keystore path
-  private final static String KEY_STORE_FILE_NAME = "data/keystore.uber";
+  private final static String KEY_STORE_FILE_NAME = "data/test-keystore.uber";
+  // the test configuration certificate path
+  private final static String SINGLETON_CONFIGURATION_FILE_PATH = "data/test-SingletonConfiguration.crt";
+  // the hash of nodes-test.xml
+  public final static String NODES_TEST_HASH
+          = "za/WLROet9/zocKvuR0WJku9ut2x26hpQmIEOe7UVo+gJgtxmpmlt7SYaiCtKAeybIdevm2NNN448mmt9CZEvA==";
 
   public NodesInitializerTest() {
   }
@@ -100,11 +106,12 @@ public class NodesInitializerTest {
             = new NodesInitializer(
                     false, // isClassExistsTested
                     keystorePassword,
-            nodeRuntime,
-            "data/test-keystore.uber"); // keyStoreFilePath
+                    nodeRuntime,
+                    KEY_STORE_FILE_NAME, // keyStoreFilePath
+                    SINGLETON_CONFIGURATION_FILE_PATH); // configurationCertificateFilePath
     nodesInitializer.process(
             "data/nodes-test.xml", // nodesPath
-            "qqYwj2MH8bNf0T6mS5eQNar3b00y+WAJzhc81RfcSy2+PiVczKwI5g3BffRNJdw9M3dUPh0yapqdbaegWjnurw=="); // nodesFileHashString
+            NODES_TEST_HASH); // nodesFileHashString
     try {
       nodesInitializer.process(
               "data/nodes-test.xml", // nodesPath
@@ -125,15 +132,22 @@ public class NodesInitializerTest {
     final String containerName = "TestContainer";
     final BasicNodeRuntime nodeRuntime = new BasicNodeRuntime(containerName);
     final char[] keystorePassword = "test-password".toCharArray();
+    final File singletonConfigurationFile = new File(SINGLETON_CONFIGURATION_FILE_PATH);
+    if (singletonConfigurationFile.exists()) {
+      singletonConfigurationFile.delete();
+    }
     final NodesInitializer nodesInitializer
             = new NodesInitializer(
                     false, // isClassExistsTested
                     keystorePassword,
-            nodeRuntime,
-            "data/test-keystore.uber"); // keyStoreFilePath
+                    nodeRuntime,
+                    KEY_STORE_FILE_NAME, // keyStoreFilePath
+                    SINGLETON_CONFIGURATION_FILE_PATH); // configurationCertificateFilePath
     nodesInitializer.process(
             "data/nodes-test.xml", // nodesPath
-            "qqYwj2MH8bNf0T6mS5eQNar3b00y+WAJzhc81RfcSy2+PiVczKwI5g3BffRNJdw9M3dUPh0yapqdbaegWjnurw=="); // nodesFileHashString
+            NODES_TEST_HASH); // nodesFileHashString
+    assertTrue(singletonConfigurationFile.exists());
+
     nodesInitializer.finalization();
   }
 

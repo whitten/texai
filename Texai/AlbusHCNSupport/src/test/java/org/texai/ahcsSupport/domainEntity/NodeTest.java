@@ -106,6 +106,15 @@ public class NodeTest {
   }
 
   /**
+   * Test of extractContainerName method, of class Node.
+   */
+  @Test
+  public void testExtractContainerName() {
+    LOGGER.info("extractContainerName");
+    assertEquals("TestContainer", Node.extractContainerName("TestContainer.TestAgent.TestRole"));
+  }
+
+  /**
    * Test of toString method, of class Node.
    */
   @Test

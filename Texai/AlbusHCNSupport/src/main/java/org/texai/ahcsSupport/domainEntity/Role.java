@@ -192,6 +192,22 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   }
 
   /**
+   * Extracts the role name from the given qualified name string, container-name.agent-name.role-name.
+   *
+   * @param qualifiedName the given qualified name string
+   * @return the role name
+   */
+  public static String extractRoleName(final String qualifiedName) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(qualifiedName) : "qualifiedName must be a non-empty string";
+
+    final String[] names = qualifiedName.split("\\.");
+    assert names.length == 3;
+
+    return names[2];
+  }
+
+  /**
    * Gets the containing node.
    *
    * @return the containing node
@@ -428,7 +444,7 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
         assert skill != null : "service not found " + message.getRecipientService() + "\n" + message.toDetailedString() + "\n skillDictionary: " + skillDictionary;
       }
     }
-    
+
     if (skill == null) {
       // dispatch the message to any skill that understands the operation
       boolean isSkillFound = false;
@@ -458,7 +474,7 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
         message1.put(AHCSConstants.AHCS_ORIGINAL_MESSAGE, message);
         sendMessage(message1);
       }
-      
+
     } else {
       // the recipientService was found
       skill.receiveMessage(message);
