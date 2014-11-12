@@ -30,6 +30,7 @@
         <include>bootstrap-queries.xml</include>
         <include>kb-statements.txt</include>
         <include>nodes.xml</include>
+        <include>SeedNodeInfos.ser</include>
       </includes>
       <outputDirectory>data</outputDirectory>
     </fileSet>

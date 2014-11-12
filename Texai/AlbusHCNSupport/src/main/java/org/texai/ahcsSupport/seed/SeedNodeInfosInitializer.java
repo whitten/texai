@@ -1,6 +1,13 @@
 package org.texai.ahcsSupport.seed;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.InetAddress;
+import java.security.NoSuchProviderException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Set;
 import org.apache.log4j.Logger;
@@ -27,7 +34,6 @@ import org.texai.x509.X509Utils;
 public class SeedNodeInfosInitializer {
 
   // the logger
-
   private static final Logger LOGGER = Logger.getLogger(SeedNodeInfosInitializer.class);
   // the seed node infos
   private final Set<SeedNodeInfo> seedNodeInfos = new ArraySet<>();
@@ -44,22 +50,32 @@ public class SeedNodeInfosInitializer {
    */
   private void process() {
 
-    // the demo mint peer
     try {
-    String qualifiedName = "Mint.SingletonConfigurationRole";
-    InetAddress inetAddress = InetAddress.getLocalHost();
-    int port = 35048;
-    String cerfificateFilePath = "/home/reed/docker/Mint/";
-    X509Certificate x509Certificate = X509Utils.readX509Certificate(null);
+      // the demo mint peer
+      String qualifiedName = "Mint.SingletonConfigurationRole";
+      InetAddress inetAddress = InetAddress.getLocalHost();
+      int port = 35048;
+      String cerfificateFilePath = "/home/reed/docker/Mint/Main-1.0/data/SingletonConfiguration.crt";
+      if (!(new File(cerfificateFilePath)).exists()) {
+        throw new TexaiException("cerfificate path not found " + cerfificateFilePath);
+      }
+      X509Certificate x509Certificate = X509Utils.readX509Certificate(new FileInputStream(cerfificateFilePath));
 
+      seedNodeInfos.add(new SeedNodeInfo(
+              qualifiedName,
+              inetAddress,
+              port,
+              x509Certificate));
 
-
-    } catch (Exception ex) {
+      // other seeds ...
+      final String seedNodeInfosFilePath = "../Main/data/SeedNodeInfos.ser";
+      LOGGER.info("writing " + seedNodeInfosFilePath);
+      try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(seedNodeInfosFilePath))) {
+        objectOutputStream.writeObject(seedNodeInfos);
+      }
+    } catch (CertificateException | NoSuchProviderException | IOException ex) {
       throw new TexaiException(ex);
     }
-
-
-
   }
 
   /**
@@ -67,7 +83,7 @@ public class SeedNodeInfosInitializer {
    *
    * @param args the command line arguments - unused
    */
-  public void main(final String[] args) {
+  public static void main(final String[] args) {
     final SeedNodeInfosInitializer seedNodeInfosInitializer = new SeedNodeInfosInitializer();
     seedNodeInfosInitializer.process();
   }
