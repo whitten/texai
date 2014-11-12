@@ -1,4 +1,4 @@
-package org.texai.ahcsSupport;
+package org.texai.ahcsSupport.seed;
 
 import java.io.Serializable;
 import java.net.InetAddress;
@@ -9,9 +9,9 @@ import org.texai.ahcsSupport.domainEntity.Role;
 import org.texai.util.StringUtils;
 
 /**
- * SeedNodesInfo.java
- *
- * Description:
+ * SeedNodeInfo.java
+
+ Description: Contains the location and credentials for a network seed node.
  *
  * Copyright (C) Nov 11, 2014, Stephen L. Reed, Texai.org.
  *
@@ -24,7 +24,7 @@ import org.texai.util.StringUtils;
  * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation,
  * Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-public class SeedNodesInfo implements Serializable {
+public class SeedNodeInfo implements Serializable {
 
   // the default serial version UID
 
@@ -45,7 +45,7 @@ public class SeedNodesInfo implements Serializable {
    * @param port the TCP port
    * @param x509Certificate the configuration role's certificate
    */
-  public SeedNodesInfo(
+  public SeedNodeInfo(
           final String qualifiedName,
           final InetAddress inetAddress,
           final int port,
@@ -119,7 +119,7 @@ public class SeedNodesInfo implements Serializable {
     if (getClass() != obj.getClass()) {
       return false;
     }
-    final SeedNodesInfo other = (SeedNodesInfo) obj;
+    final SeedNodeInfo other = (SeedNodeInfo) obj;
     if (!Objects.equals(this.qualifiedName, other.qualifiedName)) {
       return false;
     }

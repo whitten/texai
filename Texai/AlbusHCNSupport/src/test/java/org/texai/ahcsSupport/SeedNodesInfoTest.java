@@ -5,6 +5,7 @@
  */
 package org.texai.ahcsSupport;
 
+import org.texai.ahcsSupport.seed.SeedNodeInfo;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.security.InvalidAlgorithmParameterException;
@@ -37,7 +38,7 @@ public class SeedNodesInfoTest {
   // the logger
   private static final Logger LOGGER = Logger.getLogger(SeedNodesInfoTest.class);
   // the test instance
-  private static SeedNodesInfo instance = makeSeedNodesInfo();
+  private static SeedNodeInfo instance = makeSeedNodesInfo();
 
   public SeedNodesInfoTest() {
   }
@@ -59,7 +60,7 @@ public class SeedNodesInfoTest {
   }
 
   /**
-   * Test of getQualifiedName method, of class SeedNodesInfo.
+   * Test of getQualifiedName method, of class SeedNodeInfo.
    */
   @Test
   public void testGetQualifiedName() {
@@ -68,7 +69,7 @@ public class SeedNodesInfoTest {
   }
 
   /**
-   * Test of getInetAddress method, of class SeedNodesInfo.
+   * Test of getInetAddress method, of class SeedNodeInfo.
    */
   @Test
   public void testGetInetAddress() {
@@ -77,7 +78,7 @@ public class SeedNodesInfoTest {
   }
 
   /**
-   * Test of getPort method, of class SeedNodesInfo.
+   * Test of getPort method, of class SeedNodeInfo.
    */
   @Test
   public void testGetPort() {
@@ -86,7 +87,7 @@ public class SeedNodesInfoTest {
   }
 
   /**
-   * Test of getX509Certificate method, of class SeedNodesInfo.
+   * Test of getX509Certificate method, of class SeedNodeInfo.
    */
   @Test
   public void testGetX509Certificate() {
@@ -95,7 +96,7 @@ public class SeedNodesInfoTest {
   }
 
   /**
-   * Test of hashCode method, of class SeedNodesInfo.
+   * Test of hashCode method, of class SeedNodeInfo.
    */
   @Test
   public void testHashCode() {
@@ -104,7 +105,7 @@ public class SeedNodesInfoTest {
   }
 
   /**
-   * Test of equals method, of class SeedNodesInfo.
+   * Test of equals method, of class SeedNodeInfo.
    */
   @Test
   public void testEquals() {
@@ -114,7 +115,7 @@ public class SeedNodesInfoTest {
   }
 
   /**
-   * Test of toString method, of class SeedNodesInfo.
+   * Test of toString method, of class SeedNodeInfo.
    */
   @Test
   public void testToString() {
@@ -122,7 +123,7 @@ public class SeedNodesInfoTest {
     assertEquals("[Seed TestContainer localhost/127.0.0.1:5048]", instance.toString());
   }
 
-  private static SeedNodesInfo makeSeedNodesInfo() {
+  private static SeedNodeInfo makeSeedNodesInfo() {
     final String qualifiedName = "TestContainer.SingletonConfigurationAgent.SingletonConfigurationRole";
     final InetAddress inetAddress = InetAddress.getLoopbackAddress();
     final int port = NetworkUtils.TEXAI_PORT;
@@ -138,7 +139,7 @@ public class SeedNodesInfoTest {
       throw new TexaiException(ex);
     }
 
-    return new SeedNodesInfo(
+    return new SeedNodeInfo(
             qualifiedName,
             inetAddress,
             port,

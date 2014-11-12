@@ -11,12 +11,15 @@
  */
 package org.texai.skill.singletonConfiguration;
 
+import java.io.File;
+import java.util.Set;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.ahcsSupport.seed.SeedNodeInfo;
 
 /**
  *
@@ -27,6 +30,8 @@ public class SingletonConfiguration extends AbstractSkill {
 
   // the log4j logger
   private static final Logger LOGGER = Logger.getLogger(SingletonConfiguration.class);
+  // the locations and credentials for network seed nodes
+  private Set<SeedNodeInfo> seedNodesInfos;
 
   /** Constructs a new SingletonConfiguration instance. */
   public SingletonConfiguration() {
@@ -51,6 +56,7 @@ public class SingletonConfiguration extends AbstractSkill {
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
+        initialization(message);
         setSkillState(State.INITIALIZED);
         return true;
 
@@ -122,6 +128,29 @@ public class SingletonConfiguration extends AbstractSkill {
   protected Logger getLogger() {
     return LOGGER;
   }
+
+  /** Initializes the seed node information.
+   *
+   * @param message the received initialization task message
+   */
+  private void initialization(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+
+    LOGGER.info("initializing the seed node information ...");
+
+    // deserialize the set of SeedNodeInfo objects from the specified file
+    final String seedNodeInfosFilePath = "data/seedNodeInfos.ser";
+    final File seedNodeInfosFile = new File(seedNodeInfosFilePath);
+
+
+    
+    // the locations and credentials of the network seed nodes
+
+
+    //TODO
+  }
+
 
   /**
    * Perform this role's mission, which is to configure the roles in this container whose parents are nomadic singleton roles hosted
