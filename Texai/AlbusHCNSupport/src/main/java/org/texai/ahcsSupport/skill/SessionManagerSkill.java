@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License along with this program;
  * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-package org.texai.ahcsSupport;
+package org.texai.ahcsSupport.skill;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -28,7 +28,9 @@ import java.util.UUID;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.joda.time.Duration;
+import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
+import org.texai.ahcsSupport.Message;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 
@@ -55,14 +57,14 @@ public class SessionManagerSkill extends AbstractSkill {
   }
 
   /** Gets the logger.
-   * 
+   *
    * @return  the logger
    */
   @Override
   protected Logger getLogger() {
     return LOGGER;
   }
-  
+
   /** Returns the class name of this skill.
    *
    * @return the class name of this skill
@@ -110,7 +112,7 @@ public class SessionManagerSkill extends AbstractSkill {
         propagateOperationToChildRoles(operation);
         setSkillState(State.READY);
         return true;
-        
+
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
         return true;

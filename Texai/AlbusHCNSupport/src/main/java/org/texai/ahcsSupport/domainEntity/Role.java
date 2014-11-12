@@ -21,7 +21,7 @@
 package org.texai.ahcsSupport.domainEntity;
 
 import java.util.Objects;
-import org.texai.ahcsSupport.AbstractSkill;
+import org.texai.ahcsSupport.skill.AbstractSkill;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,12 +35,12 @@ import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
-import org.texai.ahcsSupport.AbstractSubSkill;
+import org.texai.ahcsSupport.skill.AbstractSubSkill;
 import org.texai.ahcsSupport.MessageDispatcher;
-import org.texai.ahcsSupport.ManagedSessionSkill;
+import org.texai.ahcsSupport.skill.ManagedSessionSkill;
 import org.texai.ahcsSupport.Message;
-import org.texai.ahcsSupport.BasicNodeRuntime;
-import org.texai.ahcsSupport.SessionManagerSkill;
+import org.texai.ahcsSupport.skill.BasicNodeRuntime;
+import org.texai.ahcsSupport.skill.SessionManagerSkill;
 import org.texai.kb.persistence.CascadePersistence;
 import org.texai.kb.persistence.RDFEntity;
 import org.texai.kb.persistence.RDFEntityManager;

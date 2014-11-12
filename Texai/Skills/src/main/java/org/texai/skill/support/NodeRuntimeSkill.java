@@ -25,8 +25,8 @@ package org.texai.skill.support;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
-import org.texai.ahcsSupport.AbstractSkill;
-import org.texai.ahcsSupport.BasicNodeRuntime;
+import org.texai.ahcsSupport.skill.AbstractSkill;
+import org.texai.ahcsSupport.skill.BasicNodeRuntime;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.Role;
 

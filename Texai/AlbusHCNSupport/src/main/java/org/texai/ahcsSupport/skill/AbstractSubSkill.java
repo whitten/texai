@@ -1,9 +1,9 @@
 /*
- * AbstractLibrary.java
+ * AbstractSubSkill.java
  *
- * Created on Jun 30, 2010, 12:41:59 PM
+ * Created on Jun 30, 2010, 11:17:19 AM
  *
- * Description: Provides an abstract library to support skills.
+ * Description: An abstract skill that provides sub-behavior for another skill.
  *
  * Copyright (C) Jun 30, 2010, Stephen L. Reed.
  *
@@ -18,39 +18,27 @@
  * You should have received a copy of the GNU General Public License along with this program;
  * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-package org.texai.ahcsSupport;
+package org.texai.ahcsSupport.skill;
 
 import net.jcip.annotations.NotThreadSafe;
 
-/** Provides an abstract library to support skills.
+/** An abstract skill that provides sub-behavior for another skill. Generally, subskills may be shared among skills and
+ * threads and thus should either not preserve state, or preserve state in a dictionary keyed by a message parameter, e.g.
+ * inReplyTo.
  *
  * @author reed
  */
 @NotThreadSafe
-public abstract class AbstractLibrary {
+public abstract class AbstractSubSkill extends AbstractSkill {
 
-  // the containing skill
-  private final AbstractSkill skill;
-
-  /** Constructs a new AbstractLibrary instance.
-   *
-   * @param skill the containing skill
-   */
-  public AbstractLibrary(final AbstractSkill skill) {
-    this.skill = skill;
+  /** Constructs a new AbstractSubSkill instance. */
+  public AbstractSubSkill() {
   }
 
-  /** initializes this library */
-  public abstract void initialize();
+  /** Initializes this skill */
+  public abstract void initialization();
 
-  /** shuts down this library and releases its resources */
-  public abstract void shutdown();
+  /** finalizes this skill and releases its resources. */
+  public abstract void finalization();
 
-  /** Gets the containing skill.
-   *
-   * @return the containing skill
-   */
-  public AbstractSkill getSkill() {
-    return skill;
-  }
 }

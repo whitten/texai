@@ -32,7 +32,7 @@ import javax.persistence.Id;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.openrdf.model.URI;
-import org.texai.ahcsSupport.BasicNodeRuntime;
+import org.texai.ahcsSupport.skill.BasicNodeRuntime;
 import org.texai.kb.persistence.CascadePersistence;
 import org.texai.kb.persistence.RDFEntity;
 import org.texai.kb.persistence.RDFEntityManager;

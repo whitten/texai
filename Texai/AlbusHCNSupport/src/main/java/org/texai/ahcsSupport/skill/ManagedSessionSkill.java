@@ -19,7 +19,7 @@
  * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-package org.texai.ahcsSupport;
+package org.texai.ahcsSupport.skill;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Target;

@@ -19,7 +19,7 @@
  * You should have received a copy of the GNU General Public License along with this program;
  * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-package org.texai.ahcsSupport;
+package org.texai.ahcsSupport.skill;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,6 +30,9 @@ import java.util.Timer;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.texai.ahcsSupport.Message;
+import org.texai.ahcsSupport.MessageDispatcher;
+import org.texai.ahcsSupport.NodeAccess;
 import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.ahcsSupport.domainEntity.Role;
 import org.texai.kb.persistence.RDFEntityManager;
@@ -231,7 +234,7 @@ public class BasicNodeRuntime implements MessageDispatcher {
   /**
    * Returns the NodeRuntimeSkill instance which is used to send and receive
    * messages on behalf of this node runtime.
-   * 
+   *
    * @return the NodeRuntimeSkill instance
    */
   public AbstractSkill getNodeRuntimeSkill() {

@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License along with this program;
  * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-package org.texai.ahcsSupport;
+package org.texai.ahcsSupport.skill;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,7 +31,9 @@ import java.util.TimerTask;
 import java.util.UUID;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
+import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
+import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.Role;
 import org.texai.kb.persistence.RDFEntityManager;
 import org.texai.util.StringUtils;

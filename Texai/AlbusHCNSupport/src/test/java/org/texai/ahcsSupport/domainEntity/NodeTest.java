@@ -32,7 +32,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.texai.ahcsSupport.BasicNodeRuntime;
+import org.texai.ahcsSupport.skill.BasicNodeRuntime;
 import org.texai.kb.CacheInitializer;
 import org.texai.kb.journal.JournalWriter;
 import org.texai.kb.persistence.DistributedRepositoryManager;

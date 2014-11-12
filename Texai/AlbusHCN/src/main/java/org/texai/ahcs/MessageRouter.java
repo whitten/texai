@@ -25,7 +25,6 @@ package org.texai.ahcs;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 import net.sbbi.upnp.impls.InternetGatewayDevice;

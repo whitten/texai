@@ -32,7 +32,7 @@ import java.io.IOException;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
-import org.texai.ahcsSupport.AbstractSkill;
+import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;

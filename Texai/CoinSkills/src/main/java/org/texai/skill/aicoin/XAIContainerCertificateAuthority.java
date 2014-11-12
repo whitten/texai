@@ -25,7 +25,7 @@ package org.texai.skill.aicoin;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
-import org.texai.ahcsSupport.AbstractSkill;
+import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 
 /** Provides X.509 Certificate Authority behavior, in which a certificate request from a role, node runtime,

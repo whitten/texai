@@ -20,6 +20,7 @@
  */
 package org.texai.ahcsSupport;
 
+import org.texai.ahcsSupport.skill.AbstractSkill;
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.InvalidKeyException;

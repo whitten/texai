@@ -8,7 +8,7 @@
  * Copyright (C) Feb 17, 2012, Stephen L. Reed, Texai.org.
  *
  */
-package org.texai.ahcsSupport;
+package org.texai.ahcsSupport.skill;
 
 import net.jcip.annotations.NotThreadSafe;
 
