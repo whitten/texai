@@ -41,14 +41,14 @@ public final class ContainerOperation extends AbstractSkill {
   }
 
   /** Gets the logger.
-   * 
+   *
    * @return  the logger
    */
   @Override
   protected Logger getLogger() {
     return LOGGER;
   }
-  
+
   /**
    * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries
    * are single threaded with regard to the conversation.
@@ -70,11 +70,6 @@ public final class ContainerOperation extends AbstractSkill {
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
-        setSkillState(AHCSConstants.State.INITIALIZED);
-        return true;
-
-      case AHCSConstants.AHCS_READY_TASK:
-        assert this.getSkillState().equals(AHCSConstants.State.INITIALIZED) : "prior state must be initialized";
         setSkillState(AHCSConstants.State.READY);
         return true;
 
@@ -122,13 +117,12 @@ public final class ContainerOperation extends AbstractSkill {
     return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.AHCS_READY_TASK,
       AHCSConstants.PERFORM_MISSION_TASK
     };
   }
 
   /** Perform this role's mission, which is to manage the containers.
-   * 
+   *
    * @param message the received perform mission task message
    */
   private void performMission(final Message message) {
@@ -138,5 +132,5 @@ public final class ContainerOperation extends AbstractSkill {
 
     //TODO
   }
-  
+
 }

@@ -37,7 +37,6 @@ public final class AHCSConstants {
   public enum State {
 
     UNINITIALIZED,
-    INITIALIZED,
     READY,
     SHUTDOWN
   }
@@ -97,9 +96,6 @@ public final class AHCSConstants {
   //
   // the quiesce_Task operation
   public static final String AHCS_QUIESCE_TASK = "AHCS quiesce_Task";
-  //
-  // the ready_Task operation
-  public static final String AHCS_READY_TASK = "AHCS ready_Task";
   //
   // the restart_Task operation
   public static final String AHCS_RESTART_TASK = "AHCS restart_Task";
@@ -276,6 +272,9 @@ public final class AHCSConstants {
   // the returnFromConverseYesNoQueryWithUser_Info operation
   public static final String RETURN_FROM_CONVERSE_YES_NO_QUERY_WITH_USER_INFO = "returnFromConverseYesNoQueryWithUser_Info";
   public static final String RETURN_FROM_CONVERSE_YES_NO_QUERY_WITH_USER_INFO_RESPONSE = "returnFromConverseYesNoQueryWithUser_Info_response";
+  //
+  // the seedConnectionRequest_Info operation
+  public static final String SEED_CONNECTION_REQUEST_INFO = "seedConnectionRequest_Info";
 
   //
   // shared message parameters

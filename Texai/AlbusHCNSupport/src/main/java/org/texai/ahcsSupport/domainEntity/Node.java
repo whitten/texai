@@ -287,8 +287,6 @@ public class Node implements CascadePersistence, Comparable<Node> {
     assert StringUtils.isNonEmptyString(qualifiedName) : "qualifiedName must be a non empty string";
 
     final String[] names = qualifiedName.split("\\.");
-    assert names.length == 3;
-
     return names[0];
   }
 

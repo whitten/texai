@@ -27,10 +27,12 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import net.sbbi.upnp.impls.InternetGatewayDevice;
 import net.sbbi.upnp.messages.ActionResponse;
 import net.sbbi.upnp.messages.UPNPResponseException;
 import org.apache.log4j.Logger;
+import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -41,6 +43,10 @@ import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.Role;
 import org.texai.network.netty.ConnectionUtils;
 import org.texai.network.netty.handler.AbstractAlbusHCSMessageHandler;
+import org.texai.network.netty.handler.AbstractAlbusHCSMessageHandlerFactory;
+import org.texai.network.netty.handler.AbstractBitTorrentHandlerFactory;
+import org.texai.network.netty.handler.AbstractHTTPRequestHandlerFactory;
+import org.texai.network.netty.handler.HTTPRequestHandlerFactory;
 import org.texai.util.NetworkUtils;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
@@ -81,7 +87,9 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
    */
   private String externalHostName;
   // the local container name
-  final String localContainerName;
+  private final String localContainerName;
+  // the server bootstrap that listens for incomming messages
+  private ServerBootstrap serverBootstrap;
 
   /**
    * Constructs a new AbstractMessageRouter instance.
@@ -94,6 +102,28 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
 
     this.nodeRuntime = nodeRuntime;
     localContainerName = nodeRuntime.getContainerName();
+
+  }
+
+  /** Listens for incomming messages on the given port.
+   *
+   * @param port the given TCP port
+   */
+  public void listenForIncommingConnections(final int port) {
+
+    final X509SecurityInfo x509SecurityInfo = null;
+    final AbstractAlbusHCSMessageHandlerFactory albusHCSMessageHandlerFactory = new AlbusHCSMessageHandlerFactory(this);
+    final AbstractBitTorrentHandlerFactory bitTorrentHandlerFactory = null;
+    final AbstractHTTPRequestHandlerFactory httpRequestHandlerFactory = null;
+
+    serverBootstrap = ConnectionUtils.createPortUnificationServer(
+            port,
+            x509SecurityInfo,
+            albusHCSMessageHandlerFactory,
+            bitTorrentHandlerFactory,
+            httpRequestHandlerFactory,
+            nodeRuntime.getExecutor(),  // bossExecutor,
+            nodeRuntime.getExecutor()); // workerExecutor
   }
 
   /**
@@ -153,9 +183,14 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
    */
   public void finalization() {
     if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("closing the listening socket");
+    }
+    ConnectionUtils.closePortUnificationServer(serverBootstrap);
+    if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("closing channels ...");
     }
     containerChannelDictionary.values().stream().forEach(channel -> {
+      LOGGER.debug("  " + channel.getRemoteAddress());
       channel.close();
     });
   }
@@ -363,6 +398,9 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
     Channel channel;
     synchronized (containerChannelDictionary) {
       channel = containerChannelDictionary.get(message.getRecipientContainerName());
+    }
+    if (channel == null) {
+      throw new TexaiException("no communcations channel to recipient " + message);
     }
 
     if (!channel.isBound()) {

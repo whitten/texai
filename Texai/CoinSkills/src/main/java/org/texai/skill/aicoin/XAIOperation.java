@@ -91,11 +91,6 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
-        setSkillState(AHCSConstants.State.INITIALIZED);
-        return true;
-
-      case AHCSConstants.AHCS_READY_TASK:
-        assert getSkillState().equals(AHCSConstants.State.INITIALIZED) : "prior state must be initialized";
         setSkillState(AHCSConstants.State.READY);
         return true;
 
@@ -145,7 +140,6 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
     return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.AHCS_READY_TASK,
       AHCSConstants.PERFORM_MISSION_TASK,
       AHCSConstants.TASK_ACCOMPLISHED_INFO};
   }

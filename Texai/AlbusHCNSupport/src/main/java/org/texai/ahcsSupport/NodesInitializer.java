@@ -109,6 +109,8 @@ public final class NodesInitializer {
   private final String configurationCertificateFilePath;
   // the X.509 certificate for the SingletonConfiguration role
   private X509Certificate singletonConfigurationCertificate;
+  // the key store that contains the X.509 certificates
+  private KeyStore keyStore;
 
   /**
    * Constructs a new NodeInitializer instance.
@@ -200,7 +202,7 @@ public final class NodesInitializer {
     final BufferedInputStream bufferedInputStream;
     try {
       final File nodesFile = new File(nodesPath);
-      LOGGER.info("parsing the nodes file: " + nodesFile.toString());
+      LOGGER.debug("parsing the nodes file: " + nodesFile.toString());
       bufferedInputStream = new BufferedInputStream(new FileInputStream(nodesFile));
     } catch (final FileNotFoundException ex) {
       throw new TexaiException(ex);
@@ -235,7 +237,7 @@ public final class NodesInitializer {
     try {
       final RepositoryConnection repositoryConnection
               = DistributedRepositoryManager.getInstance().getRepositoryConnectionForRepositoryName("Nodes");
-      LOGGER.info("repository size: " + repositoryConnection.size());
+      LOGGER.debug("repository size: " + repositoryConnection.size());
     } catch (final RepositoryException ex) {
       throw new TexaiException(ex);
     }
@@ -245,10 +247,10 @@ public final class NodesInitializer {
    * Populates node roles from prototype nodes.
    */
   private void populateNodeRolesFromPrototytpeNodes() {
-    LOGGER.info("populating roles from prototypes ...");
+    LOGGER.debug("populating roles from prototypes ...");
     nodeFieldsHolderDictionary.values().stream().sorted().forEach((nodeFieldsHolder1) -> {
-      LOGGER.info("");
-      LOGGER.info("  targetNodeFieldsHolder:    " + nodeFieldsHolder1);
+      LOGGER.debug("");
+      LOGGER.debug("  targetNodeFieldsHolder:    " + nodeFieldsHolder1);
       nodeFieldsHolder1.prototypeNodeNames.stream().forEach(prototypeNodeName -> {
         final NodeFieldsHolder prototypeNodeFieldsHolder1 = nodeFieldsHolderDictionary.get(prototypeNodeName);
         if (prototypeNodeFieldsHolder1 == null) {
@@ -275,22 +277,22 @@ public final class NodesInitializer {
     assert targetNodeFieldsHolder != null : "targetNodeFieldsHolder must not be null";
     assert prototypeNodeFieldsHolder != null : "prototypeNodeFieldsHolder must not be null";
 
-    LOGGER.info("");
-    LOGGER.info("    prototypeNodeFieldsHolder: " + prototypeNodeFieldsHolder);
+    LOGGER.debug("");
+    LOGGER.debug("    prototypeNodeFieldsHolder: " + prototypeNodeFieldsHolder);
     prototypeNodeFieldsHolder.roleFieldsHolders.stream().forEach(new Consumer<RoleFieldsHolder>() {
 
       @Override
       public void accept(final RoleFieldsHolder roleFieldsHolder1) {
         final RoleFieldsHolder clonedRoleFieldsHolder = new RoleFieldsHolder();
-        LOGGER.info("");
-        LOGGER.info("    role:        " + roleFieldsHolder1.qualifiedName);
+        LOGGER.debug("");
+        LOGGER.debug("    role:        " + roleFieldsHolder1.qualifiedName);
         final String[] nameParts = roleFieldsHolder1.qualifiedName.split("\\.");
         if (nameParts.length != 3) {
           throw new TexaiException("malformed qualified role name: " + roleFieldsHolder1.qualifiedName);
         }
         // rename the role qualified name to prefix it with the name of the target node
         clonedRoleFieldsHolder.qualifiedName = targetNodeFieldsHolder.name + "." + nameParts[2];
-        LOGGER.info("    cloned role: " + clonedRoleFieldsHolder.qualifiedName);
+        LOGGER.debug("    cloned role: " + clonedRoleFieldsHolder.qualifiedName);
         clonedRoleFieldsHolder.description = roleFieldsHolder1.description;
         clonedRoleFieldsHolder.parentQualifiedName = roleFieldsHolder1.parentQualifiedName;
         clonedRoleFieldsHolder.skillClasses.addAll(roleFieldsHolder1.skillClasses);
@@ -323,15 +325,15 @@ public final class NodesInitializer {
     });
     nodeNamesToRemove.stream().sorted().forEach(key -> {
       final NodeFieldsHolder nodeFieldsHolder1 = nodeFieldsHolderDictionary.get(key);
-      LOGGER.info("removing abstract agent: " + nodeFieldsHolder1);
+      LOGGER.debug("removing abstract agent: " + nodeFieldsHolder1);
       nodeFieldsHolderDictionary.remove(key);
-      LOGGER.info("removing abstract agent's roles...");
+      LOGGER.debug("removing abstract agent's roles...");
       final Set<String> roleNamesToRemove = new HashSet<>();
       nodeFieldsHolder1.roleFieldsHolders.stream().forEach(roleFieldsHolder1 -> {
         roleNamesToRemove.add(roleFieldsHolder1.qualifiedName);
       });
       roleNamesToRemove.stream().forEach(roleName -> {
-        LOGGER.info("  removed " + roleFieldsHolderDictionary.get(roleName));
+        LOGGER.debug("  removed " + roleFieldsHolderDictionary.get(roleName));
         roleFieldsHolderDictionary.remove(roleName);
       });
     });
@@ -341,7 +343,7 @@ public final class NodesInitializer {
    * Verifies that the specified parent role exists for each declaring role.
    */
   private void verifyParentRoles() {
-    LOGGER.info("verifying parent roles ...");
+    LOGGER.debug("verifying parent roles ...");
     roleFieldsHolderDictionary.values().stream().sorted().forEach(roleFieldsHolder1 -> {
       final String parentQualifiedName = roleFieldsHolder1.parentQualifiedName;
       if (StringUtils.isNonEmptyString(parentQualifiedName)) {
@@ -350,10 +352,10 @@ public final class NodesInitializer {
           throw new TexaiException("cannot find parent role: " + parentQualifiedName + "\n for role "
                   + roleFieldsHolder1.qualifiedName);
         }
-        LOGGER.info("  " + roleFieldsHolder1.qualifiedName + " has parent " + parentQualifiedName);
+        LOGGER.debug("  " + roleFieldsHolder1.qualifiedName + " has parent " + parentQualifiedName);
         parentRoleFieldsHolder.childQualifiedNames.add(roleFieldsHolder1.qualifiedName);
       } else {
-        LOGGER.info("  no parent role for " + roleFieldsHolder1.qualifiedName);
+        LOGGER.debug("  no parent role for " + roleFieldsHolder1.qualifiedName);
       }
     });
   }
@@ -362,7 +364,7 @@ public final class NodesInitializer {
    * Verifies that the specified child role exists for each declaring parent role.
    */
   private void verifyChildRoles() {
-    LOGGER.info("verifying child roles ...");
+    LOGGER.debug("verifying child roles ...");
     roleFieldsHolderDictionary.values().stream().sorted().forEach(roleFieldsHolder1 -> {
       roleFieldsHolder1.childQualifiedNames.stream().forEach(childQualifiedName -> {
         final RoleFieldsHolder childRoleFieldsHolder = roleFieldsHolderDictionary.get(childQualifiedName);
@@ -374,7 +376,7 @@ public final class NodesInitializer {
           throw new TexaiException(" child role mismatch, parent: " + roleFieldsHolder1.qualifiedName
                   + ", child: " + childQualifiedName);
         }
-        LOGGER.info("  " + roleFieldsHolder1.qualifiedName + " has child " + childQualifiedName);
+        LOGGER.debug("  " + roleFieldsHolder1.qualifiedName + " has child " + childQualifiedName);
 
       });
     });
@@ -384,14 +386,14 @@ public final class NodesInitializer {
    * Displays the nodes and their roles.
    */
   private void displayNodes() {
-    LOGGER.info("");
-    LOGGER.info("nodes and their roles ...");
+    LOGGER.debug("");
+    LOGGER.debug("nodes and their roles ...");
     nodeFieldsHolderDictionary.values().stream().sorted().forEach(nodeFieldsHolder1 -> {
-      LOGGER.info("");
-      LOGGER.info("  " + nodeFieldsHolder1);
+      LOGGER.debug("");
+      LOGGER.debug("  " + nodeFieldsHolder1);
       assert !nodeFieldsHolder1.roleFieldsHolders.isEmpty();
       nodeFieldsHolder1.roleFieldsHolders.stream().sorted().forEach(roleFieldsHolder1 -> {
-        LOGGER.info("    " + roleFieldsHolder1);
+        LOGGER.debug("    " + roleFieldsHolder1);
       });
     });
   }
@@ -402,9 +404,8 @@ public final class NodesInitializer {
   private void generateX509CertificatesForRoles() {
 
     //TODO create a write-only keystore
-    final KeyStore keyStore;
     try {
-      LOGGER.info("getting the keystore " + keyStoreFilePath);
+      LOGGER.debug("getting the keystore " + keyStoreFilePath);
       keyStore = X509Utils.findOrCreateUberKeyStore(keyStoreFilePath, keyStorePassword);
       try (final FileOutputStream keyStoreOutputStream = new FileOutputStream(new File(keyStoreFilePath))) {
         keyStore.store(keyStoreOutputStream, keyStorePassword);
@@ -414,16 +415,16 @@ public final class NodesInitializer {
       throw new TexaiException(ex);
     }
 
-    LOGGER.info("getting self-signed X.509 certificates for roles ...");
+    LOGGER.debug("getting self-signed X.509 certificates for roles ...");
     roleFieldsHolderDictionary.values().stream().sorted().forEach(roleFieldsHolder1 -> {
-      LOGGER.info("  " + roleFieldsHolder1.qualifiedName);
+      LOGGER.debug("  " + roleFieldsHolder1.qualifiedName);
       if (roleFieldsHolder1.areRemoteCommunicationsPermitted) {
 
         boolean isFound = false;
         if (X509Utils.keyStoreContains(keyStoreFilePath,
                 keyStorePassword,
                 roleFieldsHolder1.qualifiedName)) {  // alias
-          LOGGER.info("    getting the existing certificate");
+          LOGGER.debug("    getting the existing certificate");
           roleFieldsHolder1.x509SecurityInfo
                   = X509Utils.getX509SecurityInfo(
                           keyStore,
@@ -435,7 +436,7 @@ public final class NodesInitializer {
         }
 
         if (!isFound) {
-          LOGGER.info("    generating a new certificate");
+          LOGGER.debug("    generating a new certificate");
           final KeyPair keyPair;
           try {
             keyPair = X509Utils.generateRSAKeyPair3072();
@@ -454,7 +455,7 @@ public final class NodesInitializer {
               keyStorePassword,
               roleFieldsHolder1.qualifiedName)) {  // alias
         try {
-          LOGGER.info("    deleting unwanted certificate from the keystore: " + roleFieldsHolder1.qualifiedName);
+          LOGGER.debug("    deleting unwanted certificate from the keystore: " + roleFieldsHolder1.qualifiedName);
           keyStore.deleteEntry(roleFieldsHolder1.qualifiedName); // alias
         } catch (KeyStoreException ex) {
           throw new TexaiException(ex);
@@ -467,17 +468,17 @@ public final class NodesInitializer {
     } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException ex) {
       throw new TexaiException(ex);
     }
-    LOGGER.info("");
-    LOGGER.info("confirming that roles' certificates can be retrieved from storage ...");
+    LOGGER.debug("");
+    LOGGER.debug("confirming that roles' certificates can be retrieved from storage ...");
     roleFieldsHolderDictionary.values().stream().sorted().forEach(roleFieldsHolder1 -> {
-      LOGGER.info("  " + roleFieldsHolder1.qualifiedName);
+      LOGGER.debug("  " + roleFieldsHolder1.qualifiedName);
       if (roleFieldsHolder1.areRemoteCommunicationsPermitted) {
         if (X509Utils.keyStoreContains(keyStoreFilePath,
                 keyStorePassword,
                 roleFieldsHolder1.qualifiedName)) {  // alias
-          LOGGER.info("    certificate OK");
+          LOGGER.debug("    certificate OK");
         } else {
-          LOGGER.info("    certificate not stored for " + roleFieldsHolder1.qualifiedName);
+          LOGGER.debug("    certificate not stored for " + roleFieldsHolder1.qualifiedName);
         }
       }
     });
@@ -510,20 +511,20 @@ public final class NodesInitializer {
    * Persists the nodes and their roles.
    */
   private void persistNodes() {
-    LOGGER.info("");
-    LOGGER.info("persisting nodes and their roles ...");
+    LOGGER.debug("");
+    LOGGER.debug("persisting nodes and their roles ...");
     final RepositoryConnection repositoryConnection = nodeAccess.getRDFEntityManager().getConnectionToNamedRepository("Nodes");
     try {
       repositoryConnection.begin();
       nodeFieldsHolderDictionary.values().stream().sorted().forEach(nodeFieldsHolder1 -> {
-        LOGGER.info("");
-        LOGGER.info("  " + nodeFieldsHolder1);
+        LOGGER.debug("");
+        LOGGER.debug("  " + nodeFieldsHolder1);
         if (nodeFieldsHolder1.isAbstract) {
-          LOGGER.info("      abstract and not persisted");
+          LOGGER.debug("      abstract and not persisted");
         } else {
           final Set<Role> roles = new ArraySet<>();
           nodeFieldsHolder1.roleFieldsHolders.stream().sorted().forEach(roleFieldsHolder1 -> {
-            LOGGER.info("    " + roleFieldsHolder1);
+            LOGGER.debug("    " + roleFieldsHolder1);
             final Role role = new Role(
                     roleFieldsHolder1.qualifiedName,
                     roleFieldsHolder1.description,
@@ -535,7 +536,7 @@ public final class NodesInitializer {
             nodeAccess.persistRole(role);
             roles.add(role);
             role.getChildQualifiedNames().stream().forEach(childQualifiedName -> {
-              LOGGER.info("      child: " + childQualifiedName);
+              LOGGER.debug("      child: " + childQualifiedName);
             });
           });
           assert !roles.isEmpty();
@@ -561,20 +562,28 @@ public final class NodesInitializer {
    * Loads the persisted nodes and injects the runtime dependencies.
    */
   private void loadNodesAndInjectDependencies() {
-    LOGGER.info("");
-    LOGGER.info("loading the persisted nodes and injecting dependencies ...");
+    LOGGER.debug("");
+    LOGGER.debug("loading the persisted nodes and injecting dependencies ...");
     nodeAccess.getNodes().stream().sorted().forEach(node -> {
-      LOGGER.info("");
-      LOGGER.info("  " + node);
+      LOGGER.debug("");
+      LOGGER.debug("  " + node);
       node.setNodeRuntime(nodeRuntime);
       assert !node.getRoles().isEmpty();
       node.getRoles().stream().sorted().forEach(role -> {
-        LOGGER.info("    " + role);
+        LOGGER.debug("    " + role);
         role.instantiate();
         final Node node1 = role.getNode();
         assert node.equals(node1);
         nodeRuntime.registerRole(role);
-        role.initialize(nodeRuntime);
+         X509SecurityInfo x509SecurityInfo = null;
+         if (role.areRemoteCommunicationsPermitted()) {
+           x509SecurityInfo = X509Utils.getX509SecurityInfo(
+                   keyStore,
+                   keyStorePassword, // keyStorePassword
+                   role.getQualifiedName()); // alias
+           assert x509SecurityInfo!= null;
+         }
+         role.initialize(nodeRuntime, x509SecurityInfo);
       });
     });
   }
@@ -583,10 +592,10 @@ public final class NodesInitializer {
    * Displays the network singleton nodes.
    */
   private void displayNetworkSingletonNodes() {
-    LOGGER.info("");
-    LOGGER.info("the network singleton nodes (nomadic agents) ...");
+    LOGGER.debug("");
+    LOGGER.debug("the network singleton nodes (nomadic agents) ...");
     nodeAccess.getNodes().stream().filter(Node.isNetworkSingletonNode()).sorted().forEach(node -> {
-      LOGGER.info("  " + node);
+      LOGGER.debug("  " + node);
     });
   }
 
@@ -614,8 +623,8 @@ public final class NodesInitializer {
     final String keyDataPath = graphPath + "/" + graphName + "-key.txt";
     BufferedWriter graphBufferedWriter = null;
     BufferedWriter keyBufferedWriter = null;
-    LOGGER.info("");
-    LOGGER.info("graphDataPath: " + graphDataPath);
+    LOGGER.debug("");
+    LOGGER.debug("graphDataPath: " + graphDataPath);
     try {
       graphBufferedWriter = new BufferedWriter(new FileWriter(graphDataPath));
       keyBufferedWriter = new BufferedWriter(new FileWriter(keyDataPath));
@@ -787,7 +796,7 @@ public final class NodesInitializer {
     for (int i = 0; i < keyStorePassword.length; i++) {
       keyStorePassword[i] = 0;
     }
-    LOGGER.info("NodesInitializer completed");
+    LOGGER.debug("NodesInitializer completed");
   }
 
   /**

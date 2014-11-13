@@ -123,17 +123,10 @@ public final class TopmostFriendship extends AbstractSkill {
     // initialize the child roles
     LOGGER.info("initializing child roles");
     propagateOperationToChildRoles(message.getOperation());
-    setSkillState(State.INITIALIZED);
+    setSkillState(State.READY);
 
     //TODO wait for child roles to be initialized
-    
-    // ready the child roles
-    LOGGER.info("readying child roles");
-    propagateOperationToChildRoles(AHCSConstants.AHCS_READY_TASK); // operation
-    setSkillState(State.READY);
-    
-    //TODO wait for child roles to be ready
-    
+
     try {
       Thread.sleep(2000);
     } catch (InterruptedException ex) {
@@ -142,13 +135,13 @@ public final class TopmostFriendship extends AbstractSkill {
   }
 
   /** Perform this role's mission, which is to provide topmost perception and friendship behavior.
-   * 
+   *
    * @param message the received perform mission task message
    */
   private void performMission() {
     assert getSkillState().equals(State.READY) : "state must be ready";
 
-    LOGGER.info("performing the mission");    
+    LOGGER.info("performing the mission");
     // send a performMission task message to the NetworkOperationAgent
     final Message performMissionMessage = new Message(
           getRole().getQualifiedName(), // senderQualifiedName
@@ -157,17 +150,17 @@ public final class TopmostFriendship extends AbstractSkill {
           NetworkOperation.class.getName(), // recipientService
           AHCSConstants.PERFORM_MISSION_TASK); // operation
     sendMessage(performMissionMessage);
-    
+
     //TODO same for the remaining child agent roles
   }
-  
+
   /** Gets the logger.
-   * 
+   *
    * @return  the logger
    */
   @Override
   protected Logger getLogger() {
     return LOGGER;
   }
-  
+
 }

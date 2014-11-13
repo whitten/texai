@@ -48,14 +48,14 @@ public final class XAIMint extends AbstractSkill {
   }
 
   /** Gets the logger.
-   * 
+   *
    * @return  the logger
    */
   @Override
   protected Logger getLogger() {
     return LOGGER;
   }
-  
+
   /**
    * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
    * with regard to the conversation.
@@ -77,11 +77,6 @@ public final class XAIMint extends AbstractSkill {
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
-        setSkillState(AHCSConstants.State.INITIALIZED);
-        return true;
-
-      case AHCSConstants.AHCS_READY_TASK:
-        assert this.getSkillState().equals(AHCSConstants.State.INITIALIZED) : "prior state must be initialized";
         setSkillState(AHCSConstants.State.READY);
         return true;
 
@@ -89,7 +84,7 @@ public final class XAIMint extends AbstractSkill {
         assert this.getSkillState().equals(AHCSConstants.State.READY) : "prior state must be ready";
         mintNewBlocks();
         return true;
-        
+
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
         return true;
@@ -126,7 +121,6 @@ public final class XAIMint extends AbstractSkill {
     return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.AHCS_READY_TASK,
       AHCSConstants.MINT_NEW_BLOCKS_TASK
     };
   }

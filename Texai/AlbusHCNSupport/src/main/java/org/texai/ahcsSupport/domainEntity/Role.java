@@ -162,13 +162,18 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
    * Initializes a role object retrieved from the quad store.
    *
    * @param nodeRuntime the node runtime
+   * @param x509SecurityInfo the cached X.509 certificate information used to authenticate, sign and
+   * encrypt remote communications, or null if this role performs only communications local to the container.
    */
-  public void initialize(final BasicNodeRuntime nodeRuntime) {
+  public void initialize(
+          final BasicNodeRuntime nodeRuntime,
+          final X509SecurityInfo x509SecurityInfo) {
     //Preconditions
     assert nodeRuntime != null : "nodeRuntime must not be null";
     assert node != null : "node must not be null";
 
     this.nodeRuntime = nodeRuntime;
+    this.x509SecurityInfo = x509SecurityInfo;
     installSkills();
   }
 
@@ -498,6 +503,7 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
 
     if (areRemoteCommunicationsPermitted && message.isBetweenContainers()) {
       // sign messages sent between containers
+      assert x509SecurityInfo != null;
       message.sign(x509SecurityInfo.getPrivateKey());
     }
 

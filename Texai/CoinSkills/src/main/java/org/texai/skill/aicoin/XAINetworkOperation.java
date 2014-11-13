@@ -47,14 +47,14 @@ public final class XAINetworkOperation extends AbstractSkill {
   }
 
   /** Gets the logger.
-   * 
+   *
    * @return  the logger
    */
   @Override
   protected Logger getLogger() {
     return LOGGER;
   }
-  
+
   /**
    * Receives and attempts to process the given message. The skill is thread
    * safe, given that any contained libraries are single threaded with regard to
@@ -78,12 +78,6 @@ public final class XAINetworkOperation extends AbstractSkill {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
         propagateOperationToChildRoles(operation);
-        setSkillState(AHCSConstants.State.INITIALIZED);
-        return true;
-
-      case AHCSConstants.AHCS_READY_TASK:
-        assert this.getSkillState().equals(AHCSConstants.State.INITIALIZED) : "prior state must be initialized";
-        propagateOperationToChildRoles(operation);
         setSkillState(AHCSConstants.State.READY);
         return true;
 
@@ -91,7 +85,7 @@ public final class XAINetworkOperation extends AbstractSkill {
         performMission(message);
         return true;
 
-        
+
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
         return true;
@@ -130,13 +124,12 @@ public final class XAINetworkOperation extends AbstractSkill {
     return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.AHCS_READY_TASK,
       AHCSConstants.PERFORM_MISSION_TASK
     };
   }
 
   /** Perform this role's mission, which is to manage the containers.
-   * 
+   *
    * @param message the received perform mission task message
    */
   private void performMission(final Message message) {
@@ -144,7 +137,7 @@ public final class XAINetworkOperation extends AbstractSkill {
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
-    LOGGER.info("performing the mission");    
+    LOGGER.info("performing the mission");
     getRole().getChildQualifiedNamesForAgent("XAIOperationAgent").stream().forEach(operationAgent -> {
       final Message performMissionMessage = new Message(
               getRole().getQualifiedName(), // senderQualifiedName

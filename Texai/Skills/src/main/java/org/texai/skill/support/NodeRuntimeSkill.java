@@ -96,13 +96,9 @@ public class NodeRuntimeSkill extends AbstractSkill {
 
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
-        setSkillState(State.INITIALIZED);
-        return true;
-
-      case AHCSConstants.AHCS_READY_TASK:
-        assert getSkillState().equals(State.INITIALIZED) : "prior state must be initialized";
         setSkillState(State.READY);
         return true;
+
     }
     sendMessage(notUnderstoodMessage(message));
     return true;
@@ -133,6 +129,7 @@ public class NodeRuntimeSkill extends AbstractSkill {
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
+      AHCSConstants.AHCS_INITIALIZE_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,};
   }
 

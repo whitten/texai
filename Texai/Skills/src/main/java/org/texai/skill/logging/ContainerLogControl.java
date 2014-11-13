@@ -68,10 +68,6 @@ public class ContainerLogControl extends AbstractSkill {
         initialization(message);
         return true;
 
-      case AHCSConstants.AHCS_READY_TASK:
-        ready(message);
-        return true;
-
       case AHCSConstants.SET_LOGGING_LEVEL:
         setLoggingLevel((String) message.get(AHCSConstants.MSG_PARM_CLASS_NAME), // className
                 (String) message.get(AHCSConstants.MSG_PARM_LOGGING_LEVEL)); // loggingLevel
@@ -160,7 +156,6 @@ public class ContainerLogControl extends AbstractSkill {
     return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.AHCS_READY_TASK,
       AHCSConstants.LOG_OPERATION_TASK,
       AHCSConstants.UNLOG_OPERATION_TASK,};
   }
@@ -172,16 +167,6 @@ public class ContainerLogControl extends AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
     assert this.getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
-
-    setSkillState(State.INITIALIZED);
-  }
-
-  // Performs the ready operation.
-  // @param message the received ready message
-  private void ready(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-    assert this.getSkillState().equals(State.INITIALIZED) : "prior state must be initialized";
 
     setSkillState(State.READY);
   }

@@ -61,11 +61,13 @@ public class SeedNodeInfosInitializer {
       }
       X509Certificate x509Certificate = X509Utils.readX509Certificate(new FileInputStream(cerfificateFilePath));
 
-      seedNodeInfos.add(new SeedNodeInfo(
+      SeedNodeInfo seedNodeInfo = new SeedNodeInfo(
               qualifiedName,
               inetAddress,
               port,
-              x509Certificate));
+              x509Certificate);
+      seedNodeInfos.add(seedNodeInfo);
+      LOGGER.info(seedNodeInfo);
 
       // other seeds ...
       final String seedNodeInfosFilePath = "../Main/data/SeedNodeInfos.ser";

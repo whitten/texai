@@ -107,7 +107,7 @@ public class Message implements Serializable {
   /**
    * Constructs a new Message instance.
    *
-   * @param senderQualifiedName the sender role's id
+   * @param senderQualifiedName the sender role's qualified name
    * @param senderService the sender role's qualified name,
    * container.nodename.rolename
    * @param recipientQualifiedName the recipient role's qualified name,
@@ -137,7 +137,7 @@ public class Message implements Serializable {
    *
    * @param senderQualifiedName the sender role's qualified name,
    * container.nodename.rolename
-   * @param senderService the sender recipientService
+   * @param senderService the sender service
    * @param recipientQualifiedName the recipient role's qualified name,
    * container.nodename.rolename
    * @param recipientService the recipient recipientService, commonly used to
@@ -145,8 +145,7 @@ public class Message implements Serializable {
    * recipient role
    * @param operation the operation, which can be a task, sensation, or
    * information
-   * @param parameterDictionary the operation parameter dictionary, name -->
-   * value
+   * @param parameterDictionary the operation parameter dictionary, name --> value
    * @param version the message recipientService/operation version
    */
   public Message(
@@ -264,8 +263,7 @@ public class Message implements Serializable {
    * @param senderQualifiedName the sender role's qualified name,
    * container.nodename.rolename
    * @param senderService the sender recipientService
-   * @param recipientQualifiedName the recipient role's qualified name,
-   * container.nodename.rolename
+   * @param recipientQualifiedName the recipient role's qualified name, container.nodename.rolename
    * @param conversationId the conversation id
    * @param replyWith the reply-with UUID
    * @param inReplyTo in-reply-to UUID
@@ -680,7 +678,7 @@ public class Message implements Serializable {
     }
     stringBuilder.append(" --> ");
     stringBuilder.append(recipientQualifiedName);
-    
+
     stringBuilder.append(':');
     if (recipientService != null) {
       int index = recipientService.lastIndexOf('.');
@@ -901,7 +899,7 @@ public class Message implements Serializable {
    * @param service the given service name
    * @return whether the given service names a valid Java class
    */
-  private boolean isValidService(final String service) {
+  public static boolean isValidService(final String service) {
     //Preconditions
     assert StringUtils.isNonEmptyString(service) : "service must be a non-empty string";
 

@@ -71,10 +71,6 @@ public class NetworkLogControl extends AbstractSkill {
         initialization(message);
         return true;
 
-      case AHCSConstants.AHCS_READY_TASK:
-        ready(message);
-        return true;
-
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
         return true;
@@ -109,8 +105,7 @@ public class NetworkLogControl extends AbstractSkill {
   public String[] getUnderstoodOperations() {
     return new String[]{
               AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
-              AHCSConstants.AHCS_INITIALIZE_TASK,
-              AHCSConstants.AHCS_READY_TASK
+              AHCSConstants.AHCS_INITIALIZE_TASK
             };
   }
 
@@ -125,20 +120,7 @@ public class NetworkLogControl extends AbstractSkill {
 
     // initialize child JVM logger management roles
     propagateOperationToChildRoles(AHCSConstants.AHCS_INITIALIZE_TASK); // operation
-    setSkillState(State.INITIALIZED);
-  }
-
-  /** Performs the ready operation.
-   *
-   * @param message the message
-   */
-  private void ready(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-    assert this.getSkillState().equals(State.INITIALIZED) : "prior state must be initialized";
-
-    // ready child JVM logger management roles
-    propagateOperationToChildRoles(AHCSConstants.AHCS_READY_TASK); // operation
     setSkillState(State.READY);
   }
+
 }

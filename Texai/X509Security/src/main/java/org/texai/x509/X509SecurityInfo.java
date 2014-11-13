@@ -62,7 +62,7 @@ public final class X509SecurityInfo {
    *
    * @param keyStore the key store containing the peer's X.509 certificate chain
    * @param keyStorePassword the password to the key store
-   * @param certificateAlias the private key entry alias
+   * @param certificateAlias the certificate entry alias
    */
   public X509SecurityInfo(
           final KeyStore keyStore,

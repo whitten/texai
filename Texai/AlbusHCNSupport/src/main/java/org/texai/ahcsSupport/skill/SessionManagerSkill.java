@@ -101,15 +101,6 @@ public class SessionManagerSkill extends AbstractSkill {
         getSkillInstance(DUMMY_SESSION_HANDLE).receiveMessage(message);
         // initialize child roles
         propagateOperationToChildRoles(operation);
-        setSkillState(State.INITIALIZED);
-        return true;
-
-      case AHCSConstants.AHCS_READY_TASK:
-        assert getSkillState().equals(State.INITIALIZED) : "prior state must be initialized";
-        // ready a dummy instance of the role
-        getSkillInstance(DUMMY_SESSION_HANDLE).receiveMessage(message);
-        // ready child roles
-        propagateOperationToChildRoles(operation);
         setSkillState(State.READY);
         return true;
 
@@ -177,15 +168,6 @@ public class SessionManagerSkill extends AbstractSkill {
                   getRole().getQualifiedName(), // recipientQualifiedName
                   skillClass.getName(), // service
                   AHCSConstants.AHCS_INITIALIZE_TASK); // operation
-          skill.receiveMessage(message);
-
-          // ready the skill instance
-          message = new Message(
-                  getRole().getQualifiedName(), // senderQualifiedName
-                  getClassName(), // senderService
-                  getRole().getQualifiedName(), // recipientQualifiedName
-                  skillClass.getName(), // service
-                  AHCSConstants.AHCS_READY_TASK); // operation
           skill.receiveMessage(message);
         }
       } else {

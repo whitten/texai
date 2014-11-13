@@ -30,7 +30,7 @@ public class SkillTemplate extends AbstractSkill {
   /** Constructs a new SkillTemplate instance. */
   public SkillTemplate() {
   }
-  
+
   /** Receives and attempts to process the given message.  The skill is thread safe, given that any contained libraries are single threaded
    * with regard to the conversation.
    *
@@ -50,24 +50,18 @@ public class SkillTemplate extends AbstractSkill {
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
-        
+
         // OPTIONAL
         // initialize child roles
         propagateOperationToChildRoles(operation);
-        
-        setSkillState(State.INITIALIZED);
-        return true;
 
-      case AHCSConstants.AHCS_READY_TASK:
-        assert getSkillState().equals(State.INITIALIZED) : "prior state must be initialized";
-        
-        // OPTIONAL
-        // ready child roles
-        propagateOperationToChildRoles(operation);
-        
         setSkillState(State.READY);
         return true;
-        
+
+      case AHCSConstants.PERFORM_MISSION_TASK:
+        performMission(message);
+        return true;
+
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
         return true;
@@ -103,18 +97,30 @@ public class SkillTemplate extends AbstractSkill {
   public String[] getUnderstoodOperations() {
     return new String[]{
               AHCSConstants.AHCS_INITIALIZE_TASK,
-              AHCSConstants.AHCS_READY_TASK,
+              AHCSConstants.PERFORM_MISSION_TASK,
               AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
             };
   }
-  
+
+  /**
+   * Perform this role's mission.
+   *
+   * @param message the received perform mission task message
+   */
+  private void performMission(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+
+  }
+
   /** Gets the logger.
-   * 
+   *
    * @return  the logger
    */
   @Override
   protected Logger getLogger() {
     return LOGGER;
   }
-  
+
 }

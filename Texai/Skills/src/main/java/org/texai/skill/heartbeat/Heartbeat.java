@@ -55,14 +55,14 @@ public class Heartbeat extends AbstractSkill {
   }
 
   /** Gets the logger.
-   * 
+   *
    * @return  the logger
    */
   @Override
   protected Logger getLogger() {
     return LOGGER;
   }
-  
+
   /**
    * Receives and attempts to process the given message. The skill is thread
    * safe, given that any contained libraries are single threaded with regard to
@@ -89,12 +89,6 @@ public class Heartbeat extends AbstractSkill {
 
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         initialization(message);
-        setSkillState(AHCSConstants.State.INITIALIZED);
-        return true;
-
-      case AHCSConstants.AHCS_READY_TASK:
-        ready();
-        setSkillState(AHCSConstants.State.READY);
         return true;
 
       case AHCSConstants.PERFORM_MISSION_TASK:
@@ -140,7 +134,6 @@ public class Heartbeat extends AbstractSkill {
     return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.AHCS_READY_TASK,
       AHCSConstants.PERFORM_MISSION_TASK,
       AHCSConstants.AHCS_SHUTDOWN_TASK
     };
@@ -160,23 +153,11 @@ public class Heartbeat extends AbstractSkill {
       LOGGER.debug("initializing " + toString() + " in role " + getRole());
     }
 
-    // all nodes send a heartbeat to the parent heartbeat role, 
+    // all nodes send a heartbeat to the parent heartbeat role,
     outboundParentHeartbeatInfo = new OutboundHeartbeatInfo(
             getRole().getParentQualifiedName(), // recipientQualifiedName
             "org.texai.skill.heartbeat.ContainerHeartbeat", // service
             this); // heartbeat
-  }
-
-  /**
-   * Begins processing this skill.
-   */
-  private void ready() {
-    //Preconditions
-    assert this.getSkillState().equals(State.INITIALIZED) : "prior state must be initialized";
-
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.info("ready " + this);
-    }
 
     // create a timer that periodically reviews the outbound heartbeat information objects
     final Timer timer = getNodeRuntime().getTimer();

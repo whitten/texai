@@ -39,14 +39,14 @@ public class XAIFinancialAccountingAndControl extends AbstractSkill {
   }
 
   /** Gets the logger.
-   * 
+   *
    * @return  the logger
    */
   @Override
   protected Logger getLogger() {
     return LOGGER;
   }
-  
+
   /**
    * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries
    * are single threaded with regard to the conversation.
@@ -68,13 +68,9 @@ public class XAIFinancialAccountingAndControl extends AbstractSkill {
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
-        setSkillState(AHCSConstants.State.INITIALIZED);
+        setSkillState(AHCSConstants.State.READY);
         return true;
 
-      case AHCSConstants.AHCS_READY_TASK:
-        assert this.getSkillState().equals(AHCSConstants.State.INITIALIZED) : "prior state must be initialized";
-        return true;
-        
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
         return true;
@@ -110,8 +106,8 @@ public class XAIFinancialAccountingAndControl extends AbstractSkill {
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
-      AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.AHCS_READY_TASK,};
+      AHCSConstants.AHCS_INITIALIZE_TASK
+    };
   }
 
 }

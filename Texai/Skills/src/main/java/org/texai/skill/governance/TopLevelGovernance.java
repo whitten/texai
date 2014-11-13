@@ -71,10 +71,6 @@ public final class TopLevelGovernance extends AbstractSkill {
         initialization(message);
         return true;
 
-      case AHCSConstants.AHCS_READY_TASK:
-        ready(message);
-        return true;
-
     }
 
     // otherwise not understood
@@ -108,8 +104,7 @@ public final class TopLevelGovernance extends AbstractSkill {
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
-      AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.AHCS_READY_TASK,
+      AHCSConstants.AHCS_INITIALIZE_TASK
     };
   }
 
@@ -125,24 +120,8 @@ public final class TopLevelGovernance extends AbstractSkill {
 
     // initialize child governance roles
     propagateOperationToChildRoles( message.getOperation());
-    setSkillState(State.INITIALIZED);
-  }
-
-  /**
-   * Performs the ready operation.
-   *
-   * @param message the received ready message
-   */
-  private void ready(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-    assert this.getSkillState().equals(State.INITIALIZED) : "prior state must be initialized";
-
-    // ready child node logger roles
-    propagateOperationToChildRoles(message.getOperation());
     setSkillState(State.READY);
   }
-
 
   /**
    * Gets the logger.

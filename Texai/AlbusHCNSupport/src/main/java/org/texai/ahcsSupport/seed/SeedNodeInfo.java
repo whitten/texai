@@ -7,6 +7,7 @@ import java.util.Objects;
 import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.ahcsSupport.domainEntity.Role;
 import org.texai.util.StringUtils;
+import org.texai.x509.X509SecurityInfo;
 
 /**
  * SeedNodeInfo.java

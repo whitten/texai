@@ -102,7 +102,6 @@ public class AICoinMain {
 
     Logger.getLogger(DistributedRepositoryManager.class).setLevel(Level.WARN);
     Logger.getLogger(KBAccess.class).setLevel(Level.WARN);
-    Logger.getLogger(NodesInitializer.class).setLevel(Level.WARN);
     Logger.getLogger(RDFEntityPersister.class).setLevel(Level.WARN);
     Logger.getLogger(X509Utils.class).setLevel(Level.WARN);
 

@@ -34,6 +34,7 @@ import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.Message;
+import static org.texai.ahcsSupport.Message.DEFAULT_VERSION;
 import org.texai.ahcsSupport.domainEntity.Role;
 import org.texai.kb.persistence.RDFEntityManager;
 import org.texai.util.StringUtils;
@@ -56,9 +57,9 @@ public abstract class AbstractSkill {
   private final Map<UUID, MessageTimeOutInfo> messageTimeOutInfoDictionary = new HashMap<>();
   // the one-time operations - to receive one of these a second time is an error
   private static final List<String> oneTimeOperations = new ArrayList<>();
+
   static {
     oneTimeOperations.add(AHCSConstants.AHCS_INITIALIZE_TASK);
-    oneTimeOperations.add(AHCSConstants.AHCS_READY_TASK);
     oneTimeOperations.add(AHCSConstants.PERFORM_MISSION_TASK);
   }
   // the used one-time operations
@@ -70,9 +71,11 @@ public abstract class AbstractSkill {
   public AbstractSkill() {
   }
 
-  /** Verifies whether this skill permits the execution of the given operation.
-   * 
+  /**
+   * Verifies whether this skill permits the execution of the given operation.
+   *
    * @param message the given message specifying the operation
+   *
    * @return whether this skill permits the execution of the given operation
    */
   public boolean isOperationPermitted(final Message message) {
@@ -89,7 +92,7 @@ public abstract class AbstractSkill {
     }
     return true;
   }
-  
+
   /**
    * Gets the RDF entity manager.
    *
@@ -136,9 +139,8 @@ public abstract class AbstractSkill {
   }
 
   /**
-   * Receives and attempts to process the given message. The skill is thread
-   * safe, given that any contained libraries are single threaded with regard to
-   * the conversation.
+   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
+   * with regard to the conversation.
    *
    * @param message the given message
    *
@@ -147,9 +149,8 @@ public abstract class AbstractSkill {
   public abstract boolean receiveMessage(final Message message);
 
   /**
-   * Synchronously processes the given message. The skill is thread safe, given
-   * that any contained libraries are single threaded with regard to the
-   * conversation.
+   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single threaded with regard
+   * to the conversation.
    *
    * @param message the given message
    *
@@ -185,6 +186,34 @@ public abstract class AbstractSkill {
     getNodeRuntime().getExecutor().execute(new MessageSendingRunnable(
             message,
             getRole()));
+  }
+
+  /**
+   * Makes a message given the recipient and operation.
+   *
+   * @param recipientQualifiedName the recipient role's qualified name, container.nodename.rolename
+   * @param recipientService the recipient service
+   * @param operation the operation
+   * @param parameterDictionary the operation parameter dictionary, name --> value
+   *
+   * @return
+   */
+  public Message makeMessage(
+          final String recipientQualifiedName,
+          final String recipientService,
+          final String operation,
+          final Map<String, Object> parameterDictionary) {
+    //Preconditions
+    assert recipientQualifiedName != null : "recipientQualifiedName must not be null";
+    assert recipientService == null || Message.isValidService(recipientService) : "the recipient service is not a found Java class " + recipientService;
+    return new Message(
+            role.getQualifiedName(), // senderQualifiedName,
+            getClassName(), // senderService,
+            recipientQualifiedName,
+            recipientService,
+            operation,
+            parameterDictionary,
+            DEFAULT_VERSION);
   }
 
   /**
@@ -239,8 +268,7 @@ public abstract class AbstractSkill {
   }
 
   /**
-   * Propagates the given operation to the child roles, and to any service that
-   * understands the operation.
+   * Propagates the given operation to the child roles, and to any service that understands the operation.
    *
    * @param operation the given operation
    */
@@ -267,13 +295,11 @@ public abstract class AbstractSkill {
   }
 
   /**
-   * Returns a not-understood message for replying to the sender of the given
-   * message.
+   * Returns a not-understood message for replying to the sender of the given message.
    *
    * @param receivedMessage the given message
    *
-   * @return a not-understood message for replying to the sender of the given
-   * message
+   * @return a not-understood message for replying to the sender of the given message
    */
   protected Message notUnderstoodMessage(final Message receivedMessage) {
     //Preconditions
@@ -291,13 +317,11 @@ public abstract class AbstractSkill {
   }
 
   /**
-   * Returns an operation-not-permitted message for replying to the sender of the given
-   * message.
+   * Returns an operation-not-permitted message for replying to the sender of the given message.
    *
    * @param receivedMessage the given message
    *
-   * @return a not-understood message for replying to the sender of the given
-   * message
+   * @return a not-understood message for replying to the sender of the given message
    */
   protected Message operationNotPermittedMessage(final Message receivedMessage) {
     //Preconditions
@@ -315,14 +339,12 @@ public abstract class AbstractSkill {
   }
 
   /**
-   * Sets a message reply timeout for the given sent message. Usually the reply
-   * is received before the timeout has elapsed, and cancels the timer which is
-   * looked up by message reply-with.
+   * Sets a message reply timeout for the given sent message. Usually the reply is received before the timeout has elapsed, and cancels the
+   * timer which is looked up by message reply-with.
    *
    * @param message the given sent message
    * @param timeoutMillis the number of milliseconds to wait before
-   * @param isRecoverable the indicator whether to send a timeout status message
-   * back to the message sender.
+   * @param isRecoverable the indicator whether to send a timeout status message back to the message sender.
    * @param recoveryAction an optional tag which indicates the recovery action
    */
   protected void setMessageReplyTimeout(
@@ -350,7 +372,7 @@ public abstract class AbstractSkill {
             messageTimeoutTask,
             timeoutMillis); // delay
   }
-  
+
   /**
    * Removes a previously set replyMessage timeout using the given replyTo value of the sent message.
    *
@@ -358,26 +380,26 @@ public abstract class AbstractSkill {
    */
   protected void removeMessageTimeOut(final UUID replyWith) {
     //Preconditions
-    assert replyWith != null : "replyWith must not be null" ;
+    assert replyWith != null : "replyWith must not be null";
 
     synchronized (messageTimeOutInfoDictionary) {
       final MessageTimeOutInfo messageTimeOutInfo = messageTimeOutInfoDictionary.remove(replyWith);
-      assert messageTimeOutInfo != null : "inReplyTo: " + replyWith + 
-              "\nmessageTimeOutInfoDictionary: " + messageTimeOutInfoDictionary;
+      assert messageTimeOutInfo != null : "inReplyTo: " + replyWith
+              + "\nmessageTimeOutInfoDictionary: " + messageTimeOutInfoDictionary;
       getLogger().info("removed message timeout for " + messageTimeOutInfo);
       messageTimeOutInfo.messageTimeoutTask.cancel();
     }
   }
 
-  /** Gets the logger.
-   * 
-   * @return  the logger
+  /**
+   * Gets the logger.
+   *
+   * @return the logger
    */
   abstract protected Logger getLogger();
-  
+
   /**
-   * Provides a message timeout task which executes unless this task is canceled
-   * beforehand.
+   * Provides a message timeout task which executes unless this task is canceled beforehand.
    */
   class MessageTimeoutTask extends TimerTask {
 
@@ -432,8 +454,7 @@ public abstract class AbstractSkill {
   }
 
   /**
-   * Provides a container for message timeout information, indexed by the
-   * reply-with UUID.
+   * Provides a container for message timeout information, indexed by the reply-with UUID.
    */
   class MessageTimeOutInfo {
 
@@ -441,7 +462,7 @@ public abstract class AbstractSkill {
     private final Message message;
     // the timeout milliseconds
     private final long timeoutMillis;
-    // the indicator whether the skill can attempt recovery 
+    // the indicator whether the skill can attempt recovery
     private final boolean isRecoverable;
     // the recovery action
     private final String recoveryAction;
@@ -531,9 +552,7 @@ public abstract class AbstractSkill {
    * @return a description of the given skill state
    */
   public static String stateDescription(final State skillState) {
-    if (skillState.equals(State.INITIALIZED)) {
-      return "initialized";
-    } else if (skillState.equals(State.READY)) {
+    if (skillState.equals(State.READY)) {
       return "ready";
     } else if (skillState.equals(State.SHUTDOWN)) {
       return "shutdown";
@@ -585,6 +604,15 @@ public abstract class AbstractSkill {
     assert role != null : "role must not be null for " + this;
 
     role.removeStateValueBinding(stateVariableName);
+  }
+
+  /**
+   * Returns the container name.
+   *
+   * @return the container name
+   */
+  public String getContainerName() {
+    return getNodeRuntime().getContainerName();
   }
 
   /**

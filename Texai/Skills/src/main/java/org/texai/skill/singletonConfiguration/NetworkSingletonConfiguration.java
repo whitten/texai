@@ -70,12 +70,6 @@ public final class NetworkSingletonConfiguration extends AbstractSkill {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
         propagateOperationToChildRoles(operation);
-        setSkillState(AHCSConstants.State.INITIALIZED);
-        return true;
-
-      case AHCSConstants.AHCS_READY_TASK:
-        assert this.getSkillState().equals(AHCSConstants.State.INITIALIZED) : "prior state must be initialized";
-        propagateOperationToChildRoles(operation);
         setSkillState(AHCSConstants.State.READY);
         return true;
 
@@ -127,7 +121,6 @@ public final class NetworkSingletonConfiguration extends AbstractSkill {
     return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.AHCS_READY_TASK,
       AHCSConstants.PERFORM_MISSION_TASK,
       AHCSConstants.TASK_ACCOMPLISHED_INFO};
   }

@@ -11,15 +11,23 @@
  */
 package org.texai.skill.singletonConfiguration;
 
-import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.HashMap;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
+import org.texai.ahcs.NodeRuntime;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.ahcsSupport.seed.SeedNodeInfo;
+import org.texai.util.TexaiException;
+import org.texai.x509.X509SecurityInfo;
 
 /**
  *
@@ -33,14 +41,18 @@ public class SingletonConfiguration extends AbstractSkill {
   // the locations and credentials for network seed nodes
   private Set<SeedNodeInfo> seedNodesInfos;
 
-  /** Constructs a new SingletonConfiguration instance. */
+  /**
+   * Constructs a new SingletonConfiguration instance.
+   */
   public SingletonConfiguration() {
   }
 
-  /** Receives and attempts to process the given message.  The skill is thread safe, given that any contained libraries are single threaded
+  /**
+   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
    * with regard to the conversation.
    *
    * @param message the given message
+   *
    * @return whether the message was successfully processed
    */
   @Override
@@ -57,11 +69,6 @@ public class SingletonConfiguration extends AbstractSkill {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
         initialization(message);
-        setSkillState(State.INITIALIZED);
-        return true;
-
-      case AHCSConstants.AHCS_READY_TASK:
-        assert getSkillState().equals(State.INITIALIZED) : "prior state must be initialized";
         setSkillState(State.READY);
         return true;
 
@@ -74,14 +81,17 @@ public class SingletonConfiguration extends AbstractSkill {
         //TODO
         return true;
 
+      case AHCSConstants.SEED_CONNECTION_REQUEST_INFO:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
+        seedConnectionRequest(message);
+        return true;
+
       case AHCSConstants.PERFORM_MISSION_TASK:
         performMission(message);
         return true;
 
       //TODO REQUEST_CONFIGURATON_TASK
-        // seed another peer who requests the locations of the nomadic singleton agents.
-
-
+      // seed another peer who requests the locations of the nomadic singleton agents.
       // handle other operations ...
     }
     // otherwise, the message is not understood
@@ -89,10 +99,12 @@ public class SingletonConfiguration extends AbstractSkill {
     return true;
   }
 
-  /** Synchronously processes the given message.  The skill is thread safe, given that any contained libraries are single threaded
-   * with regard to the conversation.
+  /**
+   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single threaded with regard
+   * to the conversation.
    *
    * @param message the given message
+   *
    * @return the response message or null if not applicable
    */
   @Override
@@ -101,7 +113,6 @@ public class SingletonConfiguration extends AbstractSkill {
     assert message != null : "message must not be null";
 
     //TODO handle operations
-
     return (notUnderstoodMessage(message));
   }
 
@@ -115,24 +126,27 @@ public class SingletonConfiguration extends AbstractSkill {
     return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.AHCS_READY_TASK,
       AHCSConstants.PERFORM_MISSION_TASK,
+      AHCSConstants.SEED_CONNECTION_REQUEST_INFO,
       AHCSConstants.TASK_ACCOMPLISHED_INFO};
   }
 
-  /** Gets the logger.
+  /**
+   * Gets the logger.
    *
-   * @return  the logger
+   * @return the logger
    */
   @Override
   protected Logger getLogger() {
     return LOGGER;
   }
 
-  /** Initializes the seed node information.
+  /**
+   * Initializes the seed node information.
    *
    * @param message the received initialization task message
    */
+  @SuppressWarnings({"unchecked"})
   private void initialization(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
@@ -140,21 +154,66 @@ public class SingletonConfiguration extends AbstractSkill {
     LOGGER.info("initializing the seed node information ...");
 
     // deserialize the set of SeedNodeInfo objects from the specified file
-    final String seedNodeInfosFilePath = "data/seedNodeInfos.ser";
-    final File seedNodeInfosFile = new File(seedNodeInfosFilePath);
+    final String seedNodeInfosFilePath = "data/SeedNodeInfos.ser";
+    try {
+      try (ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(seedNodeInfosFilePath))) {
+        seedNodesInfos = (Set<SeedNodeInfo>) objectInputStream.readObject();
+      }
+    } catch (IOException | ClassNotFoundException ex) {
+      throw new TexaiException("cannot find " + seedNodeInfosFilePath);
+    }
+
+    final AtomicBoolean isSeedNode = new AtomicBoolean(false);
+    LOGGER.info("the locations and credentials of the network seed nodes ...");
+    seedNodesInfos.stream().forEach(seedNodeInfo -> {
+      if (getContainerName().equals(Node.extractContainerName(seedNodeInfo.getQualifiedName()))) {
+        LOGGER.info("  " + seedNodeInfo + " - (me)");
+        isSeedNode.set(true);
+      } else {
+        LOGGER.info("  " + seedNodeInfo + " connecting ...");
 
 
-    
-    // the locations and credentials of the network seed nodes
 
 
-    //TODO
+        // create a separate key store for the peer certificates
+
+        // create a dictionary of their security infos so channels can be openned
+
+//        final X509SecurityInfo x509SecurityInfo = ((NodeRuntime) getNodeRuntime()).getNodeRuntimeSkill().getRole().
+//
+//        ((NodeRuntime) getNodeRuntime()).openChannelToPeerContainer(
+//                Node.extractContainerName(seedNodeInfo.getQualifiedName()), // containerName,
+//                seedNodeInfo.getInetAddress().getHostAddress(), // hostName,
+//                seedNodeInfo.getPort(), // port,
+//                x509SecurityInfo);
+
+        //compose and send a message to the seed peer
+        final Message connectionRequestMessage = makeMessage(
+                seedNodeInfo.getQualifiedName(), // recipientQualifiedName
+                getClassName(), // recipientService
+                AHCSConstants.SEED_CONNECTION_REQUEST_INFO, // operation
+                new HashMap<>()); // parameterDictionary
+        sendMessageViaSeparateThread(connectionRequestMessage);
+      }
+    });
   }
 
+  /**
+   * Process the received connection request by responding with the current network configuration.
+   *
+   * @param message the received seed connection request message
+   */
+  private void seedConnectionRequest(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+
+    LOGGER.info("received a seed connection request from " + message.getSenderContainerName());
+  }
 
   /**
-   * Perform this role's mission, which is to configure the roles in this container whose parents are nomadic singleton roles hosted
-   * on a probably remote super-peer.
+   * Perform this role's mission, which is to configure the roles in this container whose parents are nomadic singleton roles hosted on a
+   * probably remote super-peer.
    *
    * @param message the received perform mission task message
    */
