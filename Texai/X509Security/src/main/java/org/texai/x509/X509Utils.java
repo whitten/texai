@@ -43,6 +43,7 @@ import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStore.PasswordProtection;
 import java.security.KeyStoreException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
@@ -84,6 +85,8 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.texai.util.Base64Coder;
+import org.texai.util.ByteUtils;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 
@@ -1216,4 +1219,40 @@ public final class X509Utils {
       LOGGER.info("  " + aliases.nextElement());
     }
   }
+
+  /**
+   * Verifies the expected SHA-512 hash of the given file.
+   *
+   * @param filePath the file path
+   * @param fileHashString the file SHA-512 hash encoded as a base 64 string, used to detect tampering
+   */
+  public static void verifyFileHash(
+          final String filePath,
+          final String fileHashString) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(filePath) : "nodesPath must not be empty";
+    assert StringUtils.isNonEmptyString(fileHashString) : "nodesFileHashString must not be empty";
+
+    final byte[] hashBytes;
+    try {
+      addBouncyCastleSecurityProvider();
+      final MessageDigest messageDigest = MessageDigest.getInstance("SHA-512", BOUNCY_CASTLE_PROVIDER);
+      final FileInputStream fileInputStream = new FileInputStream(filePath);
+      final byte[] dataBytes = new byte[1024];
+      int nread;
+      while ((nread = fileInputStream.read(dataBytes)) != -1) {
+        messageDigest.update(dataBytes, 0, nread);
+      }
+      hashBytes = messageDigest.digest();
+      final byte[] expectedHashBytes = Base64Coder.decode(fileHashString);
+      if (!ByteUtils.areEqual(expectedHashBytes, hashBytes)) {
+        LOGGER.warn("actual encoded hash bytes:\n" + new String(Base64Coder.encode(hashBytes)));
+        throw new TexaiException("file: " + filePath + " fails expected hash checksum");
+      }
+    } catch (NoSuchAlgorithmException | NoSuchProviderException | IOException ex) {
+      throw new TexaiException(ex);
+    }
+
+  }
+
 }

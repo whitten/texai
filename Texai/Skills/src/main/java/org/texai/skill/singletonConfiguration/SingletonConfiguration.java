@@ -19,7 +19,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
-import org.texai.ahcs.NodeRuntime;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.skill.AbstractSkill;
@@ -27,7 +26,7 @@ import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.ahcsSupport.seed.SeedNodeInfo;
 import org.texai.util.TexaiException;
-import org.texai.x509.X509SecurityInfo;
+import org.texai.x509.X509Utils;
 
 /**
  *
@@ -40,6 +39,9 @@ public class SingletonConfiguration extends AbstractSkill {
   private static final Logger LOGGER = Logger.getLogger(SingletonConfiguration.class);
   // the locations and credentials for network seed nodes
   private Set<SeedNodeInfo> seedNodesInfos;
+  // the SHA-512 hash of the seed node infos serialized file
+  private final String seedNodeInfosFileHashString =
+          "RreCep5ZgCJd9f0G66/7bRz3bdbWfXSNMMCATJed8YgKBYi4zbbkgC0srC4GECSrIAXKJAkXIfCAI1vvjWOLMg==";
 
   /**
    * Constructs a new SingletonConfiguration instance.
@@ -155,6 +157,9 @@ public class SingletonConfiguration extends AbstractSkill {
 
     // deserialize the set of SeedNodeInfo objects from the specified file
     final String seedNodeInfosFilePath = "data/SeedNodeInfos.ser";
+    X509Utils.verifyFileHash(
+            seedNodeInfosFilePath, // filePath
+            seedNodeInfosFileHashString); // fileHashString
     try {
       try (ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(seedNodeInfosFilePath))) {
         seedNodesInfos = (Set<SeedNodeInfo>) objectInputStream.readObject();

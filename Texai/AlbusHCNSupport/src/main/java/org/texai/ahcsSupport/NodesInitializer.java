@@ -31,7 +31,6 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateEncodingException;
@@ -58,8 +57,6 @@ import org.texai.ahcsSupport.domainEntity.StateValueBinding;
 import org.texai.kb.CacheInitializer;
 import org.texai.kb.persistence.DistributedRepositoryManager;
 import org.texai.util.ArraySet;
-import org.texai.util.Base64Coder;
-import org.texai.util.ByteUtils;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 import org.texai.x509.X509SecurityInfo;
@@ -145,41 +142,6 @@ public final class NodesInitializer {
   }
 
   /**
-   * Verifies the expected SHA-512 hash of the nodes file.
-   *
-   * @param nodesPath the nodes XML file path
-   * @param nodesFileHashString the nodes file SHA-512 hash encoded as a base 64 string, used to detect tampering
-   */
-  private void verifyNodesFileHash(
-          final String nodesPath,
-          final String nodesFileHashString) {
-    //Preconditions
-    assert StringUtils.isNonEmptyString(nodesPath) : "nodesPath must not be empty";
-    assert StringUtils.isNonEmptyString(nodesFileHashString) : "nodesFileHashString must not be empty";
-
-    final byte[] hashBytes;
-    try {
-      X509Utils.addBouncyCastleSecurityProvider();
-      final MessageDigest messageDigest = MessageDigest.getInstance("SHA-512", X509Utils.BOUNCY_CASTLE_PROVIDER);
-      final FileInputStream fileInputStream = new FileInputStream(nodesPath);
-      final byte[] dataBytes = new byte[1024];
-      int nread;
-      while ((nread = fileInputStream.read(dataBytes)) != -1) {
-        messageDigest.update(dataBytes, 0, nread);
-      }
-      hashBytes = messageDigest.digest();
-      final byte[] expectedHashBytes = Base64Coder.decode(nodesFileHashString);
-      if (!ByteUtils.areEqual(expectedHashBytes, hashBytes)) {
-        LOGGER.warn("actual encoded hash bytes:\n" + new String(Base64Coder.encode(hashBytes)));
-        throw new TexaiException("nodes file: " + nodesPath + " fails expected hash checksum");
-      }
-    } catch (NoSuchAlgorithmException | NoSuchProviderException | IOException ex) {
-      throw new TexaiException(ex);
-    }
-
-  }
-
-  /**
    * Reads the nodes XML file and records the node and role fields.
    *
    * @param nodesPath the nodes XML file path
@@ -195,7 +157,9 @@ public final class NodesInitializer {
       throw new TexaiException("JCE Unlimited Strength Policy files are not installed");
     }
 
-    verifyNodesFileHash(nodesPath, nodesFileHashString);
+    X509Utils.verifyFileHash(
+            nodesPath, // filePath
+            nodesFileHashString); // fileHashString
 
     CacheInitializer.initializeCaches();
     DistributedRepositoryManager.clearNamedRepository("Nodes");
