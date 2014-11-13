@@ -15,10 +15,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
+import org.texai.ahcs.NodeRuntime;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.skill.AbstractSkill;
@@ -26,6 +28,7 @@ import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.ahcsSupport.seed.SeedNodeInfo;
 import org.texai.util.TexaiException;
+import org.texai.x509.X509SecurityInfo;
 import org.texai.x509.X509Utils;
 
 /**
@@ -40,8 +43,8 @@ public class SingletonConfiguration extends AbstractSkill {
   // the locations and credentials for network seed nodes
   private Set<SeedNodeInfo> seedNodesInfos;
   // the SHA-512 hash of the seed node infos serialized file
-  private final String seedNodeInfosFileHashString =
-          "RreCep5ZgCJd9f0G66/7bRz3bdbWfXSNMMCATJed8YgKBYi4zbbkgC0srC4GECSrIAXKJAkXIfCAI1vvjWOLMg==";
+  private final String seedNodeInfosFileHashString
+          = "RreCep5ZgCJd9f0G66/7bRz3bdbWfXSNMMCATJed8YgKBYi4zbbkgC0srC4GECSrIAXKJAkXIfCAI1vvjWOLMg==";
 
   /**
    * Constructs a new SingletonConfiguration instance.
@@ -176,28 +179,18 @@ public class SingletonConfiguration extends AbstractSkill {
         isSeedNode.set(true);
       } else {
         LOGGER.info("  " + seedNodeInfo + " connecting ...");
-
-
-
-
-        // create a separate key store for the peer certificates
-
-        // create a dictionary of their security infos so channels can be openned
-
-//        final X509SecurityInfo x509SecurityInfo = ((NodeRuntime) getNodeRuntime()).getNodeRuntimeSkill().getRole().
-//
-//        ((NodeRuntime) getNodeRuntime()).openChannelToPeerContainer(
-//                Node.extractContainerName(seedNodeInfo.getQualifiedName()), // containerName,
-//                seedNodeInfo.getInetAddress().getHostAddress(), // hostName,
-//                seedNodeInfo.getPort(), // port,
-//                x509SecurityInfo);
-
         //compose and send a message to the seed peer
+        final Map<String, Object> parameterDictionary = new HashMap<>();
+        parameterDictionary.put(AHCSConstants.SEED_CONNECTION_REQUEST_INFO_HOST_NAME,
+                seedNodeInfo.getInetAddress().getHostAddress());
+        parameterDictionary.put(
+                AHCSConstants.SEED_CONNECTION_REQUEST_INFO_PORT,
+                seedNodeInfo.getPort());
         final Message connectionRequestMessage = makeMessage(
                 seedNodeInfo.getQualifiedName(), // recipientQualifiedName
                 getClassName(), // recipientService
                 AHCSConstants.SEED_CONNECTION_REQUEST_INFO, // operation
-                new HashMap<>()); // parameterDictionary
+                parameterDictionary);
         sendMessageViaSeparateThread(connectionRequestMessage);
       }
     });

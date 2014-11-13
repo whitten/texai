@@ -25,9 +25,9 @@ package org.texai.ahcs;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executor;
 import net.sbbi.upnp.impls.InternetGatewayDevice;
 import net.sbbi.upnp.messages.ActionResponse;
 import net.sbbi.upnp.messages.UPNPResponseException;
@@ -38,6 +38,7 @@ import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
+import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.MessageDispatcher;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.Role;
@@ -46,11 +47,11 @@ import org.texai.network.netty.handler.AbstractAlbusHCSMessageHandler;
 import org.texai.network.netty.handler.AbstractAlbusHCSMessageHandlerFactory;
 import org.texai.network.netty.handler.AbstractBitTorrentHandlerFactory;
 import org.texai.network.netty.handler.AbstractHTTPRequestHandlerFactory;
-import org.texai.network.netty.handler.HTTPRequestHandlerFactory;
 import org.texai.util.NetworkUtils;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 import org.texai.x509.X509SecurityInfo;
+import org.texai.x509.X509Utils;
 
 /**
  *
@@ -86,8 +87,6 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
    * the host address as presented to the Internet, e.g. texai.dyndns.org
    */
   private String externalHostName;
-  // the local container name
-  private final String localContainerName;
   // the server bootstrap that listens for incomming messages
   private ServerBootstrap serverBootstrap;
 
@@ -101,11 +100,10 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
     assert nodeRuntime != null : "nodeRuntime must not be null";
 
     this.nodeRuntime = nodeRuntime;
-    localContainerName = nodeRuntime.getContainerName();
-
   }
 
-  /** Listens for incomming messages on the given port.
+  /**
+   * Listens for incomming messages on the given port.
    *
    * @param port the given TCP port
    */
@@ -122,7 +120,7 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
             albusHCSMessageHandlerFactory,
             bitTorrentHandlerFactory,
             httpRequestHandlerFactory,
-            nodeRuntime.getExecutor(),  // bossExecutor,
+            nodeRuntime.getExecutor(), // bossExecutor,
             nodeRuntime.getExecutor()); // workerExecutor
   }
 
@@ -151,8 +149,10 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
    * @param hostName the host name, or IP address of the container
    * @param port the container's TCP port number
    * @param x509SecurityInfo the X.509 certificate used by this peer to authenticate and encrypt the channel
+   *
+   * @return the channel
    */
-  public void openChannelToPeerContainer(
+  public Channel openChannelToPeerContainer(
           final String containerName,
           final String hostName,
           final int port,
@@ -176,6 +176,7 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
     synchronized (containerChannelDictionary) {
       containerChannelDictionary.put(containerName, channel);
     }
+    return channel;
   }
 
   /**
@@ -391,7 +392,7 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
    *
    * @param message the Albus message
    */
-  protected void routeAlbusMessageToPeerRouter(final Message message) {
+  private void routeAlbusMessageToPeerRouter(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
 
@@ -400,7 +401,31 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
       channel = containerChannelDictionary.get(message.getRecipientContainerName());
     }
     if (channel == null) {
-      throw new TexaiException("no communcations channel to recipient " + message);
+      if (message.getOperation().equals(AHCSConstants.SEED_CONNECTION_REQUEST_INFO)) {
+        final String hostName = message.get(AHCSConstants.SEED_CONNECTION_REQUEST_INFO_HOST_NAME).toString();
+        final int port = (Integer) message.get(AHCSConstants.SEED_CONNECTION_REQUEST_INFO_PORT);
+        LOGGER.info("retrieving X.509 security info for " + message.getSenderQualifiedName());
+        final X509SecurityInfo x509SecurityInfo;
+        try {
+          x509SecurityInfo = X509Utils.getX509SecurityInfo(
+                  nodeRuntime.getKeyStore(),
+                  nodeRuntime.getKeyStorePassword(),
+                  message.getSenderQualifiedName()); // alias
+        } catch (Throwable ex) {
+          X509Utils.logAliases(nodeRuntime.getKeyStore(), LOGGER);
+          throw new TexaiException(ex);
+        }
+
+        LOGGER.info("opening connection to " + hostName + ':' + port);
+        channel = openChannelToPeerContainer(
+                message.getRecipientContainerName(), // containerName,
+                hostName,
+                port,
+                x509SecurityInfo);
+        assert channel != null;
+      } else {
+        throw new TexaiException("no communcations channel to recipient " + message);
+      }
     }
 
     if (!channel.isBound()) {

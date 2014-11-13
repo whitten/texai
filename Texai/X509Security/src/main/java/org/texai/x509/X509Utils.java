@@ -1221,6 +1221,27 @@ public final class X509Utils {
   }
 
   /**
+   * Logs the aliases contained in the given keystore to the given logger.
+   *
+   * @param keyStore the given keystore
+   * @param logger the given logger
+   */
+  public static void logAliases(
+          final KeyStore keyStore,
+          final Logger logger) {
+    Enumeration<String> aliases;
+    try {
+      aliases = keyStore.aliases();
+    } catch (KeyStoreException ex) {
+      throw new TexaiException(ex);
+    }
+    logger.info("aliases...");
+    while (aliases.hasMoreElements()) {
+      logger.info("  " + aliases.nextElement());
+    }
+  }
+
+  /**
    * Verifies the expected SHA-512 hash of the given file.
    *
    * @param filePath the file path

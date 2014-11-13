@@ -21,6 +21,7 @@
  */
 package org.texai.ahcsSupport.skill;
 
+import java.security.KeyStore;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,6 +31,7 @@ import java.util.Timer;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.bouncycastle.util.Arrays;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.MessageDispatcher;
 import org.texai.ahcsSupport.NodeAccess;
@@ -64,8 +66,11 @@ public class BasicNodeRuntime implements MessageDispatcher {
   private final Set<String> loggedOperations = new HashSet<>();
   // The NodeRuntimeSkill instance which is used to send and receive messages on behalf of this node runtime
   private AbstractSkill nodeRuntimeSkill;
-
-  /**
+  // the key store for certain roles' X.509Certificates and the private keys
+  private KeyStore keyStore;
+  // the key store password
+  private char[] keyStorePassword;
+   /**
    * Constructs a new BasicNodeRuntime instance.
    *
    * @param containerName the container name
@@ -94,6 +99,44 @@ public class BasicNodeRuntime implements MessageDispatcher {
    */
   public Set<Node> getNodes() {
     return Collections.unmodifiableSet(new HashSet<Node>(nodeDictionary.values()));
+  }
+
+  /** Gets the key store.
+   *
+   * @return the key store
+   */
+  public KeyStore getKeyStore() {
+    return keyStore;
+  }
+
+  /** Sets the key store.
+   *
+   * @param keyStore the given key store
+   */
+  public void setKeyStore(final KeyStore keyStore) {
+    //Preconditions
+    assert keyStore != null : "keyStore must not be null";
+
+    this.keyStore = keyStore;
+  }
+
+  /** Gets the key store password.
+   *
+   * @return the key store password
+   */
+  public char[] getKeyStorePassword() {
+    return Arrays.copyOf(keyStorePassword, keyStorePassword.length);
+  }
+
+  /** Sets the key store password.
+   *
+   * @param keyStorePassword the given key store password
+   */
+  public void setKeyStorePassword(final char[] keyStorePassword) {
+    //Preconditions
+    assert keyStorePassword != null : "keyStorePassword must not be null";
+
+    this.keyStorePassword = Arrays.copyOf(keyStorePassword, keyStorePassword.length);
   }
 
   /**

@@ -248,7 +248,7 @@ public final class AHCSConstants {
   //
   // the writeWordToUser_Task operation
   public static final String WRITE_WORD_TO_USER_TASK = "writeWordToUser_Task";
-  // the word parameter of the the writeWordToUser_Task
+  // the word parameter of the writeWordToUser_Task
   public static final String WRITE_WORD_TO_USER_TASK_WORD = "writeWordToUser_Task_word";
   //
   //
@@ -275,6 +275,10 @@ public final class AHCSConstants {
   //
   // the seedConnectionRequest_Info operation
   public static final String SEED_CONNECTION_REQUEST_INFO = "seedConnectionRequest_Info";
+  // the host name parameter of the seedConnectionRequest_Info
+  public static final String SEED_CONNECTION_REQUEST_INFO_HOST_NAME = "seedConnectionRequest_Info_HostName";
+  // the port parameter of the seedConnectionRequest_Info
+  public static final String SEED_CONNECTION_REQUEST_INFO_PORT = "seedConnectionRequest_Info_Port";
 
   //
   // shared message parameters

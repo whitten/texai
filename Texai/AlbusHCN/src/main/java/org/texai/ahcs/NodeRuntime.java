@@ -32,7 +32,6 @@ import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.Role;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
-import org.texai.x509.X509SecurityInfo;
 
 /**
  * Provides runtime support for nodes in a container.
@@ -209,32 +208,6 @@ public class NodeRuntime extends BasicNodeRuntime {
     }
     message.verify(x509Certificate);
     LOGGER.info("verified message");
-  }
-
-  /**
-   * Opens an encrypted communications channel with the given peer container.
-   *
-   * @param containerName the unique container name
-   * @param hostName the host name, or IP address of the container
-   * @param port the container's TCP port number
-   * @param x509SecurityInfo the X.509 certificate used by this peer to authenticate and encrypt the channel
-   */
-  public void openChannelToPeerContainer(
-          final String containerName,
-          final String hostName,
-          final int port,
-          final X509SecurityInfo x509SecurityInfo) {
-    //Preconditions
-    assert StringUtils.isNonEmptyString(containerName) : "containerName must be a non-empty string";
-    assert StringUtils.isNonEmptyString(hostName) : "hostname must be a non-empty string";
-    assert port > 0 : "port must be positive";
-    assert x509SecurityInfo != null : "x509SecurityInfo must not be null";
-
-    messageRouter.openChannelToPeerContainer(
-            containerName,
-            hostName,
-            port,
-            x509SecurityInfo);
   }
 
   //TODO - use this method or delete it.

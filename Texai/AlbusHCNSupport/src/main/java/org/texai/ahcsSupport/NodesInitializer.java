@@ -37,6 +37,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -432,6 +433,8 @@ public final class NodesInitializer {
     } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException ex) {
       throw new TexaiException(ex);
     }
+    nodeRuntime.setKeyStore(keyStore);
+    nodeRuntime.setKeyStorePassword(keyStorePassword);
     LOGGER.debug("");
     LOGGER.debug("confirming that roles' certificates can be retrieved from storage ...");
     roleFieldsHolderDictionary.values().stream().sorted().forEach(roleFieldsHolder1 -> {
@@ -444,6 +447,11 @@ public final class NodesInitializer {
         } else {
           LOGGER.debug("    certificate not stored for " + roleFieldsHolder1.qualifiedName);
         }
+        final X509SecurityInfo x509SecurityInfo = X509Utils.getX509SecurityInfo(
+                  nodeRuntime.getKeyStore(),
+                  nodeRuntime.getKeyStorePassword(),
+                  roleFieldsHolder1.qualifiedName); // alias
+        LOGGER.debug("    X.509 subject: " + x509SecurityInfo.getX509Certificate().getSubjectDN());
       }
     });
   }
