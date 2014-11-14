@@ -217,13 +217,15 @@ public class NodeRuntime extends BasicNodeRuntime {
     if (x509Certificate == null) {
       // new peers joining the network provide their certificate as a parameter
       if (message.getOperation().equals(AHCSConstants.SEED_CONNECTION_REQUEST_INFO)) {
-        x509Certificate = (X509Certificate) message.get(AHCSConstants.SEED_CONNECTION_REQUEST_INFO_X509_CERTIFICATE);
+        LOGGER.info("adding certificate for " + message.getSenderQualifiedName());
+        x509Certificate = (X509Certificate) message.get(AHCSConstants.MSG_PARM_X509_CERTIFICATE);
         assert x509Certificate != null;
         addX509Certificate(
-          message.getSenderQualifiedName(), // qualifiedName
-          x509Certificate);
+                message.getSenderQualifiedName(), // qualifiedName
+                x509Certificate);
+      } else {
+        throw new TexaiException("X.509 certificate not found for sender " + message.getSenderQualifiedName());
       }
-      throw new TexaiException("X.509 certificate not found for sender " + message.getSenderQualifiedName());
     }
     message.verify(x509Certificate);
     LOGGER.info("verified message");

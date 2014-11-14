@@ -43,7 +43,7 @@ public class SingletonConfiguration extends AbstractSkill {
   private Set<SeedNodeInfo> seedNodesInfos;
   // the SHA-512 hash of the seed node infos serialized file
   private final String seedNodeInfosFileHashString
-          = "5hDfWuEuSXKKMkzwFhtxOC4Oo57Eao8OJvRRzzjiV5bWFOQNiluh3dQ5uG83VZwKWKF0BDrDYAM3dfdYUCOyDA==";
+          = "CqpjZ7ef3wZllB+MNAlMk/THJOHVMDN4sXqLoixftqOtFvBJ/Yo/f8J4uBPMZUMZSXrHgTpsT9iB1JETvffaYQ==";
 
   /**
    * Constructs a new SingletonConfiguration instance.
@@ -178,6 +178,7 @@ public class SingletonConfiguration extends AbstractSkill {
         LOGGER.info("  " + seedNodeInfo + " - (me)");
         isSeedNode.set(true);
       } else {
+        LOGGER.info("  " + seedNodeInfo);
         connectToSeedPeer(
           seedNodeInfo.getQualifiedName(),
           seedNodeInfo.getHostName(),
@@ -211,8 +212,7 @@ public class SingletonConfiguration extends AbstractSkill {
     parameterDictionary.put(
             AHCSConstants.SEED_CONNECTION_REQUEST_INFO_PORT,
             port);
-    parameterDictionary.put(
-            AHCSConstants.SEED_CONNECTION_REQUEST_INFO_X509_CERTIFICATE,
+    parameterDictionary.put(AHCSConstants.MSG_PARM_X509_CERTIFICATE,
             getRole().getX509Certificate());
     final Message connectionRequestMessage = makeMessage(
             peerQualifiedName, // recipientQualifiedName

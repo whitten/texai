@@ -47,6 +47,8 @@ public class AICoinMain {
   public static final Logger LOGGER = Logger.getLogger(AICoinMain.class);
   // the node runtime
   private NodeRuntime nodeRuntime;
+  // the version
+  private static final String VERSION = "1.0";
   /**
    * the shutdown hook
    */
@@ -106,7 +108,7 @@ public class AICoinMain {
     Logger.getLogger(RDFEntityPersister.class).setLevel(Level.WARN);
     Logger.getLogger(X509Utils.class).setLevel(Level.WARN);
 
-    LOGGER.info("A.I. Coin version 1.0");
+    LOGGER.info("A.I. Coin version " + VERSION);
     LOGGER.info("starting the node runtime in the container named " + containerName);
     nodeRuntime = new NodeRuntime(containerName);
     // configure a shutdown hook to run the finalization method in case the JVM is abnormally ended

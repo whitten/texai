@@ -22,6 +22,9 @@
     <file>
       <source>scripts/run-aicoin-main.sh</source>
     </file>
+    <file>
+      <source>scripts/debug-run-aicoin-main.sh</source>
+    </file>
   </files>
   <fileSets>
     <fileSet>

@@ -3,7 +3,6 @@ package org.texai.ahcsSupport.seed;
 import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.Objects;
-import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.ahcsSupport.domainEntity.Role;
 import org.texai.util.StringUtils;
 
@@ -132,7 +131,7 @@ public class SeedNodeInfo implements Serializable {
   public String toString() {
     return (new StringBuilder())
             .append("[Seed ")
-            .append(Node.extractContainerName(qualifiedName))
+            .append(qualifiedName)
             .append(' ')
             .append(hostName)
             .append(':')
