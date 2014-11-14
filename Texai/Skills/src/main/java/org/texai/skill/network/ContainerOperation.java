@@ -1,10 +1,12 @@
 package org.texai.skill.network;
 
+import java.util.HashMap;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.skill.support.NodeRuntimeSkill;
 
 /**
  * Created on Sep 1, 2014, 1:48:49 PM.
@@ -130,7 +132,11 @@ public final class ContainerOperation extends AbstractSkill {
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
-    //TODO
+    final Message performMissionMessage = makeMessage(
+            NodeRuntimeSkill.class.getName(), // recipientService
+            AHCSConstants.PERFORM_MISSION_TASK, // operation
+            new HashMap<>()); // parameterDictionary
+    sendMessageViaSeparateThread(performMissionMessage);
   }
 
 }

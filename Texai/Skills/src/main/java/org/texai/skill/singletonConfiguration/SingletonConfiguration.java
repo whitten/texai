@@ -20,15 +20,14 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
-import org.texai.ahcs.NodeRuntime;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.ahcsSupport.seed.SeedNodeInfo;
+import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
-import org.texai.x509.X509SecurityInfo;
 import org.texai.x509.X509Utils;
 
 /**
@@ -44,7 +43,7 @@ public class SingletonConfiguration extends AbstractSkill {
   private Set<SeedNodeInfo> seedNodesInfos;
   // the SHA-512 hash of the seed node infos serialized file
   private final String seedNodeInfosFileHashString
-          = "RreCep5ZgCJd9f0G66/7bRz3bdbWfXSNMMCATJed8YgKBYi4zbbkgC0srC4GECSrIAXKJAkXIfCAI1vvjWOLMg==";
+          = "5hDfWuEuSXKKMkzwFhtxOC4Oo57Eao8OJvRRzzjiV5bWFOQNiluh3dQ5uG83VZwKWKF0BDrDYAM3dfdYUCOyDA==";
 
   /**
    * Constructs a new SingletonConfiguration instance.
@@ -160,6 +159,7 @@ public class SingletonConfiguration extends AbstractSkill {
 
     // deserialize the set of SeedNodeInfo objects from the specified file
     final String seedNodeInfosFilePath = "data/SeedNodeInfos.ser";
+    LOGGER.info("seedNodeInfosFileHashString\n" + seedNodeInfosFileHashString);
     X509Utils.verifyFileHash(
             seedNodeInfosFilePath, // filePath
             seedNodeInfosFileHashString); // fileHashString
@@ -173,27 +173,54 @@ public class SingletonConfiguration extends AbstractSkill {
 
     final AtomicBoolean isSeedNode = new AtomicBoolean(false);
     LOGGER.info("the locations and credentials of the network seed nodes ...");
-    seedNodesInfos.stream().forEach(seedNodeInfo -> {
+    seedNodesInfos.stream().forEach((SeedNodeInfo seedNodeInfo) -> {
       if (getContainerName().equals(Node.extractContainerName(seedNodeInfo.getQualifiedName()))) {
         LOGGER.info("  " + seedNodeInfo + " - (me)");
         isSeedNode.set(true);
       } else {
-        LOGGER.info("  " + seedNodeInfo + " connecting ...");
-        //compose and send a message to the seed peer
-        final Map<String, Object> parameterDictionary = new HashMap<>();
-        parameterDictionary.put(AHCSConstants.SEED_CONNECTION_REQUEST_INFO_HOST_NAME,
-                seedNodeInfo.getInetAddress().getHostAddress());
-        parameterDictionary.put(
-                AHCSConstants.SEED_CONNECTION_REQUEST_INFO_PORT,
-                seedNodeInfo.getPort());
-        final Message connectionRequestMessage = makeMessage(
-                seedNodeInfo.getQualifiedName(), // recipientQualifiedName
-                getClassName(), // recipientService
-                AHCSConstants.SEED_CONNECTION_REQUEST_INFO, // operation
-                parameterDictionary);
-        sendMessageViaSeparateThread(connectionRequestMessage);
+        connectToSeedPeer(
+          seedNodeInfo.getQualifiedName(),
+          seedNodeInfo.getHostName(),
+          seedNodeInfo.getPort());
       }
     });
+  }
+
+  /** Connects to the given seed peer.
+   *
+   * @param peerQualifiedName the seed peer name
+   * @param hostName the host name
+   * @param port the port
+   */
+  private void connectToSeedPeer(
+          final String peerQualifiedName,
+          final String hostName,
+          final int port) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(peerQualifiedName) : "peerQualifiedName must be a non-empty string";
+    assert StringUtils.isNonEmptyString(hostName) : "hostName must be a non-empty string";
+    assert port > 1024 : "port must be greater than 1024";
+    assert getRole().getX509Certificate() != null : "X509Certificate must not be null";
+
+    LOGGER.info("connecting to seed peer " + peerQualifiedName + " at " + hostName + ':' + port);
+    //compose and send a message to the seed peer
+    final Map<String, Object> parameterDictionary = new HashMap<>();
+    parameterDictionary.put(
+            AHCSConstants.SEED_CONNECTION_REQUEST_INFO_HOST_NAME,
+            hostName);
+    parameterDictionary.put(
+            AHCSConstants.SEED_CONNECTION_REQUEST_INFO_PORT,
+            port);
+    parameterDictionary.put(
+            AHCSConstants.SEED_CONNECTION_REQUEST_INFO_X509_CERTIFICATE,
+            getRole().getX509Certificate());
+    final Message connectionRequestMessage = makeMessage(
+            peerQualifiedName, // recipientQualifiedName
+            getClassName(), // recipientService
+            AHCSConstants.SEED_CONNECTION_REQUEST_INFO, // operation
+            parameterDictionary);
+    sendMessageViaSeparateThread(connectionRequestMessage);
+
   }
 
   /**

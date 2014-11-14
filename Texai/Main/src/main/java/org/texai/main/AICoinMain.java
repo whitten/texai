@@ -100,12 +100,13 @@ public class AICoinMain {
     //Preconditions
     assert StringUtils.isNonEmptyString(containerName) : "containerName must be a non-empty string";
 
-    Logger.getLogger(NodesInitializer.class).setLevel(Level.DEBUG);
+    //Logger.getLogger(NodesInitializer.class).setLevel(Level.DEBUG);
     Logger.getLogger(DistributedRepositoryManager.class).setLevel(Level.WARN);
     Logger.getLogger(KBAccess.class).setLevel(Level.WARN);
     Logger.getLogger(RDFEntityPersister.class).setLevel(Level.WARN);
     Logger.getLogger(X509Utils.class).setLevel(Level.WARN);
 
+    LOGGER.info("A.I. Coin version 1.0");
     LOGGER.info("starting the node runtime in the container named " + containerName);
     nodeRuntime = new NodeRuntime(containerName);
     // configure a shutdown hook to run the finalization method in case the JVM is abnormally ended

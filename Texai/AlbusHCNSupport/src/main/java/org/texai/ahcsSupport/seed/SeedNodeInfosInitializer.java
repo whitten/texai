@@ -52,9 +52,9 @@ public class SeedNodeInfosInitializer {
 
     try {
       // the demo mint peer
-      String qualifiedName = "Mint.SingletonConfigurationRole";
-      InetAddress inetAddress = InetAddress.getLocalHost();
-      int port = 35048;
+      String qualifiedName = "Mint.SingletonConfigurationAgent.SingletonConfigurationRole";
+      String hostName = "Mint";
+      int port = 5048;
       String cerfificateFilePath = "/home/reed/docker/Mint/Main-1.0/data/SingletonConfiguration.crt";
       if (!(new File(cerfificateFilePath)).exists()) {
         throw new TexaiException("cerfificate path not found " + cerfificateFilePath);
@@ -63,7 +63,7 @@ public class SeedNodeInfosInitializer {
 
       SeedNodeInfo seedNodeInfo = new SeedNodeInfo(
               qualifiedName,
-              inetAddress,
+              hostName,
               port,
               x509Certificate);
       seedNodeInfos.add(seedNodeInfo);

@@ -22,6 +22,7 @@ chown -R aicoin:aicoin /aicoin
 ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
 ENV REPOSITORIES ../repositories
 ENV SECURITY_DIR /aicoin
+ENV LISTENING_PORT 5048
 
 # -----------------------------------------
 # change to unique values of your choosing

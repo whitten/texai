@@ -25,7 +25,6 @@ package org.texai.ahcs;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import net.sbbi.upnp.impls.InternetGatewayDevice;
@@ -41,8 +40,8 @@ import org.jboss.netty.channel.MessageEvent;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.MessageDispatcher;
 import org.texai.ahcsSupport.Message;
-import org.texai.ahcsSupport.domainEntity.Role;
-import org.texai.network.netty.ConnectionUtils;
+import org.texai.ahcsSupport.domainEntity.Node;
+import org.texai.network.netty.utils.ConnectionUtils;
 import org.texai.network.netty.handler.AbstractAlbusHCSMessageHandler;
 import org.texai.network.netty.handler.AbstractAlbusHCSMessageHandlerFactory;
 import org.texai.network.netty.handler.AbstractBitTorrentHandlerFactory;
@@ -108,8 +107,13 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
    * @param port the given TCP port
    */
   public void listenForIncommingConnections(final int port) {
+    //Preconditions
+    assert port > 1024 : "port must not be a reserved port 1-1024";
 
-    final X509SecurityInfo x509SecurityInfo = null;
+    final X509SecurityInfo x509SecurityInfo = X509Utils.getX509SecurityInfo(
+                  nodeRuntime.getKeyStore(),
+                  nodeRuntime.getKeyStorePassword(),
+                  nodeRuntime.getNodeRuntimeSkill().getRole().getQualifiedName()); // alias
     final AbstractAlbusHCSMessageHandlerFactory albusHCSMessageHandlerFactory = new AlbusHCSMessageHandlerFactory(this);
     final AbstractBitTorrentHandlerFactory bitTorrentHandlerFactory = null;
     final AbstractHTTPRequestHandlerFactory httpRequestHandlerFactory = null;
@@ -369,18 +373,15 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
 
     LOGGER.info("");
     final String recipientQualifiedName = message.getRecipientQualifiedName();
-    // Albus message sent between roles via their respective message routers
-    final Role localRecipientRole = nodeRuntime.getLocalRole(recipientQualifiedName);
-    if (localRecipientRole == null) {
-      LOGGER.info("======> dispatching outbound role message " + message);
-      routeAlbusMessageToPeerRouter(message);
-    } else {
-      // route to local node runtime
+    if (Node.extractContainerName(recipientQualifiedName).equals(nodeRuntime.getContainerName())) {
       LOGGER.info("<====== dispatching inbound role message " + message);
-      // use a separate thread for the role message because it might block, e.g. to retrieve the sender's X509 certificate
+      // use a separate thread for the message dispatch
       nodeRuntime.getExecutor().execute(new AlbusMessageDispatchRunner(
               nodeRuntime, // albusMessageDispatcher
               message));
+    } else {
+      LOGGER.info("======> dispatching outbound role message " + message);
+      routeAlbusMessageToPeerRouter(message);
     }
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("  dispatch completed");

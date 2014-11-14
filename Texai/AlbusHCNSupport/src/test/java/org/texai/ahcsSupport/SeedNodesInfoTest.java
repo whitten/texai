@@ -7,7 +7,6 @@ package org.texai.ahcsSupport;
 
 import org.texai.ahcsSupport.seed.SeedNodeInfo;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
@@ -38,7 +37,7 @@ public class SeedNodesInfoTest {
   // the logger
   private static final Logger LOGGER = Logger.getLogger(SeedNodesInfoTest.class);
   // the test instance
-  private static SeedNodeInfo instance = makeSeedNodesInfo();
+  private static final SeedNodeInfo instance = makeSeedNodesInfo();
 
   public SeedNodesInfoTest() {
   }
@@ -69,12 +68,12 @@ public class SeedNodesInfoTest {
   }
 
   /**
-   * Test of getInetAddress method, of class SeedNodeInfo.
+   * Test of getHostName method, of class SeedNodeInfo.
    */
   @Test
-  public void testGetInetAddress() {
-    LOGGER.info("getInetAddress");
-    assertEquals("localhost/127.0.0.1", instance.getInetAddress().toString());
+  public void testGetHostName() {
+    LOGGER.info("getHostName");
+    assertEquals("gandalf", instance.getHostName());
   }
 
   /**
@@ -120,12 +119,12 @@ public class SeedNodesInfoTest {
   @Test
   public void testToString() {
     LOGGER.info("toString");
-    assertEquals("[Seed TestContainer localhost/127.0.0.1:5048]", instance.toString());
+    assertEquals("[Seed TestContainer gandalf:5048]", instance.toString());
   }
 
   private static SeedNodeInfo makeSeedNodesInfo() {
     final String qualifiedName = "TestContainer.SingletonConfigurationAgent.SingletonConfigurationRole";
-    final InetAddress inetAddress = InetAddress.getLoopbackAddress();
+    final String hostName= "gandalf";
     final int port = NetworkUtils.TEXAI_PORT;
     final X509Certificate x509Certificate;
     final KeyPair keyPair;
@@ -141,7 +140,7 @@ public class SeedNodesInfoTest {
 
     return new SeedNodeInfo(
             qualifiedName,
-            inetAddress,
+            hostName,
             port,
             x509Certificate);
   }

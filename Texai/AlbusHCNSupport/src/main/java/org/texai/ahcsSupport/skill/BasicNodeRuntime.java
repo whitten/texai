@@ -128,7 +128,7 @@ public class BasicNodeRuntime implements MessageDispatcher {
     return Arrays.copyOf(keyStorePassword, keyStorePassword.length);
   }
 
-  /** Sets the key store password.
+  /** Sets the key store password. A copy is used to preserve immutability.
    *
    * @param keyStorePassword the given key store password
    */

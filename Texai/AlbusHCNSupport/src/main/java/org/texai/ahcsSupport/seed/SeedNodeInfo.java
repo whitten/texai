@@ -1,13 +1,11 @@
 package org.texai.ahcsSupport.seed;
 
 import java.io.Serializable;
-import java.net.InetAddress;
 import java.security.cert.X509Certificate;
 import java.util.Objects;
 import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.ahcsSupport.domainEntity.Role;
 import org.texai.util.StringUtils;
-import org.texai.x509.X509SecurityInfo;
 
 /**
  * SeedNodeInfo.java
@@ -32,8 +30,8 @@ public class SeedNodeInfo implements Serializable {
   private static final long serialVersionUID = 1L;
   // the qualified name of the role, container.agent.role
   private final String qualifiedName;
-  // the internet IP address
-  private final InetAddress inetAddress;
+  // the internet host name
+  private final String hostName;
   // the TCP port
   private final int port;
   // the configuration role's certificate
@@ -42,24 +40,24 @@ public class SeedNodeInfo implements Serializable {
   /**
    * Creates a new instance of SeedNodesInfo.
    * @param qualifiedName the qualified name of the role, container.agent.role
-   * @param inetAddress the internet IP address
+   * @param hostName the internet host name
    * @param port the TCP port
    * @param x509Certificate the configuration role's certificate
    */
   public SeedNodeInfo(
           final String qualifiedName,
-          final InetAddress inetAddress,
+          final String hostName,
           final int port,
           final X509Certificate x509Certificate) {
     //Preconditions
     assert StringUtils.isNonEmptyString(qualifiedName) : "qualifiedName must be a non-empty string";
     assert Role.extractRoleName(qualifiedName).equals("SingletonConfigurationRole") : "must be SingletonConfigurationRole";
-    assert inetAddress != null : "inetAddress must not be null";
+    assert StringUtils.isNonEmptyString(hostName) : "hostName must be a non-empty string";
     assert port > 1024 : "port must be greater than 1024";
     assert x509Certificate != null : "x509Certificate must not be null";
 
     this.qualifiedName = qualifiedName;
-    this.inetAddress = inetAddress;
+    this.hostName = hostName;
     this.port = port;
     this.x509Certificate = x509Certificate;
   }
@@ -72,12 +70,12 @@ public class SeedNodeInfo implements Serializable {
     return qualifiedName;
   }
 
-  /** Gets the internet IP address.
+  /** Gets the internet host name.
    *
-   * @return the internet IP address
+   * @return the internet host name
    */
-  public InetAddress getInetAddress() {
-    return inetAddress;
+  public String getHostName() {
+    return hostName;
   }
 
   /** Gets the TCP port.
@@ -121,10 +119,7 @@ public class SeedNodeInfo implements Serializable {
       return false;
     }
     final SeedNodeInfo other = (SeedNodeInfo) obj;
-    if (!Objects.equals(this.qualifiedName, other.qualifiedName)) {
-      return false;
-    }
-    return true;
+    return this.qualifiedName.equals(other.qualifiedName);
   }
 
 
@@ -139,7 +134,7 @@ public class SeedNodeInfo implements Serializable {
             .append("[Seed ")
             .append(Node.extractContainerName(qualifiedName))
             .append(' ')
-            .append(inetAddress)
+            .append(hostName)
             .append(':')
             .append(port)
             .append(']')

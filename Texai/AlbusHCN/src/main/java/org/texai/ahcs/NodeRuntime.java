@@ -27,6 +27,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
+import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.skill.BasicNodeRuntime;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.Role;
@@ -44,8 +45,7 @@ public class NodeRuntime extends BasicNodeRuntime {
   // the logger
   private static final Logger LOGGER = Logger.getLogger(NodeRuntime.class);
   /**
-   * the dictionary of replyWith values used to suspend message-sending threads
-   * while awaiting response messages, replyWith --> lock object
+   * the dictionary of replyWith values used to suspend message-sending threads while awaiting response messages, replyWith --> lock object
    */
   private final Map<UUID, Object> replyWithsDictionary = new HashMap<>();
 
@@ -58,8 +58,7 @@ public class NodeRuntime extends BasicNodeRuntime {
   private final Map<String, X509Certificate> x509CertificateDictionary = new HashMap<>();
 
   /**
-   * the name of the cache for the X.509 certificates, remote role id --> X.509
-   * certificate
+   * the name of the cache for the X.509 certificates, remote role id --> X.509 certificate
    */
   public static final String CACHE_X509_CERTIFICATES = "X.509 certificates";
 
@@ -99,11 +98,10 @@ public class NodeRuntime extends BasicNodeRuntime {
   }
 
   /**
-   * Associates the given role qualified name with the given X.509 certificate,
-   * for subsequent retrieval of the certificate for a given role.
+   * Associates the given role qualified name with the given X.509 certificate, for subsequent retrieval of the certificate for a given
+   * role.
    *
-   * @param qualifiedName the given role qualified name, i.e.
-   * container-name.agent-name.role-name
+   * @param qualifiedName the given role qualified name, i.e. container-name.agent-name.role-name
    * @param x509Certificate the given X.509 certificate
    */
   public void addX509Certificate(
@@ -117,14 +115,15 @@ public class NodeRuntime extends BasicNodeRuntime {
               + x509Certificate);
     }
 
-    x509CertificateDictionary.put(qualifiedName, x509Certificate);
+    synchronized (x509CertificateDictionary) {
+      x509CertificateDictionary.put(qualifiedName, x509Certificate);
+    }
   }
 
   /**
    * Gets the X.509 certificate associated with the given role qualified name.
    *
-   * @param qualifiedName the given role qualified name, i.e.
-   * container-name.agent-name.role-name
+   * @param qualifiedName the given role qualified name, i.e. container-name.agent-name.role-name
    *
    * @return the retrieved X.509 certificate, or null if not found
    */
@@ -132,7 +131,9 @@ public class NodeRuntime extends BasicNodeRuntime {
     //Preconditions
     assert StringUtils.isNonEmptyString(qualifiedName) : "qualifiedName must be a non-empty string";
 
-    return x509CertificateDictionary.get(qualifiedName);
+    synchronized (x509CertificateDictionary) {
+      return x509CertificateDictionary.get(qualifiedName);
+    }
   }
 
   /**
@@ -156,8 +157,19 @@ public class NodeRuntime extends BasicNodeRuntime {
   }
 
   /**
-   * Dispatches a message, which is between roles in this container, or inbound
-   * from another container, or outbound to another container.
+   * Listens for incomming messages on the given port.
+   *
+   * @param port the given TCP port
+   */
+  public void listenForIncommingConnections(final int port) {
+    //Preconditions
+    assert port > 1024 : "port must not be a reserved port 1-1024";
+
+    messageRouter.listenForIncommingConnections(port);
+  }
+
+  /**
+   * Dispatches a message, which is between roles in this container, or inbound from another container, or outbound to another container.
    *
    * @param message the Albus message
    */
@@ -192,9 +204,8 @@ public class NodeRuntime extends BasicNodeRuntime {
   }
 
   /**
-   * Verifies a message sent between roles in the Albus hierarchical control
-   * system network, throwing an exception if the message's digital signature
-   * fails verification.
+   * Verifies a message sent between roles in the Albus hierarchical control system network, throwing an exception if the message's digital
+   * signature fails verification.
    *
    * @param message the message
    */
@@ -204,6 +215,14 @@ public class NodeRuntime extends BasicNodeRuntime {
 
     X509Certificate x509Certificate = getX509Certificate(message.getSenderQualifiedName());
     if (x509Certificate == null) {
+      // new peers joining the network provide their certificate as a parameter
+      if (message.getOperation().equals(AHCSConstants.SEED_CONNECTION_REQUEST_INFO)) {
+        x509Certificate = (X509Certificate) message.get(AHCSConstants.SEED_CONNECTION_REQUEST_INFO_X509_CERTIFICATE);
+        assert x509Certificate != null;
+        addX509Certificate(
+          message.getSenderQualifiedName(), // qualifiedName
+          x509Certificate);
+      }
       throw new TexaiException("X.509 certificate not found for sender " + message.getSenderQualifiedName());
     }
     message.verify(x509Certificate);

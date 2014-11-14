@@ -279,6 +279,8 @@ public final class AHCSConstants {
   public static final String SEED_CONNECTION_REQUEST_INFO_HOST_NAME = "seedConnectionRequest_Info_HostName";
   // the port parameter of the seedConnectionRequest_Info
   public static final String SEED_CONNECTION_REQUEST_INFO_PORT = "seedConnectionRequest_Info_Port";
+  // the X.509 certificate parameter of the seedConnectionRequest_Info
+  public static final String SEED_CONNECTION_REQUEST_INFO_X509_CERTIFICATE = "seedConnectionRequest_Info_X509Certificate";
 
   //
   // shared message parameters

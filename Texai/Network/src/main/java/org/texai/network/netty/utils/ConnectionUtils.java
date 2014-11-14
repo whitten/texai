@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License along with this program;
  * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-package org.texai.network.netty;
+package org.texai.network.netty.utils;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -119,7 +119,7 @@ public final class ConnectionUtils {
 
     // bind and start to accept incoming connections
     serverBootstrap.bind(new InetSocketAddress(port));
-    LOGGER.info("launcher accepting connections on port " + port);
+    LOGGER.info("accepting connections on port " + port);
     return serverBootstrap;
   }
 

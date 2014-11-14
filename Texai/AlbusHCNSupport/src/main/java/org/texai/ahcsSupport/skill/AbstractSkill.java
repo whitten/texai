@@ -189,6 +189,31 @@ public abstract class AbstractSkill {
   }
 
   /**
+   * Makes a message given the recipient service within this role and the operation.
+   *
+   * @param recipientService the recipient service within this role
+   * @param operation the operation
+   * @param parameterDictionary the operation parameter dictionary, name --> value
+   *
+   * @return
+   */
+  public Message makeMessage(
+          final String recipientService,
+          final String operation,
+          final Map<String, Object> parameterDictionary) {
+    //Preconditions
+    assert recipientService == null || Message.isValidService(recipientService) : "the recipient service is not a found Java class " + recipientService;
+    return new Message(
+            role.getQualifiedName(), // senderQualifiedName,
+            getClassName(), // senderService,
+            role.getQualifiedName(), // recipientQualifiedName,
+            recipientService,
+            operation,
+            parameterDictionary,
+            DEFAULT_VERSION);
+  }
+
+  /**
    * Makes a message given the recipient and operation.
    *
    * @param recipientQualifiedName the recipient role's qualified name, container.nodename.rolename
