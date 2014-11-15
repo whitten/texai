@@ -279,6 +279,9 @@ public final class AHCSConstants {
   public static final String SEED_CONNECTION_REQUEST_INFO_HOST_NAME = "seedConnectionRequest_Info_HostName";
   // the port parameter of the seedConnectionRequest_Info
   public static final String SEED_CONNECTION_REQUEST_INFO_PORT = "seedConnectionRequest_Info_Port";
+  //
+  // the singletonAgentHosts_Info operation
+  public static final String SINGLETON_AGENT_HOSTS_INFO = "singletonAgentHosts_Info";
 
   //
   // shared message parameters
@@ -313,6 +316,8 @@ public final class AHCSConstants {
   public static final String MSG_PARM_RECIPIENT_ROLE_ID = "recipient role id";
   // the message parameter for the role type name
   public static final String MSG_PARM_ROLE_TYPE_NAME = "role type name";
+  // the message parameter for the singleton agent hosts
+  public static final String MSG_PARM_SINGLETON_AGENT_HOSTS = "singleton agent hosts";
   // the message parameter for the skill class name
   public static final String MSG_PARM_SKILL_CLASS_NAME = "skill class name";
   // the spokenText parameter

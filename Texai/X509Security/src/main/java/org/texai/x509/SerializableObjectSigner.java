@@ -25,12 +25,18 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.security.InvalidKeyException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import net.jcip.annotations.NotThreadSafe;
+import org.texai.util.TexaiException;
+import static org.texai.x509.X509Utils.BOUNCY_CASTLE_PROVIDER;
+import static org.texai.x509.X509Utils.addBouncyCastleSecurityProvider;
 
 /**
  * Provides digital signatures for serializable objects.
@@ -116,4 +122,29 @@ public final class SerializableObjectSigner {
     signature.update(byteArrayOutputStream.toByteArray());
     return signature.verify(signatureBytes);
   }
+
+  /**
+   * Returns a SHA-512 hash of the given ArrayList of serializable objects.
+   *
+   * @param serializableObject the serialized object, which is an ArrayList of serializable objects.
+   * @return a SHA-512 hash
+   */
+  public static byte[] sha512Hash(final ArrayList<Object> serializableObject) {
+    //Preconditions
+    assert serializableObject != null : "serializableObject must not be null";
+    assert !serializableObject.isEmpty() : "serializableObject must not be empty";
+
+    try {
+      addBouncyCastleSecurityProvider();
+      final MessageDigest messageDigest = MessageDigest.getInstance("SHA-512", BOUNCY_CASTLE_PROVIDER);
+      final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+      final ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+      objectOutputStream.writeObject(serializableObject);
+      messageDigest.update(byteArrayOutputStream.toByteArray());
+      return messageDigest.digest();
+    } catch (NoSuchAlgorithmException | NoSuchProviderException | IOException ex) {
+      throw new TexaiException(ex);
+    }
   }
+
+}

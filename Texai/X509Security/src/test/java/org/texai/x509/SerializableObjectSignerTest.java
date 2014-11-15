@@ -28,6 +28,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SignatureException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import javax.net.ssl.X509KeyManager;
 import org.apache.log4j.Logger;
 import org.junit.After;
@@ -36,6 +37,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.texai.util.Base64Coder;
 
 /**
  *
@@ -138,6 +140,44 @@ public class SerializableObjectSignerTest {
     } catch (IOException | InvalidKeyException | NoSuchAlgorithmException | SignatureException ex) {
       fail(ex.getMessage());
     }
+  }
+
+  /**
+   * Test of sha512Hash method, of class SerializableObjectSigner.
+   */
+  @Test
+  public void testSHA512Hash() {
+    LOGGER.info("sha512Hash");
+
+    ArrayList<Object> serializableObject = new ArrayList<>();
+    serializableObject.add("abc");
+    serializableObject.add(true);
+    serializableObject.add(1L);
+    serializableObject.add(1.5);
+
+    byte[] sha512Hash = SerializableObjectSigner.sha512Hash(serializableObject);
+    String sha512HashString = new String(Base64Coder.encode(sha512Hash));
+    assertEquals("Jq7Eto56T7GbLtKLg1J0stQCSW7YKLn23P7D35GmzfEVE5Pzbpsr7mnH5nwg7nIBFS709fwq7fsFDqNaTJ2IoA==", sha512HashString);
+
+    serializableObject = new ArrayList<>();
+    serializableObject.add("abc");
+    serializableObject.add(true);
+    serializableObject.add(1L);
+    serializableObject.add(1.5);
+
+    sha512Hash = SerializableObjectSigner.sha512Hash(serializableObject);
+    sha512HashString = new String(Base64Coder.encode(sha512Hash));
+    assertEquals("Jq7Eto56T7GbLtKLg1J0stQCSW7YKLn23P7D35GmzfEVE5Pzbpsr7mnH5nwg7nIBFS709fwq7fsFDqNaTJ2IoA==", sha512HashString);
+
+    serializableObject = new ArrayList<>();
+    serializableObject.add("abcd"); // different value
+    serializableObject.add(true);
+    serializableObject.add(1L);
+    serializableObject.add(1.5);
+
+    sha512Hash = SerializableObjectSigner.sha512Hash(serializableObject);
+    sha512HashString = new String(Base64Coder.encode(sha512Hash));
+    assertEquals("MF/fm5fn5VjReFII2xUXfKp3OcTNkDg+Chm+p3c7HuPJ0jUFMD0Sj6O0ocGMIUxWsg2sdew58Es7qiokb+oUfQ==", sha512HashString);
   }
 
   static class MySerializableObject implements Serializable {

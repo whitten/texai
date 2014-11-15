@@ -216,7 +216,8 @@ public class NodeRuntime extends BasicNodeRuntime {
     X509Certificate x509Certificate = getX509Certificate(message.getSenderQualifiedName());
     if (x509Certificate == null) {
       // new peers joining the network provide their certificate as a parameter
-      if (message.getOperation().equals(AHCSConstants.SEED_CONNECTION_REQUEST_INFO)) {
+      if (message.getOperation().equals(AHCSConstants.SEED_CONNECTION_REQUEST_INFO) ||
+              message.getOperation().equals(AHCSConstants.SINGLETON_AGENT_HOSTS_INFO)) {
         LOGGER.info("adding certificate for " + message.getSenderQualifiedName());
         x509Certificate = (X509Certificate) message.get(AHCSConstants.MSG_PARM_X509_CERTIFICATE);
         assert x509Certificate != null;

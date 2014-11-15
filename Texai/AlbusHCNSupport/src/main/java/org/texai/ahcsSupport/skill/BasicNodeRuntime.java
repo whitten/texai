@@ -22,6 +22,7 @@
 package org.texai.ahcsSupport.skill;
 
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,6 +41,8 @@ import org.texai.ahcsSupport.domainEntity.Role;
 import org.texai.kb.persistence.RDFEntityManager;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
+import org.texai.x509.X509SecurityInfo;
+import org.texai.x509.X509Utils;
 
 /**
  * Provides runtime support for nodes in the local JVM.
@@ -137,6 +140,28 @@ public class BasicNodeRuntime implements MessageDispatcher {
     assert keyStorePassword != null : "keyStorePassword must not be null";
 
     this.keyStorePassword = Arrays.copyOf(keyStorePassword, keyStorePassword.length);
+  }
+
+  /** Gets X.509 security information for the given local role.
+   *
+   * @param role  the given local role
+   * @return the X.509 security information
+   */
+  public X509SecurityInfo getX509SecurityInfo(final Role role) {
+    //Preconditions
+    assert role != null : "role must not be null";
+    assert localRoleDictionary.containsKey(role.getQualifiedName()) : "role must be a local role";
+    assert role.areRemoteCommunicationsPermitted() : "role must be permitted to perform remote communications";
+    try {
+      assert getKeyStore().containsAlias(role.getQualifiedName()) : "no key store entry for " + role;
+    } catch (KeyStoreException ex) {
+      throw new TexaiException(ex);
+    }
+
+    return X509Utils.getX509SecurityInfo(
+                  getKeyStore(),
+                  getKeyStorePassword(),
+                  role.getQualifiedName()); // alias
   }
 
   /**

@@ -30,10 +30,9 @@
   (className: org.texai.inference.sparql.domainEntity.Variable)
   (className: org.texai.inference.sparql.domainEntity.WhereClause))
 
- (Launcher
+ (MiscAgentDataObjects
   (indices: "spoc,posc")
-  (className: org.texai.texaiLauncher.domainEntity.NodeRuntimeInfo)
-  (className: org.texai.texaiLauncher.domainEntity.TexaiLauncherInfo))
+  (className: org.texai.skill.domainEntity.SingletonAgentHosts))
 
  (Nodes
   (indices: "spoc,posc")

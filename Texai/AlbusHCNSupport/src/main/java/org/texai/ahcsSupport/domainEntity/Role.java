@@ -346,6 +346,17 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
     }
   }
 
+  /** Gets X.509 security information for this role.
+   *
+   * @return the X.509 security information
+   */
+  public X509SecurityInfo getX509SecurityInfo() {
+    //Preconditions
+    assert areRemoteCommunicationsPermitted() : "role must be permitted to perform remote communications";
+
+    return nodeRuntime.getX509SecurityInfo(this);
+  }
+
   /**
    * Gets the state value associated with the given variable name.
    *

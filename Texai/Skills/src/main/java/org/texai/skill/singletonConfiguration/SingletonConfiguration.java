@@ -17,15 +17,19 @@ import java.io.ObjectInputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicBoolean;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.ahcsSupport.seed.SeedNodeInfo;
+import org.texai.skill.domainEntity.SingletonAgentHosts;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 import org.texai.x509.X509Utils;
@@ -90,6 +94,11 @@ public class SingletonConfiguration extends AbstractSkill {
         seedConnectionRequest(message);
         return true;
 
+      case AHCSConstants.SINGLETON_AGENT_HOSTS_INFO:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
+        seedConnectionReply(message);
+        return true;
+
       case AHCSConstants.PERFORM_MISSION_TASK:
         performMission(message);
         return true;
@@ -132,6 +141,7 @@ public class SingletonConfiguration extends AbstractSkill {
       AHCSConstants.AHCS_INITIALIZE_TASK,
       AHCSConstants.PERFORM_MISSION_TASK,
       AHCSConstants.SEED_CONNECTION_REQUEST_INFO,
+      AHCSConstants.SINGLETON_AGENT_HOSTS_INFO,
       AHCSConstants.TASK_ACCOMPLISHED_INFO};
   }
 
@@ -180,14 +190,15 @@ public class SingletonConfiguration extends AbstractSkill {
       } else {
         LOGGER.info("  " + seedNodeInfo);
         connectToSeedPeer(
-          seedNodeInfo.getQualifiedName(),
-          seedNodeInfo.getHostName(),
-          seedNodeInfo.getPort());
+                seedNodeInfo.getQualifiedName(),
+                seedNodeInfo.getHostName(),
+                seedNodeInfo.getPort());
       }
     });
   }
 
-  /** Connects to the given seed peer.
+  /**
+   * Connects to the given seed peer.
    *
    * @param peerQualifiedName the seed peer name
    * @param hostName the host name
@@ -234,6 +245,108 @@ public class SingletonConfiguration extends AbstractSkill {
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
     LOGGER.info("received a seed connection request from " + message.getSenderContainerName());
+
+    final Map<String, Object> parameterDictionary = new HashMap<>();
+    final SingletonAgentHosts singletonAgentHosts = singletonAgentHosts();
+    parameterDictionary.put(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS, singletonAgentHosts);
+    parameterDictionary.put(AHCSConstants.MSG_PARM_X509_CERTIFICATE, getRole().getX509Certificate());
+    LOGGER.info(singletonAgentHosts.toDetailedString());
+
+    final Message singletonAgentHostsMessage = makeMessage(
+            message.getSenderQualifiedName(), // recipientQualifiedName
+            message.getSenderService(), // recipientService
+            AHCSConstants.SINGLETON_AGENT_HOSTS_INFO, // operation
+            parameterDictionary); // parameterDictionary
+
+    sendMessage(singletonAgentHostsMessage);
+  }
+
+  /**
+   * Process the received connection reply.
+   *
+   * @param message the received seed connection reply message
+   */
+  private void seedConnectionReply(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+
+    LOGGER.info("received a seed connection reply from " + message.getSenderContainerName());
+    final SingletonAgentHosts singletonAgentHosts =
+            (SingletonAgentHosts) message.get(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS);
+    LOGGER.info(singletonAgentHosts.toDetailedString());
+
+    //TODO make the parent role assignments
+  }
+
+  /**
+   * Returns a demo version of the singleton agent hosts assignments, which are all to the Mint peer.
+   *
+   * the network singleton nodes (nomadic agents) ... Mint.NetworkLogControlAgent Mint.NetworkOperationAgent
+   * Mint.NetworkSingletonConfigurationAgent Mint.TopLevelGovernanceAgent Mint.TopLevelHeartbeatAgent Mint.TopmostFriendshipAgent
+   * Mint.XAIFinancialAccountingAndControlAgent Mint.XAIMintAgent Mint.XAINetworkEpisodicMemoryAgent Mint.XAINetworkOperationAgent
+   * Mint.XAINetworkSeedAgent Mint.XAIPrimaryAuditAgent Mint.XAIRecoveryAgent Mint.XAIRewardAllocationAgent
+   *
+   * @return a demo version of the singleton agent hosts assignments
+   */
+  private SingletonAgentHosts singletonAgentHosts() {
+    final Map<String, String> singletonAgentDictionary = new HashMap<>();
+    singletonAgentDictionary.put("NetworkLogControlAgent", "Mint");
+    singletonAgentDictionary.put("NetworkOperationAgent", "Mint");
+    singletonAgentDictionary.put("NetworkSingletonConfigurationAgent", "Mint");
+    singletonAgentDictionary.put("TopLevelGovernanceAgent", "Mint");
+    singletonAgentDictionary.put("TopLevelHeartbeatAgent", "Mint");
+    singletonAgentDictionary.put("TopmostFriendshipAgent", "Mint");
+    singletonAgentDictionary.put("XAIFinancialAccountingAndControlAgent", "Mint");
+    singletonAgentDictionary.put("XAIMintAgent", "Mint");
+    singletonAgentDictionary.put("XAINetworkEpisodicMemoryAgent", "Mint");
+    singletonAgentDictionary.put("XAINetworkOperationAgent", "Mint");
+    singletonAgentDictionary.put("XAINetworkSeedAgent", "Mint");
+    singletonAgentDictionary.put("XAIPrimaryAuditAgent", "Mint");
+    singletonAgentDictionary.put("XAIRecoveryAgent", "Mint");
+    singletonAgentDictionary.put("XAIRewardAllocationAgent", "Mint");
+    final DateTime effectiveDateTime = new DateTime(
+            2014, // year
+            11, // monthOfYear,
+            14, // dayOfMonth
+            12, // hourOfDay
+            15, // minuteOfHour,
+            5, // secondOfMinute,
+            0, // millisOfSecond,
+            DateTimeZone.forTimeZone(TimeZone.getTimeZone("CST"))); // zone
+    final DateTime terminationDateTime = new DateTime(
+            2015, // year
+            11, // monthOfYear,
+            14, // dayOfMonth
+            12, // hourOfDay
+            15, // minuteOfHour,
+            5, // secondOfMinute,
+            0, // millisOfSecond,
+            DateTimeZone.forTimeZone(TimeZone.getTimeZone("CST"))); // zone
+    final DateTime createdDateTime = new DateTime(
+            2014, // year
+            11, // monthOfYear,
+            13, // dayOfMonth
+            12, // hourOfDay
+            15, // minuteOfHour,
+            5, // secondOfMinute,
+            0, // millisOfSecond,
+            DateTimeZone.forTimeZone(TimeZone.getTimeZone("CST"))); // zone
+    final byte[] authorSignatureBytes = SingletonAgentHosts.signSingletonAgentHosts(
+            singletonAgentDictionary,
+            effectiveDateTime,
+            terminationDateTime,
+            getRole().getQualifiedName(), // authorQualifiedName,
+            createdDateTime,
+            getRole().getX509SecurityInfo().getPrivateKey());
+
+    return new SingletonAgentHosts(
+            singletonAgentDictionary,
+            effectiveDateTime,
+            terminationDateTime,
+            getRole().getQualifiedName(), // authorQualifiedName,
+            createdDateTime,
+            authorSignatureBytes);
   }
 
   /**
@@ -250,4 +363,5 @@ public class SingletonConfiguration extends AbstractSkill {
     LOGGER.info("performing the mission");
 
   }
+
 }
