@@ -160,6 +160,9 @@ public final class AHCSConstants {
   // the script name
   public static final String INTERPRET_FACT_ACQUISITION_SCRIPT_TASK_NAME = "interpret fact acquisition script_Task_name";
   //
+  // the joinAcknowledged_Task operation
+  public static final String JOIN_ACKNOWLEDGED_TASK = "joinAcknowledged_Task";
+  //
   // the learn faces_Task operation
   public static final String LEARN_FACES_TASK = "learn faces_Task";
   //
@@ -260,8 +263,10 @@ public final class AHCSConstants {
   //
   // information messages - end with _Info
   //
+  // the acknowledged_Info operation
+  public static final String ACKNOWLEDGED_INFO = "acknowledged_Info";
   // the joinNetworkSingleton_Info operation
-  public static final String JOIN_NETWORK_SINGLETON_AGENT_INFO = "joinNetworkSingleton_Info";
+  public static final String JOIN_NETWORK_SINGLETON_AGENT_INFO = "joinNetworkSingletonAgent_Info";
   // the keep-alive information operation
   public static final String KEEP_ALIVE_INFO = "keepAlive_Info";
   // the task accomplished information operation

@@ -142,33 +142,38 @@ public class ConfigureParentToSingleton extends AbstractSkill {
     // iterate over all roles of this agent
     getRole().getNode().getRoles().stream().sorted().forEach((Role role) -> {
       final String parentQualifiedName = role.getParentQualifiedName();
-      assert StringUtils.isNonEmptyString(parentQualifiedName);
-      if (singletonAgentHosts.isNetworkSingleton(parentQualifiedName)) {
-        // a parent agent/role needs to be changed to the corresponding network singleton agent/role
-        final String newParentQualifiedName = singletonAgentHosts.mapNetworkSingleton(parentQualifiedName);
-        assert StringUtils.isNonEmptyString(newParentQualifiedName);
-        stringBuilder
-                .append("\n  old parent role: ")
-                .append(parentQualifiedName)
-                .append("\n  new parent role: ")
-                .append(newParentQualifiedName);
-        role.setParentQualifiedName(newParentQualifiedName);
-        LOGGER.info(stringBuilder.toString());
+      if (StringUtils.isNonEmptyString(parentQualifiedName)) {
+        if (singletonAgentHosts.isNetworkSingleton(parentQualifiedName)) {
+          // a parent agent/role needs to be changed to the corresponding network singleton agent/role
+          final String newParentQualifiedName = singletonAgentHosts.mapNetworkSingleton(parentQualifiedName);
+          assert StringUtils.isNonEmptyString(newParentQualifiedName);
+          stringBuilder
+                  .append("\n  old parent role: ")
+                  .append(parentQualifiedName)
+                  .append("\n  new parent role: ")
+                  .append(newParentQualifiedName);
+          role.setParentQualifiedName(newParentQualifiedName);
+          LOGGER.info(stringBuilder.toString());
 
-        // send a join info message to the new parent agent/role
-        final Message joinMessage = new Message(
-                role.getQualifiedName(), // senderQualifiedName
-                null, // senderService
-                newParentQualifiedName, // recipientQualifiedName
-                null, // recipientService
-                AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO); // operation
-        assert role.getX509Certificate() != null;
-        joinMessage.put(AHCSConstants.MSG_PARM_X509_CERTIFICATE, role.getX509Certificate());
+          // send a join info message to the new parent agent/role
+          final Message joinMessage = new Message(
+                  role.getQualifiedName(), // senderQualifiedName
+                  null, // senderService
+                  newParentQualifiedName, // recipientQualifiedName
+                  null, // recipientService
+                  AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO); // operation
+          assert role.getX509Certificate() != null;
+          joinMessage.put(AHCSConstants.MSG_PARM_X509_CERTIFICATE, role.getX509Certificate());
 
-        role.sendMessageViaSeparateThread(joinMessage);
+          //TODO set and handle timeout
+          role.sendMessageViaSeparateThread(joinMessage);
+        }
+      } else {
+        LOGGER.info("  no parent role for " + role);
       }
     });
 
     LOGGER.info(stringBuilder.toString());
   }
+
 }

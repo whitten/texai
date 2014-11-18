@@ -215,9 +215,11 @@ public class NodeRuntime extends BasicNodeRuntime {
 
     X509Certificate x509Certificate = getX509Certificate(message.getSenderQualifiedName());
     if (x509Certificate == null) {
-      // new peers joining the network provide their certificate as a parameter
-      if (message.getOperation().equals(AHCSConstants.SEED_CONNECTION_REQUEST_INFO) ||
-              message.getOperation().equals(AHCSConstants.SINGLETON_AGENT_HOSTS_INFO)) {
+      // both sides provide their certificate as a parameter, when a new peer joins the network
+      if (message.getOperation().equals(AHCSConstants.SEED_CONNECTION_REQUEST_INFO)
+              || message.getOperation().equals(AHCSConstants.SINGLETON_AGENT_HOSTS_INFO)
+              || message.getOperation().equals(AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO)
+              || message.getOperation().equals(AHCSConstants.JOIN_ACKNOWLEDGED_TASK)) {
         LOGGER.info("adding certificate for " + message.getSenderQualifiedName());
         x509Certificate = (X509Certificate) message.get(AHCSConstants.MSG_PARM_X509_CERTIFICATE);
         assert x509Certificate != null;
@@ -229,7 +231,9 @@ public class NodeRuntime extends BasicNodeRuntime {
       }
     }
     message.verify(x509Certificate);
-    LOGGER.info("verified message");
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("verified message");
+    }
   }
 
   //TODO - use this method or delete it.

@@ -471,7 +471,13 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
       }
       if (!isSkillFound) {
         if (message.getRecipientService() == null) {
-          LOGGER.info("no skill understands the opeation " + message.toDetailedString());
+          LOGGER.info("no skill understands the operation ...");
+          getSkills().stream().sorted().forEach((AbstractSkill skill1) -> {
+            LOGGER.info("  " + skill1 + " understands");
+            for (final String understoodOperation : skill1.getUnderstoodOperations()) {
+              LOGGER.info("    " + understoodOperation);
+            }
+          });
         } else {
           LOGGER.info(getNode().getName() + ": skill not found for service: " + message.toDetailedString() + "\nservice: " + message.getRecipientService());
           LOGGER.info(getNode().getName() + ": skillDictionary:\n  " + skillDictionary);

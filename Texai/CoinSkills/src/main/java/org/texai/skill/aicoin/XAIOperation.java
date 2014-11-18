@@ -104,6 +104,15 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
         performMission(message);
         return true;
 
+      case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        joinAcknowledgedTask(message);
+        return true;
+
+      case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
+        LOGGER.warn(message);
+        return true;
+
       // handle other operations ...
     }
 
@@ -142,7 +151,9 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
       AHCSConstants.PERFORM_MISSION_TASK,
-      AHCSConstants.TASK_ACCOMPLISHED_INFO};
+      AHCSConstants.TASK_ACCOMPLISHED_INFO,
+      AHCSConstants.JOIN_ACKNOWLEDGED_TASK
+    };
   }
 
   /**
@@ -256,6 +267,18 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
   public void receiveBitcoinMessageFromSlave(final com.google.bitcoin.core.Message message) {
     // send the outbound bitcoin message from the slave peer to the Texai network recipient.
 
+  }
+
+  /**
+   * Receive the new parent role's acknowledgement of joining the network.
+   *
+   * @param message the received perform mission task message
+   */
+  private void joinAcknowledgedTask(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+
+    LOGGER.info("join acknowledged from " + message.getSenderQualifiedName());
   }
 
 }

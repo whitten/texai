@@ -20,8 +20,10 @@
  */
 package org.texai.skill.governance;
 
+import java.security.cert.X509Certificate;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
+import org.texai.ahcs.NodeRuntime;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.skill.AbstractSkill;
@@ -77,6 +79,11 @@ public final class TopmostFriendship extends AbstractSkill {
         singletonAgentHosts(message);
         return true;
 
+      case AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        joinNetworkSingletonAgent(message);
+        return true;
+
       // handle other operations ...
     }
 
@@ -113,7 +120,8 @@ public final class TopmostFriendship extends AbstractSkill {
     return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.SINGLETON_AGENT_HOSTS_INFO
+      AHCSConstants.SINGLETON_AGENT_HOSTS_INFO,
+      AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO
     };
   }
 
@@ -168,12 +176,6 @@ public final class TopmostFriendship extends AbstractSkill {
   }
 
   /**
-   * Become passive as the network singleton assumes responsibility for this role's child roles.
-   */
-  private void becomePassive() {
-  }
-
-  /**
    * Perform this role's mission, which is to provide topmost perception and friendship behavior.
    */
   private void performMission() {
@@ -202,4 +204,31 @@ public final class TopmostFriendship extends AbstractSkill {
     return LOGGER;
   }
 
+
+  /** Pass down the task to configure roles for singleton agent hosts.
+   *
+   * @param message the confiure singleton agent hosts task message
+   */
+  private void joinNetworkSingletonAgent(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+
+    LOGGER.info("child role joining this network singleton " + message.getSenderQualifiedName());
+    final String childQualifiedName = message.getSenderQualifiedName();
+    final X509Certificate x509Certificate = (X509Certificate) message.get(AHCSConstants.MSG_PARM_X509_CERTIFICATE);
+    assert x509Certificate != null;
+
+    ((NodeRuntime) getNodeRuntime()).addX509Certificate(childQualifiedName, x509Certificate);
+
+    // send a acknowledged_info message to the joined peer agent/role
+    final Message acknowledgedInfoMessage = makeMessage(
+            message.getSenderQualifiedName(), // recipientQualifiedName
+            message.getSenderService(), // recipientService
+            AHCSConstants.JOIN_ACKNOWLEDGED_TASK); // operation
+    acknowledgedInfoMessage.put(
+            AHCSConstants.MSG_PARM_X509_CERTIFICATE, // parameterName
+            getRole().getX509Certificate()); // parameterValue
+    sendMessage(acknowledgedInfoMessage);
+  }
 }

@@ -59,7 +59,7 @@ public class NodesInitializerTest {
   private final static String SINGLETON_CONFIGURATION_FILE_PATH = "data/test-SingletonConfiguration.crt";
   // the hash of nodes-test.xml
   public final static String NODES_TEST_HASH
-          = "17fd128X8tpU3h9ytYsR2rxfIECyerE70gamsC/fpyL6bO0mGTP4W4ovYn9tN6iu+KVDqRcfhmwwB23sWnyo2A==";
+          = "rB/XRibYEIRQqThfyu3dgWwYMDG/GFZA/ooMw6f9H2hiI7bftitMGEo7xHSqZt6YtiZ7aA1ud6TPkBgFZ79xeA==";
 
   public NodesInitializerTest() {
   }

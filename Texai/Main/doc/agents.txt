@@ -1,0 +1,54 @@
+the network singleton nodes (nomadic agents) and their  child roles  ...
+
+  Mint.NetworkLogControlAgent
+    Mint.ContainerLogControlAgent.ContainerLogControlRole
+
+  Mint.NetworkOperationAgent
+    Mint.ContainerOperationAgent.ContainerOperationRole
+    Mint.NetworkLogControlAgent.NetworkLogControlRole
+    Mint.NetworkSingletonConfigurationAgent.NetworkSingletonConfigurationRole
+    Mint.XAINetworkOperationAgent.XAINetworkOperationRole
+
+  Mint.NetworkSingletonConfigurationAgent
+    Mint.SingletonConfigurationAgent.SingletonConfigurationRole
+
+  Mint.TopLevelGovernanceAgent
+    Mint.ContainerGovernanceAgent.ContainerGovernanceRole
+
+  Mint.TopLevelHeartbeatAgent
+    Mint.ContainerHeartbeatAgent.ContainerHeartbeatRole
+
+  Mint.TopmostFriendshipAgent
+    Mint.NetworkOperationAgent.NetworkOperationRole
+    Mint.TopLevelGovernanceAgent.TopLevelGovernanceRole
+    Mint.TopLevelHeartbeatAgent.TopLevelHeartbeatRole
+
+  Mint.XAIFinancialAccountingAndControlAgent
+
+  Mint.XAIMintAgent
+
+  Mint.XAINetworkEpisodicMemoryAgent
+    Mint.XAIContainerEpisodicMemoryAgent.XAIContainerEpisodicMemoryRole
+
+  Mint.XAINetworkOperationAgent
+    Mint.XAIBlockchainArchiveAgent.XAIBlockchainArchiveRole
+    Mint.XAIClientGatewayAgent.XAIClientGatewayRole
+    Mint.XAIContainerAuditAgent.XAIContainerAuditRole
+    Mint.XAIContainerCertificateAuthorityAgent.XAIContainerCertificateAuthorityRole
+    Mint.XAIFinancialAccountingAndControlAgent.XAIClientGatewayRole
+    Mint.XAIMintAgent.XAIMintRole
+    Mint.XAINetworkEpisodicMemoryAgent.XAINetworkEpisodicMemoryRole
+    Mint.XAIOperationAgent.XAIOperationRole
+    Mint.XAIPrimaryAuditAgent.XAIPrimaryAuditRole
+    Mint.XAIRecoveryAgent.XAIRecoveryRole
+    Mint.XAIRewardAllocationAgent.XAIRewardAllocationRole
+
+  Mint.XAINetworkSeedAgent
+    Mint.XAISeedAgent.XAISeedRole
+
+  Mint.XAIPrimaryAuditAgent
+
+  Mint.XAIRecoveryAgent
+
+  Mint.XAIRewardAllocationAgent
+

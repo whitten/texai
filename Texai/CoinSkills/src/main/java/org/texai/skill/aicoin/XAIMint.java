@@ -1,10 +1,12 @@
 package org.texai.skill.aicoin;
 
 import java.io.IOException;
+import java.security.cert.X509Certificate;
 import java.util.Timer;
 import java.util.TimerTask;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
+import org.texai.ahcs.NodeRuntime;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
@@ -86,6 +88,20 @@ public final class XAIMint extends AbstractSkill {
         mintNewBlocks();
         return true;
 
+      case AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        joinNetworkSingletonAgent(message);
+        return true;
+
+      case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        joinAcknowledgedTask(message);
+        return true;
+
+      case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
+        LOGGER.warn(message);
+        return true;
+
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
         return true;
@@ -122,7 +138,9 @@ public final class XAIMint extends AbstractSkill {
     return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.MINT_NEW_BLOCKS_TASK
+      AHCSConstants.MINT_NEW_BLOCKS_TASK,
+      AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO,
+      AHCSConstants.JOIN_ACKNOWLEDGED_TASK
     };
   }
 
@@ -176,5 +194,44 @@ public final class XAIMint extends AbstractSkill {
     } catch (final IOException ex) {
       throw new TexaiException(ex);
     }
+  }
+
+  /** Pass down the task to configure roles for singleton agent hosts.
+   *
+   * @param message the confiure singleton agent hosts task message
+   */
+  private void joinNetworkSingletonAgent(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+
+    LOGGER.info("child role joining this network singleton " + message.getSenderQualifiedName());
+    final String childQualifiedName = message.getSenderQualifiedName();
+    final X509Certificate x509Certificate = (X509Certificate) message.get(AHCSConstants.MSG_PARM_X509_CERTIFICATE);
+    assert x509Certificate != null;
+
+    ((NodeRuntime) getNodeRuntime()).addX509Certificate(childQualifiedName, x509Certificate);
+
+    // send a acknowledged_info message to the joined peer agent/role
+    final Message acknowledgedInfoMessage = makeMessage(
+            message.getSenderQualifiedName(), // recipientQualifiedName
+            message.getSenderService(), // recipientService
+            AHCSConstants.JOIN_ACKNOWLEDGED_TASK); // operation
+    acknowledgedInfoMessage.put(
+            AHCSConstants.MSG_PARM_X509_CERTIFICATE, // parameterName
+            getRole().getX509Certificate()); // parameterValue
+    sendMessage(acknowledgedInfoMessage);
+  }
+
+  /**
+   * Receive the new parent role's acknowledgement of joining the network.
+   *
+   * @param message the received perform mission task message
+   */
+  private void joinAcknowledgedTask(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+
+    LOGGER.info("join acknowledged from " + message.getSenderQualifiedName());
   }
 }

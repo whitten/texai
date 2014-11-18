@@ -37,7 +37,6 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -573,6 +572,20 @@ public final class NodesInitializer {
    * Displays the network singleton nodes.
    */
   private void displayNetworkSingletonNodes() {
+    LOGGER.debug("");
+    LOGGER.debug("the network singleton nodes (nomadic agents) and their  child roles  ...");
+    nodeAccess.getNodes().stream().filter(Node.isNetworkSingletonNode()).sorted().forEach(node -> {
+      LOGGER.debug("");
+      LOGGER.debug("  " + node);
+      node.getRoles().stream().sorted().forEach((Role role) -> {
+        role.getChildQualifiedNames().stream().sorted().forEach((String childQualifiedName) -> {
+          final Role childRole = nodeRuntime.getLocalRole(childQualifiedName);
+          assert childRole != null;
+          LOGGER.debug("    " + childQualifiedName);
+        });
+      });
+    });
+
     LOGGER.debug("");
     LOGGER.debug("the network singleton nodes (nomadic agents) and their filtered non-singleton child roles  ...");
     nodeAccess.getNodes().stream().filter(Node.isNetworkSingletonNode()).sorted().forEach(node -> {

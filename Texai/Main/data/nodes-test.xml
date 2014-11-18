@@ -29,7 +29,7 @@
       </role>
       <role>
         <qualifiedName>UniversalRolesAgent.ConfigureParentToSingletonRole</qualifiedName>
-        <description>Provides periodic heartbeat messages to indicate that this node is alive.</description>
+        <description>Configures parent roles to refer to network singleton agent roles.</description>
         <parentQualifiedName>ContainerOperationAgent.ContainerOperationRole</parentQualifiedName>
         <skill-classes>
           <skill-class>
@@ -466,7 +466,7 @@
     </prototypeNodeNames>
     <roles>
       <role>
-        <qualifiedName>XAINetworkSeedAgent.XAINetworkSeedRole</qualifiedName>
+        <qualifiedName>XAISeedAgent.XAISeedRole</qualifiedName>
         <description>Provides a AICoin network seed for wallet and processor clients. Maintains the mapping of client gateways
           and their respective IP addresses.</description>
         <parentQualifiedName>XAINetworkSeedAgent.XAINetworkSeedRole</parentQualifiedName>

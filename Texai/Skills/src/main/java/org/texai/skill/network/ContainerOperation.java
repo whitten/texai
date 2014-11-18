@@ -85,6 +85,15 @@ public final class ContainerOperation extends AbstractSkill {
         configureSingletonAgentHostsTask(message);
         return true;
 
+      case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        joinAcknowledgedTask(message);
+        return true;
+
+      case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
+        LOGGER.warn(message);
+        return true;
+
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
         return true;
@@ -124,9 +133,11 @@ public final class ContainerOperation extends AbstractSkill {
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.OPERATION_NOT_PERMITTED_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
       AHCSConstants.PERFORM_MISSION_TASK,
-      AHCSConstants.DELEGATE_CONFIGURE_SINGLETON_AGENT_HOSTS_TASK
+      AHCSConstants.DELEGATE_CONFIGURE_SINGLETON_AGENT_HOSTS_TASK,
+      AHCSConstants.JOIN_ACKNOWLEDGED_TASK
     };
   }
 
@@ -138,7 +149,6 @@ public final class ContainerOperation extends AbstractSkill {
   private void performMission(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
-    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
     final Message performMissionMessage = makeMessage(
             NodeRuntimeSkill.class.getName(), // recipientService
@@ -170,7 +180,18 @@ public final class ContainerOperation extends AbstractSkill {
       configureSingletonAgentHostsTask.put(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS, singletonAgentHosts);
       sendMessageViaSeparateThread(configureSingletonAgentHostsTask);
     });
-    propagateOperationToChildRoles(AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK);
+  }
+
+  /**
+   * Receive the new parent role's acknowledgement of joining the network.
+   *
+   * @param message the received perform mission task message
+   */
+  private void joinAcknowledgedTask(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+
+    LOGGER.info("join acknowledged from " + message.getSenderQualifiedName());
   }
 
 }

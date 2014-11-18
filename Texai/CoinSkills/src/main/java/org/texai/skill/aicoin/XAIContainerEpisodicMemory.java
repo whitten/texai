@@ -73,6 +73,15 @@ public class XAIContainerEpisodicMemory extends AbstractSkill {
         setSkillState(State.READY);
         return true;
 
+      case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        joinAcknowledgedTask(message);
+        return true;
+
+      case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
+        LOGGER.warn(message);
+        return true;
+
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
         return true;
@@ -107,8 +116,21 @@ public class XAIContainerEpisodicMemory extends AbstractSkill {
   public String[] getUnderstoodOperations() {
     return new String[] {
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.JOIN_ACKNOWLEDGED_TASK
     };
+  }
+
+  /**
+   * Receive the new parent role's acknowledgement of joining the network.
+   *
+   * @param message the received perform mission task message
+   */
+  private void joinAcknowledgedTask(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+
+    LOGGER.info("join acknowledged from " + message.getSenderQualifiedName());
   }
 
 }

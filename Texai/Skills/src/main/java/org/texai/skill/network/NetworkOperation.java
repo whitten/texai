@@ -99,6 +99,15 @@ public final class NetworkOperation extends AbstractSkill {
         joinNetworkSingletonAgent(message);
         return true;
 
+      case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        joinAcknowledgedTask(message);
+        return true;
+
+      case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
+        LOGGER.warn(message);
+        return true;
+
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
         return true;
@@ -142,7 +151,8 @@ public final class NetworkOperation extends AbstractSkill {
       AHCSConstants.AHCS_INITIALIZE_TASK,
       AHCSConstants.PERFORM_MISSION_TASK,
       AHCSConstants.DELEGATE_CONFIGURE_SINGLETON_AGENT_HOSTS_TASK,
-      AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO
+      AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO,
+      AHCSConstants.JOIN_ACKNOWLEDGED_TASK
     };
   }
 
@@ -201,7 +211,7 @@ public final class NetworkOperation extends AbstractSkill {
             = (SingletonAgentHosts) message.get(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS); // parameterName
     assert singletonAgentHosts != null;
 
-    // send message to network operations -- resend to container operations --> child Configure roles.
+    // send message to container operations to configure parent roles throughout the container.
     final Message configureSingletonAgentHostsTask = makeMessage(
             getRole().getChildQualifiedNameForAgent("ContainerOperationAgent"), // recipientQualifiedName
             ContainerOperation.class.getName(), // recipientService
@@ -220,14 +230,34 @@ public final class NetworkOperation extends AbstractSkill {
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
-    LOGGER.info("child role joining this network singleton");
+    LOGGER.info("child role joining this network singleton " + message.getSenderQualifiedName());
     final String childQualifiedName = message.getSenderQualifiedName();
     final X509Certificate x509Certificate = (X509Certificate) message.get(AHCSConstants.MSG_PARM_X509_CERTIFICATE);
     assert x509Certificate != null;
 
     ((NodeRuntime) getNodeRuntime()).addX509Certificate(childQualifiedName, x509Certificate);
 
-    // send a resume
+    // send a acknowledged_info message to the joined peer agent/role
+    final Message acknowledgedInfoMessage = makeMessage(
+            message.getSenderQualifiedName(), // recipientQualifiedName
+            message.getSenderService(), // recipientService
+            AHCSConstants.JOIN_ACKNOWLEDGED_TASK); // operation
+    acknowledgedInfoMessage.put(
+            AHCSConstants.MSG_PARM_X509_CERTIFICATE, // parameterName
+            getRole().getX509Certificate()); // parameterValue
+    sendMessage(acknowledgedInfoMessage);
+  }
+
+  /**
+   * Receive the new parent role's acknowledgement of joining the network.
+   *
+   * @param message the received perform mission task message
+   */
+  private void joinAcknowledgedTask(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+
+    LOGGER.info("join acknowledged from " + message.getSenderQualifiedName());
   }
 
 }

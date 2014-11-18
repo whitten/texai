@@ -105,6 +105,15 @@ public class SingletonConfiguration extends AbstractSkill {
         performMission(message);
         return true;
 
+      case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        joinAcknowledgedTask(message);
+        return true;
+
+      case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
+        LOGGER.warn(message);
+        return true;
+
       //TODO REQUEST_CONFIGURATON_TASK
       // seed another peer who requests the locations of the nomadic singleton agents.
       // handle other operations ...
@@ -144,6 +153,7 @@ public class SingletonConfiguration extends AbstractSkill {
       AHCSConstants.PERFORM_MISSION_TASK,
       AHCSConstants.SEED_CONNECTION_REQUEST_INFO,
       AHCSConstants.SINGLETON_AGENT_HOSTS_INFO,
+      AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.TASK_ACCOMPLISHED_INFO};
   }
 
@@ -377,6 +387,18 @@ public class SingletonConfiguration extends AbstractSkill {
                 seedNodeInfo.getPort());
       }
     });
+  }
+
+  /**
+   * Receive the new parent role's acknowledgement of joining the network.
+   *
+   * @param message the received perform mission task message
+   */
+  private void joinAcknowledgedTask(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+
+    LOGGER.info("join acknowledged from " + message.getSenderQualifiedName());
   }
 
 }
