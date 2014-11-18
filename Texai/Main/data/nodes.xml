@@ -7,7 +7,7 @@
     <roles>
       <role>
         <qualifiedName>UniversalRolesAgent.GovernanceRole</qualifiedName>
-        <description>Ensures that this node complies with policy</description>
+        <description>Ensures that this node complies with policy.</description>
         <parentQualifiedName>ContainerGovernanceAgent.ContainerGovernanceRole</parentQualifiedName>
         <skill-classes>
           <skill-class>
@@ -23,6 +23,17 @@
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.heartbeat.Heartbeat</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+      <role>
+        <qualifiedName>UniversalRolesAgent.ConfigureParentToSingletonRole</qualifiedName>
+        <description>Provides periodic heartbeat messages to indicate that this node is alive.</description>
+        <parentQualifiedName>ContainerOperationAgent.ContainerOperationRole</parentQualifiedName>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.singletonConfiguration.ConfigureParentToSingleton</skill-class-name>
           </skill-class>
         </skill-classes>
         <variableNames></variableNames>
@@ -387,7 +398,7 @@
         <qualifiedName>NetworkSingletonConfigurationAgent.NetworkSingletonConfigurationRole</qualifiedName>
         <description>Provides network configuration the AICoin network. Maintains the assignment of
           nomadic agents to particular containers.</description>
-        <parentQualifiedName>XAINetworkOperationAgent.XAINetworkOperationRole</parentQualifiedName>
+        <parentQualifiedName>NetworkOperationAgent.NetworkOperationRole</parentQualifiedName>
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>

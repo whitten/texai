@@ -60,6 +60,7 @@ public class XAIContainerEpisodicMemory extends AbstractSkill {
   public boolean receiveMessage(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
+    assert getRole().getNode().getNodeRuntime() != null;
 
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
@@ -106,7 +107,7 @@ public class XAIContainerEpisodicMemory extends AbstractSkill {
   public String[] getUnderstoodOperations() {
     return new String[] {
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
     };
   }
 

@@ -227,7 +227,8 @@ public class Node implements CascadePersistence, Comparable<Node> {
     return isNetworkSingleton;
   }
 
-  /** Returns a predicate for whether this node is a singleton nomadic agent.
+  /**
+   * Returns a predicate for whether this node is a singleton nomadic agent.
    *
    * @return a predicate for whether this node is a singleton nomadic agent
    */
@@ -246,6 +247,37 @@ public class Node implements CascadePersistence, Comparable<Node> {
   }
 
   /**
+   * Extracts the container name from the given qualified name string, container-name.agent-name.role-name .
+   *
+   * @param qualifiedName the given qualified name string, container-name.agent-name.role-name
+   *
+   * @return the container name
+   */
+  public static String extractContainerName(final String qualifiedName) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(qualifiedName) : "qualifiedName must be a non empty string";
+
+    final String[] names = qualifiedName.split("\\.");
+    return names[0];
+  }
+
+  /**
+   * Extracts the container and agent name from the given qualified name string, container-name.agent-name.role-name .
+   *
+   * @param qualifiedName the given qualified name string, container-name.agent-name.role-name
+   *
+   * @return the container and agent name, container-name.agent-name
+   */
+  public static String extractContainerAgentName(final String qualifiedName) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(qualifiedName) : "qualifiedName must be a non empty string";
+
+    final String[] names = qualifiedName.split("\\.");
+    assert names.length == 3;
+    return names[0] + '.' + names[1];
+  }
+
+  /**
    * Extracts the agent name from this agent's qualified name string, container-name.agent-name.role-name.
    *
    * @return the agent name
@@ -253,7 +285,7 @@ public class Node implements CascadePersistence, Comparable<Node> {
   public String extractAgentName() {
 
     final String[] names = name.split("\\.");
-    assert names.length == 2;
+    assert names.length > 1;
 
     return names[1];
   }
@@ -276,18 +308,35 @@ public class Node implements CascadePersistence, Comparable<Node> {
   }
 
   /**
-   * Extracts the container name from the given qualified name string, container-name.agent-name.role-name .
+   * Extracts the agent name and role from the given qualified name string, container-name.agent-name.role-name .
    *
    * @param qualifiedName the given qualified name string, container-name.agent-name.role-name
    *
-   * @return the container name
+   * @return the agent name and role
    */
-  public static String extractContainerName(final String qualifiedName) {
+  public static String extractAgentRoleName(final String qualifiedName) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(qualifiedName) : "qualifiedName must be a non empty string";
+
+    int index = qualifiedName.indexOf('.');
+    assert index > -1;
+    return qualifiedName.substring(index + 1);
+  }
+
+  /**
+   * Extracts the role name from the given qualified name string, container-name.agent-name.role-name .
+   *
+   * @param qualifiedName the given qualified name string, container-name.agent-name.role-name
+   *
+   * @return the role name
+   */
+  public static String extractRoleName(final String qualifiedName) {
     //Preconditions
     assert StringUtils.isNonEmptyString(qualifiedName) : "qualifiedName must be a non empty string";
 
     final String[] names = qualifiedName.split("\\.");
-    return names[0];
+    assert names.length == 3;
+    return names[2];
   }
 
   /**
@@ -389,6 +438,8 @@ public class Node implements CascadePersistence, Comparable<Node> {
     });
     roles.stream().forEach((role) -> {
       role.instantiate();
+      // ensure that the referred-to node is not a copy
+      role.setNode(this);
     });
   }
 

@@ -81,6 +81,7 @@ public final class ContainerHeartbeat extends AbstractSkill {
   public boolean receiveMessage(Message message) {
     //Preconditions
     assert message != null : "message must not be null";
+    assert getRole().getNode().getNodeRuntime() != null;
 
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
@@ -147,7 +148,8 @@ public final class ContainerHeartbeat extends AbstractSkill {
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
       AHCSConstants.PERFORM_MISSION_TASK,
-      AHCSConstants.KEEP_ALIVE_INFO};
+      AHCSConstants.KEEP_ALIVE_INFO
+    };
   }
 
   /**

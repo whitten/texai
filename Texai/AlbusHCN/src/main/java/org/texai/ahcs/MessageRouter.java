@@ -314,48 +314,6 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
   }
 
   /**
-   * Provides a thread to execute the SSLProxy or SSL endpoint that handles an inbound Chord message, and which might then subsequently
-   * block the I/O thread while awaiting a conversational response from a Chord network peer. The parent thread is an
-   * AbstractAlbusHCSMessageHandler and must not block.
-   */
-  static class AlbusMessageDispatchRunner implements Runnable {
-
-    /**
-     * the SSL proxy, SSL endpoint, or node runtime
-     */
-    private final MessageDispatcher albusMessageDispatcher;
-    /**
-     * the message
-     */
-    private final Message message;
-
-    /**
-     * Constructs a new AlbusMessageDispatchRunner instance.
-     *
-     * @param albusMessageDispatcher the SSL proxy, SSL endpoint, or node runtime
-     * @param message the message
-     */
-    AlbusMessageDispatchRunner(
-            final MessageDispatcher albusMessageDispatcher,
-            final Message message) {
-      //Preconditions
-      assert albusMessageDispatcher != null : "albusMessageDispatcher must not be null";
-      assert message != null : "message must not be null";
-
-      this.albusMessageDispatcher = albusMessageDispatcher;
-      this.message = message;
-    }
-
-    /**
-     * Executes this runnable.
-     */
-    @Override
-    public void run() {
-      albusMessageDispatcher.dispatchMessage(message);
-    }
-  }
-
-  /**
    * Dispatch the given message, which is inbound from another container, or outbound to another container.
    *
    * @param message the Albus message
@@ -448,6 +406,46 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
           }
         });
       }
+    }
+  }
+
+  /**
+   * Provides a thread to dispatch the message.
+   */
+  static class AlbusMessageDispatchRunner implements Runnable {
+
+    /**
+     * the SSL proxy, SSL endpoint, or node runtime
+     */
+    private final MessageDispatcher albusMessageDispatcher;
+    /**
+     * the message
+     */
+    private final Message message;
+
+    /**
+     * Constructs a new AlbusMessageDispatchRunner instance.
+     *
+     * @param albusMessageDispatcher the SSL proxy, SSL endpoint, or node runtime
+     * @param message the message
+     */
+    AlbusMessageDispatchRunner(
+            final MessageDispatcher albusMessageDispatcher,
+            final Message message) {
+      //Preconditions
+      assert albusMessageDispatcher != null : "albusMessageDispatcher must not be null";
+      assert message != null : "message must not be null";
+
+      this.albusMessageDispatcher = albusMessageDispatcher;
+      this.message = message;
+    }
+
+    /**
+     * Executes this runnable.
+     */
+    @Override
+    public void run() {
+      albusMessageDispatcher.dispatchMessage(message);
     }
   }
 

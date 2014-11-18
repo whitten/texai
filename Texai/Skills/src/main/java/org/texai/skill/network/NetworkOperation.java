@@ -1,10 +1,13 @@
 package org.texai.skill.network;
 
+import java.security.cert.X509Certificate;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
+import org.texai.ahcs.NodeRuntime;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.skill.domainEntity.SingletonAgentHosts;
 
 /**
  * Created on Aug 30, 2014, 11:30:19 PM.
@@ -67,6 +70,7 @@ public final class NetworkOperation extends AbstractSkill {
   public boolean receiveMessage(Message message) {
     //Preconditions
     assert message != null : "message must not be null";
+    assert getRole().getNode().getNodeRuntime() != null;
 
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
@@ -83,6 +87,16 @@ public final class NetworkOperation extends AbstractSkill {
       case AHCSConstants.PERFORM_MISSION_TASK:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
         performMission(message);
+        return true;
+
+      case AHCSConstants.DELEGATE_CONFIGURE_SINGLETON_AGENT_HOSTS_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        configureSingletonAgentHostsTask(message);
+        return true;
+
+      case AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        joinNetworkSingletonAgent(message);
         return true;
 
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
@@ -126,7 +140,9 @@ public final class NetworkOperation extends AbstractSkill {
     return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.PERFORM_MISSION_TASK
+      AHCSConstants.PERFORM_MISSION_TASK,
+      AHCSConstants.DELEGATE_CONFIGURE_SINGLETON_AGENT_HOSTS_TASK,
+      AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO
     };
   }
 
@@ -152,6 +168,15 @@ public final class NetworkOperation extends AbstractSkill {
             AHCSConstants.PERFORM_MISSION_TASK); // operation
     sendMessageViaSeparateThread(performMissionMessage);
 
+    // send the perform mission task to the NetworkSingletonConfigurationAgent
+    performMissionMessage = new Message(
+            getRole().getQualifiedName(), // senderQualifiedName
+            getClassName(), // senderService,
+            getRole().getChildQualifiedNameForAgent("NetworkSingletonConfigurationAgent"), // recipientQualifiedName,
+            "org.texai.skill.singletonConfiguration.NetworkSingletonConfiguration", // recipientService
+            AHCSConstants.PERFORM_MISSION_TASK); // operation
+    sendMessageViaSeparateThread(performMissionMessage);
+
     // send the perform mission task to the ContainerOperationAgent
     performMissionMessage = new Message(
             getRole().getQualifiedName(), // senderQualifiedName
@@ -160,6 +185,49 @@ public final class NetworkOperation extends AbstractSkill {
             ContainerOperation.class.getName(), // recipientService
             AHCSConstants.PERFORM_MISSION_TASK); // operation
     sendMessageViaSeparateThread(performMissionMessage);
+  }
+
+  /** Pass down the task to configure roles for singleton agent hosts.
+   *
+   * @param message the confiure singleton agent hosts task message
+   */
+  private void configureSingletonAgentHostsTask(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+
+    LOGGER.info("configuring the child roles with singleton agent hosts");
+    final SingletonAgentHosts singletonAgentHosts
+            = (SingletonAgentHosts) message.get(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS); // parameterName
+    assert singletonAgentHosts != null;
+
+    // send message to network operations -- resend to container operations --> child Configure roles.
+    final Message configureSingletonAgentHostsTask = makeMessage(
+            getRole().getChildQualifiedNameForAgent("ContainerOperationAgent"), // recipientQualifiedName
+            ContainerOperation.class.getName(), // recipientService
+            AHCSConstants.DELEGATE_CONFIGURE_SINGLETON_AGENT_HOSTS_TASK); // operation
+    configureSingletonAgentHostsTask.put(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS, singletonAgentHosts);
+
+    sendMessageViaSeparateThread(configureSingletonAgentHostsTask);
+  }
+
+  /** Pass down the task to configure roles for singleton agent hosts.
+   *
+   * @param message the confiure singleton agent hosts task message
+   */
+  private void joinNetworkSingletonAgent(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+
+    LOGGER.info("child role joining this network singleton");
+    final String childQualifiedName = message.getSenderQualifiedName();
+    final X509Certificate x509Certificate = (X509Certificate) message.get(AHCSConstants.MSG_PARM_X509_CERTIFICATE);
+    assert x509Certificate != null;
+
+    ((NodeRuntime) getNodeRuntime()).addX509Certificate(childQualifiedName, x509Certificate);
+
+    // send a resume
   }
 
 }

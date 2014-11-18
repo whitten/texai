@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicBoolean;
-import net.jcip.annotations.NotThreadSafe;
+import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -30,6 +30,7 @@ import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.ahcsSupport.seed.SeedNodeInfo;
 import org.texai.skill.domainEntity.SingletonAgentHosts;
+import org.texai.skill.governance.TopmostFriendship;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 import org.texai.x509.X509Utils;
@@ -38,7 +39,7 @@ import org.texai.x509.X509Utils;
  *
  * @author reed
  */
-@NotThreadSafe
+@ThreadSafe
 public class SingletonConfiguration extends AbstractSkill {
 
   // the log4j logger
@@ -67,6 +68,7 @@ public class SingletonConfiguration extends AbstractSkill {
   public boolean receiveMessage(Message message) {
     //Preconditions
     assert message != null : "message must not be null";
+    assert getRole().getNode().getNodeRuntime() != null;
 
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
@@ -165,36 +167,6 @@ public class SingletonConfiguration extends AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
 
-    LOGGER.info("initializing the seed node information ...");
-
-    // deserialize the set of SeedNodeInfo objects from the specified file
-    final String seedNodeInfosFilePath = "data/SeedNodeInfos.ser";
-    LOGGER.info("seedNodeInfosFileHashString\n" + seedNodeInfosFileHashString);
-    X509Utils.verifyFileHash(
-            seedNodeInfosFilePath, // filePath
-            seedNodeInfosFileHashString); // fileHashString
-    try {
-      try (ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(seedNodeInfosFilePath))) {
-        seedNodesInfos = (Set<SeedNodeInfo>) objectInputStream.readObject();
-      }
-    } catch (IOException | ClassNotFoundException ex) {
-      throw new TexaiException("cannot find " + seedNodeInfosFilePath);
-    }
-
-    final AtomicBoolean isSeedNode = new AtomicBoolean(false);
-    LOGGER.info("the locations and credentials of the network seed nodes ...");
-    seedNodesInfos.stream().forEach((SeedNodeInfo seedNodeInfo) -> {
-      if (getContainerName().equals(Node.extractContainerName(seedNodeInfo.getQualifiedName()))) {
-        LOGGER.info("  " + seedNodeInfo + " - (me)");
-        isSeedNode.set(true);
-      } else {
-        LOGGER.info("  " + seedNodeInfo);
-        connectToSeedPeer(
-                seedNodeInfo.getQualifiedName(),
-                seedNodeInfo.getHostName(),
-                seedNodeInfo.getPort());
-      }
-    });
   }
 
   /**
@@ -231,7 +203,6 @@ public class SingletonConfiguration extends AbstractSkill {
             AHCSConstants.SEED_CONNECTION_REQUEST_INFO, // operation
             parameterDictionary);
     sendMessageViaSeparateThread(connectionRequestMessage);
-
   }
 
   /**
@@ -272,11 +243,24 @@ public class SingletonConfiguration extends AbstractSkill {
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
     LOGGER.info("received a seed connection reply from " + message.getSenderContainerName());
-    final SingletonAgentHosts singletonAgentHosts =
-            (SingletonAgentHosts) message.get(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS);
+    final SingletonAgentHosts singletonAgentHosts
+            = (SingletonAgentHosts) message.get(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS);
     LOGGER.info(singletonAgentHosts.toDetailedString());
 
-    //TODO make the parent role assignments
+    // send an singletonAgentHosts_Info message to the TopmostFriendshipAgent.
+    final String recipientQualifiedName = getRole().getNode().getNodeRuntime().getContainerName() + '.'
+            + AHCSConstants.NODE_NAME_TOPMOST_FRIENDSHIP_ROLE;
+
+    final Message singletonAgentHostsMessage = makeMessage(
+            recipientQualifiedName,
+            TopmostFriendship.class.getName(), // recipientService
+            AHCSConstants.SINGLETON_AGENT_HOSTS_INFO); // operation
+
+    singletonAgentHostsMessage.put(
+            AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS, // parameterName
+            singletonAgentHosts); // parameterValue
+
+    sendMessageViaSeparateThread(singletonAgentHostsMessage);
   }
 
   /**
@@ -355,6 +339,7 @@ public class SingletonConfiguration extends AbstractSkill {
    *
    * @param message the received perform mission task message
    */
+  @SuppressWarnings("unchecked")
   private void performMission(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
@@ -362,6 +347,36 @@ public class SingletonConfiguration extends AbstractSkill {
 
     LOGGER.info("performing the mission");
 
+    LOGGER.info("initializing the seed node information ...");
+
+    // deserialize the set of SeedNodeInfo objects from the specified file
+    final String seedNodeInfosFilePath = "data/SeedNodeInfos.ser";
+    LOGGER.info("seedNodeInfosFileHashString\n" + seedNodeInfosFileHashString);
+    X509Utils.verifyFileHash(
+            seedNodeInfosFilePath, // filePath
+            seedNodeInfosFileHashString); // fileHashString
+    try {
+      try (ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(seedNodeInfosFilePath))) {
+        seedNodesInfos = (Set<SeedNodeInfo>) objectInputStream.readObject();
+      }
+    } catch (IOException | ClassNotFoundException ex) {
+      throw new TexaiException("cannot find " + seedNodeInfosFilePath);
+    }
+
+    final AtomicBoolean isSeedNode = new AtomicBoolean(false);
+    LOGGER.info("the locations and credentials of the network seed nodes ...");
+    seedNodesInfos.stream().forEach((SeedNodeInfo seedNodeInfo) -> {
+      if (getContainerName().equals(Node.extractContainerName(seedNodeInfo.getQualifiedName()))) {
+        LOGGER.info("  " + seedNodeInfo + " - (me)");
+        isSeedNode.set(true);
+      } else {
+        LOGGER.info("  " + seedNodeInfo);
+        connectToSeedPeer(
+                seedNodeInfo.getQualifiedName(),
+                seedNodeInfo.getHostName(),
+                seedNodeInfo.getPort());
+      }
+    });
   }
 
 }

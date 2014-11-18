@@ -237,6 +237,30 @@ public class SingletonAgentHostsTest {
   }
 
   /**
+   * Test of isNetworkSingleton method, of class SingletonAgentHosts.
+   */
+  @Test
+  public void testIsNetworkSingleton() {
+    LOGGER.info("isNetworkSingleton");
+    SingletonAgentHosts instance = makeSingletonAgentHosts();
+    assertTrue(instance.isNetworkSingleton("Bob.NetworkOperationAgent.NetworkOperationRole"));
+    assertTrue(instance.isNetworkSingleton("Bob.MintAgent.MintRole"));
+    assertFalse(instance.isNetworkSingleton("Bob.ContainerOperationAgent.ContainerOperationRole"));
+  }
+
+  /**
+   * Test of mapNetworkSingleton method, of class SingletonAgentHosts.
+   */
+  @Test
+  public void testMapNetworkSingleton() {
+    LOGGER.info("mapNetworkSingleton");
+    SingletonAgentHosts instance = makeSingletonAgentHosts();
+    assertEquals("Test2Container.NetworkOperationAgent.NetworkOperationRole", instance.mapNetworkSingleton("Bob.NetworkOperationAgent.NetworkOperationRole"));
+    assertEquals("Test3Container.MintAgent.MintRole", instance.mapNetworkSingleton("Bob.MintAgent.MintRole"));
+
+  }
+
+  /**
    * Makes a test SingletonAgentHosts instance.
    *
    * @return the test SingletonAgentHosts instance

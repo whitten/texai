@@ -26,6 +26,7 @@ import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.skill.domainEntity.SingletonAgentHosts;
 import org.texai.skill.network.NetworkOperation;
 
 /**
@@ -56,6 +57,7 @@ public final class TopmostFriendship extends AbstractSkill {
   public boolean receiveMessage(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
+    assert getRole().getNode().getNodeRuntime() != null;
 
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
@@ -71,7 +73,11 @@ public final class TopmostFriendship extends AbstractSkill {
         initialization(message);
         return true;
 
-    // handle other operations ...
+      case AHCSConstants.SINGLETON_AGENT_HOSTS_INFO:
+        singletonAgentHosts(message);
+        return true;
+
+      // handle other operations ...
     }
 
     // not understood
@@ -106,7 +112,8 @@ public final class TopmostFriendship extends AbstractSkill {
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
-      AHCSConstants.AHCS_INITIALIZE_TASK
+      AHCSConstants.AHCS_INITIALIZE_TASK,
+      AHCSConstants.SINGLETON_AGENT_HOSTS_INFO
     };
   }
 
@@ -126,7 +133,6 @@ public final class TopmostFriendship extends AbstractSkill {
     setSkillState(State.READY);
 
     //TODO wait for child roles to be initialized
-
     try {
       Thread.sleep(2000);
     } catch (InterruptedException ex) {
@@ -134,9 +140,41 @@ public final class TopmostFriendship extends AbstractSkill {
     performMission();
   }
 
-  /** Perform this role's mission, which is to provide topmost perception and friendship behavior.
+  /**
+   * Receives a singleton agent hosts message, whose contents map certain local agent/role addresses to their network singleton
+   * counterparts. The message is propagated to the child roles, who update their parent roles if the parent is a network singleton. This
+   * action has the likely effect of shutting this node off from the network.
    *
-   * @param message the received perform mission task message
+   * @param message the received singletonAgentHosts info message
+   */
+  private void singletonAgentHosts(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(State.READY) : "state must be ready";
+
+    LOGGER.info("configuring the child roles with singleton agent hosts");
+    final SingletonAgentHosts singletonAgentHosts
+            = (SingletonAgentHosts) message.get(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS); // parameterName
+    assert singletonAgentHosts != null;
+
+    // send message to network operations -- resend to container operations --> child Configure roles.
+    final Message configureSingletonAgentHostsTask = makeMessage(
+            getRole().getChildQualifiedNameForAgent("NetworkOperationAgent"), // recipientQualifiedName
+            NetworkOperation.class.getName(), // recipientService
+            AHCSConstants.DELEGATE_CONFIGURE_SINGLETON_AGENT_HOSTS_TASK); // operation
+    configureSingletonAgentHostsTask.put(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS, singletonAgentHosts);
+
+    sendMessageViaSeparateThread(configureSingletonAgentHostsTask);
+  }
+
+  /**
+   * Become passive as the network singleton assumes responsibility for this role's child roles.
+   */
+  private void becomePassive() {
+  }
+
+  /**
+   * Perform this role's mission, which is to provide topmost perception and friendship behavior.
    */
   private void performMission() {
     assert getSkillState().equals(State.READY) : "state must be ready";
@@ -144,19 +182,20 @@ public final class TopmostFriendship extends AbstractSkill {
     LOGGER.info("performing the mission");
     // send a performMission task message to the NetworkOperationAgent
     final Message performMissionMessage = new Message(
-          getRole().getQualifiedName(), // senderQualifiedName
-          getClassName(), // senderService,
-          getRole().getChildQualifiedNameForAgent("NetworkOperationAgent"), // recipientQualifiedName,
-          NetworkOperation.class.getName(), // recipientService
-          AHCSConstants.PERFORM_MISSION_TASK); // operation
+            getRole().getQualifiedName(), // senderQualifiedName
+            getClassName(), // senderService,
+            getRole().getChildQualifiedNameForAgent("NetworkOperationAgent"), // recipientQualifiedName,
+            NetworkOperation.class.getName(), // recipientService
+            AHCSConstants.PERFORM_MISSION_TASK); // operation
     sendMessage(performMissionMessage);
 
     //TODO same for the remaining child agent roles
   }
 
-  /** Gets the logger.
+  /**
+   * Gets the logger.
    *
-   * @return  the logger
+   * @return the logger
    */
   @Override
   protected Logger getLogger() {

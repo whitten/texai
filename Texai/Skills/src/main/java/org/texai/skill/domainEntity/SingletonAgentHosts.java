@@ -38,6 +38,8 @@ import net.jcip.annotations.Immutable;
 import net.jcip.annotations.ThreadSafe;
 import org.joda.time.DateTime;
 import org.openrdf.model.URI;
+import org.texai.ahcsSupport.domainEntity.Node;
+import org.texai.ahcsSupport.domainEntity.Role;
 import org.texai.kb.persistence.RDFEntity;
 import org.texai.kb.persistence.RDFPersistent;
 import org.texai.kb.persistence.RDFProperty;
@@ -276,6 +278,44 @@ public final class SingletonAgentHosts implements RDFPersistent, Serializable {
    */
   public Map<String, String> getSingletonAgentDictionary() {
     return new HashMap<>(singletonAgentDictionary);
+  }
+
+  /**
+   * Returns whether the agent referred to by the given qualified name, container-name.agent-name.role-name, is a network singleton.
+   *
+   * @param qualifiedName the given qualified name, container-name.agent-name.role-name
+   *
+   * @return whether the agent referred to by the given qualified name is a network singleton
+   */
+  public boolean isNetworkSingleton(final String qualifiedName) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(qualifiedName) : "qualifiedName must be a non-empty string";
+
+    final String agentName = Node.extractAgentName(qualifiedName);
+    return singletonAgentDictionary.containsKey(agentName);
+  }
+
+  /**
+   * Returns the network singleton qualified name that has the same agent and role names as the given qualified role name,
+   * container-name.agent-name.role-name. Suppose that Alice is joining the network, and the NetworkOperations agent singleton is
+   * Mint.NetworkOperations.NetworkOperationsRole. Alice's local agent is Alice.NetworkOperations.NetworkOperationsRole. Any of Alice's
+   * roles having this as a parent role need to be changed to Mint.NetworkOperations.NetworkOperationsRole.
+   *
+   * @param qualifiedName the given qualified role name
+   *
+   * @return the corresponding network singleton qualified name
+   */
+  public String mapNetworkSingleton(final String qualifiedName) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(qualifiedName) : "qualifiedName must be a non-empty string";
+
+    final String agentName = Node.extractAgentName(qualifiedName);
+    final String singletonContainerName = singletonAgentDictionary.get(agentName);
+    if (singletonContainerName == null) {
+      return null;
+    } else {
+      return singletonContainerName + '.' + Node.extractAgentRoleName(qualifiedName);
+    }
   }
 
   /**

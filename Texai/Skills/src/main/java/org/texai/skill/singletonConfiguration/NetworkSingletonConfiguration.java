@@ -60,6 +60,7 @@ public final class NetworkSingletonConfiguration extends AbstractSkill {
   public boolean receiveMessage(Message message) {
     //Preconditions
     assert message != null : "message must not be null";
+    assert getRole().getNode().getNodeRuntime() != null;
 
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
@@ -122,7 +123,8 @@ public final class NetworkSingletonConfiguration extends AbstractSkill {
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
       AHCSConstants.PERFORM_MISSION_TASK,
-      AHCSConstants.TASK_ACCOMPLISHED_INFO};
+      AHCSConstants.TASK_ACCOMPLISHED_INFO
+    };
   }
 
 
@@ -138,5 +140,15 @@ public final class NetworkSingletonConfiguration extends AbstractSkill {
 
     LOGGER.info("performing the mission");
 
+    final String recipientQualifiedName = getRole().getFirstChildQualifiedNameForAgent("SingletonConfigurationAgent");
+    final Message performMissionMessage = makeMessage(
+            recipientQualifiedName,
+            SingletonConfiguration.class.getName(), // recipientService
+            AHCSConstants.PERFORM_MISSION_TASK); // operation
+    sendMessageViaSeparateThread(performMissionMessage);
+
+
+
+    //TODO parent of this role should be NetworkOperations
   }
 }

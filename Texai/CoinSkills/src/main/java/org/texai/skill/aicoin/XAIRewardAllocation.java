@@ -60,6 +60,7 @@ public final class XAIRewardAllocation extends AbstractSkill {
   public boolean receiveMessage(Message message) {
     //Preconditions
     assert message != null : "message must not be null";
+    assert getRole().getNode().getNodeRuntime() != null;
 
     if (!isOperationPermitted(message)) {
       sendMessage(operationNotPermittedMessage(message));

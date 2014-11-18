@@ -20,10 +20,8 @@
  */
 package org.texai.ahcsSupport.skill;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -56,11 +54,13 @@ public abstract class AbstractSkill {
   // the message timeout information dictionary, message reply-with --> message timeout info
   private final Map<UUID, MessageTimeOutInfo> messageTimeOutInfoDictionary = new HashMap<>();
   // the one-time operations - to receive one of these a second time is an error
-  private static final List<String> oneTimeOperations = new ArrayList<>();
+  private static final Set<String> oneTimeOperations = new HashSet<>();
 
   static {
     oneTimeOperations.add(AHCSConstants.AHCS_INITIALIZE_TASK);
     oneTimeOperations.add(AHCSConstants.PERFORM_MISSION_TASK);
+    oneTimeOperations.add(AHCSConstants.SINGLETON_AGENT_HOSTS_INFO);
+    oneTimeOperations.add(AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK);
   }
   // the used one-time operations
   private final Set<String> usedOneTimeOperations = new HashSet<>();
@@ -173,19 +173,17 @@ public abstract class AbstractSkill {
   }
 
   /**
-   * Sends the given message via the node runtime.
+   * Sends the given message via the node runtime, via a separate thread.
    *
    * @param message the given message
    */
   public void sendMessageViaSeparateThread(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
-    assert getRole() != null : "role must not be null";
+    assert role != null : "role must not be null for " + this;
     assert message.getSenderQualifiedName().equals(getRole().getQualifiedName()) : "message sender must match this role " + message + "\nrole: " + getRole();
 
-    getNodeRuntime().getExecutor().execute(new MessageSendingRunnable(
-            message,
-            getRole()));
+    role.sendMessageViaSeparateThread(message);
   }
 
   /**
@@ -210,6 +208,32 @@ public abstract class AbstractSkill {
             recipientService,
             operation,
             parameterDictionary,
+            DEFAULT_VERSION);
+  }
+
+  /**
+   * Makes a message given the recipient and operation.
+   *
+   * @param recipientQualifiedName the recipient role's qualified name, container.nodename.rolename
+   * @param recipientService the recipient service
+   * @param operation the operation
+   *
+   * @return
+   */
+  public Message makeMessage(
+          final String recipientQualifiedName,
+          final String recipientService,
+          final String operation) {
+    //Preconditions
+    assert recipientQualifiedName != null : "recipientQualifiedName must not be null";
+    assert recipientService == null || Message.isValidService(recipientService) : "the recipient service is not a found Java class " + recipientService;
+    return new Message(
+            role.getQualifiedName(), // senderQualifiedName,
+            getClassName(), // senderService,
+            recipientQualifiedName,
+            recipientService,
+            operation,
+            new HashMap<>(),
             DEFAULT_VERSION);
   }
 
@@ -303,6 +327,21 @@ public abstract class AbstractSkill {
     assert role != null : "role must not be null for " + this;
 
     role.propagateOperationToChildRoles(
+            operation,
+            getClassName()); // senderService
+  }
+
+  /**
+   * Propagates the given operation to the child roles, and to any service that understands the operation, using separate threads.
+   *
+   * @param operation the given operation
+   */
+  public void propagateOperationToChildRolesSeparateThreads(final String operation) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(operation) : "operation must be a non-empty string";
+    assert role != null : "role must not be null for " + this;
+
+    role.propagateOperationToChildRolesSeparateThreads(
             operation,
             getClassName()); // senderService
   }
@@ -688,46 +727,6 @@ public abstract class AbstractSkill {
     assert StringUtils.isNonEmptyString(subSkillClassName) : "subSkillClassName must be a non-empty string";
 
     return getRole().findSubSkill(subSkillClassName);
-  }
-
-  /**
-   * Provides a message sending runnable.
-   */
-  public static class MessageSendingRunnable implements Runnable {
-
-    /**
-     * the message to send
-     */
-    final Message message;
-    /**
-     * the sender role
-     */
-    final Role role;
-
-    /**
-     * Constructs a new MessageSendingRunnable instance.
-     *
-     * @param message the message to send
-     * @param role the sender role
-     */
-    public MessageSendingRunnable(
-            final Message message,
-            final Role role) {
-      //Preconditions
-      assert message != null : "message must not be null";
-      assert role != null : "role must not be null";
-
-      this.message = message;
-      this.role = role;
-    }
-
-    /**
-     * Sends the message.
-     */
-    @Override
-    public void run() {
-      role.sendMessage(message);
-    }
   }
 
 }

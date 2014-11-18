@@ -118,7 +118,8 @@ public final class NodesInitializer {
    * @param keyStorePassword the keystore password, which is not persisted
    * @param nodeRuntime the node runtime
    * @param keyStoreFilePath the keystore path, which is different for test vs production
-   * @param configurationCertificateFilePath the output path for the configuration role's certificate, which is different for test vs production
+   * @param configurationCertificateFilePath the output path for the configuration role's certificate, which is different for test vs
+   * production
    */
   public NodesInitializer(
           final boolean isClassExistsTested,
@@ -448,9 +449,9 @@ public final class NodesInitializer {
           LOGGER.debug("    certificate not stored for " + roleFieldsHolder1.qualifiedName);
         }
         final X509SecurityInfo x509SecurityInfo = X509Utils.getX509SecurityInfo(
-                  nodeRuntime.getKeyStore(),
-                  nodeRuntime.getKeyStorePassword(),
-                  roleFieldsHolder1.qualifiedName); // alias
+                nodeRuntime.getKeyStore(),
+                nodeRuntime.getKeyStorePassword(),
+                roleFieldsHolder1.qualifiedName); // alias
         LOGGER.debug("    X.509 subject: " + x509SecurityInfo.getX509Certificate().getSubjectDN());
       }
     });
@@ -468,7 +469,7 @@ public final class NodesInitializer {
       }
     });
     if (singletonConfigurationCertificate == null) {
-      throw new TexaiException("missing " +  singletonConfigurationRoleName);
+      throw new TexaiException("missing " + singletonConfigurationRoleName);
     }
     LOGGER.info("emitting the configuration role's certificate to " + configurationCertificateFilePath);
     try {
@@ -520,6 +521,7 @@ public final class NodesInitializer {
           nodeAccess.persistNode(node);
           node.getRoles().stream().forEach(role -> {
             role.setNode(node);
+            assert role.getNode() == node;
             nodeAccess.persistRole(role);
           });
         }
@@ -540,23 +542,30 @@ public final class NodesInitializer {
       LOGGER.debug("");
       LOGGER.debug("  " + node);
       node.setNodeRuntime(nodeRuntime);
+      assert node.getNodeRuntime() != null;
       assert !node.getRoles().isEmpty();
-      node.getRoles().stream().sorted().forEach(role -> {
+      //node.getRoles().stream().sorted().forEach(role -> {
+      for (final Role role : node.getRoles()) {
         LOGGER.debug("    " + role);
         role.instantiate();
-        final Node node1 = role.getNode();
-        assert node.equals(node1);
+
+        assert node.equals(role.getNode());
+        assert node.getId().equals(role.getNode().getId());
+        assert node.getNodeRuntime() != null;
+        assert role.getNode().getNodeRuntime() != null;
+
         nodeRuntime.registerRole(role);
-         X509SecurityInfo x509SecurityInfo = null;
-         if (role.areRemoteCommunicationsPermitted()) {
-           x509SecurityInfo = X509Utils.getX509SecurityInfo(
-                   keyStore,
-                   keyStorePassword, // keyStorePassword
-                   role.getQualifiedName()); // alias
-           assert x509SecurityInfo!= null;
-         }
-         role.initialize(nodeRuntime, x509SecurityInfo);
-      });
+        X509SecurityInfo x509SecurityInfo = null;
+        if (role.areRemoteCommunicationsPermitted()) {
+          x509SecurityInfo = X509Utils.getX509SecurityInfo(
+                  keyStore,
+                  keyStorePassword, // keyStorePassword
+                  role.getQualifiedName()); // alias
+          assert x509SecurityInfo != null;
+        }
+        role.initialize(nodeRuntime, x509SecurityInfo);
+      }
+      //});
     });
   }
 
@@ -565,9 +574,19 @@ public final class NodesInitializer {
    */
   private void displayNetworkSingletonNodes() {
     LOGGER.debug("");
-    LOGGER.debug("the network singleton nodes (nomadic agents) ...");
+    LOGGER.debug("the network singleton nodes (nomadic agents) and their filtered non-singleton child roles  ...");
     nodeAccess.getNodes().stream().filter(Node.isNetworkSingletonNode()).sorted().forEach(node -> {
+      LOGGER.debug("");
       LOGGER.debug("  " + node);
+      node.getRoles().stream().sorted().forEach((Role role) -> {
+        role.getChildQualifiedNames().stream().sorted().forEach((String childQualifiedName) -> {
+          final Role childRole = nodeRuntime.getLocalRole(childQualifiedName);
+          assert childRole != null;
+          if (!childRole.getNode().isNetworkSingleton()) {
+            LOGGER.debug("    " + childQualifiedName);
+          }
+        });
+      });
     });
   }
 

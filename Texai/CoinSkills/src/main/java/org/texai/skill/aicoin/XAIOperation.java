@@ -77,6 +77,7 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
   public boolean receiveMessage(Message message) {
     //Preconditions
     assert message != null : "message must not be null";
+    assert getRole().getNode().getNodeRuntime() != null;
 
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {

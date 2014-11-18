@@ -109,6 +109,9 @@ public final class AHCSConstants {
   // the shutdown_Task operation
   public static final String AHCS_SHUTDOWN_TASK = "AHCS shutdown_Task";
   //
+  // the delegateConfigureSingletonAgentHosts_Task operation
+  public static final String CONFIGURE_SINGLETON_AGENT_HOSTS_TASK = "configureSingletonAgentHosts_Task";
+  //
   // the connect child role to parent_Task operation
   public static final String CONNECT_CHILD_ROLE_TO_PARENT_TASK = "connect child role to parent_Task";
   //
@@ -132,6 +135,9 @@ public final class AHCSConstants {
   //
   // the defineNewRoleType_Task operation
   public static final String DEFINE_NEW_SKILL_CLASS_TASK = "defineNewSkillClass_Task";
+  //
+  // the configureSingletonAgentHosts_Task operation
+  public static final String DELEGATE_CONFIGURE_SINGLETON_AGENT_HOSTS_TASK = "delegateConfigureSingletonAgentHosts_Task";
   //
   // the describe nodes_Task operation
   public static final String DESCRIBE_NODES_TASK = "describe nodes_Task";
@@ -254,6 +260,8 @@ public final class AHCSConstants {
   //
   // information messages - end with _Info
   //
+  // the joinNetworkSingleton_Info operation
+  public static final String JOIN_NETWORK_SINGLETON_AGENT_INFO = "joinNetworkSingleton_Info";
   // the keep-alive information operation
   public static final String KEEP_ALIVE_INFO = "keepAlive_Info";
   // the task accomplished information operation

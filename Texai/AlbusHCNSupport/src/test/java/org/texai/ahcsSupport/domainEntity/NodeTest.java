@@ -94,6 +94,22 @@ public class NodeTest {
     assertNotNull(instance.getId());
     final Node loadedInstance = rdfEntityManager.find(Node.class, instance.getId());
     assertEquals(loadedInstance, instance);
+    loadedInstance.instantiate();
+    loadedInstance.getRoles().stream().forEach ((Role role) -> {
+      assertTrue(role.getNode().equals(loadedInstance));
+      assertEquals(role.getNode().getId(), loadedInstance.getId());
+      loadedInstance.setStateValue("var1", "value");
+      assertEquals("value", role.getNode().getStateValue("var1"));
+    });
+  }
+
+  /**
+   * Test of extractRoleName method, of class Node.
+   */
+  @Test
+  public void testExtractRoleName() {
+    LOGGER.info("extractRoleName");
+    assertEquals("role", Node.extractRoleName("container.agent.role"));
   }
 
   /**
@@ -106,12 +122,30 @@ public class NodeTest {
   }
 
   /**
+   * Test of extractAgentRoleName method, of class Node.
+   */
+  @Test
+  public void testExtractAgentRoleName() {
+    LOGGER.info("extractAgentRoleName");
+    assertEquals("agent.role", Node.extractAgentRoleName("container.agent.role"));
+  }
+
+  /**
    * Test of extractContainerName method, of class Node.
    */
   @Test
   public void testExtractContainerName() {
     LOGGER.info("extractContainerName");
     assertEquals("TestContainer", Node.extractContainerName("TestContainer.TestAgent.TestRole"));
+  }
+
+  /**
+   * Test of extractContainerAgentName method, of class Node.
+   */
+  @Test
+  public void testExtractContainerAgentName() {
+    LOGGER.info("extractContainerAgentName");
+    assertEquals("TestContainer.TestAgent", Node.extractContainerAgentName("TestContainer.TestAgent.TestRole"));
   }
 
   /**

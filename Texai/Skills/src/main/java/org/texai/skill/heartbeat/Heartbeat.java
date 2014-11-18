@@ -76,6 +76,7 @@ public class Heartbeat extends AbstractSkill {
   public boolean receiveMessage(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
+    assert getRole().getNode().getNodeRuntime() != null;
 
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {

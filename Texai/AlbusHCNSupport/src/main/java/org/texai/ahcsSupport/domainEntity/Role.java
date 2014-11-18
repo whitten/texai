@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.persistence.Id;
@@ -77,7 +78,7 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   private Node node;
   // the parent qualified role name, i.e. container.nodename.rolename, which is null if this is a top level role
   @RDFProperty()
-  private final String parentQualifiedName;
+  private String parentQualifiedName;
   // the qualified child role names, i.e. container.nodename.rolename, which are empty if this is a lowest level role.
   @RDFProperty()
   private final Set<String> childQualifiedNames;
@@ -122,17 +123,13 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
    *
    * @param qualifiedName the role qualified name
    * @param description the role's description in English
-   * @param parentQualifiedName the parent qualified role name, i.e.
-   * container.nodename.rolename, which is null if this is a top level role
-   * @param childQualifiedNames the qualified child role names, i.e.
-   * container.nodename.rolename, which are empty if this is a lowest level
+   * @param parentQualifiedName the parent qualified role name, i.e. container.nodename.rolename, which is null if this is a top level role
+   * @param childQualifiedNames the qualified child role names, i.e. container.nodename.rolename, which are empty if this is a lowest level
    * role.
-   * @param skillClasses the skill class names, which are objects that contain,
-   * verify and format the class names
+   * @param skillClasses the skill class names, which are objects that contain, verify and format the class names
    * @param variableNames the state variable names
-   * @param areRemoteCommunicationsPermitted the indicator whether this role is
-   * permitted to send a message to a recipient in another container, which
-   * requires an X.509 certificate
+   * @param areRemoteCommunicationsPermitted the indicator whether this role is permitted to send a message to a recipient in another
+   * container, which requires an X.509 certificate
    */
   public Role(
           final String qualifiedName,
@@ -162,8 +159,8 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
    * Initializes a role object retrieved from the quad store.
    *
    * @param nodeRuntime the node runtime
-   * @param x509SecurityInfo the cached X.509 certificate information used to authenticate, sign and
-   * encrypt remote communications, or null if this role performs only communications local to the container.
+   * @param x509SecurityInfo the cached X.509 certificate information used to authenticate, sign and encrypt remote communications, or null
+   * if this role performs only communications local to the container.
    */
   public void initialize(
           final BasicNodeRuntime nodeRuntime,
@@ -171,6 +168,7 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
     //Preconditions
     assert nodeRuntime != null : "nodeRuntime must not be null";
     assert node != null : "node must not be null";
+    assert node.getNodeRuntime() != null && node.getNodeRuntime().equals(nodeRuntime);
 
     this.nodeRuntime = nodeRuntime;
     this.x509SecurityInfo = x509SecurityInfo;
@@ -200,6 +198,7 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
    * Extracts the role name from the given qualified name string, container-name.agent-name.role-name.
    *
    * @param qualifiedName the given qualified name string
+   *
    * @return the role name
    */
   public static String extractRoleName(final String qualifiedName) {
@@ -320,19 +319,16 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   }
 
   /**
-   * Gets whether this role is permitted to send a message to a recipient in
-   * another container, which requires an X.509 certificate.
+   * Gets whether this role is permitted to send a message to a recipient in another container, which requires an X.509 certificate.
    *
-   * @return whether this role is permitted to send a message to a recipient in
-   * another container
+   * @return whether this role is permitted to send a message to a recipient in another container
    */
   public boolean areRemoteCommunicationsPermitted() {
     return areRemoteCommunicationsPermitted;
   }
 
   /**
-   * Returns the X.509 certificate belonging to this role, or null if this role
-   * is not permitted to communicate with another container.
+   * Returns the X.509 certificate belonging to this role, or null if this role is not permitted to communicate with another container.
    *
    * @return the X.509 certificate belonging to this role
    */
@@ -346,7 +342,8 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
     }
   }
 
-  /** Gets X.509 security information for this role.
+  /**
+   * Gets X.509 security information for this role.
    *
    * @return the X.509 security information
    */
@@ -400,8 +397,7 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   }
 
   /**
-   * Sends the given message to the addressed sub-skill and returns the response
-   * message.
+   * Sends the given message to the addressed sub-skill and returns the response message.
    *
    * @param message the message for the addressed sub-skill
    *
@@ -502,6 +498,21 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
    *
    * @param message the given message
    */
+  public void sendMessageViaSeparateThread(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert nodeRuntime != null : "nodeRuntime must not be null";
+
+    getNodeRuntime().getExecutor().execute(new MessageSendingRunnable(
+            message,
+            this));
+  }
+
+  /**
+   * Sends the given message via the node runtime.
+   *
+   * @param message the given message
+   */
   public void sendMessage(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
@@ -522,6 +533,7 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
       LOGGER.debug(getNode().getName() + ": sending message: " + message.toDetailedString());
     }
     nodeRuntime.dispatchMessage(message);
+
   }
 
   /**
@@ -531,6 +543,32 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
    * @param senderService the sender service
    */
   public void propagateOperationToChildRoles(
+          final String operation,
+          final String senderService) {
+    //Preconditions
+    assert operation != null : "operation must not be null";
+    assert !operation.isEmpty() : "operation must not be empty";
+    assert senderService != null : "senderService must not be null";
+    assert !senderService.isEmpty() : "senderService must not be empty";
+    assert !childQualifiedNames.isEmpty() : "childQualifiedNames must not be empty";
+
+    childQualifiedNames.stream().forEach((childQualifiedName) -> {
+      sendMessage(new Message(
+              qualifiedName, // senderQualifiedName
+              senderService,
+              childQualifiedName, // recipientQualifiedName
+              null, // service
+              operation)); // operation
+    });
+  }
+
+  /**
+   * Propagates the given operation to the child roles, using separate threads.
+   *
+   * @param operation the given operation
+   * @param senderService the sender service
+   */
+  public void propagateOperationToChildRolesSeparateThreads(
           final String operation,
           final String senderService) {
     //Preconditions
@@ -627,8 +665,7 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   }
 
   /**
-   * Gets the parent qualified role name, i.e. container.nodename.rolename,
-   * which is null if this is a top level role.
+   * Gets the parent qualified role name, i.e. container.nodename.rolename, which is null if this is a top level role.
    *
    * @return the parent qualified role name
    */
@@ -637,8 +674,19 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   }
 
   /**
-   * Gets the qualified child role names, i.e. container.nodename.rolename,
-   * which are empty if this is a lowest level role.
+   * Sets the parent qualified role name, i.e. container.nodename.rolename.
+   *
+   * @param parentQualifiedName the parent qualified role name
+   */
+  public void setParentQualifiedName(final String parentQualifiedName) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(parentQualifiedName) : "parentQualifiedName must be a non-empty string";
+
+    this.parentQualifiedName = parentQualifiedName;
+  }
+
+  /**
+   * Gets the qualified child role names, i.e. container.nodename.rolename, which are empty if this is a lowest level role.
    *
    * @return the qualified child role names
    */
@@ -647,10 +695,10 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   }
 
   /**
-   * Gets the first qualified child role name, i.e. container.nodename.rolename,
-   * which matches the given nodename.
+   * Gets the first qualified child role name, i.e. container.nodename.rolename, which matches the given nodename.
    *
    * @param nodeName the given child nodename, e.g. XAIOperationAgent
+   *
    * @return the qualified child role name, or null if not found
    */
   public String getChildQualifiedNameForAgent(final String nodeName) {
@@ -668,18 +716,38 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   }
 
   /**
-   * Gets the first qualified child role name, i.e. container.nodename.rolename,
-   * which matches the given nodename.
+   * Gets the first qualified child role name, i.e. container-name.agent-name.role-name, which matches the given child agent name.
    *
-   * @param nodeName the given child nodename, e.g. XAIOperationAgent
-   * @return the qualified child role name, or null if not found
+   * @param agentName the given child agent, e.g. XAIOperationAgent
+   *
+   * @return the qualified child role name, e.g. Mint.XAIOperationAgent.XAIOperationAgentRole, or null if not found
    */
-  public Set<String> getChildQualifiedNamesForAgent(final String nodeName) {
+  public String getFirstChildQualifiedNameForAgent(final String agentName) {
     //Preconditions
-    assert StringUtils.isNonEmptyString(nodeName) : "nodeName must be a non-empty string";
+    assert StringUtils.isNonEmptyString(agentName) : "agentName must be a non-empty string";
+
+    final Set<String> childQualifiedNamesForAgent = getChildQualifiedNamesForAgent(agentName);
+    Optional<String> optional = childQualifiedNamesForAgent.stream().findFirst();
+    if (optional.isPresent()) {
+      return optional.get();
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Gets qualified child role names, i.e. container-name.agent-name.role-name, which match the given child agent name.
+   *
+   * @param agentName the given child agent, e.g. XAIOperationAgent
+   *
+   * @return the qualified child role name, e.g. Mint.XAIOperationAgent.XAIOperationAgentRole, or null if not found
+   */
+  public Set<String> getChildQualifiedNamesForAgent(final String agentName) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(agentName) : "agentName must be a non-empty string";
 
     final Set<String> childQualifiedNamesForAgent = new HashSet<>();
-    final String target = "." + nodeName + ".";
+    final String target = "." + agentName + ".";
     childQualifiedNames.stream().filter((childQualifiedName) -> (childQualifiedName.contains(target))).forEach((childQualifiedName) -> {
       childQualifiedNamesForAgent.add(childQualifiedName);
     });
@@ -687,8 +755,7 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   }
 
   /**
-   * Gets the skill class names, which are objects that verify and format the
-   * class names.
+   * Gets the skill class names, which are objects that verify and format the class names.
    *
    * @return the skill class names
    */
@@ -715,8 +782,7 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   }
 
   /**
-   * Gets the subskills dictionary, subskill class name --> subskill shared
-   * instance.
+   * Gets the subskills dictionary, subskill class name --> subskill shared instance.
    *
    * @return the subskills dictionary
    */
@@ -774,7 +840,6 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   @Override
   public void instantiate() {
     node.getId(); // force instantiation of the Node object.
-
     skillClasses.stream().forEach((skillClass) -> {
       skillClass.instantiate();
     });
@@ -784,8 +849,7 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
    * Recursively persists this RDF entity and all its components.
    *
    * @param rdfEntityManager the RDF entity manager
-   * @param overrideContext the user's belief context, or null to persist to
-   * each object's default context
+   * @param overrideContext the user's belief context, or null to persist to each object's default context
    */
   public void cascadePersist(
           final RDFEntityManager rdfEntityManager,
@@ -801,8 +865,7 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
    *
    * @param rootRDFEntity the root RDF entity
    * @param rdfEntityManager the RDF entity manager
-   * @param overrideContext the user's belief context, or null to persist to
-   * each object's default context
+   * @param overrideContext the user's belief context, or null to persist to each object's default context
    */
   @Override
   public void cascadePersist(RDFPersistent rootRDFEntity, RDFEntityManager rdfEntityManager, URI overrideContext) {
@@ -838,8 +901,7 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   }
 
   /**
-   * Compares another role with this one, collating by qualified role name, i.e.
-   * container.nodename.rolename.
+   * Compares another role with this one, collating by qualified role name, i.e. container.nodename.rolename.
    *
    * @param that the other role
    *
@@ -851,6 +913,46 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
     assert that != null : "that must not be null";
 
     return this.qualifiedName.compareTo(that.qualifiedName);
+  }
+
+  /**
+   * Provides a message sending runnable.
+   */
+  public static class MessageSendingRunnable implements Runnable {
+
+    /**
+     * the message to send
+     */
+    final Message message;
+    /**
+     * the sender role
+     */
+    final Role role;
+
+    /**
+     * Constructs a new MessageSendingRunnable instance.
+     *
+     * @param message the message to send
+     * @param role the sender role
+     */
+    public MessageSendingRunnable(
+            final Message message,
+            final Role role) {
+      //Preconditions
+      assert message != null : "message must not be null";
+      assert role != null : "role must not be null";
+
+      this.message = message;
+      this.role = role;
+    }
+
+    /**
+     * Sends the message.
+     */
+    @Override
+    public void run() {
+      role.sendMessage(message);
+    }
   }
 
 }

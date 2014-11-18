@@ -119,7 +119,7 @@ public class SeedNodesInfoTest {
   @Test
   public void testToString() {
     LOGGER.info("toString");
-    assertEquals("[Seed TestContainer gandalf:5048]", instance.toString());
+    assertEquals("[Seed TestContainer.SingletonConfigurationAgent.SingletonConfigurationRole gandalf:5048]", instance.toString());
   }
 
   private static SeedNodeInfo makeSeedNodesInfo() {

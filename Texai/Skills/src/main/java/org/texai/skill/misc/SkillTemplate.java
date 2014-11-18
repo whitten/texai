@@ -27,20 +27,25 @@ public class SkillTemplate extends AbstractSkill {
   // the log4j logger
   private static final Logger LOGGER = Logger.getLogger(SkillTemplate.class);
 
-  /** Constructs a new SkillTemplate instance. */
+  /**
+   * Constructs a new SkillTemplate instance.
+   */
   public SkillTemplate() {
   }
 
-  /** Receives and attempts to process the given message.  The skill is thread safe, given that any contained libraries are single threaded
+  /**
+   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
    * with regard to the conversation.
    *
    * @param message the given message
+   *
    * @return whether the message was successfully processed
    */
   @Override
   public boolean receiveMessage(Message message) {
     //Preconditions
     assert message != null : "message must not be null";
+    assert getRole().getNode().getNodeRuntime() != null;
 
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
@@ -73,10 +78,12 @@ public class SkillTemplate extends AbstractSkill {
     return true;
   }
 
-  /** Synchronously processes the given message.  The skill is thread safe, given that any contained libraries are single threaded
-   * with regard to the conversation.
+  /**
+   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single threaded with regard
+   * to the conversation.
    *
    * @param message the given message
+   *
    * @return the response message or null if not applicable
    */
   @Override
@@ -85,21 +92,21 @@ public class SkillTemplate extends AbstractSkill {
     assert message != null : "message must not be null";
 
     //TODO handle operations
-
     return (notUnderstoodMessage(message));
   }
 
-  /** Returns the understood operations.
+  /**
+   * Returns the understood operations.
    *
    * @return the understood operations
    */
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
-              AHCSConstants.AHCS_INITIALIZE_TASK,
-              AHCSConstants.PERFORM_MISSION_TASK,
-              AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
-            };
+      AHCSConstants.AHCS_INITIALIZE_TASK,
+      AHCSConstants.PERFORM_MISSION_TASK,
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
+    };
   }
 
   /**
@@ -114,9 +121,10 @@ public class SkillTemplate extends AbstractSkill {
 
   }
 
-  /** Gets the logger.
+  /**
+   * Gets the logger.
    *
-   * @return  the logger
+   * @return the logger
    */
   @Override
   protected Logger getLogger() {

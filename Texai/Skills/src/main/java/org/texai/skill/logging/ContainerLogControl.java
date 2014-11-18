@@ -53,6 +53,7 @@ public class ContainerLogControl extends AbstractSkill {
   public boolean receiveMessage(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
+    assert getRole().getNode().getNodeRuntime() != null;
 
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
@@ -157,7 +158,8 @@ public class ContainerLogControl extends AbstractSkill {
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
       AHCSConstants.LOG_OPERATION_TASK,
-      AHCSConstants.UNLOG_OPERATION_TASK,};
+      AHCSConstants.UNLOG_OPERATION_TASK
+    };
   }
 
   // Performs the initialization operation.

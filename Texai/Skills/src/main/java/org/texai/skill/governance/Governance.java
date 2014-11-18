@@ -37,29 +37,35 @@ public final class Governance extends AbstractSkill {
   // the logger
   private static final Logger LOGGER = Logger.getLogger(Governance.class);
 
-  /** Constructs a new Governance instance. */
+  /**
+   * Constructs a new Governance instance.
+   */
   public Governance() {
   }
 
-  /** Gets the logger.
+  /**
+   * Gets the logger.
    *
-   * @return  the logger
+   * @return the logger
    */
   @Override
   protected Logger getLogger() {
     return LOGGER;
   }
 
-  /** Receives and attempts to process the given message.  The skill is thread safe, given that any contained libraries are single threaded
+  /**
+   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
    * with regard to the conversation.
    *
    * @param message the given message
+   *
    * @return whether the message was successfully processed
    */
   @Override
   public boolean receiveMessage(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
+    assert getRole().getNode().getNodeRuntime() != null;
 
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
@@ -85,10 +91,12 @@ public final class Governance extends AbstractSkill {
     return true;
   }
 
-  /** Synchronously processes the given message.  The skill is thread safe, given that any contained libraries are single threaded
-   * with regard to the conversation.
+  /**
+   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single threaded with regard
+   * to the conversation.
    *
    * @param message the given message
+   *
    * @return the response message or null if not applicable
    */
   @Override
@@ -97,19 +105,19 @@ public final class Governance extends AbstractSkill {
     assert message != null : "message must not be null";
 
     //TODO handle operations
-
     return notUnderstoodMessage(message);
   }
 
-  /** Returns the understood operations.
+  /**
+   * Returns the understood operations.
    *
    * @return the understood operations
    */
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
-              AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
-              AHCSConstants.AHCS_INITIALIZE_TASK
-            };
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.AHCS_INITIALIZE_TASK
+    };
   }
 }
