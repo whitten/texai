@@ -1,4 +1,0 @@
-2014-08-23T16:59:43.062-05:00 1 add texai:org.texai.texaiLauncher.domainEntity.TexaiLauncherInfo rdf:type cyc:ObjectType in cyc:UniversalVocabularyMt .
-2014-08-23T16:59:43.108-05:00 1 add texai:org.texai.texaiLauncher.domainEntity.TexaiLauncherInfo rdfs:subClassOf cyc:AbstractInformationStructure in cyc:UniversalVocabularyMt .
-2014-08-23T16:59:43.108-05:00 1 add texai:org.texai.texaiLauncher.domainEntity.TexaiLauncherInfo_9d169428-684e-450f-8fc3-5d3bbaa4d6eb rdf:type texai:org.texai.texaiLauncher.domainEntity.TexaiLauncherInfo in cyc:UniversalVocabularyMt .
-2014-08-23T16:59:44.992-05:00 1 add texai:org.texai.texaiLauncher.domainEntity.TexaiLauncherInfo_91f26b80-8900-439c-bf30-de855c05d445 rdf:type texai:org.texai.texaiLauncher.domainEntity.TexaiLauncherInfo in cyc:UniversalVocabularyMt .
