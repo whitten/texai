@@ -73,6 +73,7 @@ public final class XAINetworkSeed extends AbstractSkill {
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
+        propagateOperationToChildRoles(operation);
         setSkillState(AHCSConstants.State.READY);
         return true;
 

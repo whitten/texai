@@ -111,9 +111,9 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
     assert port > 1024 : "port must not be a reserved port 1-1024";
 
     final X509SecurityInfo x509SecurityInfo = X509Utils.getX509SecurityInfo(
-                  nodeRuntime.getKeyStore(),
-                  nodeRuntime.getKeyStorePassword(),
-                  nodeRuntime.getNodeRuntimeSkill().getRole().getQualifiedName()); // alias
+            nodeRuntime.getKeyStore(),
+            nodeRuntime.getKeyStorePassword(),
+            nodeRuntime.getNodeRuntimeSkill().getRole().getQualifiedName()); // alias
     final AbstractAlbusHCSMessageHandlerFactory albusHCSMessageHandlerFactory = new AlbusHCSMessageHandlerFactory(this);
     final AbstractBitTorrentHandlerFactory bitTorrentHandlerFactory = null;
     final AbstractHTTPRequestHandlerFactory httpRequestHandlerFactory = null;
@@ -327,18 +327,22 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("dispatching message " + message);
       LOGGER.debug("  reply-with: " + message.getReplyWith());
+      LOGGER.debug("");
     }
 
-    LOGGER.info("");
     final String recipientQualifiedName = message.getRecipientQualifiedName();
     if (Node.extractContainerName(recipientQualifiedName).equals(nodeRuntime.getContainerName())) {
-      LOGGER.info("<====== dispatching inbound role message " + message);
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("<====== dispatching inbound role message " + message);
+      }
       // use a separate thread for the message dispatch
       nodeRuntime.getExecutor().execute(new AlbusMessageDispatchRunner(
               nodeRuntime, // albusMessageDispatcher
               message));
     } else {
-      LOGGER.info("======> dispatching outbound role message " + message);
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("======> dispatching outbound role message " + message);
+      }
       routeAlbusMessageToPeerRouter(message);
     }
     if (LOGGER.isDebugEnabled()) {

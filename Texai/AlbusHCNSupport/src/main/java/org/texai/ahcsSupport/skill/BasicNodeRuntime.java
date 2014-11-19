@@ -67,6 +67,8 @@ public class BasicNodeRuntime implements MessageDispatcher {
   private final Timer timer = new Timer();
   // the operations to be logged
   private final Set<String> loggedOperations = new HashSet<>();
+  // the operations to be filtered from logging
+  private final Set<String> filteredOperations = new HashSet<>();
   // The NodeRuntimeSkill instance which is used to send and receive messages on behalf of this node runtime
   private AbstractSkill nodeRuntimeSkill;
   // the key store for certain roles' X.509Certificates and the private keys
@@ -273,6 +275,52 @@ public class BasicNodeRuntime implements MessageDispatcher {
 
     synchronized (loggedOperations) {
       return loggedOperations.contains(message.getOperation());
+    }
+  }
+
+  /**
+   * Adds the given operation to the list of operations to filtered from logging.
+   *
+   * @param operation the given operation
+   */
+  public void addFilteredOperation(final String operation) {
+    //Preconditions
+    assert operation != null : "operation must not be null";
+    assert !operation.isEmpty() : "operation must not be empty";
+
+    synchronized (filteredOperations) {
+      filteredOperations.add(operation);
+    }
+  }
+
+  /**
+   * Removes the given operation from the list of operations to filtered from logging.
+   *
+   * @param operation the given operation
+   */
+  public void removeFilteredOperation(final String operation) {
+    //Preconditions
+    assert operation != null : "operation must not be null";
+    assert !operation.isEmpty() : "operation must not be empty";
+
+    synchronized (filteredOperations) {
+      filteredOperations.remove(operation);
+    }
+  }
+
+  /**
+   * Returns whether the given message is to be filtered from logging.
+   *
+   * @param message the given message
+   *
+   * @return whether the given message is to be filtered from logging
+   */
+  public boolean isMessageFiltered(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+
+    synchronized (filteredOperations) {
+      return filteredOperations.contains(message.getOperation());
     }
   }
 

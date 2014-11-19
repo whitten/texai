@@ -25,6 +25,9 @@ import org.texai.kb.CacheInitializer;
 import org.texai.kb.persistence.DistributedRepositoryManager;
 import org.texai.kb.persistence.KBAccess;
 import org.texai.kb.persistence.RDFEntityPersister;
+import org.texai.network.netty.handler.PortUnificationHandler;
+import org.texai.network.netty.pipeline.PortUnificationChannelPipelineFactory;
+import org.texai.ssl.TexaiSSLContextFactory;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 import org.texai.x509.X509Utils;
@@ -104,12 +107,15 @@ public class AICoinMain {
 
     //Logger.getLogger(NodesInitializer.class).setLevel(Level.DEBUG);
     Logger.getLogger(DistributedRepositoryManager.class).setLevel(Level.WARN);
+    Logger.getLogger(PortUnificationHandler.class).setLevel(Level.WARN);
+    Logger.getLogger(PortUnificationChannelPipelineFactory.class).setLevel(Level.WARN);
+    Logger.getLogger(TexaiSSLContextFactory.class).setLevel(Level.WARN);
     Logger.getLogger(KBAccess.class).setLevel(Level.WARN);
     Logger.getLogger(RDFEntityPersister.class).setLevel(Level.WARN);
     Logger.getLogger(X509Utils.class).setLevel(Level.WARN);
 
     LOGGER.info("A.I. Coin version " + VERSION);
-    LOGGER.info("starting the node runtime in the container named " + containerName);
+    LOGGER.info("starting the software agents in the container named " + containerName);
     nodeRuntime = new NodeRuntime(containerName);
     // configure a shutdown hook to run the finalization method in case the JVM is abnormally ended
     shutdownHook = new ShutdownHook();
@@ -120,7 +126,7 @@ public class AICoinMain {
     assert !Logger.getLogger(RDFEntityPersister.class).isInfoEnabled();
 
     // load the repositories with the node and role types
-    LOGGER.info("loading nodes and their roles, and installing skills for each role ...");
+    LOGGER.info("loading agents and their roles, and installing skills for each role ...");
     final NodesInitializer nodesInitializer = new NodesInitializer(
             true, // isClassExistsTested,
             keyStorePassword,
@@ -199,6 +205,14 @@ public class AICoinMain {
     public void run() {
       Thread.currentThread().setName("Node Runtime");
       LOGGER.info("starting the node runtime");
+
+      nodeRuntime.addFilteredOperation(AHCSConstants.AHCS_INITIALIZE_TASK);
+      nodeRuntime.addFilteredOperation(AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK);
+      nodeRuntime.addFilteredOperation(AHCSConstants.JOIN_ACKNOWLEDGED_TASK);
+      nodeRuntime.addFilteredOperation(AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO);
+      nodeRuntime.addFilteredOperation(AHCSConstants.KEEP_ALIVE_INFO);
+      nodeRuntime.addFilteredOperation(AHCSConstants.SEED_CONNECTION_REQUEST_INFO);
+      nodeRuntime.addFilteredOperation(AHCSConstants.SINGLETON_AGENT_HOSTS_INFO);
 
       // send the initialize message to the <container>.TopmostFriendshipAgent.TopmostFriendshipRole
       final String recipientQualifiedName = nodeRuntime.getContainerName() + ".TopmostFriendshipAgent.TopmostFriendshipRole";

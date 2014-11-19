@@ -25,6 +25,7 @@ package org.texai.skill.heartbeat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Timer;
 import java.util.TimerTask;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
@@ -32,6 +33,8 @@ import org.joda.time.DateTime;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.ahcsSupport.domainEntity.Node;
+import org.texai.ahcsSupport.domainEntity.Role;
 import org.texai.util.StringUtils;
 
 /**
@@ -176,6 +179,17 @@ public final class ContainerHeartbeat extends AbstractSkill {
       LOGGER.debug("initializing " + toString() + " in role " + getRole());
     }
 
+    outboundParentHeartbeatInfo = new OutboundHeartbeatInfo(
+            getRole(),
+            TopLevelHeartbeat.class.getName()); // service
+    // create a timer that periodically reviews the outbound heartbeat information objects
+    final Timer timer = getNodeRuntime().getTimer();
+    synchronized (timer) {
+      timer.scheduleAtFixedRate(
+              new HeartbeatProcessor(this), // task
+              OUTBOUND_HEARTBEAT_PERIOD_MILLIS, // delay
+              OUTBOUND_HEARTBEAT_PERIOD_MILLIS); // period
+    }
   }
 
   /**
@@ -189,14 +203,6 @@ public final class ContainerHeartbeat extends AbstractSkill {
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
-//    LOGGER.info("performing the mission");
-//    final Message performMissionMessage = new Message(
-//            getRole().getQualifiedName(), // senderQualifiedName
-//            getClassName(), // senderService,
-//            getRole().getChildQualifiedNameForAgent("XAINetworkOperationAgent"), // recipientQualifiedName,
-//            "org.texai.skill.aicoin.XAINetworkOperation", // recipientService
-//            AHCSConstants.PERFORM_MISSION_TASK); // operation
-//    sendMessage(performMissionMessage);
   }
 
   /**
@@ -272,7 +278,6 @@ public final class ContainerHeartbeat extends AbstractSkill {
         });
       }
 
-      //TODO work out the message sent to the parent role
       if (outboundParentHeartbeatInfo != null) {
         // send heartbeats after waiting at least the specified duration
         final long outboundHeartbeatReceivedThresholdMillis = currentTimeMillis - OUTBOUND_HEARTBEAT_PERIOD_MILLIS;
@@ -369,9 +374,9 @@ public final class ContainerHeartbeat extends AbstractSkill {
   protected static class OutboundHeartbeatInfo {
 
     /**
-     * the heartbeat recipient's qualified name
+     * the role
      */
-    protected final String recipentQualifiedName;
+    protected final Role role;
     /**
      * the millisecond time at which the most recent heartbeat was sent
      */
@@ -380,31 +385,22 @@ public final class ContainerHeartbeat extends AbstractSkill {
      * the recipient's service (skill class)
      */
     protected final String service;
-    /**
-     * the heartbeat
-     */
-    protected final Heartbeat heartbeat;
 
     /**
      * Constructs a new OutboundHeartbeatInfo instance.
      *
-     * @param recipentQualifiedName the heartbeat recipient's qualified name
+     * @param role the role
      * @param service the service, or null if not specified
-     * @param heartbeat the heartbeat skill instance
      */
     OutboundHeartbeatInfo(
-            final String recipentQualifiedName,
-            final String service,
-            final Heartbeat heartbeat) {
+            final Role role,
+            final String service) {
       //Preconditions
-      assert StringUtils.isNonEmptyString(recipentQualifiedName) : "recipentQualifiedName must be a non-empty string";
-      assert service != null : "service must not be null";
-      assert !service.isEmpty() : "service must not be empty";
-      assert heartbeat != null : "heartbeat must not be null";
+      assert role != null : "role must not be null";
+      assert StringUtils.isNonEmptyString(service) : "service must be a non-empty string";
 
-      this.recipentQualifiedName = recipentQualifiedName;
+      this.role = role;
       this.service = service;
-      this.heartbeat = heartbeat;
     }
 
     /**
@@ -423,7 +419,7 @@ public final class ContainerHeartbeat extends AbstractSkill {
         return false;
       }
       final OutboundHeartbeatInfo other = (OutboundHeartbeatInfo) obj;
-      return Objects.equals(this.recipentQualifiedName, other.recipentQualifiedName);
+      return Objects.equals(this.role, other.role);
     }
 
     /**
@@ -434,7 +430,7 @@ public final class ContainerHeartbeat extends AbstractSkill {
     @Override
     public int hashCode() {
       int hash = 7;
-      hash = 89 * hash + Objects.hashCode(this.recipentQualifiedName);
+      hash = 89 * hash + Objects.hashCode(this.role);
       return hash;
     }
 
@@ -446,14 +442,14 @@ public final class ContainerHeartbeat extends AbstractSkill {
     @Override
     public String toString() {
       final StringBuilder stringBuilder = new StringBuilder();
-      stringBuilder.append("[Outbound heartbeat from: ");
-      stringBuilder.append(heartbeat.getRole());
+      stringBuilder.append("[Outbound heartbeat");
       if (heartbeatSentMillis > 0) {
-        stringBuilder.append(", last sent ");
+        stringBuilder.append(" last sent ");
         final long secondsAgo = (System.currentTimeMillis() - heartbeatSentMillis) / 1000;
         stringBuilder.append(secondsAgo);
-        stringBuilder.append(" seconds ago]");
+        stringBuilder.append(" seconds ago");
       }
+      stringBuilder.append(']');
       return stringBuilder.toString();
     }
   }
@@ -484,18 +480,14 @@ public final class ContainerHeartbeat extends AbstractSkill {
     assert outboundHeartbeatInfo != null : "inboundHeartbeatInfo must not be null";
     assert heartbeat != null : "heartbeat must not be null";
 
-    final Message message = new Message(
+    final Message keepAliveInfoMessage = new Message(
             heartbeat.getRole().getQualifiedName(), // senderQualifiedName
             heartbeat.getClass().getName(), // senderService
-            outboundHeartbeatInfo.recipentQualifiedName,
+            outboundHeartbeatInfo.role.getParentQualifiedName(), // recipentQualifiedName,
             outboundHeartbeatInfo.service,
             AHCSConstants.KEEP_ALIVE_INFO); // operation
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("  dispatching keep-alive message");
-      LOGGER.debug("    from " + heartbeat.getRole().getQualifiedName());
-      LOGGER.debug("    to " + outboundHeartbeatInfo.recipentQualifiedName);
-    }
-    sendMessage(message);
+    LOGGER.info("  sending keep-alive to " + Node.extractContainerName(outboundHeartbeatInfo.role.getParentQualifiedName()));
+    sendMessage(keepAliveInfoMessage);
 
     outboundHeartbeatInfo.heartbeatSentMillis = System.currentTimeMillis();
   }

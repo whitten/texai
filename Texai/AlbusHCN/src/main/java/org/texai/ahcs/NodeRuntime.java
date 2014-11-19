@@ -192,10 +192,15 @@ public class NodeRuntime extends BasicNodeRuntime {
         return;
       }
     }
-//    if (isMessageLogged(message) || LOGGER.isDebugEnabled()) {
-//      LOGGER.info("relaying message to local role " + message);
-//    }
-    LOGGER.info(message);
+    boolean isMessageLogged = !isMessageFiltered(message);
+
+    if (!isMessageLogged && isMessageLogged(message)) {
+      isMessageLogged = true;
+    }
+    if (isMessageLogged || LOGGER.isDebugEnabled()) {
+      LOGGER.info(message);
+    }
+//    LOGGER.info(message);
     final Role role = this.getLocalRole(message.getRecipientQualifiedName());
     if (role == null) {
       throw new TexaiException("recipient not found for " + message);

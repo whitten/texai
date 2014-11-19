@@ -73,6 +73,7 @@ public class XAINetworkEpisodicMemory extends AbstractSkill {
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
+        propagateOperationToChildRoles(operation);
         setSkillState(State.READY);
         return true;
 
