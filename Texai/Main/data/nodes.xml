@@ -19,7 +19,7 @@
       <role>
         <qualifiedName>UniversalRolesAgent.HeartbeatRole</qualifiedName>
         <description>Provides periodic heartbeat messages to indicate that this node is alive.</description>
-        <parentQualifiedName>ContainerHeartbeatAgent.ContainerHeartbeatRole</parentQualifiedName>
+        <parentQualifiedName>ContainerOperationAgent.ContainerHeartbeatRole</parentQualifiedName>
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.heartbeat.Heartbeat</skill-class-name>
@@ -110,51 +110,6 @@
   </node>
 
   <node>
-    <name>TopLevelHeartbeatAgent</name>
-    <missionDescription>Manages the container heartbeat agents to ensure liveness.</missionDescription>
-    <isNetworkSingleton>true</isNetworkSingleton>
-    <prototypeNodeNames>
-      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
-    </prototypeNodeNames>
-    <roles>
-      <role>
-        <qualifiedName>TopLevelHeartbeatAgent.TopLevelHeartbeatRole</qualifiedName>
-        <description>Manages the container heartbeat agents to ensure liveness.</description>
-        <parentQualifiedName>TopmostFriendshipAgent.TopmostFriendshipRole</parentQualifiedName>
-        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
-        <skill-classes>
-          <skill-class>
-            <skill-class-name>org.texai.skill.heartbeat.TopLevelHeartbeat</skill-class-name>
-          </skill-class>
-        </skill-classes>
-        <variableNames></variableNames>
-      </role>
-    </roles>
-  </node>
-
-  <node>
-    <name>ContainerHeartbeatAgent</name>
-    <missionDescription>Manages a container's agents to ensure liveness.</missionDescription>
-    <prototypeNodeNames>
-      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
-    </prototypeNodeNames>
-    <roles>
-      <role>
-        <qualifiedName>ContainerHeartbeatAgent.ContainerHeartbeatRole</qualifiedName>
-        <description>Manages a container's agents to ensure liveness.</description>
-        <parentQualifiedName>TopLevelHeartbeatAgent.TopLevelHeartbeatRole</parentQualifiedName>
-        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
-        <skill-classes>
-          <skill-class>
-            <skill-class-name>org.texai.skill.heartbeat.ContainerHeartbeat</skill-class-name>
-          </skill-class>
-        </skill-classes>
-        <variableNames></variableNames>
-      </role>
-    </roles>
-  </node>
-
-  <node>
     <name>NetworkOperationAgent</name>
     <missionDescription>Manages the network, the containers, and the AICoin agents within the containers. Interacts with human operators.</missionDescription>
     <isNetworkSingleton>true</isNetworkSingleton>
@@ -170,6 +125,18 @@
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.network.NetworkOperation</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+      <role>
+        <qualifiedName>NetworkOperationAgent.TopLevelHeartbeatRole</qualifiedName>
+        <description>Manages the container heartbeat agents to ensure liveness.</description>
+        <parentQualifiedName>TopmostFriendshipAgent.TopmostFriendshipRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.heartbeat.TopLevelHeartbeat</skill-class-name>
           </skill-class>
         </skill-classes>
         <variableNames></variableNames>
@@ -240,6 +207,18 @@
           </skill-class>
           <skill-class>
             <skill-class-name>org.texai.skill.support.NodeRuntimeSkill</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+      <role>
+        <qualifiedName>ContainerOperationAgent.ContainerHeartbeatRole</qualifiedName>
+        <description>Manages a container's agents to ensure liveness.</description>
+        <parentQualifiedName>NetworkOperationAgent.TopLevelHeartbeatRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.heartbeat.ContainerHeartbeat</skill-class-name>
           </skill-class>
         </skill-classes>
         <variableNames></variableNames>
