@@ -16,12 +16,16 @@ import net.jcip.annotations.NotThreadSafe;
 import net.sf.ehcache.CacheManager;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.tz.CachedDateTimeZone;
 import org.texai.ahcs.NodeRuntime;
 import static org.texai.ahcs.NodeRuntime.CACHE_X509_CERTIFICATES;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.NodesInitializer;
 import org.texai.kb.CacheInitializer;
+import org.texai.kb.journal.JournalWriter;
 import org.texai.kb.persistence.DistributedRepositoryManager;
 import org.texai.kb.persistence.KBAccess;
 import org.texai.kb.persistence.RDFEntityPersister;
@@ -115,7 +119,7 @@ public class AICoinMain {
     Logger.getLogger(X509Utils.class).setLevel(Level.WARN);
 
     LOGGER.info("A.I. Coin version " + VERSION);
-    LOGGER.info("starting the software agents in the container named " + containerName);
+    LOGGER.info("Starting the software agents in the container named " + containerName);
     nodeRuntime = new NodeRuntime(containerName);
     // configure a shutdown hook to run the finalization method in case the JVM is abnormally ended
     shutdownHook = new ShutdownHook();
@@ -125,8 +129,20 @@ public class AICoinMain {
     CacheInitializer.addNamedCaches(NAMED_CACHES);
     assert !Logger.getLogger(RDFEntityPersister.class).isInfoEnabled();
 
+    // for the demo, delete the previous knowledge base journals
+    JournalWriter.deleteJournalFiles();
+
+    final String timeZoneId = System.getenv("TIMEZONE");
+    if (!StringUtils.isNonEmptyString(timeZoneId)) {
+      throw new TexaiException("the TIMEZONE environment variable must be set to a valid timezone\n "
+              + "see http://tutorials.jenkov.com/java-date-time/java-util-timezone.html");
+    }
+    LOGGER.debug("The time zone is " + timeZoneId);
+    DateTimeZone.setDefault(DateTimeZone.forID(timeZoneId));
+    LOGGER.info("Started " + (new DateTime()).toString("MM/dd/yyyy hh:mm a"));
+
     // load the repositories with the node and role types
-    LOGGER.info("loading agents and their roles, and installing skills for each role ...");
+    LOGGER.info("Loading agents and their roles, and installing skills for each role ...");
     final NodesInitializer nodesInitializer = new NodesInitializer(
             true, // isClassExistsTested,
             keyStorePassword,

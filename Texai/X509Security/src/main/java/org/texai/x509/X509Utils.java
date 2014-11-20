@@ -256,6 +256,7 @@ public final class X509Utils {
       }
     } catch (IOException ex) {
       LOGGER.error("cannot write serialized secure random to " + path);
+      LOGGER.error("working directory: " + System.getProperty("user.dir"));
       throw new TexaiException(ex);
     }
   }

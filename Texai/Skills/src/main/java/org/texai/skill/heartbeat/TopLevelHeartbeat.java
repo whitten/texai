@@ -31,6 +31,7 @@ import java.util.TimerTask;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.texai.ahcs.NodeRuntime;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.skill.AbstractSkill;
@@ -164,7 +165,12 @@ public final class TopLevelHeartbeat extends AbstractSkill {
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
 
-    LOGGER.info("recording keep-alive from " + message.getSenderContainerName());
+    final StringBuilder stringBuilder = new StringBuilder()
+            .append("recording keep-alive from ")
+            .append(message.getSenderContainerName())
+            .append(" at ")
+            .append((new DateTime()).toString("MM/dd/yyyy hh:mm a"));
+    LOGGER.info(stringBuilder.toString());
     final String senderQualifiedName = message.getSenderQualifiedName();
     InboundHeartbeatInfo inboundHeartBeatInfo = inboundHeartbeatInfos.get(senderQualifiedName);
     if (inboundHeartBeatInfo == null) {
@@ -172,11 +178,6 @@ public final class TopLevelHeartbeat extends AbstractSkill {
       inboundHeartbeatInfos.put(senderQualifiedName, inboundHeartBeatInfo);
     }
     inboundHeartBeatInfo.heartbeatReceivedMillis = System.currentTimeMillis();
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("  received keep-alive message " + (new DateTime()).toString("MM/dd/yyyy hh:mm a"));
-      LOGGER.debug("    from " + senderQualifiedName);
-      LOGGER.debug("    to " + getRole().getQualifiedName());
-    }
   }
 
   /**
