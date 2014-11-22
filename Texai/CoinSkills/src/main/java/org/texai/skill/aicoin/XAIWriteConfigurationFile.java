@@ -112,19 +112,19 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
 
+    final String directoryPath = (String) message.get(AHCSConstants.WRITE_CONFIGURATION_FILE_TASK_DIRECTORY_PATH);
+    assert StringUtils.isNonEmptyString(directoryPath);
+    LOGGER.info("The aicoin-qt configuration directory is " + directoryPath);
     // delete the old version of the configuration file
-    final String homeDirectory = System.getProperty("user.home");
-    assert StringUtils.isNonEmptyString(homeDirectory);
-    final File confFile = new File(homeDirectory + "/.bitcoin/bitcoin.conf");
+    final File confFile = new File(directoryPath + "/aicoin.conf");
     LOGGER.info("confFile: " + confFile);
     if (confFile.exists()) {
       LOGGER.info("deleting existing " + confFile);
       confFile.delete();
     }
 
-    // create the .bitcoin directory if not already present
-    final File directory = new File(homeDirectory + "/.bitcoin");
-    LOGGER.info("directory: " + directory);
+    // create the .aicoin directory if not already present
+    final File directory = new File(directoryPath);
     if (!directory.isDirectory()) {
       directory.mkdir();
       assert directory.isDirectory();

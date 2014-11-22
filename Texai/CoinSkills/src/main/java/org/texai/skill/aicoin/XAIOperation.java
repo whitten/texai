@@ -1,16 +1,14 @@
 package org.texai.skill.aicoin;
 
-import java.io.IOException;
 import java.util.UUID;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.skill.aicoin.support.AICoinUtils;
 import org.texai.skill.aicoin.support.XAIBitcoinMessageReceiver;
 import org.texai.util.EnvironmentUtils;
-import org.texai.util.StreamConsumer;
-import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 
 /**
@@ -48,6 +46,8 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
   private static final String CONVERSATION_ID = "conversationId";
   // the replyWith state variable
   private static final String REPLY_WITH = "replyWith";
+  // the path to the aicoin-qt configuration and data directory
+  private static final String AICOIN_DIRECTORY_PATH = "../.aicoin";
 
   /**
    * Constructs a new XTCOperation instance.
@@ -181,6 +181,7 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
             replyWith,
             XAIWriteConfigurationFile.class.getName(), // recipientService
             AHCSConstants.WRITE_CONFIGURATION_FILE_TASK); // operation
+    writeConfigurationFileTaskmessage.put(AHCSConstants.WRITE_CONFIGURATION_FILE_TASK_DIRECTORY_PATH, AICOIN_DIRECTORY_PATH);
     // set timeout
     setMessageReplyTimeout(
             writeConfigurationFileTaskmessage,
@@ -201,27 +202,16 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
     assert message.getInReplyTo() != null : "message must have inReplyTo value " + message.toDetailedString();
 
     removeMessageTimeOut(message.getInReplyTo());
-    LOGGER.info("the bitcoind configuration file has been written");
+    LOGGER.info("The bitcoind configuration file has been written");
+    launchAicoind();
   }
 
   /**
-   * Shuts down the bitcoind instance.
+   * Launches the aicoind instance.
    */
-  private void shutdownBitcoind() {
-    sendCommandToBitcoind("");
-  }
-
-  /**
-   * Perform a remote procedure call to the bitcoind instance with the given
-   * command string.
-   *
-   * @param command the bitcoind command
-   */
-  private void sendCommandToBitcoind(final String command) {
-    //Preconditions
-    assert StringUtils.isNonEmptyString(command) : "message must be a non-empty string";
+  private void launchAicoind() {
     if (!EnvironmentUtils.isLinux()) {
-      throw new TexaiException("must be running on Linux");
+      throw new TexaiException("Operating system must be Linux");
     }
 
     String[] cmdArray = {
@@ -230,32 +220,18 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
       ""
     };
     final StringBuilder stringBuilder = new StringBuilder();
-    stringBuilder.append("bitcoind-cli ");
+    stringBuilder.append("../bin/aicoin-qt -datadir=").append(AICOIN_DIRECTORY_PATH);
     cmdArray[2] = stringBuilder.toString();
-    LOGGER.info("shell cmd: " + cmdArray[2]);
-    try {
-      final Process process = Runtime.getRuntime().exec(cmdArray);
-      final StreamConsumer errorConsumer = new StreamConsumer(process.getErrorStream(), LOGGER);
-      final StreamConsumer outputConsumer = new StreamConsumer(process.getInputStream(), LOGGER);
-      errorConsumer.setName("errorConsumer");
-      errorConsumer.start();
-      outputConsumer.setName("outputConsumer");
-      outputConsumer.start();
-      int exitVal = process.waitFor();
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("exitVal: " + exitVal);
-      }
+    LOGGER.info("Launching the slave aicoin-qt instance");
+    LOGGER.info("  shell cmd: " + cmdArray[2]);
+    AICoinUtils.executeHostCommand(cmdArray);
+  }
 
-      process.getInputStream().close();
-      process.getOutputStream().close();
-    } catch (InterruptedException ex) {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("interrupted");
-      }
-    } catch (final IOException ex) {
-      throw new TexaiException(ex);
-    }
-
+  /**
+   * Shuts down the aicoind instance.
+   */
+  private void shutdownAicoind() {
+    //TODO
   }
 
   @Override

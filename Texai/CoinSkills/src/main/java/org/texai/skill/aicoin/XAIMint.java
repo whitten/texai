@@ -10,6 +10,7 @@ import org.texai.ahcs.NodeRuntime;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.skill.aicoin.support.AICoinUtils;
 import org.texai.util.EnvironmentUtils;
 import org.texai.util.TexaiException;
 
@@ -189,12 +190,9 @@ public final class XAIMint extends AbstractSkill {
     stringBuilder.append("git/bitcoin/src/ ; ./bitcoin-cli setgenerate true");
     cmdArray[2] = stringBuilder.toString();
     LOGGER.info("shell cmd: " + cmdArray[2]);
-    try {
-      Runtime.getRuntime().exec(cmdArray);
-    } catch (final IOException ex) {
-      throw new TexaiException(ex);
-    }
-  }
+    AICoinUtils.executeHostCommand(cmdArray);
+
+   }
 
   /** Pass down the task to configure roles for singleton agent hosts.
    *

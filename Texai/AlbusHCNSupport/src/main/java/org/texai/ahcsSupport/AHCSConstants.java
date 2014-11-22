@@ -242,8 +242,10 @@ public final class AHCSConstants {
   public static final String WANT_THE_DIALOG_INITIATIVE_TASK = "want_the_dialog_initiative_Task";
   //
   //
-  // the want_the_dialog_initiative_Task operation
+  // the writeConfigurationFile_Task operation
   public static final String WRITE_CONFIGURATION_FILE_TASK = "writeConfigurationFile_Task";
+  // the configuration file directory path parameter
+  public static final String WRITE_CONFIGURATION_FILE_TASK_DIRECTORY_PATH = "writeConfigurationFile_Task_directoryPath";
   //
   // the writeFormFillTextToUser_Task operation
   public static final String WRITE_FORM_FILL_TEXT_TO_USER_TASK = "writeFormFillTextToUser_Task";

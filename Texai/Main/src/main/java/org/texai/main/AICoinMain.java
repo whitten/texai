@@ -7,6 +7,7 @@
  *
  * Copyright (C) Sep 21, 2011, Stephen L. Reed, Texai.org.
  *
+ * See the file "LICENSE" for the full license governing this code.
  */
 package org.texai.main;
 
@@ -18,7 +19,6 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.joda.time.tz.CachedDateTimeZone;
 import org.texai.ahcs.NodeRuntime;
 import static org.texai.ahcs.NodeRuntime.CACHE_X509_CERTIFICATES;
 import org.texai.ahcsSupport.AHCSConstants;
