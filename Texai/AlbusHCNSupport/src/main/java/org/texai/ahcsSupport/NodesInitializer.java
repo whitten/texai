@@ -470,7 +470,7 @@ public final class NodesInitializer {
     if (singletonConfigurationCertificate == null) {
       throw new TexaiException("missing " + singletonConfigurationRoleName);
     }
-    LOGGER.info("emitting the configuration role's certificate to " + configurationCertificateFilePath);
+    LOGGER.debug("emitting the configuration role's certificate to " + configurationCertificateFilePath);
     try {
       X509Utils.writeX509Certificate(singletonConfigurationCertificate,
               configurationCertificateFilePath); // filePath

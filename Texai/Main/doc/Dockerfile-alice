@@ -1,16 +1,35 @@
-# Pull base image.
+# pull base image
 FROM dockerfile/ubuntu
 
-# Install Java.
+# suppress apt-get warning
+ENV DEBIAN_FRONTEND noninteractive
+
+# install Java
 RUN \
   echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
   add-apt-repository -y ppa:webupd8team/java && \
   apt-get update && \
   apt-get install -y oracle-java8-installer && \
-  rm -rf /var/lib/apt/lists/* && \
   rm -rf /var/cache/oracle-jdk8-installer
 
-# Define working directory.
+# install Bitcoin Core dependencies
+RUN add-apt-repository ppa:bitcoin/bitcoin \
+ && apt-get update \
+ && apt-get install -y --no-install-recommends bitcoin-qt
+
+# (Demo) install vnc, xvfb
+RUN apt-get install -y x11vnc xvfb
+RUN mkdir ~/.vnc
+# -----------------------------------------
+# Change the VNC remote access password
+RUN x11vnc -storepasswd 1234 ~/.vnc/passwd
+# -----------------------------------------
+
+# clean up
+RUN  apt-get clean \
+ && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# define working directory.
 WORKDIR /aicoin
 
 # user
@@ -18,10 +37,14 @@ RUN groupadd -r aicoin -g 433 && \
 useradd -u 431 -r -g aicoin -d /work -s /sbin/nologin -c "aicoin user" aicoin && \
 chown -R aicoin:aicoin /aicoin
 
+# demo machine UUID for D-Bus
+RUN echo "f0f7445784a85840abdc5085547de53b" > /etc/machine-id
+
 # variables
 ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
 ENV REPOSITORIES ../repositories
 ENV SECURITY_DIR /aicoin
+ENV TIMEZONE America/Chicago
 ENV LISTENING_PORT 5048
 
 # -----------------------------------------
@@ -31,7 +54,10 @@ ENV RPC_USER rpctestuser
 ENV RPC_PASSWORD rpctestpassword
 # -----------------------------------------
 
+# A.I. Coin port
 EXPOSE 5048
+# VNC port
+EXPOSE 5900
 
-# Define default command.
+# define default command
 CMD ["bash"]

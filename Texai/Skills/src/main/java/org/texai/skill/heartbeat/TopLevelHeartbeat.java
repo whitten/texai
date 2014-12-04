@@ -36,6 +36,7 @@ import org.texai.ahcs.NodeRuntime;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.skill.network.ContainerOperation;
 import org.texai.util.StringUtils;
 
 /**
@@ -87,24 +88,61 @@ public final class TopLevelHeartbeat extends AbstractSkill {
       return true;
     }
     switch (operation) {
+      /**
+       * Initialize Task
+       *
+       * This task message is sent from the parent TopmostFriendship agent/role. It is expected to be the first task message
+       * that this role receives and it results in the role being initialized.
+       */
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
         // initialize child governance roles
         propagateOperationToChildRoles(operation);
-        setSkillState(AHCSConstants.State.READY);
+        if (getNodeRuntime().isFirstContainerInNetwork()) {
+          setSkillState(AHCSConstants.State.READY);
+        } else {
+          setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
+        }
         return true;
 
+      /**
+       * Join Acknowledged Task
+       *
+       * This task message is sent from the network-singleton, parent TopmostFriendship agent/role. It indicates that the
+       * parent is ready to converse with this role as needed.
+       */
+      case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
+        assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
+                "state must be isolated-from-network, but is " + getSkillState();
+        joinAcknowledgedTask(message);
+        return true;
+
+      /**
+       * Join Network Singleton Agent Info
+       *
+       * This task message is sent to this network singleton agent/role from a child role in another container.
+       *
+       * The sender is requesting to join the network as child of this role.
+       *
+       * The message parameter is the X.509 certificate belonging to the sender agent / role.
+       *
+       * The result is the sending of a Join Acknowleged Task message to the requesting child role, with this role's X.509 certificate as
+       * the message parameter.
+       */
       case AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
         joinNetworkSingletonAgent(message);
         return true;
 
-      case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        joinAcknowledgedTask(message);
-        return true;
-
+      /**
+       * Keep Alive Info
+       *
+       * This task message is sent to this network singleton agent/role from a child ContainerHeartbeat agent/role.
+       *
+       * The result is the recording of the liveness of the sending container.
+       */
       case AHCSConstants.KEEP_ALIVE_INFO:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
         recordKeepAlive(message);
         return true;
 
@@ -163,7 +201,6 @@ public final class TopLevelHeartbeat extends AbstractSkill {
   protected void recordKeepAlive(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
-    assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
 
     final StringBuilder stringBuilder = new StringBuilder()
             .append("recording keep-alive from ")
@@ -318,9 +355,9 @@ public final class TopLevelHeartbeat extends AbstractSkill {
     LOGGER.warn("heartbeat missing for " + inboundHeartbeatInfo);
   }
 
-  /** Pass down the task to configure roles for singleton agent hosts.
+  /** Handles the sender's request to join the network as child of this role..
    *
-   * @param message the confiure singleton agent hosts task message
+   * @param message the Join Network Singleton Agent Info message
    */
   private void joinNetworkSingletonAgent(final Message message) {
     //Preconditions
@@ -334,7 +371,7 @@ public final class TopLevelHeartbeat extends AbstractSkill {
 
     ((NodeRuntime) getNodeRuntime()).addX509Certificate(childQualifiedName, x509Certificate);
 
-    // send a acknowledged_info message to the joined peer agent/role
+    // send a Join Acknowledged Task message to the joined peer agent/role
     final Message acknowledgedInfoMessage = makeMessage(
             message.getSenderQualifiedName(), // recipientQualifiedName
             message.getSenderService(), // recipientService
@@ -355,5 +392,10 @@ public final class TopLevelHeartbeat extends AbstractSkill {
     assert message != null : "message must not be null";
 
     LOGGER.info("join acknowledged from " + message.getSenderQualifiedName());
+    final Message removeUnjoinedRoleInfoMessage = makeMessage(
+            getContainerName() + ".ContainerOperationAgent.ContainerOperationRole", // recipientQualifiedName
+            ContainerOperation.class.getName(), // recipientService
+            AHCSConstants.REMOVE_UNJOINED_ROLE_INFO); // operation
+    sendMessageViaSeparateThread(removeUnjoinedRoleInfoMessage);
   }
 }

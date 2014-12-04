@@ -60,7 +60,11 @@ public class SkillTemplate extends AbstractSkill {
         // initialize child roles
         propagateOperationToChildRoles(operation);
 
-        setSkillState(State.READY);
+        if (getNodeRuntime().isFirstContainerInNetwork()) {
+          setSkillState(AHCSConstants.State.READY);
+        } else {
+          setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
+        }
         return true;
 
       case AHCSConstants.PERFORM_MISSION_TASK:

@@ -99,7 +99,11 @@ public class NodeRuntimeSkill extends AbstractSkill {
 
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
-        setSkillState(State.READY);
+        if (getNodeRuntime().isFirstContainerInNetwork()) {
+          setSkillState(AHCSConstants.State.READY);
+        } else {
+          setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
+        }
         return true;
 
       case AHCSConstants.PERFORM_MISSION_TASK:

@@ -37,8 +37,9 @@ public final class AHCSConstants {
   public enum State {
 
     UNINITIALIZED,
+    ISOLATED_FROM_NETWORK,
     READY,
-    SHUTDOWN
+    INACTIVE
   }
 
   //
@@ -163,6 +164,9 @@ public final class AHCSConstants {
   // the joinAcknowledged_Task operation
   public static final String JOIN_ACKNOWLEDGED_TASK = "joinAcknowledged_Task";
   //
+  // the joinNetwork_Task operation
+  public static final String JOIN_NETWORK_TASK = "joinNetwork_Task";
+  //
   // the learn faces_Task operation
   public static final String LEARN_FACES_TASK = "learn faces_Task";
   //
@@ -182,8 +186,6 @@ public final class AHCSConstants {
   // the logUserWord_Task_word parameter
   public static final String LOG_USER_WORD_SKILL_WORD = "logUserWord_Skill_word";
   //
-  // the mintNewBlocks_Task operation
-  public static final String MINT_NEW_BLOCKS_TASK = "mintNewBlocks_Task";
   // the performMission_Task operation
   public static final String PERFORM_MISSION_TASK = "performMission_Task";
   // the registerSensedUtterance_Task operation
@@ -265,24 +267,38 @@ public final class AHCSConstants {
   //
   // information messages - end with _Info
   //
+  // the addUnjoinedRole_Info operation
+  public static final String ADD_UNJOINED_ROLE_INFO = "addUnjoinedRole_Info";
+  //
   // the acknowledged_Info operation
   public static final String ACKNOWLEDGED_INFO = "acknowledged_Info";
+  //
   // the joinNetworkSingleton_Info operation
   public static final String JOIN_NETWORK_SINGLETON_AGENT_INFO = "joinNetworkSingletonAgent_Info";
+  //
   // the keep-alive information operation
   public static final String KEEP_ALIVE_INFO = "keepAlive_Info";
+  //
   // the task accomplished information operation
   public static final String TASK_ACCOMPLISHED_INFO = "taskAccomplished_Info";
+  //
   // the message timeout information operation
   public static final String MESSAGE_TIMEOUT_INFO = "messageTimeout_Info";
+  //
   // the message timeout error information operation
   public static final String MESSAGE_TIMEOUT_ERROR_INFO = "messageTimeoutError_Info";
   //
   // the messageNotUnderstood_Info operation
   public static final String MESSAGE_NOT_UNDERSTOOD_INFO = "messageNotUnderstood_Info";
   //
+  // the networkJoinComplete_Info operation
+  public static final String NETWORK_JOIN_COMPLETE_INFO = "networkJoinComplete_Info";
+  //
   // the operationNotPermitted_Info operation
   public static final String OPERATION_NOT_PERMITTED_INFO = "operationNotPermitted_Info";
+  //
+  // the removeUnjoinedRole_Info operation
+  public static final String REMOVE_UNJOINED_ROLE_INFO = "removeUnjoinedRole_Info";
   //
   // the returnFromConverseYesNoQueryWithUser_Info operation
   public static final String RETURN_FROM_CONVERSE_YES_NO_QUERY_WITH_USER_INFO = "returnFromConverseYesNoQueryWithUser_Info";
@@ -319,18 +335,10 @@ public final class AHCSConstants {
   public static final String MSG_PARM_IMAGE = "image";
   // the message parameter for logging level
   public static final String MSG_PARM_LOGGING_LEVEL = "logging level";
-  // the message parameter for the node nickname
-  public static final String MSG_PARM_NODE_NICKNAME = "node nickname";
-  // the message parameter for the node type name
-  public static final String MSG_PARM_NODE_TYPE_NAME = "node type name";
   // the message parameter for the node type name
   public static final String MSG_PARM_OPERATION = "operation";
-  // the message parameter for the parent role ID
-  public static final String MSG_PARM_PARENT_ROLE_ID = "parent role id";
-  // the message parameter for the recipient role id
-  public static final String MSG_PARM_RECIPIENT_ROLE_ID = "recipient role id";
   // the message parameter for the role type name
-  public static final String MSG_PARM_ROLE_TYPE_NAME = "role type name";
+  public static final String MSG_PARM_ROLE_QUALIFIED_NAME = "role qualified name";
   // the message parameter for the singleton agent hosts
   public static final String MSG_PARM_SINGLETON_AGENT_HOSTS = "singleton agent hosts";
   // the message parameter for the skill class name

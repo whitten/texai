@@ -27,6 +27,7 @@ import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.skill.network.ContainerOperation;
 
 /** Provides X.509 Certificate Authority behavior, in which a certificate request from a role, node runtime,
  * or message router is signed by the private key of an intermediate signing certificate, which in turn has been signed
@@ -74,11 +75,16 @@ public class XAIContainerCertificateAuthority extends AbstractSkill {
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
-        setSkillState(AHCSConstants.State.READY);
+        if (getNodeRuntime().isFirstContainerInNetwork()) {
+          setSkillState(AHCSConstants.State.READY);
+        } else {
+          setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
+        }
         return true;
 
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
+                "state must be isolated-from-network, but is " + getSkillState();
         joinAcknowledgedTask(message);
         return true;
 
@@ -134,5 +140,10 @@ public class XAIContainerCertificateAuthority extends AbstractSkill {
     assert message != null : "message must not be null";
 
     LOGGER.info("join acknowledged from " + message.getSenderQualifiedName());
+    final Message removeUnjoinedRoleInfoMessage = makeMessage(
+            getContainerName() + ".ContainerOperationAgent.ContainerOperationRole", // recipientQualifiedName
+            ContainerOperation.class.getName(), // recipientService
+            AHCSConstants.REMOVE_UNJOINED_ROLE_INFO); // operation
+    sendMessageViaSeparateThread(removeUnjoinedRoleInfoMessage);
   }
 }

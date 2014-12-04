@@ -79,7 +79,11 @@ public final class Governance extends AbstractSkill {
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert this.getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
-        setSkillState(State.READY);
+        if (getNodeRuntime().isFirstContainerInNetwork()) {
+          setSkillState(AHCSConstants.State.READY);
+        } else {
+          setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
+        }
         return true;
 
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:

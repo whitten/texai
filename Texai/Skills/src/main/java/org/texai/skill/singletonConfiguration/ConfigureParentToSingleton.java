@@ -8,6 +8,7 @@ import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.ahcsSupport.domainEntity.Role;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.skill.domainEntity.SingletonAgentHosts;
+import org.texai.skill.network.ContainerOperation;
 import org.texai.util.StringUtils;
 
 /**
@@ -58,19 +59,43 @@ public class ConfigureParentToSingleton extends AbstractSkill {
       return true;
     }
     switch (operation) {
+      /**
+       * Initialize Task
+       *
+       * This task message is sent from the container-local parent ContainerOperationAgent.ContainerOperationRole. It is expected to be the
+       * first task message that this role receives and it results in the role being initialized.
+       */
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
-        // initialize child roles
-        propagateOperationToChildRoles(operation);
-        setSkillState(AHCSConstants.State.READY);
+        if (getNodeRuntime().isFirstContainerInNetwork()) {
+          setSkillState(AHCSConstants.State.READY);
+        } else {
+          setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
+        }
+        return true;
+
+      /**
+       * Configure Singleton Agent Hosts Task
+       *
+       * This task message is sent from the container-local parent ContainerOperationAgent.ContainerOperationRole.
+       *
+       * Its parameter is the SingletonAgentHosts object, which contains the the singleton agent dictionary, agent name --> hosting
+       * container name.
+       *
+       * The result is that any affected parent roles in the containing agent are revised to refer to the respective network singleton
+       * agent/roles. Furthermore a Join Network Singleton Agent Info message is sent to the affected role's new parent, with the affected
+       * role specified as the sender. As a parameter, the affected role's X509Certificate is included in the message to the new parent, who
+       * needs it to verify the message.
+       *
+       */
+      case AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK:
+        assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
+                "state must be isolated-from-network, but is " + getSkillState() + ", in " + getRole().getQualifiedName();
+        configureSingletonAgentHosts(message);
         return true;
 
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
-        return true;
-
-      case AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK:
-        configureSingletonAgentHosts(message);
         return true;
 
     }
@@ -126,7 +151,6 @@ public class ConfigureParentToSingleton extends AbstractSkill {
    * @param message the configure singleton agent hosts task message
    */
   private void configureSingletonAgentHosts(final Message message) {
-
     //Preconditions
     assert message != null : "message must not be null";
 
@@ -144,36 +168,47 @@ public class ConfigureParentToSingleton extends AbstractSkill {
       final String parentQualifiedName = role.getParentQualifiedName();
       if (StringUtils.isNonEmptyString(parentQualifiedName)) {
         if (singletonAgentHosts.isNetworkSingleton(parentQualifiedName)) {
-          // a parent agent/role needs to be changed to the corresponding network singleton agent/role
           final String newParentQualifiedName = singletonAgentHosts.mapNetworkSingleton(parentQualifiedName);
           assert StringUtils.isNonEmptyString(newParentQualifiedName);
-          stringBuilder
-                  .append("\n  old parent role: ")
-                  .append(parentQualifiedName)
-                  .append("\n  new parent role: ")
-                  .append(newParentQualifiedName);
-          role.setParentQualifiedName(newParentQualifiedName);
-          LOGGER.info(stringBuilder.toString());
+          if (newParentQualifiedName.equals(parentQualifiedName)) {
+            LOGGER.info(stringBuilder.toString());
+            LOGGER.info("parent " + newParentQualifiedName + " already set for " + role);
+          } else {
+            // a parent agent/role needs to be changed to the corresponding network singleton agent/role
+            stringBuilder
+                    .append("\n  old parent role: ")
+                    .append(parentQualifiedName)
+                    .append("\n  new parent role: ")
+                    .append(newParentQualifiedName);
+            role.setParentQualifiedName(newParentQualifiedName);
+            LOGGER.info(stringBuilder.toString());
 
-          // send a join info message to the new parent agent/role
-          final Message joinMessage = new Message(
-                  role.getQualifiedName(), // senderQualifiedName
-                  null, // senderService
-                  newParentQualifiedName, // recipientQualifiedName
-                  null, // recipientService
-                  AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO); // operation
-          assert role.getX509Certificate() != null;
-          joinMessage.put(AHCSConstants.MSG_PARM_X509_CERTIFICATE, role.getX509Certificate());
+            // synchronously send an Add Unjoined Role Info message to the ContainerOperations agent/role
+            final Message addUnjoinedRoleInfoMessage = makeMessage(
+                    getRole().getParentQualifiedName(), // recipientQualifiedName
+                    ContainerOperation.class.getName(), // recipientService
+                    AHCSConstants.ADD_UNJOINED_ROLE_INFO); // operation
+            addUnjoinedRoleInfoMessage.put(AHCSConstants.MSG_PARM_ROLE_QUALIFIED_NAME, role.getQualifiedName());
+            sendMessage(addUnjoinedRoleInfoMessage);
 
-          //TODO set and handle timeout
-          role.sendMessageViaSeparateThread(joinMessage);
+            // send a join info message to the new parent agent/role
+            final Message joinMessage = new Message(
+                    role.getQualifiedName(), // senderQualifiedName
+                    null, // senderService
+                    newParentQualifiedName, // recipientQualifiedName
+                    null, // recipientService
+                    AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO); // operation
+            assert role.getX509Certificate() != null;
+            joinMessage.put(AHCSConstants.MSG_PARM_X509_CERTIFICATE, role.getX509Certificate());
+
+            //TODO set and handle timeout
+            role.sendMessageViaSeparateThread(joinMessage);
+          }
         }
       } else {
         LOGGER.info("  no parent role for " + role);
       }
     });
-
-    LOGGER.info(stringBuilder.toString());
   }
 
 }

@@ -8,6 +8,7 @@ import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 import org.texai.skill.aicoin.support.AICoinUtils;
 import org.texai.skill.aicoin.support.XAIBitcoinMessageReceiver;
+import org.texai.skill.network.ContainerOperation;
 import org.texai.util.EnvironmentUtils;
 import org.texai.util.TexaiException;
 
@@ -48,6 +49,8 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
   private static final String REPLY_WITH = "replyWith";
   // the path to the aicoin-qt configuration and data directory
   private static final String AICOIN_DIRECTORY_PATH = "../.aicoin";
+  // the output and error stream consumers from the launched VNC server
+  private Object[] streamConsumers;
 
   /**
    * Constructs a new XTCOperation instance.
@@ -90,23 +93,53 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
       return true;
     }
     switch (operation) {
+      /**
+       * Initialize Task
+       *
+       * This task message is sent from the parent XAINetworkOperationAgent.XAINetworkOperationRole. It is expected to be the first
+       * task message that this role receives and it results in the role being initialized.
+       */
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
-        setSkillState(AHCSConstants.State.READY);
+        if (getNodeRuntime().isFirstContainerInNetwork()) {
+          setSkillState(AHCSConstants.State.READY);
+        } else {
+          setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
+        }
         return true;
 
-      case AHCSConstants.TASK_ACCOMPLISHED_INFO:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
-        continueConversation(message);
+      /**
+       * Join Acknowledged Task
+       *
+       * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.XAINetworkOperationRole.
+       * It indicates that the parent is ready to converse with this role as needed.
+       */
+      case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
+        assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
+                "state must be isolated-from-network, but is " + getSkillState();
+        joinAcknowledgedTask(message);
         return true;
 
+      /**
+       * Perform Mission Task
+       *
+       * This task message is sent from the network-singleton, parent TopmostFriendshipAgent.TopmostFriendshipRole. It commands this
+       * network-connected role to begin performing its mission.
+       */
       case AHCSConstants.PERFORM_MISSION_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
         performMission(message);
         return true;
 
-      case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        joinAcknowledgedTask(message);
+      /**
+       * Task Accomplished Info
+       *
+       * This information message is sent from this role's XAIWriteConfigurationFile skill indicating that it
+       * has emitted the aicoin.conf file.
+       */
+      case AHCSConstants.TASK_ACCOMPLISHED_INFO:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
+        continueConversation(message);
         return true;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
@@ -167,7 +200,7 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
     LOGGER.info("performing the mission");
-    // write the bitcoind configuration file
+    // write the aicoind configuration file
     final UUID conversationId = UUID.randomUUID();
     setStateValue(CONVERSATION_ID, conversationId);
     assert getStateValue(REPLY_WITH) == null;
@@ -214,17 +247,19 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
       throw new TexaiException("Operating system must be Linux");
     }
 
+    final String display = System.getenv("DISPLAY");
+    LOGGER.info("X11 DISPLAY=" + display);
     String[] cmdArray = {
       "sh",
       "-c",
       ""
     };
     final StringBuilder stringBuilder = new StringBuilder();
-    stringBuilder.append("../bin/aicoin-qt -datadir=").append(AICOIN_DIRECTORY_PATH);
+    stringBuilder.append("../bin/aicoin-qt -debug -datadir=").append(AICOIN_DIRECTORY_PATH);
     cmdArray[2] = stringBuilder.toString();
     LOGGER.info("Launching the slave aicoin-qt instance");
     LOGGER.info("  shell cmd: " + cmdArray[2]);
-    AICoinUtils.executeHostCommand(cmdArray);
+    AICoinUtils.executeHostCommandWithoutWaitForCompletion(cmdArray);
   }
 
   /**
@@ -255,6 +290,12 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
     assert message != null : "message must not be null";
 
     LOGGER.info("join acknowledged from " + message.getSenderQualifiedName());
+
+    final Message removeUnjoinedRoleInfoMessage = makeMessage(
+            getContainerName() + ".ContainerOperationAgent.ContainerOperationRole", // recipientQualifiedName
+            ContainerOperation.class.getName(), // recipientService
+            AHCSConstants.REMOVE_UNJOINED_ROLE_INFO); // operation
+    sendMessageViaSeparateThread(removeUnjoinedRoleInfoMessage);
   }
 
 }

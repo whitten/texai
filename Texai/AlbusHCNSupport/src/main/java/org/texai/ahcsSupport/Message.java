@@ -635,7 +635,7 @@ public class Message implements Serializable {
   public String toString() {
     final StringBuilder stringBuilder = new StringBuilder();
     stringBuilder.append("[");
-    stringBuilder.append(dateTime);
+    stringBuilder.append(operation);
     stringBuilder.append(' ');
     stringBuilder.append(senderQualifiedName);
     stringBuilder.append(':');
@@ -659,9 +659,8 @@ public class Message implements Serializable {
         stringBuilder.append(recipientService);
       }
     }
-    stringBuilder.append(" (");
-    stringBuilder.append(operation);
-    stringBuilder.append(") ");
+    stringBuilder.append(' ');
+    stringBuilder.append(dateTime);
     if (conversationId != null) {
       stringBuilder.append("\n  conversationId=");
       stringBuilder.append(conversationId);

@@ -117,9 +117,10 @@ public class AICoinMain {
     Logger.getLogger(KBAccess.class).setLevel(Level.WARN);
     Logger.getLogger(RDFEntityPersister.class).setLevel(Level.WARN);
     Logger.getLogger(X509Utils.class).setLevel(Level.WARN);
+    Logger.getLogger(JournalWriter.class).setLevel(Level.WARN);
 
-    LOGGER.info("A.I. Coin version " + VERSION);
-    LOGGER.info("Starting the software agents in the container named " + containerName);
+    LOGGER.info("A.I. Coin version " + VERSION + ".");
+    LOGGER.info("Starting the software agents in the container named " + containerName + ".");
     nodeRuntime = new NodeRuntime(containerName);
     // configure a shutdown hook to run the finalization method in case the JVM is abnormally ended
     shutdownHook = new ShutdownHook();
@@ -137,9 +138,15 @@ public class AICoinMain {
       throw new TexaiException("the TIMEZONE environment variable must be set to a valid timezone\n "
               + "see http://tutorials.jenkov.com/java-date-time/java-util-timezone.html");
     }
-    LOGGER.debug("The time zone is " + timeZoneId);
+    LOGGER.debug("The time zone is " + timeZoneId + ".");
     DateTimeZone.setDefault(DateTimeZone.forID(timeZoneId));
-    LOGGER.info("Started " + (new DateTime()).toString("MM/dd/yyyy hh:mm a"));
+    LOGGER.info("Started " + (new DateTime()).toString("MM/dd/yyyy hh:mm a") + ".");
+
+    if (nodeRuntime.isFirstContainerInNetwork()) {
+      LOGGER.info("This is the first container in the network and will host all the network singleton agent / roles.");
+    } else {
+      LOGGER.info("This container will join the existing network.");
+    }
 
     // load the repositories with the node and role types
     LOGGER.info("Loading agents and their roles, and installing skills for each role ...");
@@ -164,7 +171,7 @@ public class AICoinMain {
    * Finalizes this application.
    */
   private void finalization() {
-    LOGGER.info("shutting down the node runtime");
+    LOGGER.info("Shutting down the node runtime.");
     final Timer timer = nodeRuntime.getTimer();
     synchronized (timer) {
       timer.cancel();
@@ -183,7 +190,7 @@ public class AICoinMain {
     }
     X509Utils.serializeSecureRandom(X509Utils.DEFAULT_SECURE_RANDOM_PATH);
 
-    LOGGER.info("node runtime completed");
+    LOGGER.info("Node runtime completed.");
     if (!Thread.currentThread().equals(shutdownHook)) {
       System.exit(0);
     }
@@ -220,15 +227,18 @@ public class AICoinMain {
     @SuppressWarnings("SleepWhileInLoop")
     public void run() {
       Thread.currentThread().setName("Node Runtime");
-      LOGGER.info("starting the node runtime");
+      LOGGER.info("Starting the node runtime.");
 
+      // configure the list of operations to be filtered from logging
       nodeRuntime.addFilteredOperation(AHCSConstants.AHCS_INITIALIZE_TASK);
-      nodeRuntime.addFilteredOperation(AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK);
+      //nodeRuntime.addFilteredOperation(AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK);
       nodeRuntime.addFilteredOperation(AHCSConstants.JOIN_ACKNOWLEDGED_TASK);
-      nodeRuntime.addFilteredOperation(AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO);
+      //nodeRuntime.addFilteredOperation(AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO);
       nodeRuntime.addFilteredOperation(AHCSConstants.KEEP_ALIVE_INFO);
-      nodeRuntime.addFilteredOperation(AHCSConstants.SEED_CONNECTION_REQUEST_INFO);
-      nodeRuntime.addFilteredOperation(AHCSConstants.SINGLETON_AGENT_HOSTS_INFO);
+      //nodeRuntime.addFilteredOperation(AHCSConstants.SEED_CONNECTION_REQUEST_INFO);
+      //nodeRuntime.addFilteredOperation(AHCSConstants.SINGLETON_AGENT_HOSTS_INFO);
+      //nodeRuntime.addFilteredOperation(AHCSConstants.ADD_UNJOINED_ROLE_INFO);
+      //nodeRuntime.addFilteredOperation(AHCSConstants.REMOVE_UNJOINED_ROLE_INFO);
 
       // send the initialize message to the <container>.TopmostFriendshipAgent.TopmostFriendshipRole
       final String recipientQualifiedName = nodeRuntime.getContainerName() + ".TopmostFriendshipAgent.TopmostFriendshipRole";
@@ -261,7 +271,7 @@ public class AICoinMain {
     public void run() {
       Thread.currentThread().setName("shutdown");
       if (!isFinalized.get()) {
-        LOGGER.warn("***** shutdown, finalizing resources *****");
+        LOGGER.warn("Shutdown, finalizing resources.");
         finalization();
       }
     }

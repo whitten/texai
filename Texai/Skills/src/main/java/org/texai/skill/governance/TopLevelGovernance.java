@@ -28,6 +28,7 @@ import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.skill.network.ContainerOperation;
 
 /**
  * Manages the container governance agents to ensure friendly behavior.
@@ -71,7 +72,13 @@ public final class TopLevelGovernance extends AbstractSkill {
         return true;
 
       case AHCSConstants.AHCS_INITIALIZE_TASK:
-        initialization(message);
+        assert this.getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
+        propagateOperationToChildRoles(message.getOperation());
+        if (getNodeRuntime().isFirstContainerInNetwork()) {
+          setSkillState(AHCSConstants.State.READY);
+        } else {
+          setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
+        }
         return true;
 
       case AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO:
@@ -80,7 +87,8 @@ public final class TopLevelGovernance extends AbstractSkill {
         return true;
 
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
+                "state must be isolated-from-network, but is " + getSkillState();
         joinAcknowledgedTask(message);
         return true;
 
@@ -137,9 +145,6 @@ public final class TopLevelGovernance extends AbstractSkill {
     assert message != null : "message must not be null";
     assert this.getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
 
-    // initialize child governance roles
-    propagateOperationToChildRoles( message.getOperation());
-    setSkillState(State.READY);
   }
 
   /**
@@ -152,9 +157,10 @@ public final class TopLevelGovernance extends AbstractSkill {
     return LOGGER;
   }
 
-  /** Pass down the task to configure roles for singleton agent hosts.
+  /**
+   * Handles the sender's request to join the network as child of this role..
    *
-   * @param message the confiure singleton agent hosts task message
+   * @param message the Join Network Singleton Agent Info message
    */
   private void joinNetworkSingletonAgent(final Message message) {
     //Preconditions
@@ -189,5 +195,10 @@ public final class TopLevelGovernance extends AbstractSkill {
     assert message != null : "message must not be null";
 
     LOGGER.info("join acknowledged from " + message.getSenderQualifiedName());
+    final Message removeUnjoinedRoleInfoMessage = makeMessage(
+            getContainerName() + ".ContainerOperationAgent.ContainerOperationRole", // recipientQualifiedName
+            ContainerOperation.class.getName(), // recipientService
+            AHCSConstants.REMOVE_UNJOINED_ROLE_INFO); // operation
+    sendMessageViaSeparateThread(removeUnjoinedRoleInfoMessage);
   }
 }

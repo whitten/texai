@@ -31,6 +31,7 @@ import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.ahcsSupport.seed.SeedNodeInfo;
 import org.texai.skill.domainEntity.SingletonAgentHosts;
 import org.texai.skill.governance.TopmostFriendship;
+import org.texai.skill.network.ContainerOperation;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 import org.texai.x509.X509Utils;
@@ -76,47 +77,101 @@ public class SingletonConfiguration extends AbstractSkill {
       return true;
     }
     switch (operation) {
+      /**
+       * Initialize Task
+       *
+       * This task message is sent from the container-local parent NetworkConfigurationAgent.NetworkConfigurationRole.
+       * It is expected to be the first task message that this role receives and it results in the role being initialized.
+       */
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
         initialization(message);
-        setSkillState(State.READY);
+        if (getNodeRuntime().isFirstContainerInNetwork()) {
+          setSkillState(AHCSConstants.State.READY);
+        } else {
+          setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
+        }
         return true;
 
-      case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
-        LOGGER.warn(message);
+      /**
+       * Join Network Task
+       *
+       * This task message is sent from the container-local parent NetworkConfigurationAgent.NetworkConfigurationRole.
+       *
+       * The SingletonConfiguration agent/role requests the singleton agent dictionary, agent name  --> hosting container name,
+       * from a seed peer.
+       */
+      case AHCSConstants.JOIN_NETWORK_TASK:
+        assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
+                "state must be isolated-from-network, but is " + getSkillState();
+        joinNetwork(message);
         return true;
 
-      case AHCSConstants.TASK_ACCOMPLISHED_INFO:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
-        //TODO
-        return true;
-
-      case AHCSConstants.SEED_CONNECTION_REQUEST_INFO:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
-        seedConnectionRequest(message);
-        return true;
-
+      /**
+       * Singleton Agent Hosts Info
+       *
+       * This task message is sent from a peer SingletonConfigurationAgent.SingletonConfigurationRole.
+       *
+       * Its parameter is the SingletonAgentHosts object,
+       * which contains the the singleton agent dictionary, agent name  --> hosting container name.
+       *
+       * As a result, it sends a Singleton Agent Hosts Info message to the TopmostFriendshipAgent / role.
+       *
+       * The outbound message contains the singleton agent dictionary.
+       */
       case AHCSConstants.SINGLETON_AGENT_HOSTS_INFO:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
-        seedConnectionReply(message);
+        assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
+                "state must be isolated-from-network, but is " + getSkillState();
+        handleSeedConnectionReply(message);
         return true;
 
+      /**
+       * Join Acknowledged Task
+       *
+       * This task message is sent from the network-singleton parent NetworkSingletonConfigurationAgent.NetworkSingletonConfigurationRole.
+       * It indicates that the parent is ready to converse with this role as needed.
+       */
+      case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
+        assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
+                "state must be isolated-from-network, but is " + getSkillState();
+        joinAcknowledgedTask(message);
+        return true;
+
+      /**
+       * Perform Mission Task
+       *
+       * This task message is sent from the network-singleton parent NetworkSingletonConfigurationAgent.NetworkSingletonConfigurationRole.
+       * It commands this network-connected role to begin performing its mission.
+       */
       case AHCSConstants.PERFORM_MISSION_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
         performMission(message);
         return true;
 
-      case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        joinAcknowledgedTask(message);
+      /**
+       * Seed Connection Request Info
+       *
+       * This information request message is sent from a peer SingletonConfiguration agent / role in another container.
+       *
+       * As parameters, it includes the IP address and port used by the peer, and also the X.509 certificate
+       * of the peer making the request to obtain the singleton agent dictionary.
+       *
+       * As a result, a Singleton Agent Hosts Info message is sent back to the peer,
+       * with the SingletonAgentHostsInfo object as a parameter.
+       */
+      case AHCSConstants.SEED_CONNECTION_REQUEST_INFO:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
+        seedConnectionRequest(message);
         return true;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
         LOGGER.warn(message);
         return true;
 
-      //TODO REQUEST_CONFIGURATON_TASK
-      // seed another peer who requests the locations of the nomadic singleton agents.
-      // handle other operations ...
+      case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
+        LOGGER.warn(message);
+        return true;
+
     }
     // otherwise, the message is not understood
     sendMessage(notUnderstoodMessage(message));
@@ -154,6 +209,7 @@ public class SingletonConfiguration extends AbstractSkill {
       AHCSConstants.SEED_CONNECTION_REQUEST_INFO,
       AHCSConstants.SINGLETON_AGENT_HOSTS_INFO,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
+      AHCSConstants.JOIN_NETWORK_TASK,
       AHCSConstants.TASK_ACCOMPLISHED_INFO};
   }
 
@@ -172,11 +228,53 @@ public class SingletonConfiguration extends AbstractSkill {
    *
    * @param message the received initialization task message
    */
-  @SuppressWarnings({"unchecked"})
   private void initialization(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
 
+    //TODO
+  }
+
+  /**
+   * Joins the network.
+   *
+   * @param message the received Join Network Task message
+   */
+  @SuppressWarnings("unchecked")
+  private void joinNetwork(final Message message) {
+    //Preconditions
+    assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "state must be isolated-from-network";
+
+    LOGGER.info("initializing the seed node information ...");
+
+    // deserialize the set of SeedNodeInfo objects from the specified file
+    final String seedNodeInfosFilePath = "data/SeedNodeInfos.ser";
+    LOGGER.info("seedNodeInfosFileHashString\n" + seedNodeInfosFileHashString);
+    X509Utils.verifyFileHash(
+            seedNodeInfosFilePath, // filePath
+            seedNodeInfosFileHashString); // fileHashString
+    try {
+      try (ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(seedNodeInfosFilePath))) {
+        seedNodesInfos = (Set<SeedNodeInfo>) objectInputStream.readObject();
+      }
+    } catch (IOException | ClassNotFoundException ex) {
+      throw new TexaiException("cannot find " + seedNodeInfosFilePath);
+    }
+
+    final AtomicBoolean isSeedNode = new AtomicBoolean(false);
+    LOGGER.info("the locations and credentials of the network seed nodes ...");
+    seedNodesInfos.stream().forEach((SeedNodeInfo seedNodeInfo) -> {
+      if (getContainerName().equals(Node.extractContainerName(seedNodeInfo.getQualifiedName()))) {
+        LOGGER.info("  " + seedNodeInfo + " - (me)");
+        isSeedNode.set(true);
+      } else {
+        LOGGER.info("  " + seedNodeInfo);
+        connectToSeedPeer(
+                seedNodeInfo.getQualifiedName(),
+                seedNodeInfo.getHostName(),
+                seedNodeInfo.getPort());
+      }
+    });
   }
 
   /**
@@ -243,14 +341,13 @@ public class SingletonConfiguration extends AbstractSkill {
   }
 
   /**
-   * Process the received connection reply.
+   * Handles the received connection reply.
    *
    * @param message the received seed connection reply message
    */
-  private void seedConnectionReply(final Message message) {
+  private void handleSeedConnectionReply(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
-    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
     LOGGER.info("received a seed connection reply from " + message.getSenderContainerName());
     final SingletonAgentHosts singletonAgentHosts
@@ -275,11 +372,6 @@ public class SingletonConfiguration extends AbstractSkill {
 
   /**
    * Returns a demo version of the singleton agent hosts assignments, which are all to the Mint peer.
-   *
-   * the network singleton nodes (nomadic agents) ... Mint.NetworkLogControlAgent Mint.NetworkOperationAgent
-   * Mint.NetworkSingletonConfigurationAgent Mint.TopLevelGovernanceAgent Mint.TopLevelHeartbeatAgent Mint.TopmostFriendshipAgent
-   * Mint.XAIFinancialAccountingAndControlAgent Mint.XAIMintAgent Mint.XAINetworkEpisodicMemoryAgent Mint.XAINetworkOperationAgent
-   * Mint.XAINetworkSeedAgent Mint.XAIPrimaryAuditAgent Mint.XAIRecoveryAgent Mint.XAIRewardAllocationAgent
    *
    * @return a demo version of the singleton agent hosts assignments
    */
@@ -353,40 +445,9 @@ public class SingletonConfiguration extends AbstractSkill {
   private void performMission(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
-    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
     LOGGER.info("performing the mission");
 
-    LOGGER.info("initializing the seed node information ...");
-
-    // deserialize the set of SeedNodeInfo objects from the specified file
-    final String seedNodeInfosFilePath = "data/SeedNodeInfos.ser";
-    LOGGER.info("seedNodeInfosFileHashString\n" + seedNodeInfosFileHashString);
-    X509Utils.verifyFileHash(
-            seedNodeInfosFilePath, // filePath
-            seedNodeInfosFileHashString); // fileHashString
-    try {
-      try (ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(seedNodeInfosFilePath))) {
-        seedNodesInfos = (Set<SeedNodeInfo>) objectInputStream.readObject();
-      }
-    } catch (IOException | ClassNotFoundException ex) {
-      throw new TexaiException("cannot find " + seedNodeInfosFilePath);
-    }
-
-    final AtomicBoolean isSeedNode = new AtomicBoolean(false);
-    LOGGER.info("the locations and credentials of the network seed nodes ...");
-    seedNodesInfos.stream().forEach((SeedNodeInfo seedNodeInfo) -> {
-      if (getContainerName().equals(Node.extractContainerName(seedNodeInfo.getQualifiedName()))) {
-        LOGGER.info("  " + seedNodeInfo + " - (me)");
-        isSeedNode.set(true);
-      } else {
-        LOGGER.info("  " + seedNodeInfo);
-        connectToSeedPeer(
-                seedNodeInfo.getQualifiedName(),
-                seedNodeInfo.getHostName(),
-                seedNodeInfo.getPort());
-      }
-    });
   }
 
   /**
@@ -399,6 +460,11 @@ public class SingletonConfiguration extends AbstractSkill {
     assert message != null : "message must not be null";
 
     LOGGER.info("join acknowledged from " + message.getSenderQualifiedName());
+    final Message removeUnjoinedRoleInfoMessage = makeMessage(
+            getContainerName() + ".ContainerOperationAgent.ContainerOperationRole", // recipientQualifiedName
+            ContainerOperation.class.getName(), // recipientService
+            AHCSConstants.REMOVE_UNJOINED_ROLE_INFO); // operation
+    sendMessageViaSeparateThread(removeUnjoinedRoleInfoMessage);
   }
 
 }

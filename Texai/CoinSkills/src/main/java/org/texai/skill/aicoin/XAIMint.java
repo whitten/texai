@@ -1,16 +1,14 @@
 package org.texai.skill.aicoin;
 
-import java.io.IOException;
-import java.security.cert.X509Certificate;
 import java.util.Timer;
 import java.util.TimerTask;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
-import org.texai.ahcs.NodeRuntime;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 import org.texai.skill.aicoin.support.AICoinUtils;
+import org.texai.skill.network.ContainerOperation;
 import org.texai.util.EnvironmentUtils;
 import org.texai.util.TexaiException;
 
@@ -40,6 +38,8 @@ public final class XAIMint extends AbstractSkill {
   private static final Logger LOGGER = Logger.getLogger(XAIMint.class);
   // the timer
   private final Timer mintTimer;
+  // the path to the aicoin-qt configuration and data directory
+  private static final String AICOIN_DIRECTORY_PATH = "../.aicoin";
 
   /**
    * Constructs a new XTCMint instance.
@@ -50,9 +50,10 @@ public final class XAIMint extends AbstractSkill {
             true); // isDaemon
   }
 
-  /** Gets the logger.
+  /**
+   * Gets the logger.
    *
-   * @return  the logger
+   * @return the logger
    */
   @Override
   protected Logger getLogger() {
@@ -79,24 +80,42 @@ public final class XAIMint extends AbstractSkill {
       return true;
     }
     switch (operation) {
+      /**
+       * Initialize Task
+       *
+       * This task message is sent from the parent XAINetworkOperationAgent.XAINetworkOperationRole. It is expected to be the first
+       * task message that this role receives and it results in the role being initialized.
+       */
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
-        setSkillState(AHCSConstants.State.READY);
+        if (getNodeRuntime().isFirstContainerInNetwork()) {
+          setSkillState(AHCSConstants.State.READY);
+        } else {
+          setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
+        }
         return true;
 
-      case AHCSConstants.MINT_NEW_BLOCKS_TASK:
-        assert this.getSkillState().equals(AHCSConstants.State.READY) : "prior state must be ready";
-        mintNewBlocks();
-        return true;
-
-      case AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        joinNetworkSingletonAgent(message);
-        return true;
-
+      /**
+       * Join Acknowledged Task
+       *
+       * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.XAINetworkOperationRole.
+       * It indicates that the parent is ready to converse with this role as needed.
+       */
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
+                "state must be isolated-from-network, but is " + getSkillState();
         joinAcknowledgedTask(message);
+        return true;
+
+      /**
+       * Perform Mission Task
+       *
+       * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.XAINetworkOperationRole.
+       * It commands this network-connected role to begin performing its mission.
+       */
+      case AHCSConstants.PERFORM_MISSION_TASK:
+        assert this.getSkillState().equals(AHCSConstants.State.READY) : "prior state must be ready";
+        performMission(message);
         return true;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
@@ -137,12 +156,25 @@ public final class XAIMint extends AbstractSkill {
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
-      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.MINT_NEW_BLOCKS_TASK,
-      AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO,
-      AHCSConstants.JOIN_ACKNOWLEDGED_TASK
+      AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.PERFORM_MISSION_TASK
     };
+  }
+
+  /**
+   * Perform this role's mission, which is to manage the containers.
+   *
+   * @param message the received perform mission task message
+   */
+  private void performMission(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+
+    LOGGER.info("performing the mission");
+    mintNewBlocks();
   }
 
   /**
@@ -151,9 +183,10 @@ public final class XAIMint extends AbstractSkill {
   private void mintNewBlocks() {
     LOGGER.info("mint new blocks");
     mintTimer.scheduleAtFixedRate(
-            null,
-            0l, // delay,
-            10000l); // period - 10 minutes
+            new MintTimerTask(), // task
+            30000l, // delay - 30 seconds
+            //            600000l); // period - 10 minutes
+            60000l); // period - 1 minute
   }
 
   /**
@@ -179,46 +212,21 @@ public final class XAIMint extends AbstractSkill {
       throw new TexaiException("Operating system must be Linux");
     }
 
+    LOGGER.info("generate a new block");
     String[] cmdArray = {
       "sh",
       "-c",
       ""
     };
     final StringBuilder stringBuilder = new StringBuilder();
-    stringBuilder.append("cd ");
-    stringBuilder.append(System.getProperty("user.dir"));
-    stringBuilder.append("git/bitcoin/src/ ; ./bitcoin-cli setgenerate true");
+    stringBuilder
+            .append("../bin/aicoin-cli -datadir=")
+            .append(AICOIN_DIRECTORY_PATH)
+            .append(" setgenerate true 1");
     cmdArray[2] = stringBuilder.toString();
     LOGGER.info("shell cmd: " + cmdArray[2]);
-    AICoinUtils.executeHostCommand(cmdArray);
+    AICoinUtils.executeHostCommandWithoutWaitForCompletion(cmdArray);
 
-   }
-
-  /** Pass down the task to configure roles for singleton agent hosts.
-   *
-   * @param message the confiure singleton agent hosts task message
-   */
-  private void joinNetworkSingletonAgent(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
-
-    LOGGER.info("child role joining this network singleton " + message.getSenderQualifiedName());
-    final String childQualifiedName = message.getSenderQualifiedName();
-    final X509Certificate x509Certificate = (X509Certificate) message.get(AHCSConstants.MSG_PARM_X509_CERTIFICATE);
-    assert x509Certificate != null;
-
-    ((NodeRuntime) getNodeRuntime()).addX509Certificate(childQualifiedName, x509Certificate);
-
-    // send a acknowledged_info message to the joined peer agent/role
-    final Message acknowledgedInfoMessage = makeMessage(
-            message.getSenderQualifiedName(), // recipientQualifiedName
-            message.getSenderService(), // recipientService
-            AHCSConstants.JOIN_ACKNOWLEDGED_TASK); // operation
-    acknowledgedInfoMessage.put(
-            AHCSConstants.MSG_PARM_X509_CERTIFICATE, // parameterName
-            getRole().getX509Certificate()); // parameterValue
-    sendMessage(acknowledgedInfoMessage);
   }
 
   /**
@@ -231,5 +239,10 @@ public final class XAIMint extends AbstractSkill {
     assert message != null : "message must not be null";
 
     LOGGER.info("join acknowledged from " + message.getSenderQualifiedName());
+    final Message removeUnjoinedRoleInfoMessage = makeMessage(
+            getContainerName() + ".ContainerOperationAgent.ContainerOperationRole", // recipientQualifiedName
+            ContainerOperation.class.getName(), // recipientService
+            AHCSConstants.REMOVE_UNJOINED_ROLE_INFO); // operation
+    sendMessageViaSeparateThread(removeUnjoinedRoleInfoMessage);
   }
 }

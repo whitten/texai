@@ -26,6 +26,7 @@ import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.skill.network.ContainerOperation;
 
 /**
  *
@@ -70,11 +71,16 @@ public class XAIContainerEpisodicMemory extends AbstractSkill {
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
-        setSkillState(State.READY);
+        if (getNodeRuntime().isFirstContainerInNetwork()) {
+          setSkillState(AHCSConstants.State.READY);
+        } else {
+          setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
+        }
         return true;
 
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
+                "state must be isolated-from-network, but is " + getSkillState();
         joinAcknowledgedTask(message);
         return true;
 
@@ -131,6 +137,11 @@ public class XAIContainerEpisodicMemory extends AbstractSkill {
     assert message != null : "message must not be null";
 
     LOGGER.info("join acknowledged from " + message.getSenderQualifiedName());
+    final Message removeUnjoinedRoleInfoMessage = makeMessage(
+            getContainerName() + ".ContainerOperationAgent.ContainerOperationRole", // recipientQualifiedName
+            ContainerOperation.class.getName(), // recipientService
+            AHCSConstants.REMOVE_UNJOINED_ROLE_INFO); // operation
+    sendMessageViaSeparateThread(removeUnjoinedRoleInfoMessage);
   }
 
 }

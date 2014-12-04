@@ -616,12 +616,23 @@ public abstract class AbstractSkill {
    * @return a description of the given skill state
    */
   public static String stateDescription(final State skillState) {
-    if (skillState.equals(State.READY)) {
-      return "ready";
-    } else if (skillState.equals(State.SHUTDOWN)) {
-      return "shutdown";
-    } else if (skillState.equals(State.UNINITIALIZED)) {
+    //Preconditions
+    assert skillState != null : "skillState must not be null";
+
+    if (skillState.equals(State.UNINITIALIZED)) {
+      // this skill is not yet initialized
       return "uninitialized";
+    } else if (skillState.equals(State.ISOLATED_FROM_NETWORK)) {
+      // this skill is not ready to perform its mission because local container agent /roles having network singleton parents have not yet
+      // exchanged X.509 certificates with those network singleton parents.
+      return "isolated from the network";
+    } else if (skillState.equals(State.READY)) {
+      // this skill is ready to help perform its containing role's mission
+      return "ready";
+    } else if (skillState.equals(State.INACTIVE)) {
+      // this is the state of a container agent / role which is an instance of a network singleton agent / role, but is inactive
+      // because the active network singleton is hosted by another container
+      return "inactive";
     } else {
       assert false;
       return null;

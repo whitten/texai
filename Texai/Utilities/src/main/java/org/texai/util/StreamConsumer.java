@@ -25,7 +25,7 @@ import org.apache.log4j.Logger;
 @NotThreadSafe
 public class StreamConsumer extends Thread {
 
-  // the input stream that consumes the graph program standard output stream
+  // the input stream that consumes the launched process standard output or standard error stream
   private final InputStream inputStream;
   // the logger
   private final Logger logger;
@@ -57,15 +57,10 @@ public class StreamConsumer extends Thread {
       @SuppressWarnings("UnusedAssignment")
       String line = null;
       while ((line = bufferedReader.readLine()) != null) {
-        logger.info(">" + line);
-        if (logger.isDebugEnabled()) {
-          logger.debug(">" + line);
-        }
+        logger.info("> " + line);
       }
     } catch (IOException ioe) {
-      if (logger.isDebugEnabled()) {
-        logger.debug(ioe.getMessage());
-      }
+        logger.info(ioe.getMessage());
     }
   }
 }

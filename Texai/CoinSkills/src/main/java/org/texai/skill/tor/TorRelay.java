@@ -69,7 +69,11 @@ public final class TorRelay extends AbstractSkill {
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
-        setSkillState(AHCSConstants.State.READY);
+        if (getNodeRuntime().isFirstContainerInNetwork()) {
+          setSkillState(AHCSConstants.State.READY);
+        } else {
+          setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
+        }
         return true;
 
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:

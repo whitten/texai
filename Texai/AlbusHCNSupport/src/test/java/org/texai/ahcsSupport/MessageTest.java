@@ -431,7 +431,7 @@ public class MessageTest {
             parameterDictionary,
             "1.0.0");
     LOGGER.info(instance);
-    assertTrue(instance.toString().contains("container1.agent1.role1:SenderService --> container2.agent2.role2:RepositoryContentDescription (ABC_Task)"));
+    assertTrue(instance.toString().contains("ABC_Task container1.agent1.role1:SenderService --> container2.agent2.role2:RepositoryContentDescription"));
   }
 
   /**
@@ -636,7 +636,7 @@ public class MessageTest {
             parameterDictionary,
             "1.0.0");
     LOGGER.info(instance);
-    assertTrue(instance.toString().contains("container1.agent1.role1:SenderService --> container2.agent2.role2:RepositoryContentDescription (ABC_Task)"));
+    assertTrue(instance.toString().contains("ABC_Task container1.agent1.role1:SenderService --> container2.agent2.role2:RepositoryContentDescription "));
     try {
       final KeyPair keyPair = X509Utils.generateRSAKeyPair3072();
       final X509Certificate x509Certificate = X509Utils.generateSelfSignedEndEntityX509Certificate(

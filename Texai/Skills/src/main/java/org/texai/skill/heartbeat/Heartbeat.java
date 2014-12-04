@@ -33,8 +33,7 @@ import org.texai.ahcsSupport.Message;
 import org.texai.util.StringUtils;
 
 /**
- * Provides heartbeat behavior, in which remote role communication leases are
- * periodically renewed.
+ * Provides heartbeat behavior, in which remote role communication leases are periodically renewed.
  *
  * @author reed
  */
@@ -54,9 +53,10 @@ public class Heartbeat extends AbstractSkill {
   public Heartbeat() {
   }
 
-  /** Gets the logger.
+  /**
+   * Gets the logger.
    *
-   * @return  the logger
+   * @return the logger
    */
   @Override
   protected Logger getLogger() {
@@ -64,9 +64,8 @@ public class Heartbeat extends AbstractSkill {
   }
 
   /**
-   * Receives and attempts to process the given message. The skill is thread
-   * safe, given that any contained libraries are single threaded with regard to
-   * the conversation.
+   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
+   * with regard to the conversation.
    *
    * @param message the given message
    *
@@ -89,6 +88,7 @@ public class Heartbeat extends AbstractSkill {
         return true;
 
       case AHCSConstants.AHCS_INITIALIZE_TASK:
+        assert this.getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
         initialization(message);
         return true;
 
@@ -107,9 +107,8 @@ public class Heartbeat extends AbstractSkill {
   }
 
   /**
-   * Synchronously processes the given message. The skill is thread safe, given
-   * that any contained libraries are single threaded with regard to the
-   * conversation.
+   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single threaded with regard
+   * to the conversation.
    *
    * @param message the given message
    *
@@ -148,7 +147,6 @@ public class Heartbeat extends AbstractSkill {
   protected void initialization(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
-    assert this.getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("initializing " + toString() + " in role " + getRole());
@@ -168,12 +166,15 @@ public class Heartbeat extends AbstractSkill {
               OUTBOUND_HEARTBEAT_PERIOD_MILLIS, // delay
               OUTBOUND_HEARTBEAT_PERIOD_MILLIS); // period
     }
-    setSkillState(State.READY);
+    if (getNodeRuntime().isFirstContainerInNetwork()) {
+      setSkillState(AHCSConstants.State.READY);
+    } else {
+      setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
+    }
   }
 
   /**
-   * Perform this role's mission, which is to manage the network, the
-   * containers, and the TexaiCoin agents within the containers.
+   * Perform this role's mission, which is to manage the network, the containers, and the A.I. Coin agents within the containers.
    *
    * @param message the received perform mission task message
    */
@@ -199,8 +200,7 @@ public class Heartbeat extends AbstractSkill {
   }
 
   /**
-   * Periodically processes the outbound and inbound heartbeat information
-   * objects.
+   * Periodically processes the outbound and inbound heartbeat information objects.
    */
   protected class HeartbeatProcessor extends TimerTask {
 

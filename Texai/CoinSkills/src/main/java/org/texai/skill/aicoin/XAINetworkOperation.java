@@ -3,7 +3,7 @@
  *
  * Created on Sep 18, 2014, 8:10:02 AM
  *
- * Description: Manages the network, the containers, and the TexaiCoin agents within the containers. Interacts with human operators.
+ * Description: Manages the network, the containers, and the A.I. Coin agents within the containers. Interacts with human operators.
  *
  * Copyright (C) 2014 Stephen L. Reed
  *
@@ -29,10 +29,10 @@ import org.texai.ahcs.NodeRuntime;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.skill.network.ContainerOperation;
 
 /**
- * Manages the network, the containers, and the TexaiCoin agents within the
- * containers. Interacts with human operators.
+ * Manages the network, the containers, and the A.I. Coin agents within the containers. Interacts with human operators.
  *
  * @author reed
  */
@@ -48,9 +48,10 @@ public final class XAINetworkOperation extends AbstractSkill {
   public XAINetworkOperation() {
   }
 
-  /** Gets the logger.
+  /**
+   * Gets the logger.
    *
-   * @return  the logger
+   * @return the logger
    */
   @Override
   protected Logger getLogger() {
@@ -58,9 +59,8 @@ public final class XAINetworkOperation extends AbstractSkill {
   }
 
   /**
-   * Receives and attempts to process the given message. The skill is thread
-   * safe, given that any contained libraries are single threaded with regard to
-   * the conversation.
+   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
+   * with regard to the conversation.
    *
    * @param message the given message
    *
@@ -78,24 +78,60 @@ public final class XAINetworkOperation extends AbstractSkill {
       return true;
     }
     switch (operation) {
+      /**
+       * Initialize Task
+       *
+       * This task message is sent from the parent NetworkOperationAgent.NetworkOperationRole. It is expected to be the first
+       * task message that this role receives and it results in the role being initialized.
+       */
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
         propagateOperationToChildRoles(operation);
-        setSkillState(AHCSConstants.State.READY);
+        if (getNodeRuntime().isFirstContainerInNetwork()) {
+          setSkillState(AHCSConstants.State.READY);
+        } else {
+          setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
+        }
         return true;
 
+      /**
+       * Join Acknowledged Task
+       *
+       * This task message is sent from the network-singleton, parent NetworkOperationAgent.NetworkOperationRole.
+       *
+       * It indicates that the parent is ready to converse with this role as needed.
+       */
+      case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
+        assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
+                "state must be isolated-from-network, but is " + getSkillState();
+        joinAcknowledgedTask(message);
+        return true;
+
+      /**
+       * Perform Mission Task
+       *
+       * This task message is sent from the network-singleton, parent NetworkOperationAgent.NetworkOperationRole.
+       * It commands this network-connected role to begin performing its mission.
+       */
       case AHCSConstants.PERFORM_MISSION_TASK:
         performMission(message);
         return true;
 
+      /**
+       * Join Network Singleton Agent Info
+       *
+       * This task message is sent to this network singleton agent/role from a child role in another container.
+       *
+       * The sender is requesting to join the network as child of this role.
+       *
+       * The message parameter is the X.509 certificate belonging to the sender agent / role.
+       *
+       * The result is the sending of a Join Acknowleged Task message to the requesting child role, with this role's X.509
+       * certificate as the message parameter.
+       */
       case AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
         joinNetworkSingletonAgent(message);
-        return true;
-
-      case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        joinAcknowledgedTask(message);
         return true;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
@@ -113,9 +149,8 @@ public final class XAINetworkOperation extends AbstractSkill {
   }
 
   /**
-   * Synchronously processes the given message. The skill is thread safe, given
-   * that any contained libraries are single threaded with regard to the
-   * conversation.
+   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single threaded with regard
+   * to the conversation.
    *
    * @param message the given message
    *
@@ -146,30 +181,36 @@ public final class XAINetworkOperation extends AbstractSkill {
     };
   }
 
-  /** Perform this role's mission, which is to manage the containers.
+  /**
+   * Perform this role's mission, which is to manage the containers.
    *
    * @param message the received perform mission task message
    */
   private void performMission(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
-    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready: " + stateDescription(getSkillState());
 
     LOGGER.info("performing the mission");
-    getRole().getChildQualifiedNamesForAgent("XAIOperationAgent").stream().forEach(operationAgent -> {
-      final Message performMissionMessage = new Message(
-              getRole().getQualifiedName(), // senderQualifiedName
-              getClassName(), // senderService,
-              operationAgent, // recipientQualifiedName,
-              "org.texai.skill.aicoin.XAIOperation", // recipientService
-              AHCSConstants.PERFORM_MISSION_TASK); // operation
-      sendMessage(performMissionMessage);
-    });
+
+    // the operation agent launches the aicoin-qt instance in each container
+    sendMessageViaSeparateThread(makeMessage(
+            getRole().getFirstChildQualifiedNameForAgent("XAIOperationAgent"), // recipientQualifiedName
+            "org.texai.skill.aicoin.XAIOperation", // recipientService
+            AHCSConstants.PERFORM_MISSION_TASK)); // operation
+
+    // the mint agent commands its aicoin-qt instance to generate a block every 10 minutes
+    sendMessageViaSeparateThread(makeMessage(
+            getRole().getFirstChildQualifiedNameForAgent("XAIMintAgent"), // recipientQualifiedName
+            "org.texai.skill.aicoin.XAIMint", // recipientService
+            AHCSConstants.PERFORM_MISSION_TASK)); // operation
   }
 
-  /** Pass down the task to configure roles for singleton agent hosts.
+  /**
+   * Handles a join request from child role in another container. It responds by sending
+   * an acknowledgement message to the requesting child role.
    *
-   * @param message the confiure singleton agent hosts task message
+   * @param message the join network singleton agent info message
    */
   private void joinNetworkSingletonAgent(final Message message) {
     //Preconditions
@@ -204,5 +245,10 @@ public final class XAINetworkOperation extends AbstractSkill {
     assert message != null : "message must not be null";
 
     LOGGER.info("join acknowledged from " + message.getSenderQualifiedName());
+    final Message removeUnjoinedRoleInfoMessage = makeMessage(
+            getContainerName() + ".ContainerOperationAgent.ContainerOperationRole", // recipientQualifiedName
+            ContainerOperation.class.getName(), // recipientService
+            AHCSConstants.REMOVE_UNJOINED_ROLE_INFO); // operation
+    sendMessageViaSeparateThread(removeUnjoinedRoleInfoMessage);
   }
 }

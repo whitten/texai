@@ -182,6 +182,15 @@ public class NodeRuntime extends BasicNodeRuntime {
       LOGGER.info("quitting, ignoring message:\n  " + message);
       return;
     }
+    boolean isMessageLogged = !isMessageFiltered(message);
+
+    if (!isMessageLogged && isMessageLogged(message)) {
+      isMessageLogged = true;
+    }
+    if (isMessageLogged || LOGGER.isDebugEnabled()) {
+      LOGGER.info(message);
+    }
+//    LOGGER.info(message);
     if (message.isBetweenContainers()) {
       if (message.getRecipientContainerName().equals(this.getContainerName())) {
         // verify the signature of the inbound message
@@ -192,15 +201,6 @@ public class NodeRuntime extends BasicNodeRuntime {
         return;
       }
     }
-    boolean isMessageLogged = !isMessageFiltered(message);
-
-    if (!isMessageLogged && isMessageLogged(message)) {
-      isMessageLogged = true;
-    }
-    if (isMessageLogged || LOGGER.isDebugEnabled()) {
-      LOGGER.info(message);
-    }
-//    LOGGER.info(message);
     final Role role = this.getLocalRole(message.getRecipientQualifiedName());
     if (role == null) {
       throw new TexaiException("recipient not found for " + message);

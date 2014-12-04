@@ -3,7 +3,7 @@
  *
  * Created on Mar 12, 2010, 12:12:19 PM
  *
- * Description: Provides basic node runtime support. The BasicNodeRuntime class is defined in a downstream package and extends
+ * Description: Provides basic node runtime support. The NodeRuntime class is defined in a downstream package and extends
  * this class.
  *
  * Copyright (C) Mar 12, 2010 reed.
@@ -75,7 +75,10 @@ public class BasicNodeRuntime implements MessageDispatcher {
   private KeyStore keyStore;
   // the key store password
   private char[] keyStorePassword;
-   /**
+  // the cached value of isFirstContainerInNetwork()
+  private Boolean isFirstContainerInNetworkCached = null;
+
+  /**
    * Constructs a new BasicNodeRuntime instance.
    *
    * @param containerName the container name
@@ -106,7 +109,8 @@ public class BasicNodeRuntime implements MessageDispatcher {
     return Collections.unmodifiableSet(new HashSet<Node>(nodeDictionary.values()));
   }
 
-  /** Gets the key store.
+  /**
+   * Gets the key store.
    *
    * @return the key store
    */
@@ -114,7 +118,8 @@ public class BasicNodeRuntime implements MessageDispatcher {
     return keyStore;
   }
 
-  /** Sets the key store.
+  /**
+   * Sets the key store.
    *
    * @param keyStore the given key store
    */
@@ -125,7 +130,8 @@ public class BasicNodeRuntime implements MessageDispatcher {
     this.keyStore = keyStore;
   }
 
-  /** Gets the key store password.
+  /**
+   * Gets the key store password.
    *
    * @return the key store password
    */
@@ -133,7 +139,8 @@ public class BasicNodeRuntime implements MessageDispatcher {
     return Arrays.copyOf(keyStorePassword, keyStorePassword.length);
   }
 
-  /** Sets the key store password. A copy is used to preserve immutability.
+  /**
+   * Sets the key store password. A copy is used to preserve immutability.
    *
    * @param keyStorePassword the given key store password
    */
@@ -144,9 +151,11 @@ public class BasicNodeRuntime implements MessageDispatcher {
     this.keyStorePassword = Arrays.copyOf(keyStorePassword, keyStorePassword.length);
   }
 
-  /** Gets X.509 security information for the given local role.
+  /**
+   * Gets X.509 security information for the given local role.
    *
-   * @param role  the given local role
+   * @param role the given local role
+   *
    * @return the X.509 security information
    */
   public X509SecurityInfo getX509SecurityInfo(final Role role) {
@@ -161,9 +170,9 @@ public class BasicNodeRuntime implements MessageDispatcher {
     }
 
     return X509Utils.getX509SecurityInfo(
-                  getKeyStore(),
-                  getKeyStorePassword(),
-                  role.getQualifiedName()); // alias
+            getKeyStore(),
+            getKeyStorePassword(),
+            role.getQualifiedName()); // alias
   }
 
   /**
@@ -335,8 +344,7 @@ public class BasicNodeRuntime implements MessageDispatcher {
   }
 
   /**
-   * Sets the NodeRuntimeSkill instance which is used to send and receive
-   * messages on behalf of this node runtime.
+   * Sets the NodeRuntimeSkill instance which is used to send and receive messages on behalf of this node runtime.
    *
    * @param nodeRuntimeSkill the NodeRuntimeSkill instance
    */
@@ -348,13 +356,25 @@ public class BasicNodeRuntime implements MessageDispatcher {
   }
 
   /**
-   * Returns the NodeRuntimeSkill instance which is used to send and receive
-   * messages on behalf of this node runtime.
+   * Returns the NodeRuntimeSkill instance which is used to send and receive messages on behalf of this node runtime.
    *
    * @return the NodeRuntimeSkill instance
    */
   public AbstractSkill getNodeRuntimeSkill() {
     return nodeRuntimeSkill;
+  }
+
+  /** Returns whether this is the first container in the network. If so, then all the network singletons are in this container,
+   * and the procedure of joining the network can be skipped.
+   *
+   * @return whether this is the first container in the network
+   */
+  public boolean isFirstContainerInNetwork() {
+    if (isFirstContainerInNetworkCached == null) {
+      final String isFirstContainerInNetwork = System.getenv("FIRST_CONTAINER");
+      isFirstContainerInNetworkCached = new Boolean("true".equals(isFirstContainerInNetwork));
+    }
+    return isFirstContainerInNetworkCached;
   }
 
 }

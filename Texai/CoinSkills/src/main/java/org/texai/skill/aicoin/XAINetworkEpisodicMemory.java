@@ -3,7 +3,7 @@
  *
  * Created on May 5, 2010, 1:46:51 PM
  *
- * Description: Coordinates episodic memory for agents in the TexaiCoin network.
+ * Description: Coordinates episodic memory for agents in the A.I. Coin network.
  *
  * Copyright (C) May 5, 2010, Stephen L. Reed.
  *
@@ -28,9 +28,10 @@ import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.skill.network.ContainerOperation;
 
 /**
- * Coordinates episodic memory for agents in the TexaiCoin network.
+ * Coordinates episodic memory for agents in the A.I. Coin network.
  *
  * @author reed
  */
@@ -74,7 +75,11 @@ public class XAINetworkEpisodicMemory extends AbstractSkill {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
         propagateOperationToChildRoles(operation);
-        setSkillState(State.READY);
+        if (getNodeRuntime().isFirstContainerInNetwork()) {
+          setSkillState(AHCSConstants.State.READY);
+        } else {
+          setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
+        }
         return true;
 
       case AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO:
@@ -83,7 +88,8 @@ public class XAINetworkEpisodicMemory extends AbstractSkill {
         return true;
 
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
+                "state must be isolated-from-network, but is " + getSkillState();
         joinAcknowledgedTask(message);
         return true;
 
@@ -131,9 +137,9 @@ public class XAINetworkEpisodicMemory extends AbstractSkill {
     };
   }
 
-  /** Pass down the task to configure roles for singleton agent hosts.
+  /** Handles the sender's request to join the network as child of this role..
    *
-   * @param message the confiure singleton agent hosts task message
+   * @param message the Join Network Singleton Agent Info message
    */
   private void joinNetworkSingletonAgent(final Message message) {
     //Preconditions
@@ -168,5 +174,10 @@ public class XAINetworkEpisodicMemory extends AbstractSkill {
     assert message != null : "message must not be null";
 
     LOGGER.info("join acknowledged from " + message.getSenderQualifiedName());
+    final Message removeUnjoinedRoleInfoMessage = makeMessage(
+            getContainerName() + ".ContainerOperationAgent.ContainerOperationRole", // recipientQualifiedName
+            ContainerOperation.class.getName(), // recipientService
+            AHCSConstants.REMOVE_UNJOINED_ROLE_INFO); // operation
+    sendMessageViaSeparateThread(removeUnjoinedRoleInfoMessage);
   }
 }

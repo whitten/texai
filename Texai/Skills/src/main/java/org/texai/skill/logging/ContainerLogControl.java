@@ -27,6 +27,7 @@ import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.skill.network.ContainerOperation;
 
 /**
  * Governs the node logger role hierarchy within a particular JVM, and performs class level logging.
@@ -66,6 +67,7 @@ public class ContainerLogControl extends AbstractSkill {
         return true;
 
       case AHCSConstants.AHCS_INITIALIZE_TASK:
+        assert this.getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
         initialization(message);
         return true;
 
@@ -83,7 +85,8 @@ public class ContainerLogControl extends AbstractSkill {
         return true;
 
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
+                "state must be isolated-from-network, but is " + getSkillState();
         joinAcknowledgedTask(message);
         return true;
 
@@ -178,9 +181,12 @@ public class ContainerLogControl extends AbstractSkill {
   private void initialization(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
-    assert this.getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
 
-    setSkillState(State.READY);
+    if (getNodeRuntime().isFirstContainerInNetwork()) {
+      setSkillState(AHCSConstants.State.READY);
+    } else {
+      setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
+    }
   }
 
   // Records the operation for message logging.
@@ -231,9 +237,10 @@ public class ContainerLogControl extends AbstractSkill {
     getNodeRuntime().removeLoggedOperation(unloggedOperation);
   }
 
-  /** Gets the logger.
+  /**
+   * Gets the logger.
    *
-   * @return  the logger
+   * @return the logger
    */
   @Override
   protected Logger getLogger() {
@@ -250,6 +257,11 @@ public class ContainerLogControl extends AbstractSkill {
     assert message != null : "message must not be null";
 
     LOGGER.info("join acknowledged from " + message.getSenderQualifiedName());
+    final Message removeUnjoinedRoleInfoMessage = makeMessage(
+            getContainerName() + ".ContainerOperationAgent.ContainerOperationRole", // recipientQualifiedName
+            ContainerOperation.class.getName(), // recipientService
+            AHCSConstants.REMOVE_UNJOINED_ROLE_INFO); // operation
+    sendMessageViaSeparateThread(removeUnjoinedRoleInfoMessage);
   }
 
 }

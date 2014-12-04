@@ -220,6 +220,7 @@ public final class X509Utils {
     assert !path.isEmpty() : "path must not be empty";
 
     final File file = new File(path);
+    LOGGER.info("loading secure random from " + path);
     if (file.exists()) {
       // read the secure random from a file to avoid the potentially long delay of creating and initializing it
       try {

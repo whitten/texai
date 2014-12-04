@@ -9,18 +9,13 @@
  *
  * Copyright (C) 2014 Texai
  *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any later
- * version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program. If not, see
+ * You should have received a copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
 package org.texai.skill.aicoin;
@@ -45,7 +40,6 @@ import org.texai.util.TexaiException;
 public class XAIWriteConfigurationFile extends AbstractSkill {
 
   // the logger
-
   private static final Logger LOGGER = Logger.getLogger(XAIWriteConfigurationFile.class);
 
   /**
@@ -54,9 +48,10 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
   public XAIWriteConfigurationFile() {
   }
 
-  /** Gets the logger.
+  /**
+   * Gets the logger.
    *
-   * @return  the logger
+   * @return the logger
    */
   @Override
   protected Logger getLogger() {
@@ -64,9 +59,8 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
   }
 
   /**
-   * Receives and attempts to process the given message. The skill is thread
-   * safe, given that any contained libraries are single threaded with regard to
-   * the conversation.
+   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
+   * with regard to the conversation.
    *
    * @param message the given message
    *
@@ -84,11 +78,29 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
       return true;
     }
     switch (operation) {
+      /**
+       * Initialize Task
+       *
+       * This task message is sent from the parent XAINetworkOperationAgent.XAINetworkOperationRole. It is expected to be the first
+       * task message that this role receives and it results in the role being initialized.
+       */
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
-        setSkillState(AHCSConstants.State.READY);
+        if (getNodeRuntime().isFirstContainerInNetwork()) {
+          setSkillState(AHCSConstants.State.READY);
+        } else {
+          setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
+        }
         return true;
 
+      /**
+       * Write Configuration File Task
+       *
+       * This task message is sent from the parent XAIOperation skill.
+       *
+       * As a result, the aicoin.conf is generated and written to disk, and a Task Accomplished Info message is sent back
+       * to the XAIOperation skill as a response.
+       */
       case AHCSConstants.WRITE_CONFIGURATION_FILE_TASK:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
         return writeConfigurationFile(message);
@@ -106,6 +118,7 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
    * Writes the bitcoin.conf file.
    *
    * @param message the task message
+   *
    * @return whether this task completed OK
    */
   private boolean writeConfigurationFile(final Message message) {
@@ -132,7 +145,6 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
 
     //TODO implement a skill for XAIOperation that that verifies that each user is unique and that each password is unique.
     //TODO implement a parent skill that maintains a tamper-evident log of hashed/salted user and password pairs.
-
     final String rpcuser = System.getenv("RPC_USER");
     if (!StringUtils.isNonEmptyString(rpcuser)) {
       throw new TexaiException("the RPC_USER environment variable must be assigned a value");
@@ -143,7 +155,33 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
     }
     // emit the configuration file line by line
     try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(confFile))) {
-      bufferedWriter.write("testnet=1\n");
+      bufferedWriter.write("# no proof-of-work after block height\n");
+      bufferedWriter.write("nopowafter=1\n");
+      bufferedWriter.write("# no dns seeds in the demo\n");
+      bufferedWriter.write("dnsseed=0\n");
+      bufferedWriter.write("# no universal plug and play NAT routing in the demo\n");
+      bufferedWriter.write("upnp=0\n");
+      //TODO demo code
+      if (getContainerName().equals("Mint")) {
+        bufferedWriter.write("# this instance accepts incoming connections\n");
+        bufferedWriter.write("listen=1\n");
+      } else {
+        bufferedWriter.write("# this instance does not accept incoming connections\n");
+        bufferedWriter.write("listen=0\n");
+        bufferedWriter.write("# connect to the mint\n");
+        bufferedWriter.write("connect=Mint:8333\n");
+      }
+      bufferedWriter.write("# listening port\n");
+      bufferedWriter.write("port=8333\n");
+      bufferedWriter.write("# how many blocks to verify upon startup\n");
+      bufferedWriter.write("checkblocks=5\n");
+      bufferedWriter.write("# do not generate a block unless commanded to\n");
+      bufferedWriter.write("gen=0\n");
+      bufferedWriter.write("# \n");
+      bufferedWriter.write("\n");
+      bufferedWriter.write("# allow aicoin-cli to send commands to this instance\n");
+      bufferedWriter.write("rpcconnect=127.0.0.1\n");
+      bufferedWriter.write("# allow rpc commands\n");
       bufferedWriter.write("server=1\n");
       bufferedWriter.write("rpcuser=");
       bufferedWriter.write(rpcuser);
@@ -163,9 +201,8 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
   }
 
   /**
-   * Synchronously processes the given message. The skill is thread safe, given
-   * that any contained libraries are single threaded with regard to the
-   * conversation.
+   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single threaded with regard
+   * to the conversation.
    *
    * @param message the given message
    *

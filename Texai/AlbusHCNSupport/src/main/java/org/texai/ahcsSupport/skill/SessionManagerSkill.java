@@ -101,7 +101,11 @@ public class SessionManagerSkill extends AbstractSkill {
         getSkillInstance(DUMMY_SESSION_HANDLE).receiveMessage(message);
         // initialize child roles
         propagateOperationToChildRoles(operation);
-        setSkillState(State.READY);
+        if (getNodeRuntime().isFirstContainerInNetwork()) {
+          setSkillState(AHCSConstants.State.READY);
+        } else {
+          setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
+        }
         return true;
 
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:

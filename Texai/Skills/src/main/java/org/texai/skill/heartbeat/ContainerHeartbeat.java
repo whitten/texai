@@ -35,6 +35,7 @@ import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.ahcsSupport.domainEntity.Role;
+import org.texai.skill.network.ContainerOperation;
 import org.texai.util.StringUtils;
 
 /**
@@ -101,7 +102,11 @@ public final class ContainerHeartbeat extends AbstractSkill {
         initialization(message);
         // initialize child heartbeat roles
         propagateOperationToChildRoles(operation);
-        setSkillState(AHCSConstants.State.READY);
+        if (getNodeRuntime().isFirstContainerInNetwork()) {
+          setSkillState(AHCSConstants.State.READY);
+        } else {
+          setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
+        }
         return true;
 
       case AHCSConstants.PERFORM_MISSION_TASK:
@@ -113,7 +118,8 @@ public final class ContainerHeartbeat extends AbstractSkill {
         return true;
 
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
+                "state must be isolated-from-network, but is " + getSkillState();
         joinAcknowledgedTask(message);
         return true;
 
@@ -194,7 +200,7 @@ public final class ContainerHeartbeat extends AbstractSkill {
 
   /**
    * Perform this role's mission, which is to manage the network, the
-   * containers, and the TexaiCoin agents within the containers.
+   * containers, and the A.I. Coin agents within the containers.
    *
    * @param message the received perform mission task message
    */
@@ -502,5 +508,10 @@ public final class ContainerHeartbeat extends AbstractSkill {
     assert message != null : "message must not be null";
 
     LOGGER.info("join acknowledged from " + message.getSenderQualifiedName());
+    final Message removeUnjoinedRoleInfoMessage = makeMessage(
+            getContainerName() + ".ContainerOperationAgent.ContainerOperationRole", // recipientQualifiedName
+            ContainerOperation.class.getName(), // recipientService
+            AHCSConstants.REMOVE_UNJOINED_ROLE_INFO); // operation
+    sendMessageViaSeparateThread(removeUnjoinedRoleInfoMessage);
   }
 }

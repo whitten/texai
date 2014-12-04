@@ -28,6 +28,7 @@ import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.skill.network.ContainerOperation;
 
 /**
  * Governs the logger role hierarchy over one or more JVMs.
@@ -77,6 +78,7 @@ public class NetworkLogControl extends AbstractSkill {
     }
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
+        assert this.getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
         initialization(message);
         return true;
 
@@ -86,7 +88,8 @@ public class NetworkLogControl extends AbstractSkill {
         return true;
 
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
+                "state must be isolated-from-network, but is " + getSkillState();
         joinAcknowledgedTask(message);
         return true;
 
@@ -148,12 +151,17 @@ public class NetworkLogControl extends AbstractSkill {
 
     // initialize child JVM logger management roles
     propagateOperationToChildRoles(AHCSConstants.AHCS_INITIALIZE_TASK); // operation
-    setSkillState(State.READY);
+    if (getNodeRuntime().isFirstContainerInNetwork()) {
+      setSkillState(AHCSConstants.State.READY);
+    } else {
+      setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
+    }
   }
 
-  /** Pass down the task to configure roles for singleton agent hosts.
+  /**
+   * Handles the sender's request to join the network as child of this role..
    *
-   * @param message the confiure singleton agent hosts task message
+   * @param message the Join Network Singleton Agent Info message
    */
   private void joinNetworkSingletonAgent(final Message message) {
     //Preconditions
@@ -187,6 +195,11 @@ public class NetworkLogControl extends AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
 
+    final Message removeUnjoinedRoleInfoMessage = makeMessage(
+            getContainerName() + ".ContainerOperationAgent.ContainerOperationRole", // recipientQualifiedName
+            ContainerOperation.class.getName(), // recipientService
+            AHCSConstants.REMOVE_UNJOINED_ROLE_INFO); // operation
+    sendMessageViaSeparateThread(removeUnjoinedRoleInfoMessage);
     LOGGER.info("join acknowledged from " + message.getSenderQualifiedName());
   }
 }
