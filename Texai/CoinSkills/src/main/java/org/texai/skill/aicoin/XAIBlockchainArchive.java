@@ -108,6 +108,11 @@ public final class XAIBlockchainArchive extends AbstractSkill {
         LOGGER.info("now ready");
         return true;
 
+      case AHCSConstants.PERFORM_MISSION_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+        performMission(message);
+        return true;
+
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
         LOGGER.warn(message);
         return true;
@@ -149,7 +154,20 @@ public final class XAIBlockchainArchive extends AbstractSkill {
       AHCSConstants.AHCS_INITIALIZE_TASK,
       AHCSConstants.BECOME_READY_TASK,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
-      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.PERFORM_MISSION_TASK
     };
   }
+
+  /**
+   * Perform this role's mission, which is to manage the network, the containers, and the A.I. Coin agents within the containers.
+   *
+   * @param message the received perform mission task message
+   */
+  private void performMission(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+
+  }
+
 }

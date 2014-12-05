@@ -236,11 +236,13 @@ public class AICoinMain {
       nodeRuntime.addFilteredOperation(AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK);
       nodeRuntime.addFilteredOperation(AHCSConstants.DELEGATE_BECOME_READY_TASK);
       nodeRuntime.addFilteredOperation(AHCSConstants.DELEGATE_CONFIGURE_SINGLETON_AGENT_HOSTS_TASK);
+      nodeRuntime.addFilteredOperation(AHCSConstants.DELEGATE_PERFORM_MISSION_TASK);
       nodeRuntime.addFilteredOperation(AHCSConstants.JOIN_ACKNOWLEDGED_TASK);
       nodeRuntime.addFilteredOperation(AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO);
       nodeRuntime.addFilteredOperation(AHCSConstants.KEEP_ALIVE_INFO);
       nodeRuntime.addFilteredOperation(AHCSConstants.NETWORK_JOIN_COMPLETE_INFO);
       nodeRuntime.addFilteredOperation(AHCSConstants.NETWORK_JOIN_COMPLETE_SENSATION);
+      nodeRuntime.addFilteredOperation(AHCSConstants.PERFORM_MISSION_TASK);
       nodeRuntime.addFilteredOperation(AHCSConstants.REMOVE_UNJOINED_ROLE_INFO);
       nodeRuntime.addFilteredOperation(AHCSConstants.SEED_CONNECTION_REQUEST_INFO);
       nodeRuntime.addFilteredOperation(AHCSConstants.SINGLETON_AGENT_HOSTS_INFO);

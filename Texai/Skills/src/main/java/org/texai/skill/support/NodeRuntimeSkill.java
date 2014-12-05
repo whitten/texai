@@ -121,11 +121,6 @@ public class NodeRuntimeSkill extends AbstractSkill {
         LOGGER.info("now ready");
         return true;
 
-      case AHCSConstants.PERFORM_MISSION_TASK:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
-        performMission(message);
-        return true;
-
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
         return true;
@@ -162,8 +157,7 @@ public class NodeRuntimeSkill extends AbstractSkill {
     return new String[]{
       AHCSConstants.AHCS_INITIALIZE_TASK,
       AHCSConstants.BECOME_READY_TASK,
-      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
-      AHCSConstants.PERFORM_MISSION_TASK
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
     };
   }
 

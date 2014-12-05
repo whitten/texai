@@ -143,6 +143,9 @@ public final class AHCSConstants {
   // the configureSingletonAgentHosts_Task operation
   public static final String DELEGATE_CONFIGURE_SINGLETON_AGENT_HOSTS_TASK = "delegateConfigureSingletonAgentHosts_Task";
   //
+  // the delegatePerformMission_Task operation
+  public static final String DELEGATE_PERFORM_MISSION_TASK = "delegatePerformMission_Task";
+  //
   // the describe nodes_Task operation
   public static final String DESCRIBE_NODES_TASK = "describe nodes_Task";
   //

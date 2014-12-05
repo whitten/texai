@@ -109,6 +109,18 @@ public final class XAIPrimaryAudit extends AbstractNetworkSingletonSkill {
         handleDelegateBecomeReadyTask(message);
         return true;
 
+      /**
+       * Delegate Perform Mission Task
+       *
+       * A container has completed joining the network. Propagate a Delegate Perform Mission Task down the role command hierarchy.
+       *
+       * The container name is a parameter of the message.
+       */
+      case AHCSConstants.DELEGATE_PERFORM_MISSION_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        handleDelegatePerformMissionTask(message);
+        return true;
+
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
         LOGGER.warn(message);
         return true;
@@ -149,6 +161,7 @@ public final class XAIPrimaryAudit extends AbstractNetworkSingletonSkill {
     return new String[]{
       AHCSConstants.AHCS_INITIALIZE_TASK,
       AHCSConstants.DELEGATE_BECOME_READY_TASK,
+      AHCSConstants.DELEGATE_PERFORM_MISSION_TASK,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
     };

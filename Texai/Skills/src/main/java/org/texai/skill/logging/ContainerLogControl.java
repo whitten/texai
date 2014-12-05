@@ -43,12 +43,14 @@ public class ContainerLogControl extends AbstractSkill {
   public ContainerLogControl() {
   }
 
-  // Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
-  // with regard to the conversation.
-  //
-  // @param message the given message
-  //
-  // @return whether the message was successfully processed
+  /**
+   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
+   * with regard to the conversation.
+   *
+   * @param message the given message
+   *
+   * @return whether the message was successfully processed
+   */
   @Override
   public boolean receiveMessage(final Message message) {
     //Preconditions
@@ -68,8 +70,8 @@ public class ContainerLogControl extends AbstractSkill {
       /**
        * Initialize Task
        *
-       * This task message is sent from the container-local parent NetworkLogControlAgent.NetworkLogControlRole. It is expected to be the first task message
-       * that this role receives and it results in the role being initialized.
+       * This task message is sent from the container-local parent NetworkLogControlAgent.NetworkLogControlRole. It is expected to be the
+       * first task message that this role receives and it results in the role being initialized.
        */
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert this.getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
@@ -87,6 +89,11 @@ public class ContainerLogControl extends AbstractSkill {
         assert this.getSkillState().equals(State.ISOLATED_FROM_NETWORK) : "prior state must be isolated-from-network";
         setSkillState(State.READY);
         LOGGER.info("now ready");
+        return true;
+
+      case AHCSConstants.PERFORM_MISSION_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+        performMission(message);
         return true;
 
       case AHCSConstants.SET_LOGGING_LEVEL:
@@ -125,10 +132,12 @@ public class ContainerLogControl extends AbstractSkill {
     return true;
   }
 
-  // Sets the logging level for the given class.
-  //
-  // @param className the class name
-  // @param loggingLevel the logging level
+  /**
+   * Sets the logging level for the given class.
+   *
+   * @param className the class name
+   * @param loggingLevel the logging level
+   */
   private void setLoggingLevel(
           final String className,
           final String loggingLevel) {
@@ -170,12 +179,14 @@ public class ContainerLogControl extends AbstractSkill {
     Logger.getLogger(className).setLevel(level);
   }
 
-  // Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single threaded with regard
-  // to the conversation.
-  //
-  // @param message the given message
-  //
-  // @return the response message or null if not applicable
+  /**
+   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single threaded with regard
+   * to the conversation.
+   *
+   * @param message the given message
+   *
+   * @return the response message or null if not applicable
+   */
   @Override
   public Message converseMessage(final Message message) {
     //Preconditions
@@ -185,9 +196,11 @@ public class ContainerLogControl extends AbstractSkill {
     return notUnderstoodMessage(message);
   }
 
-  // Returns the understood operations.
-  //
-  // @return the understood operations
+  /**
+   * Returns the understood operations.
+   *
+   * @return the understood operations
+   */
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
@@ -196,13 +209,16 @@ public class ContainerLogControl extends AbstractSkill {
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.LOG_OPERATION_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.PERFORM_MISSION_TASK,
       AHCSConstants.UNLOG_OPERATION_TASK
     };
   }
 
-  // Performs the initialization operation.
-  //
-  // @param message the received initialization message
+  /**
+   * Performs the initialization operation.
+   *
+   * @param message the received initialization message
+   */
   private void initialization(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
@@ -214,9 +230,22 @@ public class ContainerLogControl extends AbstractSkill {
     }
   }
 
-  // Records the operation for message logging.
-  //
-  // @param message the message containing the operation to be logged
+  /**
+   * Perform this role's mission, which is to manage a container's agents to ensure friendly behavior.
+   *
+   * @param message the received perform mission task message
+   */
+  private void performMission(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+
+  }
+
+  /**
+   * Records the operation for message logging.
+   *
+   * @param message the message containing the operation to be logged
+   */
   private void logOperation(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
@@ -225,9 +254,11 @@ public class ContainerLogControl extends AbstractSkill {
     logOperation((String) message.get(AHCSConstants.LOG_OPERATION_TASK_LOGGED_OPERATION));
   }
 
-  // Records the operation for message logging.
-  //
-  // @param loggedOperation the operation to be logged
+  /**
+   * Records the operation for message logging.
+   *
+   * @param loggedOperation the operation for message logging
+   */
   private void logOperation(final String loggedOperation) {
     //Preconditions
     assert loggedOperation != null : "loggedOperation must not be null";
@@ -238,9 +269,11 @@ public class ContainerLogControl extends AbstractSkill {
     getNodeRuntime().addLoggedOperation(loggedOperation);
   }
 
-  // Removes the operation for message logging.
-  //
-  // @param message the message containing the operation to be unlogged
+  /**
+   * Removes the operation for message logging.
+   *
+   * @param message the message containing the operation to be unlogged
+   */
   private void unlogOperation(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
@@ -249,9 +282,11 @@ public class ContainerLogControl extends AbstractSkill {
     unlogOperation((String) message.get(AHCSConstants.UNLOG_OPERATION_TASK_UNLOGGED_OPERATION));
   }
 
-  // Removes the operation for message logging.
-  //
-  // @param unloggedOperation the operation to be unlogged
+  /**
+   * Removes the operation for message logging.
+   *
+   * @param unloggedOperation the operation to be unlogged
+   */
   private void unlogOperation(final String unloggedOperation) {
     //Preconditions
     assert unloggedOperation != null : "unloggedOperation must not be null";

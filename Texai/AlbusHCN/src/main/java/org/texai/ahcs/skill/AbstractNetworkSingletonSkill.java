@@ -124,7 +124,44 @@ public abstract class AbstractNetworkSingletonSkill extends AbstractSkill {
         sendMessage(outboundMessage);
       }
     });
+  }
 
+  /**
+   * Handles the Delegate Perform Mission Task message by synchronously relaying it to child roles.
+   *
+   * @param message the received Delegate Become Ready Task message
+   */
+  protected void handleDelegatePerformMissionTask(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+
+    final String containerName = (String) message.get(AHCSConstants.MSG_PARM_CONTAINER_NAME);
+    assert StringUtils.isNonEmptyString(containerName);
+
+    getLogger().info("handling Delegate Perform Mission Task message for joined container " + containerName + " ...");
+
+    getRole().getChildQualifiedNames().stream().forEach(childQualifiedName -> {
+      String operation = null;
+      // coerce remote role names to local role names for the purpose of determining network singletons
+      final boolean isNetworkSingletonRole
+              = getRole().isNetworkSingletonRole(getContainerName() + '.' + Node.extractAgentRoleName(childQualifiedName));
+      if (containerName.equals(Node.extractContainerName(childQualifiedName)) && !isNetworkSingletonRole) {
+        operation = AHCSConstants.PERFORM_MISSION_TASK;
+        getLogger().info(" sending Perform Mission Task to " + childQualifiedName);
+      } else if (isNetworkSingletonRole) {
+        operation = AHCSConstants.DELEGATE_PERFORM_MISSION_TASK;
+        getLogger().info(" sending Delegate Perform Mission Task to " + childQualifiedName);
+      }
+      if (operation != null) {
+        final Message outboundMessage = makeMessage(
+                childQualifiedName, // recipientQualifiedName
+                null, // recipientService
+                operation);
+        outboundMessage.put(AHCSConstants.MSG_PARM_CONTAINER_NAME, message.get(AHCSConstants.MSG_PARM_CONTAINER_NAME));
+        sendMessage(outboundMessage);
+      }
+    });
   }
 
 }

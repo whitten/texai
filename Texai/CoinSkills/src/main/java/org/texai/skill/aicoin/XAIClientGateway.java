@@ -17,12 +17,11 @@ import org.texai.ahcsSupport.Message;
  *
  * Copyright (C) 2014 Texai
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
- * version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
@@ -39,9 +38,10 @@ public final class XAIClientGateway extends AbstractSkill {
   public XAIClientGateway() {
   }
 
-  /** Gets the logger.
+  /**
+   * Gets the logger.
    *
-   * @return  the logger
+   * @return the logger
    */
   @Override
   protected Logger getLogger() {
@@ -49,8 +49,8 @@ public final class XAIClientGateway extends AbstractSkill {
   }
 
   /**
-   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries
-   * are single threaded with regard to the conversation.
+   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
+   * with regard to the conversation.
    *
    * @param message the given message
    *
@@ -68,11 +68,11 @@ public final class XAIClientGateway extends AbstractSkill {
       return true;
     }
     switch (operation) {
-       /**
+      /**
        * Initialize Task
        *
-       * This task message is sent from the container-local parent XAINetworkOperationAgent.XAINetworkOperationRole. It is expected to be the first task message
-       * that this role receives and it results in the role being initialized.
+       * This task message is sent from the container-local parent XAINetworkOperationAgent.XAINetworkOperationRole. It is expected to be
+       * the first task message that this role receives and it results in the role being initialized.
        */
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
@@ -86,8 +86,8 @@ public final class XAIClientGateway extends AbstractSkill {
       /**
        * Join Acknowledged Task
        *
-       * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.XAINetworkOperationRole. It indicates that the
-       * parent is ready to converse with this role as needed.
+       * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.XAINetworkOperationRole. It indicates that
+       * the parent is ready to converse with this role as needed.
        */
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
@@ -108,6 +108,11 @@ public final class XAIClientGateway extends AbstractSkill {
         LOGGER.info("now ready");
         return true;
 
+      case AHCSConstants.PERFORM_MISSION_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+        performMission(message);
+        return true;
+
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
         LOGGER.warn(message);
         return true;
@@ -122,8 +127,8 @@ public final class XAIClientGateway extends AbstractSkill {
   }
 
   /**
-   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single
-   * threaded with regard to the conversation.
+   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single threaded with regard
+   * to the conversation.
    *
    * @param message the given message
    *
@@ -149,8 +154,20 @@ public final class XAIClientGateway extends AbstractSkill {
       AHCSConstants.AHCS_INITIALIZE_TASK,
       AHCSConstants.BECOME_READY_TASK,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
-      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.PERFORM_MISSION_TASK
     };
+  }
+
+  /**
+   * Perform this role's mission, which is to manage the network, the containers, and the A.I. Coin agents within the containers.
+   *
+   * @param message the received perform mission task message
+   */
+  private void performMission(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+
   }
 
 }

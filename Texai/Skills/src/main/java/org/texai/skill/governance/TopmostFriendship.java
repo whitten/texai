@@ -294,7 +294,7 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
       }
     });
 
-    // synchronously propagate the task to the child roles
+    // synchronously propagate the Become Ready Task to the joined container's child roles
     getRole().getChildQualifiedNames().stream().forEach((String childQualifiedName) -> {
       String operation = null;
       if (containerName.equals(Node.extractContainerName(childQualifiedName))) {
@@ -312,7 +312,23 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
       }
     });
 
-    //TODO propagate the Perform Mission Task to the joined container Delegate Perform Mission
+    // synchronously propagate the Become Ready Task to the joined container's child roles
+    getRole().getChildQualifiedNames().stream().forEach((String childQualifiedName) -> {
+      String operation = null;
+      if (containerName.equals(Node.extractContainerName(childQualifiedName))) {
+        operation = AHCSConstants.PERFORM_MISSION_TASK;
+      } else if (getRole().isNetworkSingletonRole(childQualifiedName)) {
+        operation = AHCSConstants.DELEGATE_PERFORM_MISSION_TASK;
+      }
+      if (operation != null) {
+        final Message outboundMessage = makeMessage(
+                childQualifiedName, // recipientQualifiedName
+                null, // recipientService
+                operation);
+        outboundMessage.put(AHCSConstants.MSG_PARM_CONTAINER_NAME, message.get(AHCSConstants.MSG_PARM_CONTAINER_NAME));
+        sendMessage(outboundMessage);
+      }
+    });
   }
 
   /**

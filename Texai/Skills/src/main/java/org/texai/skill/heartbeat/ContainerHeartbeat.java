@@ -193,7 +193,8 @@ public final class ContainerHeartbeat extends AbstractSkill {
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.KEEP_ALIVE_INFO,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
-      AHCSConstants.PERFORM_MISSION_TASK,};
+      AHCSConstants.PERFORM_MISSION_TASK
+    };
   }
 
   /**
