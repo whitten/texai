@@ -103,6 +103,8 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   private final AtomicReference<State> roleState = new AtomicReference<>(State.UNINITIALIZED);
   // the subskills dictionary, subskill class name --> subskill shared instance
   private final Map<String, AbstractSubSkill> subSkillsDictionary = new HashMap<>();
+  // the cached value of isNetworkSingletonRole
+  private Boolean isNetworkSingletonRole;
 
   /**
    * Constructs a new Role instance. Used by the persistence framework.
@@ -471,7 +473,7 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
       }
       if (!isSkillFound) {
         if (message.getRecipientService() == null) {
-          LOGGER.info("no skill understands the operation ...");
+          LOGGER.info("no skill understands the operation " + message.getOperation() +  " ...");
           getSkills().stream().sorted().forEach((AbstractSkill skill1) -> {
             LOGGER.info("  " + skill1 + " understands");
             for (final String understoodOperation : skill1.getUnderstoodOperations()) {
@@ -794,6 +796,28 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
    */
   public Map<String, AbstractSubSkill> getSubSkillsDictionary() {
     return subSkillsDictionary;
+  }
+
+  /** Returns whether this is a network singleton role.
+   *
+   * @return whether this is a network singleton role.
+   */
+  public boolean isNetworkSingletonRole() {
+    return node.isNetworkSingleton();
+  }
+
+  /** Returns whether the given role is a network singleton role.
+   *
+   * @param qualifiedName
+   * @return whether this is a network singleton role.
+   */
+  public boolean isNetworkSingletonRole(final String qualifiedName) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(qualifiedName) : "qualifiedName must be an non-empty string";
+    assert getNodeRuntime().getLocalRole(qualifiedName) != null : qualifiedName + " must be registered with the node runtime"
+            + "\n" + getNodeRuntime().formatLocalRoles();
+
+    return getNodeRuntime().getLocalRole(qualifiedName).isNetworkSingletonRole();
   }
 
   /**

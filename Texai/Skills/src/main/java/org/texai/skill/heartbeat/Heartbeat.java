@@ -83,22 +83,39 @@ public class Heartbeat extends AbstractSkill {
       return true;
     }
     switch (operation) {
-      case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
-        LOGGER.warn(message);
-        return true;
-
+      /**
+       * Initialize Task
+       *
+       * This task message is sent from the parent ContainerOperationAgent.ContainerHeartbeatRole. It is expected to be the first task
+       * message that this role receives and it results in the role being initialized.
+       */
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert this.getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
         initialization(message);
         return true;
 
+      /**
+       * Become Ready Task
+       *
+       * This task message is sent from the network-singleton parent ContainerOperationAgent.ContainerHeartbeatRole.
+       *
+       * It results in the skill set to the ready state
+       */
+      case AHCSConstants.BECOME_READY_TASK:
+        assert this.getSkillState().equals(State.ISOLATED_FROM_NETWORK) : "prior state must be isolated-from-network";
+        setSkillState(AHCSConstants.State.READY);
+        LOGGER.info("now ready");
+        return true;
+
       case AHCSConstants.PERFORM_MISSION_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
         performMission(message);
         return true;
 
-      case AHCSConstants.AHCS_SHUTDOWN_TASK:
-        finalization();
+      case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
+        LOGGER.warn(message);
         return true;
+
     }
 
     // otherwise the received message is not understood
@@ -132,11 +149,10 @@ public class Heartbeat extends AbstractSkill {
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
-      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.PERFORM_MISSION_TASK,
-      AHCSConstants.AHCS_SHUTDOWN_TASK
-    };
+      AHCSConstants.BECOME_READY_TASK,
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.PERFORM_MISSION_TASK,};
   }
 
   /**
@@ -181,7 +197,6 @@ public class Heartbeat extends AbstractSkill {
   private void performMission(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
-    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
     LOGGER.info("performing the mission");
     final Message performMissionMessage = new Message(
@@ -191,12 +206,6 @@ public class Heartbeat extends AbstractSkill {
             "org.texai.skill.aicoin.XAINetworkOperation", // recipientService
             AHCSConstants.PERFORM_MISSION_TASK); // operation
     sendMessage(performMissionMessage);
-  }
-
-  /**
-   * Finalizes this skill and releases its resources.
-   */
-  private void finalization() {
   }
 
   /**

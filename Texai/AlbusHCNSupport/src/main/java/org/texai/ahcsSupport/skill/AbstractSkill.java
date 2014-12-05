@@ -93,6 +93,14 @@ public abstract class AbstractSkill {
     return true;
   }
 
+  /** Return whether this is a network singleton skill.
+   *
+   * @return whether this is a network singleton skill
+   */
+  public boolean isNetworkSingletonSkill() {
+    return false;
+  }
+
   /**
    * Gets the RDF entity manager.
    *
@@ -740,4 +748,21 @@ public abstract class AbstractSkill {
     return getRole().findSubSkill(subSkillClassName);
   }
 
+
+  /**
+   * Receive the new parent role's acknowledgement of joining the network.
+   *
+   * @param message the received perform mission task message
+   */
+  protected void joinAcknowledgedTask(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+
+    getLogger().info("join acknowledged from " + message.getSenderQualifiedName());
+    final Message removeUnjoinedRoleInfoMessage = makeMessage(
+            getContainerName() + ".ContainerOperationAgent.ContainerOperationRole", // recipientQualifiedName
+            "org.texai.skill.network.ContainerOperation", // recipientService
+            AHCSConstants.REMOVE_UNJOINED_ROLE_INFO); // operation
+    sendMessageViaSeparateThread(removeUnjoinedRoleInfoMessage);
+  }
 }

@@ -22,14 +22,11 @@
  */
 package org.texai.skill.aicoin;
 
-import java.security.cert.X509Certificate;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
-import org.texai.ahcs.NodeRuntime;
 import org.texai.ahcsSupport.AHCSConstants;
-import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
-import org.texai.skill.network.ContainerOperation;
+import org.texai.ahcs.skill.AbstractNetworkSingletonSkill;
 
 /**
  * Manages the network, the containers, and the A.I. Coin agents within the containers. Interacts with human operators.
@@ -37,7 +34,7 @@ import org.texai.skill.network.ContainerOperation;
  * @author reed
  */
 @ThreadSafe
-public final class XAINetworkOperation extends AbstractSkill {
+public final class XAINetworkOperation extends AbstractNetworkSingletonSkill {
 
   // the logger
   private static final Logger LOGGER = Logger.getLogger(XAINetworkOperation.class);
@@ -98,7 +95,6 @@ public final class XAINetworkOperation extends AbstractSkill {
        * Join Acknowledged Task
        *
        * This task message is sent from the network-singleton, parent NetworkOperationAgent.NetworkOperationRole.
-       *
        * It indicates that the parent is ready to converse with this role as needed.
        */
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
@@ -132,6 +128,18 @@ public final class XAINetworkOperation extends AbstractSkill {
       case AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
         joinNetworkSingletonAgent(message);
+        return true;
+
+      /**
+       * Delegate Become Ready Task
+       *
+       * A container has completed joining the network. Propagate a Delegate Become Ready Task down the role command hierarchy.
+       *
+       * The container name is a parameter of the message.
+       */
+      case AHCSConstants.DELEGATE_BECOME_READY_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        handleDelegateBecomeReadyTask(message);
         return true;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
@@ -173,11 +181,12 @@ public final class XAINetworkOperation extends AbstractSkill {
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
-      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.PERFORM_MISSION_TASK,
+      AHCSConstants.DELEGATE_BECOME_READY_TASK,
       AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO,
-      AHCSConstants.JOIN_ACKNOWLEDGED_TASK
+      AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.PERFORM_MISSION_TASK
     };
   }
 
@@ -206,49 +215,4 @@ public final class XAINetworkOperation extends AbstractSkill {
             AHCSConstants.PERFORM_MISSION_TASK)); // operation
   }
 
-  /**
-   * Handles a join request from child role in another container. It responds by sending
-   * an acknowledgement message to the requesting child role.
-   *
-   * @param message the join network singleton agent info message
-   */
-  private void joinNetworkSingletonAgent(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
-
-    LOGGER.info("child role joining this network singleton " + message.getSenderQualifiedName());
-    final String childQualifiedName = message.getSenderQualifiedName();
-    final X509Certificate x509Certificate = (X509Certificate) message.get(AHCSConstants.MSG_PARM_X509_CERTIFICATE);
-    assert x509Certificate != null;
-
-    ((NodeRuntime) getNodeRuntime()).addX509Certificate(childQualifiedName, x509Certificate);
-
-    // send a acknowledged_info message to the joined peer agent/role
-    final Message acknowledgedInfoMessage = makeMessage(
-            message.getSenderQualifiedName(), // recipientQualifiedName
-            message.getSenderService(), // recipientService
-            AHCSConstants.JOIN_ACKNOWLEDGED_TASK); // operation
-    acknowledgedInfoMessage.put(
-            AHCSConstants.MSG_PARM_X509_CERTIFICATE, // parameterName
-            getRole().getX509Certificate()); // parameterValue
-    sendMessage(acknowledgedInfoMessage);
-  }
-
-  /**
-   * Receive the new parent role's acknowledgement of joining the network.
-   *
-   * @param message the received perform mission task message
-   */
-  private void joinAcknowledgedTask(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-
-    LOGGER.info("join acknowledged from " + message.getSenderQualifiedName());
-    final Message removeUnjoinedRoleInfoMessage = makeMessage(
-            getContainerName() + ".ContainerOperationAgent.ContainerOperationRole", // recipientQualifiedName
-            ContainerOperation.class.getName(), // recipientService
-            AHCSConstants.REMOVE_UNJOINED_ROLE_INFO); // operation
-    sendMessageViaSeparateThread(removeUnjoinedRoleInfoMessage);
-  }
 }

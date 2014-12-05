@@ -205,6 +205,22 @@ public class BasicNodeRuntime implements MessageDispatcher {
     }
   }
 
+  /** Returns a formatted list of the keys of the localRoleDictionary.
+   *
+   * @return a formatted list of the keys of the localRoleDictionary
+   */
+  public String formatLocalRoles() {
+    final StringBuilder stringBuilder = new StringBuilder();
+    stringBuilder.append("local role dictionary entries ...");
+    synchronized (localRoleDictionary) {
+      localRoleDictionary.keySet().stream().sorted().forEach(qualifiedName -> {
+        stringBuilder.append("  ").append(qualifiedName).append('\n');
+      });
+    }
+    return stringBuilder.toString();
+  }
+
+
   /**
    * Gets the node runtime RDF entity manager.
    *
@@ -372,7 +388,7 @@ public class BasicNodeRuntime implements MessageDispatcher {
   public boolean isFirstContainerInNetwork() {
     if (isFirstContainerInNetworkCached == null) {
       final String isFirstContainerInNetwork = System.getenv("FIRST_CONTAINER");
-      isFirstContainerInNetworkCached = new Boolean("true".equals(isFirstContainerInNetwork));
+      isFirstContainerInNetworkCached = "true".equals(isFirstContainerInNetwork);
     }
     return isFirstContainerInNetworkCached;
   }

@@ -94,6 +94,19 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
         return true;
 
       /**
+       * Become Ready Task
+       *
+       * This task message is sent from the network-singleton parent XAINetworkOperationAgent.XAINetworkOperationRole.
+       *
+       * It results in the skill set to the ready state
+       */
+      case AHCSConstants.BECOME_READY_TASK:
+        assert this.getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "prior state must be isolated-from-network";
+        setSkillState(AHCSConstants.State.READY);
+        LOGGER.info("now ready");
+        return true;
+
+      /**
        * Write Configuration File Task
        *
        * This task message is sent from the parent XAIOperation skill.
@@ -225,9 +238,11 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
-      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.WRITE_CONFIGURATION_FILE_TASK};
+      AHCSConstants.BECOME_READY_TASK,
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.WRITE_CONFIGURATION_FILE_TASK
+    };
   }
 
 }

@@ -126,6 +126,19 @@ public final class ContainerOperation extends AbstractSkill {
         return true;
 
       /**
+       * Become Ready Task
+       *
+       * This task message is sent from the network-singleton parent NetworkOperationAgent.NetworkOperationRole.
+       *
+       * It results in the skill set to the ready state
+       */
+      case AHCSConstants.BECOME_READY_TASK:
+        assert this.getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "prior state must be isolated-from-network";
+        setSkillState(AHCSConstants.State.READY);
+        LOGGER.info("now ready");
+        return true;
+
+      /**
        * Perform Mission Task
        *
        * This task message is sent from the network-singleton, parent NetworkOperationAgent.NetworkOperationRole. It commands this
@@ -201,12 +214,13 @@ public final class ContainerOperation extends AbstractSkill {
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.ADD_UNJOINED_ROLE_INFO,
-      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
-      AHCSConstants.OPERATION_NOT_PERMITTED_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.PERFORM_MISSION_TASK,
+      AHCSConstants.BECOME_READY_TASK,
       AHCSConstants.DELEGATE_CONFIGURE_SINGLETON_AGENT_HOSTS_TASK,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.OPERATION_NOT_PERMITTED_INFO,
+      AHCSConstants.PERFORM_MISSION_TASK,
       AHCSConstants.REMOVE_UNJOINED_ROLE_INFO
     };
   }
@@ -266,7 +280,7 @@ public final class ContainerOperation extends AbstractSkill {
     synchronized (unjoinedChildQualifiedNames) {
       unjoinedChildQualifiedNames.add((String) message.get(AHCSConstants.MSG_PARM_ROLE_QUALIFIED_NAME));
     }
-    LOGGER.info("added unjoined role " + message.getSenderQualifiedName() + ", count: " + unjoinedChildQualifiedNames.size());
+    LOGGER.debug("added unjoined role " + message.getSenderQualifiedName() + ", count: " + unjoinedChildQualifiedNames.size());
   }
 
   /**
@@ -284,8 +298,8 @@ public final class ContainerOperation extends AbstractSkill {
     synchronized (unjoinedChildQualifiedNames) {
       unjoinedChildQualifiedNames.remove(message.getSenderQualifiedName());
       isEmpty = unjoinedChildQualifiedNames.isEmpty();
-      LOGGER.info("removed unjoined role " + message.getSenderQualifiedName() + ", count remaining: " + unjoinedChildQualifiedNames.size());
-      LOGGER.debug(unjoinedChildQualifiedNames);
+      LOGGER.debug("removed unjoined role " + message.getSenderQualifiedName() + ", count remaining: " + unjoinedChildQualifiedNames.size());
+      //LOGGER.debug(unjoinedChildQualifiedNames);
     }
 
     if (isEmpty) {
@@ -296,23 +310,6 @@ public final class ContainerOperation extends AbstractSkill {
               NetworkOperation.class.getName(), // recipientService
               AHCSConstants.NETWORK_JOIN_COMPLETE_INFO)); // operation
     }
-  }
-
-  /**
-   * Receive the new network-singleton parent role's acknowledgement of joining the network.
-   *
-   * @param message the received perform mission task message
-   */
-  private void joinAcknowledgedTask(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-
-    LOGGER.info("join acknowledged from " + message.getSenderQualifiedName());
-    final Message removeUnjoinedRoleInfoMessage = makeMessage(
-            getContainerName() + ".ContainerOperationAgent.ContainerOperationRole", // recipientQualifiedName
-            ContainerOperation.class.getName(), // recipientService
-            AHCSConstants.REMOVE_UNJOINED_ROLE_INFO); // operation
-    sendMessageViaSeparateThread(removeUnjoinedRoleInfoMessage);
   }
 
 }

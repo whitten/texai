@@ -17,12 +17,15 @@ RUN add-apt-repository ppa:bitcoin/bitcoin \
  && apt-get update \
  && apt-get install -y --no-install-recommends bitcoin-qt
 
-# (Demo) install vnc, xvfb
-RUN apt-get install -y x11vnc xvfb
-RUN mkdir ~/.vnc
+# (Demo) install vnc, xvfb, openbox xterm
+RUN add-apt-repository 'deb http://dl.google.com/linux/chrome/deb/ stable main' \
+ && add-apt-repository 'deb http://mirrors.kernel.org/ubuntu trusty main' \
+ && apt-get update \
+ && apt-get install -y --no-install-recommends x11vnc xvfb openbox xterm menu \
+ && mkdir ~/.vnc \
 # -----------------------------------------
 # Change the VNC remote access password
-RUN x11vnc -storepasswd 1234 ~/.vnc/passwd
+ && x11vnc -storepasswd 1234 ~/.vnc/passwd
 # -----------------------------------------
 
 # clean up
@@ -61,6 +64,8 @@ EXPOSE 8333
 EXPOSE 5048
 # VNC port
 EXPOSE 5900
+# Java remote debugger port
+EXPOSE 10000
 
 # define default command
 CMD ["bash"]

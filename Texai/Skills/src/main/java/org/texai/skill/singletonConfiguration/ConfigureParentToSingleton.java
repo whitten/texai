@@ -94,6 +94,19 @@ public class ConfigureParentToSingleton extends AbstractSkill {
         configureSingletonAgentHosts(message);
         return true;
 
+      /**
+       * Become Ready Task
+       *
+       * This task message is sent from the network-singleton parent ContainerOperationAgent.ContainerOperationRole.
+       *
+       * It results in the skill set to the ready state
+       */
+      case AHCSConstants.BECOME_READY_TASK:
+        assert this.getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "prior state must be isolated-from-network";
+        setSkillState(AHCSConstants.State.READY);
+        LOGGER.info("now ready");
+        return true;
+
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
         return true;
@@ -129,9 +142,10 @@ public class ConfigureParentToSingleton extends AbstractSkill {
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
-      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK
+      AHCSConstants.BECOME_READY_TASK,
+      AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK,
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
     };
   }
 
@@ -156,9 +170,13 @@ public class ConfigureParentToSingleton extends AbstractSkill {
 
     final StringBuilder stringBuilder = new StringBuilder();
     stringBuilder
-            .append("\nconfiguring parent roles for ")
-            .append(Node.extractContainerAgentName(getRole().getQualifiedName()))
-            .append(" ...");
+            .append("configuring parent roles for ")
+            .append(Node.extractContainerAgentName(getRole().getQualifiedName()));
+    if (LOGGER.isDebugEnabled()) {
+      stringBuilder.append(" ...");
+    } else {
+      LOGGER.info(stringBuilder.toString());
+    }
     final SingletonAgentHosts singletonAgentHosts
             = (SingletonAgentHosts) message.get(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS); // parameterName
     assert singletonAgentHosts != null;
@@ -170,19 +188,19 @@ public class ConfigureParentToSingleton extends AbstractSkill {
         if (singletonAgentHosts.isNetworkSingleton(parentQualifiedName)) {
           final String newParentQualifiedName = singletonAgentHosts.mapNetworkSingleton(parentQualifiedName);
           assert StringUtils.isNonEmptyString(newParentQualifiedName);
-          if (newParentQualifiedName.equals(parentQualifiedName)) {
-            LOGGER.info(stringBuilder.toString());
-            LOGGER.info("parent " + newParentQualifiedName + " already set for " + role);
-          } else {
-            // a parent agent/role needs to be changed to the corresponding network singleton agent/role
+          assert !newParentQualifiedName.equals(parentQualifiedName);
+          // a parent agent/role needs to be changed to the corresponding network singleton agent/role
+          if (LOGGER.isDebugEnabled()) {
             stringBuilder
                     .append("\n  old parent role: ")
                     .append(parentQualifiedName)
                     .append("\n  new parent role: ")
                     .append(newParentQualifiedName);
-            role.setParentQualifiedName(newParentQualifiedName);
-            LOGGER.info(stringBuilder.toString());
+            LOGGER.debug(stringBuilder.toString());
+          }
+          role.setParentQualifiedName(newParentQualifiedName);
 
+          if (!getRole().isNetworkSingletonRole()) {
             // synchronously send an Add Unjoined Role Info message to the ContainerOperations agent/role
             final Message addUnjoinedRoleInfoMessage = makeMessage(
                     getRole().getParentQualifiedName(), // recipientQualifiedName

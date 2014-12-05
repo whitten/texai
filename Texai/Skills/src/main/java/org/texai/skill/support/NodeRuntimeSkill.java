@@ -75,11 +75,11 @@ public class NodeRuntimeSkill extends AbstractSkill {
   }
 
   /**
-   * Receives and attempts to process the given message. The skill is thread
-   * safe, given that any contained libraries are single threaded with regard to
-   * the conversation.
+   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
+   * with regard to the conversation.
    *
    * @param message the given message
+   *
    * @return whether the message was successfully processed
    */
   @Override
@@ -93,10 +93,12 @@ public class NodeRuntimeSkill extends AbstractSkill {
       return true;
     }
     switch (operation) {
-      case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
-        LOGGER.warn(message);
-        return true;
-
+      /**
+       * Initialize Task
+       *
+       * This task message is sent from the container-local parent NetworkOperationAgent.NetworkOperationRole. It is expected to be the
+       * first task message that this role receives and it results in the role being initialized.
+       */
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
         if (getNodeRuntime().isFirstContainerInNetwork()) {
@@ -106,8 +108,26 @@ public class NodeRuntimeSkill extends AbstractSkill {
         }
         return true;
 
+      /**
+       * Become Ready Task
+       *
+       * This task message is sent from the network-singleton parent NetworkOperationAgent.NetworkOperationRole.
+       *
+       * It results in the skill set to the ready state
+       */
+      case AHCSConstants.BECOME_READY_TASK:
+        assert this.getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "prior state must be isolated-from-network";
+        setSkillState(AHCSConstants.State.READY);
+        LOGGER.info("now ready");
+        return true;
+
       case AHCSConstants.PERFORM_MISSION_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
         performMission(message);
+        return true;
+
+      case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
+        LOGGER.warn(message);
         return true;
 
     }
@@ -116,11 +136,11 @@ public class NodeRuntimeSkill extends AbstractSkill {
   }
 
   /**
-   * Synchronously processes the given message. The skill is thread safe, given
-   * that any contained libraries are single threaded with regard to the
-   * conversation.
+   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single threaded with regard
+   * to the conversation.
    *
    * @param message the given message
+   *
    * @return the response message or null if not applicable
    */
   @Override
@@ -141,8 +161,10 @@ public class NodeRuntimeSkill extends AbstractSkill {
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.PERFORM_MISSION_TASK,
-      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,};
+      AHCSConstants.BECOME_READY_TASK,
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.PERFORM_MISSION_TASK
+    };
   }
 
   /**
@@ -153,7 +175,6 @@ public class NodeRuntimeSkill extends AbstractSkill {
   private void performMission(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
-    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
     LOGGER.info("performing the mission");
     final String portString = System.getenv("LISTENING_PORT");
@@ -162,7 +183,7 @@ public class NodeRuntimeSkill extends AbstractSkill {
     }
     final int port;
     try {
-    port = Integer.parseInt(portString);
+      port = Integer.parseInt(portString);
     } catch (NumberFormatException ex) {
       throw new TexaiException("LISTENING_PORT not a valid number " + portString);
     }

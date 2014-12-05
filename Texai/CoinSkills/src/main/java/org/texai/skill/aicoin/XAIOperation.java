@@ -8,7 +8,6 @@ import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 import org.texai.skill.aicoin.support.AICoinUtils;
 import org.texai.skill.aicoin.support.XAIBitcoinMessageReceiver;
-import org.texai.skill.network.ContainerOperation;
 import org.texai.util.EnvironmentUtils;
 import org.texai.util.TexaiException;
 
@@ -121,6 +120,19 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
         return true;
 
       /**
+       * Become Ready Task
+       *
+       * This task message is sent from the network-singleton parent XAINetworkEpisodicMemoryAgent.XAINetworkEpisodicMemoryRole.
+       *
+       * It results in the skill set to the ready state
+       */
+      case AHCSConstants.BECOME_READY_TASK:
+        assert this.getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "prior state must be isolated-from-network";
+        setSkillState(AHCSConstants.State.READY);
+        LOGGER.info("now ready");
+        return true;
+
+      /**
        * Perform Mission Task
        *
        * This task message is sent from the network-singleton, parent TopmostFriendshipAgent.TopmostFriendshipRole. It commands this
@@ -181,11 +193,12 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
-      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
+      AHCSConstants.BECOME_READY_TASK,
+      AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.PERFORM_MISSION_TASK,
-      AHCSConstants.TASK_ACCOMPLISHED_INFO,
-      AHCSConstants.JOIN_ACKNOWLEDGED_TASK
+      AHCSConstants.TASK_ACCOMPLISHED_INFO
     };
   }
 
@@ -278,24 +291,6 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
   public void receiveBitcoinMessageFromSlave(final com.google.bitcoin.core.Message message) {
     // send the outbound bitcoin message from the slave peer to the Texai network recipient.
 
-  }
-
-  /**
-   * Receive the new parent role's acknowledgement of joining the network.
-   *
-   * @param message the received perform mission task message
-   */
-  private void joinAcknowledgedTask(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-
-    LOGGER.info("join acknowledged from " + message.getSenderQualifiedName());
-
-    final Message removeUnjoinedRoleInfoMessage = makeMessage(
-            getContainerName() + ".ContainerOperationAgent.ContainerOperationRole", // recipientQualifiedName
-            ContainerOperation.class.getName(), // recipientService
-            AHCSConstants.REMOVE_UNJOINED_ROLE_INFO); // operation
-    sendMessageViaSeparateThread(removeUnjoinedRoleInfoMessage);
   }
 
 }

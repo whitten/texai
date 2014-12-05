@@ -20,16 +20,17 @@
  */
 package org.texai.skill.governance;
 
-import java.security.cert.X509Certificate;
+import java.util.Iterator;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
-import org.texai.ahcs.NodeRuntime;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
-import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.ahcs.skill.AbstractNetworkSingletonSkill;
+import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.skill.domainEntity.SingletonAgentHosts;
 import org.texai.skill.network.NetworkOperation;
+import org.texai.util.TexaiException;
 
 /**
  * Provides topmost perception and friendship behavior.
@@ -37,7 +38,7 @@ import org.texai.skill.network.NetworkOperation;
  * @author reed
  */
 @ThreadSafe
-public final class TopmostFriendship extends AbstractSkill {
+public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
 
   // the logger
   private static final Logger LOGGER = Logger.getLogger(TopmostFriendship.class);
@@ -74,8 +75,8 @@ public final class TopmostFriendship extends AbstractSkill {
        * message that this topmost role receives and it results in the role being initialized and propagation of that message to all agent /
        * roles.
        *
-       * If this is the first container in the network, then a Perform Mission Task message is sent to the child NetworkOperation agent/role.
-       * Otherwise a Join Network Task message is sent.
+       * If this is the first container in the network, then a Perform Mission Task message is sent to the child NetworkOperation
+       * agent/role. Otherwise a Join Network Task message is sent.
        */
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
@@ -119,6 +120,23 @@ public final class TopmostFriendship extends AbstractSkill {
         joinNetworkSingletonAgent(message);
         return true;
 
+      /**
+       * Join Network Singleton Agent Info
+       *
+       * This task message is sent to this network singleton agent/role from a child role in another container.
+       *
+       * The sender is requesting to join the network as child of this role.
+       *
+       * The message parameter is the X.509 certificate belonging to the sender agent / role.
+       *
+       * The result is the sending of a Join Acknowleged Task message to the requesting child role, with this role's X.509 certificate as
+       * the message parameter.
+       */
+      case AHCSConstants.NETWORK_JOIN_COMPLETE_SENSATION:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        handleNetworkJoinCompleteSensation(message);
+        return true;
+
       // handle other operations ...
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
@@ -157,10 +175,11 @@ public final class TopmostFriendship extends AbstractSkill {
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
-      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.SINGLETON_AGENT_HOSTS_INFO,
-      AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO
+      AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO,
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.NETWORK_JOIN_COMPLETE_SENSATION,
+      AHCSConstants.SINGLETON_AGENT_HOSTS_INFO
     };
   }
 
@@ -193,9 +212,9 @@ public final class TopmostFriendship extends AbstractSkill {
   }
 
   /**
-   * Receives a singleton agent hosts message from the SingletonConfiguration agent / role, whose contents map certain local agent/role addresses to their network singleton
-   * counterparts. The message is propagated to the roles, who update their parent roles if the parent is a network singleton. This action
-   * has the likely indirect effect of shutting this node off from the network.
+   * Receives a singleton agent hosts message from the SingletonConfiguration agent / role, whose contents map certain local agent/role
+   * addresses to their network singleton counterparts. The message is propagated to the roles, who update their parent roles if the parent
+   * is a network singleton. This action has the likely indirect effect of shutting this node off from the network.
    *
    * @param message the received singletonAgentHosts info message
    */
@@ -255,6 +274,48 @@ public final class TopmostFriendship extends AbstractSkill {
   }
 
   /**
+   * Handles the sensation that a new container has completed joining the network.
+   *
+   * @param message the Network Join Complete Sensation message
+   */
+  private void handleNetworkJoinCompleteSensation(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+
+    final String containerName = (String) message.get(AHCSConstants.MSG_PARM_CONTAINER_NAME);
+    LOGGER.info("Sensed that container " + containerName + " has completely joined the network");
+
+    // ensure that no child network-singleton roles belong to the joining container
+    getRole().getChildQualifiedNames().stream().forEach((String childQualifiedName) -> {
+      final boolean isNetworkSingletonRole
+              = getRole().isNetworkSingletonRole(getContainerName() + '.' + Node.extractAgentRoleName(childQualifiedName));
+      if (containerName.equals(Node.extractContainerName(childQualifiedName)) && isNetworkSingletonRole) {
+        throw new TexaiException("invalid network-singleton child role from joining container " + childQualifiedName);
+      }
+    });
+
+    // synchronously propagate the task to the child roles
+    getRole().getChildQualifiedNames().stream().forEach((String childQualifiedName) -> {
+      String operation = null;
+      if (containerName.equals(Node.extractContainerName(childQualifiedName))) {
+        operation = AHCSConstants.BECOME_READY_TASK;
+      } else if (getRole().isNetworkSingletonRole(childQualifiedName)) {
+        operation = AHCSConstants.DELEGATE_BECOME_READY_TASK;
+      }
+      if (operation != null) {
+        final Message outboundMessage = makeMessage(
+                childQualifiedName, // recipientQualifiedName
+                null, // recipientService
+                operation);
+        outboundMessage.put(AHCSConstants.MSG_PARM_CONTAINER_NAME, message.get(AHCSConstants.MSG_PARM_CONTAINER_NAME));
+        sendMessage(outboundMessage);
+      }
+    });
+
+    //TODO propagate the Perform Mission Task to the joined container Delegate Perform Mission
+  }
+
+  /**
    * Gets the logger.
    *
    * @return the logger
@@ -264,30 +325,4 @@ public final class TopmostFriendship extends AbstractSkill {
     return LOGGER;
   }
 
-  /** Handles the sender's request to join the network as child of this role..
-   *
-   * @param message the Join Network Singleton Agent Info message
-   */
-  private void joinNetworkSingletonAgent(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
-
-    LOGGER.info("child role joining this network singleton " + message.getSenderQualifiedName());
-    final String childQualifiedName = message.getSenderQualifiedName();
-    final X509Certificate x509Certificate = (X509Certificate) message.get(AHCSConstants.MSG_PARM_X509_CERTIFICATE);
-    assert x509Certificate != null;
-
-    ((NodeRuntime) getNodeRuntime()).addX509Certificate(childQualifiedName, x509Certificate);
-
-    // send a acknowledged_info message to the joined peer agent/role
-    final Message acknowledgedInfoMessage = makeMessage(
-            message.getSenderQualifiedName(), // recipientQualifiedName
-            message.getSenderService(), // recipientService
-            AHCSConstants.JOIN_ACKNOWLEDGED_TASK); // operation
-    acknowledgedInfoMessage.put(
-            AHCSConstants.MSG_PARM_X509_CERTIFICATE, // parameterName
-            getRole().getX509Certificate()); // parameterValue
-    sendMessage(acknowledgedInfoMessage);
-  }
 }

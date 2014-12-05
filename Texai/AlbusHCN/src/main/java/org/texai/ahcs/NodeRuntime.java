@@ -182,6 +182,11 @@ public class NodeRuntime extends BasicNodeRuntime {
       LOGGER.info("quitting, ignoring message:\n  " + message);
       return;
     }
+
+    if (message.getOperation().equals(AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO)) {
+      throw new TexaiException("message not understood\n" + message);
+    }
+
     boolean isMessageLogged = !isMessageFiltered(message);
 
     if (!isMessageLogged && isMessageLogged(message)) {
@@ -225,7 +230,7 @@ public class NodeRuntime extends BasicNodeRuntime {
               || message.getOperation().equals(AHCSConstants.SINGLETON_AGENT_HOSTS_INFO)
               || message.getOperation().equals(AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO)
               || message.getOperation().equals(AHCSConstants.JOIN_ACKNOWLEDGED_TASK)) {
-        LOGGER.info("adding certificate for " + message.getSenderQualifiedName());
+        LOGGER.debug("adding certificate for " + message.getSenderQualifiedName());
         x509Certificate = (X509Certificate) message.get(AHCSConstants.MSG_PARM_X509_CERTIFICATE);
         assert x509Certificate != null;
         addX509Certificate(

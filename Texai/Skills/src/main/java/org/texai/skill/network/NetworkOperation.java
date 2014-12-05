@@ -1,14 +1,16 @@
 package org.texai.skill.network;
 
-import java.security.cert.X509Certificate;
+import java.util.HashSet;
+import java.util.Set;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
-import org.texai.ahcs.NodeRuntime;
 import org.texai.ahcsSupport.AHCSConstants;
-import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.ahcs.skill.AbstractNetworkSingletonSkill;
 import org.texai.skill.domainEntity.SingletonAgentHosts;
+import org.texai.skill.governance.TopmostFriendship;
 import org.texai.skill.singletonConfiguration.NetworkSingletonConfiguration;
+import org.texai.util.TexaiException;
 
 /**
  * Created on Aug 30, 2014, 11:30:19 PM.
@@ -31,10 +33,12 @@ import org.texai.skill.singletonConfiguration.NetworkSingletonConfiguration;
  * <http://www.gnu.org/licenses/>.
  */
 @ThreadSafe
-public final class NetworkOperation extends AbstractSkill {
+public final class NetworkOperation extends AbstractNetworkSingletonSkill {
 
   // the logger
   private static final Logger LOGGER = Logger.getLogger(NetworkOperation.class);
+  // the container names
+  private final Set<String> containerNames = new HashSet<>();
 
   /**
    * Constructs a new NetworkOperation instance.
@@ -83,6 +87,7 @@ public final class NetworkOperation extends AbstractSkill {
         propagateOperationToChildRoles(operation);
         if (getNodeRuntime().isFirstContainerInNetwork()) {
           setSkillState(AHCSConstants.State.READY);
+          containerNames.add(getContainerName());
         } else {
           setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
         }
@@ -165,16 +170,23 @@ public final class NetworkOperation extends AbstractSkill {
        *
        * This information message is sent from a child ContainerOperaton agent/role that has completed joining the network.
        *
-       * It results in a message synchronously propagated to all the roles in the sender's container that initializes their
-       * state. Then, after all those roles are initialized, a Delegate Perform Mission Task message is propagated to child network
-       * singleton agent / roles with the joined container's name as a parameter. A Perform Mission Task message is sent as a
-       * response to the joined child ContainerOperaton agent/role. A Become Inactive Info message is sent to the joined child
-       * TopmostFriendship agent/role, who propagates Become Inactive Task messages to agent / roles in the joined container
-       * who have been superceded by network singletons.
+       * It results in a Network Join Complete Sensation message sent to the parent TopmostFriendship agent / role.
        */
       case AHCSConstants.NETWORK_JOIN_COMPLETE_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
         handleNetworkJoinCompleteInfo(message);
+        return true;
+
+      /**
+       * Delegate Become Ready Task
+       *
+       * A container has completed joining the network. Propagate a Delegate Become Ready Task down the role command hierarchy.
+       *
+       * The container name is a parameter of the message.
+       */
+      case AHCSConstants.DELEGATE_BECOME_READY_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        handleDelegateBecomeReadyTask(message);
         return true;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
@@ -222,6 +234,7 @@ public final class NetworkOperation extends AbstractSkill {
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
       AHCSConstants.PERFORM_MISSION_TASK,
+      AHCSConstants.DELEGATE_BECOME_READY_TASK,
       AHCSConstants.DELEGATE_CONFIGURE_SINGLETON_AGENT_HOSTS_TASK,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.JOIN_NETWORK_TASK,
@@ -258,10 +271,23 @@ public final class NetworkOperation extends AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+    if (containerNames.contains(message.getSenderContainerName())) {
+      throw new TexaiException("duplicate container name");
+    }
 
-    //TODO
-    // synchronously send a Network Join Complete Task message to all child roles in the container, who each set their State to initialized and return immediately
-    // asynchronously send a Perform Mission Task message to all child roles in the container, which have a separate thread that enables blocking if necessary
+    LOGGER.info(new StringBuilder().append("Container ").append(message.getSenderContainerName()).append(" has joined the Network.").toString());
+    containerNames.add(message.getSenderContainerName());
+    /**
+     * Notify the parent TopmostFriendship agent / role that a container has completed joining the network.
+     * The TopmostFriendship agent / role synchronously sends a Become Ready Task message to all child roles in the container,
+     * who each set their State to initialized and return immediately
+     */
+    final Message networkJoinCompleteSensationMessage = makeMessage(
+            getRole().getParentQualifiedName(), // recipientQualifiedName
+            TopmostFriendship.class.getName(), // recipientService
+            AHCSConstants.NETWORK_JOIN_COMPLETE_SENSATION); // operation
+    networkJoinCompleteSensationMessage.put(AHCSConstants.MSG_PARM_CONTAINER_NAME, message.getSenderContainerName());
+    sendMessageViaSeparateThread(networkJoinCompleteSensationMessage);
   }
 
   /**
@@ -326,50 +352,6 @@ public final class NetworkOperation extends AbstractSkill {
     configureSingletonAgentHostsTask.put(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS, singletonAgentHosts);
 
     sendMessageViaSeparateThread(configureSingletonAgentHostsTask);
-  }
-
-  /** Handles the sender's request to join the network as child of this role..
-   *
-   * @param message the Join Network Singleton Agent Info message
-   */
-  private void joinNetworkSingletonAgent(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
-
-    LOGGER.info("child role joining this network singleton " + message.getSenderQualifiedName());
-    final String childQualifiedName = message.getSenderQualifiedName();
-    final X509Certificate x509Certificate = (X509Certificate) message.get(AHCSConstants.MSG_PARM_X509_CERTIFICATE);
-    assert x509Certificate != null;
-
-    ((NodeRuntime) getNodeRuntime()).addX509Certificate(childQualifiedName, x509Certificate);
-
-    // send a acknowledged_info message to the joined peer agent/role
-    final Message acknowledgedInfoMessage = makeMessage(
-            message.getSenderQualifiedName(), // recipientQualifiedName
-            message.getSenderService(), // recipientService
-            AHCSConstants.JOIN_ACKNOWLEDGED_TASK); // operation
-    acknowledgedInfoMessage.put(
-            AHCSConstants.MSG_PARM_X509_CERTIFICATE, // parameterName
-            getRole().getX509Certificate()); // parameterValue
-    sendMessage(acknowledgedInfoMessage);
-  }
-
-  /**
-   * Receive the new parent role's acknowledgement of joining the network.
-   *
-   * @param message the received perform mission task message
-   */
-  private void joinAcknowledgedTask(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-
-    LOGGER.info("join acknowledged from " + message.getSenderQualifiedName());
-    final Message removeUnjoinedRoleInfoMessage = makeMessage(
-            getContainerName() + ".ContainerOperationAgent.ContainerOperationRole", // recipientQualifiedName
-            ContainerOperation.class.getName(), // recipientService
-            AHCSConstants.REMOVE_UNJOINED_ROLE_INFO); // operation
-    sendMessageViaSeparateThread(removeUnjoinedRoleInfoMessage);
   }
 
 }

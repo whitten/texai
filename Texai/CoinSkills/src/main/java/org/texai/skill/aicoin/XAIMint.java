@@ -5,10 +5,9 @@ import java.util.TimerTask;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
-import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.ahcs.skill.AbstractNetworkSingletonSkill;
 import org.texai.skill.aicoin.support.AICoinUtils;
-import org.texai.skill.network.ContainerOperation;
 import org.texai.util.EnvironmentUtils;
 import org.texai.util.TexaiException;
 
@@ -32,7 +31,7 @@ import org.texai.util.TexaiException;
  * You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 @ThreadSafe
-public final class XAIMint extends AbstractSkill {
+public final class XAIMint extends AbstractNetworkSingletonSkill {
 
   // the logger
   private static final Logger LOGGER = Logger.getLogger(XAIMint.class);
@@ -118,6 +117,18 @@ public final class XAIMint extends AbstractSkill {
         performMission(message);
         return true;
 
+      /**
+       * Delegate Become Ready Task
+       *
+       * A container has completed joining the network. Propagate a Delegate Become Ready Task down the role command hierarchy.
+       *
+       * The container name is a parameter of the message.
+       */
+      case AHCSConstants.DELEGATE_BECOME_READY_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        handleDelegateBecomeReadyTask(message);
+        return true;
+
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
         LOGGER.warn(message);
         return true;
@@ -157,6 +168,7 @@ public final class XAIMint extends AbstractSkill {
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.AHCS_INITIALIZE_TASK,
+      AHCSConstants.DELEGATE_BECOME_READY_TASK,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.PERFORM_MISSION_TASK
@@ -229,20 +241,4 @@ public final class XAIMint extends AbstractSkill {
 
   }
 
-  /**
-   * Receive the new parent role's acknowledgement of joining the network.
-   *
-   * @param message the received perform mission task message
-   */
-  private void joinAcknowledgedTask(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-
-    LOGGER.info("join acknowledged from " + message.getSenderQualifiedName());
-    final Message removeUnjoinedRoleInfoMessage = makeMessage(
-            getContainerName() + ".ContainerOperationAgent.ContainerOperationRole", // recipientQualifiedName
-            ContainerOperation.class.getName(), // recipientService
-            AHCSConstants.REMOVE_UNJOINED_ROLE_INFO); // operation
-    sendMessageViaSeparateThread(removeUnjoinedRoleInfoMessage);
-  }
 }

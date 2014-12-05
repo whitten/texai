@@ -55,6 +55,9 @@ public final class AHCSConstants {
   // the disconnectedSession_Sensation operation
   public static final String DISCONNECTED_SESSION_SENSATION = "disconnectedSession_Sensation";
   //
+  // the networkJoinComplete_Sensation operation
+  public static final String NETWORK_JOIN_COMPLETE_SENSATION = "networkJoinComplete_Sensation";
+  //
   // the recognizedFace_Sensation operation
   public static final String RECOGNIZED_FACE_SENSATION = "recognizedFace_Sensation";
   //
@@ -110,6 +113,9 @@ public final class AHCSConstants {
   // the shutdown_Task operation
   public static final String AHCS_SHUTDOWN_TASK = "AHCS shutdown_Task";
   //
+  // the becomeReady_Task operation
+  public static final String BECOME_READY_TASK = "becomeReady_Task";
+  //
   // the delegateConfigureSingletonAgentHosts_Task operation
   public static final String CONFIGURE_SINGLETON_AGENT_HOSTS_TASK = "configureSingletonAgentHosts_Task";
   //
@@ -125,17 +131,14 @@ public final class AHCSConstants {
   // the defineNewNode_Task operation
   public static final String DEFINE_NEW_NODE_TASK = "defineNewNode_Task";
   //
-  // the defineNewNodeType_Task operation
-  public static final String DEFINE_NEW_NODE_TYPE_TASK = "defineNewNodeType_Task";
-  //
   // the defineNewSimpleNode_Task operation
   public static final String DEFINE_NEW_SIMPLE_NODE_TASK = "defineNewSimpleNode_Task";
   //
   // the defineNewRoleType_Task operation
-  public static final String DEFINE_NEW_ROLE_TYPE_TASK = "defineNewRoleType_Task";
-  //
-  // the defineNewRoleType_Task operation
   public static final String DEFINE_NEW_SKILL_CLASS_TASK = "defineNewSkillClass_Task";
+  //
+  // the delegateBecomeReady_Task operation
+  public static final String DELEGATE_BECOME_READY_TASK = "delegateBecomeReady_Task";
   //
   // the configureSingletonAgentHosts_Task operation
   public static final String DELEGATE_CONFIGURE_SINGLETON_AGENT_HOSTS_TASK = "delegateConfigureSingletonAgentHosts_Task";
@@ -327,6 +330,8 @@ public final class AHCSConstants {
   public static final String MSG_PARM_CHILD_ROLE_ID = "child role id";
   // the message parameter for class name
   public static final String MSG_PARM_CLASS_NAME = "class name";
+  // the message parameter for conversation ID
+  public static final String MSG_PARM_CONTAINER_NAME = "containerName";
   // the message parameter for conversation ID
   public static final String MSG_PARM_CONVERSATION_ID = "conversationId";
   // the formFillText

@@ -27,7 +27,6 @@ import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
-import org.texai.skill.network.ContainerOperation;
 
 /**
  * Governs the node logger role hierarchy within a particular JVM, and performs class level logging.
@@ -66,9 +65,28 @@ public class ContainerLogControl extends AbstractSkill {
         LOGGER.warn(message);
         return true;
 
+      /**
+       * Initialize Task
+       *
+       * This task message is sent from the container-local parent NetworkLogControlAgent.NetworkLogControlRole. It is expected to be the first task message
+       * that this role receives and it results in the role being initialized.
+       */
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert this.getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
         initialization(message);
+        return true;
+
+      /**
+       * Become Ready Task
+       *
+       * This task message is sent from the network-singleton parent NetworkLogControlAgent.NetworkLogControlRole.
+       *
+       * It results in the skill set to the ready state
+       */
+      case AHCSConstants.BECOME_READY_TASK:
+        assert this.getSkillState().equals(State.ISOLATED_FROM_NETWORK) : "prior state must be isolated-from-network";
+        setSkillState(State.READY);
+        LOGGER.info("now ready");
         return true;
 
       case AHCSConstants.SET_LOGGING_LEVEL:
@@ -84,6 +102,12 @@ public class ContainerLogControl extends AbstractSkill {
         unlogOperation(message);
         return true;
 
+      /**
+       * Join Acknowledged Task
+       *
+       * This task message is sent from the network-singleton, parent NetworkLogControlAgent.NetworkLogControlRole. It indicates that the
+       * parent is ready to converse with this role as needed.
+       */
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
                 "state must be isolated-from-network, but is " + getSkillState();
@@ -167,11 +191,12 @@ public class ContainerLogControl extends AbstractSkill {
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
-      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
+      AHCSConstants.BECOME_READY_TASK,
+      AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.LOG_OPERATION_TASK,
-      AHCSConstants.UNLOG_OPERATION_TASK,
-      AHCSConstants.JOIN_ACKNOWLEDGED_TASK
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.UNLOG_OPERATION_TASK
     };
   }
 
@@ -245,23 +270,6 @@ public class ContainerLogControl extends AbstractSkill {
   @Override
   protected Logger getLogger() {
     return LOGGER;
-  }
-
-  /**
-   * Receive the new parent role's acknowledgement of joining the network.
-   *
-   * @param message the received perform mission task message
-   */
-  private void joinAcknowledgedTask(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-
-    LOGGER.info("join acknowledged from " + message.getSenderQualifiedName());
-    final Message removeUnjoinedRoleInfoMessage = makeMessage(
-            getContainerName() + ".ContainerOperationAgent.ContainerOperationRole", // recipientQualifiedName
-            ContainerOperation.class.getName(), // recipientService
-            AHCSConstants.REMOVE_UNJOINED_ROLE_INFO); // operation
-    sendMessageViaSeparateThread(removeUnjoinedRoleInfoMessage);
   }
 
 }

@@ -31,7 +31,6 @@ import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.ahcsSupport.seed.SeedNodeInfo;
 import org.texai.skill.domainEntity.SingletonAgentHosts;
 import org.texai.skill.governance.TopmostFriendship;
-import org.texai.skill.network.ContainerOperation;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 import org.texai.x509.X509Utils;
@@ -138,6 +137,19 @@ public class SingletonConfiguration extends AbstractSkill {
         return true;
 
       /**
+       * Become Ready Task
+       *
+       * This task message is sent from the network-singleton parent NetworkSingletonConfigurationAgent.NetworkSingletonConfigurationRole.
+       *
+       * It results in the skill set to the ready state
+       */
+      case AHCSConstants.BECOME_READY_TASK:
+        assert this.getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "prior state must be isolated-from-network";
+        setSkillState(AHCSConstants.State.READY);
+        LOGGER.info("now ready");
+        return true;
+
+      /**
        * Perform Mission Task
        *
        * This task message is sent from the network-singleton parent NetworkSingletonConfigurationAgent.NetworkSingletonConfigurationRole.
@@ -203,13 +215,14 @@ public class SingletonConfiguration extends AbstractSkill {
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
-      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.AHCS_INITIALIZE_TASK,
+      AHCSConstants.BECOME_READY_TASK,
+      AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
+      AHCSConstants.JOIN_NETWORK_TASK,
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.PERFORM_MISSION_TASK,
       AHCSConstants.SEED_CONNECTION_REQUEST_INFO,
       AHCSConstants.SINGLETON_AGENT_HOSTS_INFO,
-      AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
-      AHCSConstants.JOIN_NETWORK_TASK,
       AHCSConstants.TASK_ACCOMPLISHED_INFO};
   }
 
@@ -448,23 +461,6 @@ public class SingletonConfiguration extends AbstractSkill {
 
     LOGGER.info("performing the mission");
 
-  }
-
-  /**
-   * Receive the new parent role's acknowledgement of joining the network.
-   *
-   * @param message the received perform mission task message
-   */
-  private void joinAcknowledgedTask(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-
-    LOGGER.info("join acknowledged from " + message.getSenderQualifiedName());
-    final Message removeUnjoinedRoleInfoMessage = makeMessage(
-            getContainerName() + ".ContainerOperationAgent.ContainerOperationRole", // recipientQualifiedName
-            ContainerOperation.class.getName(), // recipientService
-            AHCSConstants.REMOVE_UNJOINED_ROLE_INFO); // operation
-    sendMessageViaSeparateThread(removeUnjoinedRoleInfoMessage);
   }
 
 }
