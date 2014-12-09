@@ -234,10 +234,10 @@ public final class ContainerOperation extends AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
 
-    // send a Perform Mission Task message to the node runtime, which will open a message listening port
+    // send a Listen For Connections Task message to the node runtime, which will open a message listening port
     final Message performMissionMessage = makeMessage(
             NodeRuntimeSkill.class.getName(), // recipientService
-            AHCSConstants.PERFORM_MISSION_TASK, // operation
+            AHCSConstants.LISTEN_FOR_CONNECTIONS_TASK, // operation
             new HashMap<>()); // parameterDictionary
     sendMessageViaSeparateThread(performMissionMessage);
   }

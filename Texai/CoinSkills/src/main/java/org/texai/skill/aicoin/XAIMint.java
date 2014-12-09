@@ -82,8 +82,8 @@ public final class XAIMint extends AbstractNetworkSingletonSkill {
       /**
        * Initialize Task
        *
-       * This task message is sent from the parent XAINetworkOperationAgent.XAINetworkOperationRole. It is expected to be the first
-       * task message that this role receives and it results in the role being initialized.
+       * This task message is sent from the parent XAINetworkOperationAgent.XAINetworkOperationRole. It is expected to be the first task
+       * message that this role receives and it results in the role being initialized.
        */
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
@@ -97,8 +97,8 @@ public final class XAIMint extends AbstractNetworkSingletonSkill {
       /**
        * Join Acknowledged Task
        *
-       * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.XAINetworkOperationRole.
-       * It indicates that the parent is ready to converse with this role as needed.
+       * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.XAINetworkOperationRole. It indicates that
+       * the parent is ready to converse with this role as needed.
        */
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
@@ -109,8 +109,8 @@ public final class XAIMint extends AbstractNetworkSingletonSkill {
       /**
        * Perform Mission Task
        *
-       * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.XAINetworkOperationRole.
-       * It commands this network-connected role to begin performing its mission.
+       * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.XAINetworkOperationRole. It commands this
+       * network-connected role to begin performing its mission.
        */
       case AHCSConstants.PERFORM_MISSION_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.READY) : "prior state must be ready";
@@ -210,8 +210,8 @@ public final class XAIMint extends AbstractNetworkSingletonSkill {
     mintTimer.scheduleAtFixedRate(
             new MintTimerTask(), // task
             30000l, // delay - 30 seconds
-            //            600000l); // period - 10 minutes
-            60000l); // period - 1 minute
+            600000l); // period - 10 minutes
+    //60000l); // period - 1 minute
   }
 
   /**

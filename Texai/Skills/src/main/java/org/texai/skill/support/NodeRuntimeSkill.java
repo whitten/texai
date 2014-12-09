@@ -121,6 +121,18 @@ public class NodeRuntimeSkill extends AbstractSkill {
         LOGGER.info("now ready");
         return true;
 
+      /**
+       * Become Ready Task
+       *
+       * This task message is sent from the network-singleton parent NetworkOperationAgent.NetworkOperationRole.
+       *
+       * It results in the skill set to the ready state
+       */
+      case AHCSConstants.LISTEN_FOR_CONNECTIONS_TASK:
+        assert getSkillState().equals(State.READY) : "state must be ready";
+        listenForConnections(message);
+        return true;
+
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
         return true;
@@ -157,20 +169,20 @@ public class NodeRuntimeSkill extends AbstractSkill {
     return new String[]{
       AHCSConstants.AHCS_INITIALIZE_TASK,
       AHCSConstants.BECOME_READY_TASK,
+      AHCSConstants.LISTEN_FOR_CONNECTIONS_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
     };
   }
 
   /**
-   * Perform this role's mission.
+   * Start listening for incomming connections.
    *
-   * @param message the received perform mission task message
+   * @param message the received Listen For Connections task message
    */
-  private void performMission(final Message message) {
+  private void listenForConnections(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
 
-    LOGGER.info("performing the mission");
     final String portString = System.getenv("LISTENING_PORT");
     if (!StringUtils.isNonEmptyString(portString)) {
       throw new TexaiException("missing the environment variable LISTENING_PORT");

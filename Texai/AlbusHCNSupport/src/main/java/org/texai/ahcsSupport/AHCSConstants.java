@@ -176,11 +176,8 @@ public final class AHCSConstants {
   // the learn faces_Task operation
   public static final String LEARN_FACES_TASK = "learn faces_Task";
   //
-  // the listNodeTypes_Task operation
-  public static final String LIST_NODE_TYPES_TASK = "listNodeTypes_Task";
-  //
-  // the listRoleTypes_Task operation
-  public static final String LIST_ROLE_TYPES_TASK = "listRoleTypes_Task";
+  // the listenForConnections_Task operation
+  public static final String LISTEN_FOR_CONNECTIONS_TASK = "listenForConnections_Task";
   //
   // the logOperation_Task operation
   public static final String LOG_OPERATION_TASK = "logOperation_Task";
