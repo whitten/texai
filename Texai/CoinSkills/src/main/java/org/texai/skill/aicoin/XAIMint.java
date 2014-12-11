@@ -1,5 +1,6 @@
 package org.texai.skill.aicoin;
 
+import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
 import net.jcip.annotations.ThreadSafe;
@@ -207,9 +208,17 @@ public final class XAIMint extends AbstractNetworkSingletonSkill {
    */
   private void mintNewBlocks() {
     LOGGER.info("mint new blocks");
+
+    // calculate the milliseconds delay until the next 10 minute mark ...
+    final Calendar calendar = Calendar.getInstance();
+    final int minutes = calendar.get(Calendar.MINUTE);
+    final int modulo10minutes = minutes % 10;
+    long delay = (10 - modulo10minutes) * 60000;
+    assert delay <= 600000;
+
     mintTimer.scheduleAtFixedRate(
             new MintTimerTask(), // task
-            30000l, // delay - 30 seconds
+            delay,
             600000l); // period - 10 minutes
     //60000l); // period - 1 minute
   }
