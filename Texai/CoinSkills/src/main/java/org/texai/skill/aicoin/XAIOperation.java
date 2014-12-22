@@ -14,27 +14,21 @@ import org.texai.util.TexaiException;
 /**
  * Created on Aug 30, 2014, 11:31:08 PM.
  *
- * Description: Operates a slave bitcoind instance that runs in a separate
- continueConversation in the same container.
-
- Copyright (C) Aug 30, 2014, Stephen L. Reed, Texai.org.
+ * Description: Operates a slave bitcoind instance that runs in a separate continueConversation in the same container.
+ *
+ * Copyright (C) Aug 30, 2014, Stephen L. Reed, Texai.org.
  *
  * @author reed
  *
  * Copyright (C) 2014 Texai
  *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any later
- * version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program. If not, see
+ * You should have received a copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
 @ThreadSafe
@@ -57,9 +51,10 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
   public XAIOperation() {
   }
 
-  /** Gets the logger.
+  /**
+   * Gets the logger.
    *
-   * @return  the logger
+   * @return the logger
    */
   @Override
   protected Logger getLogger() {
@@ -67,9 +62,8 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
   }
 
   /**
-   * Receives and attempts to continueConversation the given message. The skill is thread
-   * safe, given that any contained libraries are single threaded with regard to
-   * the conversation.
+   * Receives and attempts to continueConversation the given message. The skill is thread safe, given that any contained libraries are
+   * single threaded with regard to the conversation.
    *
    * @param message the given message
    *
@@ -95,8 +89,8 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
       /**
        * Initialize Task
        *
-       * This task message is sent from the parent XAINetworkOperationAgent.XAINetworkOperationRole. It is expected to be the first
-       * task message that this role receives and it results in the role being initialized.
+       * This task message is sent from the parent XAINetworkOperationAgent.XAINetworkOperationRole. It is expected to be the first task
+       * message that this role receives and it results in the role being initialized.
        */
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
@@ -110,8 +104,8 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
       /**
        * Join Acknowledged Task
        *
-       * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.XAINetworkOperationRole.
-       * It indicates that the parent is ready to converse with this role as needed.
+       * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.XAINetworkOperationRole. It indicates that
+       * the parent is ready to converse with this role as needed.
        */
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
@@ -146,8 +140,8 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
       /**
        * Task Accomplished Info
        *
-       * This information message is sent from this role's XAIWriteConfigurationFile skill indicating that it
-       * has emitted the aicoin.conf file.
+       * This information message is sent from this role's XAIWriteConfigurationFile skill indicating that it has emitted the aicoin.conf
+       * file.
        */
       case AHCSConstants.TASK_ACCOMPLISHED_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
@@ -168,9 +162,8 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
   }
 
   /**
-   * Synchronously processes the given message. The skill is thread safe, given
-   * that any contained libraries are single threaded with regard to the
-   * conversation.
+   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single threaded with regard
+   * to the conversation.
    *
    * @param message the given message
    *
@@ -250,6 +243,8 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
     removeMessageTimeOut(message.getInReplyTo());
     LOGGER.info("The bitcoind configuration file has been written");
     launchAicoind();
+    // after a pause, launch the Insight blockchain explorer instance
+    getNodeRuntime().getExecutor().execute(new InsightRunner());
   }
 
   /**
@@ -271,6 +266,43 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
     stringBuilder.append("../bin/aicoin-qt -debug -shrinkdebugfile=1 -datadir=").append(AICOIN_DIRECTORY_PATH);
     cmdArray[2] = stringBuilder.toString();
     LOGGER.info("Launching the slave aicoin-qt instance");
+    LOGGER.info("  shell cmd: " + cmdArray[2]);
+    AICoinUtils.executeHostCommandWithoutWaitForCompletion(cmdArray);
+  }
+
+  class InsightRunner implements Runnable {
+
+    @Override
+    public void run() {
+      try {
+        LOGGER.info("Waiting 15 minutes before launching the block explorer ...");
+        Thread.sleep(15 * 60 * 1000);
+      } catch (InterruptedException ex) {
+      }
+      launchInsight();
+    }
+
+  }
+
+  /**
+   * Launches the Insight blockchain explorer instance.
+   */
+  private void launchInsight() {
+    if (!EnvironmentUtils.isLinux()) {
+      throw new TexaiException("Operating system must be Linux");
+    }
+
+    final String display = System.getenv("DISPLAY");
+    LOGGER.info("X11 DISPLAY=" + display);
+    String[] cmdArray = {
+      "sh",
+      "-c",
+      ""
+    };
+    final StringBuilder stringBuilder = new StringBuilder();
+    stringBuilder.append("cd /root/insight && npm start");
+    cmdArray[2] = stringBuilder.toString();
+    LOGGER.info("Launching the Insight blockchain explorer instance.");
     LOGGER.info("  shell cmd: " + cmdArray[2]);
     AICoinUtils.executeHostCommandWithoutWaitForCompletion(cmdArray);
   }
