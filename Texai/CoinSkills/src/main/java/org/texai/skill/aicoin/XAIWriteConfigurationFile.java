@@ -192,6 +192,8 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
       bufferedWriter.write("gen=0\n");
       bufferedWriter.write("# \n");
       bufferedWriter.write("\n");
+      bufferedWriter.write("# maintain an extra transaction index that allows the RPC getrawtransaction call to operate\n");
+      bufferedWriter.write("txindex=1\n");
       bufferedWriter.write("# allow aicoin-cli to send commands to this instance\n");
       bufferedWriter.write("rpcconnect=127.0.0.1\n");
       bufferedWriter.write("# allow rpc commands\n");

@@ -365,7 +365,7 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
     }
     if (channel == null) {
       if (message.getOperation().equals(AHCSConstants.SEED_CONNECTION_REQUEST_INFO)) {
-        final String hostName = message.get(AHCSConstants.SEED_CONNECTION_REQUEST_INFO_HOST_NAME).toString();
+        final String hostName = message.get(AHCSConstants.MSG_PARM_HOST_NAME).toString();
         final int port = (Integer) message.get(AHCSConstants.SEED_CONNECTION_REQUEST_INFO_PORT);
         LOGGER.info("retrieving X.509 security info for " + message.getSenderQualifiedName());
         final X509SecurityInfo x509SecurityInfo;

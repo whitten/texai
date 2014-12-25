@@ -309,8 +309,6 @@ public final class AHCSConstants {
   //
   // the seedConnectionRequest_Info operation
   public static final String SEED_CONNECTION_REQUEST_INFO = "seedConnectionRequest_Info";
-  // the host name parameter of the seedConnectionRequest_Info
-  public static final String SEED_CONNECTION_REQUEST_INFO_HOST_NAME = "seedConnectionRequest_Info_HostName";
   // the port parameter of the seedConnectionRequest_Info
   public static final String SEED_CONNECTION_REQUEST_INFO_PORT = "seedConnectionRequest_Info_Port";
   //
@@ -336,8 +334,12 @@ public final class AHCSConstants {
   public static final String MSG_PARM_CONVERSATION_ID = "conversationId";
   // the formFillText
   public static final String MSG_PARM_FORM_FILL_TEXT = "formFillText";
+  // the message parameter for the host name
+  public static final String MSG_PARM_HOST_NAME = "hostName";
   // the message parameter for image
   public static final String MSG_PARM_IMAGE = "image";
+  // the message parameter for the IP address
+  public static final String MSG_PARM_IP_ADDRESS = "ipAddress";
   // the message parameter for logging level
   public static final String MSG_PARM_LOGGING_LEVEL = "logging level";
   // the message parameter for the node type name

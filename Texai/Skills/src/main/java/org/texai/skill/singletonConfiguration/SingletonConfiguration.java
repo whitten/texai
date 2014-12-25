@@ -79,8 +79,8 @@ public class SingletonConfiguration extends AbstractSkill {
       /**
        * Initialize Task
        *
-       * This task message is sent from the container-local parent NetworkConfigurationAgent.NetworkConfigurationRole.
-       * It is expected to be the first task message that this role receives and it results in the role being initialized.
+       * This task message is sent from the container-local parent NetworkConfigurationAgent.NetworkConfigurationRole. It is expected to be
+       * the first task message that this role receives and it results in the role being initialized.
        */
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
@@ -97,8 +97,8 @@ public class SingletonConfiguration extends AbstractSkill {
        *
        * This task message is sent from the container-local parent NetworkConfigurationAgent.NetworkConfigurationRole.
        *
-       * The SingletonConfiguration agent/role requests the singleton agent dictionary, agent name  --> hosting container name,
-       * from a seed peer.
+       * The SingletonConfiguration agent/role requests the singleton agent dictionary, agent name --> hosting container name, from a seed
+       * peer.
        */
       case AHCSConstants.JOIN_NETWORK_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
@@ -111,8 +111,8 @@ public class SingletonConfiguration extends AbstractSkill {
        *
        * This task message is sent from a peer SingletonConfigurationAgent.SingletonConfigurationRole.
        *
-       * Its parameter is the SingletonAgentHosts object,
-       * which contains the the singleton agent dictionary, agent name  --> hosting container name.
+       * Its parameter is the SingletonAgentHosts object, which contains the the singleton agent dictionary, agent name --> hosting
+       * container name.
        *
        * As a result, it sends a Singleton Agent Hosts Info message to the TopmostFriendshipAgent / role.
        *
@@ -165,11 +165,10 @@ public class SingletonConfiguration extends AbstractSkill {
        *
        * This information request message is sent from a peer SingletonConfiguration agent / role in another container.
        *
-       * As parameters, it includes the IP address and port used by the peer, and also the X.509 certificate
-       * of the peer making the request to obtain the singleton agent dictionary.
+       * As parameters, it includes the IP address and port used by the peer, and also the X.509 certificate of the peer making the request
+       * to obtain the singleton agent dictionary.
        *
-       * As a result, a Singleton Agent Hosts Info message is sent back to the peer,
-       * with the SingletonAgentHostsInfo object as a parameter.
+       * As a result, a Singleton Agent Hosts Info message is sent back to the peer, with the SingletonAgentHostsInfo object as a parameter.
        */
       case AHCSConstants.SEED_CONNECTION_REQUEST_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
@@ -258,6 +257,10 @@ public class SingletonConfiguration extends AbstractSkill {
     //Preconditions
     assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "state must be isolated-from-network";
 
+    final String seedNodeIPAddress = System.getenv("AICOIN_SEED_IP");
+    if (StringUtils.isNonEmptyString(seedNodeIPAddress)) {
+
+    }
     LOGGER.info("initializing the seed node information ...");
 
     // deserialize the set of SeedNodeInfo objects from the specified file
@@ -275,7 +278,7 @@ public class SingletonConfiguration extends AbstractSkill {
     }
 
     final AtomicBoolean isSeedNode = new AtomicBoolean(false);
-    LOGGER.info("the locations and credentials of the network seed nodes ...");
+    LOGGER.info("The locations and credentials of the network seed nodes ...");
     seedNodesInfos.stream().forEach((SeedNodeInfo seedNodeInfo) -> {
       if (getContainerName().equals(Node.extractContainerName(seedNodeInfo.getQualifiedName()))) {
         LOGGER.info("  " + seedNodeInfo + " - (me)");
@@ -311,7 +314,7 @@ public class SingletonConfiguration extends AbstractSkill {
     //compose and send a message to the seed peer
     final Map<String, Object> parameterDictionary = new HashMap<>();
     parameterDictionary.put(
-            AHCSConstants.SEED_CONNECTION_REQUEST_INFO_HOST_NAME,
+            AHCSConstants.MSG_PARM_HOST_NAME,
             hostName);
     parameterDictionary.put(
             AHCSConstants.SEED_CONNECTION_REQUEST_INFO_PORT,

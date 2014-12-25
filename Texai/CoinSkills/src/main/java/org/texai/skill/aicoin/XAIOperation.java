@@ -243,8 +243,10 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
     removeMessageTimeOut(message.getInReplyTo());
     LOGGER.info("The bitcoind configuration file has been written");
     launchAicoind();
-    // after a pause, launch the Insight blockchain explorer instance
-    getNodeRuntime().getExecutor().execute(new InsightRunner());
+    if ("BlockchainExplorer".equals(getContainerName())) {
+      // after a pause, launch the Insight blockchain explorer instance
+      getNodeRuntime().getExecutor().execute(new InsightRunner());
+    }
   }
 
   /**
@@ -275,8 +277,10 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
     @Override
     public void run() {
       try {
-        LOGGER.info("Waiting 15 minutes before launching the block explorer ...");
-        Thread.sleep(15 * 60 * 1000);
+        //LOGGER.info("Waiting 15 minutes before launching the block explorer ...");
+        //Thread.sleep(15 * 60 * 1000);
+        LOGGER.info("Waiting 5 minutes before launching the block explorer ...");
+        Thread.sleep(5 * 60 * 1000);
       } catch (InterruptedException ex) {
       }
       launchInsight();

@@ -724,7 +724,28 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   }
 
   /**
-   * Gets the first qualified child role name, i.e. container-name.agent-name.role-name, which matches the given child agent name.
+   * Gets the first qualified child role name, i.e. nodename.rolename, which matches the given nodename.
+   *
+   * @param qualifiedName the given child nodename.rolename, e.g. XAIOperationAgent.XAIOperationRole
+   *
+   * @return the qualified child role name, or null if not found
+   */
+  public String getChildQualifiedNameForAgentRole(final String qualifiedName) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(qualifiedName) : "qualifiedName must be a non-empty string";
+
+    final String target = "." + qualifiedName;
+    for (final String childQualifiedName : childQualifiedNames) {
+      if (childQualifiedName.contains(target)) {
+        //TODO role and message should validate the qualified name
+        return childQualifiedName;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Gets the qualified child agent name, i.e. container-name.agent-name, which matches the given child agent name.
    *
    * @param agentName the given child agent, e.g. XAIOperationAgent
    *

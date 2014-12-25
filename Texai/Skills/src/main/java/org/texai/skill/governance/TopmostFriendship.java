@@ -29,6 +29,7 @@ import org.texai.ahcsSupport.Message;
 import org.texai.ahcs.skill.AbstractNetworkSingletonSkill;
 import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.skill.domainEntity.SingletonAgentHosts;
+import org.texai.skill.heartbeat.TopLevelHeartbeat;
 import org.texai.skill.network.NetworkOperation;
 import org.texai.util.TexaiException;
 
@@ -248,7 +249,7 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
     final Message performMissionMessage = new Message(
             getRole().getQualifiedName(), // senderQualifiedName
             getClassName(), // senderService,
-            getRole().getChildQualifiedNameForAgent("NetworkOperationAgent"), // recipientQualifiedName,
+            getRole().getChildQualifiedNameForAgentRole("NetworkOperationAgent.NetworkOperationRole"), // recipientQualifiedName,
             NetworkOperation.class.getName(), // recipientService
             AHCSConstants.JOIN_NETWORK_TASK); // operation
     sendMessage(performMissionMessage);
@@ -260,17 +261,26 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
   private void performMission() {
     assert getSkillState().equals(State.READY) : "state must be ready";
 
-    LOGGER.info("performing the mission");
+    LOGGER.info("performing the mission, propagating the task to the NetworkOperationAgent.NetworkOperationRole");
     // send a performMission task message to the NetworkOperationAgent
-    final Message performMissionMessage = new Message(
+    Message performMissionMessage = new Message(
             getRole().getQualifiedName(), // senderQualifiedName
             getClassName(), // senderService,
-            getRole().getChildQualifiedNameForAgent("NetworkOperationAgent"), // recipientQualifiedName,
+            getRole().getChildQualifiedNameForAgentRole("NetworkOperationAgent.NetworkOperationRole"), // recipientQualifiedName,
             NetworkOperation.class.getName(), // recipientService
             AHCSConstants.PERFORM_MISSION_TASK); // operation
     sendMessage(performMissionMessage);
 
-    //TODO same for the remaining child agent roles
+    LOGGER.info("performing the mission, propagating the task to the NetworkOperationAgent.TopLevelHeartbeatRole");
+    // send a performMission task message to the NetworkOperationAgent
+    performMissionMessage = new Message(
+            getRole().getQualifiedName(), // senderQualifiedName
+            getClassName(), // senderService,
+            getRole().getChildQualifiedNameForAgentRole("NetworkOperationAgent.TopLevelHeartbeatRole"), // recipientQualifiedName,
+            TopLevelHeartbeat.class.getName(), // recipientService
+            AHCSConstants.PERFORM_MISSION_TASK); // operation
+    sendMessage(performMissionMessage);
+
   }
 
   /**

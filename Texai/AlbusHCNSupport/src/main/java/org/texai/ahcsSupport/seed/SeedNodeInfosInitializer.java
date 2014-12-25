@@ -53,7 +53,6 @@ public class SeedNodeInfosInitializer {
     try {
       // the demo mint peer
       String qualifiedName = "Mint.SingletonConfigurationAgent.SingletonConfigurationRole";
-      String hostName = "Mint";
       int port = 5048;
       String cerfificateFilePath = "/home/reed/docker/Mint/Main-1.0/data/SingletonConfiguration.crt";
       if (!(new File(cerfificateFilePath)).exists()) {
@@ -61,9 +60,24 @@ public class SeedNodeInfosInitializer {
       }
       X509Certificate x509Certificate = X509Utils.readX509Certificate(new FileInputStream(cerfificateFilePath));
 
+      // Within a set of docker containers hosted on the development server, the hostname Mint resolves to the
+      // docker subnet IP address of the Mint container in that set.
+
+      // Otherwise Within the development LAN, the Mint name resolves to the IP address of the docker host, one of whose containers is the Mint
+      // container.
       SeedNodeInfo seedNodeInfo = new SeedNodeInfo(
               qualifiedName,
-              hostName,
+              "Mint", // hostName,
+              port,
+              x509Certificate);
+      seedNodeInfos.add(seedNodeInfo);
+      LOGGER.info(seedNodeInfo);
+
+      // On the internet the texai.dyndns.org name resolves to the IP address of the docker host, one of whose containers is the Mint
+      // container.
+      seedNodeInfo = new SeedNodeInfo(
+              qualifiedName,
+              "texai.dyndns.org", // hostName,
               port,
               x509Certificate);
       seedNodeInfos.add(seedNodeInfo);
