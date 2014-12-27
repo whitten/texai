@@ -178,14 +178,16 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
       if (getContainerName().equals("Mint")) {
         bufferedWriter.write("# this instance accepts incoming connections\n");
         bufferedWriter.write("listen=1\n");
+      } else if (getContainerName().equals("BlockchainExplorer")) {
+        bufferedWriter.write("# this instance accepts incoming connections\n");
+        bufferedWriter.write("listen=1\n");
+          // on a separate host in the development LAN
+          bufferedWriter.write("connect=192.168.0.7:8333\n");
       } else {
         bufferedWriter.write("# this instance does not accept incoming connections\n");
         bufferedWriter.write("listen=0\n");
         bufferedWriter.write("# connect to the mint\n");
-        if (getContainerName().equals("BlockchainExplorer")) {
-          // on a separate host in the development LAN
-          bufferedWriter.write("connect=192.168.0.7:8333\n");
-        } else if (getContainerName().equals("Alice") || getContainerName().equals("Bob")) {
+        if (getContainerName().equals("Alice") || getContainerName().equals("Bob")) {
           // on the same host in the development LAN
           bufferedWriter.write("connect=Mint:8333\n");
         } else {

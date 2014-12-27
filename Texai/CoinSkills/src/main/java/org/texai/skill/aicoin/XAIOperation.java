@@ -279,8 +279,8 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
       try {
         //LOGGER.info("Waiting 15 minutes before launching the block explorer ...");
         //Thread.sleep(15 * 60 * 1000);
-        LOGGER.info("Waiting 5 minutes before launching the block explorer ...");
-        Thread.sleep(5 * 60 * 1000);
+        LOGGER.info("Waiting 1 minute before launching the block explorer ...");
+        Thread.sleep(60 * 1000);
       } catch (InterruptedException ex) {
       }
       launchInsight();
