@@ -118,7 +118,7 @@ public class SeedNodeInfo implements Serializable {
       return false;
     }
     final SeedNodeInfo other = (SeedNodeInfo) obj;
-    return this.qualifiedName.equals(other.qualifiedName);
+    return this.qualifiedName.equals(other.qualifiedName) && this.hostName.equals(other.hostName);
   }
 
 

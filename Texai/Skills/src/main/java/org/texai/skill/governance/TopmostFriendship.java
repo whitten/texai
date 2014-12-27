@@ -230,7 +230,7 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
 
     // send message to network operations --> resend to container operations --> child Configure roles.
     final Message configureSingletonAgentHostsTask = makeMessage(
-            getRole().getChildQualifiedNameForAgent("NetworkOperationAgent"), // recipientQualifiedName
+            getRole().getChildQualifiedNameForAgentRole("NetworkOperationAgent.NetworkOperationRole"), // recipientQualifiedName
             NetworkOperation.class.getName(), // recipientService
             AHCSConstants.DELEGATE_CONFIGURE_SINGLETON_AGENT_HOSTS_TASK); // operation
     configureSingletonAgentHostsTask.put(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS, singletonAgentHosts);
@@ -262,7 +262,6 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
     assert getSkillState().equals(State.READY) : "state must be ready";
 
     LOGGER.info("performing the mission, propagating the task to the NetworkOperationAgent.NetworkOperationRole");
-    // send a performMission task message to the NetworkOperationAgent
     Message performMissionMessage = new Message(
             getRole().getQualifiedName(), // senderQualifiedName
             getClassName(), // senderService,
@@ -272,7 +271,6 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
     sendMessage(performMissionMessage);
 
     LOGGER.info("performing the mission, propagating the task to the NetworkOperationAgent.TopLevelHeartbeatRole");
-    // send a performMission task message to the NetworkOperationAgent
     performMissionMessage = new Message(
             getRole().getQualifiedName(), // senderQualifiedName
             getClassName(), // senderService,

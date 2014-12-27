@@ -48,7 +48,7 @@ public class SingletonConfiguration extends AbstractSkill {
   private Set<SeedNodeInfo> seedNodesInfos;
   // the SHA-512 hash of the seed node infos serialized file
   private final String seedNodeInfosFileHashString
-          = "CqpjZ7ef3wZllB+MNAlMk/THJOHVMDN4sXqLoixftqOtFvBJ/Yo/f8J4uBPMZUMZSXrHgTpsT9iB1JETvffaYQ==";
+          = "YUhf+GN2kmnkLzwDnkhibWxlbnfyW9UExRTg/c4njjP05jX0BvlunodyVz33dp8chbgSaheEEAqzyDtz2+bPcw==";
 
   /**
    * Constructs a new SingletonConfiguration instance.
@@ -277,14 +277,19 @@ public class SingletonConfiguration extends AbstractSkill {
       throw new TexaiException("cannot find " + seedNodeInfosFilePath);
     }
 
-    final AtomicBoolean isSeedNode = new AtomicBoolean(false);
-    LOGGER.info("The locations and credentials of the network seed nodes ...");
+    LOGGER.info("The locations and credentials of the " + seedNodesInfos.size() + " network seed nodes ...");
     seedNodesInfos.stream().forEach((SeedNodeInfo seedNodeInfo) -> {
       if (getContainerName().equals(Node.extractContainerName(seedNodeInfo.getQualifiedName()))) {
         LOGGER.info("  " + seedNodeInfo + " - (me)");
-        isSeedNode.set(true);
       } else {
         LOGGER.info("  " + seedNodeInfo);
+      }
+    });
+
+    final AtomicBoolean isSeedNode = new AtomicBoolean(false);
+    seedNodesInfos.stream().forEach((SeedNodeInfo seedNodeInfo) -> {
+      if (!getContainerName().equals(Node.extractContainerName(seedNodeInfo.getQualifiedName()))) {
+        LOGGER.info("Connecting to seed " + seedNodeInfo);
         connectToSeedPeer(
                 seedNodeInfo.getQualifiedName(),
                 seedNodeInfo.getHostName(),

@@ -54,7 +54,7 @@ public class SeedNodeInfosInitializer {
       // the demo mint peer
       String qualifiedName = "Mint.SingletonConfigurationAgent.SingletonConfigurationRole";
       int port = 5048;
-      String cerfificateFilePath = "/home/reed/docker/Mint/Main-1.0/data/SingletonConfiguration.crt";
+      String cerfificateFilePath = "../Main/data/SingletonConfiguration.crt";
       if (!(new File(cerfificateFilePath)).exists()) {
         throw new TexaiException("cerfificate path not found " + cerfificateFilePath);
       }
@@ -62,12 +62,19 @@ public class SeedNodeInfosInitializer {
 
       // Within a set of docker containers hosted on the development server, the hostname Mint resolves to the
       // docker subnet IP address of the Mint container in that set.
-
-      // Otherwise Within the development LAN, the Mint name resolves to the IP address of the docker host, one of whose containers is the Mint
-      // container.
       SeedNodeInfo seedNodeInfo = new SeedNodeInfo(
               qualifiedName,
               "Mint", // hostName,
+              port,
+              x509Certificate);
+      seedNodeInfos.add(seedNodeInfo);
+      LOGGER.info(seedNodeInfo);
+
+      // Otherwise Within the development LAN, the IP address is for the docker host, one of whose containers is the Mint
+      // container.
+      seedNodeInfo = new SeedNodeInfo(
+              qualifiedName,
+              "192.168.0.7", // hostName,
               port,
               x509Certificate);
       seedNodeInfos.add(seedNodeInfo);

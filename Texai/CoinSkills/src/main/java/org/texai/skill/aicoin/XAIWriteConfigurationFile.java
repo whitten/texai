@@ -81,8 +81,8 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
       /**
        * Initialize Task
        *
-       * This task message is sent from the parent XAINetworkOperationAgent.XAINetworkOperationRole. It is expected to be the first
-       * task message that this role receives and it results in the role being initialized.
+       * This task message is sent from the parent XAINetworkOperationAgent.XAINetworkOperationRole. It is expected to be the first task
+       * message that this role receives and it results in the role being initialized.
        */
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
@@ -111,8 +111,8 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
        *
        * This task message is sent from the parent XAIOperation skill.
        *
-       * As a result, the aicoin.conf is generated and written to disk, and a Task Accomplished Info message is sent back
-       * to the XAIOperation skill as a response.
+       * As a result, the aicoin.conf is generated and written to disk, and a Task Accomplished Info message is sent back to the
+       * XAIOperation skill as a response.
        */
       case AHCSConstants.WRITE_CONFIGURATION_FILE_TASK:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
@@ -183,6 +183,16 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
         bufferedWriter.write("listen=0\n");
         bufferedWriter.write("# connect to the mint\n");
         bufferedWriter.write("connect=Mint:8333\n");
+        if (getContainerName().equals("BlockchainExplorer")) {
+          // on a separate host in the development LAN
+          bufferedWriter.write("connect=192.168.0.7:8333\n");
+        } else if (getContainerName().equals("Alice") || getContainerName().equals("Bob")) {
+          // on the same host in the development LAN
+          bufferedWriter.write("connect=Mint:8333\n");
+        } else {
+          // the Mint address exposed to the internet
+          bufferedWriter.write("connect=texai.dyndns.org:8333\n");
+        }
       }
       bufferedWriter.write("# listening port\n");
       bufferedWriter.write("port=8333\n");

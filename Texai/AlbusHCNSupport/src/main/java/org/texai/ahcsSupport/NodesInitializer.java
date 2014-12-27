@@ -47,6 +47,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import net.jcip.annotations.NotThreadSafe;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
@@ -433,6 +434,17 @@ public final class NodesInitializer {
     } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException ex) {
       throw new TexaiException(ex);
     }
+
+    // Persist a copy of the keystore in outside of the installation directory tree
+    final File saveKeyStoreFile = new File("../../keystore.uber");
+    if (!saveKeyStoreFile.exists()) {
+      try {
+        FileUtils.copyFile(new File(keyStoreFilePath), saveKeyStoreFile);
+      } catch (IOException ex) {
+        throw new TexaiException(ex);
+      }
+    }
+
     nodeRuntime.setKeyStore(keyStore);
     nodeRuntime.setKeyStorePassword(keyStorePassword);
     LOGGER.debug("");

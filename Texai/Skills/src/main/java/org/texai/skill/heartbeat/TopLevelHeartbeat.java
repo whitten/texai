@@ -131,6 +131,17 @@ public final class TopLevelHeartbeat extends AbstractNetworkSingletonSkill {
         return true;
 
       /**
+       * Perform Mission Task
+       *
+       * This task message is sent from the network-singleton, parent TopmostFriendship agent/role.
+       */
+      case AHCSConstants.PERFORM_MISSION_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) :
+                "state must be ready, but is " + getSkillState();
+        //TODO
+        return true;
+
+      /**
        * Keep Alive Info
        *
        * This task message is sent to this network singleton agent/role from a child ContainerHeartbeat agent/role.
@@ -210,7 +221,8 @@ public final class TopLevelHeartbeat extends AbstractNetworkSingletonSkill {
       AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.KEEP_ALIVE_INFO,
-      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.PERFORM_MISSION_TASK
     };
   }
 

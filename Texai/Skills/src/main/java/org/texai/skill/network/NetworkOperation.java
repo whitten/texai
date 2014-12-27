@@ -285,11 +285,12 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
     if (containerNames.contains(message.getSenderContainerName())) {
-      throw new TexaiException("duplicate container name");
+      LOGGER.info(new StringBuilder().append("Container ").append(message.getSenderContainerName()).append(" has rejoined the Network.").toString());
+    } else {
+      LOGGER.info(new StringBuilder().append("Container ").append(message.getSenderContainerName()).append(" has joined the Network.").toString());
+    containerNames.add(message.getSenderContainerName());
     }
 
-    LOGGER.info(new StringBuilder().append("Container ").append(message.getSenderContainerName()).append(" has joined the Network.").toString());
-    containerNames.add(message.getSenderContainerName());
     /**
      * Notify the parent TopmostFriendship agent / role that a container has completed joining the network.
      * The TopmostFriendship agent / role synchronously sends a Become Ready Task message to all child roles in the container,

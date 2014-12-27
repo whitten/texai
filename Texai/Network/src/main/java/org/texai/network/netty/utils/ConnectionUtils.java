@@ -295,7 +295,7 @@ public final class ConnectionUtils {
 
       if (!channelFuture.isSuccess()) {
         LOGGER.info("cannot connect with " + inetSocketAddress);
-        throw new TexaiException(channelFuture.getCause());
+        //throw new TexaiException(channelFuture.getCause());
       }
       LOGGER.info("Albus client connected");
       synchronized (connectedChannelDictionary) {
