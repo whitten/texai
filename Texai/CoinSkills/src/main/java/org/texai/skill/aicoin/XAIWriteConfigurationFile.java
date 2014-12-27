@@ -182,7 +182,6 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
         bufferedWriter.write("# this instance does not accept incoming connections\n");
         bufferedWriter.write("listen=0\n");
         bufferedWriter.write("# connect to the mint\n");
-        bufferedWriter.write("connect=Mint:8333\n");
         if (getContainerName().equals("BlockchainExplorer")) {
           // on a separate host in the development LAN
           bufferedWriter.write("connect=192.168.0.7:8333\n");
