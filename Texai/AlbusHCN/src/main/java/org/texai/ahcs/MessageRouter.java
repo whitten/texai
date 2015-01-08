@@ -81,6 +81,10 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
    */
   private final Map<String, Channel> containerChannelDictionary = new HashMap<>();
   /**
+   * the reconnection dictionary, container-name --> channel to peer message router
+   */
+  private final Map<String, ReconnectionInfo> reconnectionDictionary = new HashMap<>();
+  /**
    * the message router external IP address
    */
   private String externalIPAddress;
@@ -170,7 +174,7 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
     assert x509SecurityInfo != null : "x509SecurityInfo must not be null";
 
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("openning a channel to " + containerName + " at " + hostName + ":" + port);
+      LOGGER.debug("opening a channel to " + containerName + " at " + hostName + ":" + port);
     }
     final InetSocketAddress inetSocketAddress = new InetSocketAddress(hostName, port);
     final Channel channel = ConnectionUtils.openAlbusHCSConnection(
@@ -181,6 +185,40 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
             nodeRuntime.getExecutor()); // workerExecutor
     synchronized (containerChannelDictionary) {
       containerChannelDictionary.put(containerName, channel);
+    }
+    synchronized (reconnectionDictionary) {
+      final ReconnectionInfo reconnectionInfo = new ReconnectionInfo(
+              containerName,
+              hostName,
+              port,
+              x509SecurityInfo);
+      reconnectionDictionary.put(containerName, reconnectionInfo);
+    }
+    return channel;
+  }
+
+  /**
+   * Reopens an encrypted communications channel with the given peer container.
+   *
+   * @param reconnectionInfo the reconnection information
+   *
+   * @return the channel
+   */
+  private Channel reopenChannelToPeerContainer(final ReconnectionInfo reconnectionInfo) {
+    assert reconnectionInfo != null : "reconnectionInfo must not be null";
+
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("reopening a channel to " + reconnectionInfo.containerName + " at " + reconnectionInfo.hostName + ":" + reconnectionInfo.port);
+    }
+    final InetSocketAddress inetSocketAddress = new InetSocketAddress(reconnectionInfo.hostName, reconnectionInfo.port);
+    final Channel channel = ConnectionUtils.openAlbusHCSConnection(
+            inetSocketAddress,
+            reconnectionInfo.x509SecurityInfo, //
+            this, //albusHCSMessageHandler
+            nodeRuntime.getExecutor(), // bossExecutor
+            nodeRuntime.getExecutor()); // workerExecutor
+    synchronized (containerChannelDictionary) {
+      containerChannelDictionary.put(reconnectionInfo.containerName, channel);
     }
     return channel;
   }
@@ -370,6 +408,15 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
     synchronized (containerChannelDictionary) {
       channel = containerChannelDictionary.get(message.getRecipientContainerName());
     }
+    if (channel != null && !channel.isBound()) {
+      final ReconnectionInfo reconnectionInfo = reconnectionDictionary.get(message.getRecipientContainerName());
+      if (reconnectionInfo == null) {
+        LOGGER.info("no reconnection information for remote peer at " + message.getRecipientContainerName());
+      } else {
+        LOGGER.info("peer has shutdown " + message.getRecipientQualifiedName() + " - attempting reconnection to " + reconnectionInfo.containerName);
+        channel = reopenChannelToPeerContainer(reconnectionInfo);
+      }
+    }
     if (channel == null) {
       if (message.getOperation().equals(AHCSConstants.SEED_CONNECTION_REQUEST_INFO)) {
         final String hostName = message.get(AHCSConstants.MSG_PARM_HOST_NAME).toString();
@@ -417,6 +464,51 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
           }
         });
       }
+    }
+  }
+
+  /**
+   * Holds remote peer reconnection information.
+   */
+  static class ReconnectionInfo {
+
+    // the container name of the remote peer
+    final String containerName;
+    // the host name
+    final String hostName;
+    // the port
+    final int port;
+    // the X.509 security information of the local agent which initiated the connection
+    final X509SecurityInfo x509SecurityInfo;
+
+    /**
+     * Constructs a new ReconnectionInfo instance.
+     *
+     * @param containerName
+     * @param hostName
+     * @param port
+     * @param x509SecurityInfo
+     */
+    ReconnectionInfo(
+            final String containerName,
+            final String hostName,
+            final int port,
+            final X509SecurityInfo x509SecurityInfo) {
+      //Preconditions
+      assert StringUtils.isNonEmptyString(containerName) : "containerName must be a non-empty string";
+      assert StringUtils.isNonEmptyString(hostName) : "hostname must be a non-empty string";
+      assert port > 0 : "port must be positive";
+      assert x509SecurityInfo != null : "x509SecurityInfo must not be null";
+
+      this.containerName = containerName;
+      this.hostName = hostName;
+      this.port = port;
+      this.x509SecurityInfo = x509SecurityInfo;
+    }
+
+    @Override
+    public String toString() {
+      return (new StringBuilder()).append("[ReconnectionInfo for ").append(containerName).append(", ").append(hostName).append(':').append(port).append(']').toString();
     }
   }
 

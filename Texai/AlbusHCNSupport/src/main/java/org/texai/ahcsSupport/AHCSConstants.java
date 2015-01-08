@@ -154,6 +154,19 @@ public final class AHCSConstants {
   // the senderSkill parameter
   public static final String SENDER_SKILL = "senderSkill";
   //
+  // the faucetExhausted_Task operation
+  public static final String FAUCET_EXHAUSTED_TASK = "faucetExhausted_Task";
+  //
+  // the faucetPaymentRequestGranted_Task operation
+  public static final String FAUCET_PAYMENT_REQUEST_GRANTED_TASK = "faucetPaymentRequestGranted_Task";
+  // the unclaimed currency amount
+  public static final String FAUCET_PAYMENT_REQUEST_GRANTED_TASK_UNCLAIMED_CURRENCY_AMOUNT = "faucetPaymentRequestGranted_Task_unclaimedCurrencyAmount";
+  //
+  // the faucetPaymentRequestRefused_Task operation
+  public static final String FAUCET_PAYMENT_REQUEST_REFUSED_TASK = "faucetPaymentRequestRefused_Task";
+  // the unclaimed currency amount
+  public static final String FAUCET_PAYMENT_REQUEST_REFUSED_TASK_UNCLAIMED_CURRENCY_AMOUNT = "faucetPaymentRequestRefused_Task_unclaimedCurrencyAmount";
+  //
   // the generate_Task operation
   public static final String GENERATE_FROM_CONSTITUENTS_TASK = "generateFromConstitutents_Task";
   // the rootSemanticConstituentNode user parameter of the generate_Task
@@ -315,6 +328,12 @@ public final class AHCSConstants {
   // the singletonAgentHosts_Info operation
   public static final String SINGLETON_AGENT_HOSTS_INFO = "singletonAgentHosts_Info";
 
+  // Sensation messages end with _Sensation
+
+  //
+  // the faucetPaymentRequest_Sensation operation
+  public static final String FAUCET_PAYMENT_REQUEST_SENSATION = "faucetPaymentRequest_Sensation";
+
   //
   // shared message parameters
   //
@@ -322,10 +341,10 @@ public final class AHCSConstants {
   public static final String AHCS_ORIGINAL_MESSAGE = "AHCS originalMessage";
   // the message parameter naming the session value
   public static final String SESSION = "AHCS session";
-  // the message parameter for a X.509 certificate
-  public static final String MSG_PARM_X509_CERTIFICATE = "X.509 Certificate";
   // the message parameter for the child role ID
   public static final String MSG_PARM_CHILD_ROLE_ID = "child role id";
+  // the message parameter for currency amount in Satoshis as a BigInteger
+  public static final String MSG_PARM_CURRENCY_AMOUNT = "currency amount";
   // the message parameter for class name
   public static final String MSG_PARM_CLASS_NAME = "class name";
   // the message parameter for conversation ID
@@ -339,7 +358,7 @@ public final class AHCSConstants {
   // the message parameter for image
   public static final String MSG_PARM_IMAGE = "image";
   // the message parameter for the IP address
-  public static final String MSG_PARM_IP_ADDRESS = "ipAddress";
+  public static final String MSG_PARM_IP_ADDRESS_STRING = "ipAddress";
   // the message parameter for logging level
   public static final String MSG_PARM_LOGGING_LEVEL = "logging level";
   // the message parameter for the node type name
@@ -356,10 +375,14 @@ public final class AHCSConstants {
   public static final String MSG_PARM_REGISTERED_USER = "registeredUser";
   // the message parameter for the role id
   public static final String MSG_PARM_ROLE_ID = "role id";
+  // the message parameter for session, which is a string key to a state dictionary, session --> session state
+  public static final String MSG_PARM_SESSION = "session";
   // the message parameter for service
   public static final String MSG_PARM_SERVICE = "service";
   // the text parameter
   public static final String MSG_PARM_TEXT = "text";
+  // the message parameter for a X.509 certificate
+  public static final String MSG_PARM_X509_CERTIFICATE = "X.509 Certificate";
   //
   // the Albus Hierarchical Control System Levels
   //

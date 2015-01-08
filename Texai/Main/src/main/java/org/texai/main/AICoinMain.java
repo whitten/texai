@@ -30,6 +30,7 @@ import org.texai.kb.persistence.DistributedRepositoryManager;
 import org.texai.kb.persistence.KBAccess;
 import org.texai.kb.persistence.RDFEntityPersister;
 import org.texai.network.netty.handler.PortUnificationHandler;
+import org.texai.network.netty.pipeline.AlbusHCNMessageClientPipelineFactory;
 import org.texai.network.netty.pipeline.PortUnificationChannelPipelineFactory;
 import org.texai.ssl.TexaiSSLContextFactory;
 import org.texai.util.StringUtils;
@@ -109,15 +110,16 @@ public class AICoinMain {
     //Preconditions
     assert StringUtils.isNonEmptyString(containerName) : "containerName must be a non-empty string";
 
-    //Logger.getLogger(NodesInitializer.class).setLevel(Level.DEBUG);
+    Logger.getLogger(AlbusHCNMessageClientPipelineFactory.class).setLevel(Level.WARN);
     Logger.getLogger(DistributedRepositoryManager.class).setLevel(Level.WARN);
+    Logger.getLogger(KBAccess.class).setLevel(Level.WARN);
+    Logger.getLogger(JournalWriter.class).setLevel(Level.WARN);
+    //Logger.getLogger(NodesInitializer.class).setLevel(Level.DEBUG);
     Logger.getLogger(PortUnificationHandler.class).setLevel(Level.WARN);
     Logger.getLogger(PortUnificationChannelPipelineFactory.class).setLevel(Level.WARN);
-    Logger.getLogger(TexaiSSLContextFactory.class).setLevel(Level.WARN);
-    Logger.getLogger(KBAccess.class).setLevel(Level.WARN);
     Logger.getLogger(RDFEntityPersister.class).setLevel(Level.WARN);
+    Logger.getLogger(TexaiSSLContextFactory.class).setLevel(Level.WARN);
     Logger.getLogger(X509Utils.class).setLevel(Level.WARN);
-    Logger.getLogger(JournalWriter.class).setLevel(Level.WARN);
 
     LOGGER.info("A.I. Coin version " + VERSION + ".");
     LOGGER.info("Starting the software agents in the container named " + containerName + ".");

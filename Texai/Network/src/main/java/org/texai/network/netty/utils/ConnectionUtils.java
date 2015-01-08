@@ -50,8 +50,7 @@ import org.texai.util.TexaiException;
 import org.texai.x509.X509SecurityInfo;
 
 /**
- * Provides convenient static methods to establish server and client Netty SSL
- * channels.
+ * Provides convenient static methods to establish server and client Netty SSL channels.
  *
  * @author reed
  */
@@ -74,21 +73,18 @@ public final class ConnectionUtils {
   }
 
   /**
-   * Creates a port unification server, handling Albus hierarchical control
-   * system messages, bit torrent messages, and HTTP requests, using a single
-   * shared socket with SSL encryption.
+   * Creates a port unification server, handling Albus hierarchical control system messages, bit torrent messages, and HTTP requests, using
+   * a single shared socket with SSL encryption.
    *
    * @param port the server port
    * @param x509SecurityInfo the X.509 security information
-   * @param albusHCSMessageHandlerFactory the Albus hierarchical control system
-   * message handler factory
+   * @param albusHCSMessageHandlerFactory the Albus hierarchical control system message handler factory
    * @param bitTorrentHandlerFactory the bit torrent message handler factory
    * @param httpRequestHandlerFactory the HTTP request message handler factory
    * @param bossExecutor the Executor which will execute the boss threads
-   * @param workerExecutor the Executor which will execute the I/O worker
-   * threads
-   * @return the server bootstrap, which contains a new server-side channel and
-   * accepts incoming connections
+   * @param workerExecutor the Executor which will execute the I/O worker threads
+   *
+   * @return the server bootstrap, which contains a new server-side channel and accepts incoming connections
    */
   public static ServerBootstrap createPortUnificationServer(
           final int port,
@@ -124,8 +120,7 @@ public final class ConnectionUtils {
   }
 
   /**
-   * Releases the resources held by the port unification server, and closes its
-   * associated thread pools.
+   * Releases the resources held by the port unification server, and closes its associated thread pools.
    *
    * @param serverBootstrap the server bootstrap
    */
@@ -134,16 +129,14 @@ public final class ConnectionUtils {
   }
 
   /**
-   * Opens an Albus hierarchical control system message connection using SSL
-   * encryption.
+   * Opens an Albus hierarchical control system message connection using SSL encryption.
    *
    * @param inetSocketAddress the IP socket address, host & port
    * @param x509SecurityInfo the X.509 security information
-   * @param albusHCSMessageHandler the Albus hierarchical control system message
-   * handler
+   * @param albusHCSMessageHandler the Albus hierarchical control system message handler
    * @param bossExecutor the Executor which will execute the boss threads
-   * @param workerExecutor the Executor which will execute the I/O worker
-   * threads
+   * @param workerExecutor the Executor which will execute the I/O worker threads
+   *
    * @return the communication channel
    */
   public static Channel openAlbusHCSConnection(
@@ -165,7 +158,7 @@ public final class ConnectionUtils {
             workerExecutor));
 
     // configure the client pipeline
-    LOGGER.info("configuring the Albus client pipeline");
+    LOGGER.info("configuring the client pipeline connecting to " + inetSocketAddress);
     final ChannelPipeline channelPipeline = AlbusHCNMessageClientPipelineFactory.getPipeline(
             albusHCSMessageHandler,
             x509SecurityInfo);
@@ -179,10 +172,10 @@ public final class ConnectionUtils {
             inetSocketAddress,
             channelConnection_lock));
 
-    LOGGER.info("waiting for connection " + channelConnection_lock);
+    LOGGER.info("waiting for connection to " + inetSocketAddress);
     try {
       channelConnection_lock.acquire();
-      LOGGER.info("completed opening the channel" + channelConnection_lock);
+      LOGGER.info("completed opening the channel to " + inetSocketAddress);
     } catch (InterruptedException ex) {
       // ignore
     }
@@ -240,7 +233,7 @@ public final class ConnectionUtils {
     @Override
     public void run() {
       // start the connection attempt
-      LOGGER.info("connecting Albus client");
+      LOGGER.info("starting the connection attempt to " + inetSocketAddress);
       clientBootstrap.connect(inetSocketAddress).addListener(new MyChannelFutureListener(
               channelConnection_lock,
               inetSocketAddress));
@@ -248,8 +241,7 @@ public final class ConnectionUtils {
   }
 
   /**
-   * Provides a channel future listener that resumes the thread waiting for the
-   * channel connection event.
+   * Provides a channel future listener that resumes the thread waiting for the channel connection event.
    */
   static class MyChannelFutureListener implements ChannelFutureListener {
 
@@ -280,11 +272,10 @@ public final class ConnectionUtils {
     }
 
     /**
-     * Invoked when the I/O operation associated with the {@link ChannelFuture}
-     * has been completed.
+     * Invoked when the I/O operation associated with the {@link ChannelFuture} has been completed.
      *
-     * @param channelFuture The source {@link ChannelFuture} which called this
-     * callback.
+     * @param channelFuture The source {@link ChannelFuture} which called this callback.
+     *
      * @throws java.lang.Exception
      */
     @Override
@@ -296,15 +287,16 @@ public final class ConnectionUtils {
       if (!channelFuture.isSuccess()) {
         LOGGER.info("cannot connect with " + inetSocketAddress);
         //throw new TexaiException(channelFuture.getCause());
+      } else {
+        LOGGER.info("client connected to " + channelFuture.getChannel().getRemoteAddress());
+        synchronized (connectedChannelDictionary) {
+          LOGGER.debug("obtained lock on the connectedChannelDictionary");
+          connectedChannelDictionary.put(channelConnection_lock, channelFuture.getChannel());
+        }
       }
-      LOGGER.info("Albus client connected");
-      synchronized (connectedChannelDictionary) {
-        LOGGER.info("obtained lock on the connectedChannelDictionary");
-        connectedChannelDictionary.put(channelConnection_lock, channelFuture.getChannel());
-      }
-      LOGGER.info("releasing the channel connection lock" + channelConnection_lock);
+      LOGGER.debug("releasing the channel connection lock" + channelConnection_lock);
       channelConnection_lock.release(); // release the lock
-      LOGGER.info("released the channel connection lock" + channelConnection_lock);
+      LOGGER.debug("released the channel connection lock" + channelConnection_lock);
     }
   }
 
@@ -315,8 +307,8 @@ public final class ConnectionUtils {
    * @param x509SecurityInfo the X.509 security information
    * @param bitTorrentHandler the bit torrent message handler
    * @param bossExecutor the Executor which will execute the boss threads
-   * @param workerExecutor the Executor which will execute the I/O worker
-   * threads
+   * @param workerExecutor the Executor which will execute the I/O worker threads
+   *
    * @return the communication channel
    */
   @SuppressWarnings("ThrowableResultIgnored")
@@ -362,8 +354,8 @@ public final class ConnectionUtils {
    * @param x509SecurityInfo the X.509 security information
    * @param httpResponseHandler the HTTP response message handler
    * @param bossExecutor the Executor which will execute the boss threads
-   * @param workerExecutor the Executor which will execute the I/O worker
-   * threads
+   * @param workerExecutor the Executor which will execute the I/O worker threads
+   *
    * @return the communication channel
    */
   @SuppressWarnings("ThrowableResultIgnored")
