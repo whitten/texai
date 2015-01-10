@@ -175,15 +175,16 @@ public final class ConnectionUtils {
     LOGGER.info("waiting for connection to " + inetSocketAddress);
     try {
       channelConnection_lock.acquire();
-      LOGGER.info("completed opening the channel to " + inetSocketAddress);
     } catch (InterruptedException ex) {
       // ignore
     }
     final Channel channel;
     synchronized (connectedChannelDictionary) {
       channel = connectedChannelDictionary.get(channelConnection_lock);
-      assert channel != null;
-      connectedChannelDictionary.remove(channelConnection_lock);
+      if (channel != null) {
+        connectedChannelDictionary.remove(channelConnection_lock);
+        LOGGER.info("completed opening the channel to " + inetSocketAddress);
+      }
     }
     return channel;
   }

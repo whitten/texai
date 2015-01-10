@@ -237,7 +237,8 @@ public final class TopLevelHeartbeat extends AbstractNetworkSingletonSkill {
     assert message != null : "message must not be null";
 
     final StringBuilder stringBuilder = new StringBuilder()
-            .append("recording keep-alive from ")
+            .append(getContainerName())
+            .append(" recording keep-alive from ")
             .append(message.getSenderContainerName())
             .append(" at ")
             .append((new DateTime()).toString("MM/dd/yyyy hh:mm a"));

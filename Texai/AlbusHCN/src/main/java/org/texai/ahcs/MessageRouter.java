@@ -439,7 +439,11 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
                 hostName,
                 port,
                 x509SecurityInfo);
-        assert channel != null;
+        if (channel == null) {
+          LOGGER.info("no connection to " + hostName + ':' + port);
+          //TODO report to network operations
+          return;
+        }
       } else {
         throw new TexaiException("no communcations channel to recipient " + message);
       }

@@ -1,9 +1,6 @@
 ContainerGovernanceAgent
   Manages a container's agents to ensure friendly behavior.
 
-ContainerHeartbeatAgent
-  Manages a container's agents to ensure liveness.
-
 ContainerLogControlAgent
   Coordinates Java logging at the container level for agents in the AICoin network.
 
@@ -25,9 +22,6 @@ SingletonConfigurationAgent
 
 TopLevelGovernanceAgent
   Manages the container governance agents to ensure friendly behavior.
-
-TopLevelHeartbeatAgent
-  Manages the container heartbeat agents to ensure liveness.
 
 TopmostFriendshipAgent
   Coordinates the top level agents to ensure friendly behavior.

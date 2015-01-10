@@ -319,6 +319,28 @@
   </node>
 
   <node>
+    <name>XAIFaucetAgent</name>
+    <missionDescription>Provides a tamper evident aicoin faucet.</missionDescription>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>XAIFaucetAgent.XAIFaucetRole</qualifiedName>
+        <description>Provides a tamper evident aicoin faucet.</description>
+        <parentQualifiedName>XAINetworkOperationAgent.XAINetworkOperationRole</parentQualifiedName>
+         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
+       <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.aicoin.XAIFaucet</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
     <name>XAIFinancialAccountingAndControlAgent</name>
     <missionDescription>Provides financial accounting and control for the AICoin network.</missionDescription>
     <isNetworkSingleton>true</isNetworkSingleton>

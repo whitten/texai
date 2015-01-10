@@ -244,7 +244,7 @@ public final class ContainerHeartbeat extends AbstractSkill {
     assert message != null : "message must not be null";
 
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("recording keep-alive " + message);
+      LOGGER.debug(getContainerName() + " recording keep-alive " + message);
     }
     final String senderQualifiedName = message.getSenderQualifiedName();
     InboundHeartbeatInfo inboundHeartBeatInfo = inboundHeartbeatInfos.get(senderQualifiedName);
@@ -512,7 +512,7 @@ public final class ContainerHeartbeat extends AbstractSkill {
             outboundHeartbeatInfo.role.getParentQualifiedName(), // recipentQualifiedName,
             outboundHeartbeatInfo.service,
             AHCSConstants.KEEP_ALIVE_INFO); // operation
-    LOGGER.info("  sending keep-alive to " + Node.extractContainerName(outboundHeartbeatInfo.role.getParentQualifiedName()));
+    LOGGER.info(getContainerName() + " sending keep-alive to " + Node.extractContainerName(outboundHeartbeatInfo.role.getParentQualifiedName()));
     sendMessage(keepAliveInfoMessage);
 
     outboundHeartbeatInfo.heartbeatSentMillis = System.currentTimeMillis();

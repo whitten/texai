@@ -23,7 +23,7 @@
       <source>scripts/run-aicoin-main.sh</source>
     </file>
     <file>
-      <source>scripts/debug-run-aicoin-main.sh</source>
+      <source>doc/openbox-run-aicoin-main.sh</source>
     </file>
   </files>
   <fileSets>

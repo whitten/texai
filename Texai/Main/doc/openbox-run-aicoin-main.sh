@@ -120,4 +120,4 @@ CLASSPATH=$CLASSPATH:lib/xml-apis-1.0.b2.jar
 # debug SSL handshake
 #java -ea -Dlog4j.configuration=file://$PWD/log4j.properties -classpath $CLASSPATH -Djavax.net.debug=all org.texai.main.AICoinMain
 
-java -ea -Dlog4j.configuration=file://$PWD/log4j.properties -classpath $CLASSPATH org.texai.main.AICoinMain
+java -ea -Dlog4j.configuration=file://$PWD/log4j.properties -classpath $CLASSPATH org.texai.main.AICoinMain 2>&1 | tee ../console.log
