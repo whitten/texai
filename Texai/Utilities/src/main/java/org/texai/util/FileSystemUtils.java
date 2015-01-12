@@ -25,6 +25,9 @@ import java.io.IOException;
 import java.security.InvalidParameterException;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 /**
  * Utility methods for working with the file system.
@@ -43,6 +46,26 @@ public final class FileSystemUtils {
    */
   private FileSystemUtils() {
   }
+
+  /** Returns a dated file name with the given prefix, e.g. manifest-2014-01-12.
+   *
+   * @param prefix the given prefix, e.g. "manifest"
+   * @return a dated file name with the given prefix, e.g. manifest-2014-01-12
+   */
+  public static String formDatedFileName(final String prefix) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(prefix) : "prefix must be a non-null string";
+
+    DateTimeFormatter dateTimeFormat = DateTimeFormat.forPattern("yyyy-MM-DD");
+    final StringBuilder stringBuilder = new StringBuilder();
+    return stringBuilder
+            .append(prefix)
+            .append('-')
+            .append(dateTimeFormat.print(new DateTime()))
+            .toString();
+  }
+
+
 
   /**
    * Deletes the supplied {@link File} - for directories, recursively delete any nested directories or files as well.

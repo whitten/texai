@@ -60,6 +60,17 @@ public class FileSystemUtilsTest {
   }
 
   /**
+   * Test of formDatedFileName method, of class FileSystemUtils.
+   */
+  @Test
+  public void testFormDatedFileName() {
+    LOGGER.info("formDatedFileName");
+    final String datedFileName = FileSystemUtils.formDatedFileName("manifest");
+    LOGGER.info("datedFileName " + datedFileName);
+    assertTrue(datedFileName.startsWith("manifest-"));
+  }
+
+  /**
    * Test of deleteRecursively method, of class FileSystemUtils.
    */
   @Test
