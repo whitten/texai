@@ -146,6 +146,9 @@ public final class AHCSConstants {
   // the delegatePerformMission_Task operation
   public static final String DELEGATE_PERFORM_MISSION_TASK = "delegatePerformMission_Task";
   //
+  // the deploymentQuiesce_Task operation
+  public static final String DEPLOYMENT_QUIESCE_TASK = "deploymentQuiesce_Task";
+  //
   // the describe nodes_Task operation
   public static final String DESCRIBE_NODES_TASK = "describe nodes_Task";
   //
@@ -201,6 +204,11 @@ public final class AHCSConstants {
   public static final String LOG_USER_WORD_TASK = "logUserWord_Task";
   // the logUserWord_Task_word parameter
   public static final String LOG_USER_WORD_SKILL_WORD = "logUserWord_Skill_word";
+  //
+  // the restartContainer_Task operation
+  public static final String RESTART_CONTAINER_TASK = "restartContainer_Task";
+  // the restartContainer_Task_delay parameter, which is a long value that indicates the millisecond delay before restarting the container
+  public static final String RESTART_CONTAINER_TASK_DELAY = "restartContainer_Task_delay";
   //
   // the performMission_Task operation
   public static final String PERFORM_MISSION_TASK = "performMission_Task";
@@ -300,6 +308,7 @@ public final class AHCSConstants {
   //
   // the message timeout information operation
   public static final String MESSAGE_TIMEOUT_INFO = "messageTimeout_Info";
+  public static final String MESSAGE_TIMEOUT_INFO_ORIGINAL_MESSAGE = "messageTimeout_Info_originalMessage";
   //
   // the message timeout error information operation
   public static final String MESSAGE_TIMEOUT_ERROR_INFO = "messageTimeoutError_Info";
@@ -309,6 +318,9 @@ public final class AHCSConstants {
   //
   // the networkJoinComplete_Info operation
   public static final String NETWORK_JOIN_COMPLETE_INFO = "networkJoinComplete_Info";
+  //
+  // the networkRestartRequest_Info operation
+  public static final String NETWORK_RESTART_REQUEST_INFO = "networkRestartRequest_Info";
   //
   // the operationNotPermitted_Info operation
   public static final String OPERATION_NOT_PERMITTED_INFO = "operationNotPermitted_Info";
@@ -373,6 +385,8 @@ public final class AHCSConstants {
   public static final String MSG_PARM_SPOKEN_TEXT = "spokenText";
   // the registered user parameter
   public static final String MSG_PARM_REGISTERED_USER = "registeredUser";
+  // the message parameter indicating the number of milliseconds to pause before retrying a message sent to a remote peer
+  public static final String MSG_PARM_RETRY_DELAY = "retryPauseDuration";
   // the message parameter for the role id
   public static final String MSG_PARM_ROLE_ID = "role id";
   // the message parameter for session, which is a string key to a state dictionary, session --> session state

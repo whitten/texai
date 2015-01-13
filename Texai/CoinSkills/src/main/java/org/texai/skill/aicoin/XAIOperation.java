@@ -207,17 +207,12 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
 
     LOGGER.info("performing the mission");
     // write the aicoind configuration file
-    final UUID conversationId = UUID.randomUUID();
-    setStateValue(CONVERSATION_ID, conversationId);
-    assert getStateValue(REPLY_WITH) == null;
-    final UUID replyWith = UUID.randomUUID();
-    setStateValue(REPLY_WITH, replyWith);
     final Message writeConfigurationFileTaskmessage = new Message(
             getRole().getQualifiedName(), // senderQualifiedName
-            getClass().getName(), // senderService
+            getClassName(), // senderService
             getRole().getQualifiedName(), // recipientQualifiedName
-            conversationId,
-            replyWith,
+            UUID.randomUUID(), // conversationId,
+            UUID.randomUUID(), // replyWith,
             XAIWriteConfigurationFile.class.getName(), // recipientService
             AHCSConstants.WRITE_CONFIGURATION_FILE_TASK); // operation
     writeConfigurationFileTaskmessage.put(AHCSConstants.WRITE_CONFIGURATION_FILE_TASK_DIRECTORY_PATH, AICOIN_DIRECTORY_PATH);

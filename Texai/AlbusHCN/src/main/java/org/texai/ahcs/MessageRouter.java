@@ -380,8 +380,8 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("<====== dispatching inbound role message " + message);
       }
-      // use a separate thread for the message dispatch
-      nodeRuntime.getExecutor().execute(new AlbusMessageDispatchRunner(
+      // use a separate thread for the inbound message dispatch
+      nodeRuntime.getExecutor().execute(new InboundMessageDispatchRunner(
               nodeRuntime, // albusMessageDispatcher
               message));
     } else {
@@ -519,7 +519,7 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
   /**
    * Provides a thread to dispatch the message.
    */
-  static class AlbusMessageDispatchRunner implements Runnable {
+  static class InboundMessageDispatchRunner implements Runnable {
 
     /**
      * the SSL proxy, SSL endpoint, or node runtime
@@ -536,7 +536,7 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
      * @param albusMessageDispatcher the SSL proxy, SSL endpoint, or node runtime
      * @param message the message
      */
-    AlbusMessageDispatchRunner(
+    InboundMessageDispatchRunner(
             final MessageDispatcher albusMessageDispatcher,
             final Message message) {
       //Preconditions

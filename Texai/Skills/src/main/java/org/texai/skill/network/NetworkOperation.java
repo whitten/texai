@@ -10,7 +10,6 @@ import org.texai.ahcs.skill.AbstractNetworkSingletonSkill;
 import org.texai.skill.domainEntity.SingletonAgentHosts;
 import org.texai.skill.governance.TopmostFriendship;
 import org.texai.skill.singletonConfiguration.NetworkSingletonConfiguration;
-import org.texai.util.TexaiException;
 
 /**
  * Created on Aug 30, 2014, 11:30:19 PM.
@@ -339,6 +338,15 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
             getRole().getQualifiedName(), // senderQualifiedName
             getClassName(), // senderService,
             getRole().getChildQualifiedNameForAgent("ContainerOperationAgent"), // recipientQualifiedName,
+            ContainerOperation.class.getName(), // recipientService
+            AHCSConstants.PERFORM_MISSION_TASK); // operation
+    sendMessageViaSeparateThread(performMissionMessage);
+
+    // send the perform mission task to the NetworkDeploymentAgent
+    performMissionMessage = new Message(
+            getRole().getQualifiedName(), // senderQualifiedName
+            getClassName(), // senderService,
+            getRole().getChildQualifiedNameForAgent("NetworkDeploymentAgent"), // recipientQualifiedName,
             ContainerOperation.class.getName(), // recipientService
             AHCSConstants.PERFORM_MISSION_TASK); // operation
     sendMessageViaSeparateThread(performMissionMessage);

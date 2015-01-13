@@ -36,7 +36,7 @@ public class XAIFaucet extends AbstractNetworkSingletonSkill {
   // the name of the aicoin faucet payments tamper-evident log
   private static final String XAI_FAUCET_PAYMENTS = "XAIFaucetPayments";
   // the tamper-evident log access object
-  private final TELogAccess teLogAccess = new TELogAccess(getRDFEntityManager());
+  private TELogAccess teLogAccess;
   // the maximum total amount of aicoin payments to a single user, 5 XAI
   private final BigInteger AMOUNT_CLAIMED_LIMIT = new BigInteger("500000000");
 
@@ -89,6 +89,7 @@ public class XAIFaucet extends AbstractNetworkSingletonSkill {
         } else {
           setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
         }
+        teLogAccess  = new TELogAccess(getRDFEntityManager());
         return true;
 
       /**
@@ -208,7 +209,7 @@ public class XAIFaucet extends AbstractNetworkSingletonSkill {
    * @param message the received faucet payment request sensation message
    */
   private synchronized void faucetPaymentRequest(final Message message) {
-    //Preconditions
+    //Preconditio
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
@@ -262,6 +263,7 @@ public class XAIFaucet extends AbstractNetworkSingletonSkill {
   protected BigInteger getUnclaimedAmount(final String key) {
     //Preconditions
     assert StringUtils.isNonEmptyString(key) : "key must be a non-empty string";
+    assert teLogAccess != null : "teLogAccess must not be null";
 
     if (teLogAccess.findTELogHeader(XAI_FAUCET_PAYMENTS) == null) {
       teLogAccess.createTELogHeader(XAI_FAUCET_PAYMENTS);

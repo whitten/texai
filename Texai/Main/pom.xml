@@ -53,35 +53,7 @@
         </configuration>
       </plugin>
 
-      <!--
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.2-beta-2</version>
-        <executions>
-          <execution>
-            <id>create-executable-jar</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <descriptorRefs>
-                <descriptorRef>
-                  jar-with-dependencies
-                </descriptorRef>
-              </descriptorRefs>
-              <archive>
-                <manifest>
-                  <mainClass>org.texai.main.AICoinMain</mainClass>
-                </manifest>
-              </archive>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      -->
-
-      <plugin>
+     <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <executions>
           <execution>
@@ -93,7 +65,6 @@
             <configuration>
               <descriptors>
                 <descriptor>src/main/assembly/all-dependencies.xml</descriptor>
-                <!-- <descriptor>/home/reed/git/texai/Texai/Main/sample.xml</descriptor> -->
               </descriptors>
               <archive>
                 <manifest>
@@ -110,7 +81,6 @@
 
 
       <plugin>
-        <!-- TODO -->
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
           <execution>

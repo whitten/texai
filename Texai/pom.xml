@@ -34,6 +34,7 @@
     <module>AlbusHCNSupport</module>
     <module>CoinSkills</module>
     <module>BitTorrentSupport</module>
+    <module>Deployment</module>
     <module>Inference</module>
     <module>Main</module>
     <module>Network</module>

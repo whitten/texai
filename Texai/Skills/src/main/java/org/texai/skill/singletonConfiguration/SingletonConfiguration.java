@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
@@ -49,6 +50,8 @@ public class SingletonConfiguration extends AbstractSkill {
   // the SHA-512 hash of the seed node infos serialized file
   private final String seedNodeInfosFileHashString
           = "YUhf+GN2kmnkLzwDnkhibWxlbnfyW9UExRTg/c4njjP05jX0BvlunodyVz33dp8chbgSaheEEAqzyDtz2+bPcw==";
+  // the indicator that network singleton configuration information has been received from a seed peer
+  private final AtomicBoolean isSeedConfigurationInfoReceived = new AtomicBoolean(false);
 
   /**
    * Constructs a new SingletonConfiguration instance.
@@ -175,6 +178,21 @@ public class SingletonConfiguration extends AbstractSkill {
         seedConnectionRequest(message);
         return true;
 
+
+      /**
+       * Message Timeout Info
+       *
+       * This information message is sent from a this skill to itself when an expected reply from a seed peer has not been received.
+       *
+       * The original Seed Connection Request Info message is included as a parameter.
+       *
+       * As a result, if no seed peer has yet replied, the seed connection request info message is resent to the seed peer.
+       */
+      case AHCSConstants.MESSAGE_TIMEOUT_INFO:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
+        seedConnectionRequestTimeout(message);
+        return true;
+
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
         LOGGER.warn(message);
         return true;
@@ -219,6 +237,7 @@ public class SingletonConfiguration extends AbstractSkill {
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.JOIN_NETWORK_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.MESSAGE_TIMEOUT_INFO,
       AHCSConstants.PERFORM_MISSION_TASK,
       AHCSConstants.SEED_CONNECTION_REQUEST_INFO,
       AHCSConstants.SINGLETON_AGENT_HOSTS_INFO,
@@ -286,7 +305,6 @@ public class SingletonConfiguration extends AbstractSkill {
       }
     });
 
-    final AtomicBoolean isSeedNode = new AtomicBoolean(false);
     seedNodesInfos.stream().forEach((SeedNodeInfo seedNodeInfo) -> {
       if (!getContainerName().equals(Node.extractContainerName(seedNodeInfo.getQualifiedName()))) {
         LOGGER.info("Connecting to seed " + seedNodeInfo);
@@ -317,20 +335,29 @@ public class SingletonConfiguration extends AbstractSkill {
 
     LOGGER.info("connecting to seed peer " + peerQualifiedName + " at " + hostName + ':' + port);
     //compose and send a message to the seed peer
-    final Map<String, Object> parameterDictionary = new HashMap<>();
-    parameterDictionary.put(
+    final Message connectionRequestMessage = new Message(
+            getRole().getQualifiedName(), // senderQualifiedName
+            getClassName(), // senderService
+            peerQualifiedName, // recipientQualifiedName
+            UUID.randomUUID(), // conversationId,
+            UUID.randomUUID(), // replyWith,
+            getClassName(), // recipientService
+            AHCSConstants.SEED_CONNECTION_REQUEST_INFO); // operation
+    connectionRequestMessage.put(
             AHCSConstants.MSG_PARM_HOST_NAME,
             hostName);
-    parameterDictionary.put(
+    connectionRequestMessage.put(
             AHCSConstants.SEED_CONNECTION_REQUEST_INFO_PORT,
             port);
-    parameterDictionary.put(AHCSConstants.MSG_PARM_X509_CERTIFICATE,
+    connectionRequestMessage.put(
+            AHCSConstants.MSG_PARM_X509_CERTIFICATE,
             getRole().getX509Certificate());
-    final Message connectionRequestMessage = makeMessage(
-            peerQualifiedName, // recipientQualifiedName
-            getClassName(), // recipientService
-            AHCSConstants.SEED_CONNECTION_REQUEST_INFO, // operation
-            parameterDictionary);
+    // set timeout
+    setMessageReplyTimeout(
+            connectionRequestMessage,
+            10000, // timeoutMillis
+            true, // isRecoverable
+            null); // recoveryAction
     sendMessageViaSeparateThread(connectionRequestMessage);
   }
 
@@ -370,26 +397,58 @@ public class SingletonConfiguration extends AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
 
+    removeMessageTimeOut(message.getInReplyTo());
     LOGGER.info("received a seed connection reply from " + message.getSenderContainerName());
-    final SingletonAgentHosts singletonAgentHosts
-            = (SingletonAgentHosts) message.get(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS);
-    LOGGER.info(singletonAgentHosts.toDetailedString());
 
-    // send an singletonAgentHosts_Info message to the TopmostFriendshipAgent.
-    final String recipientQualifiedName = getRole().getNode().getNodeRuntime().getContainerName() + '.'
-            + AHCSConstants.NODE_NAME_TOPMOST_FRIENDSHIP_ROLE;
+    if (isSeedConfigurationInfoReceived.getAndSet(true)) {
+      LOGGER.info("ignoring a redundant seed connection reply from " + message.getSenderContainerName());
+    } else {
+      final SingletonAgentHosts singletonAgentHosts
+              = (SingletonAgentHosts) message.get(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS);
+      LOGGER.info(singletonAgentHosts.toDetailedString());
 
-    final Message singletonAgentHostsMessage = makeMessage(
-            recipientQualifiedName,
-            TopmostFriendship.class.getName(), // recipientService
-            AHCSConstants.SINGLETON_AGENT_HOSTS_INFO); // operation
+      // send an singletonAgentHosts_Info message to the TopmostFriendshipAgent.
+      final String recipientQualifiedName = getRole().getNode().getNodeRuntime().getContainerName() + '.'
+              + AHCSConstants.NODE_NAME_TOPMOST_FRIENDSHIP_ROLE;
 
-    singletonAgentHostsMessage.put(
-            AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS, // parameterName
-            singletonAgentHosts); // parameterValue
+      final Message singletonAgentHostsMessage = makeMessage(
+              recipientQualifiedName,
+              TopmostFriendship.class.getName(), // recipientService
+              AHCSConstants.SINGLETON_AGENT_HOSTS_INFO); // operation
 
-    sendMessageViaSeparateThread(singletonAgentHostsMessage);
+      singletonAgentHostsMessage.put(
+              AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS, // parameterName
+              singletonAgentHosts); // parameterValue
+
+      sendMessageViaSeparateThread(singletonAgentHostsMessage);
+    }
   }
+
+  /** Handles a seed connection request timeout message.
+   *
+   * @param message the timeout message
+   */
+  private void seedConnectionRequestTimeout(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+
+    if (isSeedConfigurationInfoReceived.get()) {
+      // no need to retry the seed peer connection as the configuration was provided by another seed peer
+      return;
+    }
+    
+    final Message connectionRequestMessage = (Message) message.get(AHCSConstants.MESSAGE_TIMEOUT_INFO_ORIGINAL_MESSAGE);
+    assert connectionRequestMessage.getOperation().equals(AHCSConstants.SEED_CONNECTION_REQUEST_INFO);
+    final String peerQualifiedName = connectionRequestMessage.getRecipientQualifiedName();
+    final String hostName = (String) connectionRequestMessage.get(AHCSConstants.MSG_PARM_HOST_NAME);
+    final int port = (int) connectionRequestMessage.get(AHCSConstants.SEED_CONNECTION_REQUEST_INFO_PORT);
+
+    connectToSeedPeer(
+          peerQualifiedName,
+          hostName,
+          port);
+  }
+
 
   /**
    * Returns a demo version of the singleton agent hosts assignments, which are all to the Mint peer.

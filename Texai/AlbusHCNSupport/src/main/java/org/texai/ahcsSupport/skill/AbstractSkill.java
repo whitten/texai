@@ -93,7 +93,8 @@ public abstract class AbstractSkill {
     return true;
   }
 
-  /** Return whether this is a network singleton skill.
+  /**
+   * Return whether this is a network singleton skill.
    *
    * @return whether this is a network singleton skill
    */
@@ -428,6 +429,7 @@ public abstract class AbstractSkill {
     assert message != null : "message must not be null";
     assert message.getSenderQualifiedName().equals(getRole().getQualifiedName()) : "message sender must match this role " + message + "\nrole: " + getRole();
     assert timeoutMillis >= 0 : "timeoutMillis must not be negative";
+    assert message.getReplyWith() != null : "message must have a reply-with UUID value";
 
     final MessageTimeoutTask messageTimeoutTask = new MessageTimeoutTask(this);
     final MessageTimeOutInfo messageTimeOutInfo = new MessageTimeOutInfo(
@@ -507,10 +509,12 @@ public abstract class AbstractSkill {
         timeoutMessage = new Message(
                 messageTimeOutInfo.message.getRecipientQualifiedName(), // senderQualifiedName
                 messageTimeOutInfo.message.getRecipientService(), // senderService
-                messageTimeOutInfo.message.getRecipientQualifiedName(), // recipientQualifiedName
+                messageTimeOutInfo.message.getRecipientQualifiedName(),
+                messageTimeOutInfo.message.getConversationId(),
                 messageTimeOutInfo.message.getRecipientService(), // recipientService
-                AHCSConstants.MESSAGE_TIMEOUT_INFO);
-
+                AHCSConstants.MESSAGE_TIMEOUT_INFO, // operation
+                messageTimeOutInfo.message.getReplyWith()); // inReplyTo
+        timeoutMessage.put(AHCSConstants.MESSAGE_TIMEOUT_INFO_ORIGINAL_MESSAGE, messageTimeOutInfo.message);
       } else {
         // send MESSAGE_TIMEOUT_ERROR_INFO to parent role
         timeoutMessage = new Message(
@@ -518,7 +522,7 @@ public abstract class AbstractSkill {
                 messageTimeOutInfo.message.getRecipientService(), // senderService
                 skill.role.getParentQualifiedName(), // recipientQualifiedName
                 null, // recipientService
-                AHCSConstants.MESSAGE_TIMEOUT_ERROR_INFO);
+                AHCSConstants.MESSAGE_TIMEOUT_ERROR_INFO); // operation
       }
       skill.sendMessageViaSeparateThread(timeoutMessage);
     }
@@ -747,7 +751,6 @@ public abstract class AbstractSkill {
 
     return getRole().findSubSkill(subSkillClassName);
   }
-
 
   /**
    * Receive the new parent role's acknowledgement of joining the network.

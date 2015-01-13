@@ -549,13 +549,12 @@ public final class NodesInitializer {
   private void loadNodesAndInjectDependencies() {
     LOGGER.debug("");
     LOGGER.debug("loading the persisted nodes and injecting dependencies ...");
-    nodeAccess.getNodes().stream().sorted().forEach(node -> {
+    nodeAccess.getNodes().stream().sorted().forEach((Node node) -> {
       LOGGER.debug("");
       LOGGER.debug("  " + node);
       node.setNodeRuntime(nodeRuntime);
       assert node.getNodeRuntime() != null;
       assert !node.getRoles().isEmpty();
-      //node.getRoles().stream().sorted().forEach(role -> {
       for (final Role role : node.getRoles()) {
         LOGGER.debug("    " + role);
         role.instantiate();
@@ -576,7 +575,6 @@ public final class NodesInitializer {
         }
         role.initialize(nodeRuntime, x509SecurityInfo);
       }
-      //});
     });
   }
 

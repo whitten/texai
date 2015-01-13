@@ -81,7 +81,7 @@ public class AICoinMain {
   private final String nodesPath = "data/nodes.xml";
   // the tamper-evident hash of the nodes path file, use "1234" after revsing the nodes.xml file
   private final String NODES_FILE_HASH =
-          "teMoqtBq7Eujb1f8L96DUN+IXlGub0LOqgzA858Q0H0R+ipJZg7zfp/s78Ds72SaY1YIK6yACUHf6Hze8VeZLw==";
+          "fukO5UNFNxNm61Lc13blxrDnipjbNHh+1o///wsAQvpB+2nQWLa7PI41gUFDQMzbQuFJ4Mu3QSiQRkSvghIsMA==";
   /**
    * the node runtime application thread
    */
@@ -114,7 +114,7 @@ public class AICoinMain {
     Logger.getLogger(DistributedRepositoryManager.class).setLevel(Level.WARN);
     Logger.getLogger(KBAccess.class).setLevel(Level.WARN);
     Logger.getLogger(JournalWriter.class).setLevel(Level.WARN);
-    //Logger.getLogger(NodesInitializer.class).setLevel(Level.DEBUG);
+//    Logger.getLogger(NodesInitializer.class).setLevel(Level.DEBUG);
     Logger.getLogger(PortUnificationHandler.class).setLevel(Level.WARN);
     Logger.getLogger(PortUnificationChannelPipelineFactory.class).setLevel(Level.WARN);
     Logger.getLogger(RDFEntityPersister.class).setLevel(Level.WARN);

@@ -473,7 +473,7 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
       }
       if (!isSkillFound) {
         if (message.getRecipientService() == null) {
-          LOGGER.info("no skill understands the operation " + message.getOperation() +  " ...");
+          LOGGER.info("no skill understands the operation " + message.getOperation() + " ...");
           getSkills().stream().sorted().forEach((AbstractSkill skill1) -> {
             LOGGER.info("  " + skill1 + " understands");
             for (final String understoodOperation : skill1.getUnderstoodOperations()) {
@@ -541,7 +541,6 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
       LOGGER.debug(getNode().getName() + ": sending message: " + message.toDetailedString());
     }
     nodeRuntime.dispatchMessage(message);
-
   }
 
   /**
@@ -558,7 +557,7 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
     assert !operation.isEmpty() : "operation must not be empty";
     assert senderService != null : "senderService must not be null";
     assert !senderService.isEmpty() : "senderService must not be empty";
-    assert !childQualifiedNames.isEmpty() : "childQualifiedNames must not be empty";
+    assert !childQualifiedNames.isEmpty() : "childQualifiedNames must not be empty in " + this;
 
     childQualifiedNames.stream().forEach((childQualifiedName) -> {
       sendMessage(new Message(
@@ -819,7 +818,8 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
     return subSkillsDictionary;
   }
 
-  /** Returns whether this is a network singleton role.
+  /**
+   * Returns whether this is a network singleton role.
    *
    * @return whether this is a network singleton role.
    */
@@ -827,9 +827,11 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
     return node.isNetworkSingleton();
   }
 
-  /** Returns whether the given role is a network singleton role.
+  /**
+   * Returns whether the given role is a network singleton role.
    *
    * @param qualifiedName
+   *
    * @return whether this is a network singleton role.
    */
   public boolean isNetworkSingletonRole(final String qualifiedName) {
@@ -1002,7 +1004,13 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
      */
     @Override
     public void run() {
-      role.sendMessage(message);
+      try {
+        role.sendMessage(message);
+      } catch (Throwable ex) {
+        LOGGER.info("Caught exception " + ex.getMessage() + ", processing the message " + message);
+        LOGGER.info("Stack trace ...\n" + StringUtils.getStackTraceAsString(ex));
+        //TODO report to container operations
+      }
     }
   }
 
