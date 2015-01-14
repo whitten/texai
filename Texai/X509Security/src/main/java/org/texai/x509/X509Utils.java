@@ -1163,9 +1163,9 @@ public final class X509Utils {
     assert keyStorePassword != null : "keyStorePassword must not be null";
 
     final X509SecurityInfo x509SecurityInfo = new X509SecurityInfo(
-              keyStore,
-              keyStorePassword,
-              alias);
+            keyStore,
+            keyStorePassword,
+            alias);
 
     //Postconditions
     assert x509SecurityInfo.getKeyStore().equals(keyStore);
@@ -1244,17 +1244,15 @@ public final class X509Utils {
   }
 
   /**
-   * Verifies the expected SHA-512 hash of the given file.
+   * Returns the SHA-512 hash of the given file, encoded as a base 64 string.
    *
    * @param filePath the file path
-   * @param fileHashString the file SHA-512 hash encoded as a base 64 string, used to detect tampering
+   *
+   * @return the SHA-512 hash of the given file
    */
-  public static void verifyFileHash(
-          final String filePath,
-          final String fileHashString) {
+  public static String fileHashString(final String filePath) {
     //Preconditions
     assert StringUtils.isNonEmptyString(filePath) : "nodesPath must not be empty";
-    assert StringUtils.isNonEmptyString(fileHashString) : "nodesFileHashString must not be empty";
 
     final byte[] hashBytes;
     try {
@@ -1267,15 +1265,30 @@ public final class X509Utils {
         messageDigest.update(dataBytes, 0, nread);
       }
       hashBytes = messageDigest.digest();
-      final byte[] expectedHashBytes = Base64Coder.decode(fileHashString);
-      if (!ByteUtils.areEqual(expectedHashBytes, hashBytes)) {
-        LOGGER.warn("actual encoded hash bytes:\n" + new String(Base64Coder.encode(hashBytes)));
-        throw new TexaiException("file: " + filePath + " fails expected hash checksum");
-      }
+      return new String(Base64Coder.encode(hashBytes));
     } catch (NoSuchAlgorithmException | NoSuchProviderException | IOException ex) {
       throw new TexaiException(ex);
     }
+  }
 
+  /**
+   * Verifies the expected SHA-512 hash of the given file.
+   *
+   * @param filePath the file path
+   * @param fileHashString the file SHA-512 hash encoded as a base 64 string, used to detect tampering
+   */
+  public static void verifyFileHash(
+          final String filePath,
+          final String fileHashString) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(filePath) : "nodesPath must not be empty";
+    assert StringUtils.isNonEmptyString(fileHashString) : "nodesFileHashString must not be empty";
+
+    final String actualFileHashString = fileHashString(filePath);
+    if (!actualFileHashString.equals(fileHashString)) {
+      LOGGER.warn("actual encoded hash bytes:\n" + actualFileHashString);
+      throw new TexaiException("file: " + filePath + " fails expected hash checksum");
+    }
   }
 
 }

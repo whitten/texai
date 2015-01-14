@@ -59,7 +59,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 //import sun.security.x509.X509CertImpl;
 import static org.junit.Assert.*;
-import org.texai.util.TexaiException;
 
 /**
  *
@@ -94,6 +93,28 @@ public class X509UtilsTest {
 
   @After
   public void tearDown() {
+  }
+
+  /**
+   * Test of fileHashString and verifyFileHash methods of class X509Utils.
+   */
+  @Test
+  public void testFileHashString() {
+    LOGGER.info("fileHashString");
+    final String fileHashString = "XZSke8hxBfjSYmZqe2QWWPpKzzGohhbpJV04yTjuCA9NWQD1D0NsyytBKBCnH1PcmVuPnUFG6l+DKOpYwzJOgA==";
+    assertEquals(fileHashString, X509Utils.fileHashString("data/SignatureTest.txt"));
+    try {
+      X509Utils.verifyFileHash("data/SignatureTest.txt", fileHashString);
+    } catch (Exception ex) {
+      LOGGER.info(ex.getMessage());
+      fail();
+    }
+    try {
+      final String wrongFileHashString = "AZSke8hxBfjSYmZqe2QWWPpKzzGohhbpJV04yTjuCA9NWQD1D0NsyytBKBCnH1PcmVuPnUFG6l+DKOpYwzJOgA==";
+      X509Utils.verifyFileHash("data/SignatureTest.txt", wrongFileHashString);
+      fail();
+    } catch (Exception ex) {
+    }
   }
 
   /**
