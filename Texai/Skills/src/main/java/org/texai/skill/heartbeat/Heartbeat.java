@@ -274,7 +274,7 @@ public class Heartbeat extends AbstractSkill {
         LOGGER.debug("    from " + heartbeat.getRole().getQualifiedName());
         LOGGER.debug("    to " + outboundHeartbeatInfo.recipentQualifiedName);
       }
-      sendMessage(message);
+      sendMessageViaSeparateThread(message);
 
       outboundHeartbeatInfo.heartbeatSentMillis = System.currentTimeMillis();
     }

@@ -86,7 +86,6 @@ import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.texai.util.Base64Coder;
-import org.texai.util.ByteUtils;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 
@@ -1254,11 +1253,25 @@ public final class X509Utils {
     //Preconditions
     assert StringUtils.isNonEmptyString(filePath) : "nodesPath must not be empty";
 
+    return fileHashString(new File(filePath));
+  }
+
+  /**
+   * Returns the SHA-512 hash of the given file, encoded as a base 64 string.
+   *
+   * @param file the given file
+   *
+   * @return the SHA-512 hash of the given file
+   */
+  public static String fileHashString(final File file) {
+    //Preconditions
+    assert file != null : "file must not be null";
+
     final byte[] hashBytes;
     try {
       addBouncyCastleSecurityProvider();
       final MessageDigest messageDigest = MessageDigest.getInstance("SHA-512", BOUNCY_CASTLE_PROVIDER);
-      final FileInputStream fileInputStream = new FileInputStream(filePath);
+      final FileInputStream fileInputStream = new FileInputStream(file);
       final byte[] dataBytes = new byte[1024];
       int nread;
       while ((nread = fileInputStream.read(dataBytes)) != -1) {

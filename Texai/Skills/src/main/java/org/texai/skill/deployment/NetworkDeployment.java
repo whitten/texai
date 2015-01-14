@@ -7,12 +7,26 @@
  */
 package org.texai.skill.deployment;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
 import net.jcip.annotations.NotThreadSafe;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.util.TexaiException;
 
 /**
  *
@@ -23,6 +37,10 @@ public class NetworkDeployment extends AbstractSkill {
 
   // the log4j logger
   private static final Logger LOGGER = Logger.getLogger(NetworkDeployment.class);
+  // the millisecond period between checks for new software /data deployment
+  private static final long CHECK_FOR_DEPLOYMENT_PERIOD_MILLIS = 60 * 1000 * 5;
+  // the indicator that a software deployment is in progress
+  private final AtomicBoolean isSoftwareDeploymentUnderway = new AtomicBoolean(false);
 
   /**
    * Constructs a new SkillTemplate instance.
@@ -120,6 +138,20 @@ public class NetworkDeployment extends AbstractSkill {
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
+    createCheckForDeploymentTimerTask();
+  }
+
+  /**
+   * Creates a timer that periodically checks for software / data deployments.
+   */
+  private void createCheckForDeploymentTimerTask() {
+    final Timer timer = getNodeRuntime().getTimer();
+    synchronized (timer) {
+      timer.scheduleAtFixedRate(
+              new CheckForDeployment(this), // task
+              CHECK_FOR_DEPLOYMENT_PERIOD_MILLIS, // delay
+              CHECK_FOR_DEPLOYMENT_PERIOD_MILLIS); // period
+    }
   }
 
   /**
@@ -137,35 +169,148 @@ public class NetworkDeployment extends AbstractSkill {
    */
   class CheckForDeployment extends TimerTask {
 
+    // the network deployment skill
+    final NetworkDeployment networkDeployment;
+
+    /**
+     * Creates a new CheckForDeployment instance.
+     *
+     * @param networkDeployment the network deployment skill
+     */
+    CheckForDeployment(final NetworkDeployment networkDeployment) {
+      //Preconditions
+      assert networkDeployment != null : "networkDeployment must not be null";
+
+      this.networkDeployment = networkDeployment;
+    }
+
     /**
      * Check for a manifest to deploy.
      */
     @Override
     public void run() {
-      // scan the deployment directory looking for "deployed.log" (think about a tamper-evident log and peer verification)
+      //TODO add a tamper-evident log and peer verification
 
-      // if found then nothing to deploy and return
+      LOGGER.info("checking for a new deployment");
+      // scan the deployment directory looking for "deployed.log"
+      final File deploymentDirectory = new File("deployment");
+      if (!deploymentDirectory.exists()) {
+        LOGGER.info("creating the deployment directory");
+        deploymentDirectory.mkdir();
+        return;
+      }
+      assert deploymentDirectory.isDirectory();
+      final File[] files = deploymentDirectory.listFiles();
+      for (final File file : files) {
+        if (file.getName().equals("deployment.log")) {
+          return;
+        }
+      }
+      // process the deployment in separate thread in order to immediately release the shared timer thread
+      networkDeployment.getNodeRuntime().getExecutor().execute(new DeploymentRunable(networkDeployment, files));
+    }
+  }
 
-      // otherwise, find the manifest and verify it is non empty
+  class DeploymentRunable implements Runnable {
 
-      // set a node state variable to indicate software deployment is in progress
+    // the network deployment skill
+    final NetworkDeployment networkDeployment;
+    // the deployment directory files
+    final File[] files;
 
-      // notify all all containers to quiesce except for deployment messages
-      //   DEPLOYMENT_QUIESCE_TASK --> ContainerDeploymentRole
+    /**
+     * Creates a new CheckForDeployment instance.
+     *
+     * @param networkDeployment the network deployment skill
+     * @param files the deployment directory files
+     */
+    DeploymentRunable(
+            final NetworkDeployment networkDeployment,
+            final File[] files) {
+      //Preconditions
+      assert networkDeployment != null : "networkDeployment must not be null";
+      assert files != null : "files must not be null";
+      assert files.length > 0 : "files must be present";
 
-      // when all acknowledge, propagate each manifest command and file to each peer
-      //   ContainerDeploymentRole --> TASK_ACCOMPLISHED_INFO
+      this.networkDeployment = networkDeployment;
+      this.files = files;
+    }
 
-      // as peers acknowledge that their updates completed, write the deployed.log with the details the deployment
+    /**
+     * Runs the software deployment process.
+     */
+    @Override
+    public void run() {
+      LOGGER.info("Software and data deployment starting ...");
+      // find the manifest and verify it is non empty
+      File manifestFile = null;
+      for (final File file : files) {
+        if (file.getName().startsWith("manifest-")) {
+          manifestFile = file;
+          break;
+        }
+      }
+      if (manifestFile == null) {
+        LOGGER.info("missing manifest file");
+        //TODO report to network operations
+        return;
+      }
 
+      try {
+        final BufferedReader manifestBufferedReader = new BufferedReader(new FileReader(manifestFile));
+        while (true) {
+          final String deploymentCommandString = manifestBufferedReader.readLine();
+          if (deploymentCommandString == null) {
+            break;
+          }
+          LOGGER.info(deploymentCommandString);
+          final String command = deploymentCommandString.substring(0, 10).trim();
+          LOGGER.info("  command: " + command);
+          final String fileToDeployPath = deploymentCommandString.substring(12, deploymentCommandString.length() - 2);
+          LOGGER.info("  fileToDeployPath: " + fileToDeployPath);
+          final File fileToDeploy = new File(fileToDeployPath);
+          final File fileToSend = new File(fileToDeploy.getName());
+          LOGGER.info("  fileToSend: " + fileToSend);
 
-      // ask the network operations agent to shutdown the other peers who automatically restart in a random interval in
-      // excess of the time required to restart the network operations node
-      //   NETWORK_RESTART_REQUEST_INFO --> NetworkOperationRole
-      //   RESTART_CONTAINER_TASK --> ContainerOperationRole
+          // make a copy of the child container deployment roles for multithreading safety
+          final List<String> containerDeploymentRoleNames = new ArrayList<>(networkDeployment.getRole().getChildQualifiedNames());
+          // send the file to each child container deployment role
+          containerDeploymentRoleNames.stream().sorted().forEach((String containerDeploymentRoleName) -> {
 
+            final Message deployFileMessage = networkDeployment.makeMessage(
+                    containerDeploymentRoleName, // recipientQualifiedName
+                    ContainerDeployment.class.getName(), // recipientService
+                    AHCSConstants.DEPLOY_FILE_TASK); // operation
+            deployFileMessage.put(AHCSConstants.DEPLOY_FILE_TASK_COMMAND, deploymentCommandString);
+            deployFileMessage.put(AHCSConstants.DEPLOY_FILE_TASK_PATH, fileToDeployPath);
+            if (deploymentCommandString.equals("add") || deploymentCommandString.equals("change")) {
+              try {
+                deployFileMessage.put(AHCSConstants.DEPLOY_FILE_TASK_BYTES, FileUtils.readFileToByteArray(fileToSend));
+              } catch (IOException ex) {
+                throw new TexaiException(ex);
+              }
+            }
 
-      // the network operations node as the sole singleton agent host and await the connecting peers
+            sendMessage(deployFileMessage);
+            // pause this thread to keep from creating too many long-running downstream threads
+            try {
+              Thread.sleep(500);
+            } catch (InterruptedException ex) {
+            }
+          });
+
+          // propagate each manifest command and file to each peer
+          //   ContainerDeploymentRole --> TASK_ACCOMPLISHED_INFO
+          // as peers acknowledge that their updates completed, write the deployed.log with the details the deployment
+          // ask the network operations agent to shutdown the other peers who automatically restart in a random interval in
+          // excess of the time required to restart the network operations node
+          //   NETWORK_RESTART_REQUEST_INFO --> NetworkOperationRole
+          //   RESTART_CONTAINER_TASK --> ContainerOperationRole
+          // the network operations node as the sole singleton agent host and await the connecting peers
+        }
+      } catch (IOException ex) {
+        throw new TexaiException(ex);
+      }
     }
 
   }

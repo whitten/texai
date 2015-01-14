@@ -146,11 +146,17 @@ public final class AHCSConstants {
   // the delegatePerformMission_Task operation
   public static final String DELEGATE_PERFORM_MISSION_TASK = "delegatePerformMission_Task";
   //
-  // the deploymentQuiesce_Task operation
-  public static final String DEPLOYMENT_QUIESCE_TASK = "deploymentQuiesce_Task";
-  //
   // the describe nodes_Task operation
   public static final String DESCRIBE_NODES_TASK = "describe nodes_Task";
+  //
+  // the deployFile_Task operation
+  public static final String DEPLOY_FILE_TASK = "deployFile_Task";
+  // the deployFile_Task command parameter, which is a String specifying the deployment command, e.g. "add", "remove", "remove-dir"
+  public static final String DEPLOY_FILE_TASK_COMMAND = "deployFile_Task_command";
+  // the deployFile_Task path parameter, which is a String specifying the path, e.g. "lib/CoinSkill-1.0.jar"
+  public static final String DEPLOY_FILE_TASK_PATH = "deployFile_Task_path";
+  // the deployFile_Task bytes parameter, which is a byte[] specifying the file contents
+  public static final String DEPLOY_FILE_TASK_BYTES = "deployFile_Task_bytes";
   //
   // the directNextUtteranceBackToSender_Task operation
   public static final String DIRECT_NEXT_UTTERANCE_BACK_TO_SENDER_TASK = "directNextUtteranceBackToSender_Task";

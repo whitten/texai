@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import org.texai.util.FileSystemUtils;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
+import org.texai.x509.X509Utils;
 
 /**
  * CreateSoftwareDeploymentManifest.java
@@ -197,6 +198,7 @@ public class CreateSoftwareDeploymentManifest {
 
       if (oldFile == null) {
         LOGGER.debug("old files exhausted, adding new file " + newFile);
+        final String encodedFileHash = X509Utils.fileHashString(newFile);
         manifestStringBuilder.append(new StringBuilder().append("add     \"").append(newFile).append("\"\n").toString());
         addFileToManifest(newFile);
         newFile = advanceIterator(newFiles_iter);

@@ -39,7 +39,7 @@
     <dependency>
       <groupId>com.googlecode.json-simple</groupId>
       <artifactId>json-simple</artifactId>
-      <version>1.1</version>
+      <version>1.1.1</version>
     </dependency>
 
     <dependency>
@@ -53,7 +53,7 @@
       <artifactId>BitTorrentSupport</artifactId>
       <version>1.0</version>
     </dependency>
-    
+
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty</artifactId>
