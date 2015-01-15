@@ -56,6 +56,70 @@ public class CreateSoftwareDeploymentManifestTest {
   }
 
   /**
+   * Test of formatJSON method, of class CreateSoftwareDeploymentManifest.
+   */
+  @Test
+  public void testformatJSON() {
+    LOGGER.info("formatJSON");
+    final String jsonString = "{\"path\":\"data\\/test-deployment-dir-new\\/file-b-change\","
+            + "\"command\":\"replace\","
+            + "\"hash\":\"vfeSHKnz8dO44jB3KKVWtIjfBRTBOUCbFd6UK8vEfZagZrsFaghsr3gBccz7IvqgZ7HyJ5p3\\/wy+i8S+29fDMg==\"},"
+            + "{\"path\":\"data\\/test-deployment-dir-old\\/file-h-remove\","
+            + "\"command\":\"remove\"},"
+            + "{\"path\":\"data\\/test-deployment-dir-new\\/file-i-add\","
+            + "\"command\":\"add\","
+            + "\"hash\":\"z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXcg\\/SpIdNs6c5H0NE8XYXysP+DGNKHfuwvY7kxvUdBeoGlODJ6+SfaPg==\"},"
+            + "{\"path\":\"data\\/test-deployment-dir-new\\/subdirectory\\/CoinSkills-1.0.jar\","
+            + "\"command\":\"replace\","
+            + "\"hash\":\"BSKS7ixZiAqIBQYet9yUZizefr2I8m7NyTLRIHNNKVuOhtwjkZi4L3lg27WLccVOHW+MIXiDRQRAoHG3mvVL2g==\"},"
+            + "{\"path\":\"data\\/test-deployment-dir-new\\/subdirectory\\/file-f-add\","
+            + "\"command\":\"add\","
+            + "\"hash\":\"z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXcg\\/SpIdNs6c5H0NE8XYXysP+DGNKHfuwvY7kxvUdBeoGlODJ6+SfaPg==\"},"
+            + "{\"path\":\"data\\/test-deployment-dir-old\\/subdirectory\\/file-x-remove\","
+            + "\"command\":\"remove\"},"
+            + "{\"path\":\"data\\/test-deployment-dir-new\\/subdirectory-add\","
+            + "\"command\":\"add-dir\"},"
+            + "{\"path\":\"data\\/test-deployment-dir-new\\/subdirectory-add\\/file-g-add\","
+            + "\"command\":\"add\","
+            + "\"hash\":\"n8hoSN8jX9CMGPphSvfX0FRpRqyPeveBCF7ynPAMSvPjcQiIju8w7f2\\/RjRpM0JQoVrFGtVH31xcMQ82Eb+I+g==\"},"
+            + "{\"path\":\"data\\/test-deployment-dir-old\\/subdirectory-remove\","
+            + "\"command\":\"remove\"}]}";
+
+    final String formattedString = "{\"path\":\"data\\/test-deployment-dir-new\\/file-b-change\",\n"
+            + "  \"command\":\"replace\",\n"
+            + "  \"hash\":\"vfeSHKnz8dO44jB3KKVWtIjfBRTBOUCbFd6UK8vEfZagZrsFaghsr3gBccz7IvqgZ7HyJ5p3\\/wy+i8S+29fDMg==\"},\n"
+            + "  \n"
+            + "{\"path\":\"data\\/test-deployment-dir-old\\/file-h-remove\",\n"
+            + "  \"command\":\"remove\"},\n"
+            + "  \n"
+            + "{\"path\":\"data\\/test-deployment-dir-new\\/file-i-add\",\n"
+            + "  \"command\":\"add\",\n"
+            + "  \"hash\":\"z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXcg\\/SpIdNs6c5H0NE8XYXysP+DGNKHfuwvY7kxvUdBeoGlODJ6+SfaPg==\"},\n"
+            + "  \n"
+            + "{\"path\":\"data\\/test-deployment-dir-new\\/subdirectory\\/CoinSkills-1.0.jar\",\n"
+            + "  \"command\":\"replace\",\n"
+            + "  \"hash\":\"BSKS7ixZiAqIBQYet9yUZizefr2I8m7NyTLRIHNNKVuOhtwjkZi4L3lg27WLccVOHW+MIXiDRQRAoHG3mvVL2g==\"},\n"
+            + "  \n"
+            + "{\"path\":\"data\\/test-deployment-dir-new\\/subdirectory\\/file-f-add\",\n"
+            + "  \"command\":\"add\",\n"
+            + "  \"hash\":\"z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXcg\\/SpIdNs6c5H0NE8XYXysP+DGNKHfuwvY7kxvUdBeoGlODJ6+SfaPg==\"},\n"
+            + "  \n"
+            + "{\"path\":\"data\\/test-deployment-dir-old\\/subdirectory\\/file-x-remove\",\n"
+            + "  \"command\":\"remove\"},\n"
+            + "  \n"
+            + "{\"path\":\"data\\/test-deployment-dir-new\\/subdirectory-add\",\n"
+            + "  \"command\":\"add-dir\"},\n"
+            + "  \n"
+            + "{\"path\":\"data\\/test-deployment-dir-new\\/subdirectory-add\\/file-g-add\",\n"
+            + "  \"command\":\"add\",\n"
+            + "  \"hash\":\"n8hoSN8jX9CMGPphSvfX0FRpRqyPeveBCF7ynPAMSvPjcQiIju8w7f2\\/RjRpM0JQoVrFGtVH31xcMQ82Eb+I+g==\"},\n"
+            + "  \n"
+            + "{\"path\":\"data\\/test-deployment-dir-old\\/subdirectory-remove\",\n"
+            + "  \"command\":\"remove\"}]}";
+    assertEquals(formattedString, CreateSoftwareDeploymentManifest.formatJSON(jsonString));
+  }
+
+  /**
    * Test of advanceIterator method, of class CreateSoftwareDeploymentManifest.
    */
   @Test

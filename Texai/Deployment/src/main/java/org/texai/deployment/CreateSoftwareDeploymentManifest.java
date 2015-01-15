@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.json.simple.JSONObject;
 import org.texai.util.FileSystemUtils;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
@@ -100,6 +101,7 @@ public class CreateSoftwareDeploymentManifest {
   /**
    * Compares the new A.I. Coin peer directory with the production peer directory and prepares a manifest of changed files.
    */
+  @SuppressWarnings("unchecked")
   private void process() {
     final File oldDirectoryFile = new File(oldDirectoryPath);
     if (!oldDirectoryFile.exists()) {
@@ -124,17 +126,20 @@ public class CreateSoftwareDeploymentManifest {
     }
 
     // recursively visit and compare the old and new directory contents
-    final StringBuilder manifestStringBuilder = new StringBuilder();
+    final JSONObject jsonObject = new JSONObject();
+    final List<JSONObject> manifestItems = new ArrayList<>();
+    jsonObject.put("manifest", manifestItems);
 
-    compareDirectories(oldDirectoryFile, newDirectoryFile, manifestStringBuilder);
-    final String manifestString = manifestStringBuilder.toString();
-    LOGGER.info("manifest ...\n" + manifestString);
+    compareDirectories(oldDirectoryFile, newDirectoryFile, manifestItems);
+    final String formattedJSONString = formatJSON(jsonObject.toJSONString()) + '\n';
+
+    LOGGER.info("manifest ...\n" + formattedJSONString);
 
     final String manifestFilePath = manifestDirectory.toString() + '/' + FileSystemUtils.formDatedFileName("manifest");
     LOGGER.info("Writing manifest " + manifestFilePath);
     try {
       try (BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(manifestFilePath))) {
-        bufferedOutputStream.write(manifestString.getBytes());
+        bufferedOutputStream.write(formattedJSONString.getBytes());
       }
     } catch (Exception ex) {
       throw new TexaiException(ex);
@@ -146,14 +151,15 @@ public class CreateSoftwareDeploymentManifest {
    *
    * @param oldDirectoryFile the old directory
    * @param newDirectoryFile the corresponding new directory
-   * @param manifestStringBuilder the upgrade manifest text
+   * @param manifestItems the upgrade manifest items
    */
+  @SuppressWarnings("unchecked")
   private void compareDirectories(
           final File oldDirectoryFile,
           final File newDirectoryFile,
-          final StringBuilder manifestStringBuilder) {
+          final List<JSONObject> manifestItems) {
     //Preconditions
-    assert manifestStringBuilder != null : "manifestStringBuilder must not be null";
+    assert manifestItems != null : "manifestItems must not be null";
 
     final List<File> oldFiles = new ArrayList<>();
     for (final File file : oldDirectoryFile.listFiles()) {
@@ -198,33 +204,49 @@ public class CreateSoftwareDeploymentManifest {
 
       if (oldFile == null) {
         LOGGER.debug("old files exhausted, adding new file " + newFile);
-        final String encodedFileHash = X509Utils.fileHashString(newFile);
-        manifestStringBuilder.append(new StringBuilder().append("add     \"").append(newFile).append("\"\n").toString());
-        addFileToManifest(newFile);
+        final JSONObject manifestItem = new JSONObject();
+        manifestItem.put("command", "add");
+        manifestItem.put("path", newFile.toString());
+        manifestItem.put("hash", X509Utils.fileHashString(newFile));
+        manifestItems.add(manifestItem);
+        addFileToManifestStagingDirectory(newFile);
         newFile = advanceIterator(newFiles_iter);
 
       } else if (newFile == null) {
         LOGGER.debug("new files exhausted, removing old file " + oldFile);
-        manifestStringBuilder.append(new StringBuilder().append("remove     \"").append(oldFile).append("\"\n").toString());
+        final JSONObject manifestItem = new JSONObject();
+        manifestItem.put("command", "remove");
+        manifestItem.put("path", oldFile.toString());
+        manifestItems.add(manifestItem);
         oldFile = advanceIterator(oldFiles_iter);
 
       } else if (compareRelativeFilePaths(oldFile, newFile) < 0) {
         if (oldFile.isDirectory()) {
           LOGGER.debug("removing old directory " + oldFile);
-          manifestStringBuilder.append(new StringBuilder().append("remove-dir \"").append(oldFile).append("\"\n").toString());
+          final JSONObject manifestItem = new JSONObject();
+          manifestItem.put("command", "remove-dir");
+          manifestItem.put("path", oldFile.toString());
+          manifestItems.add(manifestItem);
         } else {
           LOGGER.debug("removing old file " + oldFile);
-          manifestStringBuilder.append(new StringBuilder().append("remove     \"").append(oldFile).append("\"\n").toString());
+          final JSONObject manifestItem = new JSONObject();
+          manifestItem.put("command", "remove");
+          manifestItem.put("path", oldFile.toString());
+          manifestItems.add(manifestItem);
         }
         oldFile = advanceIterator(oldFiles_iter);
 
       } else if (compareRelativeFilePaths(oldFile, newFile) > 0) {
         if (newFile.isDirectory()) {
-          addDirectory(newFile, manifestStringBuilder);
+          addDirectory(newFile, manifestItems);
         } else {
           LOGGER.debug("adding new file " + newFile);
-          manifestStringBuilder.append(new StringBuilder().append("add        \"").append(newFile).append("\"\n").toString());
-          addFileToManifest(newFile);
+          final JSONObject manifestItem = new JSONObject();
+          manifestItem.put("command", "add");
+          manifestItem.put("path", newFile.toString());
+          manifestItem.put("hash", X509Utils.fileHashString(newFile));
+          manifestItems.add(manifestItem);
+          addFileToManifestStagingDirectory(newFile);
         }
         newFile = advanceIterator(newFiles_iter);
 
@@ -232,7 +254,7 @@ public class CreateSoftwareDeploymentManifest {
         if (oldFile.isDirectory() && newFile.isDirectory()) {
           LOGGER.debug("");
           LOGGER.debug("recursing into old " + oldFile + ", new " + newFile);
-          compareDirectories(oldFile, newFile, manifestStringBuilder);
+          compareDirectories(oldFile, newFile, manifestItems);
         } else {
           if (oldFile.isDirectory() || newFile.isDirectory()) {
             throw new TexaiException("cannot compare a directory with a same-named file, old " + oldFile + ", new " + newFile);
@@ -242,8 +264,12 @@ public class CreateSoftwareDeploymentManifest {
           try {
             if (!FileUtils.contentEquals(oldFile, newFile)) {
               LOGGER.debug("replacing old file " + oldFile + ", with new file " + newFile);
-              manifestStringBuilder.append(new StringBuilder().append("replace    \"").append(oldFile).append("\"\n").toString());
-              addFileToManifest(newFile);
+              final JSONObject manifestItem = new JSONObject();
+              manifestItem.put("command", "replace");
+              manifestItem.put("path", newFile.toString());
+              manifestItem.put("hash", X509Utils.fileHashString(newFile));
+              manifestItems.add(manifestItem);
+              addFileToManifestStagingDirectory(newFile);
             }
           } catch (IOException ex) {
             throw new TexaiException(ex);
@@ -303,16 +329,21 @@ public class CreateSoftwareDeploymentManifest {
    * Recursively adds the files in the given directory to the manifest.
    *
    * @param directory the given directory
-   * @param manifestStringBuilder the file update mainifest
+   * @param manifestItems the upgrade manifest items
    */
-  private void addDirectory(final File directory, final StringBuilder manifestStringBuilder) {
+  private void addDirectory(
+          final File directory,
+          final List<JSONObject> manifestItems) {
     //Preconditions
     assert directory != null : "directory must not be null";
     assert directory.isDirectory() : "directory must be a directory";
-    assert manifestStringBuilder != null : "manifestStringBuilder must not be null";
+    assert manifestItems != null : "manifestItems must not be null";
 
     LOGGER.debug("adding new directory " + directory);
-    manifestStringBuilder.append(new StringBuilder().append("add-dir    \"").append(directory).append("\"\n").toString());
+    final JSONObject manifestItem = new JSONObject();
+    manifestItem.put("command", "add-dir");
+    manifestItem.put("path", directory.toString());
+    manifestItems.add(manifestItem);
     final List<File> oldFiles = new ArrayList<>();
     for (final File file : directory.listFiles()) {
       oldFiles.add(file);
@@ -320,11 +351,16 @@ public class CreateSoftwareDeploymentManifest {
     Collections.sort(oldFiles);
     for (final File file : oldFiles) {
       if (file.isDirectory()) {
-        addDirectory(file, manifestStringBuilder);
+        addDirectory(file, manifestItems);
       } else {
         LOGGER.debug("adding new file " + file);
-        manifestStringBuilder.append(new StringBuilder().append("add        \"").append(file).append("\"\n").toString());
-        addFileToManifest(file);
+        final JSONObject manifestItem2 = new JSONObject();
+        manifestItem2.put("command", "add");
+        manifestItem2.put("path", file.toString());
+        manifestItem2.put("hash", X509Utils.fileHashString(file));
+        manifestItems.add(manifestItem2);
+        addFileToManifestStagingDirectory(file);
+        addFileToManifestStagingDirectory(file);
       }
     }
   }
@@ -351,11 +387,11 @@ public class CreateSoftwareDeploymentManifest {
   }
 
   /**
-   * Adds the given file to the manifest directory.
+   * Adds the given file to the manifest staging directory.
    *
    * @param file the given file
    */
-  private void addFileToManifest(final File file) {
+  private void addFileToManifestStagingDirectory(final File file) {
     //Preconditions
     assert file != null : "file must not be null";
     assert file.exists() : "file must exist " + file;
@@ -369,6 +405,38 @@ public class CreateSoftwareDeploymentManifest {
       throw new TexaiException(ex);
     }
   }
+
+  /** Formats the given JSON string.
+   *
+   * @param jsonString  the given JSON string
+   * @return the formatted string
+   */
+  protected static String formatJSON(final String jsonString) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(jsonString) : "jsonString must be a non-empty string";
+
+    final StringBuilder stringBuilder = new StringBuilder();
+    boolean isFirst = true;
+    for (final char ch : jsonString.toCharArray()) {
+      if (ch == '{') {
+        if (isFirst) {
+          isFirst = false;
+        } else {
+          stringBuilder.append('\n');
+        }
+        stringBuilder.append('{');
+      } else if (ch == ',') {
+        stringBuilder.append(',');
+        stringBuilder.append('\n');
+        stringBuilder.append(' ');
+        stringBuilder.append(' ');
+      } else {
+        stringBuilder.append(ch);
+      }
+    }
+    return stringBuilder.toString();
+  }
+
 
   /**
    * Finalizes this application and releases its resources.
