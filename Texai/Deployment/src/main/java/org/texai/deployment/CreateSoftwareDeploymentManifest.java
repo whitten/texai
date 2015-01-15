@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.texai.util.FileSystemUtils;
@@ -96,6 +97,7 @@ public class CreateSoftwareDeploymentManifest {
     LOGGER.info("  old directory path      " + oldDirectoryPath);
     LOGGER.info("  new directory path      " + newDirectoryPath);
     LOGGER.info("  manifest directory path " + manifestDirectory);
+    Logger.getLogger(X509Utils.class).setLevel(Level.WARN);
   }
 
   /**
@@ -159,6 +161,8 @@ public class CreateSoftwareDeploymentManifest {
           final File newDirectoryFile,
           final List<JSONObject> manifestItems) {
     //Preconditions
+    assert oldDirectoryFile != null : "oldDirectoryFile must not be null";
+    assert newDirectoryFile != null : "newDirectoryFile must not be null";
     assert manifestItems != null : "manifestItems must not be null";
 
     final List<File> oldFiles = new ArrayList<>();
@@ -206,7 +210,10 @@ public class CreateSoftwareDeploymentManifest {
         LOGGER.debug("old files exhausted, adding new file " + newFile);
         final JSONObject manifestItem = new JSONObject();
         manifestItem.put("command", "add");
-        manifestItem.put("path", newFile.toString());
+        manifestItem.put("path", formRelativePath(
+                oldDirectoryPath,
+                newDirectoryPath,
+                newFile));
         manifestItem.put("hash", X509Utils.fileHashString(newFile));
         manifestItems.add(manifestItem);
         addFileToManifestStagingDirectory(newFile);
@@ -216,7 +223,10 @@ public class CreateSoftwareDeploymentManifest {
         LOGGER.debug("new files exhausted, removing old file " + oldFile);
         final JSONObject manifestItem = new JSONObject();
         manifestItem.put("command", "remove");
-        manifestItem.put("path", oldFile.toString());
+        manifestItem.put("path", formRelativePath(
+                oldDirectoryPath,
+                newDirectoryPath,
+                oldFile));
         manifestItems.add(manifestItem);
         oldFile = advanceIterator(oldFiles_iter);
 
@@ -225,25 +235,38 @@ public class CreateSoftwareDeploymentManifest {
           LOGGER.debug("removing old directory " + oldFile);
           final JSONObject manifestItem = new JSONObject();
           manifestItem.put("command", "remove-dir");
-          manifestItem.put("path", oldFile.toString());
+          manifestItem.put("path", formRelativePath(
+                  oldDirectoryPath,
+                  newDirectoryPath,
+                  oldFile));
           manifestItems.add(manifestItem);
         } else {
           LOGGER.debug("removing old file " + oldFile);
           final JSONObject manifestItem = new JSONObject();
           manifestItem.put("command", "remove");
-          manifestItem.put("path", oldFile.toString());
+          manifestItem.put("path", formRelativePath(
+                  oldDirectoryPath,
+                  newDirectoryPath,
+                  oldFile));
           manifestItems.add(manifestItem);
         }
         oldFile = advanceIterator(oldFiles_iter);
 
       } else if (compareRelativeFilePaths(oldFile, newFile) > 0) {
         if (newFile.isDirectory()) {
-          addDirectory(newFile, manifestItems);
+          addDirectory(
+                  oldDirectoryPath,
+                  newDirectoryPath,
+                  newFile,
+                  manifestItems);
         } else {
           LOGGER.debug("adding new file " + newFile);
           final JSONObject manifestItem = new JSONObject();
           manifestItem.put("command", "add");
-          manifestItem.put("path", newFile.toString());
+          manifestItem.put("path", formRelativePath(
+                  oldDirectoryPath,
+                  newDirectoryPath,
+                  newFile));
           manifestItem.put("hash", X509Utils.fileHashString(newFile));
           manifestItems.add(manifestItem);
           addFileToManifestStagingDirectory(newFile);
@@ -266,7 +289,10 @@ public class CreateSoftwareDeploymentManifest {
               LOGGER.debug("replacing old file " + oldFile + ", with new file " + newFile);
               final JSONObject manifestItem = new JSONObject();
               manifestItem.put("command", "replace");
-              manifestItem.put("path", newFile.toString());
+              manifestItem.put("path", formRelativePath(
+                      oldDirectoryPath,
+                      newDirectoryPath,
+                      newFile));
               manifestItem.put("hash", X509Utils.fileHashString(newFile));
               manifestItems.add(manifestItem);
               addFileToManifestStagingDirectory(newFile);
@@ -328,13 +354,19 @@ public class CreateSoftwareDeploymentManifest {
   /**
    * Recursively adds the files in the given directory to the manifest.
    *
+   * @param oldDirectoryPath the location of a copy of the production directory
+   * @param newDirectoryPath the location of a copy of the proposed production directory
    * @param directory the given directory
    * @param manifestItems the upgrade manifest items
    */
   private void addDirectory(
+          final String oldDirectoryPath,
+          final String newDirectoryPath,
           final File directory,
           final List<JSONObject> manifestItems) {
     //Preconditions
+    assert StringUtils.isNonEmptyString(oldDirectoryPath) : "the oldDirectoryPath must be a non-empty string";
+    assert StringUtils.isNonEmptyString(newDirectoryPath) : "the newDirectoryPath must be a non-empty string";
     assert directory != null : "directory must not be null";
     assert directory.isDirectory() : "directory must be a directory";
     assert manifestItems != null : "manifestItems must not be null";
@@ -342,7 +374,10 @@ public class CreateSoftwareDeploymentManifest {
     LOGGER.debug("adding new directory " + directory);
     final JSONObject manifestItem = new JSONObject();
     manifestItem.put("command", "add-dir");
-    manifestItem.put("path", directory.toString());
+    manifestItem.put("path", formRelativePath(
+            oldDirectoryPath,
+            newDirectoryPath,
+            directory));
     manifestItems.add(manifestItem);
     final List<File> oldFiles = new ArrayList<>();
     for (final File file : directory.listFiles()) {
@@ -351,17 +386,85 @@ public class CreateSoftwareDeploymentManifest {
     Collections.sort(oldFiles);
     for (final File file : oldFiles) {
       if (file.isDirectory()) {
-        addDirectory(file, manifestItems);
+        addDirectory(
+                oldDirectoryPath,
+                newDirectoryPath,
+                file, // directory
+                manifestItems);
       } else {
         LOGGER.debug("adding new file " + file);
         final JSONObject manifestItem2 = new JSONObject();
         manifestItem2.put("command", "add");
-        manifestItem2.put("path", file.toString());
+        manifestItem2.put("path", formRelativePath(
+                oldDirectoryPath,
+                newDirectoryPath,
+                file));
         manifestItem2.put("hash", X509Utils.fileHashString(file));
         manifestItems.add(manifestItem2);
         addFileToManifestStagingDirectory(file);
         addFileToManifestStagingDirectory(file);
       }
+    }
+  }
+
+  /**
+   * Forms the relative path of the given file in either of the given two directories.
+   *
+   * @param oldDirectory the location of a copy of the production directory
+   * @param newDirectory the location of a copy of the proposed production directory
+   * @param file the given file
+   *
+   * @return the relative path of the given file
+   */
+  protected static String formRelativePath(
+          final File oldDirectory,
+          final File newDirectory,
+          final File file) {
+    //Preconditions
+    assert oldDirectory != null : "oldDirectory must not be null";
+    assert newDirectory != null : "newDirectory must not be null";
+    assert file != null : "file must not be null";
+
+    return formRelativePath(
+            oldDirectory.toString(),
+            newDirectory.toString(),
+            file);
+  }
+
+  /**
+   * Forms the relative path of the given file in either of the given two directories.
+   *
+   * @param oldDirectoryPath the location of a copy of the production directory
+   * @param newDirectoryPath the location of a copy of the proposed production directory
+   * @param file the given file
+   *
+   * @return the relative path of the given file
+   */
+  protected static String formRelativePath(
+          final String oldDirectoryPath,
+          final String newDirectoryPath,
+          final File file) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(oldDirectoryPath) : "oldDirectoryPath must be a non-empty string";
+    assert StringUtils.isNonEmptyString(oldDirectoryPath) : "oldDirectoryPath must be a non-empty string";
+    assert file != null : "file must not be null";
+
+    final String filePath = file.toString();
+    if (filePath.startsWith(oldDirectoryPath)) {
+      if (oldDirectoryPath.endsWith("/")) {
+        return filePath.substring(oldDirectoryPath.length());
+      } else {
+        return filePath.substring(oldDirectoryPath.length() + 1);
+      }
+    } else if (filePath.startsWith(newDirectoryPath)) {
+      if (newDirectoryPath.endsWith("/")) {
+        return filePath.substring(newDirectoryPath.length());
+      } else {
+        return filePath.substring(newDirectoryPath.length() + 1);
+      }
+    } else {
+      assert false;
+      return null;
     }
   }
 
@@ -406,9 +509,11 @@ public class CreateSoftwareDeploymentManifest {
     }
   }
 
-  /** Formats the given JSON string.
+  /**
+   * Formats the given JSON string.
    *
-   * @param jsonString  the given JSON string
+   * @param jsonString the given JSON string
+   *
    * @return the formatted string
    */
   protected static String formatJSON(final String jsonString) {
@@ -436,7 +541,6 @@ public class CreateSoftwareDeploymentManifest {
     }
     return stringBuilder.toString();
   }
-
 
   /**
    * Finalizes this application and releases its resources.

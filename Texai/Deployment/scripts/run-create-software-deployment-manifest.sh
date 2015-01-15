@@ -3,6 +3,9 @@
 # Create a software deployment manifest.
 
 CLASSPATH=lib/commons-io-2.4.jar
+CLASSPATH=$CLASSPATH:lib/bcprov-jdk14-1.50.jar
+CLASSPATH=$CLASSPATH:lib/bcprov-jdk15on-1.50.jar
+CLASSPATH=$CLASSPATH:lib/bcpkix-jdk14-1.50.jar
 CLASSPATH=$CLASSPATH:lib/json-simple-1.1.1.jar
 CLASSPATH=$CLASSPATH:lib/joda-time-1.6.jar
 CLASSPATH=$CLASSPATH:lib/log4j-1.2.15.jar

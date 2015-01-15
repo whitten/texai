@@ -139,6 +139,42 @@ public class CreateSoftwareDeploymentManifestTest {
   }
 
   /**
+   * Test of formRelativePath method, of class CreateSoftwareDeploymentManifest.
+   */
+  @Test
+  public void testFormRelativePath() {
+    LOGGER.info("formRelativePath");
+
+    final String oldDirectoryPath = "/a/b/c/";
+    final String newDirectoryPath = "/d/e/f/";
+    File file = new File("/a/b/c/myfile.txt");
+    String relativePath = CreateSoftwareDeploymentManifest.formRelativePath(
+            oldDirectoryPath,
+            newDirectoryPath,
+            file);
+    assertEquals("myfile.txt", relativePath);
+    file = new File("/d/e/f/myfile.txt");
+    relativePath = CreateSoftwareDeploymentManifest.formRelativePath(
+            oldDirectoryPath,
+            newDirectoryPath,
+            file);
+    assertEquals("myfile.txt", relativePath);
+    final File oldDirectory = new File(oldDirectoryPath);
+    final File newDirectory = new File(newDirectoryPath);
+    relativePath = CreateSoftwareDeploymentManifest.formRelativePath(
+            oldDirectory,
+            newDirectory,
+            file);
+    assertEquals("myfile.txt", relativePath);
+    file = new File("/a/b/c/myfile.txt");
+    relativePath = CreateSoftwareDeploymentManifest.formRelativePath(
+            oldDirectory,
+            newDirectory,
+            file);
+    assertEquals("myfile.txt", relativePath);
+  }
+
+  /**
    * Test of isIgnored method, of class CreateSoftwareDeploymentManifest.
    */
   @Test
