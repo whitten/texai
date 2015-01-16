@@ -54,7 +54,9 @@ import org.texai.util.StringUtils;
  */
 public class MessageTest {
 
-  /** the logger */
+  /**
+   * the logger
+   */
   private static final Logger LOGGER = Logger.getLogger(MessageTest.class);
 
   public MessageTest() {
@@ -191,7 +193,7 @@ public class MessageTest {
             parameterDictionary,
             "1.0.0");
     assertFalse(instance2.isBetweenContainers());
-}
+  }
 
   /**
    * Test of isInfo method, of class Message.
@@ -418,6 +420,10 @@ public class MessageTest {
     String parameterName = "my-parm";
     Serializable parameterValue = 10;
     parameterDictionary.put(parameterName, parameterValue);
+    parameterName = "bytes";
+    final byte[] byteArray = {1, 2, 3, 4, 5, 6, 7, 8};
+    parameterValue = byteArray;
+    parameterDictionary.put(parameterName, parameterValue);
     Message instance = new Message(
             senderQualifiedName,
             "SenderService", // senderService
@@ -430,16 +436,18 @@ public class MessageTest {
             "ABC_Task", // operation
             parameterDictionary,
             "1.0.0");
-    LOGGER.info(instance);
-    assertTrue(instance.toString().contains("ABC_Task container1.agent1.role1:SenderService --> container2.agent2.role2:RepositoryContentDescription"));
+    final String result = instance.toString();
+    LOGGER.info(result);
+    assertTrue(result.contains("ABC_Task container1.agent1.role1:SenderService --> container2.agent2.role2:RepositoryContentDescription"));
+    assertTrue(result.contains("bytes=byte[](length=8)"));
   }
 
   /**
-   * Test of toString method, of class Message.
+   * Test of toDetailedString method, of class Message.
    */
   @Test
   public void testToDetailedString() {
-    LOGGER.info("toString");
+    LOGGER.info("toDetailedString");
     final String senderQualifiedName = "container1.agent1.role1";
     final String recipientQualifiedName = "container2.agent2.role2";
     final UUID conversationId = UUID.randomUUID();
@@ -451,6 +459,10 @@ public class MessageTest {
     final Map<String, Object> parameterDictionary = new HashMap<>();
     String parameterName = "my-parm";
     Serializable parameterValue = 10;
+    parameterDictionary.put(parameterName, parameterValue);
+    parameterName = "bytes";
+    final byte[] byteArray = {1, 2, 3, 4, 5, 6, 7, 8};
+    parameterValue = byteArray;
     parameterDictionary.put(parameterName, parameterValue);
     Message instance = new Message(
             senderQualifiedName,
@@ -465,7 +477,7 @@ public class MessageTest {
             parameterDictionary,
             "1.0.0");
     LOGGER.info(instance.toDetailedString());
-    //assertTrue(instance.toDetailedString().contains(""));
+    assertTrue(instance.toDetailedString().contains("parameter: bytes=byte[](length=8)"));
   }
 
   /**

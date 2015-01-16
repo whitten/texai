@@ -677,12 +677,15 @@ public class Message implements Serializable {
         } else {
           stringBuilder.append(',');
         }
-        stringBuilder.append("\n  ");
-        stringBuilder.append(entry.getKey());
-        stringBuilder.append('=');
+        stringBuilder
+                .append("\n  ")
+                .append(entry.getKey())
+                .append('=');
         final Object value = entry.getValue();
         if (value instanceof X509Certificate) {
           stringBuilder.append('[').append(((X509Certificate) value).getSubjectDN()).append(']');
+        } else if (value instanceof byte[]) {
+          stringBuilder.append("byte[](length=").append(((byte[]) entry.getValue()).length).append(")");
         } else {
           stringBuilder.append(value.toString());
         }
@@ -732,11 +735,22 @@ public class Message implements Serializable {
         } else {
           stringBuilder.append(',');
         }
+
+        if (entry.getKey().equals("bytes")) {
+          System.out.println("break here");
+        }
+
+        final String parameterValue;
+        if (entry.getValue() instanceof byte[]) {
+          parameterValue = "byte[](length=" + ((byte[]) entry.getValue()).length + ")";
+        } else {
+          parameterValue = entry.getValue().toString();
+        }
         stringBuilder
                 .append("\n    parameter: ")
                 .append(entry.getKey())
                 .append('=')
-                .append(entry.getValue().toString());
+                .append(parameterValue);
       }
       stringBuilder.append('\n');
     }
