@@ -359,6 +359,7 @@ public class CreateSoftwareDeploymentManifest {
    * @param directory the given directory
    * @param manifestItems the upgrade manifest items
    */
+  @SuppressWarnings("unchecked")
   private void addDirectory(
           final String oldDirectoryPath,
           final String newDirectoryPath,

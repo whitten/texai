@@ -62,6 +62,10 @@ public class ContainerDeployment extends AbstractSkill {
         performMission(message);
         return true;
 
+      case AHCSConstants.DEPLOY_FILE_TASK:
+        deployFile(message);
+        return true;
+
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
         return true;
@@ -99,6 +103,7 @@ public class ContainerDeployment extends AbstractSkill {
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.AHCS_INITIALIZE_TASK,
+      AHCSConstants.DEPLOY_FILE_TASK,
       AHCSConstants.PERFORM_MISSION_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
     };
@@ -114,6 +119,23 @@ public class ContainerDeployment extends AbstractSkill {
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
+  }
+
+  /**
+   * Perform the specified file deployment task.
+   *
+   * @param message the received perform mission task message
+   */
+  private void deployFile(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+
+    LOGGER.info("deploying files ...");
+    final String command = (String) message.get(AHCSConstants.DEPLOY_FILE_TASK_COMMAND);
+    LOGGER.info("  command: " + command);
+    final String fileToDeployPath = (String) message.get(AHCSConstants.DEPLOY_FILE_TASK_PATH);
+    LOGGER.info("  path:    " + fileToDeployPath);
   }
 
   /**

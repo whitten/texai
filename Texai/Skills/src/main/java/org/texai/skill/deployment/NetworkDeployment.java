@@ -7,11 +7,7 @@
  */
 package org.texai.skill.deployment;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,10 +15,12 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.json.simple.parser.ParseException;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
@@ -240,7 +238,12 @@ public class NetworkDeployment extends AbstractSkill {
      * Runs the software deployment process.
      */
     @Override
+    @SuppressWarnings("SleepWhileInLoop")
     public void run() {
+      if (isSoftwareDeploymentUnderway.getAndSet(true)) {
+        LOGGER.info("exiting thread because software deployment is underway");
+        return;
+      }
       LOGGER.info("Software and data deployment starting ...");
       // find the manifest and verify it is non empty
       File manifestFile = null;
@@ -257,17 +260,15 @@ public class NetworkDeployment extends AbstractSkill {
       }
 
       try {
-        final BufferedReader manifestBufferedReader = new BufferedReader(new FileReader(manifestFile));
-        while (true) {
-          final String deploymentCommandString = manifestBufferedReader.readLine();
-          if (deploymentCommandString == null) {
-            break;
-          }
-          LOGGER.info(deploymentCommandString);
-          final String command = deploymentCommandString.substring(0, 10).trim();
+        final JSONObject jsonObject = (JSONObject) JSONValue.parseWithException(new FileReader(manifestFile));
+        @SuppressWarnings("unchecked")
+        final List<JSONObject> manifestItems = (List<JSONObject>) jsonObject.get("manifest");
+        for (final JSONObject manifestItem : manifestItems) {
+          LOGGER.info(manifestItem);
+          final String command = (String) manifestItem.get("command");
           LOGGER.info("  command: " + command);
-          final String fileToDeployPath = deploymentCommandString.substring(12, deploymentCommandString.length() - 2);
-          LOGGER.info("  fileToDeployPath: " + fileToDeployPath);
+          final String fileToDeployPath = (String) manifestItem.get("command");
+          LOGGER.info("  path: " + fileToDeployPath);
           final File fileToDeploy = new File(fileToDeployPath);
           final File fileToSend = new File(fileToDeploy.getName());
           LOGGER.info("  fileToSend: " + fileToSend);
@@ -281,9 +282,9 @@ public class NetworkDeployment extends AbstractSkill {
                     containerDeploymentRoleName, // recipientQualifiedName
                     ContainerDeployment.class.getName(), // recipientService
                     AHCSConstants.DEPLOY_FILE_TASK); // operation
-            deployFileMessage.put(AHCSConstants.DEPLOY_FILE_TASK_COMMAND, deploymentCommandString);
+            deployFileMessage.put(AHCSConstants.DEPLOY_FILE_TASK_COMMAND, command);
             deployFileMessage.put(AHCSConstants.DEPLOY_FILE_TASK_PATH, fileToDeployPath);
-            if (deploymentCommandString.equals("add") || deploymentCommandString.equals("change")) {
+            if (command.equals("add") || command.equals("change")) {
               try {
                 deployFileMessage.put(AHCSConstants.DEPLOY_FILE_TASK_BYTES, FileUtils.readFileToByteArray(fileToSend));
               } catch (IOException ex) {
@@ -308,8 +309,10 @@ public class NetworkDeployment extends AbstractSkill {
           //   RESTART_CONTAINER_TASK --> ContainerOperationRole
           // the network operations node as the sole singleton agent host and await the connecting peers
         }
-      } catch (IOException ex) {
+      } catch (IOException | ParseException ex) {
         throw new TexaiException(ex);
+      } finally {
+        isSoftwareDeploymentUnderway.set(false);
       }
     }
 
