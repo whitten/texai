@@ -31,6 +31,7 @@ import static org.junit.Assert.*;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.SkillClass;
+import org.texai.skill.deployment.NetworkDeployment.CheckForDeployment;
 import org.texai.skill.network.NetworkOperation;
 import org.texai.skill.testHarness.SkillTestHarness;
 import org.texai.util.ArraySet;
@@ -43,12 +44,36 @@ public class NetworkDeploymentTest {
 
   // the logger
   private static final Logger LOGGER = Logger.getLogger(NetworkDeploymentTest.class);
+  private static final String containerName = "Test";
+  private static final String skillClassName = NetworkDeployment.class.getName();
+  private static final String nodeName = "NetworkDeploymentAgent";
+  private static final String roleName = "NetworkDeploymentRole";
+  private static SkillTestHarness skillTestHarness;
 
   public NetworkDeploymentTest() {
   }
 
   @BeforeClass
   public static void setUpClass() {
+    final Set<SkillClass> skillClasses = new ArraySet<>();
+    final SkillClass skillClass = new SkillClass(
+            skillClassName, // skillClassName
+            true); // isClassExistsTested
+    skillClasses.add(skillClass);
+    final Set<String> variableNames = new ArraySet<>();
+    final Set<String> childQualifiedNames = new ArraySet<>();
+    childQualifiedNames.add(containerName + ".ContainerDeploymentAgent.ContainerDeploymentRole");
+    skillTestHarness = new SkillTestHarness(
+            containerName + "." + nodeName, // name
+            "test mission description", // missionDescription
+            true, // isNetworkSingleton
+            containerName + "." + nodeName + "." + roleName, // qualifiedName
+            "test role description", // description
+            containerName + ".NetworkOperationAgent.NetworkOperationRole", // parentQualifiedName
+            childQualifiedNames,
+            skillClasses,
+            variableNames,
+            false); // areRemoteCommunicationsPermitted
   }
 
   @AfterClass
@@ -64,47 +89,42 @@ public class NetworkDeploymentTest {
   }
 
   /**
-   * Test of class NetworkDeployment.
+   * Test of class NetworkDeployment initialize task message.
    */
   @Test
-  public void testNetworkDeployment() {
-    LOGGER.info("NetworkDeployment");
-    final String skillClassName = NetworkDeployment.class.getName();
-    final String nodeName = "NetworkDeploymentAgent";
-    final String roleName = "NetworkDeploymentRole";
+  public void testInitializeTaskMessage() {
+    LOGGER.info("testing " + AHCSConstants.AHCS_INITIALIZE_TASK + " message");
 
-    final String containerName = "Test";
-    final Set<SkillClass> skillClasses = new ArraySet<>();
-    final SkillClass skillClass = new SkillClass(
-          skillClassName, // skillClassName
-          true); // isClassExistsTested
-    skillClasses.add(skillClass);
-    final Set<String> variableNames = new ArraySet<>();
-    final Set<String> childQualifiedNames = new ArraySet<>();
-    childQualifiedNames.add(containerName + ".ContainerDeploymentAgent.ContainerDeploymentRole");
-    final SkillTestHarness skillTestHarness = new SkillTestHarness(
-          containerName + "." + nodeName, // name
-          "test mission description", // missionDescription
-          true, // isNetworkSingleton
-          containerName + "." + nodeName + "." + roleName, // qualifiedName
-          "test role description", // description
-          containerName + ".NetworkOperationAgent.NetworkOperationRole", // parentQualifiedName
-          childQualifiedNames,
-          skillClasses,
-          variableNames,
-          false); // areRemoteCommunicationsPermitted
-
+    skillTestHarness.reset();
     final Message initializeMessage = new Message(
-          containerName + ".NetworkOperationAgent", // senderQualifiedName
-          NetworkOperation.class.getName(), // senderService
-          containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
-          skillClassName, // recipientService
-          AHCSConstants.AHCS_INITIALIZE_TASK); // operation
+            containerName + ".NetworkOperationAgent", // senderQualifiedName
+            NetworkOperation.class.getName(), // senderService
+            containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
+            skillClassName, // recipientService
+            AHCSConstants.AHCS_INITIALIZE_TASK); // operation
 
     skillTestHarness.dispatchMessage(initializeMessage);
     skillTestHarness.getSkillState(skillClassName);
     assertEquals("ISOLATED_FROM_NETWORK", skillTestHarness.getSkillState(skillClassName).toString());
     assertEquals("[AHCS initialize_Task, org.texai.skill.deployment.NetworkDeployment]", skillTestHarness.getOperationAndServiceInfo().toString());
+  }
+
+  /**
+   * Test of class CheckForDeployment.
+   */
+  @Test
+  public void testCheckForDeployment() {
+    LOGGER.info("CheckForDeployment");
+    skillTestHarness.reset();
+    final NetworkDeployment networkDeployment = (NetworkDeployment) skillTestHarness.getSkill(skillClassName);
+    final CheckForDeployment checkForDeployment = networkDeployment.makeCheckForDeployment();
+    checkForDeployment.run();
+    final Message sentMessage = skillTestHarness.getSentMessage();
+    assertTrue(sentMessage.toString().startsWith("[deployFile_Task Test.NetworkDeploymentAgent.NetworkDeploymentRole:NetworkDeployment --> Test.ContainerDeploymentAgent.ContainerDeploymentRole:ContainerDeployment "));
+    assertTrue(sentMessage.toString().endsWith("\n"
+            + "  deployFile_Task_command=remove-dir,\n"
+            + "  deployFile_Task_path=deployment\n"
+            + "]"));
   }
 
   /**

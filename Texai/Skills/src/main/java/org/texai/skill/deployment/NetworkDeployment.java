@@ -160,10 +160,18 @@ public class NetworkDeployment extends AbstractSkill {
     return LOGGER;
   }
 
+  /** Returns a new CheckForDeployment instance for unit testing.
+   *
+   * @return a new CheckForDeployment instance
+   */
+  protected CheckForDeployment makeCheckForDeployment() {
+    return new CheckForDeployment(this);
+  }
+
   /**
    * Periodically checks for a manifest to deploy.
    */
-  class CheckForDeployment extends TimerTask {
+  protected class CheckForDeployment extends TimerTask {
 
     // the network deployment skill
     final NetworkDeployment networkDeployment;
@@ -187,9 +195,9 @@ public class NetworkDeployment extends AbstractSkill {
     public void run() {
       //TODO add a tamper-evident log and peer verification
 
-      LOGGER.info("checking for a new deployment");
       // scan the deployment directory looking for "deployed.log"
       final File deploymentDirectory = new File("deployment");
+      LOGGER.info("checking for a new deployment in " + deploymentDirectory);
       if (!deploymentDirectory.exists()) {
         LOGGER.info("creating the deployment directory");
         deploymentDirectory.mkdir();
@@ -203,7 +211,8 @@ public class NetworkDeployment extends AbstractSkill {
         }
       }
       // process the deployment in separate thread in order to immediately release the shared timer thread
-      networkDeployment.getNodeRuntime().getExecutor().execute(new DeploymentRunable(networkDeployment, files));
+      //networkDeployment.getNodeRuntime().getExecutor().execute(new DeploymentRunable(networkDeployment, files));
+      (new DeploymentRunable(networkDeployment, files)).run();
     }
   }
 
@@ -243,6 +252,7 @@ public class NetworkDeployment extends AbstractSkill {
         return;
       }
       LOGGER.info("Software and data deployment starting ...");
+      LOGGER.info(files.length + " files");
       // find the manifest and verify it is non empty
       File manifestFile = null;
       for (final File file : files) {
@@ -256,19 +266,22 @@ public class NetworkDeployment extends AbstractSkill {
         //TODO report to network operations
         return;
       }
+      LOGGER.info("manifestFile: " + manifestFile);
 
       try {
         final JSONObject jsonObject = (JSONObject) JSONValue.parseWithException(new FileReader(manifestFile));
+        LOGGER.info("jsonObject: " + jsonObject);
         @SuppressWarnings("unchecked")
         final List<JSONObject> manifestItems = (List<JSONObject>) jsonObject.get("manifest");
+        LOGGER.info("manifestItems: " + manifestItems);
         for (final JSONObject manifestItem : manifestItems) {
           LOGGER.info(manifestItem);
           final String command = (String) manifestItem.get("command");
           LOGGER.info("  command: " + command);
-          final String fileToDeployPath = (String) manifestItem.get("command");
+          final String fileToDeployPath = (String) manifestItem.get("path");
           LOGGER.info("  path: " + fileToDeployPath);
           final File fileToDeploy = new File(fileToDeployPath);
-          final File fileToSend = new File(fileToDeploy.getName());
+          final File fileToSend = new File("deployment/" + fileToDeploy.getName());
           LOGGER.info("  fileToSend: " + fileToSend);
 
           // make a copy of the child container deployment roles for multithreading safety

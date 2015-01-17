@@ -69,7 +69,6 @@ public class ContainerDeployment extends AbstractSkill {
         return;
 
       // handle other operations ...
-      // handle other operations ...
     }
     // otherwise, the message is not understood
     sendMessage(notUnderstoodMessage(message));

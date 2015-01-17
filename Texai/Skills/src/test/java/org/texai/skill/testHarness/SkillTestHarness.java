@@ -132,7 +132,20 @@ public class SkillTestHarness {
     return skill.getSkillState();
   }
 
+  /** Gets the role's skill having the given class name.
+   *
+   * @param skillClassName  the given class name
+   * @return the skill
+   */
+  public AbstractSkill getSkill(final String skillClassName) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(skillClassName) : "skillClassName must be a non-empty string";
+    assert role.getSkillDictionary().containsKey(skillClassName) :
+            "skillClassName is not a skill for this role, skillDictonary ...\n " + role.getSkillDictionary();
 
+    return role.getSkill(skillClassName);
+  }
+  
   /**
    * Gets the mock node runtime.
    *
