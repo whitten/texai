@@ -56,11 +56,9 @@ public final class XAIRecovery extends AbstractNetworkSingletonSkill {
    * with regard to the conversation.
    *
    * @param message the given message
-   *
-   * @return whether the message was successfully processed
    */
   @Override
-  public boolean receiveMessage(Message message) {
+  public void receiveMessage(Message message) {
     //Preconditions
     assert message != null : "message must not be null";
     assert getRole().getNode().getNodeRuntime() != null;
@@ -68,7 +66,7 @@ public final class XAIRecovery extends AbstractNetworkSingletonSkill {
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
       sendMessage(operationNotPermittedMessage(message));
-      return true;
+      return;
     }
     switch (operation) {
       /**
@@ -84,7 +82,7 @@ public final class XAIRecovery extends AbstractNetworkSingletonSkill {
         } else {
           setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
         }
-        return true;
+        return;
 
       /**
        * Join Acknowledged Task
@@ -96,7 +94,7 @@ public final class XAIRecovery extends AbstractNetworkSingletonSkill {
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
                 "state must be isolated-from-network, but is " + getSkillState();
         joinAcknowledgedTask(message);
-        return true;
+        return;
 
       /**
        * Delegate Become Ready Task
@@ -108,7 +106,7 @@ public final class XAIRecovery extends AbstractNetworkSingletonSkill {
       case AHCSConstants.DELEGATE_BECOME_READY_TASK:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
         handleDelegateBecomeReadyTask(message);
-        return true;
+        return;
 
       /**
        * Delegate Perform Mission Task
@@ -120,19 +118,18 @@ public final class XAIRecovery extends AbstractNetworkSingletonSkill {
       case AHCSConstants.DELEGATE_PERFORM_MISSION_TASK:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
         handleDelegatePerformMissionTask(message);
-        return true;
+        return;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
         LOGGER.warn(message);
-        return true;
+        return;
 
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
-        return true;
+        return;
     }
 
     sendMessage(notUnderstoodMessage(message));
-    return true;
   }
 
   /**

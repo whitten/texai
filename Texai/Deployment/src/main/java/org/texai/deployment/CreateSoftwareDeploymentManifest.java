@@ -181,6 +181,7 @@ public class CreateSoftwareDeploymentManifest {
 
     File oldFile = advanceIterator(oldFiles_iter);
     File newFile = advanceIterator(newFiles_iter);
+    assert newFile.exists() : "newFile does not exist " + newFile;
 
     while (true) {
       LOGGER.debug("");
@@ -207,18 +208,28 @@ public class CreateSoftwareDeploymentManifest {
       }
 
       if (oldFile == null) {
-        LOGGER.debug("old files exhausted, adding new file " + newFile);
-        final JSONObject manifestItem = new JSONObject();
-        manifestItem.put("command", "add");
-        manifestItem.put("path", formRelativePath(
-                oldDirectoryPath,
-                newDirectoryPath,
-                newFile));
-        manifestItem.put("hash", X509Utils.fileHashString(newFile));
-        manifestItems.add(manifestItem);
-        addFileToManifestStagingDirectory(newFile);
-        newFile = advanceIterator(newFiles_iter);
-
+        if (newFile != null) {
+          if (newFile.isDirectory()) {
+            addNewDirectory(
+                    newFile,
+                    manifestItems);
+          } else if (newFile.isFile()) {
+            LOGGER.debug("old files exhausted, adding new file " + newFile);
+            final JSONObject manifestItem = new JSONObject();
+            manifestItem.put("command", "add");
+            manifestItem.put("path", formRelativePath(
+                    oldDirectoryPath,
+                    newDirectoryPath,
+                    newFile));
+            //TODO is newFile a directory?
+            manifestItem.put("hash", X509Utils.fileHashString(newFile));
+            manifestItems.add(manifestItem);
+            addFileToManifestStagingDirectory(newFile);
+          } else {
+            assert false : "newfile is neither a file nor a directory " + newFile;
+          }
+          newFile = advanceIterator(newFiles_iter);
+        }
       } else if (newFile == null) {
         LOGGER.debug("new files exhausted, removing old file " + oldFile);
         final JSONObject manifestItem = new JSONObject();
@@ -260,16 +271,9 @@ public class CreateSoftwareDeploymentManifest {
                   newFile,
                   manifestItems);
         } else {
-          LOGGER.debug("adding new file " + newFile);
-          final JSONObject manifestItem = new JSONObject();
-          manifestItem.put("command", "add");
-          manifestItem.put("path", formRelativePath(
-                  oldDirectoryPath,
-                  newDirectoryPath,
-                  newFile));
-          manifestItem.put("hash", X509Utils.fileHashString(newFile));
-          manifestItems.add(manifestItem);
-          addFileToManifestStagingDirectory(newFile);
+          addNewFile(
+                  newFile,
+                  manifestItems);
         }
         newFile = advanceIterator(newFiles_iter);
 
@@ -306,6 +310,63 @@ public class CreateSoftwareDeploymentManifest {
         newFile = advanceIterator(newFiles_iter);
       }
     }
+  }
+
+  /**
+   * Adds a new file to the manifest.
+   *
+   * @param newFile the new file
+   * @param manifestItems the upgrade manifest items
+   */
+  @SuppressWarnings("unchecked")
+  private void addNewFile(
+          final File newFile,
+          final List<JSONObject> manifestItems) {
+    //Preconditions
+    assert newFile != null : "newFile must not be null";
+    assert newFile.isFile() : "newFile must be a file";
+    assert manifestItems != null : "manifestItems must not be null";
+
+    LOGGER.debug("adding new file " + newFile);
+    final JSONObject manifestItem = new JSONObject();
+    manifestItem.put("command", "add");
+    manifestItem.put("path", formRelativePath(
+            oldDirectoryPath,
+            newDirectoryPath,
+            newFile));
+    manifestItem.put("hash", X509Utils.fileHashString(newFile));
+    manifestItems.add(manifestItem);
+    addFileToManifestStagingDirectory(newFile);
+  }
+
+  /**
+   * Recursively adds the given directory and its files.
+   *
+   * @param newDirectoryFile the new directory
+   * @param manifestItems the upgrade manifest items
+   */
+  private void addNewDirectory(
+          final File newDirectoryFile,
+          final List<JSONObject> manifestItems) {
+    //Preconditions
+    assert newDirectoryFile != null : "newDirectoryFile must not be null";
+    assert newDirectoryFile.isDirectory() : "newDirectoryFile must be a directory";
+    assert manifestItems != null : "manifestItems must not be null";
+
+    for (final File newFile : newDirectoryFile.listFiles()) {
+      if (newFile.isFile()) {
+        addNewFile(
+                newFile,
+                manifestItems);
+      } else if (newFile.isDirectory()) {
+        addNewDirectory(
+                newFile,
+                manifestItems);
+      } else {
+        assert false : "newfile is neither a file nor a directory " + newFile;
+      }
+    }
+
   }
 
   /**
@@ -502,7 +563,7 @@ public class CreateSoftwareDeploymentManifest {
     assert file.isFile() : "file must be a file " + file;
 
     final File targetFile = new File(manifestDirectory.toString() + '/' + file.getName());
-    LOGGER.debug("copying " + file + " to " + targetFile);
+    LOGGER.info("copying " + file + " to " + targetFile);
     try {
       FileUtils.copyFile(file, targetFile);
     } catch (IOException ex) {

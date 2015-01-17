@@ -58,11 +58,9 @@ public final class Governance extends AbstractSkill {
    * with regard to the conversation.
    *
    * @param message the given message
-   *
-   * @return whether the message was successfully processed
    */
   @Override
-  public boolean receiveMessage(final Message message) {
+  public void receiveMessage(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
     assert getRole().getNode().getNodeRuntime() != null;
@@ -70,11 +68,11 @@ public final class Governance extends AbstractSkill {
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
       sendMessage(operationNotPermittedMessage(message));
-      return true;
+      return;
     }
     if (operation.equals(AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO)) {
       LOGGER.warn(message);
-      return true;
+      return;
     }
     switch (operation) {
       /**
@@ -90,7 +88,7 @@ public final class Governance extends AbstractSkill {
         } else {
           setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
         }
-        return true;
+        return;
 
       /**
        * Become Ready Task
@@ -103,15 +101,14 @@ public final class Governance extends AbstractSkill {
         assert this.getSkillState().equals(State.ISOLATED_FROM_NETWORK) : "prior state must be isolated-from-network";
         setSkillState(State.READY);
         LOGGER.info("now ready");
-        return true;
+        return;
 
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
-        return true;
+        return;
     }
 
     sendMessage(notUnderstoodMessage(message));
-    return true;
   }
 
   /**

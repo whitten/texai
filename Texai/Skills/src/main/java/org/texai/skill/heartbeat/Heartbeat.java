@@ -72,7 +72,7 @@ public class Heartbeat extends AbstractSkill {
    * @return whether the message was successfully processed
    */
   @Override
-  public boolean receiveMessage(final Message message) {
+  public void receiveMessage(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
     assert getRole().getNode().getNodeRuntime() != null;
@@ -80,7 +80,7 @@ public class Heartbeat extends AbstractSkill {
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
       sendMessage(operationNotPermittedMessage(message));
-      return true;
+      return;
     }
     switch (operation) {
       /**
@@ -92,7 +92,7 @@ public class Heartbeat extends AbstractSkill {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert this.getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
         initialization(message);
-        return true;
+        return;
 
       /**
        * Become Ready Task
@@ -105,22 +105,21 @@ public class Heartbeat extends AbstractSkill {
         assert this.getSkillState().equals(State.ISOLATED_FROM_NETWORK) : "prior state must be isolated-from-network";
         setSkillState(AHCSConstants.State.READY);
         LOGGER.info("now ready");
-        return true;
+        return;
 
       case AHCSConstants.PERFORM_MISSION_TASK:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
         performMission(message);
-        return true;
+        return;
 
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
-        return true;
+        return;
 
     }
 
     // otherwise the received message is not understood
     sendMessage(notUnderstoodMessage(message));
-    return true;
   }
 
   /**

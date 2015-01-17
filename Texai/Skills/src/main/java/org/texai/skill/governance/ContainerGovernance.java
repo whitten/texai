@@ -58,11 +58,9 @@ public final class ContainerGovernance extends AbstractSkill {
    * are single threaded with regard to the conversation.
    *
    * @param message the given message
-   *
-   * @return whether the message was successfully processed
    */
   @Override
-  public boolean receiveMessage(Message message) {
+  public void receiveMessage(Message message) {
     //Preconditions
     assert message != null : "message must not be null";
     assert getRole().getNode().getNodeRuntime() != null;
@@ -70,7 +68,7 @@ public final class ContainerGovernance extends AbstractSkill {
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
       sendMessage(operationNotPermittedMessage(message));
-      return true;
+      return;
     }
     switch (operation) {
       /**
@@ -87,7 +85,7 @@ public final class ContainerGovernance extends AbstractSkill {
         } else {
           setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
         }
-        return true;
+        return;
 
       /**
        * Join Acknowledged Task
@@ -99,7 +97,7 @@ public final class ContainerGovernance extends AbstractSkill {
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
                 "state must be isolated-from-network, but is " + getSkillState();
         joinAcknowledgedTask(message);
-        return true;
+        return;
 
       /**
        * Become Ready Task
@@ -112,24 +110,23 @@ public final class ContainerGovernance extends AbstractSkill {
         assert this.getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "prior state must be isolated-from-network";
         setSkillState(AHCSConstants.State.READY);
         LOGGER.info("now ready");
-        return true;
+        return;
 
       case AHCSConstants.PERFORM_MISSION_TASK:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
         performMission(message);
-        return true;
+        return;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
         LOGGER.warn(message);
-        return true;
+        return;
 
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
-        return true;
+        return;
     }
 
     sendMessage(notUnderstoodMessage(message));
-    return true;
   }
 
   /**

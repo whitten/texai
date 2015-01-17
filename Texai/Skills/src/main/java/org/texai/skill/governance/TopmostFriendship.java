@@ -54,11 +54,9 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
    * Receives and attempts to process the given message.
    *
    * @param message the given message
-   *
-   * @return whether the message was successfully processed
    */
   @Override
-  public boolean receiveMessage(final Message message) {
+  public void receiveMessage(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
     assert getRole().getNode().getNodeRuntime() != null;
@@ -66,7 +64,7 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
       sendMessage(operationNotPermittedMessage(message));
-      return true;
+      return;
     }
     switch (operation) {
       /**
@@ -82,7 +80,7 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
         initialization(message);
-        return true;
+        return;
 
       /**
        * Singleton Agent Hosts Info
@@ -102,7 +100,7 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
       case AHCSConstants.SINGLETON_AGENT_HOSTS_INFO:
         assert getSkillState().equals(State.ISOLATED_FROM_NETWORK) : "state must be ready";
         singletonAgentHosts(message);
-        return true;
+        return;
 
       /**
        * Join Network Singleton Agent Info
@@ -119,7 +117,7 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
       case AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
         joinNetworkSingletonAgent(message);
-        return true;
+        return;
 
       /**
        * Join Network Singleton Agent Info
@@ -136,18 +134,17 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
       case AHCSConstants.NETWORK_JOIN_COMPLETE_SENSATION:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
         handleNetworkJoinCompleteSensation(message);
-        return true;
+        return;
 
       // handle other operations ...
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
-        return true;
+        return;
 
     }
 
     // not understood
     sendMessage(notUnderstoodMessage(message));
-    return true;
   }
 
   /**

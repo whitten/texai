@@ -62,11 +62,9 @@ public final class ContainerOperation extends AbstractSkill {
    * with regard to the conversation.
    *
    * @param message the given message
-   *
-   * @return whether the message was successfully processed
    */
   @Override
-  public boolean receiveMessage(Message message) {
+  public void receiveMessage(Message message) {
     //Preconditions
     assert message != null : "message must not be null";
     assert getRole().getNode().getNodeRuntime() != null;
@@ -74,7 +72,7 @@ public final class ContainerOperation extends AbstractSkill {
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
       sendMessage(operationNotPermittedMessage(message));
-      return true;
+      return;
     }
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
@@ -91,7 +89,7 @@ public final class ContainerOperation extends AbstractSkill {
         } else {
           setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
         }
-        return true;
+        return;
 
       /**
        * Delegate Configure Singleton Agent Hosts Task
@@ -111,7 +109,7 @@ public final class ContainerOperation extends AbstractSkill {
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
                 "state must be isolated-from-network, but is " + getSkillState();
         configureSingletonAgentHostsTask(message);
-        return true;
+        return;
 
       /**
        * Join Acknowledged Task
@@ -123,7 +121,7 @@ public final class ContainerOperation extends AbstractSkill {
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
                 "state must be isolated-from-network, but is " + getSkillState();
         joinAcknowledgedTask(message);
-        return true;
+        return;
 
       /**
        * Become Ready Task
@@ -136,7 +134,7 @@ public final class ContainerOperation extends AbstractSkill {
         assert this.getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "prior state must be isolated-from-network";
         setSkillState(AHCSConstants.State.READY);
         LOGGER.info("now ready");
-        return true;
+        return;
 
       /**
        * Perform Mission Task
@@ -149,7 +147,7 @@ public final class ContainerOperation extends AbstractSkill {
       case AHCSConstants.PERFORM_MISSION_TASK:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
         performMission(message);
-        return true;
+        return;
 
       /**
        * Add Unjoined Role Info
@@ -159,7 +157,7 @@ public final class ContainerOperation extends AbstractSkill {
       case AHCSConstants.ADD_UNJOINED_ROLE_INFO:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "state must be isolated-from-network";
         addUnjoinedRole(message);
-        return true;
+        return;
 
       /**
        * Remove Unjoined Role Info
@@ -171,21 +169,21 @@ public final class ContainerOperation extends AbstractSkill {
       case AHCSConstants.REMOVE_UNJOINED_ROLE_INFO:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "state must be isolated-from-network";
         removeUnjoinedRole(message);
-        return true;
+        return;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
         LOGGER.warn(message);
-        return true;
+        return;
 
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
-        return true;
+        return;
 
+      // handle other operations ...
       // handle other operations ...
     }
 
     sendMessage(notUnderstoodMessage(message));
-    return true;
   }
 
   /**

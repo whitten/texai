@@ -152,10 +152,8 @@ public abstract class AbstractSkill {
    * with regard to the conversation.
    *
    * @param message the given message
-   *
-   * @return whether the message was successfully processed
    */
-  public abstract boolean receiveMessage(final Message message);
+  public abstract void receiveMessage(final Message message);
 
   /**
    * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single threaded with regard

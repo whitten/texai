@@ -64,11 +64,9 @@ public class SingletonConfiguration extends AbstractSkill {
    * with regard to the conversation.
    *
    * @param message the given message
-   *
-   * @return whether the message was successfully processed
    */
   @Override
-  public boolean receiveMessage(Message message) {
+  public void receiveMessage(Message message) {
     //Preconditions
     assert message != null : "message must not be null";
     assert getRole().getNode().getNodeRuntime() != null;
@@ -76,7 +74,7 @@ public class SingletonConfiguration extends AbstractSkill {
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
       sendMessage(operationNotPermittedMessage(message));
-      return true;
+      return;
     }
     switch (operation) {
       /**
@@ -93,7 +91,7 @@ public class SingletonConfiguration extends AbstractSkill {
         } else {
           setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
         }
-        return true;
+        return;
 
       /**
        * Join Network Task
@@ -107,7 +105,7 @@ public class SingletonConfiguration extends AbstractSkill {
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
                 "state must be isolated-from-network, but is " + getSkillState();
         joinNetwork(message);
-        return true;
+        return;
 
       /**
        * Singleton Agent Hosts Info
@@ -125,7 +123,7 @@ public class SingletonConfiguration extends AbstractSkill {
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
                 "state must be isolated-from-network, but is " + getSkillState();
         handleSeedConnectionReply(message);
-        return true;
+        return;
 
       /**
        * Join Acknowledged Task
@@ -137,7 +135,7 @@ public class SingletonConfiguration extends AbstractSkill {
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
                 "state must be isolated-from-network, but is " + getSkillState();
         joinAcknowledgedTask(message);
-        return true;
+        return;
 
       /**
        * Become Ready Task
@@ -150,7 +148,7 @@ public class SingletonConfiguration extends AbstractSkill {
         assert this.getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "prior state must be isolated-from-network";
         setSkillState(AHCSConstants.State.READY);
         LOGGER.info("now ready");
-        return true;
+        return;
 
       /**
        * Perform Mission Task
@@ -161,7 +159,7 @@ public class SingletonConfiguration extends AbstractSkill {
       case AHCSConstants.PERFORM_MISSION_TASK:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
         performMission(message);
-        return true;
+        return;
 
       /**
        * Seed Connection Request Info
@@ -176,7 +174,7 @@ public class SingletonConfiguration extends AbstractSkill {
       case AHCSConstants.SEED_CONNECTION_REQUEST_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
         seedConnectionRequest(message);
-        return true;
+        return;
 
 
       /**
@@ -191,20 +189,19 @@ public class SingletonConfiguration extends AbstractSkill {
       case AHCSConstants.MESSAGE_TIMEOUT_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
         seedConnectionRequestTimeout(message);
-        return true;
+        return;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
         LOGGER.warn(message);
-        return true;
+        return;
 
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
-        return true;
+        return;
 
     }
     // otherwise, the message is not understood
     sendMessage(notUnderstoodMessage(message));
-    return true;
   }
 
   /**
@@ -436,7 +433,7 @@ public class SingletonConfiguration extends AbstractSkill {
       // no need to retry the seed peer connection as the configuration was provided by another seed peer
       return;
     }
-    
+
     final Message connectionRequestMessage = (Message) message.get(AHCSConstants.MESSAGE_TIMEOUT_INFO_ORIGINAL_MESSAGE);
     assert connectionRequestMessage.getOperation().equals(AHCSConstants.SEED_CONNECTION_REQUEST_INFO);
     final String peerQualifiedName = connectionRequestMessage.getRecipientQualifiedName();

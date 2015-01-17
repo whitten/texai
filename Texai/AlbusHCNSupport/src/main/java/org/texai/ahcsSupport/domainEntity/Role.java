@@ -103,8 +103,6 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   private final AtomicReference<State> roleState = new AtomicReference<>(State.UNINITIALIZED);
   // the subskills dictionary, subskill class name --> subskill shared instance
   private final Map<String, AbstractSubSkill> subSkillsDictionary = new HashMap<>();
-  // the cached value of isNetworkSingletonRole
-  private Boolean isNetworkSingletonRole;
 
   /**
    * Constructs a new Role instance. Used by the persistence framework.
@@ -298,16 +296,16 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   /**
    * Finds the role's skill instance having the specified class name (service).
    *
-   * @param subSkillClassName the specified class name (service)
+   * @param skillClassName the specified class name (service)
    *
    * @return the skill
    */
-  public AbstractSkill getSkill(final String subSkillClassName) {
+  public AbstractSkill getSkill(final String skillClassName) {
     //Preconditions
-    assert StringUtils.isNonEmptyString(subSkillClassName) : "subSkillClassName must be a non-empty string";
+    assert StringUtils.isNonEmptyString(skillClassName) : "skillClassName must be a non-empty string";
 
     synchronized (skillDictionary.values()) {
-      return skillDictionary.get(subSkillClassName);
+      return skillDictionary.get(skillClassName);
     }
   }
 
@@ -455,7 +453,9 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
           // not a primary skill for this role, try the shared subskill dictionary
           skill = findSubSkill(message.getRecipientService());
         }
-        assert skill != null : "service not found " + message.getRecipientService() + "\n" + message.toDetailedString() + "\n skillDictionary: " + skillDictionary;
+        assert skill != null :
+                "service not found " + message.getRecipientService() + "\n" + message.toDetailedString() +
+                "\n skillDictionary: " + skillDictionary;
       }
     }
 

@@ -53,18 +53,16 @@ public final class TorRelay extends AbstractSkill {
    * are single threaded with regard to the conversation.
    *
    * @param message the given message
-   *
-   * @return whether the message was successfully processed
    */
   @Override
-  public boolean receiveMessage(Message message) {
+  public void receiveMessage(Message message) {
     //Preconditions
     assert message != null : "message must not be null";
 
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
       sendMessage(operationNotPermittedMessage(message));
-      return true;
+      return;
     }
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
@@ -74,15 +72,14 @@ public final class TorRelay extends AbstractSkill {
         } else {
           setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
         }
-        return true;
+        return;
 
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
-        return true;
+        return;
     }
 
     sendMessage(notUnderstoodMessage(message));
-    return true;
   }
 
   /**

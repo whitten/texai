@@ -201,6 +201,7 @@ public class CreateSoftwareDeploymentManifestTest {
       "data/test-deployment-dir-new",
       "data/test-deployment-manifests"
     };
+    LOGGER.info("working directory: " + System.getProperty("user.dir"));
     CreateSoftwareDeploymentManifest.main(args);
   }
 

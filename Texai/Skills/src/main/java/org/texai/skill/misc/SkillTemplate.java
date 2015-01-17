@@ -38,11 +38,9 @@ public class SkillTemplate extends AbstractSkill {
    * with regard to the conversation.
    *
    * @param message the given message
-   *
-   * @return whether the message was successfully processed
    */
   @Override
-  public boolean receiveMessage(Message message) {
+  public void receiveMessage(Message message) {
     //Preconditions
     assert message != null : "message must not be null";
     assert getRole().getNode().getNodeRuntime() != null;
@@ -50,7 +48,7 @@ public class SkillTemplate extends AbstractSkill {
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
       sendMessage(operationNotPermittedMessage(message));
-      return true;
+      return;
     }
     switch (operation) {
       case AHCSConstants.AHCS_INITIALIZE_TASK:
@@ -65,21 +63,21 @@ public class SkillTemplate extends AbstractSkill {
         } else {
           setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
         }
-        return true;
+        return;
 
       case AHCSConstants.PERFORM_MISSION_TASK:
         performMission(message);
-        return true;
+        return;
 
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
-        return true;
+        return;
 
+      // handle other operations ...
       // handle other operations ...
     }
     // otherwise, the message is not understood
     sendMessage(notUnderstoodMessage(message));
-    return true;
   }
 
   /**

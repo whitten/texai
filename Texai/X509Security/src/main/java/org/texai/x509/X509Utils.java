@@ -1266,6 +1266,7 @@ public final class X509Utils {
   public static String fileHashString(final File file) {
     //Preconditions
     assert file != null : "file must not be null";
+    assert file.isFile() : "file must be a file, e.g. not a directory, " + file;
 
     final byte[] hashBytes;
     try {
