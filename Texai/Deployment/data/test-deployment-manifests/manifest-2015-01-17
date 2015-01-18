@@ -4,7 +4,7 @@
   "hash":"vfeSHKnz8dO44jB3KKVWtIjfBRTBOUCbFd6UK8vEfZagZrsFaghsr3gBccz7IvqgZ7HyJ5p3\/wy+i8S+29fDMg=="},
   
 {"path":"file-h-remove",
-  "command":"remove"},
+  "command":"delete"},
   
 {"path":"file-i-add",
   "command":"add",
@@ -19,7 +19,7 @@
   "hash":"z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXcg\/SpIdNs6c5H0NE8XYXysP+DGNKHfuwvY7kxvUdBeoGlODJ6+SfaPg=="},
   
 {"path":"subdirectory\/file-x-remove",
-  "command":"remove"},
+  "command":"delete"},
   
 {"path":"subdirectory-add\/file-g-add",
   "command":"add",

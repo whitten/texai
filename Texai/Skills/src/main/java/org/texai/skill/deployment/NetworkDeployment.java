@@ -211,8 +211,7 @@ public class NetworkDeployment extends AbstractSkill {
         }
       }
       // process the deployment in separate thread in order to immediately release the shared timer thread
-      //networkDeployment.getNodeRuntime().getExecutor().execute(new DeploymentRunable(networkDeployment, files));
-      (new DeploymentRunable(networkDeployment, files)).run();
+      networkDeployment.getNodeRuntime().getExecutor().execute(new DeploymentRunable(networkDeployment, files));
     }
   }
 

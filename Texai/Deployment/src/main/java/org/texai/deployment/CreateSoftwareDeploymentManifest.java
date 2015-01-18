@@ -231,9 +231,9 @@ public class CreateSoftwareDeploymentManifest {
           newFile = advanceIterator(newFiles_iter);
         }
       } else if (newFile == null) {
-        LOGGER.debug("new files exhausted, removing old file " + oldFile);
+        LOGGER.debug("new files exhausted, deleting old file " + oldFile);
         final JSONObject manifestItem = new JSONObject();
-        manifestItem.put("command", "remove");
+        manifestItem.put("command", "delete");
         manifestItem.put("path", formRelativePath(
                 oldDirectoryPath,
                 newDirectoryPath,
@@ -243,18 +243,18 @@ public class CreateSoftwareDeploymentManifest {
 
       } else if (compareRelativeFilePaths(oldFile, newFile) < 0) {
         if (oldFile.isDirectory()) {
-          LOGGER.debug("removing old directory " + oldFile);
+          LOGGER.debug("deleting old directory " + oldFile);
           final JSONObject manifestItem = new JSONObject();
-          manifestItem.put("command", "remove-dir");
+          manifestItem.put("command", "delete-dir");
           manifestItem.put("path", formRelativePath(
                   oldDirectoryPath,
                   newDirectoryPath,
                   oldFile));
           manifestItems.add(manifestItem);
         } else {
-          LOGGER.debug("removing old file " + oldFile);
+          LOGGER.debug("deleting old file " + oldFile);
           final JSONObject manifestItem = new JSONObject();
-          manifestItem.put("command", "remove");
+          manifestItem.put("command", "delete");
           manifestItem.put("path", formRelativePath(
                   oldDirectoryPath,
                   newDirectoryPath,

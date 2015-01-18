@@ -7,11 +7,15 @@
  */
 package org.texai.skill.deployment;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.util.TexaiException;
 
 /**
  *
@@ -128,11 +132,84 @@ public class ContainerDeployment extends AbstractSkill {
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
-    LOGGER.info("deploying files ...");
+    LOGGER.info("deploying file ...");
     final String command = (String) message.get(AHCSConstants.DEPLOY_FILE_TASK_COMMAND);
     LOGGER.info("  command: " + command);
     final String fileToDeployPath = (String) message.get(AHCSConstants.DEPLOY_FILE_TASK_PATH);
     LOGGER.info("  path:    " + fileToDeployPath);
+
+    switch (command) {
+      case "add":
+      case "replace":
+        LOGGER.info("writing " + fileToDeployPath);
+        try {
+          final FileOutputStream fileOutputStream = new FileOutputStream(fileToDeployPath);
+          final byte[] bytes = (byte[]) message.get(AHCSConstants.DEPLOY_FILE_TASK_BYTES);
+          fileOutputStream.write(bytes);
+        } catch (IOException ex) {
+          throw new TexaiException(ex);
+        } break;
+
+      case "add-dir":
+        LOGGER.info("creating directory " + fileToDeployPath);
+        final File directory = new File(fileToDeployPath);
+        final boolean isOk = directory.mkdirs();
+        if (!isOk) {
+          throw new TexaiException("cannot create directory " + directory);
+      } break;
+
+      case "delete-dir":
+        deleteDirectory(new File(fileToDeployPath));
+        break;
+
+      case "delete":
+        deleteFile(new File(fileToDeployPath));
+        break;
+
+      default:
+        assert false;
+    }
+  }
+
+  /**
+   * Recursively deletes the given directory and its contained files and subdirectories.
+   *
+   * @param directory the given directory
+   */
+  private void deleteDirectory(final File directory) {
+    //Preconditions
+    assert directory != null : "directory must not be null";
+    assert directory.isDirectory() : "directory must be a directory";
+
+    for (final File file : directory.listFiles()) {
+      if (file.isDirectory()) {
+        deleteDirectory(file);
+      } else {
+        deleteFile(file);
+      }
+    }
+    LOGGER.info("deleting directory " + directory);
+    final boolean isOk = directory.delete();
+    if (!isOk) {
+      throw new TexaiException("cannot delete " + directory);
+    }
+  }
+
+  /**
+   * Deletes the given file.
+   *
+   * @param file the given file
+   */
+  private void deleteFile(final File file) {
+    //Preconditions
+    assert file != null : "file must not be null";
+    assert file.isFile() : "file must be a file";
+
+    LOGGER.info("deleting file " + file);
+    final boolean isOk = file.delete();
+    if (!isOk) {
+      throw new TexaiException("cannot delete " + file);
+    }
   }
 
   /**
