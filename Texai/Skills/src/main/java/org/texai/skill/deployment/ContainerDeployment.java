@@ -16,6 +16,7 @@ import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 import org.texai.util.TexaiException;
+import org.texai.x509.MessageDigestUtils;
 
 /**
  *
@@ -141,14 +142,22 @@ public class ContainerDeployment extends AbstractSkill {
     switch (command) {
       case "add":
       case "replace":
+        final String hash = (String) message.get(AHCSConstants.DEPLOY_FILE_TASK_HASH);
+        LOGGER.info("  hash: " + hash);
+
         LOGGER.info("writing " + fileToDeployPath);
         try {
           final FileOutputStream fileOutputStream = new FileOutputStream(fileToDeployPath);
           final byte[] bytes = (byte[]) message.get(AHCSConstants.DEPLOY_FILE_TASK_BYTES);
+          MessageDigestUtils.verifyFileHash(hash, hash);
           fileOutputStream.write(bytes);
+          if (command.equals("add") && fileToDeployPath.startsWith("deployment-manifests/manifest-")) {
+            //TODO parse manifest file and ensure all files are processed
+          }
         } catch (IOException ex) {
           throw new TexaiException(ex);
-        } break;
+        }
+        break;
 
       case "add-dir":
         LOGGER.info("creating directory " + fileToDeployPath);
@@ -156,7 +165,8 @@ public class ContainerDeployment extends AbstractSkill {
         final boolean isOk = directory.mkdirs();
         if (!isOk) {
           throw new TexaiException("cannot create directory " + directory);
-      } break;
+        }
+        break;
 
       case "delete-dir":
         deleteDirectory(new File(fileToDeployPath));

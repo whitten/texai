@@ -34,7 +34,7 @@ import org.texai.skill.domainEntity.SingletonAgentHosts;
 import org.texai.skill.governance.TopmostFriendship;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
-import org.texai.x509.X509Utils;
+import org.texai.x509.MessageDigestUtils;
 
 /**
  *
@@ -282,7 +282,7 @@ public class SingletonConfiguration extends AbstractSkill {
     // deserialize the set of SeedNodeInfo objects from the specified file
     final String seedNodeInfosFilePath = "data/SeedNodeInfos.ser";
     LOGGER.info("seedNodeInfosFileHashString\n" + seedNodeInfosFileHashString);
-    X509Utils.verifyFileHash(
+    MessageDigestUtils.verifyFileHash(
             seedNodeInfosFilePath, // filePath
             seedNodeInfosFileHashString); // fileHashString
     try {

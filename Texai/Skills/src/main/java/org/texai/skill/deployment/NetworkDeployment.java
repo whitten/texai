@@ -160,12 +160,15 @@ public class NetworkDeployment extends AbstractSkill {
     return LOGGER;
   }
 
-  /** Returns a new CheckForDeployment instance for unit testing.
+  /**
+   * Returns a new CheckForDeployment instance for unit testing.
    *
    * @return a new CheckForDeployment instance
    */
-  protected CheckForDeployment makeCheckForDeployment() {
-    return new CheckForDeployment(this);
+  protected CheckForDeployment makeCheckForDeploymentForUnitTest() {
+    return new CheckForDeployment(
+            this, // networkDeployment
+            true); // isUnitTest
   }
 
   /**
@@ -175,6 +178,8 @@ public class NetworkDeployment extends AbstractSkill {
 
     // the network deployment skill
     final NetworkDeployment networkDeployment;
+    // the indicator whether this timer test is executed as part of a unit test, in which case there is no Timer
+    final boolean isUnitTest;
 
     /**
      * Creates a new CheckForDeployment instance.
@@ -186,6 +191,23 @@ public class NetworkDeployment extends AbstractSkill {
       assert networkDeployment != null : "networkDeployment must not be null";
 
       this.networkDeployment = networkDeployment;
+      isUnitTest = false;
+    }
+
+    /**
+     * Creates a new CheckForDeployment instance.
+     *
+     * @param networkDeployment the network deployment skill
+     * @param isUnitTest the indicator whether this timer test is executed as part of a unit test, in which case there is no Timer
+     */
+    CheckForDeployment(
+            final NetworkDeployment networkDeployment,
+            final boolean isUnitTest) {
+      //Preconditions
+      assert networkDeployment != null : "networkDeployment must not be null";
+
+      this.networkDeployment = networkDeployment;
+      this.isUnitTest = isUnitTest;
     }
 
     /**
@@ -210,8 +232,13 @@ public class NetworkDeployment extends AbstractSkill {
           return;
         }
       }
-      // process the deployment in separate thread in order to immediately release the shared timer thread
-      networkDeployment.getNodeRuntime().getExecutor().execute(new DeploymentRunable(networkDeployment, files));
+      if (isUnitTest) {
+        // no timer thread when unit testing, and need to wait for the results
+        (new DeploymentRunable(networkDeployment, files)).run();
+      } else {
+        // process the deployment in separate thread in order to immediately release the shared timer thread
+        networkDeployment.getNodeRuntime().getExecutor().execute(new DeploymentRunable(networkDeployment, files));
+      }
     }
   }
 
@@ -282,7 +309,11 @@ public class NetworkDeployment extends AbstractSkill {
           final File fileToDeploy = new File(fileToDeployPath);
           final File fileToSend = new File("deployment/" + fileToDeploy.getName());
           LOGGER.info("  fileToSend: " + fileToSend);
+          if (command.equals("add") || command.equals("change")) {
+            final String hash = (String) manifestItem.get("hash");
+            LOGGER.info("  hash: " + hash);
 
+          }
           // make a copy of the child container deployment roles for multithreading safety
           final List<String> containerDeploymentRoleNames = new ArrayList<>(networkDeployment.getRole().getChildQualifiedNames());
           // send the file to each child container deployment role

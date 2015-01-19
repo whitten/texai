@@ -60,6 +60,7 @@ import org.texai.kb.persistence.DistributedRepositoryManager;
 import org.texai.util.ArraySet;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
+import org.texai.x509.MessageDigestUtils;
 import org.texai.x509.X509SecurityInfo;
 import org.texai.x509.X509Utils;
 import org.xml.sax.Attributes;
@@ -159,7 +160,7 @@ public final class NodesInitializer {
       throw new TexaiException("JCE Unlimited Strength Policy files are not installed");
     }
 
-    X509Utils.verifyFileHash(
+    MessageDigestUtils.verifyFileHash(
             nodesPath, // filePath
             nodesFileHashString); // fileHashString
 

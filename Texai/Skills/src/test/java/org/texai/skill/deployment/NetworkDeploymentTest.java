@@ -117,9 +117,11 @@ public class NetworkDeploymentTest {
     LOGGER.info("CheckForDeployment");
     skillTestHarness.reset();
     final NetworkDeployment networkDeployment = (NetworkDeployment) skillTestHarness.getSkill(skillClassName);
-    final CheckForDeployment checkForDeployment = networkDeployment.makeCheckForDeployment();
+    final CheckForDeployment checkForDeployment = networkDeployment.makeCheckForDeploymentForUnitTest();
     checkForDeployment.run();
     final Message sentMessage = skillTestHarness.getSentMessage();
+    assertNotNull(sentMessage);
+    LOGGER.info("sentMessage...\n" + sentMessage);
     assertTrue(sentMessage.toString().startsWith("[deployFile_Task Test.NetworkDeploymentAgent.NetworkDeploymentRole:NetworkDeployment --> Test.ContainerDeploymentAgent.ContainerDeploymentRole:ContainerDeployment "));
     assertTrue(sentMessage.toString().endsWith("\n"
             + "  deployFile_Task_command=remove-dir,\n"

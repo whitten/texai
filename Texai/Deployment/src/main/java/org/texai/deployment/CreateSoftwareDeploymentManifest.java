@@ -15,7 +15,7 @@ import org.json.simple.JSONObject;
 import org.texai.util.FileSystemUtils;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
-import org.texai.x509.X509Utils;
+import org.texai.x509.MessageDigestUtils;
 
 /**
  * CreateSoftwareDeploymentManifest.java
@@ -97,7 +97,7 @@ public class CreateSoftwareDeploymentManifest {
     LOGGER.info("  old directory path      " + oldDirectoryPath);
     LOGGER.info("  new directory path      " + newDirectoryPath);
     LOGGER.info("  manifest directory path " + manifestDirectory);
-    Logger.getLogger(X509Utils.class).setLevel(Level.WARN);
+    Logger.getLogger(MessageDigestUtils.class).setLevel(Level.WARN);
   }
 
   /**
@@ -221,8 +221,7 @@ public class CreateSoftwareDeploymentManifest {
                     oldDirectoryPath,
                     newDirectoryPath,
                     newFile));
-            //TODO is newFile a directory?
-            manifestItem.put("hash", X509Utils.fileHashString(newFile));
+            manifestItem.put("hash", MessageDigestUtils.fileHashString(newFile));
             manifestItems.add(manifestItem);
             addFileToManifestStagingDirectory(newFile);
           } else {
@@ -297,7 +296,7 @@ public class CreateSoftwareDeploymentManifest {
                       oldDirectoryPath,
                       newDirectoryPath,
                       newFile));
-              manifestItem.put("hash", X509Utils.fileHashString(newFile));
+              manifestItem.put("hash", MessageDigestUtils.fileHashString(newFile));
               manifestItems.add(manifestItem);
               addFileToManifestStagingDirectory(newFile);
             }
@@ -334,7 +333,7 @@ public class CreateSoftwareDeploymentManifest {
             oldDirectoryPath,
             newDirectoryPath,
             newFile));
-    manifestItem.put("hash", X509Utils.fileHashString(newFile));
+    manifestItem.put("hash", MessageDigestUtils.fileHashString(newFile));
     manifestItems.add(manifestItem);
     addFileToManifestStagingDirectory(newFile);
   }
@@ -461,7 +460,7 @@ public class CreateSoftwareDeploymentManifest {
                 oldDirectoryPath,
                 newDirectoryPath,
                 file));
-        manifestItem2.put("hash", X509Utils.fileHashString(file));
+        manifestItem2.put("hash", MessageDigestUtils.fileHashString(file));
         manifestItems.add(manifestItem2);
         addFileToManifestStagingDirectory(file);
         addFileToManifestStagingDirectory(file);
