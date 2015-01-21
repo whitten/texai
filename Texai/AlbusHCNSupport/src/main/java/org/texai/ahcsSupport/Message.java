@@ -923,8 +923,8 @@ public class Message implements Serializable {
       messageString1Prefix = messageString1.substring(0, messageString1.length() - 30);
       messageString1Suffix = messageString1.substring(messageString1.length() - 1);
     } else {
-      messageString1Prefix = messageString1.substring(0, messageString1.length() - 30);
-      messageString1Suffix = messageString1.substring(messageString1.length() - 1);
+      messageString1Prefix = messageString1.substring(0, index - 30);
+      messageString1Suffix = messageString1.substring(index);
     }
 
     // remove the date from message string 2 to form a prefix and suffix
@@ -937,8 +937,8 @@ public class Message implements Serializable {
       messageString2Prefix = messageString2.substring(0, messageString2.length() - 30);
       messageString2Suffix = messageString2.substring(messageString2.length() - 1);
     } else {
-      messageString2Prefix = messageString2.substring(0, messageString2.length() - 30);
-      messageString2Suffix = messageString2.substring(messageString2.length() - 1);
+      messageString2Prefix = messageString2.substring(0, index - 30);
+      messageString2Suffix = messageString2.substring(index);
     }
     return messageString1Prefix.equals(messageString2Prefix) && messageString1Suffix.equals(messageString2Suffix);
   }
