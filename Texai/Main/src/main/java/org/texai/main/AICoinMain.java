@@ -6,8 +6,6 @@
  * Description: The main program which executes an A.I. Coin cryptocurrency network node.
  *
  * Copyright (C) Sep 21, 2011, Stephen L. Reed, Texai.org.
- *
- * See the file "LICENSE" for the full license governing this code.
  */
 package org.texai.main;
 

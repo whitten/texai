@@ -3,8 +3,6 @@ package org.texai.skill.aicoin.support;
 import java.io.IOException;
 import org.apache.log4j.Logger;
 import org.texai.util.EnvironmentUtils;
-import org.texai.util.StreamConsumer;
-import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 
 /**

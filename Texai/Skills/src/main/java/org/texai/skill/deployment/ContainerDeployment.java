@@ -8,15 +8,12 @@
 package org.texai.skill.deployment;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 import org.texai.util.TexaiException;
-import org.texai.x509.MessageDigestUtils;
 
 /**
  *
@@ -52,6 +49,12 @@ public class ContainerDeployment extends AbstractSkill {
       return;
     }
     switch (operation) {
+      /**
+       * Initialize Task
+       *
+       * This task message is sent from the parent NetworkDeploymentAgent.NetworkDeploymentRole. It is expected to be the first task message
+       * that this role receives and it results in the role being initialized.
+       */
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
         if (getNodeRuntime().isFirstContainerInNetwork()) {
@@ -65,8 +68,8 @@ public class ContainerDeployment extends AbstractSkill {
         performMission(message);
         return;
 
-      case AHCSConstants.DEPLOY_FILE_TASK:
-        deployFile(message);
+      case AHCSConstants.DEPLOY_FILES_TASK:
+        deployFiles(message);
         return;
 
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
@@ -105,7 +108,7 @@ public class ContainerDeployment extends AbstractSkill {
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.DEPLOY_FILE_TASK,
+      AHCSConstants.DEPLOY_FILES_TASK,
       AHCSConstants.PERFORM_MISSION_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
     };
@@ -128,57 +131,61 @@ public class ContainerDeployment extends AbstractSkill {
    *
    * @param message the received perform mission task message
    */
-  private void deployFile(final Message message) {
+  private void deployFiles(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
-    LOGGER.info("deploying file ...");
-    final String command = (String) message.get(AHCSConstants.DEPLOY_FILE_TASK_COMMAND);
-    LOGGER.info("  command: " + command);
-    final String fileToDeployPath = (String) message.get(AHCSConstants.DEPLOY_FILE_TASK_PATH);
-    LOGGER.info("  path:    " + fileToDeployPath);
+    LOGGER.info("deploying files ...");
+    final byte[] zippedBytes = (byte[]) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES);
+    final String manifestJSONString = (String) message.get(AHCSConstants.DEPLOY_FILES_TASK_MANIFEST);
+    LOGGER.info("  manifest:    " + manifestJSONString);
 
-    switch (command) {
-      case "add":
-      case "replace":
-        final String hash = (String) message.get(AHCSConstants.DEPLOY_FILE_TASK_HASH);
-        LOGGER.info("  hash: " + hash);
+    //TODO first time, record the manifest and ensure that each item has been processed and that every item is actually on the manifest
+    //otherwise ensure that the given manifest is the same as the first one.
 
-        LOGGER.info("writing " + fileToDeployPath);
-        try {
-          final FileOutputStream fileOutputStream = new FileOutputStream(fileToDeployPath);
-          final byte[] bytes = (byte[]) message.get(AHCSConstants.DEPLOY_FILE_TASK_BYTES);
-          MessageDigestUtils.verifyFileHash(hash, hash);
-          fileOutputStream.write(bytes);
-          if (command.equals("add") && fileToDeployPath.startsWith("deployment-manifests/manifest-")) {
-            //TODO parse manifest file and ensure all files are processed
-          }
-        } catch (IOException ex) {
-          throw new TexaiException(ex);
-        }
-        break;
 
-      case "add-dir":
-        LOGGER.info("creating directory " + fileToDeployPath);
-        final File directory = new File(fileToDeployPath);
-        final boolean isOk = directory.mkdirs();
-        if (!isOk) {
-          throw new TexaiException("cannot create directory " + directory);
-        }
-        break;
 
-      case "delete-dir":
-        deleteDirectory(new File(fileToDeployPath));
-        break;
-
-      case "delete":
-        deleteFile(new File(fileToDeployPath));
-        break;
-
-      default:
-        assert false;
-    }
+//    switch (command) {
+//      case "add":
+//      case "replace":
+//        final String hash = (String) message.get(AHCSConstants.DEPLOY_FILE_TASK_HASH);
+//        LOGGER.info("  hash: " + hash);
+//
+//        LOGGER.info("writing " + fileToDeployPath);
+//        try {
+//          final FileOutputStream fileOutputStream = new FileOutputStream(fileToDeployPath);
+//          final byte[] bytes = (byte[]) message.get(AHCSConstants.DEPLOY_FILE_TASK_BYTES);
+//          MessageDigestUtils.verifyFileHash(hash, hash); // throws an exception if verification fails
+//          fileOutputStream.write(bytes);
+//          if (command.equals("add") && fileToDeployPath.startsWith("deployment-manifests/manifest-")) {
+//            //TODO parse manifest file and ensure all files are processed
+//          }
+//        } catch (IOException ex) {
+//          throw new TexaiException(ex);
+//        }
+//        break;
+//
+//      case "add-dir":
+//        LOGGER.info("creating directory " + fileToDeployPath);
+//        final File directory = new File(fileToDeployPath);
+//        final boolean isOk = directory.mkdirs();
+//        if (!isOk) {
+//          throw new TexaiException("cannot create directory " + directory);
+//        }
+//        break;
+//
+//      case "delete-dir":
+//        deleteDirectory(new File(fileToDeployPath));
+//        break;
+//
+//      case "delete":
+//        deleteFile(new File(fileToDeployPath));
+//        break;
+//
+//      default:
+//        assert false;
+//    }
   }
 
   /**

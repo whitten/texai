@@ -5,7 +5,7 @@
  *
  * Description: .
  *
- * Copyright (C) May 10, 2010 reed.
+ * Copyright (C) May 10, 2010 Stephen L. Reed
  *
  * This program is free software; you can redistribute it and/or modify it under the terms
  * of the GNU General Public License as published by the Free Software Foundation; either

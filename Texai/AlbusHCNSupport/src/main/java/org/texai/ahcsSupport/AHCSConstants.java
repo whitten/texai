@@ -7,16 +7,6 @@
  *
  * Copyright (C) Jun 26, 2009 Stephen L. Reed.
  *
- * This program is free software; you can redistribute it and/or modify it under the terms
- * of the GNU General Public License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with this program;
- * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 package org.texai.ahcsSupport;
 
@@ -150,17 +140,11 @@ public final class AHCSConstants {
   public static final String DESCRIBE_NODES_TASK = "describe nodes_Task";
   //
   // the deployFile_Task operation
-  public static final String DEPLOY_FILE_TASK = "deployFile_Task";
-  // the deployFile_Task command parameter, which is a String specifying the deployment command, e.g. "add", "remove", "remove-dir"
-  public static final String DEPLOY_FILE_TASK_COMMAND = "deployFile_Task_command";
-  // the deployFile_Task path parameter, which is a String specifying the path, e.g. "lib/CoinSkill-1.0.jar"
-  public static final String DEPLOY_FILE_TASK_PATH = "deployFile_Task_path";
-  // the deployFile_Task bytes parameter, which is a byte[] specifying the file contents
-  public static final String DEPLOY_FILE_TASK_BYTES = "deployFile_Task_bytes";
-  // the deployFile_Task hash parameter, which is a String specifying the file contents SHA-256 hash
-  public static final String DEPLOY_FILE_TASK_HASH = "deployFile_Task_hash";
-  // the deployFile_Task manifest parameter, which is a JSON String specifying the entire deployment manifest
-  public static final String DEPLOY_FILE_TASK_MANIFEST = "deployFile_Task_manifest";
+  public static final String DEPLOY_FILES_TASK = "deployFile_Task";
+  // the deployFile_Task manifest parameter, which is a JSON String specifying the deployment manifest
+  public static final String DEPLOY_FILES_TASK_MANIFEST = "deployFile_Task_manifest";
+  // the deployFile_Task zipped bytes parameter, which is a byte array in zip archive format of the deployed files
+  public static final String DEPLOY_FILES_TASK_ZIPPED_BYTES = "deployFile_Task_zippedBytes";
   //
   // the directNextUtteranceBackToSender_Task operation
   public static final String DIRECT_NEXT_UTTERANCE_BACK_TO_SENDER_TASK = "directNextUtteranceBackToSender_Task";
