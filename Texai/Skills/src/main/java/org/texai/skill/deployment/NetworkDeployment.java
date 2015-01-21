@@ -7,7 +7,11 @@
  */
 package org.texai.skill.deployment;
 
+import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +27,7 @@ import org.json.simple.parser.ParseException;
 import org.texai.ahcs.skill.AbstractNetworkSingletonSkill;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.Message;
+import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.util.TexaiException;
 import org.texai.util.ZipUtils;
 
@@ -86,8 +91,8 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
       /**
        * Join Acknowledged Task
        *
-       * This task message is sent from the network-singleton, parent NetworkOperationAgent.NetworkOperationRole.
-       * It indicates that the parent is ready to converse with this role as needed.
+       * This task message is sent from the network-singleton, parent NetworkOperationAgent.NetworkOperationRole. It indicates that the
+       * parent is ready to converse with this role as needed.
        */
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
@@ -122,8 +127,8 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
       /**
        * Perform Mission Task
        *
-       * This task message is sent from the network-singleton, parent NetworkOperationAgent.NetworkOperationRole.
-       * It commands this network-connected role to begin performing its mission.
+       * This task message is sent from the network-singleton, parent NetworkOperationAgent.NetworkOperationRole. It commands this
+       * network-connected role to begin performing its mission.
        */
       case AHCSConstants.PERFORM_MISSION_TASK:
         performMission(message);
@@ -133,7 +138,6 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
         LOGGER.warn(message);
         return;
 
-      // handle other operations ...
       // handle other operations ...
     }
     // otherwise, the message is not understood
@@ -172,7 +176,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
   }
 
   /**
-   * Perform this role's mission.
+   * Performs this role's mission. It starts a timer task that periodically checks for files to deploy to the network.
    *
    * @param message the received perform mission task message
    */
@@ -326,6 +330,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
       }
       final File deploymentDirectory = new File("deployment");
       LOGGER.info("Software and data deployment starting ...");
+      final File logFile = new File("deployment/deployment.log");
       LOGGER.info(files.length + " files");
       // find the manifest and verify it is non empty
       File manifestFile = null;
@@ -341,7 +346,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
         return;
       }
       LOGGER.info("manifestFile: " + manifestFile);
-
+      final StringBuilder stringBuilder = new StringBuilder();
       try {
         final String manifestJSONString = FileUtils.readFileToString(manifestFile);
         final JSONObject jsonObject = (JSONObject) JSONValue.parseWithException(manifestJSONString);
@@ -376,22 +381,37 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
           deployFileMessage.put(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES, zippedBytes);
           deployFileMessage.put(AHCSConstants.DEPLOY_FILES_TASK_MANIFEST, manifestJSONString);
           sendMessage(deployFileMessage);
+          stringBuilder
+                  .append("deployed to ")
+                  .append(Node.extractContainerName(containerDeploymentRoleName))
+                  .append('\n').toString();
           // pause this thread to keep from creating too many long-running downstream threads
           try {
             Thread.sleep(500);
           } catch (InterruptedException ex) {
           }
         });
+        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("deployment/deployment.log"))) {
+          bufferedWriter.write(stringBuilder.toString());
+        } catch (IOException ex) {
+          throw new TexaiException(ex);
+        }
 
-          // propagate each manifest command and file to each peer
-          //   ContainerDeploymentRole --> TASK_ACCOMPLISHED_INFO
-          // as peers acknowledge that their updates completed, write the deployed.log with the details the deployment
-          // ask the network operations agent to shutdown the other peers who automatically restart in a random interval in
-          // excess of the time required to restart the network operations node
-          //   NETWORK_RESTART_REQUEST_INFO --> NetworkOperationRole
-          //   RESTART_CONTAINER_TASK --> ContainerOperationRole
-          // the network operations node as the sole singleton agent host and await the connecting peers
-      } catch (IOException | ParseException ex) {
+        //   ContainerDeploymentRole --> TASK_ACCOMPLISHED_INFO
+        // as peers acknowledge that their updates completed, write the deployed.log with the details the deployment
+        // ask the network operations agent to shutdown the other peers who automatically restart in a random interval in
+        // excess of the time required to restart the network operations node
+        //   NETWORK_RESTART_REQUEST_INFO --> NetworkOperationRole
+        //   RESTART_CONTAINER_TASK --> ContainerOperationRole
+        // the network operations node as the sole singleton agent host and await the connecting peers
+        //   ContainerDeploymentRole --> TASK_ACCOMPLISHED_INFO
+        // as peers acknowledge that their updates completed, write the deployed.log with the details the deployment
+        // ask the network operations agent to shutdown the other peers who automatically restart in a random interval in
+        // excess of the time required to restart the network operations node
+        //   NETWORK_RESTART_REQUEST_INFO --> NetworkOperationRole
+        //   RESTART_CONTAINER_TASK --> ContainerOperationRole
+        // the network operations node as the sole singleton agent host and await the connecting peers
+              } catch (IOException | ParseException ex) {
         throw new TexaiException(ex);
       } finally {
         isSoftwareDeploymentUnderway.set(false);

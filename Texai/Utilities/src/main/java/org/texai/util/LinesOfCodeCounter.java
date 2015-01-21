@@ -24,15 +24,20 @@ public final class LinesOfCodeCounter {
   private static final String[] PATHS = {
     "/home/reed/git/texai/Texai/AlbusHCN/src/main",
     "/home/reed/git/texai/Texai/AlbusHCNSupport/src/main",
+    "/home/reed/git/texai/Texai/CoinSkills/src/main",
     "/home/reed/git/texai/Texai/BitTorrentSupport/src/main",
+    "/home/reed/git/texai/Texai/Deployment/src/main",
+    "/home/reed/git/texai/Texai/Inference/src/main",
+    "/home/reed/git/texai/Texai/Main/src/main",
     "/home/reed/git/texai/Texai/Network/src/main",
     "/home/reed/git/texai/Texai/RDFEntityManager/src/main",
     "/home/reed/git/texai/Texai/Security/src/main",
+    "/home/reed/git/texai/Texai/Skills/src/main",
     "/home/reed/git/texai/Texai/SSLBitTorrent/src/main",
+    "/home/reed/git/texai/Texai/TamperEvidentLog/src/main",
     "/home/reed/git/texai/Texai/UPNPLib/src/main",
     "/home/reed/git/texai/Texai/Utilities/src/main",
     "/home/reed/git/texai/Texai/WebServer/src/main",
-    "/home/reed/git/texai/Texai/X509CertificateServer/src",
     "/home/reed/git/texai/Texai/X509Security/src/main"
   };
 

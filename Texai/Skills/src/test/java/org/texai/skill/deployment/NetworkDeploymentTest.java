@@ -3,11 +3,14 @@
  */
 package org.texai.skill.deployment;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -102,6 +105,11 @@ public class NetworkDeploymentTest {
   @Test
   public void testCheckForDeployment() {
     LOGGER.info("CheckForDeployment");
+    final File deploymentLogFile = new File("deployment/deployment.log");
+    if (deploymentLogFile.exists()) {
+      deploymentLogFile.delete();
+    }
+    assertFalse(deploymentLogFile.exists());
     skillTestHarness.reset();
     final NetworkDeployment networkDeployment = (NetworkDeployment) skillTestHarness.getSkill(skillClassName);
     final CheckForDeployment checkForDeployment = networkDeployment.makeCheckForDeploymentForUnitTest();
@@ -140,6 +148,14 @@ public class NetworkDeploymentTest {
             + ",\n"
             + "  deployFile_Task_zippedBytes=byte[](length=17946)\n"
             + "]"));
+    assertTrue(deploymentLogFile.exists());
+    try {
+      assertEquals(
+              "deployed to Test\n",
+              FileUtils.readFileToString(deploymentLogFile));
+    } catch (IOException ex) {
+      fail();
+    }
   }
 
   /**
