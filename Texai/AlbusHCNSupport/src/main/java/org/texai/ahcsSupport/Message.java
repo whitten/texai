@@ -898,4 +898,49 @@ public class Message implements Serializable {
       return false;
     }
   }
+
+  /** Returns whether the two given message strings are equal when the date portions are ignored. This is useful
+   * for unit testing.
+   *
+   * @param messageString1 the first given message string
+   * @param messageString2 the second given message string
+   * @return
+   */
+  public static boolean areMessageStringsEqualIgnoringDate(
+          final String messageString1,
+          final String messageString2) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(messageString1) : "messageString1 must be a non-empty string";
+    assert StringUtils.isNonEmptyString(messageString2) : "messageString2 must be a non-empty string";
+
+    // remove the date from message string 1 to form a prefix and suffix
+    final String messageString1Prefix;
+    final String messageString1Suffix;
+    int index = messageString1.indexOf('\n');
+    if (index == -1) {
+      // no conversationId, no reply-with, no parameters
+      assert messageString1.length() - 31 > 0;
+      messageString1Prefix = messageString1.substring(0, messageString1.length() - 30);
+      messageString1Suffix = messageString1.substring(messageString1.length() - 1);
+    } else {
+      messageString1Prefix = messageString1.substring(0, messageString1.length() - 30);
+      messageString1Suffix = messageString1.substring(messageString1.length() - 1);
+    }
+
+    // remove the date from message string 2 to form a prefix and suffix
+    final String messageString2Prefix;
+    final String messageString2Suffix;
+    index = messageString2.indexOf('\n');
+    if (index == -1) {
+      // no conversationId, no reply-with, no parameters
+      assert messageString2.length() - 31 > 0;
+      messageString2Prefix = messageString2.substring(0, messageString2.length() - 30);
+      messageString2Suffix = messageString2.substring(messageString2.length() - 1);
+    } else {
+      messageString2Prefix = messageString2.substring(0, messageString2.length() - 30);
+      messageString2Suffix = messageString2.substring(messageString2.length() - 1);
+    }
+    return messageString1Prefix.equals(messageString2Prefix) && messageString1Suffix.equals(messageString2Suffix);
+  }
+
 }

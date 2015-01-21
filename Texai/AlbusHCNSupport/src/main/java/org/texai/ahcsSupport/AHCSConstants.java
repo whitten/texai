@@ -159,6 +159,8 @@ public final class AHCSConstants {
   public static final String DEPLOY_FILE_TASK_BYTES = "deployFile_Task_bytes";
   // the deployFile_Task hash parameter, which is a String specifying the file contents SHA-256 hash
   public static final String DEPLOY_FILE_TASK_HASH = "deployFile_Task_hash";
+  // the deployFile_Task manifest parameter, which is a JSON String specifying the entire deployment manifest
+  public static final String DEPLOY_FILE_TASK_MANIFEST = "deployFile_Task_manifest";
   //
   // the directNextUtteranceBackToSender_Task operation
   public static final String DIRECT_NEXT_UTTERANCE_BACK_TO_SENDER_TASK = "directNextUtteranceBackToSender_Task";

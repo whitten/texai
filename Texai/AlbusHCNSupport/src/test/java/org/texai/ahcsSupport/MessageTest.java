@@ -83,6 +83,96 @@ public class MessageTest {
   }
 
   /**
+   * Test of areMessageStringsEqualIgnoringDate method, of class Message.
+   */
+  @Test
+  public void testAreMessageStringsEqualIgnoringDate() {
+    LOGGER.info("areMessageStringsEqualIgnoringDate");
+    String senderQualifiedName = "container1.agent1.role1";
+    String recipientQualifiedName = "container2.agent2.role2";
+
+    final Message message1 = new Message(
+            senderQualifiedName,
+            "SenderService", // senderService
+            recipientQualifiedName,
+            "org.texai.kb.persistence.domainEntity.RepositoryContentDescription", // recipientService
+            "ABC_Task"); // operation
+    final String message1String = message1.toString();
+
+    final Message message2 = new Message(
+            senderQualifiedName,
+            "SenderService", // senderService
+            recipientQualifiedName,
+            "org.texai.kb.persistence.domainEntity.RepositoryContentDescription", // recipientService
+            "ABC_Task"); // operation
+    final String message2String = message2.toString();
+
+    assertTrue(Message.areMessageStringsEqualIgnoringDate(message2String, message2String));
+
+    final Message message3 = new Message(
+            senderQualifiedName,
+            "SenderService", // senderService
+            recipientQualifiedName,
+            "org.texai.kb.persistence.domainEntity.RepositoryContentDescription", // recipientService
+            "XYZ_Task"); // operation
+    final String message3String = message3.toString();
+
+    assertFalse(Message.areMessageStringsEqualIgnoringDate(message1String, message3String));
+
+    final UUID conversationId = UUID.randomUUID();
+    final UUID replyWith = UUID.randomUUID();
+    final UUID inReplyTo = UUID.randomUUID();
+    final DateTime replyByDateTime = null;
+    final Map<String, Object> parameterDictionary = new HashMap<>();
+    parameterDictionary.put("test-parmeter", "test-value");
+    final Message message4 = new Message(
+            senderQualifiedName,
+            "SenderService", // senderService
+            recipientQualifiedName,
+            conversationId,
+            replyWith,
+            inReplyTo,
+            replyByDateTime,
+            "org.texai.kb.persistence.domainEntity.RepositoryContentDescription", // service
+            "ABC_Task", // operation,
+            parameterDictionary,
+            "1.0.0");
+    final String message4String = message4.toString();
+
+    final Message message5 = new Message(
+            senderQualifiedName,
+            "SenderService", // senderService
+            recipientQualifiedName,
+            conversationId,
+            replyWith,
+            inReplyTo,
+            replyByDateTime,
+            "org.texai.kb.persistence.domainEntity.RepositoryContentDescription", // service
+            "ABC_Task", // operation,
+            parameterDictionary,
+            "1.0.0");
+    final String message5String = message5.toString();
+
+    assertTrue(Message.areMessageStringsEqualIgnoringDate(message4String, message5String));
+    assertFalse(Message.areMessageStringsEqualIgnoringDate(message1String, message5String));
+
+    final Message message6 = new Message(
+            senderQualifiedName,
+            "SenderService", // senderService
+            recipientQualifiedName,
+            conversationId,
+            replyWith,
+            inReplyTo,
+            replyByDateTime,
+            "org.texai.kb.persistence.domainEntity.RepositoryContentDescription", // service
+            "XYZ_Task", // operation,
+            parameterDictionary,
+            "1.0.0");
+    final String message6String = message6.toString();
+    assertFalse(Message.areMessageStringsEqualIgnoringDate(message4String, message6String));
+  }
+
+  /**
    * Test of getOperation method, of class Message.
    */
   @Test
