@@ -226,6 +226,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
             true); // isUnitTest
   }
 
+  
   /**
    * Periodically checks for a manifest to deploy.
    */
