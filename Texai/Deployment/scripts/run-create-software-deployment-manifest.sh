@@ -14,5 +14,5 @@ CLASSPATH=$CLASSPATH:lib/Utilities-1.0.jar
 CLASSPATH=$CLASSPATH:lib/X509Security-1.0.jar
 
 java -ea -Dlog4j.configuration=file://$PWD/log4j.properties -classpath $CLASSPATH org.texai.deployment.CreateSoftwareDeploymentManifest \
-/home/reed/Bob-old /home/reed/docker/Bob data/deployment-manifests
+/home/reed/docker/Bob /home/reed/Bob-old data/deployment-manifests
 

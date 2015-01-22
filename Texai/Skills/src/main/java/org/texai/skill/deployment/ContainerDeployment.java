@@ -187,7 +187,7 @@ public class ContainerDeployment extends AbstractSkill {
   }
 
   /**
-   * Perform the specified file deployment task, and reply with a task accomplished message when done.
+   * Perform the specified file deployment task.
    *
    * @param message the received perform mission task message
    */
@@ -250,7 +250,7 @@ public class ContainerDeployment extends AbstractSkill {
     } catch (ParseException ex) {
       throw new TexaiException(ex);
     }
-    sendMessage(Message.replyTaskAccomplished(message));
+
   }
 
   /** Extracts the file to deploy from the zip file, writes it to the deployed path, and then verifies its contents using

@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -80,6 +81,7 @@ public class SeedNodeInfosInitializer {
       seedNodeInfos.add(seedNodeInfo);
       LOGGER.info(seedNodeInfo);
 
+      // other seeds ...
       final String seedNodeInfosFilePath = "../Main/data/SeedNodeInfos.ser";
       LOGGER.info("writing " + seedNodeInfosFilePath);
       try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(seedNodeInfosFilePath))) {
