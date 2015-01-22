@@ -51,12 +51,14 @@ public class SkillTemplate extends AbstractSkill {
       return;
     }
     switch (operation) {
+      /**
+       * Initialize Task
+       *
+       * This task message is sent from the parent [container.role]. It is expected to be the first task
+       * message that this role receives and it results in the role being initialized.
+       */
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
-
-        // OPTIONAL
-        // initialize child roles
-        propagateOperationToChildRoles(operation);
 
         if (getNodeRuntime().isFirstContainerInNetwork()) {
           setSkillState(AHCSConstants.State.READY);
@@ -65,6 +67,37 @@ public class SkillTemplate extends AbstractSkill {
         }
         return;
 
+      /**
+       * Join Acknowledged Task
+       *
+       * This task message is sent from the network-singleton, [container.role]. It indicates that
+       * the parent is ready to converse with this role as needed.
+       */
+      case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
+        assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
+                "state must be isolated-from-network, but is " + getSkillState();
+        joinAcknowledgedTask(message);
+        return;
+
+      /**
+       * Become Ready Task
+       *
+       * This task message is sent from the network-singleton parent [container.role].
+       *
+       * It results in the skill set to the ready state
+       */
+      case AHCSConstants.BECOME_READY_TASK:
+        assert this.getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "prior state must be isolated-from-network";
+        setSkillState(AHCSConstants.State.READY);
+        LOGGER.info("now ready");
+        return;
+
+      /**
+       * Perform Mission Task
+       *
+       * This task message is sent from the network-singleton, [container.role]. It commands this
+       * network-connected role to begin performing its mission.
+       */
       case AHCSConstants.PERFORM_MISSION_TASK:
         performMission(message);
         return;

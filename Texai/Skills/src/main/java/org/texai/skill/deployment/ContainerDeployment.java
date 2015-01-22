@@ -64,10 +64,50 @@ public class ContainerDeployment extends AbstractSkill {
         }
         return;
 
+      /**
+       * Join Acknowledged Task
+       *
+       * This task message is sent from the network-singleton, parent NetworkDeploymentAgent.NetworkDeploymentRole. It indicates that
+       * the parent is ready to converse with this role as needed.
+       */
+      case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
+        assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
+                "state must be isolated-from-network, but is " + getSkillState();
+        joinAcknowledgedTask(message);
+        return;
+
+      /**
+       * Become Ready Task
+       *
+       * This task message is sent from the network-singleton parent NetworkDeploymentAgent.NetworkDeploymentRole.
+       *
+       * It results in the skill set to the ready state
+       */
+      case AHCSConstants.BECOME_READY_TASK:
+        assert this.getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "prior state must be isolated-from-network";
+        setSkillState(AHCSConstants.State.READY);
+        LOGGER.info("now ready");
+        return;
+
+      /**
+       * Perform Mission Task
+       *
+       * This task message is sent from the network-singleton, parent NetworkDeploymentAgent.NetworkDeploymentRole. It commands this
+       * network-connected role to begin performing its mission.
+       */
       case AHCSConstants.PERFORM_MISSION_TASK:
         performMission(message);
         return;
 
+      /**
+       * Perform Mission Task
+       *
+       * This task message is sent from the network-singleton, parent NetworkDeploymentAgent.NetworkDeploymentRole. It commands this
+       * network-connected role to deploy included files according to the included manifest.
+       *
+       * When all the files are deployed, a Task Accomplished Info message is sent back to the
+       * NetworkDeployment skill as a response.
+       */
       case AHCSConstants.DEPLOY_FILES_TASK:
         deployFiles(message);
         return;
