@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: org.texai.webserver.ChatServerTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.915 sec - in org.texai.webserver.ChatServerTest
