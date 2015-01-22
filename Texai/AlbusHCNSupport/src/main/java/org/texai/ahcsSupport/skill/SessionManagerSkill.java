@@ -75,7 +75,9 @@ public class SessionManagerSkill extends AbstractSkill {
 
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
-      sendMessage(operationNotPermittedMessage(message));
+      sendMessage(Message.operationNotPermittedMessage(
+              message, // receivedMessage
+              this)); // skill
       return;
     }
     switch (operation) {

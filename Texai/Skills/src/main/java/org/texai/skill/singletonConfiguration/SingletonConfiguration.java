@@ -73,7 +73,9 @@ public class SingletonConfiguration extends AbstractSkill {
 
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
-      sendMessage(operationNotPermittedMessage(message));
+      sendMessage(Message.operationNotPermittedMessage(
+              message, // receivedMessage
+              this)); // skill
       return;
     }
     switch (operation) {
@@ -201,7 +203,9 @@ public class SingletonConfiguration extends AbstractSkill {
 
     }
     // otherwise, the message is not understood
-    sendMessage(notUnderstoodMessage(message));
+    sendMessage(Message.notUnderstoodMessage(
+            message, // receivedMessage
+            this)); // skill
   }
 
   /**
@@ -217,8 +221,10 @@ public class SingletonConfiguration extends AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
 
-    //TODO handle operations
-    return (notUnderstoodMessage(message));
+    // handle operations
+    return Message.notUnderstoodMessage(
+            message, // receivedMessage
+            this); // skill
   }
 
   /**

@@ -297,9 +297,6 @@ public final class AHCSConstants {
   // the keep-alive information operation
   public static final String KEEP_ALIVE_INFO = "keepAlive_Info";
   //
-  // the task accomplished information operation
-  public static final String TASK_ACCOMPLISHED_INFO = "taskAccomplished_Info";
-  //
   // the message timeout information operation
   public static final String MESSAGE_TIMEOUT_INFO = "messageTimeout_Info";
   public static final String MESSAGE_TIMEOUT_INFO_ORIGINAL_MESSAGE = "messageTimeout_Info_originalMessage";
@@ -333,6 +330,9 @@ public final class AHCSConstants {
   //
   // the singletonAgentHosts_Info operation
   public static final String SINGLETON_AGENT_HOSTS_INFO = "singletonAgentHosts_Info";
+  //
+  // the task accomplished information operation
+  public static final String TASK_ACCOMPLISHED_INFO = "taskAccomplished_Info";
 
   // Sensation messages end with _Sensation
 

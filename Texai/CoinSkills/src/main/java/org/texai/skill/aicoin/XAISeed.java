@@ -49,7 +49,9 @@ public final class XAISeed extends AbstractSkill {
 
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
-      sendMessage(operationNotPermittedMessage(message));
+      sendMessage(Message.operationNotPermittedMessage(
+              message, // receivedMessage
+              this)); // skill
       return;
     }
     switch (operation) {
@@ -107,7 +109,9 @@ public final class XAISeed extends AbstractSkill {
         return;
     }
 
-    sendMessage(notUnderstoodMessage(message));
+    sendMessage(Message.notUnderstoodMessage(
+            message, // receivedMessage
+            this)); // skill
   }
 
   /**
@@ -123,8 +127,10 @@ public final class XAISeed extends AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
 
-    //TODO handle operations
-    return notUnderstoodMessage(message);
+    // handle operations
+    return Message.notUnderstoodMessage(
+            message, // receivedMessage
+            this); // skill
   }
 
   /**

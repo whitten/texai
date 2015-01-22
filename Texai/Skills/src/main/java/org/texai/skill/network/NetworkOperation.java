@@ -56,7 +56,9 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
 
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
-      sendMessage(operationNotPermittedMessage(message));
+      sendMessage(Message.operationNotPermittedMessage(
+              message, // receivedMessage
+              this)); // skill
       return;
     }
     switch (operation) {
@@ -194,12 +196,13 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
         return;
 
       // handle other operations ...
-      // handle other operations ...
     }
 
     assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
 
-    sendMessage(notUnderstoodMessage(message));
+    sendMessage(Message.notUnderstoodMessage(
+            message, // receivedMessage
+            this)); // skill
   }
 
   /**
@@ -215,8 +218,10 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
     //Preconditions
     assert message != null : "message must not be null";
 
-    //TODO handle operations
-    return notUnderstoodMessage(message);
+    // handle operations
+    return Message.notUnderstoodMessage(
+            message, // receivedMessage
+            this); // skill
   }
 
   /**

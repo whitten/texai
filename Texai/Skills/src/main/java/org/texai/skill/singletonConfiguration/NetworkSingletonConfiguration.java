@@ -38,8 +38,6 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
   /**
    * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
    * with regard to the conversation.
-   *
-   * @return whether the message was successfully processed
    */
   @Override
   public void receiveMessage(Message message) {
@@ -49,7 +47,9 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
 
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
-      sendMessage(operationNotPermittedMessage(message));
+      sendMessage(Message.operationNotPermittedMessage(
+              message, // receivedMessage
+              this)); // skill
       return;
     }
     switch (operation) {
@@ -156,10 +156,11 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
         return;
 
       // REQUEST_TO_JOIN_INFO message from new node wanting to join the network.
-      // REQUEST_TO_JOIN_INFO message from new node wanting to join the network.
     }
 
-    sendMessage(notUnderstoodMessage(message));
+    sendMessage(Message.notUnderstoodMessage(
+            message, // receivedMessage
+            this)); // skill
   }
 
   /**
@@ -175,8 +176,10 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
     //Preconditions
     assert message != null : "message must not be null";
 
-    //TODO handle operations
-    return notUnderstoodMessage(message);
+    // handle operations
+    return Message.notUnderstoodMessage(
+            message, // receivedMessage
+            this); // skill
   }
 
   /**

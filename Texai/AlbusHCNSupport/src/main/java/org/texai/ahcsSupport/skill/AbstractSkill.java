@@ -351,51 +351,9 @@ public abstract class AbstractSkill {
     //Preconditions
     assert receivedMessage != null : "receivedMessage must not be null";
 
-    sendMessage(notUnderstoodMessage(receivedMessage));
-  }
-
-  /**
-   * Returns a not-understood message for replying to the sender of the given message.
-   *
-   * @param receivedMessage the given message
-   *
-   * @return a not-understood message for replying to the sender of the given message
-   */
-  protected Message notUnderstoodMessage(final Message receivedMessage) {
-    //Preconditions
-    assert receivedMessage != null : "receivedMessage must not be null";
-    assert role != null : "role must not be null";
-
-    final Message message = new Message(
-            getRole().getQualifiedName(), // senderQualifiedName
-            getClassName(), // senderService,
-            receivedMessage.getSenderQualifiedName(), // recipientQualifiedName
-            receivedMessage.getSenderService(), // service
-            AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO); // operation
-    message.put(AHCSConstants.AHCS_ORIGINAL_MESSAGE, receivedMessage);
-    return message;
-  }
-
-  /**
-   * Returns an operation-not-permitted message for replying to the sender of the given message.
-   *
-   * @param receivedMessage the given message
-   *
-   * @return a not-understood message for replying to the sender of the given message
-   */
-  protected Message operationNotPermittedMessage(final Message receivedMessage) {
-    //Preconditions
-    assert receivedMessage != null : "receivedMessage must not be null";
-    assert role != null : "role must not be null";
-
-    final Message message = new Message(
-            getRole().getQualifiedName(), // senderQualifiedName
-            getClassName(), // senderService,
-            receivedMessage.getSenderQualifiedName(), // recipientQualifiedName
-            receivedMessage.getSenderService(), // service
-            AHCSConstants.OPERATION_NOT_PERMITTED_INFO); // operation
-    message.put(AHCSConstants.AHCS_ORIGINAL_MESSAGE, receivedMessage);
-    return message;
+    sendMessage(Message.notUnderstoodMessage(
+            receivedMessage,
+            this)); // skill
   }
 
   /**

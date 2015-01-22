@@ -9,7 +9,6 @@
  */
 package org.texai.skill.governance;
 
-import java.util.Iterator;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
@@ -52,7 +51,9 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
 
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
-      sendMessage(operationNotPermittedMessage(message));
+      sendMessage(Message.operationNotPermittedMessage(
+              message, // receivedMessage
+              this)); // skill
       return;
     }
     switch (operation) {
@@ -133,7 +134,9 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
     }
 
     // not understood
-    sendMessage(notUnderstoodMessage(message));
+    sendMessage(Message.notUnderstoodMessage(
+            message, // receivedMessage
+            this)); // skill
   }
 
   /**
@@ -149,9 +152,10 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
     //Preconditions
     assert message != null : "message must not be null";
 
-    // handle operations ...
-    // not understood
-    return notUnderstoodMessage(message);
+    // handle operations
+    return Message.notUnderstoodMessage(
+            message, // receivedMessage
+            this); // skill
   }
 
   /**

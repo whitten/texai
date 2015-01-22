@@ -7,10 +7,8 @@
  */
 package org.texai.skill.deployment;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -65,7 +63,9 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
 
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
-      sendMessage(operationNotPermittedMessage(message));
+      sendMessage(Message.operationNotPermittedMessage(
+              message, // receivedMessage
+              this)); // skill
       return;
     }
     switch (operation) {
@@ -141,7 +141,9 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
       // handle other operations ...
     }
     // otherwise, the message is not understood
-    sendMessage(notUnderstoodMessage(message));
+    sendMessage(Message.notUnderstoodMessage(
+            message, // receivedMessage
+            this)); // skill
   }
 
   /**
@@ -157,8 +159,10 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
     //Preconditions
     assert message != null : "message must not be null";
 
-    //TODO handle operations
-    return (notUnderstoodMessage(message));
+    // handle operations
+    return Message.notUnderstoodMessage(
+            message, // receivedMessage
+            this); // skill
   }
 
   /**

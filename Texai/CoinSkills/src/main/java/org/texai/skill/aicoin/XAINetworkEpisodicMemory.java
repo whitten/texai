@@ -53,7 +53,9 @@ public class XAINetworkEpisodicMemory extends AbstractNetworkSingletonSkill {
 
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
-      sendMessage(operationNotPermittedMessage(message));
+      sendMessage(Message.operationNotPermittedMessage(
+              message, // receivedMessage
+              this)); // skill
       return;
     }
     switch (operation) {
@@ -135,7 +137,9 @@ public class XAINetworkEpisodicMemory extends AbstractNetworkSingletonSkill {
         return;
     }
 
-    sendMessage(notUnderstoodMessage(message));
+    sendMessage(Message.notUnderstoodMessage(
+            message, // receivedMessage
+            this)); // skill
   }
 
   /** Synchronously processes the given message.  The skill is thread safe, given that any contained libraries are single threaded
@@ -149,9 +153,10 @@ public class XAINetworkEpisodicMemory extends AbstractNetworkSingletonSkill {
     //Preconditions
     assert message != null : "message must not be null";
 
-    //TODO handle operations
-
-    return notUnderstoodMessage(message);
+    // handle operations
+    return Message.notUnderstoodMessage(
+            message, // receivedMessage
+            this); // skill
   }
 
   /**

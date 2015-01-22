@@ -57,8 +57,6 @@ public class Heartbeat extends AbstractSkill {
    * with regard to the conversation.
    *
    * @param message the given message
-   *
-   * @return whether the message was successfully processed
    */
   @Override
   public void receiveMessage(final Message message) {
@@ -68,7 +66,9 @@ public class Heartbeat extends AbstractSkill {
 
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
-      sendMessage(operationNotPermittedMessage(message));
+      sendMessage(Message.operationNotPermittedMessage(
+              message, // receivedMessage
+              this)); // skill
       return;
     }
     switch (operation) {
@@ -108,7 +108,9 @@ public class Heartbeat extends AbstractSkill {
     }
 
     // otherwise the received message is not understood
-    sendMessage(notUnderstoodMessage(message));
+    sendMessage(Message.notUnderstoodMessage(
+            message, // receivedMessage
+            this)); // skill
   }
 
   /**
@@ -124,9 +126,10 @@ public class Heartbeat extends AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
 
-    //TODO handle operations
-    // otherwise the received message is not understood
-    return notUnderstoodMessage(message);
+    // handle operations
+    return Message.notUnderstoodMessage(
+            message, // receivedMessage
+            this); // skill
   }
 
   /**

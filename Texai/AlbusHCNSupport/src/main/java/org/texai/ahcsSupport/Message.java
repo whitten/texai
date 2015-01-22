@@ -10,13 +10,10 @@
  */
 package org.texai.ahcsSupport;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -33,7 +30,6 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import net.jcip.annotations.Immutable;
 import org.joda.time.DateTime;
-import static org.junit.Assert.assertTrue;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 import org.texai.x509.SerializableObjectSigner;
@@ -369,6 +365,56 @@ public class Message implements Serializable {
             message.getSenderService(), // recipientService
             AHCSConstants.TASK_ACCOMPLISHED_INFO, // operation
             message.replyWith); // inReplyTo
+  }
+
+  /**
+   * Returns a not-understood message for replying to the sender of the given message.
+   *
+   * @param receivedMessage the given message
+   * @param skill the skill that sends the message
+   *
+   * @return a not-understood message for replying to the sender of the given message
+   */
+  public static Message notUnderstoodMessage(
+          final Message receivedMessage,
+          final AbstractSkill skill) {
+    //Preconditions
+    assert receivedMessage != null : "receivedMessage must not be null";
+    assert skill != null : "skill must not be null";
+
+    final Message message = new Message(
+            skill.getRole().getQualifiedName(), // senderQualifiedName
+            skill.getClassName(), // senderService,
+            receivedMessage.getSenderQualifiedName(), // recipientQualifiedName
+            receivedMessage.getSenderService(), // service
+            AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO); // operation
+    message.put(AHCSConstants.AHCS_ORIGINAL_MESSAGE, receivedMessage);
+    return message;
+  }
+
+  /**
+   * Returns an operation-not-permitted message for replying to the sender of the given message.
+   *
+   * @param receivedMessage the given message
+   * @param skill the skill that sends the message
+   *
+   * @return a not-understood message for replying to the sender of the given message
+   */
+  public static Message operationNotPermittedMessage(
+          final Message receivedMessage,
+          final AbstractSkill skill) {
+    //Preconditions
+    assert receivedMessage != null : "receivedMessage must not be null";
+    assert skill != null : "role must not be null";
+
+    final Message message = new Message(
+            skill.getRole().getQualifiedName(), // senderQualifiedName
+            skill.getClassName(), // senderService,
+            receivedMessage.getSenderQualifiedName(), // recipientQualifiedName
+            receivedMessage.getSenderService(), // service
+            AHCSConstants.OPERATION_NOT_PERMITTED_INFO); // operation
+    message.put(AHCSConstants.AHCS_ORIGINAL_MESSAGE, receivedMessage);
+    return message;
   }
 
   /**

@@ -28,7 +28,6 @@ import net.jcip.annotations.ThreadSafe;
 import org.joda.time.DateTime;
 import org.openrdf.model.URI;
 import org.texai.ahcsSupport.domainEntity.Node;
-import org.texai.ahcsSupport.domainEntity.Role;
 import org.texai.kb.persistence.RDFEntity;
 import org.texai.kb.persistence.RDFPersistent;
 import org.texai.kb.persistence.RDFProperty;

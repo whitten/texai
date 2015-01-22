@@ -59,7 +59,9 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
 
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
-      sendMessage(operationNotPermittedMessage(message));
+      sendMessage(Message.operationNotPermittedMessage(
+              message, // receivedMessage
+              this)); // skill
       return;
     }
     switch (operation) {
@@ -109,16 +111,15 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
         return;
     }
 
-    sendMessage(notUnderstoodMessage(message));
-
+    sendMessage(Message.notUnderstoodMessage(
+            message, // receivedMessage
+            this)); // skill
   }
 
   /**
    * Writes the bitcoin.conf file.
    *
    * @param message the task message
-   *
-   * @return whether this task completed OK
    */
   private void writeConfigurationFile(final Message message) {
     //Preconditions
@@ -161,33 +162,37 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
       bufferedWriter.write("# no universal plug and play NAT routing in the demo\n");
       bufferedWriter.write("upnp=0\n");
       //TODO demo code
-      if (getContainerName().equals("Mint")) {
-        bufferedWriter.write("# this instance accepts incoming connections\n");
-        bufferedWriter.write("listen=1\n");
-      } else if (getContainerName().equals("Alice")) {
-        bufferedWriter.write("# this instance accepts incoming connections\n");
-        bufferedWriter.write("listen=1\n");
-        bufferedWriter.write("# connect to the mint\n");
-        // on the same host in the development LAN
-        bufferedWriter.write("connect=Mint:8333\n");
-      } else if (getContainerName().equals("BlockchainExplorer")) {
-        bufferedWriter.write("# this instance accepts incoming connections\n");
-        bufferedWriter.write("listen=1\n");
-//        // on a separate host in the development LAN
-//        bufferedWriter.write("connect=192.168.0.7:8333\n");
-        // on the same host in the development LAN
-        bufferedWriter.write("connect=Mint:8333\n");
-      } else {
-        bufferedWriter.write("# this instance does not accept incoming connections\n");
-        bufferedWriter.write("listen=0\n");
-        bufferedWriter.write("# connect to the mint\n");
-        if (getContainerName().equals("Bob")) {
+      switch (getContainerName()) {
+        case "Mint":
+          bufferedWriter.write("# this instance accepts incoming connections\n");
+          bufferedWriter.write("listen=1\n");
+          break;
+        case "Alice":
+          bufferedWriter.write("# this instance accepts incoming connections\n");
+          bufferedWriter.write("listen=1\n");
+          bufferedWriter.write("# connect to the mint\n");
           // on the same host in the development LAN
           bufferedWriter.write("connect=Mint:8333\n");
-        } else {
-          // the Mint address exposed to the internet
-          bufferedWriter.write("connect=texai.dyndns.org:8333\n");
-        }
+          break;
+        case "BlockchainExplorer":
+          bufferedWriter.write("# this instance accepts incoming connections\n");
+          bufferedWriter.write("listen=1\n");
+          //        // on a separate host in the development LAN
+//        bufferedWriter.write("connect=192.168.0.7:8333\n");
+          // on the same host in the development LAN
+          bufferedWriter.write("connect=Mint:8333\n");
+          break;
+        default:
+          bufferedWriter.write("# this instance does not accept incoming connections\n");
+          bufferedWriter.write("listen=0\n");
+          bufferedWriter.write("# connect to the mint\n");
+          if (getContainerName().equals("Bob")) {
+            // on the same host in the development LAN
+            bufferedWriter.write("connect=Mint:8333\n");
+          } else {
+            // the Mint address exposed to the internet
+            bufferedWriter.write("connect=texai.dyndns.org:8333\n");
+          } break;
       }
       bufferedWriter.write("# listening port\n");
       bufferedWriter.write("port=8333\n");
@@ -232,8 +237,10 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
 
-    //TODO handle operations
-    return notUnderstoodMessage(message);
+    // handle operations
+    return Message.notUnderstoodMessage(
+            message, // receivedMessage
+            this); // skill
   }
 
   /**

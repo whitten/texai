@@ -73,7 +73,9 @@ public final class ContainerHeartbeat extends AbstractSkill {
 
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
-      sendMessage(operationNotPermittedMessage(message));
+      sendMessage(Message.operationNotPermittedMessage(
+              message, // receivedMessage
+              this)); // skill
       return;
     }
     if (operation.equals(AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO)) {
@@ -144,7 +146,9 @@ public final class ContainerHeartbeat extends AbstractSkill {
     }
 
     // other operations ...
-    sendMessage(notUnderstoodMessage(message));
+    sendMessage(Message.notUnderstoodMessage(
+            message, // receivedMessage
+            this)); // skill
   }
 
   /**
@@ -160,8 +164,10 @@ public final class ContainerHeartbeat extends AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
 
-    //TODO handle operations
-    return notUnderstoodMessage(message);
+    // handle operations
+    return Message.notUnderstoodMessage(
+            message, // receivedMessage
+            this); // skill
   }
 
   /**

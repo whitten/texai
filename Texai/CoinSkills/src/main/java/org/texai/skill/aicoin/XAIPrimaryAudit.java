@@ -54,7 +54,9 @@ public final class XAIPrimaryAudit extends AbstractNetworkSingletonSkill {
 
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
-      sendMessage(operationNotPermittedMessage(message));
+      sendMessage(Message.operationNotPermittedMessage(
+              message, // receivedMessage
+              this)); // skill
       return;
     }
     switch (operation) {
@@ -118,7 +120,9 @@ public final class XAIPrimaryAudit extends AbstractNetworkSingletonSkill {
         return;
     }
 
-    sendMessage(notUnderstoodMessage(message));
+    sendMessage(Message.notUnderstoodMessage(
+            message, // receivedMessage
+            this)); // skill
   }
 
   /**
@@ -134,8 +138,10 @@ public final class XAIPrimaryAudit extends AbstractNetworkSingletonSkill {
     //Preconditions
     assert message != null : "message must not be null";
 
-    //TODO handle operations
-    return notUnderstoodMessage(message);
+    // handle operations
+    return Message.notUnderstoodMessage(
+            message, // receivedMessage
+            this); // skill
   }
 
   /**

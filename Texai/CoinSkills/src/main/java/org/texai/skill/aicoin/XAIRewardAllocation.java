@@ -48,7 +48,9 @@ public final class XAIRewardAllocation extends AbstractNetworkSingletonSkill {
     assert getRole().getNode().getNodeRuntime() != null;
 
     if (!isOperationPermitted(message)) {
-      sendMessage(operationNotPermittedMessage(message));
+      sendMessage(Message.operationNotPermittedMessage(
+              message, // receivedMessage
+              this)); // skill
       return;
     }
     final String operation = message.getOperation();
@@ -113,7 +115,9 @@ public final class XAIRewardAllocation extends AbstractNetworkSingletonSkill {
         return;
     }
 
-    sendMessage(notUnderstoodMessage(message));
+    sendMessage(Message.notUnderstoodMessage(
+            message, // receivedMessage
+            this)); // skill
   }
 
   /**
@@ -129,8 +133,10 @@ public final class XAIRewardAllocation extends AbstractNetworkSingletonSkill {
     //Preconditions
     assert message != null : "message must not be null";
 
-    //TODO handle operations
-    return notUnderstoodMessage(message);
+    // handle operations
+    return Message.notUnderstoodMessage(
+            message, // receivedMessage
+            this); // skill
   }
 
   /**
