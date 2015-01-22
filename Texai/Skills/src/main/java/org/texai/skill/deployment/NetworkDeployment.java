@@ -12,7 +12,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -26,6 +28,7 @@ import org.texai.ahcs.skill.AbstractNetworkSingletonSkill;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.Node;
+import org.texai.skill.network.NetworkOperation;
 import org.texai.util.TexaiException;
 import org.texai.util.ZipUtils;
 
@@ -42,6 +45,8 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
   private static final long CHECK_FOR_DEPLOYMENT_PERIOD_MILLIS = 60 * 1000 * 5;
   // the indicator that a software deployment is in progress
   private final AtomicBoolean isSoftwareDeploymentUnderway = new AtomicBoolean(false);
+  // the names of containers which have not completed a software and data file deployment task
+  protected final Set<String> undeployedContainerNames = new HashSet<>();
 
   /**
    * Constructs a new SkillTemplate instance.
@@ -131,7 +136,22 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
        * network-connected role to begin performing its mission.
        */
       case AHCSConstants.PERFORM_MISSION_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
         performMission(message);
+        return;
+
+      /**
+       * Task Accomplished Info
+       *
+       * This information message is sent from the child ContainerDeploymentAgent.ContainerDeploymentRole. It notifies this network
+       * singleton role that the container has completed the software and data file deployment task.
+       *
+       * When all the containers have respondedk, an Deployment Completed Info message is sent to the parent
+       * NetworkOperationAgent.NetworkOperationRole so that it can restart the network.
+       */
+      case AHCSConstants.TASK_ACCOMPLISHED_INFO:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        handleTaskAccomplishedInfo(message);
         return;
 
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
@@ -190,6 +210,34 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
     createCheckForDeploymentTimerTask();
+  }
+
+  /**
+   * Receives notification a child container deployment has completed its software and data file deployment task.
+   *
+   * @param message the received perform mission task message
+   */
+  private void handleTaskAccomplishedInfo(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+
+    final String containerName = message.getSenderContainerName();
+    int undeployedContainerNames_size;
+    LOGGER.info(containerName + " completed software and data file deployment");
+    synchronized (undeployedContainerNames) {
+      final boolean isRemoved = undeployedContainerNames.remove(containerName);
+      assert isRemoved : "container was not previously present: " + containerName;
+      undeployedContainerNames_size = undeployedContainerNames.size();
+    }
+    LOGGER.info("number of undeployed containers remaining: " + undeployedContainerNames_size);
+    if (undeployedContainerNames_size == 0) {
+      // notify network operations that the deployment is complete, and that the network should be restarted
+      final Message networkRestartRequestInfo = makeMessage(getRole().getParentQualifiedName(), // recipientQualifiedName
+                  NetworkOperation.class.getName(), // recipientService
+                  AHCSConstants.NETWORK_RESTART_REQUEST_INFO);
+      sendMessage(networkRestartRequestInfo);
+    }
   }
 
   /**
@@ -334,7 +382,6 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
       }
       final File deploymentDirectory = new File("deployment");
       LOGGER.info("Software and data deployment starting ...");
-      final File logFile = new File("deployment/deployment.log");
       LOGGER.info(files.length + " files");
       // find the manifest and verify it is non empty
       File manifestFile = null;
@@ -379,15 +426,23 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
         // send the manifest and zipped bytes to each child container deployment role
         containerDeploymentRoleNames.stream().sorted().forEach((String containerDeploymentRoleName) -> {
 
+          final String containerName = Node.extractContainerName(containerDeploymentRoleName);
           final Message deployFileMessage = networkDeployment.makeMessage(containerDeploymentRoleName, // recipientQualifiedName
                   ContainerDeployment.class.getName(), // recipientService
                   AHCSConstants.DEPLOY_FILES_TASK); // operation
           deployFileMessage.put(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES, zippedBytes);
           deployFileMessage.put(AHCSConstants.DEPLOY_FILES_TASK_MANIFEST, manifestJSONString);
+
+          synchronized (undeployedContainerNames) {
+            // track the containers that have been tasked to deploy, so that when subsequent Task Accomplished messages are
+            // received, it can determine when all have deployed and then restart the network
+            undeployedContainerNames.add(containerName);
+          }
           sendMessage(deployFileMessage);
+
           stringBuilder
                   .append("deployed to ")
-                  .append(Node.extractContainerName(containerDeploymentRoleName))
+                  .append(containerName)
                   .append('\n').toString();
           // pause this thread to keep from creating too many long-running downstream threads
           try {
@@ -400,11 +455,6 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
         } catch (IOException ex) {
           throw new TexaiException(ex);
         }
-
-        //   ContainerDeploymentRole --> TASK_ACCOMPLISHED_INFO
-        // as peers acknowledge that their updates completed, write the deployed.log with the details the deployment
-        // ask the network operations agent to shutdown the other peers who automatically restart in a random interval in
-        // excess of the time required to restart the network operations node
         //   NETWORK_RESTART_REQUEST_INFO --> NetworkOperationRole
         //   RESTART_CONTAINER_TASK --> ContainerOperationRole
         // the network operations node as the sole singleton agent host and await the connecting peers
@@ -415,7 +465,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
         //   NETWORK_RESTART_REQUEST_INFO --> NetworkOperationRole
         //   RESTART_CONTAINER_TASK --> ContainerOperationRole
         // the network operations node as the sole singleton agent host and await the connecting peers
-              } catch (IOException | ParseException ex) {
+      } catch (IOException | ParseException ex) {
         throw new TexaiException(ex);
       } finally {
         isSoftwareDeploymentUnderway.set(false);

@@ -111,6 +111,7 @@ public class ContainerDeployment extends AbstractSkill {
        * network-connected role to begin performing its mission.
        */
       case AHCSConstants.PERFORM_MISSION_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
         performMission(message);
         return;
 
@@ -123,6 +124,7 @@ public class ContainerDeployment extends AbstractSkill {
        * When all the files are deployed, a Task Accomplished Info message is sent back to the NetworkDeployment skill as a response.
        */
       case AHCSConstants.DEPLOY_FILES_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
         deployFiles(message);
         return;
 
@@ -187,7 +189,7 @@ public class ContainerDeployment extends AbstractSkill {
   }
 
   /**
-   * Perform the specified file deployment task.
+   * Perform the specified file deployment task, and reply with a task accomplished message when done.
    *
    * @param message the received perform mission task message
    */
@@ -250,7 +252,7 @@ public class ContainerDeployment extends AbstractSkill {
     } catch (ParseException ex) {
       throw new TexaiException(ex);
     }
-
+    sendMessage(Message.replyTaskAccomplished(message));
   }
 
   /** Extracts the file to deploy from the zip file, writes it to the deployed path, and then verifies its contents using
