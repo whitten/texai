@@ -132,6 +132,24 @@ public class SkillTestHarness {
     return skill.getSkillState();
   }
 
+  /** Sets the state of the role's skill having the given class name.
+   *
+   * @param state the state of the role's skill
+   * @param skillClassName  the given class name
+   */
+  public void setSkillState(
+          final AHCSConstants.State state,
+          final String skillClassName) {
+    //Preconditions
+    assert state != null : "state must not be null";
+    assert StringUtils.isNonEmptyString(skillClassName) : "skillClassName must be a non-empty string";
+    assert role.getSkillDictionary().containsKey(skillClassName) :
+            "skillClassName is not a skill for this role, skillDictonary ...\n " + role.getSkillDictionary();
+
+    final AbstractSkill skill = role.getSkill(skillClassName);
+    skill.setSkillState(state);
+  }
+
   /** Gets the role's skill having the given class name.
    *
    * @param skillClassName  the given class name
@@ -145,7 +163,7 @@ public class SkillTestHarness {
 
     return role.getSkill(skillClassName);
   }
-  
+
   /**
    * Gets the mock node runtime.
    *

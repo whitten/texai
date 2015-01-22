@@ -8,8 +8,12 @@
 package org.texai.skill.deployment;
 
 import java.io.File;
+import java.util.List;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.json.simple.parser.ParseException;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
@@ -23,7 +27,7 @@ import org.texai.util.TexaiException;
 public class ContainerDeployment extends AbstractSkill {
 
   // the log4j logger
-  private static final Logger LOGGER = Logger.getLogger(NetworkDeployment.class);
+  private static final Logger LOGGER = Logger.getLogger(ContainerDeployment.class);
 
   /**
    * Constructs a new SkillTemplate instance.
@@ -67,8 +71,8 @@ public class ContainerDeployment extends AbstractSkill {
       /**
        * Join Acknowledged Task
        *
-       * This task message is sent from the network-singleton, parent NetworkDeploymentAgent.NetworkDeploymentRole. It indicates that
-       * the parent is ready to converse with this role as needed.
+       * This task message is sent from the network-singleton, parent NetworkDeploymentAgent.NetworkDeploymentRole. It indicates that the
+       * parent is ready to converse with this role as needed.
        */
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
@@ -105,8 +109,7 @@ public class ContainerDeployment extends AbstractSkill {
        * This task message is sent from the network-singleton, parent NetworkDeploymentAgent.NetworkDeploymentRole. It commands this
        * network-connected role to deploy included files according to the included manifest.
        *
-       * When all the files are deployed, a Task Accomplished Info message is sent back to the
-       * NetworkDeployment skill as a response.
+       * When all the files are deployed, a Task Accomplished Info message is sent back to the NetworkDeployment skill as a response.
        */
       case AHCSConstants.DEPLOY_FILES_TASK:
         deployFiles(message);
@@ -148,7 +151,9 @@ public class ContainerDeployment extends AbstractSkill {
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.AHCS_INITIALIZE_TASK,
+      AHCSConstants.BECOME_READY_TASK,
       AHCSConstants.DEPLOY_FILES_TASK,
+      AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.PERFORM_MISSION_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
     };
@@ -179,13 +184,15 @@ public class ContainerDeployment extends AbstractSkill {
     LOGGER.info("deploying files ...");
     final byte[] zippedBytes = (byte[]) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES);
     final String manifestJSONString = (String) message.get(AHCSConstants.DEPLOY_FILES_TASK_MANIFEST);
-    LOGGER.info("  manifest:    " + manifestJSONString);
+    LOGGER.info("  manifest:\n" + manifestJSONString);
+    try {
+    final JSONObject jsonObject = (JSONObject) JSONValue.parseWithException(manifestJSONString);
+    LOGGER.info("jsonObject: " + jsonObject);
+    @SuppressWarnings("unchecked")
+    final List<JSONObject> manifestItems = (List<JSONObject>) jsonObject.get("manifest");
 
     //TODO first time, record the manifest and ensure that each item has been processed and that every item is actually on the manifest
     //otherwise ensure that the given manifest is the same as the first one.
-
-
-
 //    switch (command) {
 //      case "add":
 //      case "replace":
@@ -226,6 +233,9 @@ public class ContainerDeployment extends AbstractSkill {
 //      default:
 //        assert false;
 //    }
+    } catch (ParseException ex){
+      throw new TexaiException(ex);
+    }
   }
 
   /**
