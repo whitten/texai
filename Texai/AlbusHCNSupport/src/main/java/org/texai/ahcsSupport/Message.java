@@ -10,8 +10,15 @@
  */
 package org.texai.ahcsSupport;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -26,6 +33,7 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import net.jcip.annotations.Immutable;
 import org.joda.time.DateTime;
+import static org.junit.Assert.assertTrue;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 import org.texai.x509.SerializableObjectSigner;
@@ -764,7 +772,7 @@ public class Message implements Serializable {
       return false;
     }
     final Message other = (Message) obj;
-    if (this.senderQualifiedName.equals(senderQualifiedName)) {
+    if (!this.senderQualifiedName.equals(senderQualifiedName)) {
       return false;
     }
     if (this.senderService != null && !this.senderService.equals(other.senderService)) {
@@ -889,11 +897,12 @@ public class Message implements Serializable {
     }
   }
 
-  /** Returns whether the two given message strings are equal when the date portions are ignored. This is useful
-   * for unit testing.
+  /**
+   * Returns whether the two given message strings are equal when the date portions are ignored. This is useful for unit testing.
    *
    * @param messageString1 the first given message string
    * @param messageString2 the second given message string
+   *
    * @return
    */
   public static boolean areMessageStringsEqualIgnoringDate(
@@ -931,6 +940,44 @@ public class Message implements Serializable {
       messageString2Suffix = messageString2.substring(index);
     }
     return messageString1Prefix.equals(messageString2Prefix) && messageString1Suffix.equals(messageString2Suffix);
+  }
+
+  /**
+   * Serializes this message to the given file. This is useful for unit testing.
+   *
+   * @param filePath the given file path
+   */
+  public void serializeToFile(final String filePath) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(filePath) : "filePath must be a non-empty string";
+
+    try {
+      try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(filePath))) {
+        objectOutputStream.writeObject(this);
+      }
+    } catch (IOException ex) {
+      throw new TexaiException(ex);
+    }
+  }
+
+  /**
+   * Deserializes the given file to a message. This is useful for unit testing.
+   *
+   * @param filePath the given file path
+   * @return the deserialized message
+   */
+  public static Message deserializeMessage(final String filePath) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(filePath) : "filePath must be a non-empty string";
+
+    try {
+      final ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(filePath));
+      final Object result = objectInputStream.readObject();
+      assert result instanceof Message;
+      return (Message) result;
+    } catch (IOException | ClassNotFoundException ex) {
+      throw new TexaiException(ex);
+    }
   }
 
 }

@@ -153,6 +153,7 @@ public class NetworkDeploymentTest {
       assertEquals(
               "deployed to Test\n",
               FileUtils.readFileToString(deploymentLogFile));
+      sentMessage.serializeToFile("data/test-messages/deployFileTaskMessage.ser");
     } catch (IOException ex) {
       fail();
     }

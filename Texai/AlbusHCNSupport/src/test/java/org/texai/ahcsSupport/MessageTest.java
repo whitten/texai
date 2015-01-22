@@ -9,7 +9,13 @@
  */
 package org.texai.ahcsSupport;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -69,6 +75,80 @@ public class MessageTest {
 
   public static URI randomURI() {
     return new URIImpl(Constants.TEXAI_NAMESPACE + UUID.randomUUID().toString());
+  }
+
+  /**
+   * Test serialization.
+   */
+  @Test
+  public void testSerialization() {
+    LOGGER.info("serialization");
+    ObjectOutputStream objectOutputStream = null;
+    try {
+      String senderQualifiedName = "container1.agent1.role1";
+      String recipientQualifiedName = "container2.agent2.role2";
+      final Message message1 = new Message(
+              senderQualifiedName,
+              "SenderService", // senderService
+              recipientQualifiedName,
+              "org.texai.kb.persistence.domainEntity.RepositoryContentDescription", // recipientService
+              "ABC_Task"); // operation
+
+      // serialize
+      final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+      objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+      objectOutputStream.writeObject(message1);
+      objectOutputStream.close();
+      assertTrue(byteArrayOutputStream.toByteArray().length > 0);
+
+      // deserialize
+      final byte[] serializedBytes = byteArrayOutputStream.toByteArray();
+      final InputStream inputStream = new ByteArrayInputStream(serializedBytes);
+      ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
+      Object result = objectInputStream.readObject();
+      assert result instanceof Message;
+      assertEquals(result, message1);
+
+    } catch (IOException | ClassNotFoundException ex) {
+      fail(ex.getMessage());
+    } finally {
+      try {
+        if (objectOutputStream != null) {
+          objectOutputStream.close();
+        }
+      } catch (IOException ex) {
+        fail(ex.getMessage());
+      }
+    }
+  }
+
+  /**
+   * Test of serializeToFile and deserializeMessage methods, of class Message.
+   */
+  @Test
+  public void testSerializeToFile() {
+    LOGGER.info("serializeToFile and back again");
+    String senderQualifiedName = "container1.agent1.role1";
+    String recipientQualifiedName = "container2.agent2.role2";
+    final Message message = new Message(
+            senderQualifiedName,
+            "SenderService", // senderService
+            recipientQualifiedName,
+            "org.texai.kb.persistence.domainEntity.RepositoryContentDescription", // recipientService
+            "ABC_Task"); // operation
+    final String serializedMessageFilePath = "data/test-message.ser";
+    final File serializedMessageFile = new File(serializedMessageFilePath);
+    if (serializedMessageFile.exists()) {
+      serializedMessageFile.delete();
+    }
+    assertFalse(serializedMessageFile.exists());
+
+    message.serializeToFile(serializedMessageFilePath);
+
+    assertTrue(serializedMessageFile.exists());
+    assertTrue(serializedMessageFile.isFile());
+    final Message deserializedMessage = Message.deserializeMessage(serializedMessageFilePath);
+    assertEquals(message, deserializedMessage);
   }
 
   /**
@@ -603,11 +683,11 @@ public class MessageTest {
             "ABC_Task", // operation
             parameterDictionary2,
             "1.0.0");
-    //assertTrue(instance1.equals(instance2));  only true if both instances are created at the same time
+    assertTrue(instance1.equals(instance2));
     Message instance3 = new Message(
             "container1.agent1.role1", // senderQualifiedName
             "SenderService", // senderService
-            "container2.agent2.role2", // recipientQualifiedName
+            "container3.agent2.role2", // recipientQualifiedName
             conversationId,
             replyWith,
             inReplyTo,
