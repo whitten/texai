@@ -1,0 +1,75 @@
+{"manifest":[
+{"path":"Main-1.0\/data\/nodes.xml",
+  "command":"replace",
+  "hash":"fukO5UNFNxNm61Lc13blxrDnipjbNHh+1o\/\/\/wsAQvpB+2nQWLa7PI41gUFDQMzbQuFJ4Mu3QSiQRkSvghIsMA=="},
+  
+{"path":"Main-1.0\/lib\/AlbusHCN-1.0.jar",
+  "command":"replace",
+  "hash":"Cts103fDFjpJfa3V3GU4gv0EBMpqqJS2l2kkSJvQWekdUAsY4w8\/fLDjCORxYlcvCnUPBHubTgLzk2P3hvM\/2w=="},
+  
+{"path":"Main-1.0\/lib\/AlbusHCNSupport-1.0.jar",
+  "command":"replace",
+  "hash":"D3kAyYCmdeJeCN7EdoxZ+ol2cqyeYVV1sGEzxt2rDHLmtIcxAo6Go+5KkbGg3YLkQV6gPJJbpLvP81EvFgBsKA=="},
+  
+{"path":"Main-1.0\/lib\/BitTorrentSupport-1.0.jar",
+  "command":"replace",
+  "hash":"okB8CutCa0Pu8oLQ1ruKznEumdn5dxFEEIgwuyzOqX\/dtxDKKmA2e\/MiHA96g3X8UsNo2uz9Ki+NerblOJbfhQ=="},
+  
+{"path":"Main-1.0\/lib\/CoinSkills-1.0.jar",
+  "command":"replace",
+  "hash":"wsx8emhdPs5Uh0b7mbl21zs2tpiUSgb\/xmsWMzgCivWxA0x2cruYtM0mcUHMASZfP6J1WMwDrVVap7FOuuHsdA=="},
+  
+{"path":"Main-1.0\/lib\/Inference-1.0.jar",
+  "command":"replace",
+  "hash":"ocIbSCHc78TPCUSEJjABICVTO7TZOKrhut8pMfzgTJbsqy\/4oSDfSkBHzC78aOeo+Neq+SWssI4c1NJaX9I4gg=="},
+  
+{"path":"Main-1.0\/lib\/JavaBitcoindRpcClient-0.9.0.jar",
+  "command":"add",
+  "hash":"VmlCyM3MdelJ1\/gmx+L5DVQ5xtFr7UmsZmyU3dxFMXOAaPdV7LZ\/itEbTfV4Aqcz+JCojATIXTDwXtxJr5grOw=="},
+  
+{"path":"Main-1.0\/lib\/Main-1.0.jar",
+  "command":"replace",
+  "hash":"EJ8r4wU2K1p5bytERCzFSqARgLAeeqe8t\/ITBNoGwNkS1QSCZIMUkH3Gk4KG7YRgKi2i\/FCBjITxk3WqC\/Iplg=="},
+  
+{"path":"Main-1.0\/lib\/Network-1.0.jar",
+  "command":"replace",
+  "hash":"fXPARlQATJ4CMQhF6UY6WjAdr\/AW1ygQ1EZT3pcer8NiwCEDWD3CaCKpJrjOOj0pw6hQ7a1zDbFT2nzZ0BHGBw=="},
+  
+{"path":"Main-1.0\/lib\/RDFEntityManager-1.0.jar",
+  "command":"replace",
+  "hash":"cPtSjyKw0WXcx+Nr7+mP+H5cPCF4SHDDSVkxuUPJSXsB21QO5YXKnfc7v1sdEA2\/B\/JcSB+McsTLVb5ewsN3zw=="},
+  
+{"path":"Main-1.0\/lib\/Skills-1.0.jar",
+  "command":"replace",
+  "hash":"BDPQqC39mCJ661fs8yJEXgKG0nMsZDLG0hYauS5SzjgGpV\/EjkKtGAoVkIuq2NEycIUFoIMekk2Y7+5A3FzqHg=="},
+  
+{"path":"Main-1.0\/lib\/TamperEvidentLog-1.0.jar",
+  "command":"replace",
+  "hash":"Xf2hZN+vwWhYShIKX75IUO5iGDXi177n9tNkeyLmBTiMKp8LKBwlfzkzWaohKnwUBKhevjmzsQSX0ZT4DeeJKw=="},
+  
+{"path":"Main-1.0\/lib\/UPNPLib-1.0.jar",
+  "command":"replace",
+  "hash":"otrR8RCJrBlu9gIxDl+B7TMuUfpgtkdNKNLQkDiUOA7zDxhw\/NhHD8F5hpg8IJJm2hu1Pcpsn1fRR5ijWuapNQ=="},
+  
+{"path":"Main-1.0\/lib\/Utilities-1.0.jar",
+  "command":"replace",
+  "hash":"ikfmtVvTZXy6bjUG7nWkwMO+S9XnbttbqJ4mTdKbYcxFD4LmUnBTMJ3NaVyy\/HKPHCVDUD2yzyAan5Sbzs33tA=="},
+  
+{"path":"Main-1.0\/lib\/X509Security-1.0.jar",
+  "command":"replace",
+  "hash":"QnfrQAx4bNCPOvhWgpIhXJJgPFku0s3zioDhl\/uNhOa47hQXJ+mreeiQy7QCurgM6DX8cwQP3kM\/fRbOtxXQXQ=="},
+  
+{"path":"Main-1.0\/lib\/json-simple-1.1.1.jar",
+  "command":"add",
+  "hash":"+HmL+8yKuAAbr5DOR+wiZCNNwdotSql\/3NwJkEcqa1paMvgo53YUB3fVmKmdigwPUcbQdnrhqClpCrkgCuNXQg=="},
+  
+{"path":"Main-1.0\/lib\/json-simple-1.1.jar",
+  "command":"delete"},
+  
+{"path":"bin\/aicoin-cli",
+  "command":"replace",
+  "hash":"tj0GSSJxBp8pxvzldlxRrd116pmk62I9Gy42Kn452JTpmpXnqV\/AZ5j2N18oPqZ+3AiRr3CHZwg27pF8TUvBoQ=="},
+  
+{"path":"bin\/aicoin-qt",
+  "command":"replace",
+  "hash":"eVoMC+v8\/GpQkkCOrRM7si4ucqVVgzMbAhPPxJyOXW4830nSN9dJ0y4HK0nvESBn3ynlsFumnbIe3hMnN2Z\/EQ=="}]}

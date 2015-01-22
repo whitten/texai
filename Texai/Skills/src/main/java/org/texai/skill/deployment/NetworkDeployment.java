@@ -134,6 +134,16 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
         performMission(message);
         return;
 
+      /**
+       * Task Accomplished Info
+       *
+       * This information message is sent from a child ContainerDeploymentAgent.ContainerDeploymentRole. It informs this
+       * network-singleton role that the Deploy Files Task has been accomplished.
+       */
+      case AHCSConstants.TASK_ACCOMPLISHED_INFO:
+        processDeploymentTaskAccomplished(message);
+        return;
+
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
         return;
@@ -174,8 +184,12 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.AHCS_INITIALIZE_TASK,
+      AHCSConstants.DELEGATE_BECOME_READY_TASK,
+      AHCSConstants.DELEGATE_PERFORM_MISSION_TASK,
+      AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.PERFORM_MISSION_TASK,
-      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.TASK_ACCOMPLISHED_INFO
     };
   }
 
@@ -213,6 +227,18 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
   @Override
   protected Logger getLogger() {
     return LOGGER;
+  }
+
+  /** Handles the task accomplished information message from a child ContainerDeploymentAgent.
+   *
+   * @param message task accomplished information message
+   */
+  private void processDeploymentTaskAccomplished(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+
+    
   }
 
   /**

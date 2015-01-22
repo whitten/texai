@@ -76,8 +76,10 @@ public class CreateSoftwareDeploymentManifest {
     }
 
     ignoredDirectoryPaths.add(".aicoin");
+    ignoredDirectoryPaths.add("deployment");
     ignoredDirectoryPaths.add("journals");
     ignoredDirectoryPaths.add("repositories");
+
 
     ignoredFilePaths.add("agents-graph.dot");
     ignoredFilePaths.add("agents-graph-key.txt");
@@ -85,6 +87,7 @@ public class CreateSoftwareDeploymentManifest {
     ignoredFilePaths.add("console.log");
     ignoredFilePaths.add("keystore.uber");
     ignoredFilePaths.add("secure-random.ser");
+    ignoredFilePaths.add("SingletonConfiguration.crt");
     ignoredFilePaths.add("wallet.dat"); // redundant because .aicoin is ignored
     ignoredFilePaths.add("x11vnc.log");
   }

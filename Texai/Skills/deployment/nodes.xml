@@ -145,6 +145,43 @@
   </node>
 
   <node>
+    <name>ContainerOperationAgent</name>
+    <missionDescription>Manages a container and the AICoin agent within the container. Interacts with the human container operator.</missionDescription>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>ContainerOperationAgent.ContainerOperationRole</qualifiedName>
+        <description>Manages the network, the containers, and the AICoin agents within the containers. Interacts with human operators.</description>
+        <parentQualifiedName>NetworkOperationAgent.NetworkOperationRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.network.ContainerOperation</skill-class-name>
+          </skill-class>
+          <skill-class>
+            <skill-class-name>org.texai.skill.support.NodeRuntimeSkill</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+      <role>
+        <qualifiedName>ContainerOperationAgent.ContainerHeartbeatRole</qualifiedName>
+        <description>Manages a container's agents to ensure liveness.</description>
+        <parentQualifiedName>NetworkOperationAgent.TopLevelHeartbeatRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.heartbeat.ContainerHeartbeat</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
     <name>NetworkLogControlAgent</name>
     <missionDescription>Coordinates Java logging for agents in the AICoin network.</missionDescription>
     <isNetworkSingleton>true</isNetworkSingleton>
@@ -190,35 +227,43 @@
   </node>
 
   <node>
-    <name>ContainerOperationAgent</name>
-    <missionDescription>Manages a container and the AICoin agent within the container. Interacts with the human container operator.</missionDescription>
+    <name>NetworkDeploymentAgent</name>
+    <missionDescription>Performs software deployment at the network level.</missionDescription>
+    <isNetworkSingleton>true</isNetworkSingleton>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
     <roles>
       <role>
-        <qualifiedName>ContainerOperationAgent.ContainerOperationRole</qualifiedName>
-        <description>Manages the network, the containers, and the AICoin agents within the containers. Interacts with human operators.</description>
+        <qualifiedName>NetworkDeploymentAgent.NetworkDeploymentRole</qualifiedName>
+        <description>Performs software deployment at the network level.</description>
         <parentQualifiedName>NetworkOperationAgent.NetworkOperationRole</parentQualifiedName>
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
-            <skill-class-name>org.texai.skill.network.ContainerOperation</skill-class-name>
-          </skill-class>
-          <skill-class>
-            <skill-class-name>org.texai.skill.support.NodeRuntimeSkill</skill-class-name>
+            <skill-class-name>org.texai.skill.deployment.NetworkDeployment</skill-class-name>
           </skill-class>
         </skill-classes>
         <variableNames></variableNames>
       </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>ContainerDeploymentAgent</name>
+    <missionDescription>Performs software deployment at the container level.</missionDescription>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
       <role>
-        <qualifiedName>ContainerOperationAgent.ContainerHeartbeatRole</qualifiedName>
-        <description>Manages a container's agents to ensure liveness.</description>
-        <parentQualifiedName>NetworkOperationAgent.TopLevelHeartbeatRole</parentQualifiedName>
+        <qualifiedName>ContainerDeploymentAgent.ContainerDeploymentRole</qualifiedName>
+        <description>Performs software deployment at the container level.</description>
+        <parentQualifiedName>NetworkDeploymentAgent.NetworkDeploymentRole</parentQualifiedName>
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
-            <skill-class-name>org.texai.skill.heartbeat.ContainerHeartbeat</skill-class-name>
+            <skill-class-name>org.texai.skill.deployment.ContainerDeployment</skill-class-name>
           </skill-class>
         </skill-classes>
         <variableNames></variableNames>
@@ -311,6 +356,28 @@
         <skill-classes>
           <skill-class>
             <skill-class-name>org.texai.skill.aicoin.XAIClientGateway</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>XAIFaucetAgent</name>
+    <missionDescription>Provides a tamper evident aicoin faucet.</missionDescription>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>XAIFaucetAgent.XAIFaucetRole</qualifiedName>
+        <description>Provides a tamper evident aicoin faucet.</description>
+        <parentQualifiedName>XAINetworkOperationAgent.XAINetworkOperationRole</parentQualifiedName>
+         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
+       <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.aicoin.XAIFaucet</skill-class-name>
           </skill-class>
         </skill-classes>
         <variableNames></variableNames>
