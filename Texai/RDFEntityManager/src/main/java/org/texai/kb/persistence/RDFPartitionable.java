@@ -6,7 +6,6 @@
  * Description: Defines the RDF repository partition interface.
  *
  * Copyright (C) Dec 20, 2012, Stephen L. Reed, Texai.org.
- *
  */
 package org.texai.kb.persistence;
 

@@ -6,17 +6,6 @@
  * Description:  This class removes domain entities from the RDF store.
  *
  * Copyright (C) August 13, 2007 Stephen L. Reed.
- *
- * This program is free software; you can redistribute it and/or modify it under the terms
- * of the GNU General Public License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with this program;
- * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 package org.texai.kb.persistence;
 
@@ -67,6 +56,7 @@ public final class RDFEntityRemover extends AbstractRDFEntityAccessor {
    * @param repositoryConnection the repository connection
    * @param rdfEntity the RDF entity to be removed
    */
+  @SuppressWarnings("deprecation")
   public void remove(
           final RepositoryConnection repositoryConnection,
           final RDFPersistent rdfEntity) {
@@ -85,6 +75,7 @@ public final class RDFEntityRemover extends AbstractRDFEntityAccessor {
     configureRDFEntitySettings();
     findInstanceURI();
     try {
+      @SuppressWarnings("deprecation")
       final boolean isAutoCommit = repositoryConnection.isAutoCommit();
       if (isAutoCommit) {
         // perform removal operations within a transaction to avoid the otherwise unsatisfactory performance resulting from auto-commiting each

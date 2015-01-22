@@ -7,17 +7,6 @@
  * subclasses for loading and persistence.
  *
  * Copyright (C) 2006 Stephen L. Reed.
- *
- * This program is free software; you can redistribute it and/or modify it under the terms
- * of the GNU General Public License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with this program;
- * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 package org.texai.kb.persistence;
 
@@ -49,66 +38,105 @@ import org.openrdf.repository.RepositoryResult;
 import org.texai.kb.Constants;
 import org.texai.util.TexaiException;
 
-/** This abstract class contains the state and behavior that is common to the concrete subclasses RDFEntityLoader,
- * RDFEntityPersister and RDFEntityRemover.  It is responsible for parsing the semantic annotations from the
- * entity in preparation for persist() or find() methods.
+/**
+ * This abstract class contains the state and behavior that is common to the concrete subclasses RDFEntityLoader, RDFEntityPersister and
+ * RDFEntityRemover. It is responsible for parsing the semantic annotations from the entity in preparation for persist() or find() methods.
  *
  *
- * It features a stack to contain state information during recursive
- * method calls, avoiding the need to construct new instances.
+ * It features a stack to contain state information during recursive method calls, avoiding the need to construct new instances.
  *
  * @author reed
  */
 @NotThreadSafe
 public abstract class AbstractRDFEntityAccessor {          // NOPMD
 
-  /** the predicate used to persist a map entry key */
+  /**
+   * the predicate used to persist a map entry key
+   */
   protected static final URI PERSISTENT_MAP_ENTRY_KEY_URI = new URIImpl(Constants.TERM_PERSISTENT_MAP_ENTRY_KEY);
-  /** the predicate used to persist a map entry value */
+  /**
+   * the predicate used to persist a map entry value
+   */
   protected static final URI PERSISTENT_MAP_ENTRY_VALUE_URI = new URIImpl(Constants.TERM_PERSISTENT_MAP_ENTRY_VALUE);
-  /** the class of the RDF entity */
+  /**
+   * the class of the RDF entity
+   */
   private Class<?> rdfEntityClass;
-  /** the instantiated RDF entity */
+  /**
+   * the instantiated RDF entity
+   */
   private RDFPersistent rdfEntity;
-  /** the array of type level annotations */
+  /**
+   * the array of type level annotations
+   */
   private Annotation[] typeLevelAnnotations;
-  /** the dictionary of field level annotations, field -> RDFProperty annotation */
+  /**
+   * the dictionary of field level annotations, field -> RDFProperty annotation
+   */
   private Map<Field, Annotation> fieldAnnotationDictionary;
-  /** the id field */
+  /**
+   * the id field
+   */
   private Field idField;
-  /** the namespace dictionary, prefix --> namespace URI */
+  /**
+   * the namespace dictionary, prefix --> namespace URI
+   */
   private Map<String, String> namespaceDictionary;
-  /** the super classes of this RDF entity */
+  /**
+   * the super classes of this RDF entity
+   */
   private URI[] subClassOfURIs;
-  /** the typeURIs of this RDF entity */
+  /**
+   * the typeURIs of this RDF entity
+   */
   private URI[] typeURIs;
-  /** the class URI */
+  /**
+   * the class URI
+   */
   private URI classURI;
-  /** the stack of abstract RDF entity information that allows recursive method calls */
+  /**
+   * the stack of abstract RDF entity information that allows recursive method calls
+   */
   private final Stack<Object> rdfEntityInfoStack = new Stack<>();
-  /** the persistence context URI */
+  /**
+   * the persistence context URI
+   */
   private URI contextURI;
-  /** the override persistence context URI */
+  /**
+   * the override persistence context URI
+   */
   private URI overrideContextURI = null;
-  /** the effective persistence context URI */
+  /**
+   * the effective persistence context URI
+   */
   private URI effectiveContextURI;
-  /** the instance URI */
+  /**
+   * the instance URI
+   */
   private URI instanceURI;
-  /** the value factory */
+  /**
+   * the value factory
+   */
   private final ValueFactory valueFactory = new ValueFactoryImpl();
-  /** the dictionary of memoized class annotation information, class --> ClassAnnotationInfo */
+  /**
+   * the dictionary of memoized class annotation information, class --> ClassAnnotationInfo
+   */
   private final Map<Class<?>, ClassAnnotationInfo> memoizedClassAnnotationInfos = new HashMap<>();
 
-  /** Creates a new instance of AbstractRDFEntityAccessor. */
+  /**
+   * Creates a new instance of AbstractRDFEntityAccessor.
+   */
   protected AbstractRDFEntityAccessor() {
     super();
     fieldAnnotationDictionary = new HashMap<>();
     namespaceDictionary = new HashMap<>();
   }
 
-  /** Returns true if the given object is an annotated RDF entity.
+  /**
+   * Returns true if the given object is an annotated RDF entity.
    *
    * @param obj the given object
+   *
    * @return true if the given object is an annotated RDF entity
    */
   public final boolean isRDFEntity(final Object obj) {
@@ -118,9 +146,11 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     return isRDFEntityClass(obj.getClass());
   }
 
-  /** Returns true if the given object class is an annotated RDF entity class.
+  /**
+   * Returns true if the given object class is an annotated RDF entity class.
    *
    * @param clazz the given object class
+   *
    * @return true if the given object is an annotated RDF entity class
    */
   @SuppressWarnings("unchecked")
@@ -137,7 +167,9 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     return false;
   }
 
-  /** Gathers annotations for the RDF entity class. */
+  /**
+   * Gathers annotations for the RDF entity class.
+   */
   protected final void gatherAnnotationsForRDFEntityClass() {
     //Preconditions
     assert rdfEntityClass != null : "rdfEntityClass must not be null";    // NOPMD
@@ -168,7 +200,9 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     }
   }
 
-  /** Processes the type level annotations to configure the RDF entity settings */
+  /**
+   * Processes the type level annotations to configure the RDF entity settings
+   */
   protected final void configureRDFEntitySettings() {
     //Preconditions
     assert typeLevelAnnotations != null : "typeLevelAnnotations must not be null";
@@ -237,9 +271,11 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     }
   }
 
-  /** Gets the class URI from its RDF type level annotations.
+  /**
+   * Gets the class URI from its RDF type level annotations.
    *
    * @param clazz the class
+   *
    * @return the class URI from its RDF type level annotations
    */
   protected final URI getClassURI(final Class<?> clazz) {
@@ -277,8 +313,9 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     return classURI;
   }
 
-  /** Gathers the field level annotations for the given class and its superclasses, creating the
-   * dictionary, field -> RDFProperty annotation.  Also locates the id field.
+  /**
+   * Gathers the field level annotations for the given class and its superclasses, creating the dictionary, field -> RDFProperty annotation.
+   * Also locates the id field.
    *
    * @param clazz the given class
    */
@@ -312,11 +349,13 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     }
   }
 
-  /** Returns the given annotation from the given field, or null if not found.  This implementation ignores whether
-   * the annotation class and the given class have different classloaders as might happen in the OSGi framework.
+  /**
+   * Returns the given annotation from the given field, or null if not found. This implementation ignores whether the annotation class and
+   * the given class have different classloaders as might happen in the OSGi framework.
    *
    * @param field the given field
    * @param clazz the given annotation class
+   *
    * @return the given annotation from the given field, or null if not found
    */
   private Annotation getAnnotation(final Field field, final Class<?> clazz) {
@@ -333,9 +372,11 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     return null;
   }
 
-  /** Returns a URI formed from the given name, prepending a namespace if required.
+  /**
+   * Returns a URI formed from the given name, prepending a namespace if required.
    *
    * @param name the given name, which may include a namespace prefix
+   *
    * @return a URI formed from the given name, prepending a namespace if required
    */
   protected final URI makeURI(final String name) {
@@ -372,10 +413,12 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     return uri;
   }
 
-  /** Gets a default property URI for the annotated field.
+  /**
+   * Gets a default property URI for the annotated field.
    *
    * @param field the annotated field
    * @param rdfProperty the property annotation
+   *
    * @return a default property URI
    */
   protected URI getEffectivePropertyURI(final Field field, final RDFProperty rdfProperty) {
@@ -393,13 +436,15 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
             field.getType()); // fieldType
   }
 
-  /** Gets the logger.
+  /**
+   * Gets the logger.
    *
    * @return the logger
    */
   abstract Logger getLogger();
 
-  /** Gets the value factory.
+  /**
+   * Gets the value factory.
    *
    * @return the value factory
    */
@@ -407,7 +452,8 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     return valueFactory;
   }
 
-  /** Gets the RDF entity class.
+  /**
+   * Gets the RDF entity class.
    *
    * @return the RDF entity class
    */
@@ -415,7 +461,8 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     return rdfEntityClass;
   }
 
-  /** Sets the RDF entity class.
+  /**
+   * Sets the RDF entity class.
    *
    * @param rdfEntityClass the RDF entity class
    */
@@ -426,7 +473,8 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     this.rdfEntityClass = rdfEntityClass;
   }
 
-  /** Gets the instantiated RDF entity.
+  /**
+   * Gets the instantiated RDF entity.
    *
    * @return the instantiated RDF entity
    */
@@ -434,7 +482,8 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     return rdfEntity;
   }
 
-  /** Sets the instantiated RDF entity.
+  /**
+   * Sets the instantiated RDF entity.
    *
    * @param rdfEntity the instantiated RDF entity
    */
@@ -442,7 +491,8 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     this.rdfEntity = rdfEntity;
   }
 
-  /** Gets the array of type level annotations.
+  /**
+   * Gets the array of type level annotations.
    *
    * @return the array of type level annotations
    */
@@ -450,7 +500,8 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     return typeLevelAnnotations;                           // NOPMD
   }
 
-  /** Gets the dictionary of field level annotations.
+  /**
+   * Gets the dictionary of field level annotations.
    *
    * @return the dictionary of field level annotations, field -> Id or RDFProperty annotation
    */
@@ -458,7 +509,8 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     return fieldAnnotationDictionary;
   }
 
-  /** Gets the super classes of this RDF entity.
+  /**
+   * Gets the super classes of this RDF entity.
    *
    * @return the super classes of this RDF entity
    */
@@ -494,7 +546,8 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     this.typeURIs = typeURIs;
   }
 
-  /** Gets the class URI.
+  /**
+   * Gets the class URI.
    *
    * @return the class URI for this RDF entity
    */
@@ -534,7 +587,8 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     this.contextURI = contextURI;
   }
 
-  /** Gets the instance URI.
+  /**
+   * Gets the instance URI.
    *
    * @return the instance URI
    */
@@ -551,7 +605,8 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     this.instanceURI = instanceURI;
   }
 
-  /** Gets the id field.
+  /**
+   * Gets the id field.
    *
    * @return the id field
    */
@@ -559,7 +614,8 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     return idField;
   }
 
-  /** Returns the stack level for logging.
+  /**
+   * Returns the stack level for logging.
    *
    * @return the stack level for logging.
    */
@@ -570,7 +626,9 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     return "[" + rdfEntityInfoStack.size() + "] ";
   }
 
-  /** Pushes the current session bean state onto a stack and then intitializes the session state. */
+  /**
+   * Pushes the current session bean state onto a stack and then intitializes the session state.
+   */
   protected final void saveAbstractSessionState() {
     //Preconditions
     assert rdfEntityInfoStack != null : "rdfEntityInfoStack must not be null";
@@ -592,7 +650,9 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
             idField));
   }
 
-  /** Initializes the session bean state. */
+  /**
+   * Initializes the session bean state.
+   */
   protected final void initializeAbstractSessionState() {
     rdfEntityClass = null;
     rdfEntity = null;
@@ -609,7 +669,9 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     idField = null;
   }
 
-  /** Restores the session state following a recursive method call. */
+  /**
+   * Restores the session state following a recursive method call.
+   */
   protected final void restoreAbstractSessionState() {
     //Preconditions
     assert rdfEntityInfoStack != null : "rdfEntityInfoStack must not be null";
@@ -633,7 +695,8 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     }
   }
 
-  /** Gets the override persistence context.
+  /**
+   * Gets the override persistence context.
    *
    * @return the override persistence context
    */
@@ -641,7 +704,8 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     return overrideContextURI;
   }
 
-  /** Sets the override persistence context.
+  /**
+   * Sets the override persistence context.
    *
    * @param overrideContextURI the override persistence context
    */
@@ -649,7 +713,8 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     this.overrideContextURI = overrideContextURI;
   }
 
-  /** Gets the effective persistence context URI.
+  /**
+   * Gets the effective persistence context URI.
    *
    * @return the effective persistence context URI
    */
@@ -657,7 +722,8 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     return effectiveContextURI;
   }
 
-  /** Sets the effective persistence context URI.
+  /**
+   * Sets the effective persistence context URI.
    *
    * @param effectiveContextURI the effective persistence context URI
    */
@@ -668,34 +734,62 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     this.effectiveContextURI = effectiveContextURI;
   }
 
-  /** Contains the session bean state for recursive method calls. */
+  /**
+   * Contains the session bean state for recursive method calls.
+   */
   private static class AbstractRDFEntityInfo {             // NOPMD
 
-    /** the RDF entity class */
+    /**
+     * the RDF entity class
+     */
     private final Class<?> rdfEntityClass;                    // NOPMD
-    /** the instantiated RDF entity */
+    /**
+     * the instantiated RDF entity
+     */
     private final RDFPersistent rdfEntity;                        // NOPMD
-    /** the array of type level annotations */
+    /**
+     * the array of type level annotations
+     */
     private final Annotation[] typeLevelAnnotations;       // NOPMD
-    /** the dictionary of field level annotations, field -> Id or RDFProperty annotation */
+    /**
+     * the dictionary of field level annotations, field -> Id or RDFProperty annotation
+     */
     private final Map<Field, Annotation> fieldAnnotationDictionary;    // NOPMD
-    /** the namespace dictionary, prefix --> namespace URI */
+    /**
+     * the namespace dictionary, prefix --> namespace URI
+     */
     private final Map<String, String> namespaceDictionary; // NOPMD
-    /** the contextURI */
+    /**
+     * the contextURI
+     */
     private final URI contextURI;                          // NOPMD
-    /** the override persistence context URI */
+    /**
+     * the override persistence context URI
+     */
     private final URI overrideContextURI;
-    /** the effective persistence context URI */
+    /**
+     * the effective persistence context URI
+     */
     private final URI effectiveContextURI;
-    /** the RDF super classes of this RDF entity */
+    /**
+     * the RDF super classes of this RDF entity
+     */
     private final URI[] subClassOfURIs;                    // NOPMD
-    /** the typeURIs of this RDF entity */
+    /**
+     * the typeURIs of this RDF entity
+     */
     private final URI[] typeURIs;                          // NOPMD
-    /** the class URI */
+    /**
+     * the class URI
+     */
     private final URI classURI;                            // NOPMD
-    /** the instance URI */
+    /**
+     * the instance URI
+     */
     private final URI instanceURI;                         // NOPMD
-    /** the id field */
+    /**
+     * the id field
+     */
     private final Field idField;                           // NOPMD
 
     /**
@@ -747,19 +841,30 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     }
   }
 
-  /** Contains the memoized class annotation information. */
+  /**
+   * Contains the memoized class annotation information.
+   */
   private static class ClassAnnotationInfo {
 
-    /** the array of type level annotations */
+    /**
+     * the array of type level annotations
+     */
     private final Annotation[] typeLevelAnnotations;        // NOPMD
-    /** the dictionary of field level annotations, field -> Id or RDFProperty annotation */
+    /**
+     * the dictionary of field level annotations, field -> Id or RDFProperty annotation
+     */
     private final Map<Field, Annotation> fieldAnnotationDictionary;       // NOPMD
-    /** the namespace dictionary, prefix --> namespace URI */
+    /**
+     * the namespace dictionary, prefix --> namespace URI
+     */
     private final Map<String, String> namespaceDictionary; // NOPMD
-    /** the id field */
+    /**
+     * the id field
+     */
     private final Field idField;                           // NOPMD
 
-    /** Constructs a new ClassAnnotationInfo instance.
+    /**
+     * Constructs a new ClassAnnotationInfo instance.
      *
      * @param typeLevelAnnotations the array of type level annotation
      * @param fieldAnnotationDictionary the dictionary of field level annotations, field -> Id or RDFProperty annotation
@@ -783,12 +888,14 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     }
   }
 
-  /** Adds the given list of RDF values to the repository as an RDF list structure.
+  /**
+   * Adds the given list of RDF values to the repository as an RDF list structure.
    *
    * @param repositoryConnection the repository connection
    * @param rdfEntityManager the entity manager
    * @param valueList the given list of RDF values
    * @param writer the export output writer, or null when objects are ordinarily persisted to the given RDF quad store
+   *
    * @return the blank node that heads the RDF list structure
    */
   public final BNode addRDFList(
@@ -883,10 +990,12 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     return rdfListHead;
   }
 
-  /** Returns the list of RDF values linked from the given RDF list head.
+  /**
+   * Returns the list of RDF values linked from the given RDF list head.
    *
    * @param repositoryConnection the repository connection
    * @param rdfListHead the blank node that heads the RDF list
+   *
    * @return the list of RDF values linked from the given RDF list head
    */
   public final List<Value> getRDFListValues(
@@ -992,13 +1101,15 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
 //
 //    return firstAndRest;
 //  }
-  /** Returns the URI array [first, rest] whose elements are the first element of the given list node, and the rest of the list at the
-   * given node.
+  /**
+   * Returns the URI array [first, rest] whose elements are the first element of the given list node, and the rest of the list at the given
+   * node.
    *
    * @param repositoryConnection the repository connection
    * @param listNode the blank node that heads the RDF list
-   * @return the URI array [first, rest] whose elements are the first element of the given list node, and the rest of the list at the
-   * given node
+   *
+   * @return the URI array [first, rest] whose elements are the first element of the given list node, and the rest of the list at the given
+   * node
    */
   private Value[] getRDFListComponents(
           final RepositoryConnection repositoryConnection,
@@ -1043,7 +1154,8 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     return firstAndRest;
   }
 
-  /** Removes the given RDF list.
+  /**
+   * Removes the given RDF list.
    *
    * @param repositoryConnection the repository connection
    * @param rdfEntityManager the entity manager
@@ -1085,21 +1197,34 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
     removeRDFList(repositoryConnection, rdfEntityManager, (BNode) rest);
   }
 
-  /** Provides a container for a map entry. */
+  /**
+   * Provides a container for a map entry.
+   */
   protected static class MapEntry {
 
-    /** the map entry key Java object */
+    /**
+     * the map entry key Java object
+     */
     protected Object key;
-    /** the map entry key RDF value */
+    /**
+     * the map entry key RDF value
+     */
     protected Value keyRDFValue;
-    /** the map entry value Java object */
+    /**
+     * the map entry value Java object
+     */
     protected Object value;
-    /** the map entry value RDF value */
+    /**
+     * the map entry value RDF value
+     */
     protected Value valueRDFValue;
-    /** the blank node */
+    /**
+     * the blank node
+     */
     protected BNode bNode;
 
-    /** Constructs a new MapEntry object.
+    /**
+     * Constructs a new MapEntry object.
      *
      * @param bNode the blank node
      * @param keyRDFValue the map entry key RDF value
@@ -1119,7 +1244,8 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
       this.valueRDFValue = valueRDFValue;
     }
 
-    /** Constructs a new MapEntry object.
+    /**
+     * Constructs a new MapEntry object.
      *
      * @param key the map entry key
      * @param value the map entry value
@@ -1133,11 +1259,13 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
       this.value = value;
     }
 
-    /** Makes a map entry given the blank node that persisted it.
+    /**
+     * Makes a map entry given the blank node that persisted it.
      *
      * @param bNode the blank node that persisted the map entry
      * @param repositoryConnection the repository connection
      * @param effectiveContextURI the effective context term
+     *
      * @return the map entry
      */
     static MapEntry makeMapEntry(
@@ -1167,7 +1295,8 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
       return new MapEntry(bNode, keyRDFValue, valueRDFValue);
     }
 
-    /** Returns a string representation of this object.
+    /**
+     * Returns a string representation of this object.
      *
      * @return a string representation of this object
      */
@@ -1176,9 +1305,11 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
       return key + "-->" + value;
     }
 
-    /** Returns whether some other object equals this one.
+    /**
+     * Returns whether some other object equals this one.
      *
      * @param obj the other object
+     *
      * @return whether some other object equals this one
      */
     @Override
@@ -1193,13 +1324,15 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
       if (this.key != other.key && (this.key == null || !this.key.equals(other.key))) {
         return false;
       }
-      if (this.value != other.value && (this.value == null || !this.value.equals(other.value))) {
-        return false;
+      if (this.value == other.value) {
+        return true;
+      } else {
+        return this.value.equals(other.value);
       }
-      return true;
     }
 
-    /** Returns a hash code for this object.
+    /**
+     * Returns a hash code for this object.
      *
      * @return a hash code for this object
      */

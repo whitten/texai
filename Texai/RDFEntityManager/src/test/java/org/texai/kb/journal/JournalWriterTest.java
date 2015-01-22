@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.texai.kb.journal;
 
 import java.io.File;
@@ -47,7 +43,7 @@ public class JournalWriterTest {
         file.delete();
       }
     }
-    List<JournalRequest> journalRequests = new ArrayList<JournalRequest>();
+    List<JournalRequest> journalRequests = new ArrayList<>();
     journalRequests.add(new JournalRequest(
             TEST_REPOSITORY_NAME,
             Constants.ADD_OPERATION,

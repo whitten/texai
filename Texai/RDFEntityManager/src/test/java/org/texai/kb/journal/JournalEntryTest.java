@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.texai.kb.journal;
 
 import org.apache.log4j.Logger;
@@ -22,8 +18,8 @@ import org.texai.kb.Constants;
 public class JournalEntryTest {
 
   // the logger
-  private static Logger LOGGER = Logger.getLogger(JournalEntryTest.class);
-  
+  private static final Logger LOGGER = Logger.getLogger(JournalEntryTest.class);
+
   public JournalEntryTest() {
   }
 
@@ -37,7 +33,7 @@ public class JournalEntryTest {
     JournalEntry result = JournalEntry.parse(string);
     LOGGER.info(result.toString());
     assertTrue(result.toString().endsWith("add cyc:arity rdf:type cyc:BinaryPredicate ."));
-                                        
+
   }
 
   /**

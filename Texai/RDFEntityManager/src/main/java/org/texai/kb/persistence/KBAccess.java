@@ -6,17 +6,6 @@
  * Description: Provides knowledge base access methods.
  *
  * Copyright (C) Jan 31, 2009 Stephen L. Reed.
- *
- * This program is free software; you can redistribute it and/or modify it under the terms
- * of the GNU General Public License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with this program;
- * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 package org.texai.kb.persistence;
 
@@ -817,7 +806,7 @@ public final class KBAccess {
         writer.write(RDFUtility.formatStatementAsTurtle(statement));
         writer.newLine();
       } catch (IOException ex) {
-        new TexaiException(ex);
+        throw new TexaiException(ex);
       }
     }
     LOGGER.info("added: " + RDFUtility.formatStatement(statement));            // NOPMD
@@ -834,7 +823,7 @@ public final class KBAccess {
           writer.write(RDFUtility.formatStatementAsTurtle(statement));
           writer.newLine();
         } catch (IOException ex) {
-          new TexaiException(ex);
+          throw new TexaiException(ex);
         }
       }
       LOGGER.info("added: " + RDFUtility.formatStatement(statement));
@@ -851,7 +840,7 @@ public final class KBAccess {
           writer.write(RDFUtility.formatStatementAsTurtle(statement));
           writer.newLine();
         } catch (IOException ex) {
-          new TexaiException(ex);
+          throw new TexaiException(ex);
         }
       }
       LOGGER.info("added: " + RDFUtility.formatStatement(statement));
@@ -894,7 +883,7 @@ public final class KBAccess {
         writer.write(RDFUtility.formatStatementAsTurtle(statement));
         writer.newLine();
       } catch (IOException ex) {
-        new TexaiException(ex);
+        throw new TexaiException(ex);
       }
     }
     LOGGER.info("added: " + RDFUtility.formatStatement(statement));            // NOPMD
@@ -910,7 +899,7 @@ public final class KBAccess {
           writer.write(RDFUtility.formatStatementAsTurtle(statement));
           writer.newLine();
         } catch (IOException ex) {
-          new TexaiException(ex);
+          throw new TexaiException(ex);
         }
       }
       LOGGER.info("added: " + RDFUtility.formatStatement(statement));
@@ -954,7 +943,7 @@ public final class KBAccess {
         writer.write(RDFUtility.formatStatementAsTurtle(statement));
         writer.newLine();
       } catch (IOException ex) {
-        new TexaiException(ex);
+        throw new TexaiException(ex);
       }
     }
     LOGGER.info("added: " + RDFUtility.formatStatement(statement));            // NOPMD
@@ -973,7 +962,7 @@ public final class KBAccess {
           writer.write(RDFUtility.formatStatementAsTurtle(statement));
           writer.newLine();
         } catch (IOException ex) {
-          new TexaiException(ex);
+          throw new TexaiException(ex);
         }
       }
       LOGGER.info("added: " + RDFUtility.formatStatement(statement));
@@ -993,7 +982,7 @@ public final class KBAccess {
           writer.write(RDFUtility.formatStatementAsTurtle(statement));
           writer.newLine();
         } catch (IOException ex) {
-          new TexaiException(ex);
+          throw new TexaiException(ex);
         }
       }
       LOGGER.info("added: " + RDFUtility.formatStatement(statement));
@@ -1030,7 +1019,7 @@ public final class KBAccess {
         writer.write(RDFUtility.formatStatementAsTurtle(statement));
         writer.newLine();
       } catch (IOException ex) {
-        new TexaiException(ex);
+        throw new TexaiException(ex);
       }
     }
     LOGGER.info("added: " + RDFUtility.formatStatement(statement));
@@ -1045,7 +1034,7 @@ public final class KBAccess {
         writer.write(RDFUtility.formatStatementAsTurtle(statement));
         writer.newLine();
       } catch (IOException ex) {
-        new TexaiException(ex);
+        throw new TexaiException(ex);
       }
     }
     LOGGER.info("added: " + RDFUtility.formatStatement(statement));
@@ -1097,7 +1086,7 @@ public final class KBAccess {
           writer.write(RDFUtility.formatStatementAsTurtle(statement));
           writer.newLine();
         } catch (IOException ex) {
-          new TexaiException(ex);
+          throw new TexaiException(ex);
         }
       }
       LOGGER.info("added: " + RDFUtility.formatStatement(statement));
@@ -1114,7 +1103,7 @@ public final class KBAccess {
           writer.write(RDFUtility.formatStatementAsTurtle(statement));
           writer.newLine();
         } catch (IOException ex) {
-          new TexaiException(ex);
+          throw new TexaiException(ex);
         }
       }
       LOGGER.info("added: " + RDFUtility.formatStatement(statement));
@@ -1131,7 +1120,7 @@ public final class KBAccess {
           writer.write(RDFUtility.formatStatementAsTurtle(statement));
           writer.newLine();
         } catch (IOException ex) {
-          new TexaiException(ex);
+          throw new TexaiException(ex);
         }
       }
       LOGGER.info("added: " + RDFUtility.formatStatement(statement));
@@ -1147,7 +1136,7 @@ public final class KBAccess {
         writer.write(RDFUtility.formatStatementAsTurtle(statement));
         writer.newLine();
       } catch (IOException ex) {
-        new TexaiException(ex);
+        throw new TexaiException(ex);
       }
     }
     LOGGER.info("added: " + RDFUtility.formatStatement(statement));
@@ -1162,7 +1151,7 @@ public final class KBAccess {
         writer.write(RDFUtility.formatStatementAsTurtle(statement));
         writer.newLine();
       } catch (IOException ex) {
-        new TexaiException(ex);
+        throw new TexaiException(ex);
       }
     }
     LOGGER.info("added: " + RDFUtility.formatStatement(statement));
@@ -1174,6 +1163,7 @@ public final class KBAccess {
    * @param oldURI the old URI
    * @param newURI the new URI
    */
+  @SuppressWarnings("deprecation")
   public void renameURI(
           final String repositoryName,
           final URI oldURI,
@@ -1187,6 +1177,7 @@ public final class KBAccess {
     final RepositoryConnection repositoryConnection = rdfEntityManager.getConnectionToNamedRepository(repositoryName);
     final List<Statement> oldStatements = new ArrayList<>();
     try {
+      @SuppressWarnings("deprecation")
       final boolean isExternalTransaction = !repositoryConnection.isAutoCommit();
       if (!isExternalTransaction) {
         // establish a transaction

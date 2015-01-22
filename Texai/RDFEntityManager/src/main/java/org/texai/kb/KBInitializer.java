@@ -6,17 +6,6 @@
  * Description: Initializes the OpenCyc knowledge base.
  *
  * Copyright (C) Nov 21, 2010, Stephen L. Reed.
- *
- * This program is free software; you can redistribute it and/or modify it under the terms
- * of the GNU General Public License as published by the Free Software Foundation; either
- * version 3 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with this program;
- * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 package org.texai.kb;
 
@@ -82,6 +71,7 @@ public final class KBInitializer implements ParsedTurtleStatementHandler {
   /** Initializes the OpenCyc knowledge base by default unless this instance was constructed
    * with a given repository connection.
    */
+  @SuppressWarnings("deprecation")
   public void process() {
     LOGGER.info("Turtle-format RDF input file path: " + statementFilePath);
     if (rdfEntityManager != null) {
@@ -130,6 +120,7 @@ public final class KBInitializer implements ParsedTurtleStatementHandler {
    * @param statement the statement
    */
   @Override
+  @SuppressWarnings("deprecation")
   public void handleStatement(final Statement statement) {
     LOGGER.debug("statement: " + RDFUtility.formatStatementAsTurtle(statement));
     try {

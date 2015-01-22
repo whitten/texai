@@ -6,17 +6,6 @@
  * Description: Provides a performance test for the RDF Entity Manager.
  *
  * Copyright (C) August 10, 2007 Stephen L. Reed.
- *
- * This program is free software; you can redistribute it and/or modify it under the terms
- * of the GNU General Public License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with this program;
- * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 package org.texai.kb.persistence.benchmark;
 
@@ -274,6 +263,7 @@ public final class PerformanceBenchmark {
     final Set<String> cyclistNotes = new HashSet<>();
     cyclistNotes.add("note 1");
     cyclistNotes.add("note 2");
+    cyclistNotes.toString();
     rdfTestEntity2.setDontCareField("do not care");
     rdfTestEntity2.setFavoriteTestRDFEntityPeer(rdfTestEntity2);
     rdfTestEntity2.setMaxNbrOfScooterRiders(2);
@@ -281,7 +271,8 @@ public final class PerformanceBenchmark {
     myPeers.add(rdfTestEntity1);
     rdfTestEntity2.setMyPeers(myPeers);
     final List<Double> myPeersStrengths = new ArrayList<>();
-    myPeersStrengths.add(Double.valueOf(0.5d));
+    myPeersStrengths.add(0.5d);
+    myPeersStrengths.toString();
     rdfTestEntity2.setName("LinkedTestDomainEntity " + serialNbr);
     rdfTestEntity2.setNumberOfCrew(1);
     final String[] comments2 = {"comment 1", "comment 2"};
@@ -326,7 +317,7 @@ public final class PerformanceBenchmark {
     assert rdfTestEntity.getFavoriteTestRDFEntityPeer() != null;
     assert rdfTestEntity.getMaxNbrOfScooterRiders() == 2;
     assert rdfTestEntity.getMyPeers().size() == 1;
-    assert rdfTestEntity.getName().indexOf("TestDomainEntity") > -1 : " name: '" + rdfTestEntity.getName() + "'";
+    assert rdfTestEntity.getName().contains("TestDomainEntity") : " name: '" + rdfTestEntity.getName() + "'";
     assert rdfTestEntity.getNumberOfCrew() == 1;
     assert rdfTestEntity.getComment().length == 2;
     assert rdfTestEntity.getByteField() == (byte) 5;

@@ -6,7 +6,6 @@
  * Description: Provides a container for repository partition information.
  *
  * Copyright (C) Dec 20, 2012, Stephen L. Reed, Texai.org.
- *
  */
 package org.texai.kb.persistence;
 

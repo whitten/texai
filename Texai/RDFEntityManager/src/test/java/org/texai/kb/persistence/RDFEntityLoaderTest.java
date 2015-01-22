@@ -7,17 +7,6 @@
  * Description: .
  *
  * Copyright (C) August 8, 2007 Stephen L. Reed.
- *
- * This program is free software; you can redistribute it and/or modify it under the terms
- * of the GNU General Public License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with this program;
- * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 package org.texai.kb.persistence;
 
@@ -114,6 +103,7 @@ public class RDFEntityLoaderTest {
   }
 
   @AfterClass
+  @SuppressWarnings("deprecation")
   public static void tearDownClass() throws Exception {
     CacheManager.getInstance().shutdown();
     try {
@@ -127,6 +117,7 @@ public class RDFEntityLoaderTest {
   }
 
   @Before
+  @SuppressWarnings("deprecation")
   public void setUp() {
     try {
       repositoryConnection.clear();
@@ -219,6 +210,7 @@ public class RDFEntityLoaderTest {
 
   /** tests Sesame queries that use context. */
   @Test
+  @SuppressWarnings("deprecation")
   public void testSesameQueriesUsingContext() {
     LOGGER.info("test Sesame queries using context");
 
@@ -482,6 +474,7 @@ public class RDFEntityLoaderTest {
 
   /** Tests list and array field edits. */
   @Test
+  @SuppressWarnings("deprecation")
   public void testListAndArrayFieldEdits() {
     LOGGER.info("list and array field edits");
 

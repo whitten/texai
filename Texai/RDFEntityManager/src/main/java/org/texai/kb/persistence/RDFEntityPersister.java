@@ -7,17 +7,6 @@
  * mapping entity associations onto RDF triples.
  *
  * Copyright (C) 2006 Stephen L. Reed.
- *
- * This program is free software; you can redistribute it and/or modify it under the terms
- * of the GNU General Public License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with this program;
- * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 package org.texai.kb.persistence;
 
@@ -195,6 +184,7 @@ public final class RDFEntityPersister extends AbstractRDFEntityAccessor {  // NO
    * @param writer the export output writer, or null when objects are ordinarily persisted to the given RDF quad store
    * @return the instance URI that represents the RDF entity
    */
+  @SuppressWarnings("deprecation")
   public URI persist(
           final RepositoryConnection repositoryConnection,
           final RDFPersistent rdfEntity,

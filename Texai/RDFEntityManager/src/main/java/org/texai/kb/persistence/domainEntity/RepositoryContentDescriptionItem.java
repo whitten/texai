@@ -6,17 +6,6 @@
  * Description: Provides a container for describing the persistent class whose instances are persisted in a specified repository.
  *
  * Copyright (C) May 1, 2009 Stephen L. Reed.
- *
- * This program is free software; you can redistribute it and/or modify it under the terms
- * of the GNU General Public License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with this program;
- * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 package org.texai.kb.persistence.domainEntity;
 
@@ -93,18 +82,16 @@ public class RepositoryContentDescriptionItem implements Comparable<RepositoryCo
       return false;
     }
     final RepositoryContentDescriptionItem other = (RepositoryContentDescriptionItem) obj;
-    if (this.classTerm != other.classTerm && (this.classTerm == null || !this.classTerm.equals(other.classTerm))) {
-      return false;
-    }
-    return true;
+    return this.classTerm.equals(other.classTerm);
   }
+
 
   /** Returns a hash code for this object.
    *
    * @return a hash code for this object
    */
   @Override
-  @SuppressWarnings("PMD")
+  @SuppressWarnings(value = "PMD")
   public int hashCode() {
     int hash = 7;
     hash = 31 * hash + (this.classTerm != null ? this.classTerm.hashCode() : 0);
