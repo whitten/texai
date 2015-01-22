@@ -25,14 +25,8 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
 
   // the logger
   private static final Logger LOGGER = Logger.getLogger(XAIOperation.class);
-  // the conversationId state variable
-  private static final String CONVERSATION_ID = "conversationId";
-  // the replyWith state variable
-  private static final String REPLY_WITH = "replyWith";
   // the path to the aicoin-qt configuration and data directory
   private static final String AICOIN_DIRECTORY_PATH = "../.aicoin";
-  // the output and error stream consumers from the launched VNC server
-  private Object[] streamConsumers;
 
   /**
    * Constructs a new XTCOperation instance.
@@ -103,7 +97,7 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
       /**
        * Become Ready Task
        *
-       * This task message is sent from the network-singleton parent XAINetworkEpisodicMemoryAgent.XAINetworkEpisodicMemoryRole.
+       * This task message is sent from the network-singleton parent XAINetworkOperationAgent.XAINetworkOperationRole.
        *
        * It results in the skill set to the ready state
        */

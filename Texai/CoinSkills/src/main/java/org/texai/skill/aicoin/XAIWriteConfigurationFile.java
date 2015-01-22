@@ -102,6 +102,7 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
       case AHCSConstants.WRITE_CONFIGURATION_FILE_TASK:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
         writeConfigurationFile(message);
+        return;
 
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
