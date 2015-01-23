@@ -191,7 +191,7 @@ public class Heartbeat extends AbstractSkill {
 
     LOGGER.info("performing the mission");
     final Message performMissionMessage = new Message(
-            getRole().getQualifiedName(), // senderQualifiedName
+            getQualifiedName(), // senderQualifiedName
             getClassName(), // senderService,
             getRole().getChildQualifiedNameForAgent("XAINetworkOperationAgent"), // recipientQualifiedName,
             "org.texai.skill.aicoin.XAINetworkOperation", // recipientService
@@ -255,14 +255,14 @@ public class Heartbeat extends AbstractSkill {
       assert heartbeat != null : "heartbeat must not be null";
 
       final Message message = new Message(
-              heartbeat.getRole().getQualifiedName(), // senderQualifiedName
+              heartbeat.getQualifiedName(), // senderQualifiedName
               heartbeat.getClass().getName(), // senderService
               outboundHeartbeatInfo.recipentQualifiedName,
               outboundHeartbeatInfo.service,
               AHCSConstants.KEEP_ALIVE_INFO); // operation
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("  dispatching keep-alive message");
-        LOGGER.debug("    from " + heartbeat.getRole().getQualifiedName());
+        LOGGER.debug("    from " + heartbeat.getQualifiedName());
         LOGGER.debug("    to " + outboundHeartbeatInfo.recipentQualifiedName);
       }
       sendMessageViaSeparateThread(message);

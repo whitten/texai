@@ -84,10 +84,9 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
        *
        * This task message is sent from the local parent TopmostFriendshipAgent.TopmostFriendshipRole.
        *
-       * As the result, a Join Network Task message is sent to the child NetworkSingletonConfiguration agent/role,
-       * which in turn sends a Join Network Task message to its child SingletonConfiguration agent/role. The
-       * SingletonConfiguration agent/role requests the singleton agent dictionary, agent name  --> hosting container name,
-       * from a seed peer.
+       * As the result, a Join Network Task message is sent to the child NetworkSingletonConfiguration agent/role, which in turn sends a
+       * Join Network Task message to its child SingletonConfiguration agent/role. The SingletonConfiguration agent/role requests the
+       * singleton agent dictionary, agent name --> hosting container name, from a seed peer.
        */
       case AHCSConstants.JOIN_NETWORK_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
@@ -187,6 +186,20 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
         handleDelegatePerformMissionTask(message);
         return;
 
+      /**
+       * Network Restart Request Info
+       *
+       * The child network deployment agent has completed deploying software and data files to all containers, and is requesting a network
+       * restart.
+       *
+       * This results in a restart container task being sent to all containers. Termination of each container follows a certain delay in
+       * order for all containers to receive the message before this one terminates.
+       */
+      case AHCSConstants.NETWORK_RESTART_REQUEST_INFO:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        handleNetworkRestartRequestInfo(message);
+        return;
+
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
         LOGGER.warn(message);
         return;
@@ -241,7 +254,8 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.JOIN_NETWORK_TASK,
       AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO,
-      AHCSConstants.NETWORK_JOIN_COMPLETE_INFO
+      AHCSConstants.NETWORK_JOIN_COMPLETE_INFO,
+      AHCSConstants.NETWORK_RESTART_REQUEST_INFO
     };
   }
 
@@ -263,9 +277,9 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
   }
 
   /**
-   * Handles the Network Join Complete information message, which is sent from a ContainerOperation agent/role that has completed
-   * joining the network. Each role in the joined container having a network singleton agent/role as a parent, now refers to the
-   * corresponding network singleton agent / role and has exchanged X.509 certificates with it.
+   * Handles the Network Join Complete information message, which is sent from a ContainerOperation agent/role that has completed joining
+   * the network. Each role in the joined container having a network singleton agent/role as a parent, now refers to the corresponding
+   * network singleton agent / role and has exchanged X.509 certificates with it.
    *
    * @param message the received Network Join Complete Info message
    */
@@ -277,13 +291,13 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
       LOGGER.info(new StringBuilder().append("Container ").append(message.getSenderContainerName()).append(" has rejoined the Network.").toString());
     } else {
       LOGGER.info(new StringBuilder().append("Container ").append(message.getSenderContainerName()).append(" has joined the Network.").toString());
-    containerNames.add(message.getSenderContainerName());
+      containerNames.add(message.getSenderContainerName());
     }
 
     /**
-     * Notify the parent TopmostFriendship agent / role that a container has completed joining the network.
-     * The TopmostFriendship agent / role synchronously sends a Become Ready Task message to all child roles in the container,
-     * who each set their State to initialized and return immediately
+     * Notify the parent TopmostFriendship agent / role that a container has completed joining the network. The TopmostFriendship agent /
+     * role synchronously sends a Become Ready Task message to all child roles in the container, who each set their State to initialized and
+     * return immediately
      */
     final Message networkJoinCompleteSensationMessage = makeMessage(
             getRole().getParentQualifiedName(), // recipientQualifiedName
@@ -307,7 +321,7 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
 
     // send the perform mission task to the XAINetworkOperationAgent
     Message performMissionMessage = new Message(
-            getRole().getQualifiedName(), // senderQualifiedName
+            getQualifiedName(), // senderQualifiedName
             getClassName(), // senderService,
             getRole().getChildQualifiedNameForAgent("XAINetworkOperationAgent"), // recipientQualifiedName,
             "org.texai.skill.aicoin.XAINetworkOperation", // recipientService
@@ -316,7 +330,7 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
 
     // send the perform mission task to the NetworkSingletonConfigurationAgent
     performMissionMessage = new Message(
-            getRole().getQualifiedName(), // senderQualifiedName
+            getQualifiedName(), // senderQualifiedName
             getClassName(), // senderService,
             getRole().getChildQualifiedNameForAgent("NetworkSingletonConfigurationAgent"), // recipientQualifiedName,
             "org.texai.skill.singletonConfiguration.NetworkSingletonConfiguration", // recipientService
@@ -325,7 +339,7 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
 
     // send the perform mission task to the ContainerOperationAgent
     performMissionMessage = new Message(
-            getRole().getQualifiedName(), // senderQualifiedName
+            getQualifiedName(), // senderQualifiedName
             getClassName(), // senderService,
             getRole().getChildQualifiedNameForAgent("ContainerOperationAgent"), // recipientQualifiedName,
             ContainerOperation.class.getName(), // recipientService
@@ -334,12 +348,37 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
 
     // send the perform mission task to the NetworkDeploymentAgent
     performMissionMessage = new Message(
-            getRole().getQualifiedName(), // senderQualifiedName
+            getQualifiedName(), // senderQualifiedName
             getClassName(), // senderService,
             getRole().getChildQualifiedNameForAgent("NetworkDeploymentAgent"), // recipientQualifiedName,
             ContainerOperation.class.getName(), // recipientService
             AHCSConstants.PERFORM_MISSION_TASK); // operation
     sendMessageViaSeparateThread(performMissionMessage);
+  }
+
+  /**
+   * Perform this role's mission, which is to manage the network, the containers, and the A.I. Coin agents within the containers.
+   *
+   * @param message the received perform mission task message
+   */
+  private void handleNetworkRestartRequestInfo(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+
+    LOGGER.info("Handling a network restart request");
+
+    // send the restart container task to every child container operation role.
+    getRole().getChildQualifiedNamesForAgent("ContainerOperationAgent").forEach((String childQualifiedName) -> {
+      final Message restartContainerTaskMessage = new Message(
+              getQualifiedName(), // senderQualifiedName
+              getClassName(), // senderService
+              childQualifiedName, // recipientQualifiedName
+              ContainerOperation.class.getName(), // recipientService
+              AHCSConstants.RESTART_CONTAINER_TASK); // operation
+      restartContainerTaskMessage.put(AHCSConstants.RESTART_CONTAINER_TASK_DELAY, 5000);
+      sendMessage(restartContainerTaskMessage);
+    });
   }
 
   /**

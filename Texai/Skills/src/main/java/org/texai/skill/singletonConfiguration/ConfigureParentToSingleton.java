@@ -81,7 +81,7 @@ public class ConfigureParentToSingleton extends AbstractSkill {
        */
       case AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
-                "state must be isolated-from-network, but is " + getSkillState() + ", in " + getRole().getQualifiedName();
+                "state must be isolated-from-network, but is " + getSkillState() + ", in " + getQualifiedName();
         configureSingletonAgentHosts(message);
         return;
 
@@ -165,7 +165,7 @@ public class ConfigureParentToSingleton extends AbstractSkill {
     final StringBuilder stringBuilder = new StringBuilder();
     stringBuilder
             .append("configuring parent roles for ")
-            .append(Node.extractContainerAgentName(getRole().getQualifiedName()));
+            .append(Node.extractContainerAgentName(getQualifiedName()));
     if (LOGGER.isDebugEnabled()) {
       stringBuilder.append(" ...");
     } else {

@@ -250,7 +250,7 @@ public class AICoinMain {
       // send the initialize message to the <container>.TopmostFriendshipAgent.TopmostFriendshipRole
       final String recipientQualifiedName = nodeRuntime.getContainerName() + ".TopmostFriendshipAgent.TopmostFriendshipRole";
       final Message initializeMessage = new Message(
-              nodeRuntime.getNodeRuntimeSkill().getRole().getQualifiedName(), // senderQualifiedName
+              nodeRuntime.getNodeRuntimeSkill().getQualifiedName(), // senderQualifiedName
               nodeRuntime.getNodeRuntimeSkill().getClassName(), // senderService
               recipientQualifiedName,
               null, // service

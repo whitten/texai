@@ -34,10 +34,15 @@ public class NetworkDeploymentTest {
 
   // the logger
   private static final Logger LOGGER = Logger.getLogger(NetworkDeploymentTest.class);
+  // the container name
   private static final String containerName = "Test";
+  // the class name of the tested skill
   private static final String skillClassName = NetworkDeployment.class.getName();
+  // the test node name
   private static final String nodeName = "NetworkDeploymentAgent";
+  // the test node name
   private static final String roleName = "NetworkDeploymentRole";
+  // the skill test harness
   private static SkillTestHarness skillTestHarness;
 
   public NetworkDeploymentTest() {
@@ -95,7 +100,6 @@ public class NetworkDeploymentTest {
             AHCSConstants.AHCS_INITIALIZE_TASK); // operation
 
     skillTestHarness.dispatchMessage(initializeMessage);
-    skillTestHarness.getSkillState(skillClassName);
 
     final NetworkDeployment networkDeployment = (NetworkDeployment) skillTestHarness.getSkill(skillClassName);
     if (networkDeployment.getNodeRuntime().isFirstContainerInNetwork()) {

@@ -69,6 +69,7 @@ public final class NetworkSingletonSkillTemplate extends AbstractNetworkSingleto
        */
       case AHCSConstants.AHCS_INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
+
         propagateOperationToChildRoles(operation);
         if (getNodeRuntime().isFirstContainerInNetwork()) {
           setSkillState(AHCSConstants.State.READY);

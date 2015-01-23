@@ -246,7 +246,7 @@ public final class ContainerHeartbeat extends AbstractSkill {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("  received keep-alive message " + (new DateTime()).toString("MM/dd/yyyy hh:mm a"));
       LOGGER.debug("    from " + senderQualifiedName);
-      LOGGER.debug("    to " + getRole().getQualifiedName());
+      LOGGER.debug("    to " + getQualifiedName());
     }
   }
 
@@ -497,7 +497,7 @@ public final class ContainerHeartbeat extends AbstractSkill {
     assert heartbeat != null : "heartbeat must not be null";
 
     final Message keepAliveInfoMessage = new Message(
-            heartbeat.getRole().getQualifiedName(), // senderQualifiedName
+            heartbeat.getQualifiedName(), // senderQualifiedName
             heartbeat.getClass().getName(), // senderService
             outboundHeartbeatInfo.role.getParentQualifiedName(), // recipentQualifiedName,
             outboundHeartbeatInfo.service,

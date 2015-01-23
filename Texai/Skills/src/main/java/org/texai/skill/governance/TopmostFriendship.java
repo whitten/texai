@@ -237,7 +237,7 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
     LOGGER.info("joining the network");
     // send a performMission task message to the NetworkOperationAgent
     final Message performMissionMessage = new Message(
-            getRole().getQualifiedName(), // senderQualifiedName
+            getQualifiedName(), // senderQualifiedName
             getClassName(), // senderService,
             getRole().getChildQualifiedNameForAgentRole("NetworkOperationAgent.NetworkOperationRole"), // recipientQualifiedName,
             NetworkOperation.class.getName(), // recipientService
@@ -253,7 +253,7 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
 
     LOGGER.info("performing the mission, propagating the task to the NetworkOperationAgent.NetworkOperationRole");
     Message performMissionMessage = new Message(
-            getRole().getQualifiedName(), // senderQualifiedName
+            getQualifiedName(), // senderQualifiedName
             getClassName(), // senderService,
             getRole().getChildQualifiedNameForAgentRole("NetworkOperationAgent.NetworkOperationRole"), // recipientQualifiedName,
             NetworkOperation.class.getName(), // recipientService
@@ -262,7 +262,7 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
 
     LOGGER.info("performing the mission, propagating the task to the NetworkOperationAgent.TopLevelHeartbeatRole");
     performMissionMessage = new Message(
-            getRole().getQualifiedName(), // senderQualifiedName
+            getQualifiedName(), // senderQualifiedName
             getClassName(), // senderService,
             getRole().getChildQualifiedNameForAgentRole("NetworkOperationAgent.TopLevelHeartbeatRole"), // recipientQualifiedName,
             TopLevelHeartbeat.class.getName(), // recipientService

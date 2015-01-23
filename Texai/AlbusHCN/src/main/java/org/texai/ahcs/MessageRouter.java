@@ -119,7 +119,7 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
     final X509SecurityInfo x509SecurityInfo = X509Utils.getX509SecurityInfo(
             nodeRuntime.getKeyStore(),
             nodeRuntime.getKeyStorePassword(),
-            nodeRuntime.getNodeRuntimeSkill().getRole().getQualifiedName()); // alias
+            nodeRuntime.getNodeRuntimeSkill().getQualifiedName()); // alias
     final AbstractAlbusHCSMessageHandlerFactory albusHCSMessageHandlerFactory = new AlbusHCSMessageHandlerFactory(this);
     final AbstractBitTorrentHandlerFactory bitTorrentHandlerFactory = null;
     final AbstractHTTPRequestHandlerFactory httpRequestHandlerFactory = null;

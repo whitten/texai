@@ -157,9 +157,9 @@ public class SessionManagerSkill extends AbstractSkill {
         if (!sessionHandle.equals(DUMMY_SESSION_HANDLE)) {
           // initialize the skill instance
           Message message = new Message(
-                  getRole().getQualifiedName(), // senderQualifiedName
+                  getQualifiedName(), // senderQualifiedName
                   getClassName(), // senderService
-                  getRole().getQualifiedName(), // recipientQualifiedName
+                  getQualifiedName(), // recipientQualifiedName
                   skillClass.getName(), // service
                   AHCSConstants.AHCS_INITIALIZE_TASK); // operation
           skill.receiveMessage(message);

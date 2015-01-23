@@ -86,9 +86,9 @@ public class Message implements Serializable {
           final String recipientService,
           final String operation) {
     this(
-            sendingSkill.getRole().getQualifiedName(), // senderQualifiedName
+            sendingSkill.getQualifiedName(), // senderQualifiedName
             sendingSkill.getClassName(), // senderService
-            sendingSkill.getRole().getQualifiedName(), // recipientQualifiedName
+            sendingSkill.getQualifiedName(), // recipientQualifiedName
             recipientService,
             operation,
             new HashMap<>(),
@@ -338,7 +338,7 @@ public class Message implements Serializable {
     assert skill != null : "skill must not be null";
 
     return new Message(
-            skill.getRole().getQualifiedName(),
+            skill.getQualifiedName(),
             skill.getClassName(), // senderService,
             message.getSenderQualifiedName(), // recipientQualifiedName
             message.getSenderService(), // recipientService
@@ -383,7 +383,7 @@ public class Message implements Serializable {
     assert skill != null : "skill must not be null";
 
     final Message message = new Message(
-            skill.getRole().getQualifiedName(), // senderQualifiedName
+            skill.getQualifiedName(), // senderQualifiedName
             skill.getClassName(), // senderService,
             receivedMessage.getSenderQualifiedName(), // recipientQualifiedName
             receivedMessage.getSenderService(), // service
@@ -408,7 +408,7 @@ public class Message implements Serializable {
     assert skill != null : "role must not be null";
 
     final Message message = new Message(
-            skill.getRole().getQualifiedName(), // senderQualifiedName
+            skill.getQualifiedName(), // senderQualifiedName
             skill.getClassName(), // senderService,
             receivedMessage.getSenderQualifiedName(), // recipientQualifiedName
             receivedMessage.getSenderService(), // service

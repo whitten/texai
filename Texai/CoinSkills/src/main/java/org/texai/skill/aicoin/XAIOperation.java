@@ -194,9 +194,9 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
     LOGGER.info("performing the mission");
     // write the aicoind configuration file
     final Message writeConfigurationFileTaskmessage = new Message(
-            getRole().getQualifiedName(), // senderQualifiedName
+            getQualifiedName(), // senderQualifiedName
             getClassName(), // senderService
-            getRole().getQualifiedName(), // recipientQualifiedName
+            getQualifiedName(), // recipientQualifiedName
             UUID.randomUUID(), // conversationId,
             UUID.randomUUID(), // replyWith,
             XAIWriteConfigurationFile.class.getName(), // recipientService

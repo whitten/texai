@@ -339,7 +339,7 @@ public class SingletonConfiguration extends AbstractSkill {
     LOGGER.info("connecting to seed peer " + peerQualifiedName + " at " + hostName + ':' + port);
     //compose and send a message to the seed peer
     final Message connectionRequestMessage = new Message(
-            getRole().getQualifiedName(), // senderQualifiedName
+            getQualifiedName(), // senderQualifiedName
             getClassName(), // senderService
             peerQualifiedName, // recipientQualifiedName
             UUID.randomUUID(), // conversationId,
@@ -505,7 +505,7 @@ public class SingletonConfiguration extends AbstractSkill {
             singletonAgentDictionary,
             effectiveDateTime,
             terminationDateTime,
-            getRole().getQualifiedName(), // authorQualifiedName,
+            getQualifiedName(), // authorQualifiedName,
             createdDateTime,
             getRole().getX509SecurityInfo().getPrivateKey());
 
@@ -513,7 +513,7 @@ public class SingletonConfiguration extends AbstractSkill {
             singletonAgentDictionary,
             effectiveDateTime,
             terminationDateTime,
-            getRole().getQualifiedName(), // authorQualifiedName,
+            getQualifiedName(), // authorQualifiedName,
             createdDateTime,
             authorSignatureBytes);
   }

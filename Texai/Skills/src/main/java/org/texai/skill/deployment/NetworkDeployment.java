@@ -455,7 +455,6 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
         } catch (IOException ex) {
           throw new TexaiException(ex);
         }
-        //   NETWORK_RESTART_REQUEST_INFO --> NetworkOperationRole
         //   RESTART_CONTAINER_TASK --> ContainerOperationRole
         // the network operations node as the sole singleton agent host and await the connecting peers
         //   ContainerDeploymentRole --> TASK_ACCOMPLISHED_INFO

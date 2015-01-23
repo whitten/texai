@@ -163,7 +163,7 @@ public abstract class AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
     assert role != null : "role must not be null for " + this;
-    assert message.getSenderQualifiedName().equals(getRole().getQualifiedName()) : "message sender must match this role " + message + "\nrole: " + getRole();
+    assert message.getSenderQualifiedName().equals(getQualifiedName()) : "message sender must match this role " + message + "\nrole: " + getRole();
 
     role.sendMessage(message);
   }
@@ -177,7 +177,7 @@ public abstract class AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
     assert role != null : "role must not be null for " + this;
-    assert message.getSenderQualifiedName().equals(getRole().getQualifiedName()) : "message sender must match this role " + message + "\nrole: " + getRole();
+    assert message.getSenderQualifiedName().equals(getQualifiedName()) : "message sender must match this role " + message + "\nrole: " + getRole();
 
     role.sendMessageViaSeparateThread(message);
   }
@@ -268,6 +268,15 @@ public abstract class AbstractSkill {
    */
   public String getClassName() {
     return getClass().getName();
+  }
+
+  /**
+   * Returns the qualified agent.role name for the role that contains this skill.
+   *
+   * @return the qualified agent.role name
+   */
+  public String getQualifiedName() {
+    return getRole().getQualifiedName();
   }
 
   /**
@@ -372,7 +381,7 @@ public abstract class AbstractSkill {
           final String recoveryAction) {
     //Preconditions
     assert message != null : "message must not be null";
-    assert message.getSenderQualifiedName().equals(getRole().getQualifiedName()) : "message sender must match this role " + message + "\nrole: " + getRole();
+    assert message.getSenderQualifiedName().equals(getQualifiedName()) : "message sender must match this role " + message + "\nrole: " + getRole();
     assert timeoutMillis >= 0 : "timeoutMillis must not be negative";
     assert message.getReplyWith() != null : "message must have a reply-with UUID value";
 
