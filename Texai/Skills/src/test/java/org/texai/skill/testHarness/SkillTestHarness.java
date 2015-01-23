@@ -33,6 +33,8 @@ public class SkillTestHarness {
   private Message sentMessage;
   // the most recent operation and service information propagated by the mock role
   private OperationAndServiceInfo operationAndServiceInfo;
+  // the indicator whether the JVM has been terminated by the application
+  private boolean isTerminated = false;
 
   /**
    * Creates a new instance of SkillTestHarness.
@@ -103,9 +105,19 @@ public class SkillTestHarness {
   public void reset() {
     sentMessage = null;
     operationAndServiceInfo = null;
+    isTerminated = false;
   }
 
-  /** Sends the given message to the mock role.
+  /** Returns whether the JVM has been terminated by the application.
+   *
+   * @return whether the JVM has been terminated by the application
+   */
+  public boolean isTerminated() {
+    return isTerminated;
+  }
+
+  /**
+   * Sends the given message to the mock role.
    *
    * @param message the given message
    */
@@ -117,9 +129,11 @@ public class SkillTestHarness {
     role.dispatchMessage(message);
   }
 
-  /** Gets the state of the role's skill having the given class name.
+  /**
+   * Gets the state of the role's skill having the given class name.
    *
-   * @param skillClassName  the given class name
+   * @param skillClassName the given class name
+   *
    * @return the state of the role's skill
    */
   public AHCSConstants.State getSkillState(final String skillClassName) {
@@ -132,10 +146,11 @@ public class SkillTestHarness {
     return skill.getSkillState();
   }
 
-  /** Sets the state of the role's skill having the given class name.
+  /**
+   * Sets the state of the role's skill having the given class name.
    *
    * @param state the state of the role's skill
-   * @param skillClassName  the given class name
+   * @param skillClassName the given class name
    */
   public void setSkillState(
           final AHCSConstants.State state,
@@ -150,9 +165,11 @@ public class SkillTestHarness {
     skill.setSkillState(state);
   }
 
-  /** Gets the role's skill having the given class name.
+  /**
+   * Gets the role's skill having the given class name.
    *
-   * @param skillClassName  the given class name
+   * @param skillClassName the given class name
+   *
    * @return the skill
    */
   public AbstractSkill getSkill(final String skillClassName) {
@@ -218,6 +235,15 @@ public class SkillTestHarness {
      */
     MockNodeRuntime(final String containerName) {
       super(containerName);
+    }
+
+    /**
+     * Terminates this JVM with an exit code that causes the bash wrapper script to restart the Java application.
+     */
+    @Override
+    public void restartJVM() {
+      LOGGER.info("MOCK - the JVM has terminated");
+      isTerminated = true;
     }
   }
 
@@ -352,7 +378,9 @@ public class SkillTestHarness {
 
   }
 
-  /** Provides a container for operation and sender service information. */
+  /**
+   * Provides a container for operation and sender service information.
+   */
   public static class OperationAndServiceInfo {
 
     // the given operation
@@ -373,7 +401,8 @@ public class SkillTestHarness {
       this.senderService = senderService;
     }
 
-    /** Returns a string representation of this object.
+    /**
+     * Returns a string representation of this object.
      *
      * @return a string representation of this object
      */

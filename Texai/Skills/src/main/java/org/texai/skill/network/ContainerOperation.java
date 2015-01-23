@@ -160,6 +160,19 @@ public final class ContainerOperation extends AbstractSkill {
         removeUnjoinedRole(message);
         return;
 
+      /**
+       * Restart Container Task
+       *
+       * This message is sent the parent NetworkOperationAgent.NetworkOperationRole instructing the container to restart following
+       * a given delay.
+       *
+       * As a result, this JVM exits, and the wrapping bash script restarts it
+       */
+      case AHCSConstants.RESTART_CONTAINER_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        handleRestartContainerTask(message);
+        return;
+
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
         LOGGER.warn(message);
         return;
@@ -212,7 +225,8 @@ public final class ContainerOperation extends AbstractSkill {
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.OPERATION_NOT_PERMITTED_INFO,
       AHCSConstants.PERFORM_MISSION_TASK,
-      AHCSConstants.REMOVE_UNJOINED_ROLE_INFO
+      AHCSConstants.REMOVE_UNJOINED_ROLE_INFO,
+      AHCSConstants.RESTART_CONTAINER_TASK
     };
   }
 
@@ -301,6 +315,29 @@ public final class ContainerOperation extends AbstractSkill {
               NetworkOperation.class.getName(), // recipientService
               AHCSConstants.NETWORK_JOIN_COMPLETE_INFO)); // operation
     }
+  }
+
+  /**
+   * Removes the given sender from the set of roles which have not yet joined the network.
+   *
+   * @param message the Add Unjoined Role Info message sent by
+   */
+  private void handleRestartContainerTask(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert message.get(AHCSConstants.RESTART_CONTAINER_TASK_DELAY) != null :
+            "the " + AHCSConstants.RESTART_CONTAINER_TASK_DELAY + " parameter must be present ...\n" + message;
+
+    final long delay = (long) message.get(AHCSConstants.RESTART_CONTAINER_TASK_DELAY);
+    LOGGER.info("Restarting the application after a pause of " + delay + " microseconds");
+    assert delay > 0 : AHCSConstants.RESTART_CONTAINER_TASK_DELAY + " must be positive";
+
+    try {
+      Thread.sleep(delay);
+    } catch (InterruptedException ex) {
+      // ignore
+    }
+    getNodeRuntime().restartJVM();
   }
 
 }

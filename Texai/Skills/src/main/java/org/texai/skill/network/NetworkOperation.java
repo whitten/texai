@@ -376,7 +376,7 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
               childQualifiedName, // recipientQualifiedName
               ContainerOperation.class.getName(), // recipientService
               AHCSConstants.RESTART_CONTAINER_TASK); // operation
-      restartContainerTaskMessage.put(AHCSConstants.RESTART_CONTAINER_TASK_DELAY, 5000);
+      restartContainerTaskMessage.put(AHCSConstants.RESTART_CONTAINER_TASK_DELAY, 5000L);
       sendMessage(restartContainerTaskMessage);
     });
   }

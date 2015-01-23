@@ -382,4 +382,9 @@ public class BasicNodeRuntime implements MessageDispatcher {
     return isFirstContainerInNetworkCached;
   }
 
+  /** Terminates this JVM with an exit code that causes the bash wrapper script to restart the Java application. */
+  public void restartJVM() {
+    System.exit(100);
+  }
+
 }
