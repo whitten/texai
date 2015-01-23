@@ -34,6 +34,7 @@ import static org.junit.Assert.*;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.SkillClass;
+import org.texai.skill.network.NetworkOperation;
 import org.texai.skill.testHarness.SkillTestHarness;
 import org.texai.util.ArraySet;
 import org.texai.x509.X509Utils;
@@ -47,6 +48,10 @@ public class ContainerDeploymentTest {
   // the logger
   private static final Logger LOGGER = Logger.getLogger(ContainerDeploymentTest.class);
   private static final String containerName = "Test";
+  // the test parent qualified name
+  private static final String parentQualifiedName = containerName + ".NetworkDeploymentAgent.NetworkDeploymentRole";
+  // the test parent service
+  private static final String parentService = NetworkOperation.class.getName();
   private static final String skillClassName = ContainerDeployment.class.getName();
   private static final String nodeName = "ContainerDeploymentAgent";
   private static final String roleName = "ContainerDeploymentRole";
@@ -262,6 +267,32 @@ public class ContainerDeploymentTest {
     }
     Collections.sort(fileNames);
     return fileNames.toString();
+  }
+
+  /**
+   * Test of class NetworkSingletonSkillTemplate - Message Not Understood Info.
+   */
+  @Test
+  public void testMessageNotUnderstoodInfo() {
+    LOGGER.info("testing " + AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO + " message");
+
+    skillTestHarness.reset();
+    skillTestHarness.setSkillState(AHCSConstants.State.READY, skillClassName);
+    final Message taskAccomplishedInfoMessage = new Message(
+            parentQualifiedName, // senderQualifiedName
+            parentService, // senderService
+            containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
+            skillClassName, // recipientService
+            "an-unknown-operation_Task"); // operation
+
+    skillTestHarness.dispatchMessage(taskAccomplishedInfoMessage);
+
+    assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
+    assertNull(skillTestHarness.getOperationAndServiceInfo());
+    final Message sentMessage = skillTestHarness.getSentMessage();
+    assertNotNull(sentMessage);
+    LOGGER.info("sentMessage...\n" + sentMessage);
+    assertTrue(sentMessage.toString().startsWith(""));
   }
 
   /**

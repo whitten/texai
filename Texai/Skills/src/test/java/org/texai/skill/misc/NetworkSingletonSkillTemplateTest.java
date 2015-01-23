@@ -31,7 +31,6 @@ import static org.junit.Assert.*;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.SkillClass;
-import org.texai.skill.deployment.NetworkDeployment;
 import org.texai.skill.network.NetworkOperation;
 import org.texai.skill.testHarness.SkillTestHarness;
 import org.texai.util.ArraySet;
@@ -48,6 +47,8 @@ public class NetworkSingletonSkillTemplateTest {
   private static final String containerName = "Test";
   // the test parent qualified name
   private static final String parentQualifiedName = containerName + ".NetworkOperationAgent.NetworkOperationRole";
+  // the test parent service
+  private static final String parentService = NetworkOperation.class.getName();
   // the test child qualified name
   private static final String childQualifiedName = containerName + ".ContainerDeploymentAgent.ContainerDeploymentRole";
   // the class name of the tested skill
@@ -108,7 +109,7 @@ public class NetworkSingletonSkillTemplateTest {
     skillTestHarness.setSkillState(AHCSConstants.State.UNINITIALIZED, skillClassName);
     final Message initializeMessage = new Message(
             parentQualifiedName, // senderQualifiedName
-            NetworkOperation.class.getName(), // senderService
+            NetworkSingletonSkillTemplate.class.getName(), // senderService
             containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
             skillClassName, // recipientService
             AHCSConstants.AHCS_INITIALIZE_TASK); // operation
@@ -123,6 +124,32 @@ public class NetworkSingletonSkillTemplateTest {
     }
     assertNotNull(skillTestHarness.getOperationAndServiceInfo());
     assertEquals("[AHCS initialize_Task, org.texai.skill.misc.NetworkSingletonSkillTemplate]", skillTestHarness.getOperationAndServiceInfo().toString());
+  }
+
+  /**
+   * Test of class NetworkSingletonSkillTemplate - Message Not Understood Info.
+   */
+  @Test
+  public void testMessageNotUnderstoodInfo() {
+    LOGGER.info("testing " + AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO + " message");
+
+    skillTestHarness.reset();
+    skillTestHarness.setSkillState(AHCSConstants.State.READY, skillClassName);
+    final Message taskAccomplishedInfoMessage = new Message(
+            parentQualifiedName, // senderQualifiedName
+            parentService, // senderService
+            containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
+            skillClassName, // recipientService
+            "an-unknown-operation_Task"); // operation
+
+    skillTestHarness.dispatchMessage(taskAccomplishedInfoMessage);
+
+    assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
+    assertNull(skillTestHarness.getOperationAndServiceInfo());
+    final Message sentMessage = skillTestHarness.getSentMessage();
+    assertNotNull(sentMessage);
+    LOGGER.info("sentMessage...\n" + sentMessage);
+    assertTrue(sentMessage.toString().startsWith("[messageNotUnderstood_Info Test.NetworkSingletonSkillTemplateAgent.NetworkSingletonSkillTemplateRole:NetworkSingletonSkillTemplate --> Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation "));
   }
 
   /**

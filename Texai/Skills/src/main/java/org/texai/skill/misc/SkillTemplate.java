@@ -111,7 +111,9 @@ public class SkillTemplate extends AbstractSkill {
       // handle other operations ...
 
     }
-    // otherwise, the message is not understood
+    sendMessage(Message.notUnderstoodMessage(
+            message, // receivedMessage
+            this)); // skill
   }
 
   /**

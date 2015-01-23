@@ -36,6 +36,10 @@ public class NetworkDeploymentTest {
   private static final Logger LOGGER = Logger.getLogger(NetworkDeploymentTest.class);
   // the container name
   private static final String containerName = "Test";
+  // the test parent qualified name
+  private static final String parentQualifiedName = containerName + ".NetworkOperationAgent.NetworkOperationRole";
+  // the test parent service
+  private static final String parentService = NetworkOperation.class.getName();
   // the class name of the tested skill
   private static final String skillClassName = NetworkDeployment.class.getName();
   // the test node name
@@ -258,6 +262,32 @@ public class NetworkDeploymentTest {
     assertTrue(Message.areMessageStringsEqualIgnoringDate(
             sentMessage.toString(),
             "[networkRestartRequest_Info Test.NetworkDeploymentAgent.NetworkDeploymentRole:NetworkDeployment --> Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation 2015-01-22T15:16:22.534-06:00]"));
+  }
+
+  /**
+   * Test of class NetworkSingletonSkillTemplate - Message Not Understood Info.
+   */
+  @Test
+  public void testMessageNotUnderstoodInfo() {
+    LOGGER.info("testing " + AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO + " message");
+
+    skillTestHarness.reset();
+    skillTestHarness.setSkillState(AHCSConstants.State.READY, skillClassName);
+    final Message taskAccomplishedInfoMessage = new Message(
+            parentQualifiedName, // senderQualifiedName
+            parentService, // senderService
+            containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
+            skillClassName, // recipientService
+            "an-unknown-operation_Task"); // operation
+
+    skillTestHarness.dispatchMessage(taskAccomplishedInfoMessage);
+
+    assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
+    assertNull(skillTestHarness.getOperationAndServiceInfo());
+    final Message sentMessage = skillTestHarness.getSentMessage();
+    assertNotNull(sentMessage);
+    LOGGER.info("sentMessage...\n" + sentMessage);
+    assertTrue(sentMessage.toString().startsWith("[messageNotUnderstood_Info Test.NetworkDeploymentAgent.NetworkDeploymentRole:NetworkDeployment --> Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation "));
   }
 
   /**

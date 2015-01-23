@@ -19,8 +19,6 @@ import static org.junit.Assert.*;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.SkillClass;
-import org.texai.skill.deployment.NetworkDeployment;
-import org.texai.skill.deployment.NetworkDeploymentTest;
 import org.texai.skill.network.NetworkOperation;
 import org.texai.skill.testHarness.SkillTestHarness;
 import org.texai.util.ArraySet;
@@ -32,11 +30,13 @@ import org.texai.util.ArraySet;
 public class SkillTemplateTest {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(NetworkDeploymentTest.class);
+  private static final Logger LOGGER = Logger.getLogger(SkillTemplateTest.class);
   // the container name
   private static final String containerName = "Test";
   // the test parent qualified name
   private static final String parentQualifiedName = containerName + ".NetworkOperationAgent.NetworkOperationRole";
+  // the test parent service
+  private static final String parentService = NetworkOperation.class.getName();
   // the test child qualified name
   private static final String childQualifiedName = containerName + ".ContainerDeploymentAgent.ContainerDeploymentRole";
   // the class name of the tested skill
@@ -113,6 +113,31 @@ public class SkillTemplateTest {
     assertNull(skillTestHarness.getOperationAndServiceInfo());
   }
 
+  /**
+   * Test of class SkillTemplate - Message Not Understood Info.
+   */
+  @Test
+  public void testMessageNotUnderstoodInfo() {
+    LOGGER.info("testing " + AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO + " message");
+
+    skillTestHarness.reset();
+    skillTestHarness.setSkillState(AHCSConstants.State.READY, skillClassName);
+    final Message taskAccomplishedInfoMessage = new Message(
+            parentQualifiedName, // senderQualifiedName
+            parentService, // senderService
+            containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
+            skillClassName, // recipientService
+            "an-unknown-operation_Task"); // operation
+
+    skillTestHarness.dispatchMessage(taskAccomplishedInfoMessage);
+
+    assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
+    assertNull(skillTestHarness.getOperationAndServiceInfo());
+    final Message sentMessage = skillTestHarness.getSentMessage();
+    assertNotNull(sentMessage);
+    LOGGER.info("sentMessage...\n" + sentMessage);
+    assertTrue(sentMessage.toString().startsWith("[messageNotUnderstood_Info Test.SkillTemplateAgent.SkillTemplateRole:SkillTemplate --> Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation "));
+  }
 
   /**
    * Test of getLogger method, of class SkillTemplate.
