@@ -18,6 +18,7 @@ import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.texai.ahcsSupport.AHCSConstants;
+import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.Node;
@@ -90,7 +91,7 @@ public final class ContainerHeartbeat extends AbstractSkill {
        * first task message that this role receives and it results in the role being initialized.
        */
       case AHCSConstants.AHCS_INITIALIZE_TASK:
-        assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
+        assert getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
         initialization(message);
         // initialize child heartbeat roles
         propagateOperationToChildRoles(operation);
@@ -280,6 +281,10 @@ public final class ContainerHeartbeat extends AbstractSkill {
       final long currentTimeMillis = System.currentTimeMillis();
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug(containerHeartbeat + " HeartbeatProcessor ...");
+      }
+      if (!containerHeartbeat.getSkillState().equals(State.READY)) {
+        LOGGER.info("No heartbeat because this skill has not yet joined the network.");
+        return;
       }
 
       // notice if any expected heartbeats are timed-out

@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.UnresolvedAddressException;
 import java.util.HashMap;
 import java.util.Map;
@@ -320,7 +321,9 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
     assert exceptionEvent != null : "exceptionEvent must not be null";
 
     final Throwable throwable = exceptionEvent.getCause();
-    if ((throwable instanceof ConnectException) || throwable instanceof UnresolvedAddressException) {
+    if ((throwable instanceof ConnectException)
+            || throwable instanceof ClosedChannelException
+            || throwable instanceof UnresolvedAddressException) {
       LOGGER.info(throwable.getMessage());
     } else {
       throw new TexaiException(throwable);

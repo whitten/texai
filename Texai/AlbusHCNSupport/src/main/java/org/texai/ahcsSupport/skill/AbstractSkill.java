@@ -18,7 +18,6 @@ import java.util.TimerTask;
 import java.util.UUID;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
-import org.joda.time.DateTime;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.Message;
@@ -73,11 +72,13 @@ public abstract class AbstractSkill {
     assert message != null : "message must not be null";
 
     if (oneTimeOperations.contains(message.getOperation())) {
-      if (usedOneTimeOperations.contains(message.getOperation())) {
-        // one-time operations are not allowed to be executed again
-        return false;
-      } else {
-        usedOneTimeOperations.add(message.getOperation());
+      synchronized (usedOneTimeOperations) {
+        if (usedOneTimeOperations.contains(message.getOperation())) {
+          // one-time operations are not allowed to be executed again
+          return false;
+        } else {
+          usedOneTimeOperations.add(message.getOperation());
+        }
       }
     }
     return true;
@@ -282,7 +283,7 @@ public abstract class AbstractSkill {
 
     return new Message(
             receivedMessage.getRecipientQualifiedName(), // senderQualifiedName
-            receivedMessage.getRecipientQualifiedName(), // senderService
+            receivedMessage.getRecipientService(), // senderService
             receivedMessage.getSenderQualifiedName(), // recipientQualifiedName
             receivedMessage.getConversationId(),
             null, // replyWith
@@ -399,8 +400,8 @@ public abstract class AbstractSkill {
   }
 
   /**
-   * Sets a message reply timeout for the given sent message. Usually the reply is received before the timeout has elapsed, and cancels the
-   * timer which is looked up by message reply-with.
+   * Sets a message reply timeout for the given sent-by-self message. Usually the reply is received before the timeout has elapsed, and
+   * cancels the timer which is looked up by message reply-with.
    *
    * @param message the given sent message
    * @param timeoutMillis the number of milliseconds to wait before
@@ -447,7 +448,7 @@ public abstract class AbstractSkill {
       final MessageTimeOutInfo messageTimeOutInfo = messageTimeOutInfoDictionary.remove(replyWith);
       assert messageTimeOutInfo != null : "inReplyTo: " + replyWith
               + "\nmessageTimeOutInfoDictionary: " + messageTimeOutInfoDictionary;
-      getLogger().info("removed message timeout for " + messageTimeOutInfo);
+      getLogger().info("removed message timeout for " + messageTimeOutInfo + ", \nkey replyWith: " + replyWith);
       messageTimeOutInfo.messageTimeoutTask.cancel();
     }
   }
@@ -489,28 +490,25 @@ public abstract class AbstractSkill {
       //Preconditions
       assert messageTimeOutInfo != null : "messageTimeOutInfo must not be null";
 
+      getLogger().info("Handling timeout while awaiting an expected reply message ...\n" + messageTimeOutInfo);
       skill.removeMessageTimeOut(messageTimeOutInfo.message.getReplyWith());
       final Message timeoutMessage;
       if (messageTimeOutInfo.isRecoverable) {
         // send MESSAGE_TIMEOUT_INFO message to self
-        timeoutMessage = new Message(
-                messageTimeOutInfo.message.getRecipientQualifiedName(), // senderQualifiedName
-                messageTimeOutInfo.message.getRecipientService(), // senderService
-                messageTimeOutInfo.message.getRecipientQualifiedName(),
-                messageTimeOutInfo.message.getConversationId(),
-                messageTimeOutInfo.message.getRecipientService(), // recipientService
-                AHCSConstants.MESSAGE_TIMEOUT_INFO, // operation
-                messageTimeOutInfo.message.getReplyWith()); // inReplyTo
-        timeoutMessage.put(AHCSConstants.MESSAGE_TIMEOUT_INFO_ORIGINAL_MESSAGE, messageTimeOutInfo.message);
+        timeoutMessage = skill.makeMessage(
+                skill.role.getQualifiedName(), // recipientQualifiedName
+                skill.getClassName(), // recipientService
+                AHCSConstants.MESSAGE_TIMEOUT_INFO); // operation
       } else {
         // send MESSAGE_TIMEOUT_ERROR_INFO to parent role
         timeoutMessage = new Message(
-                messageTimeOutInfo.message.getRecipientQualifiedName(), // senderQualifiedName
-                messageTimeOutInfo.message.getRecipientService(), // senderService
+                skill.getQualifiedName(), // senderQualifiedName
+                skill.getClassName(), // senderService
                 skill.role.getParentQualifiedName(), // recipientQualifiedName
                 null, // recipientService
-                AHCSConstants.MESSAGE_TIMEOUT_ERROR_INFO); // operation
+                AHCSConstants.MESSAGE_TIMEOUT_INFO); // operation
       }
+      timeoutMessage.put(AHCSConstants.MESSAGE_TIMEOUT_INFO_ORIGINAL_MESSAGE, messageTimeOutInfo.message);
       skill.sendMessageViaSeparateThread(timeoutMessage);
     }
 
@@ -557,7 +555,7 @@ public abstract class AbstractSkill {
      */
     @Override
     public String toString() {
-      return "[MessageTimeOutInfo " + message + "]";
+      return "[Message timeout millis: " + timeoutMillis + ", " + message.toBriefString() + "]";
     }
   }
 

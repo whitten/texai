@@ -602,6 +602,43 @@ public class MessageTest {
   }
 
   /**
+   * Test of toBriefString method, of class Message.
+   */
+  @Test
+  public void testToBriefString() {
+    LOGGER.info("toBriefString");
+    final String senderQualifiedName = "container1.agent1.role1";
+    final String recipientQualifiedName = "container2.agent2.role2";
+    final UUID conversationId = UUID.randomUUID();
+    final UUID replyWith = UUID.randomUUID();
+    final UUID inReplyTo = UUID.randomUUID();
+    final DateTime replyByDateTime = null;
+    // the test service is a valid class with a no-argument constructor, the Skills defining module is dependent on this so an actual skill class cannot be used here
+    final String service = "org.texai.kb.persistence.domainEntity.RepositoryContentDescription";
+    final Map<String, Object> parameterDictionary = new HashMap<>();
+    String parameterName = "my-parm";
+    Serializable parameterValue = 10;
+    parameterDictionary.put(parameterName, parameterValue);
+    parameterName = "bytes";
+    final byte[] byteArray = {1, 2, 3, 4, 5, 6, 7, 8};
+    parameterValue = byteArray;
+    parameterDictionary.put(parameterName, parameterValue);
+    Message instance = new Message(
+            senderQualifiedName,
+            "SenderService", // senderService
+            recipientQualifiedName,
+            conversationId,
+            replyWith,
+            inReplyTo,
+            replyByDateTime,
+            service,
+            "ABC_Task", // operation
+            parameterDictionary,
+            "1.0.0");
+    assertEquals("[ABC_Task, container1.agent1.role1:SenderService --> container2.agent2.role2:RepositoryContentDescription]", instance.toBriefString());
+  }
+
+  /**
    * Test of toDetailedString method, of class Message.
    */
   @Test

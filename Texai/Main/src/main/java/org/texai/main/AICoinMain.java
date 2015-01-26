@@ -192,7 +192,8 @@ public class AICoinMain {
 
     LOGGER.info("Node runtime completed.");
     if (!Thread.currentThread().equals(shutdownHook)) {
-      System.exit(0);
+      LOGGER.info("Exiting with a code to prevent an automatic restart.");
+      System.exit(1);
     }
 
   }

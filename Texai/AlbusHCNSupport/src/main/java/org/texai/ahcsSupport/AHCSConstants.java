@@ -301,9 +301,6 @@ public final class AHCSConstants {
   public static final String MESSAGE_TIMEOUT_INFO = "messageTimeout_Info";
   public static final String MESSAGE_TIMEOUT_INFO_ORIGINAL_MESSAGE = "messageTimeout_Info_originalMessage";
   //
-  // the message timeout error information operation
-  public static final String MESSAGE_TIMEOUT_ERROR_INFO = "messageTimeoutError_Info";
-  //
   // the messageNotUnderstood_Info operation
   public static final String MESSAGE_NOT_UNDERSTOOD_INFO = "messageNotUnderstood_Info";
   //

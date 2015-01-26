@@ -194,6 +194,8 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.AHCS_INITIALIZE_TASK,
+      AHCSConstants.DELEGATE_BECOME_READY_TASK,
+      AHCSConstants.DELEGATE_PERFORM_MISSION_TASK,
       AHCSConstants.PERFORM_MISSION_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
     };

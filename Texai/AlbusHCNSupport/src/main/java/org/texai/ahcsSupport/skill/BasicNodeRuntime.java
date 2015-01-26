@@ -52,8 +52,6 @@ public class BasicNodeRuntime implements MessageDispatcher {
   private final Map<String, Role> localRoleDictionary = new HashMap<>();
   // the executor
   private final ExecutorService executor = Executors.newCachedThreadPool();
-  // the timer
-  private final Timer timer = new Timer();
   // the operations to be logged
   private final Set<String> loggedOperations = new HashSet<>();
   // the operations to be filtered from logging
@@ -243,7 +241,7 @@ public class BasicNodeRuntime implements MessageDispatcher {
    * @return the timer
    */
   public Timer getTimer() {
-    return timer;
+    return new Timer();
   }
 
   /**
@@ -382,9 +380,9 @@ public class BasicNodeRuntime implements MessageDispatcher {
     return isFirstContainerInNetworkCached;
   }
 
-  /** Terminates this JVM with an exit code that causes the bash wrapper script to restart the Java application. */
+  /** Terminates this JVM with a normal exit code that causes the bash wrapper script to restart the Java application. */
   public void restartJVM() {
-    System.exit(100);
+    System.exit(0);
   }
 
 }

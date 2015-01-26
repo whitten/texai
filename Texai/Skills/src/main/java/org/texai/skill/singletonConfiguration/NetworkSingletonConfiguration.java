@@ -147,7 +147,23 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
         handleDelegatePerformMissionTask(message);
         return;
 
+      /**
+       * Message Timeout Info
+       *
+       * This information message is sent from a child SingletonConfigurationRole to when an expected reply from a seed peer has not been
+       * received.
+       *
+       * The original Seed Connection Request Info message is included as a parameter.
+       *
+       * This message is ignored because the child will keep requesting the seed information.
+       */
+      case AHCSConstants.MESSAGE_TIMEOUT_INFO:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
+        LOGGER.info("Ignoring a configuration information timeout reported by " + message.getSenderQualifiedName());
+        return;
+
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
+
         LOGGER.warn(message);
         return;
 
@@ -197,6 +213,7 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
       AHCSConstants.JOIN_NETWORK_TASK,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.MESSAGE_TIMEOUT_INFO,
       AHCSConstants.PERFORM_MISSION_TASK,
       AHCSConstants.TASK_ACCOMPLISHED_INFO
     };

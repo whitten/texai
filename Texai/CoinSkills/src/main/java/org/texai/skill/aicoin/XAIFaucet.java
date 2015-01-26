@@ -96,6 +96,19 @@ public class XAIFaucet extends AbstractNetworkSingletonSkill {
         return;
 
       /**
+       * Become Ready Task
+       *
+       * This task message is sent from the network-singleton parent [container.role].
+       *
+       * It results in the skill set to the ready state
+       */
+      case AHCSConstants.BECOME_READY_TASK:
+        assert this.getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "prior state must be isolated-from-network";
+        setSkillState(AHCSConstants.State.READY);
+        LOGGER.info("now ready");
+        return;
+
+      /**
        * Perform Mission Task
        *
        * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.XAINetworkOperationRole. It commands this
@@ -104,30 +117,6 @@ public class XAIFaucet extends AbstractNetworkSingletonSkill {
       case AHCSConstants.PERFORM_MISSION_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.READY) : "prior state must be ready";
         performMission(message);
-        return;
-
-      /**
-       * Delegate Become Ready Task
-       *
-       * A container has completed joining the network. Propagate a Delegate Become Ready Task down the role command hierarchy.
-       *
-       * The container name is a parameter of the message.
-       */
-      case AHCSConstants.DELEGATE_BECOME_READY_TASK:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        handleDelegateBecomeReadyTask(message);
-        return;
-
-      /**
-       * Delegate Perform Mission Task
-       *
-       * A container has completed joining the network. Propagate a Delegate Perform Mission Task down the role command hierarchy.
-       *
-       * The container name is a parameter of the message.
-       */
-      case AHCSConstants.DELEGATE_PERFORM_MISSION_TASK:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        handleDelegatePerformMissionTask(message);
         return;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
@@ -172,8 +161,7 @@ public class XAIFaucet extends AbstractNetworkSingletonSkill {
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.AHCS_INITIALIZE_TASK,
-      AHCSConstants.DELEGATE_BECOME_READY_TASK,
-      AHCSConstants.DELEGATE_PERFORM_MISSION_TASK,
+      AHCSConstants.BECOME_READY_TASK,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.PERFORM_MISSION_TASK

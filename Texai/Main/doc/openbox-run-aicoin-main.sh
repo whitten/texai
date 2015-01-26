@@ -114,10 +114,18 @@ CLASSPATH=$CLASSPATH:lib/Utilities-1.0.jar
 CLASSPATH=$CLASSPATH:lib/X509Security-1.0.jar
 CLASSPATH=$CLASSPATH:lib/xerces-1.2.3.jar
 CLASSPATH=$CLASSPATH:lib/xml-apis-1.0.b2.jar
+
+
 # debug logger configuration
 #java -ea -Dlog4j.configuration=file://$PWD/log4j.properties -Dlog4j.debug=true -classpath $CLASSPATH org.texai.main.AICoinMain
 
 # debug SSL handshake
 #java -ea -Dlog4j.configuration=file://$PWD/log4j.properties -classpath $CLASSPATH -Djavax.net.debug=all org.texai.main.AICoinMain
 
-java -ea -Dlog4j.configuration=file://$PWD/log4j.properties -classpath $CLASSPATH org.texai.main.AICoinMain 2>&1 | tee ../console.log
+# restart automatically following an automatic software deployment
+while java -ea -Dlog4j.configuration=file://$PWD/log4j.properties -classpath $CLASSPATH org.texai.main.AICoinMain 2>&1 | tee ../console.log ; do
+  echo "Restarting AI Coin Peer"
+  sleep 1
+done
+echo "AI Coin Peer terminated with an error"
+

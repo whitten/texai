@@ -73,10 +73,16 @@ public class SingletonConfiguration extends AbstractSkill {
 
     final String operation = message.getOperation();
     if (!isOperationPermitted(message)) {
-      sendMessage(Message.operationNotPermittedMessage(
-              message, // receivedMessage
-              this)); // skill
-      return;
+      if (message.getOperation().equals(AHCSConstants.SINGLETON_AGENT_HOSTS_INFO)) {
+        LOGGER.info("Ignoring a reply from a subsequent seeding peer.");
+        removeMessageTimeOut(message.getInReplyTo());
+        return;
+      } else {
+        sendMessage(Message.operationNotPermittedMessage(
+                message, // receivedMessage
+                this)); // skill
+        return;
+      }
     }
     switch (operation) {
       /**
@@ -178,7 +184,6 @@ public class SingletonConfiguration extends AbstractSkill {
         seedConnectionRequest(message);
         return;
 
-
       /**
        * Message Timeout Info
        *
@@ -189,7 +194,7 @@ public class SingletonConfiguration extends AbstractSkill {
        * As a result, if no seed peer has yet replied, the seed connection request info message is resent to the seed peer.
        */
       case AHCSConstants.MESSAGE_TIMEOUT_INFO:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
+        assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) || getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
         seedConnectionRequestTimeout(message);
         return;
 
@@ -385,6 +390,8 @@ public class SingletonConfiguration extends AbstractSkill {
     singletonAgentHostsMessage.put(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS, singletonAgentHosts);
     singletonAgentHostsMessage.put(AHCSConstants.MSG_PARM_X509_CERTIFICATE, getRole().getX509Certificate());
 
+    LOGGER.info("singletonAgentHostsMessage");
+
     sendMessage(singletonAgentHostsMessage);
   }
 
@@ -425,7 +432,8 @@ public class SingletonConfiguration extends AbstractSkill {
     }
   }
 
-  /** Handles a seed connection request timeout message.
+  /**
+   * Handles a seed connection request timeout message.
    *
    * @param message the timeout message
    */
@@ -445,11 +453,10 @@ public class SingletonConfiguration extends AbstractSkill {
     final int port = (int) connectionRequestMessage.get(AHCSConstants.SEED_CONNECTION_REQUEST_INFO_PORT);
 
     connectToSeedPeer(
-          peerQualifiedName,
-          hostName,
-          port);
+            peerQualifiedName,
+            hostName,
+            port);
   }
-
 
   /**
    * Returns a demo version of the singleton agent hosts assignments, which are all to the Mint peer.

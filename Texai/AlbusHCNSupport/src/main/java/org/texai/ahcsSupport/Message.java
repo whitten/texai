@@ -383,12 +383,12 @@ public class Message implements Serializable, Comparable<Message> {
     assert receivedMessage != null : "receivedMessage must not be null";
     assert skill != null : "role must not be null";
 
-    final Message message = new Message(
-            skill.getQualifiedName(), // senderQualifiedName
-            skill.getClassName(), // senderService,
-            receivedMessage.getSenderQualifiedName(), // recipientQualifiedName
-            receivedMessage.getSenderService(), // service
-            AHCSConstants.OPERATION_NOT_PERMITTED_INFO); // operation
+      final Message message = new Message(
+              skill.getQualifiedName(), // senderQualifiedName
+              skill.getClassName(), // senderService,
+              receivedMessage.getSenderQualifiedName(), // recipientQualifiedName
+              receivedMessage.getSenderService(), // recipientService
+              AHCSConstants.OPERATION_NOT_PERMITTED_INFO); // operation
     message.put(AHCSConstants.AHCS_ORIGINAL_MESSAGE, receivedMessage);
     return message;
   }
@@ -711,6 +711,42 @@ public class Message implements Serializable, Comparable<Message> {
         }
       }
       stringBuilder.append('\n');
+    }
+    stringBuilder.append(']');
+    return stringBuilder.toString();
+  }
+
+  /**
+   * Returns a brief string representation of this object.
+   *
+   * @return a brief string representation of this object
+   */
+  public String toBriefString() {
+    final StringBuilder stringBuilder = new StringBuilder();
+    stringBuilder.append("[");
+    stringBuilder.append(operation);
+    stringBuilder.append(", ");
+    stringBuilder.append(senderQualifiedName);
+    stringBuilder.append(':');
+    if (senderService != null) {
+      int index = senderService.lastIndexOf('.');
+      if (index > -1) {
+        stringBuilder.append(senderService.substring(index + 1));
+      } else {
+        stringBuilder.append(senderService);
+      }
+    }
+    stringBuilder.append(" --> ");
+    stringBuilder.append(recipientQualifiedName);
+
+    stringBuilder.append(':');
+    if (recipientService != null) {
+      int index = recipientService.lastIndexOf('.');
+      if (index > -1) {
+        stringBuilder.append(recipientService.substring(index + 1));
+      } else {
+        stringBuilder.append(recipientService);
+      }
     }
     stringBuilder.append(']');
     return stringBuilder.toString();
