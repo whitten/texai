@@ -181,7 +181,6 @@ public class CreateSoftwareDeploymentManifest {
 
     File oldFile = advanceIterator(oldFiles_iter);
     File newFile = advanceIterator(newFiles_iter);
-    assert newFile.exists() : "newFile does not exist " + newFile;
 
     while (true) {
       LOGGER.debug("");

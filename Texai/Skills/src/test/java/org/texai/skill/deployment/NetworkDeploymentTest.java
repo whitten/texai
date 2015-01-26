@@ -299,7 +299,7 @@ public class NetworkDeploymentTest {
     NetworkDeployment instance = new NetworkDeployment();
     final List<String> understoodOperations = new ArrayList<>(Arrays.asList(instance.getUnderstoodOperations()));
     Collections.sort(understoodOperations);
-    assertEquals("[AHCS initialize_Task, messageNotUnderstood_Info, performMission_Task]", understoodOperations.toString());
+    assertEquals("[AHCS initialize_Task, delegateBecomeReady_Task, delegatePerformMission_Task, messageNotUnderstood_Info, performMission_Task]", understoodOperations.toString());
   }
 
   /**

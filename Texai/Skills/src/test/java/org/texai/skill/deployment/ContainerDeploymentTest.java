@@ -62,6 +62,7 @@ public class ContainerDeploymentTest {
 
   @BeforeClass
   public static void setUpClass() {
+    ContainerDeployment.isUnitTest = true;
     final Set<SkillClass> skillClasses = new ArraySet<>();
     final SkillClass skillClass = new SkillClass(
             skillClassName, // skillClassName

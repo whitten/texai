@@ -37,6 +37,8 @@ public class ContainerDeployment extends AbstractSkill {
 
   // the log4j logger
   private static final Logger LOGGER = Logger.getLogger(ContainerDeployment.class);
+  // the indication that this skill is running in a unit test, with a development file arrangement
+  protected static boolean isUnitTest = false;
 
   /**
    * Constructs a new SkillTemplate instance.
@@ -216,7 +218,15 @@ public class ContainerDeployment extends AbstractSkill {
         LOGGER.info(manifestItem);
         final String command = (String) manifestItem.get("command");
         LOGGER.info("  command: " + command);
-        final String fileToDeployPath = (String) manifestItem.get("path");
+        final String fileToDeployPath;
+        if (isUnitTest) {
+          // development and unit tests run with Main-1.0 as the working directory
+          fileToDeployPath = (String) manifestItem.get("path");
+        } else {
+          // production runs with Main-1.0 as a subdirectory of the working directory
+          fileToDeployPath = "../" + (String) manifestItem.get("path");
+        }
+
         LOGGER.info("  path: " + fileToDeployPath);
         final File fileToDeploy = new File(fileToDeployPath);
 

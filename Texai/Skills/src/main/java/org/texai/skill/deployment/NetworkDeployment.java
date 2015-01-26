@@ -42,7 +42,8 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
   // the log4j logger
   private static final Logger LOGGER = Logger.getLogger(NetworkDeployment.class);
   // the millisecond period between checks for new software /data deployment
-  private static final long CHECK_FOR_DEPLOYMENT_PERIOD_MILLIS = 60 * 1000 * 5;
+//  private static final long CHECK_FOR_DEPLOYMENT_PERIOD_MILLIS = 60 * 1000 * 5;
+  private static final long CHECK_FOR_DEPLOYMENT_PERIOD_MILLIS = 60 * 1000 * 1;
   // the indicator that a software deployment is in progress
   private final AtomicBoolean isSoftwareDeploymentUnderway = new AtomicBoolean(false);
   // the names of containers which have not completed a software and data file deployment task
@@ -236,8 +237,8 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
     if (undeployedContainerNames_size == 0) {
       // notify network operations that the deployment is complete, and that the network should be restarted
       final Message networkRestartRequestInfo = makeMessage(getRole().getParentQualifiedName(), // recipientQualifiedName
-                  NetworkOperation.class.getName(), // recipientService
-                  AHCSConstants.NETWORK_RESTART_REQUEST_INFO);
+              NetworkOperation.class.getName(), // recipientService
+              AHCSConstants.NETWORK_RESTART_REQUEST_INFO);
       sendMessage(networkRestartRequestInfo);
     }
   }
@@ -324,16 +325,22 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
 
       // scan the deployment directory looking for "deployed.log"
       final File deploymentDirectory = new File("deployment");
-      LOGGER.info("checking for a new deployment in " + deploymentDirectory);
+      LOGGER.info("checking for a new deployment in " + deploymentDirectory.getAbsolutePath());
       if (!deploymentDirectory.exists()) {
         LOGGER.info("creating the deployment directory");
         deploymentDirectory.mkdir();
         return;
       }
       assert deploymentDirectory.isDirectory();
+
       final File[] files = deploymentDirectory.listFiles();
+      if (files.length == 0) {
+        LOGGER.info("No files in the deployment directory to deploy");
+        return;
+      }
       for (final File file : files) {
         if (file.getName().equals("deployment.log")) {
+          LOGGER.info("Files in the deployment directory have already been deployed.");
           return;
         }
       }
