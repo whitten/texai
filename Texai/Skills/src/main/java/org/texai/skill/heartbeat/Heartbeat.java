@@ -230,6 +230,12 @@ public class Heartbeat extends AbstractSkill {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug(heartbeat + " HeartbeatProcessor ...");
       }
+      if (!heartbeat.getSkillState().equals(State.READY)) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("No heartbeat because this skill has not yet joined the network.");
+        }
+        return;
+      }
 
       // send heartbeats after waiting at least the specified duration
       final long outboundHeartbeatReceivedThresholdMillis = currentTimeMillis - OUTBOUND_HEARTBEAT_PERIOD_MILLIS;

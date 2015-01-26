@@ -115,6 +115,20 @@ CLASSPATH=$CLASSPATH:lib/X509Security-1.0.jar
 CLASSPATH=$CLASSPATH:lib/xerces-1.2.3.jar
 CLASSPATH=$CLASSPATH:lib/xml-apis-1.0.b2.jar
 
+# migrate new version of aicoin-cli
+if [ -f bin/aicoin-cli-new ] ; then
+  echo "migrating new version of aicoin-cli"
+  rm bin/aicoin-cli
+  mv bin/aicoin-cli-new bin/aicoin-cli
+fi
+
+# migrate new version of aicoin-qt
+if [ -f bin/aicoin-qt-new ] ; then
+  echo "migrating new version of aicoin-qt"
+  rm bin/aicoin-qt
+  mv bin/aicoin-qt-new bin/aicoin-qt
+fi
+
 
 # debug logger configuration
 #java -ea -Dlog4j.configuration=file://$PWD/log4j.properties -Dlog4j.debug=true -classpath $CLASSPATH org.texai.main.AICoinMain

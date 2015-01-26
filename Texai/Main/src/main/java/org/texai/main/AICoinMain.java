@@ -191,11 +191,6 @@ public class AICoinMain {
     X509Utils.serializeSecureRandom(X509Utils.DEFAULT_SECURE_RANDOM_PATH);
 
     LOGGER.info("Node runtime completed.");
-    if (!Thread.currentThread().equals(shutdownHook)) {
-      LOGGER.info("Exiting with a code to prevent an automatic restart.");
-      System.exit(1);
-    }
-
   }
 
   /**
@@ -282,6 +277,7 @@ public class AICoinMain {
         LOGGER.warn("Shutdown, finalizing resources.");
         finalization();
       }
+      Runtime.getRuntime().halt(0);
     }
   }
 

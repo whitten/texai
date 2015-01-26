@@ -466,6 +466,7 @@ public class SingletonConfiguration extends AbstractSkill {
   private SingletonAgentHosts singletonAgentHosts() {
     final Map<String, String> singletonAgentDictionary = new HashMap<>();
     singletonAgentDictionary.put("NetworkLogControlAgent", "Mint");
+    singletonAgentDictionary.put("NetworkDeploymentAgent", "Mint");
     singletonAgentDictionary.put("NetworkOperationAgent", "Mint");
     singletonAgentDictionary.put("NetworkSingletonConfigurationAgent", "Mint");
     singletonAgentDictionary.put("TopLevelGovernanceAgent", "Mint");

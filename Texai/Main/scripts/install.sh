@@ -39,6 +39,4 @@ if [ $(hostname) = "minsky" ]; then
   cp keystore.uber Main-1.0/data
   cp Main-1.0/openbox-run-aicoin-main.sh .
   chmod a+x openbox-run-aicoin-main.sh
-
-  #rsync -v --executability --perms --recursive --times --exclude data/javacv --exclude data/*.uber --exclude data/certificate-serial-nbr.txt --exclude data/secure-random.ser --exclude data/truststore.p12 /home/reed/TexaiLauncher-1.0/* minsky::texai-launcher
 fi

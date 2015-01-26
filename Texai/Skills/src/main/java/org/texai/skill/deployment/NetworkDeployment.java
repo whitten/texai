@@ -95,6 +95,23 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
         return;
 
       /**
+       * Join Network Singleton Agent Info
+       *
+       * This task message is sent to this network singleton agent/role from a child role in another container.
+       *
+       * The sender is requesting to join the network as child of this role.
+       *
+       * The message parameter is the X.509 certificate belonging to the sender agent / role.
+       *
+       * The result is the sending of a Join Acknowleged Task message to the requesting child role, with this role's X.509
+       * certificate as the message parameter.
+       */
+      case AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        joinNetworkSingletonAgent(message);
+        return;
+
+      /**
        * Join Acknowledged Task
        *
        * This task message is sent from the network-singleton, parent NetworkOperationAgent.NetworkOperationRole. It indicates that the
@@ -197,6 +214,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
       AHCSConstants.AHCS_INITIALIZE_TASK,
       AHCSConstants.DELEGATE_BECOME_READY_TASK,
       AHCSConstants.DELEGATE_PERFORM_MISSION_TASK,
+      AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO,
       AHCSConstants.PERFORM_MISSION_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
     };

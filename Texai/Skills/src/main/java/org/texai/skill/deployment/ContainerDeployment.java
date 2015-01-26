@@ -218,7 +218,7 @@ public class ContainerDeployment extends AbstractSkill {
         LOGGER.info(manifestItem);
         final String command = (String) manifestItem.get("command");
         LOGGER.info("  command: " + command);
-        final String fileToDeployPath;
+        String fileToDeployPath;
         if (isUnitTest) {
           // development and unit tests run with Main-1.0 as the working directory
           fileToDeployPath = (String) manifestItem.get("path");
@@ -228,15 +228,13 @@ public class ContainerDeployment extends AbstractSkill {
         }
 
         LOGGER.info("  path: " + fileToDeployPath);
-        final File fileToDeploy = new File(fileToDeployPath);
-
         switch (command) {
           case "add":
           case "replace":
             final String fileHashString = (String) manifestItem.get("hash");
             LOGGER.info("  hash: " + fileHashString);
             writeManifestEntry(
-                    fileToDeploy,
+                    fileToDeployPath,
                     zipFile,
                     fileHashString);
             break;
@@ -265,22 +263,29 @@ public class ContainerDeployment extends AbstractSkill {
     sendMessage(Message.replyTaskAccomplished(message));
   }
 
-  /** Extracts the file to deploy from the zip file, writes it to the deployed path, and then verifies its contents using
-   * the given file hash string.
+  /**
+   * Extracts the file to deploy from the zip file, writes it to the deployed path, and then verifies its contents using the given file hash
+   * string.
    *
-   * @param fileToDeploy the file which will be written
+   * @param fileToDeployPath the path of file which will be written
    * @param zipFile the zip archive containing the file's bytes
    * @param fileHashString the previously computed SHA-256 hash of the file's contents for verification
    */
   private void writeManifestEntry(
-          final File fileToDeploy,
+          final String fileToDeployPath,
           final ZipFile zipFile,
           final String fileHashString) {
 
+    String fileToDeployPath1 = fileToDeployPath;
+    if (fileToDeployPath.endsWith("/aicoin-cli") || fileToDeployPath.endsWith("/aicoin-qt")) {
+      fileToDeployPath1 = fileToDeployPath + "-new";
+    }
     try {
+      final File fileToExtract = new File(fileToDeployPath);
+      final File fileToDeploy = new File(fileToDeployPath1);
       final FileOutputStream fileOutputStream = new FileOutputStream(fileToDeploy);
-      final ZipEntry zipEntry = zipFile.getEntry(fileToDeploy.getName());
-      LOGGER.info("  extracting " + fileToDeploy.getName());
+      final ZipEntry zipEntry = zipFile.getEntry(fileToExtract.getName());
+      LOGGER.info("  extracting " + fileToExtract.getName());
       LOGGER.info("writing " + fileToDeploy);
       try (BufferedInputStream bufferedInputStream = new BufferedInputStream(zipFile.getInputStream(zipEntry))) {
         int count;

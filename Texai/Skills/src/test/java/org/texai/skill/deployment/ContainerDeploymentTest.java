@@ -240,7 +240,7 @@ public class ContainerDeploymentTest {
     final File binDirectory = new File("bin");
     assert binDirectory.exists();
     assert binDirectory.isDirectory();
-    assertEquals("[aicoin-cli, aicoin-qt]", getSortedFileNamesInDirectory(binDirectory));
+    assertEquals("[aicoin-cli-new, aicoin-qt-new]", getSortedFileNamesInDirectory(binDirectory));
     FileUtils.deleteQuietly(new File("Main-1.0"));
     FileUtils.deleteQuietly(new File("bin"));
 
