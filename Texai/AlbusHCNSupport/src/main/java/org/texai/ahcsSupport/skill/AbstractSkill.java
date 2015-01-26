@@ -18,6 +18,7 @@ import java.util.TimerTask;
 import java.util.UUID;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.Message;
@@ -197,6 +198,7 @@ public abstract class AbstractSkill {
           final Map<String, Object> parameterDictionary) {
     //Preconditions
     assert recipientService == null || Message.isValidService(recipientService) : "the recipient service is not a found Java class " + recipientService;
+
     return new Message(
             role.getQualifiedName(), // senderQualifiedName,
             getClassName(), // senderService,
@@ -223,6 +225,7 @@ public abstract class AbstractSkill {
     //Preconditions
     assert recipientQualifiedName != null : "recipientQualifiedName must not be null";
     assert recipientService == null || Message.isValidService(recipientService) : "the recipient service is not a found Java class " + recipientService;
+
     return new Message(
             role.getQualifiedName(), // senderQualifiedName,
             getClassName(), // senderService,
@@ -251,6 +254,7 @@ public abstract class AbstractSkill {
     //Preconditions
     assert recipientQualifiedName != null : "recipientQualifiedName must not be null";
     assert recipientService == null || Message.isValidService(recipientService) : "the recipient service is not a found Java class " + recipientService;
+
     return new Message(
             role.getQualifiedName(), // senderQualifiedName,
             getClassName(), // senderService,
@@ -258,7 +262,36 @@ public abstract class AbstractSkill {
             recipientService,
             operation,
             parameterDictionary,
-            DEFAULT_VERSION);
+            DEFAULT_VERSION); // version
+  }
+
+  /**
+   * Makes a reply message given the received message and operation
+   *
+   * @param receivedMessage the received message
+   * @param operation the operation
+   *
+   * @return a reply message
+   */
+  public Message makeReplyMessage(
+          final Message receivedMessage,
+          final String operation) {
+    //Preconditions
+    assert receivedMessage != null : "receivedMessage must not be null";
+    assert receivedMessage.getReplyWith() != null : "receivedMessage reply-with must not be null";
+
+    return new Message(
+            receivedMessage.getRecipientQualifiedName(), // senderQualifiedName
+            receivedMessage.getRecipientQualifiedName(), // senderService
+            receivedMessage.getSenderQualifiedName(), // recipientQualifiedName
+            receivedMessage.getConversationId(),
+            null, // replyWith
+            receivedMessage.getReplyWith(), // inReplyTo
+            null, // replyByDateTime,
+            receivedMessage.getSenderService(), // recipientService
+            operation,
+            new HashMap<String, Object>(), // parameterDictionary
+            DEFAULT_VERSION); // version
   }
 
   /**

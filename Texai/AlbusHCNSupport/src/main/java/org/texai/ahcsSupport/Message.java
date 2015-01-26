@@ -322,30 +322,6 @@ public class Message implements Serializable, Comparable<Message> {
   }
 
   /**
-   * Returns a new message for replying to the given recipient.
-   *
-   * @param message the given message
-   * @param skill the skill that is sending the reply message
-   *
-   * @return a new message for forwarding to the given recipient
-   */
-  public static Message reply(
-          final Message message,
-          final AbstractSkill skill) {
-    //Preconditions
-    assert message != null : "message must not be null";
-    assert message.isTask() : "message must be a task";
-    assert skill != null : "skill must not be null";
-
-    return new Message(
-            skill.getQualifiedName(),
-            skill.getClassName(), // senderService,
-            message.getSenderQualifiedName(), // recipientQualifiedName
-            message.getSenderService(), // recipientService
-            message.getOperation().replace("_Task", "_Info")); // operation
-  }
-
-  /**
    * Returns a new taskAccomplished info message for replying to the given received task message.
    *
    * @param message the given message

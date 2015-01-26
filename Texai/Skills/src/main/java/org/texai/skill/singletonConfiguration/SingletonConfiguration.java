@@ -376,17 +376,14 @@ public class SingletonConfiguration extends AbstractSkill {
 
     LOGGER.info("received a seed connection request from " + message.getSenderContainerName());
 
-    final Map<String, Object> parameterDictionary = new HashMap<>();
     final SingletonAgentHosts singletonAgentHosts = singletonAgentHosts();
-    parameterDictionary.put(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS, singletonAgentHosts);
-    parameterDictionary.put(AHCSConstants.MSG_PARM_X509_CERTIFICATE, getRole().getX509Certificate());
     LOGGER.info(singletonAgentHosts.toDetailedString());
 
-    final Message singletonAgentHostsMessage = makeMessage(
-            message.getSenderQualifiedName(), // recipientQualifiedName
-            message.getSenderService(), // recipientService
-            AHCSConstants.SINGLETON_AGENT_HOSTS_INFO, // operation
-            parameterDictionary); // parameterDictionary
+    final Message singletonAgentHostsMessage = makeReplyMessage(
+            message, // receivedMessage
+            AHCSConstants.SINGLETON_AGENT_HOSTS_INFO); // operation
+    singletonAgentHostsMessage.put(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS, singletonAgentHosts);
+    singletonAgentHostsMessage.put(AHCSConstants.MSG_PARM_X509_CERTIFICATE, getRole().getX509Certificate());
 
     sendMessage(singletonAgentHostsMessage);
   }
@@ -399,6 +396,7 @@ public class SingletonConfiguration extends AbstractSkill {
   private void handleSeedConnectionReply(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
+    assert message.getInReplyTo() != null : "message in-reply-to must not be null\n" + message;
 
     removeMessageTimeOut(message.getInReplyTo());
     LOGGER.info("received a seed connection reply from " + message.getSenderContainerName());
