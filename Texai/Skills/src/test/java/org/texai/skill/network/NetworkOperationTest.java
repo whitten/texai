@@ -49,8 +49,6 @@ public class NetworkOperationTest {
   private static final String parentQualifiedName = containerName + ".TopmostFriendshipAgent.TopmostFriendshipRole";
   // the test parent service
   private static final String parentService = TopmostFriendship.class.getName();
-  // the test child qualified name
-  private static final String childQualifiedName = containerName + ".ContainerOperationAgent.ContainerOperationRole";
   // the class name of the tested skill
   private static final String skillClassName = NetworkOperation.class.getName();
   // the test node name
@@ -72,7 +70,11 @@ public class NetworkOperationTest {
     skillClasses.add(skillClass);
     final Set<String> variableNames = new ArraySet<>();
     final Set<String> childQualifiedNames = new ArraySet<>();
-    childQualifiedNames.add(childQualifiedName);
+    childQualifiedNames.add(containerName + ".XAINetworkOperationAgent.XAINetworkOperationRole");
+    childQualifiedNames.add(containerName + ".NetworkSingletonConfigurationAgent.NetworkSingletonConfigurationRole");
+    childQualifiedNames.add(containerName + ".ContainerOperationAgent.ContainerOperationRole");
+    childQualifiedNames.add(containerName + ".NetworkDeploymentAgent.NetworkDeploymentRole");
+
     skillTestHarness = new SkillTestHarness(
             containerName + "." + nodeName, // name
             "test mission description", // missionDescription
@@ -124,6 +126,34 @@ public class NetworkOperationTest {
     }
     assertNotNull(skillTestHarness.getOperationAndServiceInfo());
     assertEquals("[AHCS initialize_Task, org.texai.skill.network.NetworkOperation]", skillTestHarness.getOperationAndServiceInfo().toString());
+  }
+
+  /**
+   * Test of class NetworkOperation perform mission task message.
+   */
+  @Test
+  public void testPerformMissionTaskMessage() {
+    LOGGER.info("testing " + AHCSConstants.PERFORM_MISSION_TASK + " message");
+
+    skillTestHarness.reset();
+    skillTestHarness.setSkillState(AHCSConstants.State.READY, skillClassName);
+    final Message performTaskMessage = new Message(
+            parentQualifiedName, // senderQualifiedName
+            TopmostFriendship.class.getName(), // senderService
+            containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
+            skillClassName, // recipientService
+            AHCSConstants.PERFORM_MISSION_TASK); // operation
+    LOGGER.info(performTaskMessage);
+
+    skillTestHarness.dispatchMessage(performTaskMessage);
+
+    assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
+    final List<Message> sentMessages = skillTestHarness.getSentMessages();
+    LOGGER.info("messages send as a result of receiving " + AHCSConstants.PERFORM_MISSION_TASK + " ...");
+    sentMessages.stream().sorted().forEach((Message message) -> {
+      LOGGER.info(message);
+    });
+    assertEquals(4, sentMessages.size());
   }
 
   /**

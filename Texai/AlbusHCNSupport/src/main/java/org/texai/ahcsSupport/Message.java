@@ -40,7 +40,7 @@ import org.texai.x509.SerializableObjectSigner;
  * @author Stephen L. Reed
  */
 @Immutable
-public class Message implements Serializable {
+public class Message implements Serializable, Comparable<Message> {
 
   // the serial version UID
   private static final long serialVersionUID = 1L;
@@ -1010,6 +1010,7 @@ public class Message implements Serializable {
    * Deserializes the given file to a message. This is useful for unit testing.
    *
    * @param filePath the given file path
+   *
    * @return the deserialized message
    */
   public static Message deserializeMessage(final String filePath) {
@@ -1024,6 +1025,17 @@ public class Message implements Serializable {
     } catch (IOException | ClassNotFoundException ex) {
       throw new TexaiException(ex);
     }
+  }
+
+  /**
+   * Compares this object with the specified Message for order. Returns a negative integer, zero, or a positive integer as this object is
+   * less than, equal to, or greater than the specified object.
+   *
+   * @param other the other Message
+   */
+  @Override
+  public int compareTo(final Message other) {
+    return this.toString().compareTo(other.toString());
   }
 
 }

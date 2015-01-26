@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcs.skill.AbstractNetworkSingletonSkill;
+import org.texai.skill.deployment.NetworkDeployment;
 import org.texai.skill.domainEntity.SingletonAgentHosts;
 import org.texai.skill.governance.TopmostFriendship;
 import org.texai.skill.singletonConfiguration.NetworkSingletonConfiguration;
@@ -351,7 +352,7 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
             getQualifiedName(), // senderQualifiedName
             getClassName(), // senderService,
             getRole().getChildQualifiedNameForAgent("NetworkDeploymentAgent"), // recipientQualifiedName,
-            ContainerOperation.class.getName(), // recipientService
+            NetworkDeployment.class.getName(), // recipientService
             AHCSConstants.PERFORM_MISSION_TASK); // operation
     sendMessageViaSeparateThread(performMissionMessage);
   }

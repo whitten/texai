@@ -1,5 +1,7 @@
 package org.texai.skill.testHarness;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import org.apache.log4j.Logger;
 import org.texai.ahcs.NodeRuntime;
@@ -29,8 +31,8 @@ public class SkillTestHarness {
   private final Node node;
   // the mock Role
   private final Role role;
-  // the most recent message sent by the mock role
-  private Message sentMessage;
+  // the messages sent by the mock role
+  private List<Message> sentMessages = new ArrayList<>();
   // the most recent operation and service information propagated by the mock role
   private OperationAndServiceInfo operationAndServiceInfo;
   // the indicator whether the JVM has been terminated by the application
@@ -103,12 +105,13 @@ public class SkillTestHarness {
    * Resets the test harness.
    */
   public void reset() {
-    sentMessage = null;
+    sentMessages.clear();
     operationAndServiceInfo = null;
     isTerminated = false;
   }
 
-  /** Returns whether the JVM has been terminated by the application.
+  /**
+   * Returns whether the JVM has been terminated by the application.
    *
    * @return whether the JVM has been terminated by the application
    */
@@ -214,7 +217,20 @@ public class SkillTestHarness {
    * @return the most recent message sent by the mock role
    */
   public Message getSentMessage() {
-    return sentMessage;
+    if (sentMessages.isEmpty()) {
+      return null;
+    } else {
+      return sentMessages.get(sentMessages.size() - 1);
+    }
+  }
+
+  /**
+   * Returns the messages sent by the mock role.
+   *
+   * @return the most recent message sent by the mock role
+   */
+  public List<Message> getSentMessages() {
+    return sentMessages;
   }
 
   /**
@@ -321,7 +337,7 @@ public class SkillTestHarness {
       assert message != null : "message must not be null";
       assert getNodeRuntime() != null : "nodeRuntime must not be null";
 
-      sentMessage = message;
+      sentMessages.add(message);
     }
 
     /**
@@ -335,7 +351,7 @@ public class SkillTestHarness {
       assert message != null : "message must not be null";
       assert getNodeRuntime() != null : "nodeRuntime must not be null";
 
-      sentMessage = message;
+      sentMessages.add(message);
     }
 
     /**
