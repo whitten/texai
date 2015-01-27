@@ -39,6 +39,12 @@ public class ContainerDeployment extends AbstractSkill {
   private static final Logger LOGGER = Logger.getLogger(ContainerDeployment.class);
   // the indication that this skill is running in a unit test, with a development file arrangement
   protected static boolean isUnitTest = false;
+  // the number of bytes in the zip archive to be received in chunks and deployed
+  private int zippedBytes_len = 0;
+  // the zip archive bytes which are received in chunks from Network Deployment
+  private byte[] zippedBytes;
+  // the index used to append received chunk bytes into the zip archive bytes
+  private int zippedBytesIndex = 0;
 
   /**
    * Constructs a new SkillTemplate instance.
@@ -200,8 +206,58 @@ public class ContainerDeployment extends AbstractSkill {
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
-    LOGGER.info("deploying files ...");
-    final byte[] zippedBytes = (byte[]) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES);
+    final int chunkNumber = (int) message.get(AHCSConstants.DEPLOY_FILES_TASK_CHUNK_NUMBER);
+    if (chunkNumber == 1) {
+      LOGGER.info("deploying files ...");
+      // initialize the chunked file transfer
+      zippedBytes_len = (int) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES_LENGTH);
+      zippedBytes = new byte[zippedBytes_len];
+      zippedBytesIndex = 0;
+    } else {
+      assert zippedBytes_len == (int) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES_LENGTH);
+    }
+    final byte[] zippedBytesReceived = (byte[]) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES);
+    final int zippedBytesReceived_len = zippedBytesReceived.length;
+
+    System.arraycopy(
+            zippedBytesReceived, // src
+            0, // srcPos
+            zippedBytes, // dest
+            zippedBytesIndex, // destPos
+            zippedBytesReceived_len); // length
+    zippedBytesIndex = zippedBytesIndex + zippedBytesReceived_len;
+    final int bytesRemainingCnt = zippedBytes_len - zippedBytesIndex;
+    LOGGER.info("chunk " + chunkNumber + ", bytes remaining " + bytesRemainingCnt);
+    assert bytesRemainingCnt >= 0;
+    if (bytesRemainingCnt == 0) {
+
+      if (LOGGER.isDebugEnabled()) {
+        // should match the bytes that were sent
+        LOGGER.debug("zippedBytes[0]                   " + zippedBytes[0]);
+        LOGGER.debug("zippedBytes[1]                   " + zippedBytes[1]);
+        LOGGER.debug("zippedBytes[2]                   " + zippedBytes[2]);
+        LOGGER.debug("zippedBytes[3]                   " + zippedBytes[3]);
+
+        LOGGER.debug("zippedBytes[zippedBytes_len - 4] " + zippedBytes[zippedBytes_len - 4]);
+        LOGGER.debug("zippedBytes[zippedBytes_len - 3] " + zippedBytes[zippedBytes_len - 3]);
+        LOGGER.debug("zippedBytes[zippedBytes_len - 2] " + zippedBytes[zippedBytes_len - 2]);
+        LOGGER.debug("zippedBytes[zippedBytes_len - 1] " + zippedBytes[zippedBytes_len - 1]);
+      }
+
+      deployFilesFromZipArchive(message);
+      sendMessage(Message.replyTaskAccomplished(message));
+      // release resources
+      zippedBytes_len = 0;
+      zippedBytes = new byte[0];
+      zippedBytesIndex = 0;
+    }
+  }
+
+  private void deployFilesFromZipArchive(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+
+    LOGGER.info("zippedBytes length: " + zippedBytes.length);
     final ZipFile zipFile = ZipUtils.temporaryZipFile(zippedBytes);
     LOGGER.info("zipFile: " + zipFile.getName());
 
@@ -260,7 +316,6 @@ public class ContainerDeployment extends AbstractSkill {
     } catch (ParseException ex) {
       throw new TexaiException(ex);
     }
-    sendMessage(Message.replyTaskAccomplished(message));
   }
 
   /**

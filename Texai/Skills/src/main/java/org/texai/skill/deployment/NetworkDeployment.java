@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -29,6 +30,7 @@ import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.skill.network.NetworkOperation;
+import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 import org.texai.util.ZipUtils;
 
@@ -103,8 +105,8 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
        *
        * The message parameter is the X.509 certificate belonging to the sender agent / role.
        *
-       * The result is the sending of a Join Acknowleged Task message to the requesting child role, with this role's X.509
-       * certificate as the message parameter.
+       * The result is the sending of a Join Acknowleged Task message to the requesting child role, with this role's X.509 certificate as
+       * the message parameter.
        */
       case AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
@@ -432,6 +434,21 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
         @SuppressWarnings("unchecked")
         final List<JSONObject> manifestItems = (List<JSONObject>) jsonObject.get("manifest");
         final byte[] zippedBytes = ZipUtils.archiveFilesToByteArray(deploymentDirectory);
+        final int zippedBytes_len = zippedBytes.length;
+
+        if (LOGGER.isDebugEnabled()) {
+          // should match the bytes that will be received
+          LOGGER.debug("zippedBytes[0]                   " + zippedBytes[0]);
+          LOGGER.debug("zippedBytes[1]                   " + zippedBytes[1]);
+          LOGGER.debug("zippedBytes[2]                   " + zippedBytes[2]);
+          LOGGER.debug("zippedBytes[3]                   " + zippedBytes[3]);
+
+          LOGGER.debug("zippedBytes[zippedBytes_len - 4] " + zippedBytes[zippedBytes_len - 4]);
+          LOGGER.debug("zippedBytes[zippedBytes_len - 3] " + zippedBytes[zippedBytes_len - 3]);
+          LOGGER.debug("zippedBytes[zippedBytes_len - 2] " + zippedBytes[zippedBytes_len - 2]);
+          LOGGER.debug("zippedBytes[zippedBytes_len - 1] " + zippedBytes[zippedBytes_len - 1]);
+        }
+
         LOGGER.info("manifestItems: " + manifestItems);
         for (final JSONObject manifestItem : manifestItems) {
           LOGGER.info(manifestItem);
@@ -453,27 +470,16 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
         // send the manifest and zipped bytes to each child container deployment role
         containerDeploymentRoleNames.stream().sorted().forEach((String containerDeploymentRoleName) -> {
 
-          final String containerName = Node.extractContainerName(containerDeploymentRoleName);
-          final Message deployFileMessage = networkDeployment.makeMessage(containerDeploymentRoleName, // recipientQualifiedName
-                  ContainerDeployment.class.getName(), // recipientService
-                  AHCSConstants.DEPLOY_FILES_TASK); // operation
-          deployFileMessage.put(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES, zippedBytes);
-          deployFileMessage.put(AHCSConstants.DEPLOY_FILES_TASK_MANIFEST, manifestJSONString);
-
-          synchronized (undeployedContainerNames) {
-            // track the containers that have been tasked to deploy, so that when subsequent Task Accomplished messages are
-            // received, it can determine when all have deployed and then restart the network
-            undeployedContainerNames.add(containerName);
-          }
-          sendMessage(deployFileMessage);
-
-          stringBuilder
-                  .append("deployed to ")
-                  .append(containerName)
-                  .append('\n').toString();
+          deployFilesInChunks(
+                  Node.extractContainerName(containerDeploymentRoleName), // containerName
+                  containerDeploymentRoleName,
+                  manifestJSONString,
+                  zippedBytes,
+                  networkDeployment,
+                  stringBuilder);
           // pause this thread to keep from creating too many long-running downstream threads
           try {
-            Thread.sleep(500);
+            Thread.sleep(1000);
           } catch (InterruptedException ex) {
           }
         });
@@ -482,21 +488,85 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
         } catch (IOException ex) {
           throw new TexaiException(ex);
         }
-        //   RESTART_CONTAINER_TASK --> ContainerOperationRole
-        // the network operations node as the sole singleton agent host and await the connecting peers
-        //   ContainerDeploymentRole --> TASK_ACCOMPLISHED_INFO
-        // as peers acknowledge that their updates completed, write the deployed.log with the details the deployment
-        // ask the network operations agent to shutdown the other peers who automatically restart in a random interval in
-        // excess of the time required to restart the network operations node
-        //   NETWORK_RESTART_REQUEST_INFO --> NetworkOperationRole
-        //   RESTART_CONTAINER_TASK --> ContainerOperationRole
-        // the network operations node as the sole singleton agent host and await the connecting peers
       } catch (IOException | ParseException ex) {
         throw new TexaiException(ex);
       } finally {
         isSoftwareDeploymentUnderway.set(false);
       }
     }
+
+  }
+
+  /**
+   * Deploys the files in chunks because the maximum message size is 1 MB.
+   *
+   * @param containerName the recipient container name
+   * @param containerDeploymentRoleName the recipient quantified name
+   * @param manifestJSONString the deployment manifest
+   * @param zippedBytes the zip archive to deploy in chunks
+   * @param networkDeployment this skill
+   * @param stringBuilder the string builder for deployment log messages
+   */
+  private void deployFilesInChunks(
+          final String containerName,
+          final String containerDeploymentRoleName,
+          final String manifestJSONString,
+          final byte[] zippedBytes,
+          final NetworkDeployment networkDeployment,
+          final StringBuilder stringBuilder) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(containerName) : "containerName must not be null";
+    assert StringUtils.isNonEmptyString(containerDeploymentRoleName) : "containerDeploymentRoleName must not be null";
+    assert StringUtils.isNonEmptyString(manifestJSONString) : "manifestJSONString must not be null";
+    assert zippedBytes != null : "zippedBytes must not be null";
+    assert zippedBytes.length > 0 : "zippedBytes must not be empty";
+    assert networkDeployment != null : "networkDeployment must not be null";
+    assert stringBuilder != null : "stringBuilder must not be null";
+
+    synchronized (undeployedContainerNames) {
+      // track the containers that have been tasked to deploy, so that when subsequent Task Accomplished messages are
+      // received, it can determine when all have deployed and then restart the network
+      undeployedContainerNames.add(containerName);
+    }
+    int zippedBytesRemainingCnt = zippedBytes.length;
+    final int chunkSize = 900 * 1024; // 900KB
+    int chunkNumber = 1;
+    int fromPosition = 0;
+    int toPosition;
+    while (zippedBytesRemainingCnt > 0) {
+      final int zippedBytesToSendCnt;
+      if (zippedBytesRemainingCnt > chunkSize) {
+        zippedBytesToSendCnt = chunkSize;
+        zippedBytesRemainingCnt = zippedBytesRemainingCnt - chunkSize;
+      } else {
+        zippedBytesToSendCnt = zippedBytesRemainingCnt;
+        zippedBytesRemainingCnt = 0;
+      }
+      toPosition = fromPosition + zippedBytesToSendCnt;
+      final byte[] zippedBytesToSend = Arrays.copyOfRange(
+              zippedBytes, // original
+              fromPosition, // from
+              toPosition); // to
+
+      final Message deployFileMessage = networkDeployment.makeMessage(containerDeploymentRoleName, // recipientQualifiedName
+              ContainerDeployment.class.getName(), // recipientService
+              AHCSConstants.DEPLOY_FILES_TASK); // operation
+      deployFileMessage.put(AHCSConstants.DEPLOY_FILES_TASK_CHUNK_NUMBER, chunkNumber);
+      deployFileMessage.put(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES, zippedBytesToSend);
+      deployFileMessage.put(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES_LENGTH, zippedBytes.length);
+      deployFileMessage.put(AHCSConstants.DEPLOY_FILES_TASK_MANIFEST, manifestJSONString);
+
+      LOGGER.info("sending chunk number " + chunkNumber);
+      sendMessage(deployFileMessage);
+
+      chunkNumber++;
+      fromPosition = fromPosition + zippedBytesToSendCnt;
+    }
+
+    stringBuilder
+            .append("deployed to ")
+            .append(containerName)
+            .append('\n').toString();
 
   }
 

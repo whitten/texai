@@ -143,8 +143,12 @@ public final class AHCSConstants {
   public static final String DEPLOY_FILES_TASK = "deployFile_Task";
   // the deployFile_Task manifest parameter, which is a JSON String specifying the deployment manifest
   public static final String DEPLOY_FILES_TASK_MANIFEST = "deployFile_Task_manifest";
-  // the deployFile_Task zipped bytes parameter, which is a byte array in zip archive format of the deployed files
+  // the deployFile_Task zipped bytes parameter, which is a byte array chunk of the deployed files zip archive
   public static final String DEPLOY_FILES_TASK_ZIPPED_BYTES = "deployFile_Task_zippedBytes";
+  // the deployFile_Task chunk number parameter, which is an int that counts the chunks of the potentially very large zip archive bytes
+  public static final String DEPLOY_FILES_TASK_CHUNK_NUMBER = "deployFile_Task_chunkNumber";
+  // the deployFile_Task zipped bytes length, which is an int specifying the total length of the zip archive to be transferred
+  public static final String DEPLOY_FILES_TASK_ZIPPED_BYTES_LENGTH = "deployFile_Task_zippedBytesLength";
   //
   // the directNextUtteranceBackToSender_Task operation
   public static final String DIRECT_NEXT_UTTERANCE_BACK_TO_SENDER_TASK = "directNextUtteranceBackToSender_Task";

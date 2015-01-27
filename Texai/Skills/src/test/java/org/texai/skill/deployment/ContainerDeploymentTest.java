@@ -141,10 +141,10 @@ public class ContainerDeploymentTest {
             AHCSConstants.State.READY, // state
             skillClassName);
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
-    final Message deplopyFilesTaskMessage = Message.deserializeMessage("data/test-messages/deployFileTaskMessage.ser");
-    LOGGER.info(deplopyFilesTaskMessage.toString());
+    Message deployFilesTaskMessage = Message.deserializeMessage("data/test-messages/deployFileTaskMessage0.ser");
+    LOGGER.info(deployFilesTaskMessage.toString());
     assertTrue(Message.areMessageStringsEqualIgnoringDate(
-            "[deployFile_Task Test.NetworkDeploymentAgent.NetworkDeploymentRole:NetworkDeployment --> Test.ContainerDeploymentAgent.ContainerDeploymentRole:ContainerDeployment 2015-01-22T15:17:58.185-06:00\n"
+            "[deployFile_Task Test.NetworkDeploymentAgent.NetworkDeploymentRole:NetworkDeployment --> Test.ContainerDeploymentAgent.ContainerDeploymentRole:ContainerDeployment 2015-01-26T20:57:59.412-06:00\n"
             + "  deployFile_Task_manifest={\"manifest\":[\n"
             + "{\"path\":\"Main-1.0\\/data\\/nodes.xml\",\n"
             + "  \"command\":\"replace\",\n"
@@ -221,11 +221,60 @@ public class ContainerDeploymentTest {
             + "  \"command\":\"replace\",\n"
             + "  \"hash\":\"eVoMC+v8\\/GpQkkCOrRM7si4ucqVVgzMbAhPPxJyOXW4830nSN9dJ0y4HK0nvESBn3ynlsFumnbIe3hMnN2Z\\/EQ==\"}]}\n"
             + ",\n"
-            + "  deployFile_Task_zippedBytes=byte[](length=39956604)\n"
+            + "  deployFile_Task_zippedBytes=byte[](length=921600),\n"
+            + "  deployFile_Task_chunkNumber=1,\n"
+            + "  deployFile_Task_zippedBytesLength=39956604\n"
             + "]",
-            deplopyFilesTaskMessage.toString()));
-    skillTestHarness.dispatchMessage(deplopyFilesTaskMessage);
+            deployFilesTaskMessage.toString()));
+
+    skillTestHarness.dispatchMessage(deployFilesTaskMessage);
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
+
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage1.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage2.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage3.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage4.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage5.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage6.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage7.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage8.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage9.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage10.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage11.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage12.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage13.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage14.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage15.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage16.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage17.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage18.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage19.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage20.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage21.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage22.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage23.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage24.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage25.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage26.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage27.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage28.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage29.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage30.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage31.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage32.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage33.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage34.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage35.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage36.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage37.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage38.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage39.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage40.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage41.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage42.ser"));
+    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage43.ser"));
+
+
     final File mainDirectory = new File("Main-1.0");
     assert mainDirectory.exists();
     assert mainDirectory.isDirectory();
@@ -252,9 +301,11 @@ public class ContainerDeploymentTest {
             "[taskAccomplished_Info Test.ContainerDeploymentAgent.ContainerDeploymentRole:ContainerDeployment --> Test.NetworkDeploymentAgent.NetworkDeploymentRole:NetworkDeployment 2015-01-22T15:27:28.990-06:00]"));
   }
 
-  /** Returns a string representation of the sorted file names contained in the given directory.
+  /**
+   * Returns a string representation of the sorted file names contained in the given directory.
    *
    * @param directory the given directory
+   *
    * @return the sorted file names
    */
   private String getSortedFileNamesInDirectory(final File directory) {

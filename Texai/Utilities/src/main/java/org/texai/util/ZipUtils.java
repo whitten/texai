@@ -77,11 +77,16 @@ public class ZipUtils {
     //Preconditions
     assert bytes != null : "bytes must not be null";
 
+    LOGGER.info("bytes length: " + bytes.length);
     try {
       final File zipFile = File.createTempFile("archive", ".zip");
       try (FileOutputStream fileOuputStream = new FileOutputStream(zipFile)) {
         fileOuputStream.write(bytes);
       }
+      assert zipFile.exists();
+      assert zipFile.isFile();
+      LOGGER.info("zipFile: " + zipFile);
+
       return new ZipFile(zipFile);
     } catch (IOException ex) {
       throw new TexaiException(ex);

@@ -143,7 +143,7 @@ public class NetworkDeploymentTest {
     LOGGER.info("sentMessage...\n" + sentMessage);
     assertTrue(Message.areMessageStringsEqualIgnoringDate(
             sentMessage.toString(),
-            "[deployFile_Task Test.NetworkDeploymentAgent.NetworkDeploymentRole:NetworkDeployment --> Test.ContainerDeploymentAgent.ContainerDeploymentRole:ContainerDeployment 2015-01-22T14:55:07.919-06:00\n"
+            "[deployFile_Task Test.NetworkDeploymentAgent.NetworkDeploymentRole:NetworkDeployment --> Test.ContainerDeploymentAgent.ContainerDeploymentRole:ContainerDeployment 2015-01-26T20:57:13.181-06:00\n"
             + "  deployFile_Task_manifest={\"manifest\":[\n"
             + "{\"path\":\"Main-1.0\\/data\\/nodes.xml\",\n"
             + "  \"command\":\"replace\",\n"
@@ -220,14 +220,20 @@ public class NetworkDeploymentTest {
             + "  \"command\":\"replace\",\n"
             + "  \"hash\":\"eVoMC+v8\\/GpQkkCOrRM7si4ucqVVgzMbAhPPxJyOXW4830nSN9dJ0y4HK0nvESBn3ynlsFumnbIe3hMnN2Z\\/EQ==\"}]}\n"
             + ",\n"
-            + "  deployFile_Task_zippedBytes=byte[](length=39956604)\n"
+            + "  deployFile_Task_zippedBytes=byte[](length=327804),\n"
+            + "  deployFile_Task_chunkNumber=44,\n"
+            + "  deployFile_Task_zippedBytesLength=39956604\n"
             + "]"));
     assertTrue(deploymentLogFile.exists());
     try {
       assertEquals(
               "deployed to Test\n",
               FileUtils.readFileToString(deploymentLogFile));
-      sentMessage.serializeToFile("data/test-messages/deployFileTaskMessage.ser");
+      final List<Message> sentMessages = skillTestHarness.getSentMessages();
+      for (int i = 0; i < sentMessages.size(); i++) {
+        final Message sentMessage1 = sentMessages.get(i);
+        sentMessage1.serializeToFile("data/test-messages/deployFileTaskMessage" + i + ".ser");
+      }
     } catch (IOException ex) {
       fail();
     }
@@ -299,7 +305,7 @@ public class NetworkDeploymentTest {
     NetworkDeployment instance = new NetworkDeployment();
     final List<String> understoodOperations = new ArrayList<>(Arrays.asList(instance.getUnderstoodOperations()));
     Collections.sort(understoodOperations);
-    assertEquals("[AHCS initialize_Task, delegateBecomeReady_Task, delegatePerformMission_Task, messageNotUnderstood_Info, performMission_Task]", understoodOperations.toString());
+    assertEquals("[AHCS initialize_Task, delegateBecomeReady_Task, delegatePerformMission_Task, joinNetworkSingletonAgent_Info, messageNotUnderstood_Info, performMission_Task]", understoodOperations.toString());
   }
 
   /**
