@@ -44,8 +44,8 @@ public class TaggedObjectDecoder extends FrameDecoder {
   /** the maximum object size */
   private final int maxObjectSize;
 
-  /** Creates a new TaggedObjectDecoder whose maximum object size is104857 bytes.
-   * If the size of the received object is greater than 1048576 bytes, a StreamCorruptedException
+  /** Creates a new TaggedObjectDecoder having a maximum object size.
+   * If the size of the received object is greater than the maximum bytes, a StreamCorruptedException
    * will be raised.
    */
   public TaggedObjectDecoder() {

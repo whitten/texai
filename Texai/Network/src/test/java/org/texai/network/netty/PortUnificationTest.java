@@ -20,6 +20,7 @@
  */
 package org.texai.network.netty;
 
+import java.io.Serializable;
 import org.texai.network.netty.utils.ConnectionUtils;
 import org.jboss.netty.handler.codec.http.websocketx.WebSocketVersion;
 import org.jboss.netty.handler.codec.http.websocketx.PingWebSocketFrame;

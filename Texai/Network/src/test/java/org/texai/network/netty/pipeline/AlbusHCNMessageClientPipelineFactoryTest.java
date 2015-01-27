@@ -21,7 +21,6 @@
  */
 package org.texai.network.netty.pipeline;
 
-import java.security.cert.X509Certificate;
 import org.apache.log4j.Logger;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.junit.After;
