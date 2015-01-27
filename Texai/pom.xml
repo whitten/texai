@@ -33,7 +33,6 @@
     <module>AlbusHCN</module>
     <module>AlbusHCNSupport</module>
     <module>CoinSkills</module>
-    <module>BitTorrentSupport</module>
     <module>Deployment</module>
     <module>Inference</module>
     <module>Main</module>
@@ -41,7 +40,6 @@
     <module>RDFEntityManager</module>
     <module>Security</module>
     <module>Skills</module>
-    <module>SSLBitTorrent</module>
     <module>TamperEvidentLog</module>
     <module>UPNPLib</module>
     <module>Utilities</module>

@@ -61,6 +61,7 @@ public class MessageDigestUtils {
     try {
       addBouncyCastleSecurityProvider();
       final MessageDigest messageDigest = MessageDigest.getInstance("SHA-512", BOUNCY_CASTLE_PROVIDER);
+      messageDigest.reset();
       final FileInputStream fileInputStream = new FileInputStream(file);
       final byte[] dataBytes = new byte[1024];
       int nread;
@@ -88,6 +89,7 @@ public class MessageDigestUtils {
     try {
       addBouncyCastleSecurityProvider();
       final MessageDigest messageDigest = MessageDigest.getInstance("SHA-512", BOUNCY_CASTLE_PROVIDER);
+      messageDigest.reset();
       final byte[] hashBytes = messageDigest.digest(bytes);
       return new String(Base64Coder.encode(hashBytes));
     } catch (NoSuchAlgorithmException | NoSuchProviderException ex) {

@@ -439,7 +439,8 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
         // write to a temporary file, which can be accessed for debugging, e.g. open in archive manager to ensure its valid
         final ZipFile zipFile = ZipUtils.temporaryZipFile(zippedBytes);
         LOGGER.info("zipFile: " + zipFile.getName());
-        LOGGER.info("zippedBytes hash: " + MessageDigestUtils.bytesHashString(zippedBytes));
+        final String zippedBytesHash = MessageDigestUtils.bytesHashString(zippedBytes);
+        LOGGER.info("zippedBytes hash: " + zippedBytesHash);
 
         final int zippedBytes_len = zippedBytes.length;
 
@@ -482,6 +483,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
                   containerDeploymentRoleName,
                   manifestJSONString,
                   zippedBytes,
+                  zippedBytesHash,
                   networkDeployment,
                   stringBuilder);
           // pause this thread to keep from creating too many long-running downstream threads
@@ -511,6 +513,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
    * @param containerDeploymentRoleName the recipient quantified name
    * @param manifestJSONString the deployment manifest
    * @param zippedBytes the zip archive to deploy in chunks
+   * @param zippedBytesHash the SHA-256 hash of the zip archive bytes
    * @param networkDeployment this skill
    * @param stringBuilder the string builder for deployment log messages
    */
@@ -519,6 +522,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
           final String containerDeploymentRoleName,
           final String manifestJSONString,
           final byte[] zippedBytes,
+          final String zippedBytesHash,
           final NetworkDeployment networkDeployment,
           final StringBuilder stringBuilder) {
     //Preconditions
@@ -527,6 +531,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
     assert StringUtils.isNonEmptyString(manifestJSONString) : "manifestJSONString must not be null";
     assert zippedBytes != null : "zippedBytes must not be null";
     assert zippedBytes.length > 0 : "zippedBytes must not be empty";
+    assert StringUtils.isNonEmptyString(zippedBytesHash) : "zippedBytesHash must not be null";
     assert networkDeployment != null : "networkDeployment must not be null";
     assert stringBuilder != null : "stringBuilder must not be null";
 
@@ -560,6 +565,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
               AHCSConstants.DEPLOY_FILES_TASK); // operation
       deployFileMessage.put(AHCSConstants.DEPLOY_FILES_TASK_CHUNK_NUMBER, chunkNumber);
       deployFileMessage.put(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES, zippedBytesToSend);
+      deployFileMessage.put(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES_HASH, zippedBytesHash);
       deployFileMessage.put(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES_LENGTH, zippedBytes.length);
       deployFileMessage.put(AHCSConstants.DEPLOY_FILES_TASK_MANIFEST, manifestJSONString);
 

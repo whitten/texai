@@ -22,7 +22,6 @@ CLASSPATH=$CLASSPATH:lib/bcpkix-jdk14-1.50.jar
 CLASSPATH=$CLASSPATH:lib/bcprov-jdk14-1.50.jar
 CLASSPATH=$CLASSPATH:lib/bcprov-jdk15on-1.50.jar
 CLASSPATH=$CLASSPATH:lib/bitcoinj-0.11.3.jar
-CLASSPATH=$CLASSPATH:lib/BitTorrentSupport-1.0.jar
 CLASSPATH=$CLASSPATH:lib/cglib-2.2.jar
 CLASSPATH=$CLASSPATH:lib/CoinSkills-1.0.jar
 CLASSPATH=$CLASSPATH:lib/commons-beanutils-1.4.jar

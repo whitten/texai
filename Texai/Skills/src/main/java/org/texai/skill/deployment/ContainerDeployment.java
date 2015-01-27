@@ -214,7 +214,8 @@ public class ContainerDeployment extends AbstractSkill {
       zippedBytes = new byte[zippedBytes_len];
       zippedBytesIndex = 0;
     } else {
-      assert zippedBytes_len == (int) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES_LENGTH);
+      assert zippedBytes_len == (int) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES_LENGTH) :
+              "zippedBytes_len: " + zippedBytes_len + ", msg parm: " + (int) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES_LENGTH);
     }
     final byte[] zippedBytesReceived = (byte[]) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES);
     final int zippedBytesReceived_len = zippedBytesReceived.length;
@@ -263,7 +264,19 @@ public class ContainerDeployment extends AbstractSkill {
     LOGGER.info("zippedBytes length: " + zippedBytes.length);
     final ZipFile zipFile = ZipUtils.temporaryZipFile(zippedBytes);
     LOGGER.info("zipFile: " + zipFile.getName());
-    LOGGER.info("zippedBytes hash: " + MessageDigestUtils.bytesHashString(zippedBytes));
+    final String computedZippedBytesHash = MessageDigestUtils.bytesHashString(zippedBytes);
+    LOGGER.info("computed zippedBytes hash: " + computedZippedBytesHash);
+    final String expectedZippedBytesHash = (String) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES_HASH);
+    LOGGER.info("expected zippedBytes hash: " + expectedZippedBytesHash);
+    if (computedZippedBytesHash.equals(expectedZippedBytesHash)) {
+      LOGGER.info("zip archive bytes hash to the expected value");
+     } else {
+      LOGGER.info("zip archive bytes do not hash to the expected value");
+
+      //TODO negative ack
+
+      return;
+    }
 
     final String manifestJSONString = (String) message.get(AHCSConstants.DEPLOY_FILES_TASK_MANIFEST);
     LOGGER.info("  manifest:\n" + manifestJSONString);

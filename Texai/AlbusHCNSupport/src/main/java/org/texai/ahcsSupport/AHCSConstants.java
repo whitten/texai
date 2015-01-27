@@ -145,6 +145,8 @@ public final class AHCSConstants {
   public static final String DEPLOY_FILES_TASK_MANIFEST = "deployFile_Task_manifest";
   // the deployFile_Task zipped bytes parameter, which is a byte array chunk of the deployed files zip archive
   public static final String DEPLOY_FILES_TASK_ZIPPED_BYTES = "deployFile_Task_zippedBytes";
+   // the deployFile_Task zipped bytes hash parameter, which is a String that contains the SHA-256 hash of the deployed files zip archive
+  public static final String DEPLOY_FILES_TASK_ZIPPED_BYTES_HASH = "deployFile_Task_zippedBytesHash";
   // the deployFile_Task chunk number parameter, which is an int that counts the chunks of the potentially very large zip archive bytes
   public static final String DEPLOY_FILES_TASK_CHUNK_NUMBER = "deployFile_Task_chunkNumber";
   // the deployFile_Task zipped bytes length, which is an int specifying the total length of the zip archive to be transferred
@@ -244,6 +246,9 @@ public final class AHCSConstants {
   //
   // the set logging level operation
   public static final String SET_LOGGING_LEVEL = "set_logging_level_Task";
+  //
+  // the shutdown aicoind operation
+  public static final String SHUTDOWN_AICOIND_TASK = "shutdownAicoind_Task";
   //
   // the shutdown node runtime operation
   public static final String SHUTDOWN_NODE_RUNTIME = "shutdown_node_runtime_Task";

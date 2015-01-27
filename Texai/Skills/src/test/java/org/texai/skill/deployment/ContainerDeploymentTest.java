@@ -143,46 +143,7 @@ public class ContainerDeploymentTest {
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
     Message deployFilesTaskMessage = Message.deserializeMessage("data/test-messages/deployFileTaskMessage0.ser");
     LOGGER.info(deployFilesTaskMessage.toString());
-    assertTrue(Message.areMessageStringsEqualIgnoringDate(
-            "[deployFile_Task Test.NetworkDeploymentAgent.NetworkDeploymentRole:NetworkDeployment --> Test.ContainerDeploymentAgent.ContainerDeploymentRole:ContainerDeployment 2015-01-26T23:27:11.113-06:00\n"
-            + "  deployFile_Task_manifest={\"manifest\":[\n"
-            + "{\"path\":\"Main-1.0\\/data\\/nodes.xml\",\n"
-            + "  \"command\":\"replace\",\n"
-            + "  \"hash\":\"fukO5UNFNxNm61Lc13blxrDnipjbNHh+1o\\/\\/\\/wsAQvpB+2nQWLa7PI41gUFDQMzbQuFJ4Mu3QSiQRkSvghIsMA==\"},\n"
-            + "\n"
-            + "{\"path\":\"Main-1.0\\/lib\\/JavaBitcoindRpcClient-0.9.0.jar\",\n"
-            + "  \"command\":\"add\",\n"
-            + "  \"hash\":\"VmlCyM3MdelJ1\\/gmx+L5DVQ5xtFr7UmsZmyU3dxFMXOAaPdV7LZ\\/itEbTfV4Aqcz+JCojATIXTDwXtxJr5grOw==\"},\n"
-            + "\n"
-            + "{\"path\":\"Main-1.0\\/lib\\/Main-1.0.jar\",\n"
-            + "  \"command\":\"replace\",\n"
-            + "  \"hash\":\"wdPbfwE62\\/hlTuhJacjQh43S2pLCnMhzolygYJTI1fUlyF8IFgFuGYhoILNFW3Mxu88v+YArrCMZ6AF995td0g==\"},\n"
-            + "\n"
-            + "{\"path\":\"Main-1.0\\/lib\\/Network-1.0.jar\",\n"
-            + "  \"command\":\"replace\",\n"
-            + "  \"hash\":\"1oHJOLqPZPxcm8Oq4vQME4slFcdAYhBhU3c7dgy+6Ho439slVFOGrN39M1cP6wnzANmW4x7GHdhLy5X7DAxa0w==\"},\n"
-            + "\n"
-            + "{\"path\":\"Main-1.0\\/lib\\/TamperEvidentLog-1.0.jar\",\n"
-            + "  \"command\":\"replace\",\n"
-            + "  \"hash\":\"Xf2hZN+vwWhYShIKX75IUO5iGDXi177n9tNkeyLmBTiMKp8LKBwlfzkzWaohKnwUBKhevjmzsQSX0ZT4DeeJKw==\"},\n"
-            + "\n"
-            + "{\"path\":\"Main-1.0\\/lib\\/UPNPLib-1.0.jar\",\n"
-            + "  \"command\":\"replace\",\n"
-            + "  \"hash\":\"otrR8RCJrBlu9gIxDl+B7TMuUfpgtkdNKNLQkDiUOA7zDxhw\\/NhHD8F5hpg8IJJm2hu1Pcpsn1fRR5ijWuapNQ==\"},\n"
-            + "\n"
-            + "{\"path\":\"Main-1.0\\/lib\\/Utilities-1.0.jar\",\n"
-            + "  \"command\":\"replace\",\n"
-            + "  \"hash\":\"G6hqLWM7QsRSOGU9zY53Bx1RR6s8wjhZ\\/qq0jB5H0L7ysQWHzNtcW7EukG0Xps48Pa4JxfMNtI2EjEtRMLu2Tg==\"},\n"
-            + "\n"
-            + "{\"path\":\"Main-1.0\\/lib\\/json-simple-1.1.1.jar\",\n"
-            + "  \"command\":\"add\",\n"
-            + "  \"hash\":\"+HmL+8yKuAAbr5DOR+wiZCNNwdotSql\\/3NwJkEcqa1paMvgo53YUB3fVmKmdigwPUcbQdnrhqClpCrkgCuNXQg==\"}]}\n"
-            + ",\n"
-            + "  deployFile_Task_zippedBytes=byte[](length=15360),\n"
-            + "  deployFile_Task_chunkNumber=1,\n"
-            + "  deployFile_Task_zippedBytesLength=460593\n"
-            + "]",
-            deployFilesTaskMessage.toString()));
+    assertEquals("[deployFile_Task, Test.NetworkDeploymentAgent.NetworkDeploymentRole:NetworkDeployment --> Test.ContainerDeploymentAgent.ContainerDeploymentRole:ContainerDeployment]", deployFilesTaskMessage.toBriefString());
 
     skillTestHarness.dispatchMessage(deployFilesTaskMessage);
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
@@ -200,22 +161,6 @@ public class ContainerDeploymentTest {
     skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage11.ser"));
     skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage12.ser"));
     skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage13.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage14.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage15.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage16.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage17.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage18.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage19.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage20.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage21.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage22.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage23.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage24.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage25.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage26.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage27.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage28.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage29.ser"));
 
     final File mainDirectory = new File("Main-1.0");
     assert mainDirectory.exists();
@@ -227,7 +172,7 @@ public class ContainerDeploymentTest {
     final File libDirectory = new File("Main-1.0/lib");
     assert libDirectory.exists();
     assert libDirectory.isDirectory();
-    assertEquals("[JavaBitcoindRpcClient-0.9.0.jar, Main-1.0.jar, Network-1.0.jar, TamperEvidentLog-1.0.jar, UPNPLib-1.0.jar, Utilities-1.0.jar, json-simple-1.1.1.jar]", getSortedFileNamesInDirectory(libDirectory));
+    assertEquals("[TamperEvidentLog-1.0.jar, UPNPLib-1.0.jar]", getSortedFileNamesInDirectory(libDirectory));
     final File binDirectory = new File("bin");
     assert binDirectory.exists();
     assert binDirectory.isDirectory();

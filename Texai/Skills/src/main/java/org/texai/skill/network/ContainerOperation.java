@@ -332,6 +332,8 @@ public final class ContainerOperation extends AbstractSkill {
     LOGGER.info("Restarting the application after a pause of " + delay + " microseconds");
     assert delay > 0 : AHCSConstants.RESTART_CONTAINER_TASK_DELAY + " must be positive";
 
+    //TODO send message to XAIOperation to shutdown
+
     try {
       Thread.sleep(delay);
     } catch (InterruptedException ex) {

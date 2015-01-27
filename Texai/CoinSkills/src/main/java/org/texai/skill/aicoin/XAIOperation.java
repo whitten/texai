@@ -131,6 +131,18 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
         continueConversation(message);
         return;
 
+      /**
+       * Shutdown Aicoind Task
+       *
+       * This task message is sent from ContainerOperationAgent.ContainerOperationRole when the application is shutting down. The child
+       * processes must be shutdown to enable the Java application to exit.
+       */
+      case AHCSConstants.SHUTDOWN_AICOIND_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
+        shutdownAicoind();
+        shutdownInsight();
+        return;
+
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
         LOGGER.warn(message);
         return;
@@ -177,6 +189,7 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.PERFORM_MISSION_TASK,
+      AHCSConstants.SHUTDOWN_AICOIND_TASK,
       AHCSConstants.TASK_ACCOMPLISHED_INFO
     };
   }
@@ -293,10 +306,51 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
   }
 
   /**
+   * Launches the Insight blockchain explorer instance.
+   */
+  private void shutdownInsight() {
+    if (!EnvironmentUtils.isLinux()) {
+      throw new TexaiException("Operating system must be Linux");
+    }
+
+    final String display = System.getenv("DISPLAY");
+    LOGGER.info("X11 DISPLAY=" + display);
+    String[] cmdArray = {
+      "sh",
+      "-c",
+      ""
+    };
+    final StringBuilder stringBuilder = new StringBuilder();
+    stringBuilder.append("cd /root/insight && npm stop");
+    cmdArray[2] = stringBuilder.toString();
+    LOGGER.info("Launching the Insight blockchain explorer instance.");
+    LOGGER.info("  shell cmd: " + cmdArray[2]);
+    AICoinUtils.executeHostCommandWithoutWaitForCompletion(cmdArray);
+  }
+
+  /**
    * Shuts down the aicoind instance.
    */
   private void shutdownAicoind() {
-    //TODO
+    //Preconditions
+    if (!EnvironmentUtils.isLinux()) {
+      throw new TexaiException("Operating system must be Linux");
+    }
+
+    LOGGER.info("generate a new block");
+    String[] cmdArray = {
+      "sh",
+      "-c",
+      ""
+    };
+    final StringBuilder stringBuilder = new StringBuilder();
+    stringBuilder
+            .append("../bin/aicoin-cli -datadir=")
+            .append(AICOIN_DIRECTORY_PATH)
+            .append(" stop");
+    cmdArray[2] = stringBuilder.toString();
+    LOGGER.info("shell cmd: " + cmdArray[2]);
+    AICoinUtils.executeHostCommandWithoutWaitForCompletion(cmdArray);
   }
 
   @Override
