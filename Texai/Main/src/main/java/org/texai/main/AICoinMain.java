@@ -233,6 +233,7 @@ public class AICoinMain {
       nodeRuntime.addFilteredOperation(AHCSConstants.DELEGATE_BECOME_READY_TASK);
       nodeRuntime.addFilteredOperation(AHCSConstants.DELEGATE_CONFIGURE_SINGLETON_AGENT_HOSTS_TASK);
       nodeRuntime.addFilteredOperation(AHCSConstants.DELEGATE_PERFORM_MISSION_TASK);
+      nodeRuntime.addFilteredOperation(AHCSConstants.DEPLOY_FILES_TASK);
       nodeRuntime.addFilteredOperation(AHCSConstants.JOIN_ACKNOWLEDGED_TASK);
       nodeRuntime.addFilteredOperation(AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO);
       nodeRuntime.addFilteredOperation(AHCSConstants.KEEP_ALIVE_INFO);

@@ -144,86 +144,43 @@ public class ContainerDeploymentTest {
     Message deployFilesTaskMessage = Message.deserializeMessage("data/test-messages/deployFileTaskMessage0.ser");
     LOGGER.info(deployFilesTaskMessage.toString());
     assertTrue(Message.areMessageStringsEqualIgnoringDate(
-            "[deployFile_Task Test.NetworkDeploymentAgent.NetworkDeploymentRole:NetworkDeployment --> Test.ContainerDeploymentAgent.ContainerDeploymentRole:ContainerDeployment 2015-01-26T20:57:59.412-06:00\n"
+            "[deployFile_Task Test.NetworkDeploymentAgent.NetworkDeploymentRole:NetworkDeployment --> Test.ContainerDeploymentAgent.ContainerDeploymentRole:ContainerDeployment 2015-01-26T23:27:11.113-06:00\n"
             + "  deployFile_Task_manifest={\"manifest\":[\n"
             + "{\"path\":\"Main-1.0\\/data\\/nodes.xml\",\n"
             + "  \"command\":\"replace\",\n"
             + "  \"hash\":\"fukO5UNFNxNm61Lc13blxrDnipjbNHh+1o\\/\\/\\/wsAQvpB+2nQWLa7PI41gUFDQMzbQuFJ4Mu3QSiQRkSvghIsMA==\"},\n"
-            + "  \n"
-            + "{\"path\":\"Main-1.0\\/lib\\/AlbusHCN-1.0.jar\",\n"
-            + "  \"command\":\"replace\",\n"
-            + "  \"hash\":\"S3AQfCcfxHaNOq0Jtkp5LrS3s9inNd8EDfkrjPNwjTm149iGBxUI+14FzWtYez5NYh4W6oWFQn\\/LEFDWyEImRQ==\"},\n"
-            + "  \n"
-            + "{\"path\":\"Main-1.0\\/lib\\/AlbusHCNSupport-1.0.jar\",\n"
-            + "  \"command\":\"replace\",\n"
-            + "  \"hash\":\"ulT5yhYY1QmyY\\/pwURZjC28ntzy5oWOMLRh7C5BFWZRVAGaH918YooZvhdR1xMnv35Vm8WbztQc5PZ7krps5yw==\"},\n"
-            + "  \n"
-            + "{\"path\":\"Main-1.0\\/lib\\/BitTorrentSupport-1.0.jar\",\n"
-            + "  \"command\":\"replace\",\n"
-            + "  \"hash\":\"a0Sli0FLeFdmrFB3AkUFIme0zr7an\\/OEQ\\/AMK6lszP0dZ\\/4G99JL\\/mDtcIIQ5uIAK3SIjannykEmpu6Oxb6UFA==\"},\n"
-            + "  \n"
-            + "{\"path\":\"Main-1.0\\/lib\\/CoinSkills-1.0.jar\",\n"
-            + "  \"command\":\"replace\",\n"
-            + "  \"hash\":\"Y4ieVHP7E6oqPjg51wNTFUqSeE5AH\\/LAy2LhnpbG7MlY3pRcbN5JGrjcGumblcRQ3GuACangS24pN0ftaMMDIg==\"},\n"
-            + "  \n"
-            + "{\"path\":\"Main-1.0\\/lib\\/Inference-1.0.jar\",\n"
-            + "  \"command\":\"replace\",\n"
-            + "  \"hash\":\"rYsFthEVgNkhIG6PB7lbsCCDLO0586XhmkNcseizYUi8PehlgalwQDqHlBXFjgnoNEke7D2t6NoyOaTDYzeZHg==\"},\n"
-            + "  \n"
+            + "\n"
             + "{\"path\":\"Main-1.0\\/lib\\/JavaBitcoindRpcClient-0.9.0.jar\",\n"
             + "  \"command\":\"add\",\n"
             + "  \"hash\":\"VmlCyM3MdelJ1\\/gmx+L5DVQ5xtFr7UmsZmyU3dxFMXOAaPdV7LZ\\/itEbTfV4Aqcz+JCojATIXTDwXtxJr5grOw==\"},\n"
-            + "  \n"
+            + "\n"
             + "{\"path\":\"Main-1.0\\/lib\\/Main-1.0.jar\",\n"
             + "  \"command\":\"replace\",\n"
             + "  \"hash\":\"wdPbfwE62\\/hlTuhJacjQh43S2pLCnMhzolygYJTI1fUlyF8IFgFuGYhoILNFW3Mxu88v+YArrCMZ6AF995td0g==\"},\n"
-            + "  \n"
+            + "\n"
             + "{\"path\":\"Main-1.0\\/lib\\/Network-1.0.jar\",\n"
             + "  \"command\":\"replace\",\n"
             + "  \"hash\":\"1oHJOLqPZPxcm8Oq4vQME4slFcdAYhBhU3c7dgy+6Ho439slVFOGrN39M1cP6wnzANmW4x7GHdhLy5X7DAxa0w==\"},\n"
-            + "  \n"
-            + "{\"path\":\"Main-1.0\\/lib\\/RDFEntityManager-1.0.jar\",\n"
-            + "  \"command\":\"replace\",\n"
-            + "  \"hash\":\"FQSFPCF8jMFO2Wvhs7plRV\\/cuHQIdZpwbSM4ir9MqwqMdHwPuL29j31FlMh5URWhA1VdlR83WL0MSQmWlyp+xg==\"},\n"
-            + "  \n"
-            + "{\"path\":\"Main-1.0\\/lib\\/Skills-1.0.jar\",\n"
-            + "  \"command\":\"replace\",\n"
-            + "  \"hash\":\"w4xainXmaZgXX1neN9KSUk3uU94r8\\/6eShEbhLUzY0tdG6CvlZP5jJUZHZ7GGKV5y\\/YXxy145W7jItzF6P0p2g==\"},\n"
-            + "  \n"
+            + "\n"
             + "{\"path\":\"Main-1.0\\/lib\\/TamperEvidentLog-1.0.jar\",\n"
             + "  \"command\":\"replace\",\n"
             + "  \"hash\":\"Xf2hZN+vwWhYShIKX75IUO5iGDXi177n9tNkeyLmBTiMKp8LKBwlfzkzWaohKnwUBKhevjmzsQSX0ZT4DeeJKw==\"},\n"
-            + "  \n"
+            + "\n"
             + "{\"path\":\"Main-1.0\\/lib\\/UPNPLib-1.0.jar\",\n"
             + "  \"command\":\"replace\",\n"
             + "  \"hash\":\"otrR8RCJrBlu9gIxDl+B7TMuUfpgtkdNKNLQkDiUOA7zDxhw\\/NhHD8F5hpg8IJJm2hu1Pcpsn1fRR5ijWuapNQ==\"},\n"
-            + "  \n"
+            + "\n"
             + "{\"path\":\"Main-1.0\\/lib\\/Utilities-1.0.jar\",\n"
             + "  \"command\":\"replace\",\n"
             + "  \"hash\":\"G6hqLWM7QsRSOGU9zY53Bx1RR6s8wjhZ\\/qq0jB5H0L7ysQWHzNtcW7EukG0Xps48Pa4JxfMNtI2EjEtRMLu2Tg==\"},\n"
-            + "  \n"
-            + "{\"path\":\"Main-1.0\\/lib\\/X509Security-1.0.jar\",\n"
-            + "  \"command\":\"replace\",\n"
-            + "  \"hash\":\"smask70ELe9vHay0Xk6q1P4RAMHW5eBnFjkGcr4VkaJNpHnoAQwTIzKyxKWtqPZ\\/H6WN3lAdnUAq0awYMzXacw==\"},\n"
-            + "  \n"
+            + "\n"
             + "{\"path\":\"Main-1.0\\/lib\\/json-simple-1.1.1.jar\",\n"
             + "  \"command\":\"add\",\n"
-            + "  \"hash\":\"+HmL+8yKuAAbr5DOR+wiZCNNwdotSql\\/3NwJkEcqa1paMvgo53YUB3fVmKmdigwPUcbQdnrhqClpCrkgCuNXQg==\"},\n"
-            + "  \n"
-            + "{\"path\":\"Main-1.0\\/lib\\/json-simple-1.1.jar\",\n"
-            + "  \"command\":\"delete\"},\n"
-            + "  \n"
-            + "{\"path\":\"bin\\/aicoin-cli\",\n"
-            + "  \"command\":\"replace\",\n"
-            + "  \"hash\":\"tj0GSSJxBp8pxvzldlxRrd116pmk62I9Gy42Kn452JTpmpXnqV\\/AZ5j2N18oPqZ+3AiRr3CHZwg27pF8TUvBoQ==\"},\n"
-            + "  \n"
-            + "{\"path\":\"bin\\/aicoin-qt\",\n"
-            + "  \"command\":\"replace\",\n"
-            + "  \"hash\":\"eVoMC+v8\\/GpQkkCOrRM7si4ucqVVgzMbAhPPxJyOXW4830nSN9dJ0y4HK0nvESBn3ynlsFumnbIe3hMnN2Z\\/EQ==\"}]}\n"
+            + "  \"hash\":\"+HmL+8yKuAAbr5DOR+wiZCNNwdotSql\\/3NwJkEcqa1paMvgo53YUB3fVmKmdigwPUcbQdnrhqClpCrkgCuNXQg==\"}]}\n"
             + ",\n"
-            + "  deployFile_Task_zippedBytes=byte[](length=921600),\n"
+            + "  deployFile_Task_zippedBytes=byte[](length=15360),\n"
             + "  deployFile_Task_chunkNumber=1,\n"
-            + "  deployFile_Task_zippedBytesLength=39956604\n"
+            + "  deployFile_Task_zippedBytesLength=460593\n"
             + "]",
             deployFilesTaskMessage.toString()));
 
@@ -259,21 +216,6 @@ public class ContainerDeploymentTest {
     skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage27.ser"));
     skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage28.ser"));
     skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage29.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage30.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage31.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage32.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage33.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage34.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage35.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage36.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage37.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage38.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage39.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage40.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage41.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage42.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage43.ser"));
-
 
     final File mainDirectory = new File("Main-1.0");
     assert mainDirectory.exists();
@@ -285,11 +227,11 @@ public class ContainerDeploymentTest {
     final File libDirectory = new File("Main-1.0/lib");
     assert libDirectory.exists();
     assert libDirectory.isDirectory();
-    assertEquals("[AlbusHCN-1.0.jar, AlbusHCNSupport-1.0.jar, BitTorrentSupport-1.0.jar, CoinSkills-1.0.jar, Inference-1.0.jar, JavaBitcoindRpcClient-0.9.0.jar, Main-1.0.jar, Network-1.0.jar, RDFEntityManager-1.0.jar, Skills-1.0.jar, TamperEvidentLog-1.0.jar, UPNPLib-1.0.jar, Utilities-1.0.jar, X509Security-1.0.jar, json-simple-1.1.1.jar]", getSortedFileNamesInDirectory(libDirectory));
+    assertEquals("[JavaBitcoindRpcClient-0.9.0.jar, Main-1.0.jar, Network-1.0.jar, TamperEvidentLog-1.0.jar, UPNPLib-1.0.jar, Utilities-1.0.jar, json-simple-1.1.1.jar]", getSortedFileNamesInDirectory(libDirectory));
     final File binDirectory = new File("bin");
     assert binDirectory.exists();
     assert binDirectory.isDirectory();
-    assertEquals("[aicoin-cli-new, aicoin-qt-new]", getSortedFileNamesInDirectory(binDirectory));
+    assertEquals("[]", getSortedFileNamesInDirectory(binDirectory));
     FileUtils.deleteQuietly(new File("Main-1.0"));
     FileUtils.deleteQuietly(new File("bin"));
 

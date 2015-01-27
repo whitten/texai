@@ -20,7 +20,6 @@
  */
 package org.texai.network.netty;
 
-import java.io.Serializable;
 import org.texai.network.netty.utils.ConnectionUtils;
 import org.jboss.netty.handler.codec.http.websocketx.WebSocketVersion;
 import org.jboss.netty.handler.codec.http.websocketx.PingWebSocketFrame;
@@ -91,14 +90,22 @@ import static org.junit.Assert.*;
  */
 public final class PortUnificationTest {
 
-  /** the logger */
+  /**
+   * the logger
+   */
   private static final Logger LOGGER = Logger.getLogger(PortUnificationTest.class);
-  /** the server port */
+  /**
+   * the server port
+   */
   private static final int SERVER_PORT = 8088;
-  /** the client executor */
+  /**
+   * the client executor
+   */
   private final Executor clientExecutor = Executors.newCachedThreadPool();
 
-  /** sets debugging */
+  /**
+   * sets debugging
+   */
 //  static {
 //    System.setProperty("javax.net.debug", "all");
 //  }
@@ -147,32 +154,34 @@ public final class PortUnificationTest {
             serverExecutor, // bossExecutor
             serverExecutor); // workerExecutor
 
-
     LOGGER.info("testing clients");
     // test clients
-    httpClient();
-    nettyWebSocketClient();
-    albusClient();
-    bitTorrentClient();
-    httpClient();
-    nettyWebSocketClient();
-    nettyWebSocketClient();
-    bitTorrentClient();
-    albusClient();
-    httpClient();
-    httpClient();
-    albusClient();
-    albusClient();
-    bitTorrentClient();
-    bitTorrentClient();
-    nettyWebSocketClient();
+    albusClientBigMessage();
+//    httpClient();
+//    nettyWebSocketClient();
+//    albusClient();
+//    bitTorrentClient();
+//    httpClient();
+//    nettyWebSocketClient();
+//    nettyWebSocketClient();
+//    bitTorrentClient();
+//    albusClient();
+//    httpClient();
+//    httpClient();
+//    albusClient();
+//    albusClient();
+//    bitTorrentClient();
+//    bitTorrentClient();
+//    nettyWebSocketClient();
 
     // shut down executor threads to exit
 //    LOGGER.info("releasing server resources");
 //    serverBootstrap.releaseExternalResources();   sometimes hangs
   }
 
-  /** Tests the exchange of serialized object messages. */
+  /**
+   * Tests the exchange of serialized object messages.
+   */
   @SuppressWarnings("ThrowableResultIgnored")
   private void albusClient() {
     // configure the client pipeline
@@ -235,7 +244,75 @@ public final class PortUnificationTest {
     channel.close();
   }
 
-  /** Tests the HTTP request and response messages. */
+  /**
+   * Tests the exchange of serialized object messages.
+   */
+  @SuppressWarnings("ThrowableResultIgnored")
+  private void albusClientBigMessage() {
+    // configure the client pipeline
+    final Object clientResume_lock = new Object();
+    final AbstractAlbusHCSMessageHandler albusHCSMessageHandler = new MockAlbusHCSMessageHandler(clientResume_lock, 10);
+    final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
+
+    final Channel channel = ConnectionUtils.openAlbusHCSConnection(
+            new InetSocketAddress("localhost", SERVER_PORT),
+            x509SecurityInfo,
+            albusHCSMessageHandler,
+            clientExecutor, // bossExecutor
+            clientExecutor); // workerExecutor
+    LOGGER.info("Albus client connected");
+
+    // send a message
+    final String senderQualifiedName = "test-container1.test-agent1.test-role1";
+    final String recipientQualifiedName = "test-container2.test-agent2.test-role2";
+    final UUID conversationId = UUID.randomUUID();
+    final UUID replyWith = UUID.randomUUID();
+    final UUID inReplyTo = UUID.randomUUID();
+    final DateTime replyByDateTime = null;
+    final String operation = "Echo_Task";
+    final Map<String, Object> parameterDictionary = new HashMap<>();
+    // the test service is a valid class with a no-argument constructor, the Skills defining module is dependent on this so an actual skill class cannot be used here
+    final String service = "org.texai.kb.persistence.domainEntity.RepositoryContentDescription";
+
+    Message message = new Message(
+            senderQualifiedName,
+            "TestSenderService",
+            recipientQualifiedName,
+            conversationId,
+            replyWith,
+            inReplyTo,
+            replyByDateTime,
+            service,
+            operation,
+            parameterDictionary,
+            "1.0.0"); // version
+    String parameterName = "count";
+    Object parameterValue = 0;
+    message.put(parameterName, parameterValue);
+    message.put("bytes", new byte[15 * 1024]);
+    final ChannelFuture channelFuture = channel.write(message);
+
+    // wait for the request message to be sent
+    channelFuture.awaitUninterruptibly();
+    if (!channelFuture.isSuccess()) {
+      LOGGER.info(StringUtils.getStackTraceAsString(channelFuture.getCause()));
+      fail(channelFuture.getCause().getMessage());
+    }
+
+    // the message response handler will signal this thread when the test exchanges are completed
+    synchronized (clientResume_lock) {
+      try {
+        clientResume_lock.wait();
+      } catch (InterruptedException ex) {
+      }
+    }
+    LOGGER.info("releasing Albus client resources");
+    channel.close();
+  }
+
+  /**
+   * Tests the HTTP request and response messages.
+   */
   @SuppressWarnings("ThrowableResultIgnored")
   private void httpClient() {
     final ClientBootstrap clientBootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(
@@ -303,7 +380,9 @@ public final class PortUnificationTest {
     clientBootstrap.releaseExternalResources();
   }
 
-  /** Tests the Netty web socket request and response messages. */
+  /**
+   * Tests the Netty web socket request and response messages.
+   */
   @SuppressWarnings("ThrowableResultIgnored")
   private void nettyWebSocketClient() {
     final ClientBootstrap clientBootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(
@@ -399,7 +478,9 @@ public final class PortUnificationTest {
     clientBootstrap.releaseExternalResources();
   }
 
-  /** Tests the exchange of bit torrent messages. */
+  /**
+   * Tests the exchange of bit torrent messages.
+   */
   @SuppressWarnings("ThrowableResultIgnored")
   private void bitTorrentClient() {
     final ClientBootstrap clientBootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(

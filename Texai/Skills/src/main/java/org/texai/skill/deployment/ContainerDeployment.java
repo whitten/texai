@@ -227,9 +227,12 @@ public class ContainerDeployment extends AbstractSkill {
             zippedBytesReceived_len); // length
     zippedBytesIndex = zippedBytesIndex + zippedBytesReceived_len;
     final int bytesRemainingCnt = zippedBytes_len - zippedBytesIndex;
-    LOGGER.info("chunk " + chunkNumber + ", bytes remaining " + bytesRemainingCnt);
+    if (chunkNumber < 10 || chunkNumber % 10 == 0) {
+      LOGGER.info("chunk " + chunkNumber + ", bytes remaining " + bytesRemainingCnt);
+    }
     assert bytesRemainingCnt >= 0;
     if (bytesRemainingCnt == 0) {
+      LOGGER.info("chunk " + chunkNumber + ", bytes remaining " + bytesRemainingCnt);
 
       if (LOGGER.isDebugEnabled()) {
         // should match the bytes that were sent
@@ -260,6 +263,7 @@ public class ContainerDeployment extends AbstractSkill {
     LOGGER.info("zippedBytes length: " + zippedBytes.length);
     final ZipFile zipFile = ZipUtils.temporaryZipFile(zippedBytes);
     LOGGER.info("zipFile: " + zipFile.getName());
+    LOGGER.info("zippedBytes hash: " + MessageDigestUtils.bytesHashString(zippedBytes));
 
     final String manifestJSONString = (String) message.get(AHCSConstants.DEPLOY_FILES_TASK_MANIFEST);
     LOGGER.info("  manifest:\n" + manifestJSONString);

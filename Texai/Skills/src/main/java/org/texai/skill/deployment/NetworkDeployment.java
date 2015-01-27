@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.zip.ZipFile;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -33,6 +34,7 @@ import org.texai.skill.network.NetworkOperation;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 import org.texai.util.ZipUtils;
+import org.texai.x509.MessageDigestUtils;
 
 /**
  *
@@ -434,6 +436,11 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
         @SuppressWarnings("unchecked")
         final List<JSONObject> manifestItems = (List<JSONObject>) jsonObject.get("manifest");
         final byte[] zippedBytes = ZipUtils.archiveFilesToByteArray(deploymentDirectory);
+        // write to a temporary file, which can be accessed for debugging, e.g. open in archive manager to ensure its valid
+        final ZipFile zipFile = ZipUtils.temporaryZipFile(zippedBytes);
+        LOGGER.info("zipFile: " + zipFile.getName());
+        LOGGER.info("zippedBytes hash: " + MessageDigestUtils.bytesHashString(zippedBytes));
+
         final int zippedBytes_len = zippedBytes.length;
 
         if (LOGGER.isDebugEnabled()) {
@@ -529,7 +536,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
       undeployedContainerNames.add(containerName);
     }
     int zippedBytesRemainingCnt = zippedBytes.length;
-    final int chunkSize = 900 * 1024; // 900KB
+    final int chunkSize = 8 * 1024; // 8KB
     int chunkNumber = 1;
     int fromPosition = 0;
     int toPosition;
@@ -556,7 +563,9 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
       deployFileMessage.put(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES_LENGTH, zippedBytes.length);
       deployFileMessage.put(AHCSConstants.DEPLOY_FILES_TASK_MANIFEST, manifestJSONString);
 
-      LOGGER.info("sending chunk number " + chunkNumber);
+      if (chunkNumber < 10 || chunkNumber % 10 == 0 || zippedBytesRemainingCnt == 0) {
+        LOGGER.info("sending chunk number " + chunkNumber);
+      }
       sendMessage(deployFileMessage);
 
       chunkNumber++;

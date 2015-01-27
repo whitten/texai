@@ -26,38 +26,42 @@ import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
 import org.texai.network.netty.NetworkConstants;
 
-/** Provides a tagged object decoder.  A tagged object is a serialized object with a protocol identification
- * byte prepended.
+/**
+ * Provides a tagged object decoder. A tagged object is a serialized object with a protocol identification byte prepended.
  *
  * @author reed
  */
 @NotThreadSafe
 public class TaggedObjectDecoder extends FrameDecoder {
 
-  /** the logger */
+  /**
+   * the logger
+   */
   private static final Logger LOGGER = Logger.getLogger(TaggedObjectDecoder.class);
-  /** the maximum object size */
+  /**
+   * the maximum object size
+   */
   private final int maxObjectSize;
 
-  /** Creates a new TaggedObjectDecoder having a maximum object size.
-   * If the size of the received object is greater than the maximum bytes, a StreamCorruptedException
-   * will be raised.
+  /**
+   * Creates a new TaggedObjectDecoder having a maximum object size. If the size of the received object is greater than the maximum bytes, a
+   * StreamCorruptedException will be raised.
    */
   public TaggedObjectDecoder() {
     this(1048576);
   }
 
-  /** Creates a new decoder with the specified maximum object size.
+  /**
+   * Creates a new decoder with the specified maximum object size.
    *
-   * @param maxObjectSize  the maximum byte length of the serialized object.
-   *                       if the length of the received object is greater
-   *                       than this value, {@link StreamCorruptedException}
-   *                       will be raised.
+   * @param maxObjectSize the maximum byte length of the serialized object. if the length of the received object is greater than this value,
+   * {@link StreamCorruptedException} will be raised.
    */
   public TaggedObjectDecoder(final int maxObjectSize) {
     //Preconditions
@@ -68,17 +72,15 @@ public class TaggedObjectDecoder extends FrameDecoder {
     this.maxObjectSize = maxObjectSize;
   }
 
-  /** Decodes the received packets so far into an object.
+  /**
+   * Decodes the received packets so far into an object.
    *
-   * @param channelHandlerContext      the context of this handler
-   * @param channel  the current channel
-   * @param channelBuffer   the cumulative buffer of received packets so far.
-   *                 Note that the buffer might be empty, which means you
-   *                 should not make an assumption that the buffer contains
-   *                 at least one byte in your decoder implementation.
+   * @param channelHandlerContext the context of this handler
+   * @param channel the current channel
+   * @param channelBuffer the cumulative buffer of received packets so far. Note that the buffer might be empty, which means you should not
+   * make an assumption that the buffer contains at least one byte in your decoder implementation.
    *
-   * @return the object if all its bytes were contained in the buffer.
-   *         null if there's not enough data in the buffer to decode an object.
+   * @return the object if all its bytes were contained in the buffer. null if there's not enough data in the buffer to decode an object.
    * @throws IOException if an input/output error occurs
    * @throws ClassNotFoundException if the serialized object's class cannot be found
    */
