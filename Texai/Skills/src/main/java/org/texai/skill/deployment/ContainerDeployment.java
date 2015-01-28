@@ -45,6 +45,8 @@ public class ContainerDeployment extends AbstractSkill {
   private byte[] zippedBytes;
   // the index used to append received chunk bytes into the zip archive bytes
   private int zippedBytesIndex = 0;
+  // the last received chunk number
+  private int previousChunkNumber = 0;
 
   /**
    * Constructs a new SkillTemplate instance.
@@ -213,9 +215,19 @@ public class ContainerDeployment extends AbstractSkill {
       zippedBytes_len = (int) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES_LENGTH);
       zippedBytes = new byte[zippedBytes_len];
       zippedBytesIndex = 0;
+      previousChunkNumber = 1;
     } else {
       assert zippedBytes_len == (int) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES_LENGTH) :
               "zippedBytes_len: " + zippedBytes_len + ", msg parm: " + (int) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES_LENGTH);
+      if (chunkNumber == previousChunkNumber + 1) {
+        previousChunkNumber++;
+      } else {
+        LOGGER.info("received zip file chunk " + chunkNumber + ", but expected to receive chunk " + previousChunkNumber + 1);
+
+        //TODO retry
+        return;
+      }
+
     }
     final byte[] zippedBytesReceived = (byte[]) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES);
     final int zippedBytesReceived_len = zippedBytesReceived.length;
@@ -228,12 +240,12 @@ public class ContainerDeployment extends AbstractSkill {
             zippedBytesReceived_len); // length
     zippedBytesIndex = zippedBytesIndex + zippedBytesReceived_len;
     final int bytesRemainingCnt = zippedBytes_len - zippedBytesIndex;
-    if (chunkNumber < 10 || chunkNumber % 10 == 0) {
+    if (chunkNumber < 50 || chunkNumber % 10 == 0) {
       LOGGER.info("chunk " + chunkNumber + ", bytes remaining " + bytesRemainingCnt);
     }
     assert bytesRemainingCnt >= 0;
     if (bytesRemainingCnt == 0) {
-      LOGGER.info("chunk " + chunkNumber + ", bytes remaining " + bytesRemainingCnt);
+      LOGGER.info("zip archive file transfer completed");
 
       if (LOGGER.isDebugEnabled()) {
         // should match the bytes that were sent
@@ -264,17 +276,24 @@ public class ContainerDeployment extends AbstractSkill {
     LOGGER.info("zippedBytes length: " + zippedBytes.length);
     final ZipFile zipFile = ZipUtils.temporaryZipFile(zippedBytes);
     LOGGER.info("zipFile: " + zipFile.getName());
+    LOGGER.info("verifying zip file");
+    if (!ZipUtils.verify(zipFile.getName())) {
+      LOGGER.info("corrupted zip file");
+
+      //TODO negative ack
+      return;
+    }
+
     final String computedZippedBytesHash = MessageDigestUtils.bytesHashString(zippedBytes);
     LOGGER.info("computed zippedBytes hash: " + computedZippedBytesHash);
     final String expectedZippedBytesHash = (String) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES_HASH);
     LOGGER.info("expected zippedBytes hash: " + expectedZippedBytesHash);
     if (computedZippedBytesHash.equals(expectedZippedBytesHash)) {
-      LOGGER.info("zip archive bytes hash to the expected value");
-     } else {
-      LOGGER.info("zip archive bytes do not hash to the expected value");
+      LOGGER.info("zip archive bytes has the expected hash value");
+    } else {
+      LOGGER.info("zip archive bytes does not have the expected hash value");
 
       //TODO negative ack
-
       return;
     }
 

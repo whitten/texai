@@ -441,6 +441,12 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
         LOGGER.info("zipFile: " + zipFile.getName());
         final String zippedBytesHash = MessageDigestUtils.bytesHashString(zippedBytes);
         LOGGER.info("zippedBytes hash: " + zippedBytesHash);
+        LOGGER.info("verifying zip file");
+        if (!ZipUtils.verify(zipFile.getName())) {
+          LOGGER.info("corrupted zip file");
+          //TODO report to network operations
+          return;
+        }
 
         final int zippedBytes_len = zippedBytes.length;
 
@@ -569,7 +575,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
       deployFileMessage.put(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES_LENGTH, zippedBytes.length);
       deployFileMessage.put(AHCSConstants.DEPLOY_FILES_TASK_MANIFEST, manifestJSONString);
 
-      if (chunkNumber < 10 || chunkNumber % 10 == 0 || zippedBytesRemainingCnt == 0) {
+      if (chunkNumber < 50 || chunkNumber % 10 == 0 || zippedBytesRemainingCnt == 0) {
         LOGGER.info("sending chunk number " + chunkNumber);
       }
       sendMessage(deployFileMessage);
