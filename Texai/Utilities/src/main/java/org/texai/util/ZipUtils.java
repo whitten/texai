@@ -7,7 +7,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Enumeration;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 import org.apache.log4j.Logger;
@@ -90,6 +93,50 @@ public class ZipUtils {
       return new ZipFile(zipFile);
     } catch (IOException ex) {
       throw new TexaiException(ex);
+    }
+  }
+
+  /**
+   * Returns true if the given zip archive file is not corrupted, with regard to reading its catelog and reading its entries.
+   *
+   * @param zipFilePathName the path to the given zip archive file
+   *
+   * @return true if the given zip archive file is not corrupted
+   */
+  public static boolean verify(final String zipFilePathName) {
+    final ZipFile zipFile;
+    int zipEntryCnt = 0;
+    int zipEntryActualCnt = 0;
+    try {
+      zipFile = new ZipFile(zipFilePathName);
+      zipEntryCnt = zipFile.size();
+
+      final Enumeration<? extends ZipEntry> zipFile_enum = zipFile.entries();
+      final byte[] buffer = new byte[4096];
+      while (zipFile_enum.hasMoreElements()) {
+        final ZipEntry zipEntry = zipFile_enum.nextElement();
+        zipEntryActualCnt++;
+        // read the contents of the zip file entry
+        final InputStream inputStream = zipFile.getInputStream(zipEntry);
+        while (true) {
+          final int bytesRead = inputStream.read(buffer);
+          if (bytesRead == -1) {
+            break;
+          }
+        }
+      }
+    } catch (ZipException e) {
+      zipEntryCnt = -1;
+      LOGGER.info(StringUtils.getStackTraceAsString(e));
+    } catch (IOException e) {
+      LOGGER.info(StringUtils.getStackTraceAsString(e));
+      zipEntryCnt = -1;
+    }
+    if (zipEntryCnt > 0 && zipEntryCnt != zipEntryActualCnt) {
+      LOGGER.info("Expected " + zipEntryCnt + " zip entries, but found " + zipEntryActualCnt);
+      return false;
+    } else {
+      return zipEntryCnt > 0;
     }
   }
 

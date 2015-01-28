@@ -67,7 +67,7 @@ public class ZipUtilsTest {
     }
     Collections.sort(inputFileNames);
     assertEquals("[file1.txt, file2.txt, file3.txt]", inputFileNames.toString());
-    
+
     final byte[] zippedBytes = ZipUtils.archiveFilesToByteArray(directory);
     assertEquals(394, zippedBytes.length);
 
@@ -118,7 +118,26 @@ public class ZipUtilsTest {
     Collections.sort(extractedFileNames);
     assertEquals("[file1.txt, file2.txt, file3.txt]", extractedFileNames.toString());
 
+    assertTrue(ZipUtils.verify(zipFile.getName()));
+  }
 
+  /**
+   * Test of class ZipUtils.
+   */
+  @Test
+  public void testVerify() {
+    LOGGER.info("verify");
+
+    assertFalse(ZipUtils.verify("does not exist"));
+    File notAZipFile = null;
+    try {
+      notAZipFile = File.createTempFile("my-file", ".txt");
+    } catch (IOException ex) {
+      LOGGER.info(ex.getMessage());
+      fail();
+    }
+    assertNotNull(notAZipFile);
+    assertFalse(ZipUtils.verify(notAZipFile.getPath()));
 
   }
 
