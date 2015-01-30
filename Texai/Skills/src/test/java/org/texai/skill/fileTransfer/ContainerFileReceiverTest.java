@@ -39,26 +39,26 @@ import org.texai.util.ArraySet;
  *
  * @author reed
  */
-public class FileTransferTest {
+public class ContainerFileReceiverTest {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(FileTransferTest.class);
+  private static final Logger LOGGER = Logger.getLogger(ContainerFileReceiverTest.class);
   // the container name
   private static final String containerName = "Test";
   // the test parent qualified name
-  private static final String parentQualifiedName = containerName + ".NetworkNetworkFileTransferAgent.NetworkFileTransferRole";
+  private static final String parentQualifiedName = containerName + ".NetworkFileTransferAgent.NetworkFileTransferRole";
   // the test parent service
   private static final String parentService = NetworkOperation.class.getName();
   // the class name of the tested skill
-  private static final String skillClassName = FileTransfer.class.getName();
+  private static final String skillClassName = ContainerFileReceiver.class.getName();
   // the test node name
-  private static final String nodeName = "FileTransferAgent";
-  // the test node name
-  private static final String roleName = "FileTransferRole";
+  private static final String nodeName = "ContainerFileTransferAgent";
+  // the test role name
+  private static final String roleName = "ContainerFileReceiverRole";
   // the skill test harness
   private static SkillTestHarness skillTestHarness;
 
-  public FileTransferTest() {
+  public ContainerFileReceiverTest() {
   }
 
   @BeforeClass
@@ -113,7 +113,7 @@ public class FileTransferTest {
 
     skillTestHarness.dispatchMessage(initializeMessage);
 
-    final FileTransfer skillTemplate = (FileTransfer) skillTestHarness.getSkill(skillClassName);
+    final ContainerFileReceiver skillTemplate = (ContainerFileReceiver) skillTestHarness.getSkill(skillClassName);
     if (skillTemplate.getNodeRuntime().isFirstContainerInNetwork()) {
       assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
     } else {
@@ -123,7 +123,7 @@ public class FileTransferTest {
   }
 
   /**
-   * Test of class FileTransfer - Message Not Understood Info.
+   * Test of class ContainerFileReceiver - Message Not Understood Info.
    */
   @Test
   public void testMessageNotUnderstoodInfo() {
@@ -145,28 +145,28 @@ public class FileTransferTest {
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertEquals("[messageNotUnderstood_Info, Test.FileTransferAgent.FileTransferRole:FileTransfer --> Test.NetworkNetworkFileTransferAgent.NetworkFileTransferRole:NetworkOperation]",
+    assertEquals("[messageNotUnderstood_Info, Test.ContainerFileTransferAgent.ContainerFileReceiverRole:ContainerFileReceiver --> Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkOperation]",
             sentMessage.toBriefString());
   }
 
   /**
-   * Test of getLogger method, of class FileTransfer.
+   * Test of getLogger method, of class ContainerFileReceiver.
    */
   @Test
   public void testGetLogger() {
     LOGGER.info("getLogger");
-    FileTransfer instance = new FileTransfer();
+    ContainerFileReceiver instance = new ContainerFileReceiver();
     assertNotNull(instance.getLogger());
-    assertEquals(FileTransfer.class.getName(), instance.getLogger().getName());
+    assertEquals(ContainerFileReceiver.class.getName(), instance.getLogger().getName());
   }
 
   /**
-   * Test of getUnderstoodOperations method, of class FileTransfer.
+   * Test of getUnderstoodOperations method, of class ContainerFileReceiver.
    */
   @Test
   public void testGetUnderstoodOperations() {
     LOGGER.info("getUnderstoodOperations");
-    FileTransfer instance = new FileTransfer();
+    ContainerFileReceiver instance = new ContainerFileReceiver();
     final List<String> understoodOperations = new ArrayList<>(Arrays.asList(instance.getUnderstoodOperations()));
     Collections.sort(understoodOperations);
     assertEquals("[AHCS initialize_Task, messageNotUnderstood_Info, performMission_Task]", understoodOperations.toString());

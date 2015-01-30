@@ -6,6 +6,9 @@ subgraph cluster_agents {
   NContainerDeploymentAgent [
     shape = box
     label = "ContainerDeploymentAgent" ];
+  NContainerFileTransferAgent [
+    shape = box
+    label = "ContainerFileTransferAgent" ];
   NContainerGovernanceAgent [
     shape = box
     label = "ContainerGovernanceAgent" ];
@@ -15,9 +18,6 @@ subgraph cluster_agents {
   NContainerOperationAgent [
     shape = box
     label = "ContainerOperationAgent" ];
-  NFileTransferAgent [
-    shape = box
-    label = "FileTransferAgent" ];
   NNetworkDeploymentAgent [
     shape = oval
     label = "NetworkDeploymentAgent" ];
@@ -117,7 +117,6 @@ subgraph cluster_agents {
   NContainerGovernanceAgent -> NXAIBlockchainArchiveAgent;
   NContainerOperationAgent -> NXAIMintAgent;
   NContainerGovernanceAgent -> NTopLevelGovernanceAgent;
-  NContainerOperationAgent -> NFileTransferAgent;
   NContainerOperationAgent -> NContainerGovernanceAgent;
   NContainerGovernanceAgent -> NNetworkFileTransferAgent;
   NXAINetworkOperationAgent -> NXAIContainerCertificateAuthorityAgent;
@@ -142,7 +141,6 @@ subgraph cluster_agents {
   NContainerGovernanceAgent -> NXAIMintAgent;
   NContainerGovernanceAgent -> NNetworkLogControlAgent;
   NContainerGovernanceAgent -> NXAIClientGatewayAgent;
-  NContainerGovernanceAgent -> NFileTransferAgent;
   NXAINetworkOperationAgent -> NXAIContainerAuditAgent;
   NContainerGovernanceAgent -> NXAIFaucetAgent;
   NContainerOperationAgent -> NXAIContainerAuditAgent;
@@ -157,6 +155,7 @@ subgraph cluster_agents {
   NContainerOperationAgent -> NXAIClientGatewayAgent;
   NContainerGovernanceAgent -> NSingletonConfigurationAgent;
   NXAINetworkEpisodicMemoryAgent -> NXAIContainerEpisodicMemoryAgent;
+  NContainerGovernanceAgent -> NContainerFileTransferAgent;
   NXAINetworkOperationAgent -> NXAIFinancialAccountingAndControlAgent;
   NContainerGovernanceAgent -> NContainerGovernanceAgent;
   NContainerOperationAgent -> NXAIRewardAllocationAgent;
@@ -164,15 +163,16 @@ subgraph cluster_agents {
   NContainerGovernanceAgent -> NXAIOperationAgent;
   NContainerOperationAgent -> NXAINetworkSeedAgent;
   NXAINetworkOperationAgent -> NXAINetworkEpisodicMemoryAgent;
-  NNetworkFileTransferAgent -> NFileTransferAgent;
   NNetworkOperationAgent -> NNetworkFileTransferAgent;
   NContainerGovernanceAgent -> NNetworkSingletonConfigurationAgent;
   NContainerGovernanceAgent -> NXAIFinancialAccountingAndControlAgent;
   NContainerGovernanceAgent -> NXAINetworkOperationAgent;
   NContainerGovernanceAgent -> NXAIContainerEpisodicMemoryAgent;
+  NContainerOperationAgent -> NContainerFileTransferAgent;
   NXAINetworkSeedAgent -> NXAISeedAgent;
   NContainerOperationAgent -> NXAINetworkOperationAgent;
   NXAINetworkOperationAgent -> NXAIMintAgent;
+  NNetworkFileTransferAgent -> NContainerFileTransferAgent;
   NXAINetworkOperationAgent -> NXAIRewardAllocationAgent;
   NContainerGovernanceAgent -> NXAINetworkEpisodicMemoryAgent;
   NContainerOperationAgent -> NNetworkDeploymentAgent;

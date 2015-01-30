@@ -1,8 +1,20 @@
 /*
  * Copyright (C) 2015 Texai
  *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.texai.skill.misc;
+package org.texai.skill.fileTransfer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,28 +39,26 @@ import org.texai.util.ArraySet;
  *
  * @author reed
  */
-public class SkillTemplateTest {
+public class ContainerFileSenderTest {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(SkillTemplateTest.class);
+  private static final Logger LOGGER = Logger.getLogger(ContainerFileSenderTest.class);
   // the container name
   private static final String containerName = "Test";
   // the test parent qualified name
-  private static final String parentQualifiedName = containerName + ".NetworkOperationAgent.NetworkOperationRole";
+  private static final String parentQualifiedName = containerName + ".NetworkFileTransferAgent.NetworkFileTransferRole";
   // the test parent service
   private static final String parentService = NetworkOperation.class.getName();
-  // the test child qualified name
-  private static final String childQualifiedName = containerName + ".ContainerDeploymentAgent.ContainerDeploymentRole";
   // the class name of the tested skill
-  private static final String skillClassName = SkillTemplate.class.getName();
+  private static final String skillClassName = ContainerFileSender.class.getName();
   // the test node name
-  private static final String nodeName = "SkillTemplateAgent";
+  private static final String nodeName = "ContainerFileTransferAgent";
   // the test role name
-  private static final String roleName = "SkillTemplateRole";
+  private static final String roleName = "ContainerFileSenderRole";
   // the skill test harness
   private static SkillTestHarness skillTestHarness;
 
-  public SkillTemplateTest() {
+  public ContainerFileSenderTest() {
   }
 
   @BeforeClass
@@ -60,7 +70,6 @@ public class SkillTemplateTest {
     skillClasses.add(skillClass);
     final Set<String> variableNames = new ArraySet<>();
     final Set<String> childQualifiedNames = new ArraySet<>();
-    childQualifiedNames.add(childQualifiedName);
     skillTestHarness = new SkillTestHarness(
             containerName + "." + nodeName, // name
             "test mission description", // missionDescription
@@ -104,7 +113,7 @@ public class SkillTemplateTest {
 
     skillTestHarness.dispatchMessage(initializeMessage);
 
-    final SkillTemplate skillTemplate = (SkillTemplate) skillTestHarness.getSkill(skillClassName);
+    final ContainerFileSender skillTemplate = (ContainerFileSender) skillTestHarness.getSkill(skillClassName);
     if (skillTemplate.getNodeRuntime().isFirstContainerInNetwork()) {
       assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
     } else {
@@ -114,7 +123,7 @@ public class SkillTemplateTest {
   }
 
   /**
-   * Test of class SkillTemplate - Message Not Understood Info.
+   * Test of class ContainerFileSender - Message Not Understood Info.
    */
   @Test
   public void testMessageNotUnderstoodInfo() {
@@ -136,28 +145,28 @@ public class SkillTemplateTest {
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertEquals("[messageNotUnderstood_Info, Test.SkillTemplateAgent.SkillTemplateRole:SkillTemplate --> Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation]",
+    assertEquals("[messageNotUnderstood_Info, Test.ContainerFileTransferAgent.ContainerFileSenderRole:ContainerFileSender --> Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkOperation]",
             sentMessage.toBriefString());
   }
 
   /**
-   * Test of getLogger method, of class SkillTemplate.
+   * Test of getLogger method, of class ContainerFileSender.
    */
   @Test
   public void testGetLogger() {
     LOGGER.info("getLogger");
-    SkillTemplate instance = new SkillTemplate();
+    ContainerFileSender instance = new ContainerFileSender();
     assertNotNull(instance.getLogger());
-    assertEquals(SkillTemplate.class.getName(), instance.getLogger().getName());
+    assertEquals(ContainerFileSender.class.getName(), instance.getLogger().getName());
   }
 
   /**
-   * Test of getUnderstoodOperations method, of class SkillTemplate.
+   * Test of getUnderstoodOperations method, of class ContainerFileSender.
    */
   @Test
   public void testGetUnderstoodOperations() {
     LOGGER.info("getUnderstoodOperations");
-    SkillTemplate instance = new SkillTemplate();
+    ContainerFileSender instance = new ContainerFileSender();
     final List<String> understoodOperations = new ArrayList<>(Arrays.asList(instance.getUnderstoodOperations()));
     Collections.sort(understoodOperations);
     assertEquals("[AHCS initialize_Task, messageNotUnderstood_Info, performMission_Task]", understoodOperations.toString());

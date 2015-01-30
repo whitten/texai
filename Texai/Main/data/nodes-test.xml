@@ -250,20 +250,32 @@
   </node>
 
   <node>
-    <name>FileTransferAgent</name>
+    <name>ContainerFileTransferAgent</name>
     <missionDescription>Transfers files between two containers in the AICoin network.</missionDescription>
     <prototypeNodeNames>
       <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
     </prototypeNodeNames>
     <roles>
       <role>
-        <qualifiedName>FileTransferAgent.ContainerFileTransferRole</qualifiedName>
-        <description>Transfers files between two containers in the AICoin network.</description>
+        <qualifiedName>ContainerFileTransferAgent.ContainerFileSenderRole</qualifiedName>
+        <description>Sends files between two containers in the AICoin network.</description>
         <parentQualifiedName>NetworkFileTransferAgent.NetworkFileTransferRole</parentQualifiedName>
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
         <skill-classes>
           <skill-class>
-            <skill-class-name>org.texai.skill.fileTransfer.FileTransfer</skill-class-name>
+            <skill-class-name>org.texai.skill.fileTransfer.ContainerFileSender</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+      <role>
+        <qualifiedName>ContainerFileTransferAgent.ContainerFileRecipientRole</qualifiedName>
+        <description>Receives files between two containers in the AICoin network.</description>
+        <parentQualifiedName>NetworkFileTransferAgent.NetworkFileTransferRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.fileTransfer.ContainerFileReceiver</skill-class-name>
           </skill-class>
         </skill-classes>
         <variableNames></variableNames>

@@ -1,9 +1,9 @@
 package org.texai.skill.fileTransfer;
 
 /**
- * FileTransfer.java
+ * ContainerFileReceiver.java
  *
- * Description: An instance of this skill can transfer a file from its container to another FileTransfer instance in another container.
+ * Description: An instance of this skill receives a file into its container, sent from another container.
  *
  Copyright (C) Jan 29, 2015, Stephen L. Reed.
  */
@@ -20,15 +20,15 @@ import org.texai.ahcsSupport.Message;
  * @author reed
  */
 @NotThreadSafe
-public class FileTransfer extends AbstractSkill {
+public class ContainerFileReceiver extends AbstractSkill {
 
   // the log4j logger
-  private static final Logger LOGGER = Logger.getLogger(FileTransfer.class);
+  private static final Logger LOGGER = Logger.getLogger(ContainerFileReceiver.class);
 
   /**
-   * Constructs a new FileTransfer instance.
+   * Constructs a new ContainerFileReceiver instance.
    */
-  public FileTransfer() {
+  public ContainerFileReceiver() {
   }
 
   /**
@@ -54,7 +54,7 @@ public class FileTransfer extends AbstractSkill {
       /**
        * Initialize Task
        *
-       * This task message is sent from the parent [container.role]. It is expected to be the first task
+       * This task message is sent from the parent NetworkFileTransferAgent.NetworkFileTransferRole. It is expected to be the first task
        * message that this role receives and it results in the role being initialized.
        */
       case AHCSConstants.AHCS_INITIALIZE_TASK:
@@ -70,7 +70,7 @@ public class FileTransfer extends AbstractSkill {
       /**
        * Join Acknowledged Task
        *
-       * This task message is sent from the network-singleton, [container.role]. It indicates that
+       * This task message is sent from the network-singleton, NetworkFileTransferAgent.NetworkFileTransferRole. It indicates that
        * the parent is ready to converse with this role as needed.
        */
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
@@ -82,7 +82,7 @@ public class FileTransfer extends AbstractSkill {
       /**
        * Become Ready Task
        *
-       * This task message is sent from the network-singleton parent [container.role].
+       * This task message is sent from the network-singleton parent NetworkFileTransferAgent.NetworkFileTransferRole.
        *
        * It results in the skill set to the ready state
        */
@@ -95,7 +95,7 @@ public class FileTransfer extends AbstractSkill {
       /**
        * Perform Mission Task
        *
-       * This task message is sent from the network-singleton, [container.role]. It commands this
+       * This task message is sent from the network-singleton, NetworkFileTransferAgent.NetworkFileTransferRole. It commands this
        * network-connected role to begin performing its mission.
        */
       case AHCSConstants.PERFORM_MISSION_TASK:

@@ -1,6 +1,9 @@
 ContainerDeploymentAgent
   Performs software deployment at the container level.
 
+ContainerFileTransferAgent
+  Transfers files between two containers in the AICoin network.
+
 ContainerGovernanceAgent
   Manages a container's agents to ensure friendly behavior.
 
@@ -9,9 +12,6 @@ ContainerLogControlAgent
 
 ContainerOperationAgent
   Manages a container and the AICoin agent within the container. Interacts with the human container operator.
-
-FileTransferAgent
-  Transfers files between two containers in the AICoin network.
 
 NetworkDeploymentAgent
   Performs software deployment at the network level.

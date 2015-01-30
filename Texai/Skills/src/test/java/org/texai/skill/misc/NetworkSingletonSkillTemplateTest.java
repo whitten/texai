@@ -55,7 +55,7 @@ public class NetworkSingletonSkillTemplateTest {
   private static final String skillClassName = NetworkSingletonSkillTemplate.class.getName();
   // the test node name
   private static final String nodeName = "NetworkSingletonSkillTemplateAgent";
-  // the test node name
+  // the test role name
   private static final String roleName = "NetworkSingletonSkillTemplateRole";
   // the skill test harness
   private static SkillTestHarness skillTestHarness;
