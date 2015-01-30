@@ -1,14 +1,12 @@
-/*
- * SkillTemplate.java
+package org.texai.skill.fileTransfer;
+
+/**
+ * FileTransfer.java
  *
- * Created on Mar 14, 2012, 10:49:55 PM
+ * Description: An instance of this skill can transfer a file from its container to another FileTransfer instance in another container.
  *
- * Description:
- *
- * Copyright (C) Mar 14, 2012, Stephen L. Reed, Texai.org.
- *
+ Copyright (C) Jan 29, 2015, Stephen L. Reed.
  */
-package org.texai.skill.misc;
 
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
@@ -22,15 +20,15 @@ import org.texai.ahcsSupport.Message;
  * @author reed
  */
 @NotThreadSafe
-public class SkillTemplate extends AbstractSkill {
+public class FileTransfer extends AbstractSkill {
 
   // the log4j logger
-  private static final Logger LOGGER = Logger.getLogger(SkillTemplate.class);
+  private static final Logger LOGGER = Logger.getLogger(FileTransfer.class);
 
   /**
-   * Constructs a new SkillTemplate instance.
+   * Constructs a new FileTransfer instance.
    */
-  public SkillTemplate() {
+  public FileTransfer() {
   }
 
   /**
@@ -170,5 +168,4 @@ public class SkillTemplate extends AbstractSkill {
   protected Logger getLogger() {
     return LOGGER;
   }
-
 }

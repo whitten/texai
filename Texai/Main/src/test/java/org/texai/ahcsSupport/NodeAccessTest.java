@@ -107,7 +107,7 @@ public class NodeAccessTest {
     List<Node> result = instance.getNodes();
     Collections.sort(result);
     LOGGER.info(result.toString());
-    assertTrue(result.toString().startsWith("[TestContainer.ContainerGovernanceAgent, TestContainer.ContainerHeartbeatAgent, "));
+    assertTrue(result.toString().startsWith("[TestContainer.ContainerDeploymentAgent, TestContainer.ContainerGovernanceAgent,"));
   }
 
   /**

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.texai.skill.misc;
+package org.texai.skill.fileTransfer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,28 +39,26 @@ import org.texai.util.ArraySet;
  *
  * @author reed
  */
-public class NetworkSingletonSkillTemplateTest {
+public class FileTransferTest {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(NetworkSingletonSkillTemplate.class);
+  private static final Logger LOGGER = Logger.getLogger(FileTransferTest.class);
   // the container name
   private static final String containerName = "Test";
   // the test parent qualified name
-  private static final String parentQualifiedName = containerName + ".NetworkOperationAgent.NetworkOperationRole";
+  private static final String parentQualifiedName = containerName + ".NetworkNetworkFileTransferAgent.NetworkFileTransferRole";
   // the test parent service
   private static final String parentService = NetworkOperation.class.getName();
-  // the test child qualified name
-  private static final String childQualifiedName = containerName + ".ContainerDeploymentAgent.ContainerDeploymentRole";
   // the class name of the tested skill
-  private static final String skillClassName = NetworkSingletonSkillTemplate.class.getName();
+  private static final String skillClassName = FileTransfer.class.getName();
   // the test node name
-  private static final String nodeName = "NetworkSingletonSkillTemplateAgent";
+  private static final String nodeName = "FileTransferAgent";
   // the test node name
-  private static final String roleName = "NetworkSingletonSkillTemplateRole";
+  private static final String roleName = "FileTransferRole";
   // the skill test harness
   private static SkillTestHarness skillTestHarness;
 
-  public NetworkSingletonSkillTemplateTest() {
+  public FileTransferTest() {
   }
 
   @BeforeClass
@@ -72,7 +70,6 @@ public class NetworkSingletonSkillTemplateTest {
     skillClasses.add(skillClass);
     final Set<String> variableNames = new ArraySet<>();
     final Set<String> childQualifiedNames = new ArraySet<>();
-    childQualifiedNames.add(childQualifiedName);
     skillTestHarness = new SkillTestHarness(
             containerName + "." + nodeName, // name
             "test mission description", // missionDescription
@@ -109,25 +106,24 @@ public class NetworkSingletonSkillTemplateTest {
     skillTestHarness.setSkillState(AHCSConstants.State.UNINITIALIZED, skillClassName);
     final Message initializeMessage = new Message(
             parentQualifiedName, // senderQualifiedName
-            NetworkSingletonSkillTemplate.class.getName(), // senderService
+            NetworkOperation.class.getName(), // senderService
             containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
             skillClassName, // recipientService
             AHCSConstants.AHCS_INITIALIZE_TASK); // operation
 
     skillTestHarness.dispatchMessage(initializeMessage);
 
-    final NetworkSingletonSkillTemplate networkSingletonSkillTemplate = (NetworkSingletonSkillTemplate) skillTestHarness.getSkill(skillClassName);
-    if (networkSingletonSkillTemplate.getNodeRuntime().isFirstContainerInNetwork()) {
+    final FileTransfer skillTemplate = (FileTransfer) skillTestHarness.getSkill(skillClassName);
+    if (skillTemplate.getNodeRuntime().isFirstContainerInNetwork()) {
       assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
     } else {
       assertEquals("ISOLATED_FROM_NETWORK", skillTestHarness.getSkillState(skillClassName).toString());
     }
-    assertNotNull(skillTestHarness.getOperationAndServiceInfo());
-    assertEquals("[AHCS initialize_Task, org.texai.skill.misc.NetworkSingletonSkillTemplate]", skillTestHarness.getOperationAndServiceInfo().toString());
+    assertNull(skillTestHarness.getOperationAndServiceInfo());
   }
 
   /**
-   * Test of class NetworkSingletonSkillTemplate - Message Not Understood Info.
+   * Test of class FileTransfer - Message Not Understood Info.
    */
   @Test
   public void testMessageNotUnderstoodInfo() {
@@ -149,31 +145,31 @@ public class NetworkSingletonSkillTemplateTest {
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertEquals("[messageNotUnderstood_Info, Test.NetworkSingletonSkillTemplateAgent.NetworkSingletonSkillTemplateRole:NetworkSingletonSkillTemplate --> Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation]",
+    assertEquals("[messageNotUnderstood_Info, Test.FileTransferAgent.FileTransferRole:FileTransfer --> Test.NetworkNetworkFileTransferAgent.NetworkFileTransferRole:NetworkOperation]",
             sentMessage.toBriefString());
   }
 
   /**
-   * Test of getLogger method, of class NetworkSingletonSkillTemplate.
+   * Test of getLogger method, of class FileTransfer.
    */
   @Test
   public void testGetLogger() {
     LOGGER.info("getLogger");
-    NetworkSingletonSkillTemplate instance = new NetworkSingletonSkillTemplate();
+    FileTransfer instance = new FileTransfer();
     assertNotNull(instance.getLogger());
-    assertEquals(NetworkSingletonSkillTemplate.class.getName(), instance.getLogger().getName());
+    assertEquals(FileTransfer.class.getName(), instance.getLogger().getName());
   }
 
   /**
-   * Test of getUnderstoodOperations method, of class NetworkSingletonSkillTemplate.
+   * Test of getUnderstoodOperations method, of class FileTransfer.
    */
   @Test
   public void testGetUnderstoodOperations() {
     LOGGER.info("getUnderstoodOperations");
-    NetworkSingletonSkillTemplate instance = new NetworkSingletonSkillTemplate();
+    FileTransfer instance = new FileTransfer();
     final List<String> understoodOperations = new ArrayList<>(Arrays.asList(instance.getUnderstoodOperations()));
     Collections.sort(understoodOperations);
-    assertEquals("[AHCS initialize_Task, delegateBecomeReady_Task, delegatePerformMission_Task, joinAcknowledged_Task, joinNetworkSingletonAgent_Info, messageNotUnderstood_Info, performMission_Task]", understoodOperations.toString());
+    assertEquals("[AHCS initialize_Task, messageNotUnderstood_Info, performMission_Task]", understoodOperations.toString());
   }
 
 }

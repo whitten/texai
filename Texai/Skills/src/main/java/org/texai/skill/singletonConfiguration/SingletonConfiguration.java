@@ -465,8 +465,10 @@ public class SingletonConfiguration extends AbstractSkill {
    */
   private SingletonAgentHosts singletonAgentHosts() {
     final Map<String, String> singletonAgentDictionary = new HashMap<>();
+    
     singletonAgentDictionary.put("NetworkLogControlAgent", "Mint");
     singletonAgentDictionary.put("NetworkDeploymentAgent", "Mint");
+    singletonAgentDictionary.put("NetworkFileTransferAgent", "Mint");
     singletonAgentDictionary.put("NetworkOperationAgent", "Mint");
     singletonAgentDictionary.put("NetworkSingletonConfigurationAgent", "Mint");
     singletonAgentDictionary.put("TopLevelGovernanceAgent", "Mint");
@@ -480,6 +482,7 @@ public class SingletonConfiguration extends AbstractSkill {
     singletonAgentDictionary.put("XAIPrimaryAuditAgent", "Mint");
     singletonAgentDictionary.put("XAIRecoveryAgent", "Mint");
     singletonAgentDictionary.put("XAIRewardAllocationAgent", "Mint");
+
     final DateTime effectiveDateTime = new DateTime(
             2014, // year
             11, // monthOfYear,

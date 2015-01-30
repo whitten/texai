@@ -136,7 +136,8 @@ public class SkillTemplateTest {
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertTrue(sentMessage.toString().startsWith("[messageNotUnderstood_Info Test.SkillTemplateAgent.SkillTemplateRole:SkillTemplate --> Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation "));
+    assertEquals("[messageNotUnderstood_Info, Test.SkillTemplateAgent.SkillTemplateRole:SkillTemplate --> Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation]",
+            sentMessage.toBriefString());
   }
 
   /**

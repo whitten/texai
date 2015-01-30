@@ -227,6 +227,51 @@
   </node>
 
   <node>
+    <name>NetworkFileTransferAgent</name>
+    <missionDescription>Coordinates file transfers between containers in the AICoin network.</missionDescription>
+    <isNetworkSingleton>true</isNetworkSingleton>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>NetworkFileTransferAgent.NetworkFileTransferRole</qualifiedName>
+        <description>Coordinates file transfers between containers in the AICoin network.</description>
+        <parentQualifiedName>NetworkOperationAgent.NetworkOperationRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.fileTransfer.NetworkFileTransfer</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
+    <name>FileTransferAgent</name>
+    <missionDescription>Transfers files between two containers in the AICoin network.</missionDescription>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>FileTransferAgent.ContainerFileTransferRole</qualifiedName>
+        <description>Transfers files between two containers in the AICoin network.</description>
+        <parentQualifiedName>NetworkFileTransferAgent.NetworkFileTransferRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.fileTransfer.FileTransfer</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
+  <node>
     <name>NetworkDeploymentAgent</name>
     <missionDescription>Performs software deployment at the network level.</missionDescription>
     <isNetworkSingleton>true</isNetworkSingleton>
