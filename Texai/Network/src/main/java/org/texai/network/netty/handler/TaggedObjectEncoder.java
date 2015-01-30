@@ -75,6 +75,9 @@ public class TaggedObjectEncoder extends OneToOneEncoder {
 
   /** Encodes the given object into the channel buffer.  A protocol identification byte is prepended.
    *
+   * byte 0     ... 1 (object serialization protocol for port unification)
+   * bytes 1-5  ... 32 bit integer length, the maximum is a bit more than 8K
+   *
    * @param channelHandlerContext the channel handler context
    * @param channel the channel
    * @param obj the serializable object to encode
@@ -106,6 +109,7 @@ public class TaggedObjectEncoder extends OneToOneEncoder {
     }
 
     final ChannelBuffer encoded = channelBufferOutputStream.buffer();
+    // set the data length in bytes 1-5, and do not include the protocol field nor the length field when calculating the data length
     encoded.setInt(1, encoded.writerIndex() - 5);
     return encoded;
   }

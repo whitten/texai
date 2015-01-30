@@ -47,7 +47,6 @@ import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.network.netty.utils.ConnectionUtils;
 import org.texai.network.netty.handler.AbstractAlbusHCSMessageHandler;
 import org.texai.network.netty.handler.AbstractAlbusHCSMessageHandlerFactory;
-import org.texai.network.netty.handler.AbstractBitTorrentHandlerFactory;
 import org.texai.network.netty.handler.AbstractHTTPRequestHandlerFactory;
 import org.texai.util.NetworkUtils;
 import org.texai.util.StringUtils;
@@ -122,14 +121,12 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
             nodeRuntime.getKeyStorePassword(),
             nodeRuntime.getNodeRuntimeSkill().getQualifiedName()); // alias
     final AbstractAlbusHCSMessageHandlerFactory albusHCSMessageHandlerFactory = new AlbusHCSMessageHandlerFactory(this);
-    final AbstractBitTorrentHandlerFactory bitTorrentHandlerFactory = null;
     final AbstractHTTPRequestHandlerFactory httpRequestHandlerFactory = null;
 
     serverBootstrap = ConnectionUtils.createPortUnificationServer(
             port,
             x509SecurityInfo,
             albusHCSMessageHandlerFactory,
-            bitTorrentHandlerFactory,
             httpRequestHandlerFactory,
             nodeRuntime.getExecutor(), // bossExecutor,
             nodeRuntime.getExecutor()); // workerExecutor

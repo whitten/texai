@@ -114,7 +114,6 @@ public class ChatServerTest {
     final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getServerX509SecurityInfo();
     final ChannelPipelineFactory channelPipelineFactory = new PortUnificationChannelPipelineFactory(
             null, // albusHCNMessageHandlerFactory,
-            null, // bitTorrentHandlerFactory,
             httpRequestHandlerFactory,
             x509SecurityInfo);
 

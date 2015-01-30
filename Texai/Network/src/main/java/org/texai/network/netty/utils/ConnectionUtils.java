@@ -38,12 +38,9 @@ import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.texai.network.netty.handler.AbstractAlbusHCSMessageHandler;
 import org.texai.network.netty.handler.AbstractAlbusHCSMessageHandlerFactory;
-import org.texai.network.netty.handler.AbstractBitTorrentHandler;
-import org.texai.network.netty.handler.AbstractBitTorrentHandlerFactory;
 import org.texai.network.netty.handler.AbstractHTTPRequestHandlerFactory;
 import org.texai.network.netty.handler.AbstractHTTPResponseHandler;
 import org.texai.network.netty.pipeline.AlbusHCNMessageClientPipelineFactory;
-import org.texai.network.netty.pipeline.BitTorrentClientPipelineFactory;
 import org.texai.network.netty.pipeline.HTTPClientPipelineFactory;
 import org.texai.network.netty.pipeline.PortUnificationChannelPipelineFactory;
 import org.texai.util.TexaiException;
@@ -79,7 +76,6 @@ public final class ConnectionUtils {
    * @param port the server port
    * @param x509SecurityInfo the X.509 security information
    * @param albusHCSMessageHandlerFactory the Albus hierarchical control system message handler factory
-   * @param bitTorrentHandlerFactory the bit torrent message handler factory
    * @param httpRequestHandlerFactory the HTTP request message handler factory
    * @param bossExecutor the Executor which will execute the boss threads
    * @param workerExecutor the Executor which will execute the I/O worker threads
@@ -90,7 +86,6 @@ public final class ConnectionUtils {
           final int port,
           final X509SecurityInfo x509SecurityInfo,
           final AbstractAlbusHCSMessageHandlerFactory albusHCSMessageHandlerFactory,
-          final AbstractBitTorrentHandlerFactory bitTorrentHandlerFactory,
           final AbstractHTTPRequestHandlerFactory httpRequestHandlerFactory,
           final Executor bossExecutor,
           final Executor workerExecutor) {
@@ -102,7 +97,6 @@ public final class ConnectionUtils {
     // configure the server channel pipeline factory
     final ChannelPipelineFactory channelPipelineFactory = new PortUnificationChannelPipelineFactory(
             albusHCSMessageHandlerFactory,
-            bitTorrentHandlerFactory,
             httpRequestHandlerFactory,
             x509SecurityInfo);
 
@@ -299,53 +293,6 @@ public final class ConnectionUtils {
       channelConnection_lock.release(); // release the lock
       LOGGER.debug("released the channel connection lock" + channelConnection_lock);
     }
-  }
-
-  /**
-   * Opens bit torrent message connection using SSL encryption.
-   *
-   * @param inetSocketAddress the IP socket address, host & port
-   * @param x509SecurityInfo the X.509 security information
-   * @param bitTorrentHandler the bit torrent message handler
-   * @param bossExecutor the Executor which will execute the boss threads
-   * @param workerExecutor the Executor which will execute the I/O worker threads
-   *
-   * @return the communication channel
-   */
-  @SuppressWarnings("ThrowableResultIgnored")
-  public static Channel openBitTorrentConnection(
-          final InetSocketAddress inetSocketAddress,
-          final X509SecurityInfo x509SecurityInfo,
-          final AbstractBitTorrentHandler bitTorrentHandler,
-          final Executor bossExecutor,
-          final Executor workerExecutor) {
-    //Preconditions
-    assert inetSocketAddress != null : "inetSocketAddress must not be null";
-    assert x509SecurityInfo != null : "x509SecurityInfo must not be null";
-    assert bitTorrentHandler != null : "bitTorrentHandler must not be null";
-    assert bossExecutor != null : "bossExecutor must not be null";
-    assert workerExecutor != null : "workerExecutor must not be null";
-
-    final ClientBootstrap clientBootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(
-            bossExecutor,
-            workerExecutor));
-
-    // configure the client pipeline
-    final ChannelPipeline channelPipeline = BitTorrentClientPipelineFactory.getPipeline(
-            bitTorrentHandler,
-            x509SecurityInfo);
-    clientBootstrap.setPipeline(channelPipeline);
-
-    // start the connection attempt
-    final ChannelFuture channelFuture = clientBootstrap.connect(inetSocketAddress);
-
-    // wait until the connection attempt succeeds or fails
-    final Channel channel = channelFuture.awaitUninterruptibly().getChannel();
-    if (!channelFuture.isSuccess()) {
-      throw new TexaiException(channelFuture.getCause());
-    }
-    LOGGER.info("bit torrent client connected");
-    return channel;
   }
 
   /**

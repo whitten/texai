@@ -29,7 +29,6 @@ import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.jboss.netty.handler.ssl.SslHandler;
 import org.texai.network.netty.NetworkConstants;
-import org.texai.torrent.support.BitTorrentUtils;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 
@@ -48,8 +47,6 @@ public class PortUnificationHandler extends FrameDecoder {
   private AbstractAlbusHCSMessageHandler albusHCNMessageHandler;
   /** the HTTP request handler */
   private AbstractHTTPRequestHandler httpRequestHandler;
-  /** the bit torrent handshake handler */
-  private AbstractBitTorrentHandler bitTorrentHandler;
 
   /** Constructs a new PortUnificationHandler instance. */
   public PortUnificationHandler() {
@@ -80,25 +77,11 @@ public class PortUnificationHandler extends FrameDecoder {
 
     final int magic1 = channelBuffer.getUnsignedByte(channelBuffer.readerIndex());
     final int magic2 = channelBuffer.getUnsignedByte(channelBuffer.readerIndex() + 1);
-    final int magic3 = channelBuffer.getUnsignedByte(channelBuffer.readerIndex() + 2);
-    final int magic4 = channelBuffer.getUnsignedByte(channelBuffer.readerIndex() + 3);
-    final int magic5 = channelBuffer.getUnsignedByte(channelBuffer.readerIndex() + 4);
 
     if (isSerializedObject(magic1)) {
       switchToAlbusHCN(channelHandlerContext);
     } else if (isHttp(magic1, magic2)) {
       switchToHttp(channelHandlerContext);
-    } else if (BitTorrentUtils.isBitTorrentHandshake(magic1) ||
-            BitTorrentUtils.isBitTorrentKeepAlive(magic1, magic2, magic3, magic4) ||
-            BitTorrentUtils.isBitTorrentChoke(magic1, magic2, magic3, magic4, magic5) ||
-            BitTorrentUtils.isBitTorrentUnchoke(magic1, magic2, magic3, magic4, magic5) ||
-            BitTorrentUtils.isBitTorrentInterested(magic1, magic2, magic3, magic4, magic5) ||
-            BitTorrentUtils.isBitTorrentNotInterested(magic1, magic2, magic3, magic4, magic5) ||
-            BitTorrentUtils.isBitTorrentHave(magic1, magic2, magic3, magic4, magic5) ||
-            BitTorrentUtils.isBitTorrentCancel(magic1, magic2, magic3, magic4, magic5) ||
-            BitTorrentUtils.isBitTorrentBitfield(magic5) ||
-            BitTorrentUtils.isBitTorrentPiece(magic5)) {
-      switchToBitTorrent(channelHandlerContext);
     } else {
       LOGGER.info("unknown protocol");
       // unknown protocol; discard everything and close the connection
@@ -190,31 +173,6 @@ public class PortUnificationHandler extends FrameDecoder {
     LOGGER.info("Albus HCN pipeline: " + channelPipeline.toString());
   }
 
-  /** Dynamically switches the channel pipeline to handle a bit torrent message.
-   *
-   * @param channelHandlerContext the channel handler context
-   */
-  private void switchToBitTorrent(final ChannelHandlerContext channelHandlerContext) {
-    //Preconditions
-    assert channelHandlerContext != null : "channelHandlerContext must not be null";
-
-    final ChannelPipeline channelPipeline = channelHandlerContext.getPipeline();
-    LOGGER.info("switching to bit torrent channel pipeline from: " + channelPipeline);
-    final Collection<ChannelHandler> channelHandlers = channelPipeline.toMap().values();
-    for (final ChannelHandler channelHandler : channelHandlers) {
-      if (!(channelHandler instanceof SslHandler ||
-              channelHandler instanceof PortUnificationHandler)) {
-        channelPipeline.remove(channelHandler);
-      }
-    }
-
-    channelPipeline.addLast("torrent-decoder", new BitTorrentDecoder());
-    channelPipeline.addLast("torrent-encoder", new BitTorrentEncoder());
-    channelPipeline.addLast("torrent-handler", bitTorrentHandler);
-    channelPipeline.remove(this);
-    LOGGER.info("bit torrent pipeline: " + channelPipeline.toString());
-  }
-
   /** Handles a caught exception.
    *
    * @param channelHandlerContext the channel handler context
@@ -265,16 +223,5 @@ public class PortUnificationHandler extends FrameDecoder {
     assert httpRequestHandler != null : "httpRequestHandler must not be null";
 
     this.httpRequestHandler = httpRequestHandler;
-  }
-
-  /** Sets the bit torrent handshake handler.
-   *
-   * @param bitTorrentHandler the bit torrent handshake handler
-   */
-  public void setBitTorrentHandler(final AbstractBitTorrentHandler bitTorrentHandler) {
-    //Preconditions
-    assert bitTorrentHandler != null : "bitTorrentHandler must not be null";
-
-    this.bitTorrentHandler = bitTorrentHandler;
   }
 }

@@ -110,7 +110,7 @@ public class SerializableObjectSignerTest {
       assertTrue(SerializableObjectSigner.verify(serializableObject2, x509Certificate, signatureBytes));
       Serializable serializableObject3 = new MySerializableObject("def", new InetSocketAddress("192.168.0.10", 443));
       assertFalse(SerializableObjectSigner.verify(serializableObject3, x509Certificate, signatureBytes));
-    } catch (IOException | InvalidKeyException | NoSuchAlgorithmException | SignatureException ex) {
+    } catch (IOException | InvalidKeyException | NoSuchAlgorithmException ex) {
       fail(ex.getMessage());
     }
   }
@@ -137,7 +137,7 @@ public class SerializableObjectSignerTest {
       assertFalse(SerializableObjectSigner.verify(serializableObject, x509Certificate, signatureBytes));
       serializableObject.signatureBytes = null;
       assertTrue(SerializableObjectSigner.verify(serializableObject, x509Certificate, signatureBytes));
-    } catch (IOException | InvalidKeyException | NoSuchAlgorithmException | SignatureException ex) {
+    } catch (IOException | InvalidKeyException | NoSuchAlgorithmException ex) {
       fail(ex.getMessage());
     }
   }

@@ -26,7 +26,6 @@ import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
@@ -80,6 +79,9 @@ public class TaggedObjectDecoder extends FrameDecoder {
    * @param channelBuffer the cumulative buffer of received packets so far. Note that the buffer might be empty, which means you should not
    * make an assumption that the buffer contains at least one byte in your decoder implementation.
    *
+   * byte 0     ... 1 (object serialization protocol for port unification)
+   * bytes 1-5  ... 32 bit integer length, the maximum is a bit more than 8K
+   *
    * @return the object if all its bytes were contained in the buffer. null if there's not enough data in the buffer to decode an object.
    * @throws IOException if an input/output error occurs
    * @throws ClassNotFoundException if the serialized object's class cannot be found
@@ -116,7 +118,9 @@ public class TaggedObjectDecoder extends FrameDecoder {
       return null;
     }
 
+    // skip over the data length
     channelBuffer.skipBytes(4);
+    // return the deserialized object
     return new CompactObjectInputStream(new ChannelBufferInputStream(channelBuffer, dataLen)).readObject();
   }
 }

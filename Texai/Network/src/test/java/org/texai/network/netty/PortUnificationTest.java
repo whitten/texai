@@ -67,19 +67,13 @@ import org.texai.ahcsSupport.Message;
 import org.texai.kb.Constants;
 import org.texai.network.netty.handler.AbstractAlbusHCSMessageHandler;
 import org.texai.network.netty.handler.AbstractAlbusHCSMessageHandlerFactory;
-import org.texai.network.netty.handler.AbstractBitTorrentHandler;
-import org.texai.network.netty.handler.AbstractBitTorrentHandlerFactory;
 import org.texai.network.netty.handler.AbstractHTTPRequestHandlerFactory;
 import org.texai.network.netty.handler.AbstractHTTPResponseHandler;
 import org.texai.network.netty.handler.MockAlbusHCSMessageHandler;
 import org.texai.network.netty.handler.MockAlbusHCSMessageHandlerFactory;
-import org.texai.network.netty.handler.MockBitTorrentHandler;
-import org.texai.network.netty.handler.MockBitTorrentHandlerFactory;
 import org.texai.network.netty.handler.MockHTTPRequestHandlerFactory;
 import org.texai.network.netty.handler.MockHTTPResponseHandler;
-import org.texai.network.netty.pipeline.BitTorrentClientPipelineFactory;
 import org.texai.network.netty.pipeline.HTTPClientPipelineFactory;
-import org.texai.torrent.message.BitTorrentHandshakeMessage;
 import org.texai.x509.KeyStoreTestUtils;
 import org.texai.x509.X509SecurityInfo;
 import static org.junit.Assert.*;
@@ -116,6 +110,8 @@ public final class PortUnificationTest {
   public static void setUpClass() throws Exception {
     KeyStoreTestUtils.initializeClientKeyStore();
     KeyStoreTestUtils.initializeServerKeyStore();
+    //Logger.getLogger(TaggedObjectEncoder.class).setLevel(Level.DEBUG);
+    //Logger.getLogger(TaggedObjectDecoder.class).setLevel(Level.DEBUG);
   }
 
   @AfterClass
@@ -139,7 +135,6 @@ public final class PortUnificationTest {
 
     // configure the server channel pipeline factory
     final AbstractAlbusHCSMessageHandlerFactory albusHCSMessageHandlerFactory = new MockAlbusHCSMessageHandlerFactory();
-    final AbstractBitTorrentHandlerFactory bitTorrentHandlerFactory = new MockBitTorrentHandlerFactory();
     final AbstractHTTPRequestHandlerFactory httpRequestHandlerFactory = new MockHTTPRequestHandlerFactory();
     final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getServerX509SecurityInfo();
     LOGGER.info("server x509SecurityInfo...\n" + x509SecurityInfo);
@@ -149,7 +144,6 @@ public final class PortUnificationTest {
             SERVER_PORT,
             x509SecurityInfo,
             albusHCSMessageHandlerFactory,
-            bitTorrentHandlerFactory,
             httpRequestHandlerFactory,
             serverExecutor, // bossExecutor
             serverExecutor); // workerExecutor
@@ -157,22 +151,18 @@ public final class PortUnificationTest {
     LOGGER.info("testing clients");
     // test clients
     albusClientBigMessage();
-//    httpClient();
-//    nettyWebSocketClient();
-//    albusClient();
-//    bitTorrentClient();
-//    httpClient();
-//    nettyWebSocketClient();
-//    nettyWebSocketClient();
-//    bitTorrentClient();
-//    albusClient();
-//    httpClient();
-//    httpClient();
-//    albusClient();
-//    albusClient();
-//    bitTorrentClient();
-//    bitTorrentClient();
-//    nettyWebSocketClient();
+    httpClient();
+    nettyWebSocketClient();
+    albusClient();
+    httpClient();
+    nettyWebSocketClient();
+    nettyWebSocketClient();
+    albusClient();
+    httpClient();
+    httpClient();
+    albusClient();
+    albusClient();
+    nettyWebSocketClient();
 
     // shut down executor threads to exit
 //    LOGGER.info("releasing server resources");
@@ -474,62 +464,6 @@ public final class PortUnificationTest {
     channel.getCloseFuture().awaitUninterruptibly();
 
     LOGGER.info("releasing web socket client resources");
-    channel.close();
-    clientBootstrap.releaseExternalResources();
-  }
-
-  /**
-   * Tests the exchange of bit torrent messages.
-   */
-  @SuppressWarnings("ThrowableResultIgnored")
-  private void bitTorrentClient() {
-    final ClientBootstrap clientBootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(
-            Executors.newCachedThreadPool(),
-            Executors.newCachedThreadPool()));
-
-    // configure the client pipeline
-    final Object clientResume_lock = new Object();
-    final AbstractBitTorrentHandler bitTorrentHandler = new MockBitTorrentHandler(
-            clientResume_lock,
-            1);  // iterations
-    final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
-    final ChannelPipeline channelPipeline = BitTorrentClientPipelineFactory.getPipeline(
-            bitTorrentHandler,
-            x509SecurityInfo);
-    clientBootstrap.setPipeline(channelPipeline);
-
-    // start the connection attempt
-    final ChannelFuture channelFuture = clientBootstrap.connect(new InetSocketAddress("localhost", SERVER_PORT));
-
-    // wait until the connection attempt succeeds or fails
-    final Channel channel = channelFuture.awaitUninterruptibly().getChannel();
-    if (!channelFuture.isSuccess()) {
-      LOGGER.info(StringUtils.getStackTraceAsString(channelFuture.getCause()));
-      fail(channelFuture.getCause().getMessage());
-    }
-    LOGGER.info("bit torrent client connected");
-
-    // send a message
-    final byte[] infoHash = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14};
-    final byte[] peerIdBytes = {0x14, 0x13, 0x12, 0x11, 0x10, 0x0F, 0x0E, 0x0D, 0x0C, 0x0B, 0x0A, 0x09, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01};
-    BitTorrentHandshakeMessage bitTorrentHandshakeMessage = new BitTorrentHandshakeMessage(infoHash, peerIdBytes);
-    channel.write(bitTorrentHandshakeMessage);
-
-    // wait for the request message to be sent
-    channelFuture.awaitUninterruptibly();
-    if (!channelFuture.isSuccess()) {
-      LOGGER.info(StringUtils.getStackTraceAsString(channelFuture.getCause()));
-      fail(channelFuture.getCause().getMessage());
-    }
-
-    // the message response handler will signal this thread when the test exchanges are completed
-    synchronized (clientResume_lock) {
-      try {
-        clientResume_lock.wait();
-      } catch (InterruptedException ex) {
-      }
-    }
-    LOGGER.info("releasing bit torrent client resources");
     channel.close();
     clientBootstrap.releaseExternalResources();
   }

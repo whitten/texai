@@ -199,7 +199,16 @@ public class NodeRuntime extends BasicNodeRuntime {
     if (message.isBetweenContainers()) {
       if (message.getRecipientContainerName().equals(this.getContainerName())) {
         // verify the signature of the inbound message
-        verifyMessage(message);
+        final boolean isOK = verifyMessage(message);
+        if (!isOK) {
+          //TODO report to container operations, which reports it to network operations
+          LOGGER.info("Dropping message from remote peer whose signature does not verify, " + message.toBriefString());
+          return;
+        } else if (message.getDate().plusMinutes(1).isBeforeNow()) {
+          //TODO report to container operations, which reports it to network operations
+          LOGGER.info("Dropping message from remote peer which was sent more than one minute ago, " + message.toBriefString());
+          return;
+        }
       } else {
         // route the outbound message
         messageRouter.dispatchMessage(message);
@@ -214,12 +223,14 @@ public class NodeRuntime extends BasicNodeRuntime {
   }
 
   /**
-   * Verifies a message sent between roles in the Albus hierarchical control system network, throwing an exception if the message's digital
-   * signature fails verification.
+   * Verifies a message sent between roles in the Albus hierarchical control system network, returning whether the message signature
+   * is OK.
    *
    * @param message the message
+   * @return whether the message signature
+   * is OK
    */
-  protected void verifyMessage(Message message) {
+  protected boolean verifyMessage(Message message) {
     //Preconditions
     assert message != null : "message must not be null";
 
@@ -240,10 +251,11 @@ public class NodeRuntime extends BasicNodeRuntime {
         throw new TexaiException("X.509 certificate not found for sender " + message.getSenderQualifiedName());
       }
     }
-    message.verify(x509Certificate);
+    final boolean isOK = message.verify(x509Certificate);
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("verified message");
+      LOGGER.debug("verified message: " + isOK);
     }
+    return isOK;
   }
 
   //TODO - use this method or delete it.

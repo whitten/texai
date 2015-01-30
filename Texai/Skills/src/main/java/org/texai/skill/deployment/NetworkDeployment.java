@@ -512,6 +512,10 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
 
   }
 
+
+  //TODO rewrite this as a synchronous file transfer protocol in which each block is acknowledged by the recipient
+  // before sending the next block. Also resend on a NAK.
+
   /**
    * Deploys the files in chunks because the maximum message size is 1 MB.
    *

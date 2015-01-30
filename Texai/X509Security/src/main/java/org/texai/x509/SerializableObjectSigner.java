@@ -87,7 +87,6 @@ public final class SerializableObjectSigner {
    * @throws NoSuchAlgorithmException when the signature algorithm is invalid
    * @throws InvalidKeyException if there is an error with the private key
    * @throws IOException if an input/output error occurs
-   * @throws SignatureException if there is a problem with the signature
    */
   public static boolean verify(
           final Serializable serializableObject,
@@ -96,8 +95,7 @@ public final class SerializableObjectSigner {
           throws
           NoSuchAlgorithmException,
           InvalidKeyException,
-          IOException,
-          SignatureException {
+          IOException {
     //Preconditions
     assert serializableObject != null : "serializableObject must not be null";
     assert x509Certificate != null : "x509Certificate must not be null";
@@ -108,14 +106,19 @@ public final class SerializableObjectSigner {
     final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
     final ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
     objectOutputStream.writeObject(serializableObject);
-    signature.update(byteArrayOutputStream.toByteArray());
-    return signature.verify(signatureBytes);
+    try {
+      signature.update(byteArrayOutputStream.toByteArray());
+      return signature.verify(signatureBytes);
+    } catch (SignatureException ex) {
+      return false;
+    }
   }
 
   /**
    * Returns a SHA-512 hash of the given ArrayList of serializable objects.
    *
    * @param serializableObject the serialized object, which is an ArrayList of serializable objects.
+   *
    * @return a SHA-512 hash
    */
   public static byte[] sha512Hash(final ArrayList<Object> serializableObject) {

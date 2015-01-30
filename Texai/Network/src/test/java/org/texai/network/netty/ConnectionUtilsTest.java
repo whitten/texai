@@ -36,14 +36,10 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import org.texai.network.netty.handler.AbstractAlbusHCSMessageHandler;
 import org.texai.network.netty.handler.AbstractAlbusHCSMessageHandlerFactory;
-import org.texai.network.netty.handler.AbstractBitTorrentHandler;
-import org.texai.network.netty.handler.AbstractBitTorrentHandlerFactory;
 import org.texai.network.netty.handler.AbstractHTTPRequestHandlerFactory;
 import org.texai.network.netty.handler.AbstractHTTPResponseHandler;
 import org.texai.network.netty.handler.MockAlbusHCSMessageHandler;
 import org.texai.network.netty.handler.MockAlbusHCSMessageHandlerFactory;
-import org.texai.network.netty.handler.MockBitTorrentHandler;
-import org.texai.network.netty.handler.MockBitTorrentHandlerFactory;
 import org.texai.network.netty.handler.MockHTTPRequestHandlerFactory;
 import org.texai.network.netty.handler.MockHTTPResponseHandler;
 import org.texai.x509.KeyStoreTestUtils;
@@ -71,14 +67,12 @@ public class ConnectionUtilsTest {
   public static void setUpClass() throws Exception {
     LOGGER.info("createPortUnificationServer");
     final AbstractAlbusHCSMessageHandlerFactory albusHCSMessageHandlerFactory = new MockAlbusHCSMessageHandlerFactory();
-    final AbstractBitTorrentHandlerFactory bitTorrentHandlerFactory = new MockBitTorrentHandlerFactory();
     final AbstractHTTPRequestHandlerFactory httpRequestHandlerFactory = new MockHTTPRequestHandlerFactory();
     final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getServerX509SecurityInfo();
     serverBootstrap = ConnectionUtils.createPortUnificationServer(
           SERVER_PORT,
           x509SecurityInfo,
           albusHCSMessageHandlerFactory,
-          bitTorrentHandlerFactory,
           httpRequestHandlerFactory,
           EXECUTOR, // bossExecutor
           EXECUTOR); // workerExecutor
@@ -114,30 +108,6 @@ public class ConnectionUtilsTest {
             inetSocketAddress,
             x509SecurityInfo,
             albusHCSMessageHandler,
-            EXECUTOR, // bossExecutor
-            EXECUTOR); // workerExecutor
-    assertNotNull(channel);
-    assertEquals("localhost/127.0.0.1:8088", channel.getRemoteAddress().toString());
-    LOGGER.info("closing channel");
-    channel.close();
-  }
-
-  /**
-   * Test of openBitTorrentConnection method, of class ConnectionUtils.
-   */
-  @Test
-  public void testOpenBitTorrentConnection() {
-    LOGGER.info("openBitTorrentConnection");
-    InetSocketAddress inetSocketAddress = new InetSocketAddress("localhost", SERVER_PORT);
-    X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
-    final Object clientResume_lock = new Object();
-    final AbstractBitTorrentHandler bitTorrentHandler = new MockBitTorrentHandler(
-            clientResume_lock,
-            0);  // iterations
-    final Channel channel = ConnectionUtils.openBitTorrentConnection(
-            inetSocketAddress,
-            x509SecurityInfo,
-            bitTorrentHandler,
             EXECUTOR, // bossExecutor
             EXECUTOR); // workerExecutor
     assertNotNull(channel);

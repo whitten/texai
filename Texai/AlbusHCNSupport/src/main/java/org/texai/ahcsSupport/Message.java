@@ -920,7 +920,7 @@ public class Message implements Serializable, Comparable<Message> {
     final boolean result;
     try {
       result = SerializableObjectSigner.verify(this, x509Certificate, savedSignatureBytes);
-    } catch (NoSuchAlgorithmException | InvalidKeyException | IOException | SignatureException ex) {
+    } catch (NoSuchAlgorithmException | InvalidKeyException | IOException ex) {
       throw new TexaiException(ex);
     }
     signatureBytes = savedSignatureBytes;

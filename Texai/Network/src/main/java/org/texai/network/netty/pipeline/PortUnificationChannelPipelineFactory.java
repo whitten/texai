@@ -25,7 +25,6 @@ import org.apache.log4j.Logger;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.texai.network.netty.handler.AbstractAlbusHCSMessageHandlerFactory;
-import org.texai.network.netty.handler.AbstractBitTorrentHandlerFactory;
 import org.texai.network.netty.handler.AbstractHTTPRequestHandlerFactory;
 import org.texai.network.netty.handler.PortUnificationHandler;
 import org.texai.x509.X509SecurityInfo;
@@ -41,8 +40,6 @@ public class PortUnificationChannelPipelineFactory implements ChannelPipelineFac
   private static final Logger LOGGER = Logger.getLogger(PortUnificationChannelPipelineFactory.class);
   /** the Albus HCN message handler factory */
   private final AbstractAlbusHCSMessageHandlerFactory albusHCSMessageHandlerFactory;
-  /** the bit torrent handler factory */
-  private final AbstractBitTorrentHandlerFactory bitTorrentHandlerFactory;
   /** the HTTP request handler factory */
   private final AbstractHTTPRequestHandlerFactory httpRequestHandlerFactory;
   /** the X.509 security information */
@@ -50,21 +47,18 @@ public class PortUnificationChannelPipelineFactory implements ChannelPipelineFac
 
   /** Constructs a new PortUnificationChannelPipelineFactory instance.
    * @param albusHCSMessageHandlerFactory the Albus HCN message handler factory
-   * @param bitTorrentHandlerFactory the bit torrent handler factory
    * @param httpRequestHandlerFactory the HTTP request handler factory
    * @param x509SecurityInfo the X.509 security information
    *
    */
   public PortUnificationChannelPipelineFactory(
           final AbstractAlbusHCSMessageHandlerFactory albusHCSMessageHandlerFactory,
-          final AbstractBitTorrentHandlerFactory bitTorrentHandlerFactory,
           final AbstractHTTPRequestHandlerFactory httpRequestHandlerFactory,
           final X509SecurityInfo x509SecurityInfo) {
     //Preconditions
     assert x509SecurityInfo != null : "x509SecurityInfo must not be null";
 
     this.albusHCSMessageHandlerFactory = albusHCSMessageHandlerFactory;
-    this.bitTorrentHandlerFactory = bitTorrentHandlerFactory;
     this.httpRequestHandlerFactory = httpRequestHandlerFactory;
     this.x509SecurityInfo = x509SecurityInfo;
   }
@@ -79,15 +73,11 @@ public class PortUnificationChannelPipelineFactory implements ChannelPipelineFac
     if (albusHCSMessageHandlerFactory != null) {
       portUnificationHandler.setAlbusHCNMessageHandler(albusHCSMessageHandlerFactory.getHandler());
     }
-    if (bitTorrentHandlerFactory != null) {
-      portUnificationHandler.setBitTorrentHandler(bitTorrentHandlerFactory.getHandler());
-    }
     if (httpRequestHandlerFactory != null) {
       portUnificationHandler.setHttpRequestHandler(httpRequestHandlerFactory.getHandler());
     }
     // if this pipeline only expects HTTP messages, then configure it not to require client X509 certificates
     final boolean needClientAuth = albusHCSMessageHandlerFactory != null
-            || bitTorrentHandlerFactory != null
             || httpRequestHandlerFactory == null;
     final ChannelPipeline channelPipeline = SSLPipelineFactory.getPipeline(
             false, // useClientMode

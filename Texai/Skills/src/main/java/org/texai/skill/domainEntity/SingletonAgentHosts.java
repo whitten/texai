@@ -207,7 +207,7 @@ public final class SingletonAgentHosts implements RDFPersistent, Serializable {
               serializableObject,
               x509Certificate,
               singletonAgentHosts.authorSignatureBytes);
-    } catch (NoSuchAlgorithmException | InvalidKeyException | IOException | SignatureException ex) {
+    } catch (NoSuchAlgorithmException | InvalidKeyException | IOException ex) {
       throw new TexaiException(ex);
     }
   }

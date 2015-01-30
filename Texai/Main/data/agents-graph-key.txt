@@ -1,17 +1,14 @@
-ContainerDeploymentAgent
-  Performs software deployment at the container level.
-
 ContainerGovernanceAgent
   Manages a container's agents to ensure friendly behavior.
+
+ContainerHeartbeatAgent
+  Manages a container's agents to ensure liveness.
 
 ContainerLogControlAgent
   Coordinates Java logging at the container level for agents in the AICoin network.
 
 ContainerOperationAgent
   Manages a container and the AICoin agent within the container. Interacts with the human container operator.
-
-NetworkDeploymentAgent
-  Performs software deployment at the network level.
 
 NetworkLogControlAgent
   Coordinates Java logging for agents in the AICoin network.
@@ -28,6 +25,9 @@ SingletonConfigurationAgent
 
 TopLevelGovernanceAgent
   Manages the container governance agents to ensure friendly behavior.
+
+TopLevelHeartbeatAgent
+  Manages the container heartbeat agents to ensure liveness.
 
 TopmostFriendshipAgent
   Coordinates the top level agents to ensure friendly behavior.
@@ -47,9 +47,6 @@ XAIContainerCertificateAuthorityAgent
 
 XAIContainerEpisodicMemoryAgent
   Provides episodic memory for agents in a particular container in the AICoin network.
-
-XAIFaucetAgent
-  Provides a tamper evident aicoin faucet.
 
 XAIFinancialAccountingAndControlAgent
   Provides financial accounting and control for the AICoin network.
