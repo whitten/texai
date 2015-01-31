@@ -205,6 +205,12 @@ public final class AHCSConstants {
   // the logUserWord_Task_word parameter
   public static final String LOG_USER_WORD_SKILL_WORD = "logUserWord_Skill_word";
   //
+  // the prepare to receive file task operation
+  public static final String PREPARE_TO_RECEIVE_FILE_TASK = "prepareToReceiveFile_Task";
+  //
+  // the prepare to send file task operation
+  public static final String PREPARE_TO_SEND_FILE_TASK = "prepareToSendFile_Task";
+  //
   // the restartContainer_Task operation
   public static final String RESTART_CONTAINER_TASK = "restartContainer_Task";
   // the restartContainer_Task_delay parameter, which is a long value that indicates the millisecond delay before restarting the container
@@ -256,6 +262,9 @@ public final class AHCSConstants {
   // the take_the_dialog_initiative_Task operation
   public static final String TAKE_THE_DIALOG_INITIATIVE_TASK = "take_the_dialog_initiative_Task";
   //
+  // the transfer file task operation
+  public static final String TRANSFER_FILE_TASK = "transferFile_Task";
+  //
   // the unlogOperation_Task operation
   public static final String UNLOG_OPERATION_TASK = "unlogOperation_Task";
   // unlogged operation message parameter
@@ -300,6 +309,9 @@ public final class AHCSConstants {
   // the acknowledged_Info operation
   public static final String ACKNOWLEDGED_INFO = "acknowledged_Info";
   //
+  // the exception information operation
+  public static final String EXCEPTION_INFO = "exception_Info";
+  //
   // the joinNetworkSingleton_Info operation
   public static final String JOIN_NETWORK_SINGLETON_AGENT_INFO = "joinNetworkSingletonAgent_Info";
   //
@@ -329,6 +341,9 @@ public final class AHCSConstants {
   public static final String RETURN_FROM_CONVERSE_YES_NO_QUERY_WITH_USER_INFO = "returnFromConverseYesNoQueryWithUser_Info";
   public static final String RETURN_FROM_CONVERSE_YES_NO_QUERY_WITH_USER_INFO_RESPONSE = "returnFromConverseYesNoQueryWithUser_Info_response";
   //
+  // the request accomplished accomplished operation
+  public static final String REQUEST_ACCOMPLISHED_INFO = "requestAccomplished_Info";
+  //
   // the seedConnectionRequest_Info operation
   public static final String SEED_CONNECTION_REQUEST_INFO = "seedConnectionRequest_Info";
   // the port parameter of the seedConnectionRequest_Info
@@ -339,6 +354,12 @@ public final class AHCSConstants {
   //
   // the task accomplished information operation
   public static final String TASK_ACCOMPLISHED_INFO = "taskAccomplished_Info";
+  //
+  // the transfer file chunk information operation
+  public static final String TRANSFER_FILE_CHUNK_INFO = "transferFileChunk_Info";
+  //
+  // the transfer file request information operation
+  public static final String TRANSFER_FILE_REQUEST_INFO = "transferFileRequest_Info";
 
   // Sensation messages end with _Sensation
 
@@ -353,8 +374,12 @@ public final class AHCSConstants {
   public static final String AHCS_ORIGINAL_MESSAGE = "AHCS originalMessage";
   // the message parameter naming the session value
   public static final String SESSION = "AHCS session";
+  // the message parameter for bytes size, which is an int
+  public static final String MSG_PARM_BYTES_SIZE = "bytesSize";
   // the message parameter for the child role ID
   public static final String MSG_PARM_CHILD_ROLE_ID = "child role id";
+  // the message parameter for chunk number, which is an int
+  public static final String MSG_PARM_CHUNK_NBR = "chunkNbr";
   // the message parameter for currency amount in Satoshis as a BigInteger
   public static final String MSG_PARM_CURRENCY_AMOUNT = "currency amount";
   // the message parameter for class name
@@ -363,6 +388,10 @@ public final class AHCSConstants {
   public static final String MSG_PARM_CONTAINER_NAME = "containerName";
   // the message parameter for conversation ID
   public static final String MSG_PARM_CONVERSATION_ID = "conversationId";
+  // the message parameter for file hash, which is a string
+  public static final String MSG_PARM_FILE_HASH = "fileHash";
+  // the message parameter for file size in bytes, which is a long
+  public static final String MSG_PARM_FILE_SIZE = "fileSize";
   // the formFillText
   public static final String MSG_PARM_FORM_FILL_TEXT = "formFillText";
   // the message parameter for the host name
@@ -383,12 +412,20 @@ public final class AHCSConstants {
   public static final String MSG_PARM_SKILL_CLASS_NAME = "skill class name";
   // the spokenText parameter
   public static final String MSG_PARM_SPOKEN_TEXT = "spokenText";
+  // the message parameter for recipient container name, which is a string
+  public static final String MSG_PARM_RECIPIENT_CONTAINER_NAME = "senderContainerName";
+  // the message parameter for recipient file path, which is a string
+  public static final String MSG_PARM_RECIPIENT_FILE_PATH = "recipientFilePath";
   // the registered user parameter
   public static final String MSG_PARM_REGISTERED_USER = "registeredUser";
   // the message parameter indicating the number of milliseconds to pause before retrying a message sent to a remote peer
   public static final String MSG_PARM_RETRY_DELAY = "retryPauseDuration";
   // the message parameter for the role id
   public static final String MSG_PARM_ROLE_ID = "role id";
+  // the message parameter for sender container name, which is a string
+  public static final String MSG_PARM_SENDER_CONTAINER_NAME = "senderContainerName";
+  // the message parameter for sender file path, which is a string
+  public static final String MSG_PARM_SENDER_FILE_PATH = "senderFilePath";
   // the message parameter for session, which is a string key to a state dictionary, session --> session state
   public static final String MSG_PARM_SESSION = "session";
   // the message parameter for service
