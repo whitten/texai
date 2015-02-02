@@ -42,11 +42,9 @@ public final class AHCSConstants {
     FILE_TRANSFER_COMPLETE
   }
 
-  /** Returns a string representation of the given file transfer state.
-   *
-   * @param fileTransferState the given file transfer state
-   * @return a string representation of the given file transfer state
-   */
+  // 
+  // @param fileTransferState the given file transfer state
+  // @return a string representation of the given file transfer state
   public static String fileTransferStateToString(final FileTransferState fileTransferState) {
     if (fileTransferState.equals(FileTransferState.UNINITIALIZED)) {
       return "uninitialized";
