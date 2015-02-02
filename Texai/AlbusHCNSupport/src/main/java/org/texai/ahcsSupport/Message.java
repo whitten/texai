@@ -232,7 +232,42 @@ public class Message implements Serializable, Comparable<Message> {
             recipientService,
             operation,
             new HashMap<>(), // parameterDictionary,
-            Message.DEFAULT_VERSION);
+            Message.DEFAULT_VERSION);  // version
+  }
+
+  /**
+   * Constructs a new Message instance.
+   *
+   * @param senderQualifiedName the sender role's qualified name, container.nodename.rolename
+   * @param senderService the sender recipientService
+   * @param recipientQualifiedName the recipient role's qualified name, container.nodename.rolename
+   * @param conversationId the conversation id
+   * @param replyWith the reply-with UUID
+   * @param inReplyTo in-reply-to UUID
+   * @param recipientService the recipient service
+   * @param operation the operation, which can be a task, sensation, or information
+   */
+  public Message(
+          final String senderQualifiedName,
+          final String senderService,
+          final String recipientQualifiedName,
+          final UUID conversationId,
+          final UUID replyWith,
+          final UUID inReplyTo,
+          final String recipientService,
+          final String operation) {
+    this(
+            senderQualifiedName,
+            senderService,
+            recipientQualifiedName,
+            conversationId,
+            replyWith,
+            inReplyTo,
+            null, // replyByDateTime
+            recipientService,
+            operation,
+            new HashMap<>(), // parameterDictionary,
+            Message.DEFAULT_VERSION); // version
   }
 
   /**

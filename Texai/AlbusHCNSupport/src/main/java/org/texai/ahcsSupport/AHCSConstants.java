@@ -32,6 +32,38 @@ public final class AHCSConstants {
     INACTIVE
   }
 
+  // the file transfer states
+  public enum FileTransferState {
+
+    UNINITIALIZED,
+    OK_TO_SEND,
+    OK_TO_RECEIVE,
+    FILE_TRANSFER_STARTED,
+    FILE_TRANSFER_COMPLETE
+  }
+
+  /** Returns a string representation of the given file transfer state.
+   *
+   * @param fileTransferState the given file transfer state
+   * @return a string representation of the given file transfer state
+   */
+  public static String fileTransferStateToString(final FileTransferState fileTransferState) {
+    if (fileTransferState.equals(FileTransferState.UNINITIALIZED)) {
+      return "uninitialized";
+    } else if (fileTransferState.equals(FileTransferState.OK_TO_SEND)) {
+      return "OK to send";
+    } else if (fileTransferState.equals(FileTransferState.OK_TO_RECEIVE)) {
+      return "OK to receive";
+    } else if (fileTransferState.equals(FileTransferState.FILE_TRANSFER_STARTED)) {
+      return "file transfer started";
+    } else if (fileTransferState.equals(FileTransferState.FILE_TRANSFER_COMPLETE)) {
+      return "file transfer complete";
+    } else {
+      assert false;
+      return null;
+    }
+  }
+
   //
   //
   // sensation messages - end with _Sensation, and are sent from a child node to its parent node
@@ -412,8 +444,10 @@ public final class AHCSConstants {
   public static final String MSG_PARM_SKILL_CLASS_NAME = "skill class name";
   // the spokenText parameter
   public static final String MSG_PARM_SPOKEN_TEXT = "spokenText";
+  // the message parameter for reason, which is a string
+  public static final String MSG_PARM_REASON = "reason";
   // the message parameter for recipient container name, which is a string
-  public static final String MSG_PARM_RECIPIENT_CONTAINER_NAME = "senderContainerName";
+  public static final String MSG_PARM_RECIPIENT_CONTAINER_NAME = "recipientContainerName";
   // the message parameter for recipient file path, which is a string
   public static final String MSG_PARM_RECIPIENT_FILE_PATH = "recipientFilePath";
   // the registered user parameter

@@ -33,6 +33,7 @@ import static org.junit.Assert.*;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.SkillClass;
+import org.texai.skill.deployment.NetworkDeployment;
 import org.texai.skill.network.NetworkOperation;
 import org.texai.skill.testHarness.SkillTestHarness;
 import org.texai.util.ArraySet;
@@ -166,8 +167,8 @@ public class NetworkFileTransferTest {
     skillTestHarness.setSkillState(AHCSConstants.State.READY, skillClassName);
     final UUID conversationId = UUID.randomUUID();
     final Message transferFileRequestInfoMessage = new Message(
-          parentQualifiedName, // senderQualifiedName
-          parentService, // senderService
+          "Test.NetworkDeploymentAgent.NetworkDeploymentRole", // senderQualifiedName
+          NetworkDeployment.class.getName(), // senderService
           containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
           conversationId,
           null, // replyWith
@@ -189,10 +190,14 @@ public class NetworkFileTransferTest {
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertEquals("[prepareToSendFile_Task, Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer --> TestRecipient.ContainerFileSenderRole:ContainerFileSender]",
+    assertEquals("[prepareToSendFile_Task, Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer --> TestSender.ContainerFileTransferAgent.ContainerFileSenderRole:ContainerFileSender]",
             sentMessage.toBriefString());
+    assertNotNull(sentMessage.getConversationId());
     final NetworkFileTransfer networkFileTransfer = (NetworkFileTransfer) skillTestHarness.getSkill(NetworkFileTransfer.class.getName());
-    assertTrue(networkFileTransfer.getFileTransferRequestInfo(conversationId).toString().startsWith("[TestRecipient:deployment/nodes.xml --> TestRecipient:data/nodes.xml "));
+    LOGGER.info("FileTransferRequestInfo ...\n" + networkFileTransfer.getFileTransferRequestInfo(conversationId).toString());
+    assertEquals(
+            "[TestSender:deployment/nodes.xml --> TestRecipient:data/nodes.xml]",
+            networkFileTransfer.getFileTransferRequestInfo(conversationId).toBriefString());
   }
 
   /**

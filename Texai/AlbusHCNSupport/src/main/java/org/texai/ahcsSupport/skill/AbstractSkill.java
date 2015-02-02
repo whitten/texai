@@ -199,6 +199,8 @@ public abstract class AbstractSkill {
           final Map<String, Object> parameterDictionary) {
     //Preconditions
     assert recipientService == null || Message.isValidService(recipientService) : "the recipient service is not a found Java class " + recipientService;
+    assert operation != null : "operation must not be null";
+    assert parameterDictionary != null : "parameterDictionary must not be null";
 
     return new Message(
             role.getQualifiedName(), // senderQualifiedName,
@@ -226,6 +228,7 @@ public abstract class AbstractSkill {
     //Preconditions
     assert recipientQualifiedName != null : "recipientQualifiedName must not be null";
     assert recipientService == null || Message.isValidService(recipientService) : "the recipient service is not a found Java class " + recipientService;
+    assert operation != null : "operation must not be null";
 
     return new Message(
             role.getQualifiedName(), // senderQualifiedName,
@@ -235,6 +238,41 @@ public abstract class AbstractSkill {
             operation,
             new HashMap<>(),
             DEFAULT_VERSION);
+  }
+
+  /**
+   * Makes a message given the recipient and operation.
+   *
+   * @param recipientQualifiedName the recipient role's qualified name, container.nodename.rolename
+   * @param conversationId the conversation id
+   * @param recipientService the recipient service
+   * @param operation the operation
+   *
+   * @return
+   */
+  public Message makeMessage(
+          final String recipientQualifiedName,
+          final UUID conversationId,
+          final String recipientService,
+          final String operation) {
+    //Preconditions
+    assert recipientQualifiedName != null : "recipientQualifiedName must not be null";
+    assert conversationId != null : "conversationId must not be null";
+    assert recipientService == null || Message.isValidService(recipientService) : "the recipient service is not a found Java class " + recipientService;
+    assert StringUtils.isNonEmptyString(operation) : "operation must be a non-empty string";
+
+    return new Message(
+            role.getQualifiedName(), // senderQualifiedName,
+            getClassName(), // senderService,
+            recipientQualifiedName,
+            conversationId,
+            null, // replyWith
+            null, // inReplyTo
+            null, // replyByDateTime
+            recipientService,
+            operation,
+            new HashMap<>(), // parameterDictionary
+            DEFAULT_VERSION); // version
   }
 
   /**
@@ -255,6 +293,7 @@ public abstract class AbstractSkill {
     //Preconditions
     assert recipientQualifiedName != null : "recipientQualifiedName must not be null";
     assert recipientService == null || Message.isValidService(recipientService) : "the recipient service is not a found Java class " + recipientService;
+    assert StringUtils.isNonEmptyString(operation) : "operation must be a non-empty string";
 
     return new Message(
             role.getQualifiedName(), // senderQualifiedName,
@@ -279,7 +318,7 @@ public abstract class AbstractSkill {
           final String operation) {
     //Preconditions
     assert receivedMessage != null : "receivedMessage must not be null";
-    assert receivedMessage.getReplyWith() != null : "receivedMessage reply-with must not be null";
+    assert StringUtils.isNonEmptyString(operation) : "operation must be a non-empty string";
 
     return new Message(
             receivedMessage.getRecipientQualifiedName(), // senderQualifiedName
@@ -291,7 +330,39 @@ public abstract class AbstractSkill {
             null, // replyByDateTime,
             receivedMessage.getSenderService(), // recipientService
             operation,
-            new HashMap<String, Object>(), // parameterDictionary
+            new HashMap<>(), // parameterDictionary
+            DEFAULT_VERSION); // version
+  }
+
+  /**
+   * Makes an exception message given the received message and exception reason.
+   *
+   * @param receivedMessage the received message
+   * @param reason the exception reason
+   *
+   * @return a reply message
+   */
+  public Message makeExceptionMessage(
+          final Message receivedMessage,
+          final String reason) {
+    //Preconditions
+    assert receivedMessage != null : "receivedMessage must not be null";
+    assert StringUtils.isNonEmptyString(reason) : "reason must be a non-empty string";
+
+    final Map<String, Object> parameterDictionary = new HashMap<>();
+    parameterDictionary.put(AHCSConstants.AHCS_ORIGINAL_MESSAGE, receivedMessage);
+    parameterDictionary.put(AHCSConstants.MSG_PARM_REASON, reason);
+    return new Message(
+            receivedMessage.getRecipientQualifiedName(), // senderQualifiedName
+            receivedMessage.getRecipientService(), // senderService
+            receivedMessage.getSenderQualifiedName(), // recipientQualifiedName
+            receivedMessage.getConversationId(),
+            null, // replyWith
+            receivedMessage.getReplyWith(), // inReplyTo
+            null, // replyByDateTime,
+            receivedMessage.getSenderService(), // recipientService
+            AHCSConstants.EXCEPTION_INFO, // operation
+            parameterDictionary,
             DEFAULT_VERSION); // version
   }
 
