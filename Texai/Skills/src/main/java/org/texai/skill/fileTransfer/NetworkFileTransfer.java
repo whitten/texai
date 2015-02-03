@@ -309,6 +309,8 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
     }
     if (fileTransferInfo.getFileTransferState().equals(FileTransferState.UNINITIALIZED)) {
       handleReplyFromPreparedFileSender(message, fileTransferInfo);
+    } else if (fileTransferInfo.getFileTransferState().equals(FileTransferState.OK_TO_SEND)) {
+      handleReplyFromPreparedFileRecipient(message, fileTransferInfo);
     }
 
   }
@@ -345,6 +347,34 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
     prepareToReceiveFileTaskMessage.put(AHCSConstants.MSG_PARM_RECIPIENT_CONTAINER_NAME, fileTransferInfo.getRecipientContainerName());
     prepareToReceiveFileTaskMessage.put(AHCSConstants.MSG_PARM_FILE_HASH, fileTransferInfo.getFileHash());
     prepareToReceiveFileTaskMessage.put(AHCSConstants.MSG_PARM_FILE_SIZE, fileTransferInfo.getFileSize());
+
+    sendMessage(prepareToReceiveFileTaskMessage);
+  }
+
+  /**
+   * Handles a task accomplished information message, which is a reply from a Prepare To Receive File Task.
+   *
+   * @param message the receved task accomplished information message
+   * @param fileTransferInfo the file transfer information
+   */
+  private void handleReplyFromPreparedFileRecipient(
+          final Message message,
+          final FileTransferInfo fileTransferInfo) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert fileTransferInfo != null : "fileTransferRequestInfo must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready: " + stateDescription(getSkillState());
+
+    fileTransferInfo.setFileTransferState(FileTransferState.FILE_TRANSFER_STARTED);
+
+    LOGGER.info("handling a reply from a prepared file receiver, " + fileTransferInfo);
+
+    // continue the file transfer conversation by starting the file transfer process
+    final Message prepareToReceiveFileTaskMessage = makeMessage(
+            fileTransferInfo.getSenderContainerName() + ".ContainerFileTransferAgent.ContainerFileSenderRole", // recipientQualifiedName
+            fileTransferInfo.getConversationId(),
+            ContainerFileSender.class.getName(), // recipientService
+            AHCSConstants.TRANSFER_FILE_TASK); // operation
 
     sendMessage(prepareToReceiveFileTaskMessage);
   }
