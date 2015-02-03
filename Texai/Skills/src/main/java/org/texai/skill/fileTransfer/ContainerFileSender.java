@@ -14,11 +14,10 @@ import java.util.UUID;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
-import org.texai.ahcsSupport.AHCSConstants.FileTransferState;
 import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
-import org.texai.util.StringUtils;
+import org.texai.skill.fileTransfer.FileTransferInfo.FileTransferState;
 import org.texai.x509.MessageDigestUtils;
 
 /**
@@ -31,7 +30,7 @@ public class ContainerFileSender extends AbstractSkill {
   // the log4j logger
   private static final Logger LOGGER = Logger.getLogger(ContainerFileSender.class);
   // the file transfer dictionary, conversation id --> file transfer request info
-  private final Map<UUID, FileTransferRequestInfo> fileTransferDictionary = new HashMap<>();
+  private final Map<UUID, FileTransferInfo> fileTransferDictionary = new HashMap<>();
 
   /**
    * Constructs a new ContainerFileSender instance.
@@ -212,10 +211,11 @@ public class ContainerFileSender extends AbstractSkill {
     // record the file transfer information for use with subsequent messages in the conversation
     final String recipientFilePath = (String) message.get(AHCSConstants.MSG_PARM_RECIPIENT_FILE_PATH);
     final String recipientContainerName = (String) message.get(AHCSConstants.MSG_PARM_RECIPIENT_CONTAINER_NAME);
-    final FileTransferRequestInfo fileTransferRequestInfo = new FileTransferRequestInfo(
+    final FileTransferInfo fileTransferRequestInfo = new FileTransferInfo(
             conversationId,
             senderFilePath,
             recipientFilePath,
+            getContainerName(), // senderContainerName
             recipientContainerName);
     synchronized (fileTransferDictionary) {
       fileTransferDictionary.put(
@@ -223,16 +223,16 @@ public class ContainerFileSender extends AbstractSkill {
               fileTransferRequestInfo);
     }
 
-    fileTransferRequestInfo.fileHash = MessageDigestUtils.fileHashString(file);
-    fileTransferRequestInfo.fileSize = file.length();
-    fileTransferRequestInfo.fileTransferState = FileTransferState.OK_TO_SEND;
+    fileTransferRequestInfo.setFileHash(MessageDigestUtils.fileHashString(file));
+    fileTransferRequestInfo.setFileSize(file.length());
+    fileTransferRequestInfo.setFileTransferState(FileTransferState.OK_TO_SEND);
 
     // reply with the hash and the size of the file to be transferred
     final Message taskAccomplishedMessage = makeReplyMessage(
             message, // receivedMessage
             AHCSConstants.TASK_ACCOMPLISHED_INFO); // operation
-    taskAccomplishedMessage.put(AHCSConstants.MSG_PARM_FILE_HASH, fileTransferRequestInfo.fileHash);
-    taskAccomplishedMessage.put(AHCSConstants.MSG_PARM_FILE_SIZE, fileTransferRequestInfo.fileSize);
+    taskAccomplishedMessage.put(AHCSConstants.MSG_PARM_FILE_HASH, fileTransferRequestInfo.getFileHash());
+    taskAccomplishedMessage.put(AHCSConstants.MSG_PARM_FILE_SIZE, fileTransferRequestInfo.getFileSize());
 
     sendMessage(taskAccomplishedMessage);
   }
@@ -254,123 +254,9 @@ public class ContainerFileSender extends AbstractSkill {
    *
    * @return the file transfer information
    */
-  protected FileTransferRequestInfo getFileTransferRequestInfo(final UUID conversationId) {
+  protected FileTransferInfo getFileTransferRequestInfo(final UUID conversationId) {
     synchronized (fileTransferDictionary) {
       return fileTransferDictionary.get(conversationId);
     }
-  }
-
-  /**
-   * Provides a container for a file transfer request.
-   */
-  final static class FileTransferRequestInfo {
-
-    // the file transfer conversation id
-    private final UUID conversationId;
-    // the sender file path
-    private final String senderFilePath;
-    // the recipient file path
-    private final String recipientFilePath;
-    // the recipient container name
-    private final String recipientContainerName;
-    // the hash of the transferred file's contents
-    private String fileHash;
-    // the size of the transferred file's contents
-    private long fileSize = -1;
-    // the file transfer state
-    private AHCSConstants.FileTransferState fileTransferState = AHCSConstants.FileTransferState.UNINITIALIZED;
-    // the number of transferred file chunks
-    private int fileChunksCnt = -1;
-
-    /**
-     * Creates a new FileTransferRequestInfo instance.
-     *
-     * @param conversationId the file transfer conversation id
-     * @param senderFilePath the sender file path
-     * @param recipientFilePath the recipient file path
-     * @param recipientContainerName the starting date time of the file transfer
-     */
-    FileTransferRequestInfo(
-            final UUID conversationId,
-            final String senderFilePath,
-            final String recipientFilePath,
-            final String recipientContainerName) {
-      //Preconditions
-      assert conversationId != null : "conversationId must not be null";
-      assert StringUtils.isNonEmptyString(senderFilePath) : "senderFilePath must be a non-empty string";
-      assert StringUtils.isNonEmptyString(recipientFilePath) : "recipientFilePath must be a non-empty string";
-      assert StringUtils.isNonEmptyString(recipientContainerName) : "recipientContainerName must be a non-empty string";
-
-      this.conversationId = conversationId;
-      this.senderFilePath = senderFilePath;
-      this.recipientFilePath = recipientFilePath;
-      this.recipientContainerName = recipientContainerName;
-    }
-
-    /**
-     * Returns a brief string representation of this object.
-     *
-     * @return a brief string representation of this object
-     */
-    public String toBriefString() {
-      return (new StringBuilder())
-              .append('[')
-              .append(senderFilePath)
-              .append(" --> ")
-              .append(recipientContainerName)
-              .append(':')
-              .append(recipientFilePath)
-              .append(']')
-              .toString();
-    }
-
-    /**
-     * Returns a string representation of this object.
-     *
-     * @return a string representation of this object
-     */
-    @Override
-    public String toString() {
-      final StringBuilder stringBuilder = new StringBuilder();
-      stringBuilder
-              .append('[')
-              .append(senderFilePath)
-              .append(" --> ")
-              .append(recipientContainerName)
-              .append(':')
-              .append(recipientFilePath)
-              .append('\n');
-      if (fileHash != null) {
-        stringBuilder
-                .append("file hash: ")
-                .append(fileHash)
-                .append('\n');
-      }
-      if (fileHash != null) {
-        stringBuilder
-                .append("file hash: ")
-                .append(fileHash)
-                .append('\n');
-      }
-      if (fileSize > -1) {
-        stringBuilder
-                .append("file size: ")
-                .append(fileSize)
-                .append(" bytes\n");
-      }
-      stringBuilder
-              .append("file transfer state: ")
-              .append(AHCSConstants.fileTransferStateToString(fileTransferState))
-              .append('\n');
-      if (fileChunksCnt > -1) {
-        stringBuilder
-                .append("file chunks transfered: ")
-                .append(fileChunksCnt)
-                .append('\n');
-      }
-      stringBuilder.append(']');
-      return stringBuilder.toString();
-    }
-
   }
 }

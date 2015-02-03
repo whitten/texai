@@ -8,6 +8,9 @@ package org.texai.skill.fileTransfer;
  Copyright (C) Jan 29, 2015, Stephen L. Reed.
  */
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
@@ -24,6 +27,8 @@ public class ContainerFileReceiver extends AbstractSkill {
 
   // the log4j logger
   private static final Logger LOGGER = Logger.getLogger(ContainerFileReceiver.class);
+  // the file transfer dictionary, conversation id --> file transfer request info
+  private final Map<UUID, FileTransferInfo> fileTransferDictionary = new HashMap<>();
 
   /**
    * Constructs a new ContainerFileReceiver instance.
@@ -102,6 +107,19 @@ public class ContainerFileReceiver extends AbstractSkill {
         performMission(message);
         return;
 
+      /**
+       * Prepare To Receive File Task
+       *
+       * This task message is sent from the network-singleton, NetworkFileTransferAgent.NetworkFileTransferRole. It commands this
+       * network-connected role to prepare to receive a file.
+       *
+       * Parameters of the message are: sender file path, recipient file path, file hash and file size. As a result, a Task Accomplished
+       * Information message is replied back to the sending NetworkFileTransferRole, which continues the file transfer conversation.
+       */
+      case AHCSConstants.PREPARE_TO_RECEIVE_FILE_TASK:
+        handlePrepareToReceiveFileTask(message);
+        return;
+
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
         return;
@@ -143,6 +161,7 @@ public class ContainerFileReceiver extends AbstractSkill {
     return new String[]{
       AHCSConstants.AHCS_INITIALIZE_TASK,
       AHCSConstants.PERFORM_MISSION_TASK,
+      AHCSConstants.PREPARE_TO_RECEIVE_FILE_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
     };
   }
@@ -160,6 +179,49 @@ public class ContainerFileReceiver extends AbstractSkill {
   }
 
   /**
+   * Handles the prepare to receive file task message.
+   *
+   * @param message the received prepare to send file task message
+   */
+  private void handlePrepareToReceiveFileTask(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+
+    LOGGER.info("handling a prepare to receive file task");
+    // record the file transfer information for use with subsequent messages in the conversation
+    final UUID conversationId = message.getConversationId();
+    final String recipientFilePath = (String) message.get(AHCSConstants.MSG_PARM_RECIPIENT_FILE_PATH);
+    final String senderFilePath = (String) message.get(AHCSConstants.MSG_PARM_SENDER_FILE_PATH);
+    final String senderContainerName = (String) message.get(AHCSConstants.MSG_PARM_SENDER_CONTAINER_NAME);
+    final String recipientContainerName = (String) message.get(AHCSConstants.MSG_PARM_RECIPIENT_CONTAINER_NAME);
+    final String fileHash = (String) message.get(AHCSConstants.MSG_PARM_FILE_HASH);
+    final long fileSize = (long) message.get(AHCSConstants.MSG_PARM_FILE_SIZE);
+    final FileTransferInfo fileTransferRequestInfo = new FileTransferInfo(
+            conversationId,
+            senderFilePath,
+            recipientFilePath,
+            senderContainerName,
+            recipientContainerName);
+    fileTransferRequestInfo.setFileHash(fileHash);
+    fileTransferRequestInfo.setFileSize(fileSize);
+
+    synchronized (fileTransferDictionary) {
+      fileTransferDictionary.put(
+              conversationId,
+              fileTransferRequestInfo);
+    }
+
+    fileTransferRequestInfo.setFileTransferState(FileTransferInfo.FileTransferState.OK_TO_RECEIVE);
+
+    final Message taskAccomplishedMessage = makeReplyMessage(
+            message, // receivedMessage
+            AHCSConstants.TASK_ACCOMPLISHED_INFO); // operation
+
+    sendMessage(taskAccomplishedMessage);
+  }
+
+  /**
    * Gets the logger.
    *
    * @return the logger
@@ -167,5 +229,18 @@ public class ContainerFileReceiver extends AbstractSkill {
   @Override
   protected Logger getLogger() {
     return LOGGER;
+  }
+
+  /**
+   * Returns the file transfer information given its corresponding conversation id. Intended for unit testing.
+   *
+   * @param conversationId the conversation id
+   *
+   * @return the file transfer information
+   */
+  protected FileTransferInfo getFileTransferRequestInfo(final UUID conversationId) {
+    synchronized (fileTransferDictionary) {
+      return fileTransferDictionary.get(conversationId);
+    }
   }
 }

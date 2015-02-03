@@ -32,36 +32,6 @@ public final class AHCSConstants {
     INACTIVE
   }
 
-  // the file transfer states
-  public enum FileTransferState {
-
-    UNINITIALIZED,
-    OK_TO_SEND,
-    OK_TO_RECEIVE,
-    FILE_TRANSFER_STARTED,
-    FILE_TRANSFER_COMPLETE
-  }
-
-  // 
-  // @param fileTransferState the given file transfer state
-  // @return a string representation of the given file transfer state
-  public static String fileTransferStateToString(final FileTransferState fileTransferState) {
-    if (fileTransferState.equals(FileTransferState.UNINITIALIZED)) {
-      return "uninitialized";
-    } else if (fileTransferState.equals(FileTransferState.OK_TO_SEND)) {
-      return "OK to send";
-    } else if (fileTransferState.equals(FileTransferState.OK_TO_RECEIVE)) {
-      return "OK to receive";
-    } else if (fileTransferState.equals(FileTransferState.FILE_TRANSFER_STARTED)) {
-      return "file transfer started";
-    } else if (fileTransferState.equals(FileTransferState.FILE_TRANSFER_COMPLETE)) {
-      return "file transfer complete";
-    } else {
-      assert false;
-      return null;
-    }
-  }
-
   //
   //
   // sensation messages - end with _Sensation, and are sent from a child node to its parent node

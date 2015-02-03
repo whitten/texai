@@ -97,7 +97,7 @@ public class ContainerFileSenderTest {
   }
 
   /**
-   * Test of class NetworkDeployment initialize task message.
+   * Test of class ContainerFileSender initialize task message.
    */
   @Test
   public void testInitializeTaskMessage() {
@@ -124,7 +124,7 @@ public class ContainerFileSenderTest {
   }
 
   /**
-   * Test of class NetworkDeployment prepare to send file task message.
+   * Test of class ContainerFileSender prepare to send file task message.
    */
   @Test
   public void testPrepareToSendFileTaskMessage() {
@@ -167,12 +167,12 @@ public class ContainerFileSenderTest {
             29795);
     LOGGER.info("FileTransferRequestInfo ...\n" + containerFileSender.getFileTransferRequestInfo(conversationId).toString());
     assertEquals(
-            "[deployment/nodes.xml --> TestRecipient:data/nodes.xml]",
+            "[TestSender:deployment/nodes.xml --> TestRecipient:data/nodes.xml]",
             containerFileSender.getFileTransferRequestInfo(conversationId).toBriefString());
   }
 
   /**
-   * Test of class NetworkDeployment prepare to send file task message.
+   * Test of class ContainerFileSender prepare to send file task message.
    */
   @Test
   public void testPrepareToSendFileTaskMessage2() {
