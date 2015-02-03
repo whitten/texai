@@ -152,7 +152,7 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
        * Parameters of the message are: sender file path, recipient file path, sender container name and recipient container name.
        *
        * As a result of processing this message, a Prepare To Send File Task message is first sent to the sender container's Container File
-       * Transfer Role. The reply message continues the conversation.
+       * Sender Role. The reply message continues the conversation.
        *
        */
       case AHCSConstants.TRANSFER_FILE_REQUEST_INFO:
@@ -160,6 +160,30 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
         handleTransferFileRequestTask(message);
         return;
 
+      /**
+       * Task Accomplished Info
+       *
+       * This message is received in three situations. (1) A child ContainerTransferAgent.ContainerSenderRole replies that it has completed
+       * preparing for sending a file, providing the file hash and file size as parameters. (2) A child
+       * ContainerTransferAgent.ContainerRecipientRole replies that it has completed preparing for receiving a file. (3) A child
+       * ContainerTransferAgent.ContainerSenderRole replies that it has completed a file transfer task, providing the number of sent file
+       * chunks as a parameter.
+       *
+       * This skill uses the conversation ID of the message to look up the file transfer request information, which contains the state of
+       * the file transfer that indicates the next step in the conversation.
+       *
+       * As a result of processing this message in situation (1), a Prepare To Receive File Task message is sent to the recipient
+       * container's Container File Recipient Role. In situation (2), a Transfer File Task message is sent to the sending container's
+       * Container File Sender Role. And in situation (3), a Task Accomplished Info message is sent in reply to the peer which issued the
+       * original Transfer File Request Info message.
+       *
+       */
+      case AHCSConstants.TASK_ACCOMPLISHED_INFO:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        handleTaskAccomplishedInfo(message);
+        return;
+
+      //TODO task accomplished info and exception info handlers
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
         LOGGER.warn(message);
         return;
@@ -208,6 +232,7 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.PERFORM_MISSION_TASK,
+      AHCSConstants.TASK_ACCOMPLISHED_INFO,
       AHCSConstants.TRANSFER_FILE_REQUEST_INFO
     };
   }
@@ -229,7 +254,7 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
   /**
    * Handles a file transfer request task message.
    *
-   * @param message file transfer request task message
+   * @param message the received file transfer request task message
    */
   private void handleTransferFileRequestTask(final Message message) {
     //Preconditions
@@ -244,14 +269,17 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
     final String recipientContainerName = (String) message.get(AHCSConstants.MSG_PARM_RECIPIENT_CONTAINER_NAME);
 
     // record the file transfer information for use with subsequent messages in the conversation
-    fileTransferDictionary.put(
+    final FileTransferRequestInfo fileTransferRequestInfo = new FileTransferRequestInfo(
             conversationId,
-            new FileTransferRequestInfo(
-                    conversationId,
-                    senderFilePath,
-                    recipientFilePath,
-                    senderContainerName,
-                    recipientContainerName));
+            senderFilePath,
+            recipientFilePath,
+            senderContainerName,
+            recipientContainerName);
+    synchronized (fileTransferDictionary) {
+      fileTransferDictionary.put(
+              conversationId,
+              fileTransferRequestInfo);
+    }
 
     // continue the file transfer conversation by preparing the sending container to send the file
     final Message prepareToSendFileTaskMessage = makeMessage(
@@ -267,6 +295,62 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
   }
 
   /**
+   * Handles a task accomplished information message.
+   *
+   * @param message the receved task accomplished information message
+   */
+  private void handleTaskAccomplishedInfo(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready: " + stateDescription(getSkillState());
+
+    LOGGER.info("handling a task accomplished reply");
+    final UUID conversationId = message.getConversationId();
+    final FileTransferRequestInfo fileTransferRequestInfo;
+    synchronized (fileTransferDictionary) {
+      fileTransferRequestInfo = fileTransferDictionary.get(conversationId);
+    }
+    if (fileTransferRequestInfo.fileTransferState.equals(FileTransferState.UNINITIALIZED)) {
+      handleReplyFromPreparedFileSender(message, fileTransferRequestInfo);
+    }
+
+  }
+
+  /**
+   * Handles a task accomplished information message, which is a reply from a Prepare To Send File Task.
+   *
+   * @param message the receved task accomplished information message
+   * @param fileTransferRequestInfo the file transfer information
+   */
+  private void handleReplyFromPreparedFileSender(
+          final Message message,
+          final FileTransferRequestInfo fileTransferRequestInfo) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert fileTransferRequestInfo != null : "fileTransferRequestInfo must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready: " + stateDescription(getSkillState());
+
+    fileTransferRequestInfo.fileTransferState = AHCSConstants.FileTransferState.OK_TO_SEND;
+    fileTransferRequestInfo.fileHash = (String) message.get(AHCSConstants.MSG_PARM_FILE_HASH);
+    fileTransferRequestInfo.fileSize = (long) message.get(AHCSConstants.MSG_PARM_FILE_SIZE);
+
+    LOGGER.info("handling a reply from a prepared file sender, " + fileTransferRequestInfo);
+
+    // continue the file transfer conversation by preparing the receiveing container to receive the file
+    final Message prepareToSendFileTaskMessage = makeMessage(
+            fileTransferRequestInfo.recipientContainerName + ".ContainerFileTransferAgent.ContainerFileRecipientRole", // recipientQualifiedName
+            fileTransferRequestInfo.conversationId,
+            ContainerFileReceiver.class.getName(), // recipientService
+            AHCSConstants.PREPARE_TO_RECEIVE_FILE_TASK); // operation
+    prepareToSendFileTaskMessage.put(AHCSConstants.MSG_PARM_RECIPIENT_FILE_PATH, fileTransferRequestInfo.recipientFilePath);
+    prepareToSendFileTaskMessage.put(AHCSConstants.MSG_PARM_SENDER_CONTAINER_NAME, fileTransferRequestInfo.senderContainerName);
+    prepareToSendFileTaskMessage.put(AHCSConstants.MSG_PARM_FILE_HASH, fileTransferRequestInfo.fileHash);
+    prepareToSendFileTaskMessage.put(AHCSConstants.MSG_PARM_FILE_SIZE, fileTransferRequestInfo.fileSize);
+
+    sendMessage(prepareToSendFileTaskMessage);
+  }
+
+  /**
    * Returns the file transfer information given its corresponding conversation id. Intended for unit testing.
    *
    * @param conversationId the conversation id
@@ -274,7 +358,9 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
    * @return the file transfer information
    */
   protected FileTransferRequestInfo getFileTransferRequestInfo(final UUID conversationId) {
-    return fileTransferDictionary.get(conversationId);
+    synchronized (fileTransferDictionary) {
+      return fileTransferDictionary.get(conversationId);
+    }
   }
 
   /**
@@ -301,7 +387,7 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
     // the size of the transferred file's contents
     private long fileSize = -1;
     // the file transfer state
-    private FileTransferState fileTransferState = FileTransferState.UNINITIALIZED;
+    protected FileTransferState fileTransferState = FileTransferState.UNINITIALIZED;
     // the number of transferred file chunks
     private int fileChunksCnt = -1;
 

@@ -34,6 +34,7 @@ import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.SkillClass;
 import org.texai.skill.deployment.NetworkDeployment;
+import org.texai.skill.fileTransfer.NetworkFileTransfer.FileTransferRequestInfo;
 import org.texai.skill.network.NetworkOperation;
 import org.texai.skill.testHarness.SkillTestHarness;
 import org.texai.util.ArraySet;
@@ -187,13 +188,52 @@ public class NetworkFileTransferTest {
 
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
     assertNull(skillTestHarness.getOperationAndServiceInfo());
-    final Message sentMessage = skillTestHarness.getSentMessage();
+    Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
     assertEquals("[prepareToSendFile_Task, Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer --> TestSender.ContainerFileTransferAgent.ContainerFileSenderRole:ContainerFileSender]",
             sentMessage.toBriefString());
     assertNotNull(sentMessage.getConversationId());
-    final NetworkFileTransfer networkFileTransfer = (NetworkFileTransfer) skillTestHarness.getSkill(NetworkFileTransfer.class.getName());
+    NetworkFileTransfer networkFileTransfer = (NetworkFileTransfer) skillTestHarness.getSkill(NetworkFileTransfer.class.getName());
+    LOGGER.info("FileTransferRequestInfo ...\n" + networkFileTransfer.getFileTransferRequestInfo(conversationId).toString());
+    final FileTransferRequestInfo fileTransferRequestInfo = networkFileTransfer.getFileTransferRequestInfo(conversationId);
+    assertEquals(
+            "[TestSender:deployment/nodes.xml --> TestRecipient:data/nodes.xml]",
+            fileTransferRequestInfo.toBriefString());
+    assertEquals("uninitialized", AHCSConstants.fileTransferStateToString(fileTransferRequestInfo.fileTransferState));
+
+    // Task Accomplished Info response from the TestSender.ContainerFileTransferAgent.ContainerFileSenderRole
+    skillTestHarness.reset();
+    assertNull(skillTestHarness.getSentMessage());
+    final Message taskAccomplishedInfoMessage = new Message(
+          "TestSender.ContainerFileTransferAgent.ContainerFileSenderRole", // senderQualifiedName
+          ContainerFileSender.class.getName(), // senderService
+          containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
+          conversationId,
+          null, // replyWith
+          null, // inReplyTo
+          null, // replyByDateTime
+          NetworkFileTransfer.class.getName(), // recipientService
+          AHCSConstants.TASK_ACCOMPLISHED_INFO, // operation
+          new HashMap<>(), // parameterDictionary
+          Message.DEFAULT_VERSION); // version
+    taskAccomplishedInfoMessage.put(
+            AHCSConstants.MSG_PARM_FILE_HASH,
+            "fukO5UNFNxNm61Lc13blxrDnipjbNHh+1o///wsAQvpB+2nQWLa7PI41gUFDQMzbQuFJ4Mu3QSiQRkSvghIsMA==");
+    taskAccomplishedInfoMessage.put(AHCSConstants.MSG_PARM_FILE_SIZE, 29795L);
+
+    skillTestHarness.dispatchMessage(taskAccomplishedInfoMessage);
+
+    assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
+    assertNull(skillTestHarness.getOperationAndServiceInfo());
+    sentMessage = skillTestHarness.getSentMessage();
+    assertNotNull(sentMessage);
+    LOGGER.info("sentMessage...\n" + sentMessage);
+    assertEquals(
+            "[prepareToReceiveFile_Task, Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer --> TestRecipient.ContainerFileTransferAgent.ContainerFileRecipientRole:ContainerFileReceiver]",
+            sentMessage.toBriefString());
+    assertNotNull(sentMessage.getConversationId());
+    networkFileTransfer = (NetworkFileTransfer) skillTestHarness.getSkill(NetworkFileTransfer.class.getName());
     LOGGER.info("FileTransferRequestInfo ...\n" + networkFileTransfer.getFileTransferRequestInfo(conversationId).toString());
     assertEquals(
             "[TestSender:deployment/nodes.xml --> TestRecipient:data/nodes.xml]",
@@ -220,7 +260,9 @@ public class NetworkFileTransferTest {
     NetworkFileTransfer instance = new NetworkFileTransfer();
     final List<String> understoodOperations = new ArrayList<>(Arrays.asList(instance.getUnderstoodOperations()));
     Collections.sort(understoodOperations);
-    assertEquals("[AHCS initialize_Task, delegateBecomeReady_Task, delegatePerformMission_Task, joinAcknowledged_Task, joinNetworkSingletonAgent_Info, messageNotUnderstood_Info, performMission_Task, transferFileRequest_Info]", understoodOperations.toString());
+    assertEquals(
+            "[AHCS initialize_Task, delegateBecomeReady_Task, delegatePerformMission_Task, joinAcknowledged_Task, joinNetworkSingletonAgent_Info, messageNotUnderstood_Info, performMission_Task, taskAccomplished_Info, transferFileRequest_Info]",
+            understoodOperations.toString());
   }
 
 }

@@ -213,13 +213,15 @@ public class ContainerFileSender extends AbstractSkill {
     final String recipientFilePath = (String) message.get(AHCSConstants.MSG_PARM_RECIPIENT_FILE_PATH);
     final String recipientContainerName = (String) message.get(AHCSConstants.MSG_PARM_RECIPIENT_CONTAINER_NAME);
     final FileTransferRequestInfo fileTransferRequestInfo = new FileTransferRequestInfo(
-                    conversationId,
-                    senderFilePath,
-                    recipientFilePath,
-                    recipientContainerName);
-    fileTransferDictionary.put(
             conversationId,
-            fileTransferRequestInfo);
+            senderFilePath,
+            recipientFilePath,
+            recipientContainerName);
+    synchronized (fileTransferDictionary) {
+      fileTransferDictionary.put(
+              conversationId,
+              fileTransferRequestInfo);
+    }
 
     fileTransferRequestInfo.fileHash = MessageDigestUtils.fileHashString(file);
     fileTransferRequestInfo.fileSize = file.length();
@@ -253,7 +255,9 @@ public class ContainerFileSender extends AbstractSkill {
    * @return the file transfer information
    */
   protected FileTransferRequestInfo getFileTransferRequestInfo(final UUID conversationId) {
-    return fileTransferDictionary.get(conversationId);
+    synchronized (fileTransferDictionary) {
+      return fileTransferDictionary.get(conversationId);
+    }
   }
 
   /**
