@@ -33,7 +33,7 @@ public class Agent implements RDFPersistent {
   /** This is the URI that identifies this person.  If null, then it is automatically generated when
    * this instance is persisted.  When a subclass is instantiated, this field is ignored. */
   @Id
-  private URI id;    // NOPMD
+  final private URI id = null;    // NOPMD
   /** the name of this agent  */
   @RDFProperty(predicate = "foaf:name")
   private String name;
