@@ -7,7 +7,12 @@ package org.texai.skill.fileTransfer;
  *
  * Copyright (C) Jan 29, 2015, Stephen L. Reed.
  */
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -18,6 +23,7 @@ import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 import org.texai.skill.fileTransfer.FileTransferInfo.FileTransferState;
+import org.texai.util.StringUtils;
 import org.texai.x509.MessageDigestUtils;
 
 /**
@@ -122,6 +128,20 @@ public class ContainerFileSender extends AbstractSkill {
         handlePrepareToSendFileTask(message);
         return;
 
+      /**
+       * Transfer File Task
+       *
+       * This task message is sent from the network-singleton, NetworkFileTransferAgent.NetworkFileTransferRole. It commands this
+       * network-connected role to send a file, for which it is prepared.
+       *
+       * As a result, Transfer File Chunk Information messages are sent to the receiving container's
+       * ContainerFileTransferAgent.ContainerFileRecipientRole.
+       */
+      case AHCSConstants.TRANSFER_FILE_TASK:
+        handleTransferFileTask(message);
+        return;
+
+
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
         return;
@@ -163,7 +183,8 @@ public class ContainerFileSender extends AbstractSkill {
       AHCSConstants.AHCS_INITIALIZE_TASK,
       AHCSConstants.PERFORM_MISSION_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
-      AHCSConstants.PREPARE_TO_SEND_FILE_TASK
+      AHCSConstants.PREPARE_TO_SEND_FILE_TASK,
+      AHCSConstants.TRANSFER_FILE_TASK
     };
   }
 
@@ -211,30 +232,110 @@ public class ContainerFileSender extends AbstractSkill {
     // record the file transfer information for use with subsequent messages in the conversation
     final String recipientFilePath = (String) message.get(AHCSConstants.MSG_PARM_RECIPIENT_FILE_PATH);
     final String recipientContainerName = (String) message.get(AHCSConstants.MSG_PARM_RECIPIENT_CONTAINER_NAME);
-    final FileTransferInfo fileTransferRequestInfo = new FileTransferInfo(
+    final FileTransferInfo fileTransferInfo = new FileTransferInfo(
             conversationId,
             senderFilePath,
             recipientFilePath,
             getContainerName(), // senderContainerName
             recipientContainerName);
+    fileTransferInfo.setFileHash(MessageDigestUtils.fileHashString(file));
+    fileTransferInfo.setFileSize(file.length());
+    try {
+      fileTransferInfo.setBufferedInputStream(new BufferedInputStream(new FileInputStream(file)));
+    } catch (FileNotFoundException ex) {
+      LOGGER.info("file does not exist: " + file);
+      sendMessage(makeExceptionMessage(
+              message, // receivedMessage
+              "file does not exist: " + file)); // reason
+      return;
+    }
+    fileTransferInfo.setFileTransferState(FileTransferState.OK_TO_SEND);
+
     synchronized (fileTransferDictionary) {
       fileTransferDictionary.put(
               conversationId,
-              fileTransferRequestInfo);
+              fileTransferInfo);
     }
-
-    fileTransferRequestInfo.setFileHash(MessageDigestUtils.fileHashString(file));
-    fileTransferRequestInfo.setFileSize(file.length());
-    fileTransferRequestInfo.setFileTransferState(FileTransferState.OK_TO_SEND);
 
     // reply with the hash and the size of the file to be transferred
     final Message taskAccomplishedMessage = makeReplyMessage(
             message, // receivedMessage
             AHCSConstants.TASK_ACCOMPLISHED_INFO); // operation
-    taskAccomplishedMessage.put(AHCSConstants.MSG_PARM_FILE_HASH, fileTransferRequestInfo.getFileHash());
-    taskAccomplishedMessage.put(AHCSConstants.MSG_PARM_FILE_SIZE, fileTransferRequestInfo.getFileSize());
+    taskAccomplishedMessage.put(AHCSConstants.MSG_PARM_FILE_HASH, fileTransferInfo.getFileHash());
+    taskAccomplishedMessage.put(AHCSConstants.MSG_PARM_FILE_SIZE, fileTransferInfo.getFileSize());
 
     sendMessage(taskAccomplishedMessage);
+  }
+
+  /**
+   * Handles the prepare to send file task message.
+   *
+   * @param message the received prepare to send file task message
+   */
+  private void handleTransferFileTask(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+
+    LOGGER.info("handling a transfer file task");
+    final UUID conversationId = message.getConversationId();
+    final FileTransferInfo fileTransferInfo;
+    synchronized (fileTransferDictionary) {
+      fileTransferInfo = fileTransferDictionary.get(conversationId);
+    }
+    assert fileTransferInfo.getFileTransferState().equals(FileTransferState.OK_TO_SEND);
+    fileTransferInfo.setFileTransferState(FileTransferState.FILE_TRANSFER_STARTED);
+
+    transferFileChunk(message, fileTransferInfo);
+  }
+
+  /** Transfers a file chunks to a specified container.
+   *
+   * @param message the received message
+   * @param fileTransferInfo the file transfer information
+   */
+  private void transferFileChunk(
+          final Message message,
+          final FileTransferInfo fileTransferInfo ){
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert fileTransferInfo != null : "fileTransferInfo must not be null";
+    assert fileTransferInfo.getBufferedInputStream() != null : "bufferedInputStream must not be null";
+    assert fileTransferInfo.getConversationId().equals(message.getConversationId()) :
+            "invalid conversation id\n" + message +'\n' + fileTransferInfo;
+    assert fileTransferInfo.getFileTransferState().equals(FileTransferState.FILE_TRANSFER_STARTED);
+
+    final int bufferSize = 8192;
+    final byte[] buffer = new byte[bufferSize];
+    int bytesRead = 0;
+    try {
+      bytesRead = fileTransferInfo.getBufferedInputStream().read(buffer);
+    } catch (IOException ex) {
+      LOGGER.info(StringUtils.getStackTraceAsString(ex));
+      //TODO send exception message back to NetworkFileTransfer
+    }
+    // send a transfer file chunk information message to the receipient ContainerFileTransferAgent.ContainerFileRecipientRole.
+    final Message transferFileChunkInfoMessage = makeMessage(
+            fileTransferInfo.getRecipientContainerName() + ".ContainerFileTransferAgent.ContainerFileRecipientRole", // recipientQualifiedName
+            message.getConversationId(),
+            ContainerFileReceiver.class.getName(), // recipientService
+            AHCSConstants.TRANSFER_FILE_CHUNK_INFO); // operation
+
+    // send as a parameter the actual bytes read from the file
+    final int bytesSize;
+    if (bytesRead == -1) {
+      bytesSize = 0;
+    } else {
+      bytesSize = bytesRead;
+    }
+    final byte[] truncatedBuffer = Arrays.copyOf(buffer, bytesSize);
+    transferFileChunkInfoMessage.put(AHCSConstants.MSG_PARM_BYTES, truncatedBuffer);
+    transferFileChunkInfoMessage.put(AHCSConstants.MSG_PARM_BYTES_SIZE, bytesSize);
+
+    fileTransferInfo.incrementFileChunksCnt();
+    LOGGER.info("sending file chunk " + fileTransferInfo.getFileChunksCnt());
+
+    sendMessage(transferFileChunkInfoMessage);
   }
 
   /**

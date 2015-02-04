@@ -374,12 +374,14 @@ public final class AHCSConstants {
   public static final String AHCS_ORIGINAL_MESSAGE = "AHCS originalMessage";
   // the message parameter naming the session value
   public static final String SESSION = "AHCS session";
+  // the message parameter for bytes, which is a byte array
+  public static final String MSG_PARM_BYTES = "bytes";
   // the message parameter for bytes size, which is an int
   public static final String MSG_PARM_BYTES_SIZE = "bytesSize";
   // the message parameter for the child role ID
   public static final String MSG_PARM_CHILD_ROLE_ID = "child role id";
-  // the message parameter for chunk number, which is an int
-  public static final String MSG_PARM_CHUNK_NBR = "chunkNbr";
+  // the message parameter for file chunks count, which is an int
+  public static final String MSG_PARM_FILE_CHUNKS_CNT = "fileChunksCnt";
   // the message parameter for currency amount in Satoshis as a BigInteger
   public static final String MSG_PARM_CURRENCY_AMOUNT = "currency amount";
   // the message parameter for class name
@@ -388,6 +390,8 @@ public final class AHCSConstants {
   public static final String MSG_PARM_CONTAINER_NAME = "containerName";
   // the message parameter for conversation ID
   public static final String MSG_PARM_CONVERSATION_ID = "conversationId";
+  // the message parameter for end of file indicator, which is a boolean
+  public static final String MSG_PARM_IS_EOF = "isEOF";
   // the message parameter for file hash, which is a string
   public static final String MSG_PARM_FILE_HASH = "fileHash";
   // the message parameter for file size in bytes, which is a long

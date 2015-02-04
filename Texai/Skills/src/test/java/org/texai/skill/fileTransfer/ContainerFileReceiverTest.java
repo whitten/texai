@@ -124,7 +124,7 @@ public class ContainerFileReceiverTest {
   }
 
   /**
-   * Test of class ContainerFileReceiver prepare to send file task message.
+   * Test of class ContainerFileReceiver prepare to receive file task message.
    */
   @Test
   public void testPrepareToReceiveFileTaskMessage() {
@@ -135,14 +135,14 @@ public class ContainerFileReceiverTest {
 
     final UUID conversationId = UUID.randomUUID();
     final Message prepareToReceiveFileTaskMessage = new Message(
-          "Test.NetworkFileTransferAgent.NetworkFileTransferRole", // senderQualifiedName
-          NetworkFileTransfer.class.getName(), // senderService
-          "TestRecipient.ContainerFileTransferAgent.ContainerFileRecipientRole", // recipientQualifiedName
-          conversationId,
-          null, // replyWith
-          null, // inReplyTo
-          ContainerFileReceiver.class.getName(), // recipientService
-          AHCSConstants.PREPARE_TO_RECEIVE_FILE_TASK); // operation
+            "Test.NetworkFileTransferAgent.NetworkFileTransferRole", // senderQualifiedName
+            NetworkFileTransfer.class.getName(), // senderService
+            "TestRecipient.ContainerFileTransferAgent.ContainerFileRecipientRole", // recipientQualifiedName
+            conversationId,
+            null, // replyWith
+            null, // inReplyTo
+            ContainerFileReceiver.class.getName(), // recipientService
+            AHCSConstants.PREPARE_TO_RECEIVE_FILE_TASK); // operation
     prepareToReceiveFileTaskMessage.put(AHCSConstants.MSG_PARM_SENDER_FILE_PATH, "deployment/nodes.xml");
     prepareToReceiveFileTaskMessage.put(AHCSConstants.MSG_PARM_RECIPIENT_FILE_PATH, "data/nodes.xml");
     prepareToReceiveFileTaskMessage.put(AHCSConstants.MSG_PARM_SENDER_CONTAINER_NAME, "TestSender");
@@ -157,7 +157,7 @@ public class ContainerFileReceiverTest {
     final ContainerFileReceiver containerFileReceiver = (ContainerFileReceiver) skillTestHarness.getSkill(skillClassName);
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
     assertNull(skillTestHarness.getOperationAndServiceInfo());
-    final Message sentMessage = skillTestHarness.getSentMessage();
+    Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
     assertEquals("[taskAccomplished_Info, TestRecipient.ContainerFileTransferAgent.ContainerFileRecipientRole:ContainerFileReceiver --> Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer]",
@@ -166,7 +166,38 @@ public class ContainerFileReceiverTest {
     assertEquals(sentMessage.getConversationId().toString(), conversationId.toString());
     assertEquals(
             "[TestSender:deployment/nodes.xml --> TestRecipient:data/nodes.xml]",
-            containerFileReceiver.getFileTransferRequestInfo(conversationId).toBriefString());
+            containerFileReceiver.getFileTransferInfo(conversationId).toBriefString());
+
+    // test a received Transfer File Chunk Info message
+    skillTestHarness.reset();
+    final Message transferFileChunkInfoMessage = new Message(
+            "TestSender.ContainerFileTransferAgent.ContainerFileSenderRole", // senderQualifiedName
+            ContainerFileSender.class.getName(), // senderService
+            "TestRecipient.ContainerFileTransferAgent.ContainerFileRecipientRole", // recipientQualifiedName
+            conversationId,
+            null, // replyWith
+            null, // inReplyTo
+            ContainerFileReceiver.class.getName(), // recipientService
+            AHCSConstants.TRANSFER_FILE_CHUNK_INFO); // operation
+    final byte[] truncatedBuffer = "<tag>a test file chunk</tag>".getBytes();
+    transferFileChunkInfoMessage.put(AHCSConstants.MSG_PARM_BYTES, truncatedBuffer);
+    transferFileChunkInfoMessage.put(AHCSConstants.MSG_PARM_BYTES_SIZE, truncatedBuffer.length);
+
+    skillTestHarness.dispatchMessage(transferFileChunkInfoMessage);
+    assertNull(skillTestHarness.getOperationAndServiceInfo());
+    sentMessage = skillTestHarness.getSentMessage();
+    assertNotNull(sentMessage);
+    LOGGER.info("sentMessage...\n" + sentMessage);
+    assertEquals("[taskAccomplished_Info, TestRecipient.ContainerFileTransferAgent.ContainerFileRecipientRole:ContainerFileReceiver --> TestSender.ContainerFileTransferAgent.ContainerFileSenderRole:ContainerFileSender]",
+            sentMessage.toBriefString());
+    assertNotNull(sentMessage.getConversationId());
+    assertEquals(sentMessage.getConversationId().toString(), conversationId.toString());
+    FileTransferInfo fileTransferInfo = containerFileReceiver.getFileTransferInfo(conversationId);
+    assertEquals(
+            "[TestSender:deployment/nodes.xml --> TestRecipient:data/nodes.xml]",
+            fileTransferInfo.toBriefString());
+    assertEquals(1, sentMessage.get(AHCSConstants.MSG_PARM_FILE_CHUNKS_CNT));
+    assertEquals(fileTransferInfo.getFileChunksCnt(), sentMessage.get(AHCSConstants.MSG_PARM_FILE_CHUNKS_CNT));
   }
 
   /**
@@ -218,7 +249,7 @@ public class ContainerFileReceiverTest {
     final List<String> understoodOperations = new ArrayList<>(Arrays.asList(instance.getUnderstoodOperations()));
     Collections.sort(understoodOperations);
     assertEquals(
-            "[AHCS initialize_Task, messageNotUnderstood_Info, performMission_Task, prepareToReceiveFile_Task]",
+            "[AHCS initialize_Task, messageNotUnderstood_Info, performMission_Task, prepareToReceiveFile_Task, transferFileChunk_Info]",
             understoodOperations.toString());
   }
 

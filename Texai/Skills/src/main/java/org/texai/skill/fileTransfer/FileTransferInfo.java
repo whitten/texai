@@ -1,5 +1,7 @@
 package org.texai.skill.fileTransfer;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.util.UUID;
 import org.joda.time.DateTime;
 import org.joda.time.Seconds;
@@ -34,8 +36,50 @@ public final class FileTransferInfo {
     private long fileSize = -1;
     // the file transfer state
     private FileTransferState fileTransferState = FileTransferState.UNINITIALIZED;
+    // the sender's file input stream
+    private BufferedInputStream bufferedInputStream;
+    // the receiver's file output stream
+    private BufferedOutputStream bufferedOutputStream;
     // the number of transferred file chunks
-    private int fileChunksCnt = -1;
+    private int fileChunksCnt = 0;
+
+  /** Gets the sender's file input stream.
+   *
+   * @return the sender's file input stream
+   */
+  public BufferedInputStream getBufferedInputStream() {
+    return bufferedInputStream;
+  }
+
+  /** Sets the sender's file input stream.
+   *
+   * @param bufferedInputStream the sender's file input stream
+   */
+  public void setBufferedInputStream(final BufferedInputStream bufferedInputStream) {
+    //Preconditions
+    assert bufferedInputStream != null : "bufferedInputStream must not be null";
+
+    this.bufferedInputStream = bufferedInputStream;
+  }
+
+  /** Gets the receiver's file output stream.
+   *
+   * @return the receiver's file output stream
+   */
+  public BufferedOutputStream getBufferedOutputStream() {
+    return bufferedOutputStream;
+  }
+
+  /** Sets the receiver's file output stream.
+   *
+   * @param bufferedOutputStream the receiver's file output stream
+   */
+  public void setBufferedOutputStream(final BufferedOutputStream bufferedOutputStream) {
+    //Preconditions
+    assert bufferedOutputStream != null : "bufferedOutputStream must not be null";
+
+    this.bufferedOutputStream = bufferedOutputStream;
+  }
 
   // the file transfer states
   public enum FileTransferState {
@@ -304,14 +348,9 @@ public final class FileTransferInfo {
     return fileChunksCnt;
   }
 
-  /** Sets the number of transferred file chunks.
-   * @param fileChunksCnt the number of transferred file chunks
-   */
-  public void setFileChunksCnt(final int fileChunksCnt) {
-    //Preconditions
-    assert fileChunksCnt >= 0 : "fileChunksCnt size must not be negative";
-
-    this.fileChunksCnt = fileChunksCnt;
+  /** Increments the number of transferred file chunks. */
+  public void incrementFileChunksCnt() {
+    fileChunksCnt++;
   }
 
 }
