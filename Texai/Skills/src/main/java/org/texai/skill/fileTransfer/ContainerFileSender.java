@@ -37,6 +37,8 @@ public class ContainerFileSender extends AbstractSkill {
   private static final Logger LOGGER = Logger.getLogger(ContainerFileSender.class);
   // the file transfer dictionary, conversation id --> file transfer request info
   private final Map<UUID, FileTransferInfo> fileTransferDictionary = new HashMap<>();
+  // the indicator to clean up the file transfer dictionary after a completed file transfer
+  private boolean isFileTransferDictionaryCleaned = true;
 
   /**
    * Constructs a new ContainerFileSender instance.
@@ -134,13 +136,27 @@ public class ContainerFileSender extends AbstractSkill {
        * This task message is sent from the network-singleton, NetworkFileTransferAgent.NetworkFileTransferRole. It commands this
        * network-connected role to send a file, for which it is prepared.
        *
-       * As a result, Transfer File Chunk Information messages are sent to the receiving container's
+       * As a result, the first Transfer File Chunk Information message is sent to the receiving container's
        * ContainerFileTransferAgent.ContainerFileRecipientRole.
        */
       case AHCSConstants.TRANSFER_FILE_TASK:
         handleTransferFileTask(message);
         return;
 
+      /**
+       * Task Accomplished Information.
+       *
+       * This information message is sent from the ContainerFileTransferAgent.ContainerFileRecipientRole. It confirms that the file chunk
+       * has been written to the output path.
+       *
+       * The number of processed file chunks is a parameter of this message.
+       *
+       * As a result, either the file transfer is completed, or the nextg Transfer File Chunk Information message is sent to the receiving
+       * container's ContainerFileTransferAgent.ContainerFileRecipientRole.
+       */
+      case AHCSConstants.TASK_ACCOMPLISHED_INFO:
+        handleTaskAccomplishedInfo(message);
+        return;
 
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
@@ -184,6 +200,7 @@ public class ContainerFileSender extends AbstractSkill {
       AHCSConstants.PERFORM_MISSION_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.PREPARE_TO_SEND_FILE_TASK,
+      AHCSConstants.TASK_ACCOMPLISHED_INFO,
       AHCSConstants.TRANSFER_FILE_TASK
     };
   }
@@ -289,24 +306,69 @@ public class ContainerFileSender extends AbstractSkill {
     transferFileChunk(message, fileTransferInfo);
   }
 
-  /** Transfers a file chunks to a specified container.
+  /**
+   * Handles a received task accomplished information message from a peer container.
+   *
+   * @param message the received task accomplished information messgage
+   */
+  private void handleTaskAccomplishedInfo(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+
+    LOGGER.info("handling task accomplished information");
+    final UUID conversationId = message.getConversationId();
+    final FileTransferInfo fileTransferInfo;
+    synchronized (fileTransferDictionary) {
+      fileTransferInfo = fileTransferDictionary.get(conversationId);
+    }
+    assert fileTransferInfo.getFileTransferState().equals(FileTransferState.FILE_TRANSFER_STARTED);
+    assert (int) message.get(AHCSConstants.MSG_PARM_FILE_CHUNKS_CNT) == fileTransferInfo.getFileChunksCnt();
+
+    if (fileTransferInfo.getFileChunkBytes().length == FileTransferInfo.MAXIMUM_FILE_CHUNK_SIZE) {
+      // the last chunk sent was a full buffer, send the next chunk
+      transferFileChunk(message, fileTransferInfo);
+      return;
+    }
+
+    // send a task accomplished message back to the NetworkFileTransferAgent.NetworkFileTransferRole indicating that the
+    // file transfer is complete
+    fileTransferInfo.setFileTransferState(FileTransferState.FILE_TRANSFER_COMPLETE);
+    final Message taskAccomplishedInfoMessage = makeMessage(
+            getRole().getParentQualifiedName(), // recipientQualifiedName
+            conversationId,
+            NetworkFileTransfer.class.getName(), // recipientService
+            AHCSConstants.TASK_ACCOMPLISHED_INFO); // operation
+    final long durationMillis = System.currentTimeMillis() - fileTransferInfo.getStartingDateTime().getMillis();
+    taskAccomplishedInfoMessage.put(AHCSConstants.MSG_PARM_DURATION, durationMillis);
+    LOGGER.info("File transfer completed in " + (durationMillis / 1000) + " seconds.");
+
+    if (isFileTransferDictionaryCleaned) {
+      final FileTransferInfo removedFileTransferInfo = fileTransferDictionary.remove(message.getConversationId());
+      assert removedFileTransferInfo != null;
+    }
+
+    sendMessage(taskAccomplishedInfoMessage);
+  }
+
+  /**
+   * Transfers the next file chunk to a specified container.
    *
    * @param message the received message
    * @param fileTransferInfo the file transfer information
    */
   private void transferFileChunk(
           final Message message,
-          final FileTransferInfo fileTransferInfo ){
+          final FileTransferInfo fileTransferInfo) {
     //Preconditions
     assert message != null : "message must not be null";
     assert fileTransferInfo != null : "fileTransferInfo must not be null";
     assert fileTransferInfo.getBufferedInputStream() != null : "bufferedInputStream must not be null";
     assert fileTransferInfo.getConversationId().equals(message.getConversationId()) :
-            "invalid conversation id\n" + message +'\n' + fileTransferInfo;
+            "invalid conversation id\n" + message + '\n' + fileTransferInfo;
     assert fileTransferInfo.getFileTransferState().equals(FileTransferState.FILE_TRANSFER_STARTED);
 
-    final int bufferSize = 8192;
-    final byte[] buffer = new byte[bufferSize];
+    final byte[] buffer = new byte[FileTransferInfo.MAXIMUM_FILE_CHUNK_SIZE];
     int bytesRead = 0;
     try {
       bytesRead = fileTransferInfo.getBufferedInputStream().read(buffer);
@@ -332,8 +394,9 @@ public class ContainerFileSender extends AbstractSkill {
     transferFileChunkInfoMessage.put(AHCSConstants.MSG_PARM_BYTES, truncatedBuffer);
     transferFileChunkInfoMessage.put(AHCSConstants.MSG_PARM_BYTES_SIZE, bytesSize);
 
+    fileTransferInfo.setFileChunkBytes(truncatedBuffer);
     fileTransferInfo.incrementFileChunksCnt();
-    LOGGER.info("sending file chunk " + fileTransferInfo.getFileChunksCnt());
+    LOGGER.info("sending file chunk " + fileTransferInfo.getFileChunksCnt() + ", having size " + fileTransferInfo.getFileChunkBytes().length);
 
     sendMessage(transferFileChunkInfoMessage);
   }
@@ -360,4 +423,23 @@ public class ContainerFileSender extends AbstractSkill {
       return fileTransferDictionary.get(conversationId);
     }
   }
+
+  /**
+   * Gets whether to clean up the file transfer dictionary after a completed file transfer.
+   *
+   * @return whether to clean up the file transfer dictionary after a completed file transfer
+   */
+  public boolean isFileTransferDictionaryCleaned() {
+    return isFileTransferDictionaryCleaned;
+  }
+
+  /**
+   * Sets whether to clean up the file transfer dictionary after a completed file transfer.
+   *
+   * @param isFileTransferDictionaryCleaned whether to clean up the file transfer dictionary after a completed file transfer
+   */
+  public void setIsFileTransferDictionaryCleaned(boolean isFileTransferDictionaryCleaned) {
+    this.isFileTransferDictionaryCleaned = isFileTransferDictionaryCleaned;
+  }
+
 }

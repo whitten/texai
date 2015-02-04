@@ -390,8 +390,8 @@ public final class AHCSConstants {
   public static final String MSG_PARM_CONTAINER_NAME = "containerName";
   // the message parameter for conversation ID
   public static final String MSG_PARM_CONVERSATION_ID = "conversationId";
-  // the message parameter for end of file indicator, which is a boolean
-  public static final String MSG_PARM_IS_EOF = "isEOF";
+  // the message parameter for millisecond duration, which is a long
+  public static final String MSG_PARM_DURATION = "duration";
   // the message parameter for file hash, which is a string
   public static final String MSG_PARM_FILE_HASH = "fileHash";
   // the message parameter for file size in bytes, which is a long

@@ -35,6 +35,8 @@ public class ContainerFileReceiver extends AbstractSkill {
   private static final Logger LOGGER = Logger.getLogger(ContainerFileReceiver.class);
   // the file transfer dictionary, conversation id --> file transfer request info
   private final Map<UUID, FileTransferInfo> fileTransferDictionary = new HashMap<>();
+  // the indicator to clean up the file transfer dictionary after a completed file transfer
+  private boolean isFileTransferDictionaryCleaned = true;
 
   /**
    * Constructs a new ContainerFileReceiver instance.
@@ -277,20 +279,21 @@ public class ContainerFileReceiver extends AbstractSkill {
     transferFileChunk(message, fileTransferInfo);
   }
 
-  /** Transfers a file chunks from a container.
+  /**
+   * Transfers a file chunks from a container.
    *
    * @param message the received message
    * @param fileTransferInfo the file transfer information
    */
   private void transferFileChunk(
           final Message message,
-          final FileTransferInfo fileTransferInfo ){
+          final FileTransferInfo fileTransferInfo) {
     //Preconditions
     assert message != null : "message must not be null";
     assert fileTransferInfo != null : "fileTransferInfo must not be null";
     assert fileTransferInfo.getBufferedOutputStream() != null : "bufferedOutputStream must not be null";
     assert fileTransferInfo.getConversationId().equals(message.getConversationId()) :
-            "invalid conversation id\n" + message +'\n' + fileTransferInfo;
+            "invalid conversation id\n" + message + '\n' + fileTransferInfo;
     assert fileTransferInfo.getFileTransferState().equals(FileTransferState.FILE_TRANSFER_STARTED);
 
     final byte[] buffer = (byte[]) message.get(AHCSConstants.MSG_PARM_BYTES);
@@ -307,6 +310,10 @@ public class ContainerFileReceiver extends AbstractSkill {
       fileTransferInfo.getBufferedOutputStream().flush();
       if (bytesSize < 8192) {
         fileTransferInfo.getBufferedOutputStream().close();
+        if (isFileTransferDictionaryCleaned) {
+          final FileTransferInfo removedFileTransferInfo = fileTransferDictionary.remove(message.getConversationId());
+          assert removedFileTransferInfo != null;
+        }
         LOGGER.info("File transfer completed.");
       }
     } catch (IOException ex) {
@@ -344,4 +351,23 @@ public class ContainerFileReceiver extends AbstractSkill {
       return fileTransferDictionary.get(conversationId);
     }
   }
+
+  /**
+   * Gets whether to clean up the file transfer dictionary after a completed file transfer.
+   *
+   * @return whether to clean up the file transfer dictionary after a completed file transfer
+   */
+  public boolean isFileTransferDictionaryCleaned() {
+    return isFileTransferDictionaryCleaned;
+  }
+
+  /**
+   * Sets whether to clean up the file transfer dictionary after a completed file transfer.
+   *
+   * @param isFileTransferDictionaryCleaned whether to clean up the file transfer dictionary after a completed file transfer
+   */
+  public void setIsFileTransferDictionaryCleaned(boolean isFileTransferDictionaryCleaned) {
+    this.isFileTransferDictionaryCleaned = isFileTransferDictionaryCleaned;
+  }
+
 }

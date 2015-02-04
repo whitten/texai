@@ -170,6 +170,7 @@ public class ContainerFileReceiverTest {
 
     // test a received Transfer File Chunk Info message
     skillTestHarness.reset();
+    containerFileReceiver.setIsFileTransferDictionaryCleaned(false);
     final Message transferFileChunkInfoMessage = new Message(
             "TestSender.ContainerFileTransferAgent.ContainerFileSenderRole", // senderQualifiedName
             ContainerFileSender.class.getName(), // senderService
@@ -184,6 +185,7 @@ public class ContainerFileReceiverTest {
     transferFileChunkInfoMessage.put(AHCSConstants.MSG_PARM_BYTES_SIZE, truncatedBuffer.length);
 
     skillTestHarness.dispatchMessage(transferFileChunkInfoMessage);
+
     assertNull(skillTestHarness.getOperationAndServiceInfo());
     sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);

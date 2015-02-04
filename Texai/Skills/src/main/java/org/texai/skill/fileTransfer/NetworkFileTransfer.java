@@ -24,6 +24,8 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
   private static final Logger LOGGER = Logger.getLogger(NetworkFileTransfer.class);
   // the file transfer dictionary, conversation id --> file transfer request info
   private final Map<UUID, FileTransferInfo> fileTransferDictionary = new HashMap<>();
+  // the indicator to clean up the file transfer dictionary after a completed file transfer
+  private boolean isFileTransferDictionaryCleaned = true;
 
   /**
    * Creates a new instance of NetworkFileTransfer.
@@ -272,6 +274,9 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
             recipientFilePath,
             senderContainerName,
             recipientContainerName);
+    fileTransferRequestInfo.setRequesterQualifiedName(message.getSenderQualifiedName());
+    fileTransferRequestInfo.setRequesterService(message.getSenderService());
+
     synchronized (fileTransferDictionary) {
       fileTransferDictionary.put(
               conversationId,
@@ -311,6 +316,8 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
       handleReplyFromPreparedFileSender(message, fileTransferInfo);
     } else if (fileTransferInfo.getFileTransferState().equals(FileTransferState.OK_TO_SEND)) {
       handleReplyFromPreparedFileRecipient(message, fileTransferInfo);
+    } else if (fileTransferInfo.getFileTransferState().equals(FileTransferState.FILE_TRANSFER_STARTED)) {
+      handleReplyFromTransferFileTask(message, fileTransferInfo);
     }
 
   }
@@ -380,6 +387,42 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
   }
 
   /**
+   * Handles a task accomplished information message, which is a reply from a Transfer File Task.
+   *
+   * @param message the receved task accomplished information message
+   * @param fileTransferInfo the file transfer information
+   */
+  private void handleReplyFromTransferFileTask(
+          final Message message,
+          final FileTransferInfo fileTransferInfo) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert fileTransferInfo != null : "fileTransferRequestInfo must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready: " + stateDescription(getSkillState());
+
+    fileTransferInfo.setFileTransferState(FileTransferState.FILE_TRANSFER_COMPLETE);
+
+    LOGGER.info("handling a task accomplished (file transfer completed) " + fileTransferInfo);
+
+    // continue the file transfer conversation by replying to the original requestor
+    final Message taskAccomplishedInfoMessage = makeMessage(
+            fileTransferInfo.getRequesterQualifiedName(), // recipientQualifiedName
+            message.getConversationId(),
+            fileTransferInfo.getRequesterService(), // recipientService
+            AHCSConstants.TASK_ACCOMPLISHED_INFO); // operation
+    final long durationMillis = System.currentTimeMillis() - fileTransferInfo.getStartingDateTime().getMillis();
+    taskAccomplishedInfoMessage.put(AHCSConstants.MSG_PARM_DURATION, durationMillis);
+    LOGGER.info("File transfer completed in " + (durationMillis / 1000) + " seconds.");
+
+    if (isFileTransferDictionaryCleaned) {
+      final FileTransferInfo removedFileTransferInfo = fileTransferDictionary.remove(message.getConversationId());
+      assert removedFileTransferInfo != null;
+    }
+
+    sendMessage(taskAccomplishedInfoMessage);
+  }
+
+  /**
    * Returns the file transfer information given its corresponding conversation id. Intended for unit testing.
    *
    * @param conversationId the conversation id
@@ -390,6 +433,24 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
     synchronized (fileTransferDictionary) {
       return fileTransferDictionary.get(conversationId);
     }
+  }
+
+  /**
+   * Gets whether to clean up the file transfer dictionary after a completed file transfer.
+   *
+   * @return whether to clean up the file transfer dictionary after a completed file transfer
+   */
+  public boolean isFileTransferDictionaryCleaned() {
+    return isFileTransferDictionaryCleaned;
+  }
+
+  /**
+   * Sets whether to clean up the file transfer dictionary after a completed file transfer.
+   *
+   * @param isFileTransferDictionaryCleaned whether to clean up the file transfer dictionary after a completed file transfer
+   */
+  public void setIsFileTransferDictionaryCleaned(boolean isFileTransferDictionaryCleaned) {
+    this.isFileTransferDictionaryCleaned = isFileTransferDictionaryCleaned;
   }
 
 }

@@ -168,7 +168,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
        * This information message is sent from the child ContainerDeploymentAgent.ContainerDeploymentRole. It notifies this network
        * singleton role that the container has completed the software and data file deployment task.
        *
-       * When all the containers have respondedk, an Deployment Completed Info message is sent to the parent
+       * When all the containers have responded, a Deployment Completed Info message is sent to the parent
        * NetworkOperationAgent.NetworkOperationRole so that it can restart the network.
        */
       case AHCSConstants.TASK_ACCOMPLISHED_INFO:
