@@ -64,6 +64,7 @@ public class MockWebSocketResponseHandler extends AbstractWebSocketResponseHandl
    * @throws Exception when an exception occurs
    */
   @Override
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings({"NO_NOTIFY_NOT_NOTIFYALL"})
   public void messageReceived(
           final ChannelHandlerContext channelHandlerContext,
           final MessageEvent messageEvent) throws Exception {

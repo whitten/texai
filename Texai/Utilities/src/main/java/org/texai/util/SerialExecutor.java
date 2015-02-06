@@ -53,7 +53,7 @@ public class SerialExecutor implements Executor {
     //Preconditions
     assert task != null : "task must not be null";
 
-    tasks.offer((Runnable) new Runnable() {
+    final boolean isOK = tasks.offer((Runnable) new Runnable() {
 
       @Override
       public void run() {
@@ -64,6 +64,9 @@ public class SerialExecutor implements Executor {
         }
       }
     });
+    if (!isOK) {
+      throw new TexaiException("offer failed");
+    }
     if (activeTask == null) {
       scheduleNext();
     }

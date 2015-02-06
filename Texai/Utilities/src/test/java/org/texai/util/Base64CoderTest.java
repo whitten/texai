@@ -20,6 +20,7 @@
  */
 package org.texai.util;
 
+import java.nio.charset.Charset;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -104,7 +105,7 @@ public class Base64CoderTest {
   @Test
   public void testEncode_byteArr() {
     LOGGER.info("encode");
-    byte[] in = "abc".getBytes();
+    byte[] in = "abc".getBytes(Charset.forName("UTF-8"));
     String result = new String(Base64Coder.encode(in));
     assertEquals("YWJj", result);
   }
@@ -115,7 +116,7 @@ public class Base64CoderTest {
   @Test
   public void testEncode_byteArr_int() {
     LOGGER.info("encode");
-    byte[] in = "abcd".getBytes();
+    byte[] in = "abcd".getBytes(Charset.forName("UTF-8"));
     int iLen = 3;
     String result = new String(Base64Coder.encode(in, iLen));
     assertEquals("YWJj", result);
@@ -129,7 +130,7 @@ public class Base64CoderTest {
     LOGGER.info("decode");
     String s = "YWJj";
     byte[] result = Base64Coder.decode(s);
-    assertEquals("abc", new String(result));
+    assertEquals("abc", new String(result, Charset.forName("UTF-8")));
   }
 
   /**
@@ -140,6 +141,6 @@ public class Base64CoderTest {
     LOGGER.info("decode");
     char[] in = "YWJj".toCharArray();
     byte[] result = Base64Coder.decode(in);
-    assertEquals("abc", new String(result));
+    assertEquals("abc", new String(result, Charset.forName("UTF-8")));
   }
 }

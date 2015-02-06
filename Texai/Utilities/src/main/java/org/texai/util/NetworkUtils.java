@@ -12,9 +12,12 @@ package org.texai.util;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
@@ -203,7 +206,7 @@ public final class NetworkUtils {
     if (serverPortFile.exists()) {
       // subsequent times use the recorded server port number
       try {
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(serverPortFile))) {
+        try (final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(serverPortFile), "UTF-8"))) {
           final String line = bufferedReader.readLine();
           if (line == null) {
             throw new TexaiException("missing SSL server port in: " + SERVER_PORT_PATH);
@@ -225,7 +228,7 @@ public final class NetworkUtils {
         }
         // first time allocate in the dynamic range
         serverPort = getRandomDynamicServerPort();
-        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(serverPortFile))) {
+        try (final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(serverPortFile), "UTF-8"))) {
           bufferedWriter.append(String.valueOf(serverPort));
           bufferedWriter.newLine();
         }

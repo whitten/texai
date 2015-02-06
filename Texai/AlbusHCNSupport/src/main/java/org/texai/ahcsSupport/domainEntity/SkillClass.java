@@ -32,7 +32,7 @@ public class SkillClass implements CascadePersistence, Comparable<SkillClass> {
   private static final long serialVersionUID = 1L;
   // the id assigned by the persistence framework
   @Id
-  private URI id;    // NOPMD
+  final private URI id = null;
   // the skill class name
   @RDFProperty
   private final String skillClassName;
@@ -109,7 +109,7 @@ public class SkillClass implements CascadePersistence, Comparable<SkillClass> {
    * @return the package name
    */
   public String getPackageName() {
-    final int index = skillClassName.lastIndexOf(".");
+    final int index = skillClassName.lastIndexOf('.');
     assert index > 1;
     return skillClassName.substring(0, index);
   }
@@ -120,7 +120,7 @@ public class SkillClass implements CascadePersistence, Comparable<SkillClass> {
    * @return the unqualified class name
    */
   public String getName() {
-    final int index = skillClassName.lastIndexOf(".");
+    final int index = skillClassName.lastIndexOf('.');
     assert index > 1;
     return skillClassName.substring(index + 1);
   }

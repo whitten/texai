@@ -62,7 +62,7 @@ public class ContainerDeploymentTest {
 
   @BeforeClass
   public static void setUpClass() {
-    ContainerDeployment.isUnitTest = true;
+    ContainerDeployment.setIsUnitTest(true);
     final Set<SkillClass> skillClasses = new ArraySet<>();
     final SkillClass skillClass = new SkillClass(
             skillClassName, // skillClassName
@@ -101,7 +101,7 @@ public class ContainerDeploymentTest {
    */
   @Test
   public void testInitializeTaskMessage() {
-    LOGGER.info("testing " + AHCSConstants.AHCS_INITIALIZE_TASK + " message");
+    LOGGER.info("testing " + AHCSConstants.INITIALIZE_TASK + " message");
 
     skillTestHarness.reset();
     skillTestHarness.setSkillState(AHCSConstants.State.UNINITIALIZED, skillClassName);
@@ -110,7 +110,7 @@ public class ContainerDeploymentTest {
             NetworkDeployment.class.getName(), // senderService
             containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
             skillClassName, // recipientService
-            AHCSConstants.AHCS_INITIALIZE_TASK); // operation
+            AHCSConstants.INITIALIZE_TASK); // operation
 
     skillTestHarness.dispatchMessage(initializeMessage);
 
@@ -127,6 +127,7 @@ public class ContainerDeploymentTest {
    * Test of class ContainerDeployment deploy files task message.
    */
   @Test
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings({"RV_RETURN_VALUE_IGNORED_BAD_PRACTICE"})
   public void testDeployFilesTaskMessage() {
     LOGGER.info("testing " + AHCSConstants.DEPLOY_FILES_TASK + " message");
 

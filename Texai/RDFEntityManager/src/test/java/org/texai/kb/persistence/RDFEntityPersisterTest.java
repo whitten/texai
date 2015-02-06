@@ -222,7 +222,7 @@ public class RDFEntityPersisterTest {
     rdfTestEntity1.setNumberOfCrew(1);
 
     final String[] comments1 = {"comment 1", "comment 2"};
-    rdfTestEntity1.setComment(comments1);
+    rdfTestEntity1.setComments(comments1);
     List<Integer> integerList = new ArrayList<>();
     integerList.add(1);
     rdfTestEntity1.setIntegerList(integerList);
@@ -241,7 +241,7 @@ public class RDFEntityPersisterTest {
     rdfTestEntity2.setName("TestDomainEntity 2");
     rdfTestEntity2.setNumberOfCrew(1);
     final String[] comments2 = {"comment 1", "comment 2"};
-    rdfTestEntity2.setComment(comments2);
+    rdfTestEntity2.setComments(comments2);
     final UUID testUUID = UUID.randomUUID();
     rdfTestEntity1.setUuidField(testUUID);
     rdfTestEntity1.mapField = new HashMap<>();
@@ -289,7 +289,7 @@ public class RDFEntityPersisterTest {
     rdfTestEntity3.setName("TestDomainEntity 2");
     rdfTestEntity3.setNumberOfCrew(1);
     final String[] comments3 = {"comment 1", "comment 2"};
-    rdfTestEntity3.setComment(comments3);
+    rdfTestEntity3.setComments(comments3);
     rdfTestEntity1.getMyPeers().add(rdfTestEntity3);
     // should persist new RDF test entity 3, but not RDF test entity 2 which is already has a URI
     System.out.println("******************");

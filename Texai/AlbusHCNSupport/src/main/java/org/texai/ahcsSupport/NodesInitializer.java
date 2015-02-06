@@ -15,8 +15,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
 import java.security.KeyStore;
@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import javax.xml.parsers.ParserConfigurationException;
@@ -44,7 +45,6 @@ import org.openrdf.repository.RepositoryException;
 import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.ahcsSupport.domainEntity.Role;
 import org.texai.ahcsSupport.domainEntity.SkillClass;
-import org.texai.ahcsSupport.domainEntity.StateValueBinding;
 import org.texai.kb.CacheInitializer;
 import org.texai.kb.persistence.DistributedRepositoryManager;
 import org.texai.util.ArraySet;
@@ -126,7 +126,7 @@ public final class NodesInitializer {
     assert StringUtils.isNonEmptyString(configurationCertificateFilePath) : "configurationCertificateFilePath must be a non-empty string";
 
     this.isClassExistsTested = isClassExistsTested;
-    this.keyStorePassword = keyStorePassword;
+    this.keyStorePassword = keyStorePassword.clone();
     this.nodeRuntime = nodeRuntime;
     this.keyStoreFilePath = keyStoreFilePath;
     this.configurationCertificateFilePath = configurationCertificateFilePath;
@@ -420,8 +420,8 @@ public final class NodesInitializer {
       }
     });
     // persist the keystore and the updated certificates
-    try {
-      keyStore.store(new FileOutputStream(keyStoreFilePath), keyStorePassword);
+    try (final FileOutputStream fileOutputStream = new FileOutputStream(keyStoreFilePath)) {
+      keyStore.store(fileOutputStream, keyStorePassword);
     } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException ex) {
       throw new TexaiException(ex);
     }
@@ -463,7 +463,7 @@ public final class NodesInitializer {
    * Populates node roles from prototype nodes.
    */
   private void emitConfigurationCertificate() {
-    final String singletonConfigurationRoleName = "SingletonConfigurationRole";
+    final String singletonConfigurationRoleName = "ContainerSingletonConfigurationRole";
     roleFieldsHolderDictionary.values().stream().forEach(roleFieldsHolder1 -> {
       // save the configuration role's certificate
       if (Role.extractRoleName(roleFieldsHolder1.qualifiedName).equals(singletonConfigurationRoleName)) {
@@ -631,8 +631,8 @@ public final class NodesInitializer {
     LOGGER.debug("");
     LOGGER.debug("graphDataPath: " + graphDataPath);
     try {
-      graphBufferedWriter = new BufferedWriter(new FileWriter(graphDataPath));
-      keyBufferedWriter = new BufferedWriter(new FileWriter(keyDataPath));
+      graphBufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(graphDataPath), "UTF-8"));
+      keyBufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(keyDataPath), "UTF-8"));
       graphBufferedWriter.append("digraph \"");
       graphBufferedWriter.append(graphName);
       graphBufferedWriter.append("\" {\n");
@@ -748,7 +748,7 @@ public final class NodesInitializer {
   /**
    * Contains the fields required to construct a node instance.
    */
-  class NodeFieldsHolder implements Comparable<NodeFieldsHolder> {
+static  class NodeFieldsHolder implements Comparable<NodeFieldsHolder> {
 
     // the node qualifiedName which must end in "Agent"
     String name;
@@ -760,11 +760,16 @@ public final class NodesInitializer {
     final Set<String> prototypeNodeNames = new ArraySet<>();
     // the role field holders
     final Set<RoleFieldsHolder> roleFieldsHolders = new ArraySet<>();
-    // the persistent role state variables and their respective values
-    final Set<StateValueBinding> stateValueBindings = new ArraySet<>();
     // the indicator whether this node is a singleton nomadic agent, in which case only one container in the network hosts
     // the active node and all other nodes having the same name are inactive
     boolean isNetworkSingleton;
+
+    /** Constructs a new NodeFieldsHolder instance. */
+    NodeFieldsHolder() {
+      name = null;
+      missionDescription = null;
+      isNetworkSingleton = false;
+    }
 
     /**
      * Compares the given node field holder with this one. Collates by node qualifiedName.
@@ -776,6 +781,34 @@ public final class NodesInitializer {
     @Override
     public int compareTo(final NodeFieldsHolder other) {
       return this.name.compareTo(other.name);
+    }
+
+    /** Returns a hash code for this object.
+     *
+     * @return a hash code for this object
+     */
+    @Override
+    public int hashCode() {
+      int hash = 5;
+      hash = 67 * hash + Objects.hashCode(this.name);
+      return hash;
+    }
+
+    /** Returns whether some other object equals this one.
+     *
+     * @param obj the other object
+     * @return whether some other object equals this one
+     */
+    @Override
+    public boolean equals(Object obj) {
+      if (obj == null) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      final NodeFieldsHolder other = (NodeFieldsHolder) obj;
+      return Objects.equals(this.name, other.name);
     }
 
     /**
@@ -807,7 +840,7 @@ public final class NodesInitializer {
   /**
    * Contains the fields required to construct a role instance.
    */
-  class RoleFieldsHolder implements Comparable<RoleFieldsHolder> {
+static  class RoleFieldsHolder implements Comparable<RoleFieldsHolder> {
 
     // the qualified role name, i.e. container.nodename.rolename
     String qualifiedName;
@@ -828,6 +861,14 @@ public final class NodesInitializer {
     // during remote communication
     X509SecurityInfo x509SecurityInfo;
 
+    /** Constructs a new RoleFieldsHolder instance. */
+    RoleFieldsHolder() {
+      qualifiedName = null;
+      description = null;
+      parentQualifiedName = null;
+      x509SecurityInfo = null;
+    }
+
     /**
      * Compares the given role field holder with this one. Collates by qualified role name.
      *
@@ -843,6 +884,34 @@ public final class NodesInitializer {
       assert StringUtils.isNonEmptyString(this.qualifiedName) : "qualifiedName must be a non empty string";
 
       return this.qualifiedName.compareTo(other.qualifiedName);
+    }
+
+    /** Returns a hash code for this object.
+     *
+     * @return a hash code for this object
+     */
+    @Override
+    public int hashCode() {
+      int hash = 7;
+      hash = 79 * hash + Objects.hashCode(this.qualifiedName);
+      return hash;
+    }
+
+    /** Returns whether some other object equals this one.
+     *
+     * @param obj the other object
+     * @return whether some other object equals this one
+     */
+    @Override
+    public boolean equals(Object obj) {
+      if (obj == null) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      final RoleFieldsHolder other = (RoleFieldsHolder) obj;
+      return Objects.equals(this.qualifiedName, other.qualifiedName);
     }
 
     /**
@@ -904,6 +973,7 @@ public final class NodesInitializer {
         case "role":
           roleFieldsHolder = new RoleFieldsHolder();
           break;
+        default:
       }
     }
 
@@ -995,6 +1065,7 @@ public final class NodesInitializer {
           nodeFieldsHolderDictionary.put(nodeFieldsHolder.name, nodeFieldsHolder);
           nbrNodeTags++;
           break;
+        default:
       }
     }
   }

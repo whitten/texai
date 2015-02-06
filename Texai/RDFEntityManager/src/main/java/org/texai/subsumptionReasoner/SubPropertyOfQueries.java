@@ -325,7 +325,7 @@ public class SubPropertyOfQueries {
   }
 
   /** Provides the isSubPropertyOf cache. */
-  class IsSubPropertyOfCache extends ThreadLocal<Set<List<URI>>> {
+  static class IsSubPropertyOfCache extends ThreadLocal<Set<List<URI>>> {
 
     /** Returns the current thread's "initial value" for this thread-local variable.
      *
@@ -340,7 +340,7 @@ public class SubPropertyOfQueries {
   }
 
   /** Provides the super property cache. */
-  class SuperPropertyCache extends ThreadLocal<Map<URI, Set<URI>>> {
+  static class SuperPropertyCache extends ThreadLocal<Map<URI, Set<URI>>> {
 
     /** Returns the current thread's "initial value" for this thread-local variable.
      *

@@ -68,7 +68,7 @@ public class XAIContainerCertificateAuthority extends AbstractSkill {
        * This task message is sent from the container-local parent XAINetworkOperationAgent.XAINetworkOperationRole. It is expected to be the first task message
        * that this role receives and it results in the role being initialized.
        */
-      case AHCSConstants.AHCS_INITIALIZE_TASK:
+      case AHCSConstants.INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
         if (getNodeRuntime().isFirstContainerInNetwork()) {
           setSkillState(AHCSConstants.State.READY);
@@ -108,9 +108,6 @@ public class XAIContainerCertificateAuthority extends AbstractSkill {
         return;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
-        LOGGER.warn(message);
-        return;
-
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
         return;
@@ -145,7 +142,7 @@ public class XAIContainerCertificateAuthority extends AbstractSkill {
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
-      AHCSConstants.AHCS_INITIALIZE_TASK,
+      AHCSConstants.INITIALIZE_TASK,
       AHCSConstants.BECOME_READY_TASK,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,

@@ -140,12 +140,12 @@ public class XAISlavedBitcoindAdapter implements PeerEventListener {
    *
    * @param message the given bitcoin protocol message
    */
-  private void receiveBitcoinMessageFromSlave(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-
-    bitcoinMessageReceiver.receiveBitcoinMessageFromSlave(message);
-  }
+//  private void receiveBitcoinMessageFromSlave(final Message message) {
+//    //Preconditions
+//    assert message != null : "message must not be null";
+//
+//    bitcoinMessageReceiver.receiveBitcoinMessageFromSlave(message);
+//  }
 
   /**
    * Called on a Peer thread when a block is received.<p>

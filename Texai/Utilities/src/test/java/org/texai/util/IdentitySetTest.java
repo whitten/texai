@@ -70,11 +70,12 @@ public class IdentitySetTest {
     instance.add(3);
     assertEquals(3, instance.size());
     @SuppressWarnings("UnnecessaryBoxing")
-    final Integer element = new Integer(1);
+    final Integer element = Integer.valueOf(1);
     instance.add(element);
-    assertEquals(4, instance.size());
+    //assertEquals("[2, 3, 1]", instance.toString());
+    assertEquals(3, instance.size());
     instance.add(element);
-    assertEquals(4, instance.size());
+    assertEquals(3, instance.size());
   }
 
   /**
@@ -97,12 +98,16 @@ public class IdentitySetTest {
   public void testContains() {
     LOGGER.info("contains");
     IdentitySet<Integer> instance = new IdentitySet<>();
+    assertEquals("[]", instance.toString());
     final Integer element = 1;
     instance.add(element);
+    assertEquals("[1]", instance.toString());
     assertTrue(instance.contains(element));
     instance.add(1);
+    assertEquals("[1]", instance.toString());
     assertTrue(instance.contains(element));
-    assertFalse(instance.contains(new Integer(1)));
+    assertTrue(instance.contains(1));
+    assertTrue(instance.contains(Integer.valueOf(1)));
     assertFalse(instance.contains(new Object()));
   }
 

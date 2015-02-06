@@ -86,7 +86,7 @@ public class SkillTestHarnessTest {
           NetworkOperation.class.getName(), // senderService
           containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
           skillClassName, // recipientService
-          AHCSConstants.AHCS_INITIALIZE_TASK); // operation
+          AHCSConstants.INITIALIZE_TASK); // operation
 
     skillTestHarness.dispatchMessage(initializeMessage);
     skillTestHarness.getSkillState(skillClassName);

@@ -16,6 +16,7 @@
  */
 package org.texai.skill.fileTransfer;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -101,7 +102,7 @@ public class ContainerFileReceiverTest {
    */
   @Test
   public void testInitializeTaskMessage() {
-    LOGGER.info("testing " + AHCSConstants.AHCS_INITIALIZE_TASK + " message");
+    LOGGER.info("testing " + AHCSConstants.INITIALIZE_TASK + " message");
 
     skillTestHarness.reset();
     skillTestHarness.setSkillState(AHCSConstants.State.UNINITIALIZED, skillClassName);
@@ -110,7 +111,7 @@ public class ContainerFileReceiverTest {
             NetworkOperation.class.getName(), // senderService
             containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
             skillClassName, // recipientService
-            AHCSConstants.AHCS_INITIALIZE_TASK); // operation
+            AHCSConstants.INITIALIZE_TASK); // operation
 
     skillTestHarness.dispatchMessage(initializeMessage);
 
@@ -180,7 +181,7 @@ public class ContainerFileReceiverTest {
             null, // inReplyTo
             ContainerFileReceiver.class.getName(), // recipientService
             AHCSConstants.TRANSFER_FILE_CHUNK_INFO); // operation
-    final byte[] truncatedBuffer = "<tag>a test file chunk</tag>".getBytes();
+    final byte[] truncatedBuffer = "<tag>a test file chunk</tag>".getBytes(Charset.forName("UTF-8"));
     transferFileChunkInfoMessage.put(AHCSConstants.MSG_PARM_BYTES, truncatedBuffer);
     transferFileChunkInfoMessage.put(AHCSConstants.MSG_PARM_BYTES_SIZE, truncatedBuffer.length);
 

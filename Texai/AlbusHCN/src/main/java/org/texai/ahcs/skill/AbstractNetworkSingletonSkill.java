@@ -6,6 +6,7 @@ import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.ahcsSupport.skill.AbstractSkill;
+import org.texai.ahcsSupport.skill.BasicNodeRuntime;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 
@@ -49,6 +50,7 @@ public abstract class AbstractNetworkSingletonSkill extends AbstractSkill {
    *
    * @param message the Join Network Singleton Agent Info message
    */
+  @SuppressWarnings("unchecked")
   protected void joinNetworkSingletonAgent(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
@@ -60,7 +62,12 @@ public abstract class AbstractNetworkSingletonSkill extends AbstractSkill {
     assert x509Certificate != null;
 
     getRole().getChildQualifiedNames().add(childQualifiedName);
-    ((NodeRuntime) getNodeRuntime()).addX509Certificate(childQualifiedName, x509Certificate);
+    final BasicNodeRuntime nodeRuntime = getNodeRuntime();
+    if (nodeRuntime instanceof NodeRuntime) {
+      ((NodeRuntime) nodeRuntime).addX509Certificate(childQualifiedName, x509Certificate);
+    } else {
+      assert false;
+    }
 
     // send a acknowledged_info message to the joined peer agent/role
     final Message acknowledgedInfoMessage = makeMessage(

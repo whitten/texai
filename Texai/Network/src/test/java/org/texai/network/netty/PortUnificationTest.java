@@ -45,7 +45,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import org.apache.log4j.Logger;
 import org.jboss.netty.bootstrap.ClientBootstrap;
-import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelPipeline;
@@ -140,7 +139,7 @@ public final class PortUnificationTest {
     LOGGER.info("server x509SecurityInfo...\n" + x509SecurityInfo);
 
     final Executor serverExecutor = Executors.newCachedThreadPool();
-    final ServerBootstrap serverBootstrap = ConnectionUtils.createPortUnificationServer(
+    ConnectionUtils.createPortUnificationServer(
             SERVER_PORT,
             x509SecurityInfo,
             albusHCSMessageHandlerFactory,
@@ -173,6 +172,7 @@ public final class PortUnificationTest {
    * Tests the exchange of serialized object messages.
    */
   @SuppressWarnings("ThrowableResultIgnored")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings({"UW_UNCOND_WAIT", "WA_NOT_IN_LOOP"})
   private void albusClient() {
     // configure the client pipeline
     final Object clientResume_lock = new Object();
@@ -193,7 +193,6 @@ public final class PortUnificationTest {
     final UUID conversationId = UUID.randomUUID();
     final UUID replyWith = UUID.randomUUID();
     final UUID inReplyTo = UUID.randomUUID();
-    final DateTime replyByDateTime = null;
     final String operation = "Echo_Task";
     final Map<String, Object> parameterDictionary = new HashMap<>();
     // the test service is a valid class with a no-argument constructor, the Skills defining module is dependent on this so an actual skill class cannot be used here
@@ -206,7 +205,7 @@ public final class PortUnificationTest {
             conversationId,
             replyWith,
             inReplyTo,
-            replyByDateTime,
+            null, // replyByDateTime,
             service,
             operation,
             parameterDictionary,
@@ -238,6 +237,7 @@ public final class PortUnificationTest {
    * Tests the exchange of serialized object messages.
    */
   @SuppressWarnings("ThrowableResultIgnored")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings({"UW_UNCOND_WAIT", "WA_NOT_IN_LOOP"})
   private void albusClientBigMessage() {
     // configure the client pipeline
     final Object clientResume_lock = new Object();
@@ -271,7 +271,7 @@ public final class PortUnificationTest {
             conversationId,
             replyWith,
             inReplyTo,
-            replyByDateTime,
+            null, // replyByDateTime
             service,
             operation,
             parameterDictionary,
@@ -304,6 +304,7 @@ public final class PortUnificationTest {
    * Tests the HTTP request and response messages.
    */
   @SuppressWarnings("ThrowableResultIgnored")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings({"UW_UNCOND_WAIT", "WA_NOT_IN_LOOP"})
   private void httpClient() {
     final ClientBootstrap clientBootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(
             Executors.newCachedThreadPool(),
@@ -374,6 +375,7 @@ public final class PortUnificationTest {
    * Tests the Netty web socket request and response messages.
    */
   @SuppressWarnings("ThrowableResultIgnored")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings({"UW_UNCOND_WAIT", "WA_NOT_IN_LOOP"})
   private void nettyWebSocketClient() {
     final ClientBootstrap clientBootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(
             Executors.newCachedThreadPool(),

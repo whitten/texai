@@ -9,6 +9,7 @@
  */
 package org.texai.skill.domainEntity;
 
+import java.util.Objects;
 import java.util.Set;
 import net.jcip.annotations.Immutable;
 import net.jcip.annotations.ThreadSafe;
@@ -134,6 +135,18 @@ public final class SkillInvokingQueryContainer extends QueryContainer {
     return stringBuilder.toString();
   }
 
+  /** Returns a hash code for this object.
+   *
+   * @return  a hash code
+   */
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = 89 * hash + Objects.hashCode(this.serviceName);
+    hash = 89 * hash + Objects.hashCode(this.operation);
+    return hash;
+  }
+
   /** Returns whether some other object equals this one.
    *
    * @param obj the other object
@@ -155,10 +168,7 @@ public final class SkillInvokingQueryContainer extends QueryContainer {
     if ((this.serviceName == null) ? (other.serviceName != null) : !this.serviceName.equals(other.serviceName)) {
       return false;
     }
-    if ((this.operation == null) ? (other.operation != null) : !this.operation.equals(other.operation)) {
-      return false;
-    }
-    return true;
+    return !((this.operation == null) ? (other.operation != null) : !this.operation.equals(other.operation));
   }
 
 }

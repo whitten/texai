@@ -1,39 +1,8 @@
-ContainerDeploymentAgent
-  Performs software deployment at the container level.
-
-ContainerFileTransferAgent
-  Transfers files between two containers in the AICoin network.
-
-ContainerGovernanceAgent
-  Manages a container's agents to ensure friendly behavior.
-
-ContainerLogControlAgent
-  Coordinates Java logging at the container level for agents in the AICoin network.
-
 ContainerOperationAgent
   Manages a container and the AICoin agent within the container. Interacts with the human container operator.
 
-NetworkDeploymentAgent
-  Performs software deployment at the network level.
-
-NetworkFileTransferAgent
-  Coordinates file transfers between containers in the AICoin network.
-
-NetworkLogControlAgent
-  Coordinates Java logging for agents in the AICoin network.
-
 NetworkOperationAgent
   Manages the network, the containers, and the AICoin agents within the containers. Interacts with human operators.
-
-NetworkSingletonConfigurationAgent
-  Provides network configuration the AICoin network. Maintains the assignment of
-      nomadic agents to particular containers.
-
-SingletonConfigurationAgent
-  Configures this container's agents to refer to singleton parent roles, which can be hosted on other containers.
-
-TopLevelGovernanceAgent
-  Manages the container governance agents to ensure friendly behavior.
 
 TopmostFriendshipAgent
   Coordinates the top level agents to ensure friendly behavior.

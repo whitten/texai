@@ -104,9 +104,7 @@ public final class JournalReader {
       }
     }
     assert repositoryConnection != null;
-    BufferedReader bufferedReader = null;
-    try {
-      bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(canonicalJournalFilePath)));
+    try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(canonicalJournalFilePath), "UTF-8"))) {
       while (true) {
         final String line = bufferedReader.readLine();
         if (line == null) {
@@ -130,9 +128,6 @@ public final class JournalReader {
             LOGGER.debug("  parsed statement: " + RDFUtility.formatStatementAsTurtle(statement));
           }
         } catch (final ParseException ex) {
-          if (bufferedReader != null) {
-            bufferedReader.close();
-          }
           throw new TexaiException(ex);
         }
         try {
@@ -154,28 +149,15 @@ public final class JournalReader {
               break;
           }
         } catch (final RepositoryException ex) {
-          if (bufferedReader != null) {
-            bufferedReader.close();
-          }
           throw new TexaiException(ex);
         }
       }
       try {
         repositoryConnection.close();
       } catch (RepositoryException ex) {
-        if (bufferedReader != null) {
-          bufferedReader.close();
-        }
         throw new TexaiException(ex);
       }
     } catch (final IOException ex) {
-      if (bufferedReader != null) {
-        try {
-          bufferedReader.close();
-        } catch (final IOException ex1) {
-          throw new TexaiException(ex1);    // NOPMD
-        }
-      }
       throw new TexaiException(ex);
     }
   }

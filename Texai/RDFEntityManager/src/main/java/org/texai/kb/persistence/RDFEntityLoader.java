@@ -318,7 +318,7 @@ public final class RDFEntityLoader extends AbstractRDFEntityAccessor {   // NOPM
     setRDFEntity(rdfEntity);
     gatherAnnotationsForRDFEntityClass();
     configureRDFEntitySettings();
-    setInstanceURIFromIdField();
+    setInstanceURI((getRDFEntity()).getId());
     final Object value;
     try {
       value = loadField(
@@ -602,44 +602,6 @@ public final class RDFEntityLoader extends AbstractRDFEntityAccessor {   // NOPM
     }
 
     return instanceURIs;
-  }
-
-  /** Sets the instance URI from the id field contained in the RDF entity. */
-  private void setInstanceURIFromIdField() {
-    //Preconditions
-    assert getRDFEntity() != null : "rdfEntity() must not be null";
-
-    if (getRDFEntity() instanceof RDFPersistent) {
-      setInstanceURI((getRDFEntity()).getId());
-      return;
-    }
-    final Field idField = getIdField();
-    if (idField == null) {
-      throw new TexaiException("Id field not found for RDF entity " + getRDFEntity().getClass().getName());
-    }
-
-    Object value;
-    if (!idField.isAccessible()) {
-      idField.setAccessible(true);
-    }
-
-    try {
-      value = idField.get(getRDFEntity());
-    } catch (final IllegalArgumentException | IllegalAccessException ex) {
-      throw new TexaiException(ex);
-    }
-
-    if (value instanceof String || value instanceof java.net.URI) {
-      setInstanceURI(getValueFactory().createURI(value.toString()));
-    } else if (URI.class.isAssignableFrom(value.getClass())) {
-      setInstanceURI((URI) value);
-    } else {
-      throw new TexaiException("cannot load ID from " + value);
-    }
-
-    if (isDebugEnabled) {
-      getLogger().debug(stackLevel() + "  found instance URI " + getInstanceURI());
-    }
   }
 
   /** Instantiates the RDF entity. */

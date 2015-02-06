@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
+import static org.junit.Assert.assertTrue;
 import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDF;
@@ -33,14 +34,16 @@ public class JournalWriterTest {
     final File directory = new File("./journals/");
     if (!directory.exists()) {
       LOGGER.info("creating journals directory");
-      directory.mkdir();
+      final boolean isOK = directory.mkdir();
+      assertTrue(isOK);
     }
     assert directory.exists() : "./journals/ does not exist";
     final File[] files = directory.listFiles();
     for (final File file : files) {
       if (!file.isHidden()) {
         LOGGER.info("deleting file: " + file);
-        file.delete();
+        final boolean isOK = file.delete();
+        assertTrue(isOK);
       }
     }
     List<JournalRequest> journalRequests = new ArrayList<>();

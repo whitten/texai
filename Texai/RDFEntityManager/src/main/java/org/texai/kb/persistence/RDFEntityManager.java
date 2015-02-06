@@ -127,7 +127,7 @@ public final class RDFEntityManager {
    *
    * @param aDistributedRepositoryManager the singleton distributed repository manager
    */
-  public static void setDistributedRepositoryManager(final DistributedRepositoryManager aDistributedRepositoryManager) {
+  public synchronized static void setDistributedRepositoryManager(final DistributedRepositoryManager aDistributedRepositoryManager) {
     distributedRepositoryManager = aDistributedRepositoryManager;
   }
 
@@ -185,15 +185,15 @@ public final class RDFEntityManager {
     assert repositoryName != null : "repositoryName must not be null";
     assert !repositoryName.isEmpty() : "repositoryName must not be empty";
 
-    if (distributedRepositoryManager == null) {
+    if (getDistributedRepositoryManager() == null) {
       // initialize the distributed repository manager
       DistributedRepositoryManager.getInstance();
     }
-    assert distributedRepositoryManager != null : "distributedRepositoryManager must not be null";
+    assert getDistributedRepositoryManager() != null : "distributedRepositoryManager must not be null";
 
     RepositoryConnection repositoryConnection = repositoryConnectionDictionary.get(repositoryName);
     if (repositoryConnection == null) {
-      repositoryConnection = distributedRepositoryManager.getRepositoryConnectionForRepositoryName(repositoryName);
+      repositoryConnection = getDistributedRepositoryManager().getRepositoryConnectionForRepositoryName(repositoryName);
       repositoryConnectionDictionary.put(repositoryName, repositoryConnection);
     }
 
@@ -595,12 +595,12 @@ public final class RDFEntityManager {
     } catch (Throwable ex) {
       LOGGER.error("class: " + clazz.getName());
       LOGGER.error("instanceURI: " + instanceURI);
-      if (distributedRepositoryManager == null) {
+      if (getDistributedRepositoryManager() == null) {
         // initialize the distributed repository manager
-        distributedRepositoryManager = DistributedRepositoryManager.getInstance();
+        setDistributedRepositoryManager(DistributedRepositoryManager.getInstance());
       }
-      assert distributedRepositoryManager != null : "distributedRepositoryManager must not be null";
-      LOGGER.error("repository: " + distributedRepositoryManager.getRepositoryNameForInstance(instanceURI));
+      assert getDistributedRepositoryManager() != null : "distributedRepositoryManager must not be null";
+      LOGGER.error("repository: " + getDistributedRepositoryManager().getRepositoryNameForInstance(instanceURI));
       throw new TexaiException(ex);
     }
   }
@@ -1345,13 +1345,13 @@ public final class RDFEntityManager {
     //Preconditions
     assert uri != null : "uri must not be null";
 
-    if (distributedRepositoryManager == null) {
+    if (getDistributedRepositoryManager() == null) {
       // initialize the distributed repository manager
-      distributedRepositoryManager = DistributedRepositoryManager.getInstance();
+      setDistributedRepositoryManager(DistributedRepositoryManager.getInstance());
     }
-    assert distributedRepositoryManager != null : "distributedRepositoryManager must not be null";
+    assert getDistributedRepositoryManager() != null : "distributedRepositoryManager must not be null";
 
-    final String repositoryName = distributedRepositoryManager.getRepositoryNameForInstance(uri);
+    final String repositoryName = getDistributedRepositoryManager().getRepositoryNameForInstance(uri);
     if (repositoryName == null) {
       throw new TexaiException("repository name not found for " + uri);
     }
@@ -1372,13 +1372,13 @@ public final class RDFEntityManager {
     //Preconditions
     assert clazz != null : "clazz must not be null";
 
-    if (distributedRepositoryManager == null) {
+    if (getDistributedRepositoryManager() == null) {
       // initialize the distributed repository manager
       DistributedRepositoryManager.getInstance();
     }
-    assert distributedRepositoryManager != null : "distributedRepositoryManager must not be null";
+    assert getDistributedRepositoryManager() != null : "distributedRepositoryManager must not be null";
 
-    final String repositoryName = distributedRepositoryManager.getRepositoryNameForClassName(clazz.getName());
+    final String repositoryName = getDistributedRepositoryManager().getRepositoryNameForClassName(clazz.getName());
     if (repositoryName == null) {
       DistributedRepositoryManager.logClassNameRepositoryDictionary();
       throw new TexaiException("repository name not found for " + clazz);
@@ -1405,16 +1405,16 @@ public final class RDFEntityManager {
     assert rootRDFEntity != null : "rootRDFEntity must not be null";
     assert rdfEntity != null : "rdfEntity must not be null";
 
-    if (distributedRepositoryManager == null) {
+    if (getDistributedRepositoryManager() == null) {
       // initialize the distributed repository manager
       DistributedRepositoryManager.getInstance();
     }
-    assert distributedRepositoryManager != null : "distributedRepositoryManager must not be null";
+    assert getDistributedRepositoryManager() != null : "distributedRepositoryManager must not be null";
 
     if (rootRDFEntity.getId() == null) {
       setIdFor(rootRDFEntity);
     }
-    final String rootRepositoryName = distributedRepositoryManager.getRepositoryNameForInstance(rootRDFEntity);
+    final String rootRepositoryName = getDistributedRepositoryManager().getRepositoryNameForInstance(rootRDFEntity);
     if (rootRepositoryName == null) {
       DistributedRepositoryManager.logClassNameRepositoryDictionary();
       throw new TexaiException("repository name not found for " + rootRDFEntity.getId()
@@ -1426,7 +1426,7 @@ public final class RDFEntityManager {
     if (rdfEntity.getId() == null) {
       setIdFor(rdfEntity);
     }
-    final String repositoryName = distributedRepositoryManager.getRepositoryNameForInstance(rdfEntity);
+    final String repositoryName = getDistributedRepositoryManager().getRepositoryNameForInstance(rdfEntity);
     if (repositoryName == null) {
       repositoryConnection = rootRepositoryConnection;
     } else {

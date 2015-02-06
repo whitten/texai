@@ -616,7 +616,7 @@ public class TypeQueries {
   }
 
   /** Provides the isType cache. */
-  class IsTypeCache extends ThreadLocal<Map<String, Boolean>> {
+  static class IsTypeCache extends ThreadLocal<Map<String, Boolean>> {
 
     /** Returns the current thread's "initial value" for this thread-local variable.
      *
@@ -631,7 +631,7 @@ public class TypeQueries {
   }
 
   /** Provides the type hierarchy cache. */
-  class TypeHierarchyCache extends ThreadLocal<Map<List<URI>, List<URI>>> {
+  static class TypeHierarchyCache extends ThreadLocal<Map<List<URI>, List<URI>>> {
 
     /** Returns the current thread's "initial value" for this thread-local variable.
      *
@@ -646,7 +646,7 @@ public class TypeQueries {
   }
 
   /** Provides the types cache. */
-  class TypesCache extends ThreadLocal<Map<URI, Set<URI>>> {
+  static class TypesCache extends ThreadLocal<Map<URI, Set<URI>>> {
 
     /** Returns the current thread's "initial value" for this thread-local variable.
      *

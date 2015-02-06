@@ -291,7 +291,7 @@ public class RDFTestEntity extends AbstractRDFTestEntity implements RDFPersisten
    * @return an array type
    */
   public String[] getComment() {
-    return comments;
+    return comments.clone();
   }
 
   /** Sets an array type.
@@ -299,7 +299,7 @@ public class RDFTestEntity extends AbstractRDFTestEntity implements RDFPersisten
    * @param comment an array type
    */
   public void setComment(final String[] comment) {
-    this.comments = comment;
+    this.comments = comment.clone();
   }
 
   /** Gets a test XML datatype XMLSchema.BYTE field.
@@ -451,7 +451,7 @@ public class RDFTestEntity extends AbstractRDFTestEntity implements RDFPersisten
    * @return  a test XML datatype XMLSchema.DATETIME - Date field
    */
   public Date getDateField() {
-    return dateField;
+    return (Date) dateField.clone();
   }
 
   /** Sets a test XML datatype XMLSchema.DATETIME - Date field.
@@ -459,7 +459,7 @@ public class RDFTestEntity extends AbstractRDFTestEntity implements RDFPersisten
    * @param dateField a test XML datatype XMLSchema.DATETIME - Date field
    */
   public void setDateField(final Date dateField) {
-    this.dateField = dateField;
+    this.dateField = (Date) dateField.clone();
   }
 
   /** Gets the peer associated by an inverse property.

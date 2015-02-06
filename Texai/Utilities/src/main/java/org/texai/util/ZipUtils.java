@@ -64,7 +64,7 @@ public class ZipUtils {
         }
       }
       return byteArrayOutputStream.toByteArray();
-    } catch (Exception ex) {
+    } catch (IOException ex) {
       throw new TexaiException(ex);
     }
   }
@@ -104,7 +104,7 @@ public class ZipUtils {
    * @return true if the given zip archive file is not corrupted
    */
   public static boolean verify(final String zipFilePathName) {
-    final ZipFile zipFile;
+    ZipFile zipFile = null;
     int zipEntryCnt = 0;
     int zipEntryActualCnt = 0;
     try {
@@ -121,16 +121,22 @@ public class ZipUtils {
         while (true) {
           final int bytesRead = inputStream.read(buffer);
           if (bytesRead == -1) {
+            inputStream.close();
             break;
           }
         }
       }
-    } catch (ZipException e) {
-      zipEntryCnt = -1;
-      LOGGER.info(StringUtils.getStackTraceAsString(e));
     } catch (IOException e) {
-      LOGGER.info(StringUtils.getStackTraceAsString(e));
       zipEntryCnt = -1;
+      LOGGER.info(StringUtils.getStackTraceAsString(e));
+    } finally {
+      if (zipFile != null) {
+        try {
+          zipFile.close();
+        } catch (IOException ex) {
+          throw new TexaiException(ex);
+        }
+      }
     }
     if (zipEntryCnt > 0 && zipEntryCnt != zipEntryActualCnt) {
       LOGGER.info("Expected " + zipEntryCnt + " zip entries, but found " + zipEntryActualCnt);

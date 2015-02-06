@@ -15,6 +15,7 @@ import java.io.ObjectOutputStream;
 import java.util.Iterator;
 import org.apache.log4j.Logger;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Test;
@@ -158,7 +159,7 @@ public class ArraySetTest {
     } catch (CloneNotSupportedException ex) {
       fail(ex.getMessage());
     }
-    assertTrue(clone instanceof ArraySet<?>);
+    assertNotNull(clone);
     assertEquals(instance.toString(), clone.toString());
   }
 

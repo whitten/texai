@@ -10,6 +10,7 @@
  */
 package org.texai.network.netty.handler;
 
+import java.util.Locale;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -54,6 +55,7 @@ public class MockWebSocketSslServerHandler extends WebSocketSslServerHandler {
    * @param httpRequest the HTTP request
    * @param channelHandlerContext the channel handler context
    */
+  @Override
   public void handshake(
           final HttpRequest httpRequest,
           final ChannelHandlerContext channelHandlerContext) {
@@ -129,7 +131,7 @@ public class MockWebSocketSslServerHandler extends WebSocketSslServerHandler {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug(String.format("Channel %s received %s", channelHandlerContext.getChannel().getId(), request));
     }
-    channelHandlerContext.getChannel().write(new TextWebSocketFrame(request.toUpperCase()));
+    channelHandlerContext.getChannel().write(new TextWebSocketFrame(request.toUpperCase(Locale.ENGLISH)));
   }
 
   /** Processes an exception not otherwise caught.

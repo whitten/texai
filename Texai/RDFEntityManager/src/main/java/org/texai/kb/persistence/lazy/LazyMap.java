@@ -31,6 +31,7 @@ import org.texai.util.TexaiException;
  * @author reed
  */
 @NotThreadSafe
+@edu.umd.cs.findbugs.annotations.SuppressWarnings({"SE_BAD_FIELD", "SE_TRANSIENT_FIELD_NOT_RESTORED"})
 public class LazyMap implements Map, Serializable {
 
   /** the serial version UID */

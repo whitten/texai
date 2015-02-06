@@ -65,7 +65,7 @@ public class XAINetworkEpisodicMemory extends AbstractNetworkSingletonSkill {
        * This task message is sent from the parent XAINetworkOperationAgent.XAINetworkOperationRole. It is expected to be the first task message
        * that this role receives and it results in the role being initialized.
        */
-      case AHCSConstants.AHCS_INITIALIZE_TASK:
+      case AHCSConstants.INITIALIZE_TASK:
         assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
         propagateOperationToChildRoles(operation);
         if (getNodeRuntime().isFirstContainerInNetwork()) {
@@ -129,9 +129,6 @@ public class XAINetworkEpisodicMemory extends AbstractNetworkSingletonSkill {
         return;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
-        LOGGER.warn(message);
-        return;
-
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
         return;
@@ -167,7 +164,7 @@ public class XAINetworkEpisodicMemory extends AbstractNetworkSingletonSkill {
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
-      AHCSConstants.AHCS_INITIALIZE_TASK,
+      AHCSConstants.INITIALIZE_TASK,
       AHCSConstants.DELEGATE_BECOME_READY_TASK,
       AHCSConstants.DELEGATE_PERFORM_MISSION_TASK,
       AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO,

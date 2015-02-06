@@ -80,7 +80,7 @@ public class ExecutorUtilsTest {
   }
 
   /** Provides a test Runnable. */
-  class TestRunnable implements Runnable {
+  static class TestRunnable implements Runnable {
 
     /** Executes this test Runnable. */
     @Override

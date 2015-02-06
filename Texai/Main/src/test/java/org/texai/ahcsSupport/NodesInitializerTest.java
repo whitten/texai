@@ -59,7 +59,7 @@ public class NodesInitializerTest {
   private final static String SINGLETON_CONFIGURATION_FILE_PATH = "data/test-SingletonConfiguration.crt";
   // the hash of nodes-test.xml
   public final static String NODES_TEST_HASH
-          = "A9e1oCl+aT6fo0OIhB94n55XBq1cPAS1zu1diep+g9dwkXSY8pow+UKNJLx8Ykq8Jkaa0R88RXkPdnG2DZJsxw==";
+          = "7R+DeCZO1GusxJxPaLH6nb0vbBNPw+ZqLquXZD7VyJ+2C69L7dMGIai2c5aO6FyXva8duA9Wtwaq2qh3xRQkzg==";
 
   public NodesInitializerTest() {
   }
@@ -130,12 +130,16 @@ public class NodesInitializerTest {
   @Test
   public void testProcess() {
     LOGGER.info("beginning test");
+    Logger.getLogger(NodesInitializer.class).setLevel(Level.DEBUG);
     final String containerName = "TestContainer";
     final BasicNodeRuntime nodeRuntime = new BasicNodeRuntime(containerName);
     final char[] keystorePassword = "test-password".toCharArray();
     final File singletonConfigurationFile = new File(SINGLETON_CONFIGURATION_FILE_PATH);
     if (singletonConfigurationFile.exists()) {
-      singletonConfigurationFile.delete();
+      final boolean isOk = singletonConfigurationFile.delete();
+      if (!isOk) {
+        LOGGER.info("problem deleting the previous " + singletonConfigurationFile);
+      }
     }
     final NodesInitializer nodesInitializer
             = new NodesInitializer(

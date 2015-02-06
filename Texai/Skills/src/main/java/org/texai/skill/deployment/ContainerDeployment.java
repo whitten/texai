@@ -38,7 +38,7 @@ public class ContainerDeployment extends AbstractSkill {
   // the log4j logger
   private static final Logger LOGGER = Logger.getLogger(ContainerDeployment.class);
   // the indication that this skill is running in a unit test, with a development file arrangement
-  protected static boolean isUnitTest = false;
+  private static boolean isUnitTest = false;
   // the number of bytes in the zip archive to be received in chunks and deployed
   private int zippedBytes_len = 0;
   // the zip archive bytes which are received in chunks from Network Deployment
@@ -80,7 +80,7 @@ public class ContainerDeployment extends AbstractSkill {
        * This task message is sent from the parent NetworkDeploymentAgent.NetworkDeploymentRole. It is expected to be the first task message
        * that this role receives and it results in the role being initialized.
        */
-      case AHCSConstants.AHCS_INITIALIZE_TASK:
+      case AHCSConstants.INITIALIZE_TASK:
         assert getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
         if (getNodeRuntime().isFirstContainerInNetwork()) {
           setSkillState(AHCSConstants.State.READY);
@@ -177,7 +177,7 @@ public class ContainerDeployment extends AbstractSkill {
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
-      AHCSConstants.AHCS_INITIALIZE_TASK,
+      AHCSConstants.INITIALIZE_TASK,
       AHCSConstants.BECOME_READY_TASK,
       AHCSConstants.DEPLOY_FILES_TASK,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
@@ -208,65 +208,65 @@ public class ContainerDeployment extends AbstractSkill {
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
-    final int chunkNumber = (int) message.get(AHCSConstants.DEPLOY_FILES_TASK_CHUNK_NUMBER);
-    if (chunkNumber == 1) {
-      LOGGER.info("deploying files ...");
-      // initialize the chunked file transfer
-      zippedBytes_len = (int) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES_LENGTH);
-      zippedBytes = new byte[zippedBytes_len];
-      zippedBytesIndex = 0;
-      previousChunkNumber = 1;
-    } else {
-      assert zippedBytes_len == (int) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES_LENGTH) :
-              "zippedBytes_len: " + zippedBytes_len + ", msg parm: " + (int) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES_LENGTH);
-      if (chunkNumber == previousChunkNumber + 1) {
-        previousChunkNumber++;
-      } else {
-        LOGGER.info("received zip file chunk " + chunkNumber + ", but expected to receive chunk " + previousChunkNumber + 1);
-
-        //TODO retry
-        return;
-      }
-
-    }
-    final byte[] zippedBytesReceived = (byte[]) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES);
-    final int zippedBytesReceived_len = zippedBytesReceived.length;
-
-    System.arraycopy(
-            zippedBytesReceived, // src
-            0, // srcPos
-            zippedBytes, // dest
-            zippedBytesIndex, // destPos
-            zippedBytesReceived_len); // length
-    zippedBytesIndex = zippedBytesIndex + zippedBytesReceived_len;
-    final int bytesRemainingCnt = zippedBytes_len - zippedBytesIndex;
-    if (chunkNumber < 50 || chunkNumber % 10 == 0) {
-      LOGGER.info("chunk " + chunkNumber + ", bytes remaining " + bytesRemainingCnt);
-    }
-    assert bytesRemainingCnt >= 0;
-    if (bytesRemainingCnt == 0) {
-      LOGGER.info("zip archive file transfer completed");
-
-      if (LOGGER.isDebugEnabled()) {
-        // should match the bytes that were sent
-        LOGGER.debug("zippedBytes[0]                   " + zippedBytes[0]);
-        LOGGER.debug("zippedBytes[1]                   " + zippedBytes[1]);
-        LOGGER.debug("zippedBytes[2]                   " + zippedBytes[2]);
-        LOGGER.debug("zippedBytes[3]                   " + zippedBytes[3]);
-
-        LOGGER.debug("zippedBytes[zippedBytes_len - 4] " + zippedBytes[zippedBytes_len - 4]);
-        LOGGER.debug("zippedBytes[zippedBytes_len - 3] " + zippedBytes[zippedBytes_len - 3]);
-        LOGGER.debug("zippedBytes[zippedBytes_len - 2] " + zippedBytes[zippedBytes_len - 2]);
-        LOGGER.debug("zippedBytes[zippedBytes_len - 1] " + zippedBytes[zippedBytes_len - 1]);
-      }
-
-      deployFilesFromZipArchive(message);
-      sendMessage(Message.replyTaskAccomplished(message));
-      // release resources
-      zippedBytes_len = 0;
-      zippedBytes = new byte[0];
-      zippedBytesIndex = 0;
-    }
+//    final int chunkNumber = (int) message.get(AHCSConstants.DEPLOY_FILES_TASK_CHUNK_NUMBER);
+//    if (chunkNumber == 1) {
+//      LOGGER.info("deploying files ...");
+//      // initialize the chunked file transfer
+//      zippedBytes_len = (int) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES_LENGTH);
+//      zippedBytes = new byte[zippedBytes_len];
+//      zippedBytesIndex = 0;
+//      previousChunkNumber = 1;
+//    } else {
+//      assert zippedBytes_len == (int) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES_LENGTH) :
+//              "zippedBytes_len: " + zippedBytes_len + ", msg parm: " + (int) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES_LENGTH);
+//      if (chunkNumber == previousChunkNumber + 1) {
+//        previousChunkNumber++;
+//      } else {
+//        LOGGER.info("received zip file chunk " + chunkNumber + ", but expected to receive chunk " + previousChunkNumber + 1);
+//
+//        //TODO retry
+//        return;
+//      }
+//
+//    }
+//    final byte[] zippedBytesReceived = (byte[]) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES);
+//    final int zippedBytesReceived_len = zippedBytesReceived.length;
+//
+//    System.arraycopy(
+//            zippedBytesReceived, // src
+//            0, // srcPos
+//            zippedBytes, // dest
+//            zippedBytesIndex, // destPos
+//            zippedBytesReceived_len); // length
+//    zippedBytesIndex = zippedBytesIndex + zippedBytesReceived_len;
+//    final int bytesRemainingCnt = zippedBytes_len - zippedBytesIndex;
+//    if (chunkNumber < 50 || chunkNumber % 10 == 0) {
+//      LOGGER.info("chunk " + chunkNumber + ", bytes remaining " + bytesRemainingCnt);
+//    }
+//    assert bytesRemainingCnt >= 0;
+//    if (bytesRemainingCnt == 0) {
+//      LOGGER.info("zip archive file transfer completed");
+//
+//      if (LOGGER.isDebugEnabled()) {
+//        // should match the bytes that were sent
+//        LOGGER.debug("zippedBytes[0]                   " + zippedBytes[0]);
+//        LOGGER.debug("zippedBytes[1]                   " + zippedBytes[1]);
+//        LOGGER.debug("zippedBytes[2]                   " + zippedBytes[2]);
+//        LOGGER.debug("zippedBytes[3]                   " + zippedBytes[3]);
+//
+//        LOGGER.debug("zippedBytes[zippedBytes_len - 4] " + zippedBytes[zippedBytes_len - 4]);
+//        LOGGER.debug("zippedBytes[zippedBytes_len - 3] " + zippedBytes[zippedBytes_len - 3]);
+//        LOGGER.debug("zippedBytes[zippedBytes_len - 2] " + zippedBytes[zippedBytes_len - 2]);
+//        LOGGER.debug("zippedBytes[zippedBytes_len - 1] " + zippedBytes[zippedBytes_len - 1]);
+//      }
+//
+//      deployFilesFromZipArchive(message);
+//      sendMessage(Message.replyTaskAccomplished(message));
+//      // release resources
+//      zippedBytes_len = 0;
+//      zippedBytes = new byte[0];
+//      zippedBytesIndex = 0;
+//    }
   }
 
   private void deployFilesFromZipArchive(final Message message) {
@@ -286,16 +286,16 @@ public class ContainerDeployment extends AbstractSkill {
 
     final String computedZippedBytesHash = MessageDigestUtils.bytesHashString(zippedBytes);
     LOGGER.info("computed zippedBytes hash: " + computedZippedBytesHash);
-    final String expectedZippedBytesHash = (String) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES_HASH);
-    LOGGER.info("expected zippedBytes hash: " + expectedZippedBytesHash);
-    if (computedZippedBytesHash.equals(expectedZippedBytesHash)) {
-      LOGGER.info("zip archive bytes has the expected hash value");
-    } else {
-      LOGGER.info("zip archive bytes does not have the expected hash value");
-
-      //TODO negative ack
-      return;
-    }
+//    final String expectedZippedBytesHash = (String) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES_HASH);
+//    LOGGER.info("expected zippedBytes hash: " + expectedZippedBytesHash);
+//    if (computedZippedBytesHash.equals(expectedZippedBytesHash)) {
+//      LOGGER.info("zip archive bytes has the expected hash value");
+//    } else {
+//      LOGGER.info("zip archive bytes does not have the expected hash value");
+//
+//      //TODO negative ack
+//      return;
+//    }
 
     final String manifestJSONString = (String) message.get(AHCSConstants.DEPLOY_FILES_TASK_MANIFEST);
     LOGGER.info("  manifest:\n" + manifestJSONString);
@@ -316,7 +316,7 @@ public class ContainerDeployment extends AbstractSkill {
           fileToDeployPath = (String) manifestItem.get("path");
         } else {
           // production runs with Main-1.0 as a subdirectory of the working directory
-          fileToDeployPath = "../" + (String) manifestItem.get("path");
+          fileToDeployPath = "../" + manifestItem.get("path");
         }
 
         LOGGER.info("  path: " + fileToDeployPath);
@@ -406,5 +406,21 @@ public class ContainerDeployment extends AbstractSkill {
   @Override
   protected Logger getLogger() {
     return LOGGER;
+  }
+
+  /** Gets whether this skill is running in a unit test, with a development file arrangement.
+   *
+   * @return whether this skill is running in a unit test
+   */
+  public static boolean isUnitTest() {
+    return isUnitTest;
+  }
+
+  /** Sets whether this skill is running in a unit test, with a development file arrangement.
+   *
+   * @param aIsUnitTest whether this skill is running in a unit test, with a development file arrangement
+   */
+  protected static void setIsUnitTest(boolean aIsUnitTest) {
+    isUnitTest = aIsUnitTest;
   }
 }

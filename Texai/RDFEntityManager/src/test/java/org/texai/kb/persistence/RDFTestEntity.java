@@ -239,12 +239,12 @@ public class RDFTestEntity extends AbstractRDFTestEntity implements RDFPersisten
     return "[TestDomainEntity: " + name + ", id: " + id + "]";
   }
 
-  public String[] getComment() {
-    return comments;
+  public String[] getComments() {
+    return comments.clone();
   }
 
-  public void setComment(String[] comment) {
-    this.comments = comment;
+  public void setComments(String[] comments) {
+    this.comments = comments.clone();
   }
 
   public byte getByteField() {
@@ -320,11 +320,11 @@ public class RDFTestEntity extends AbstractRDFTestEntity implements RDFPersisten
   }
 
   public Date getDateField() {
-    return dateField;
+    return (Date) dateField.clone();
   }
 
   public void setDateField(Date dateField) {
-    this.dateField = dateField;
+    this.dateField = (Date) dateField.clone();
   }
 
   public Set<RDFTestEntity> getPeersHavingMeAsAFavorite() {

@@ -20,9 +20,11 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.UTFDataFormatException;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
@@ -220,7 +222,10 @@ public final class X509Utils {
         throw new TexaiException(ex);
       }
     } else {
-      file.getParentFile().mkdirs();
+      final boolean isOK = file.getParentFile().mkdirs();
+      if (!isOK) {
+        throw new TexaiException("problem making directories: " + file);
+      }
       serializeSecureRandom(path);
     }
     return secureRandom;
@@ -738,7 +743,6 @@ public final class X509Utils {
     assert jceksKeyStorePath != null : "jceksKeyStorePath must not be null";
     assert !jceksKeyStorePath.isEmpty() : "jceksKeyStorePath must not be empty";
     assert jceksKeyStorePath.endsWith(".jceks") : "jceks keystore file extension must be .jceks";
-    assert uberKeyStorePassword != null : "uberKeyStorePassword must not be null";
 
     LOGGER.info("copying keystore contents of " + uberKeyStorePath + " to " + jceksKeyStorePath);
     final KeyStore uberKeyStore = findOrCreateUberKeyStore(uberKeyStorePath, uberKeyStorePassword);
@@ -753,7 +757,9 @@ public final class X509Utils {
       jceksKeyStore.setEntry(alias, entry, jceksPasswordProtection);
       LOGGER.info("  copied entry: " + alias);
     }
-    jceksKeyStore.store(new FileOutputStream(jceksKeyStorePath), jceksKeyStorePassword);
+    try (final FileOutputStream fileOutputStream = new FileOutputStream(jceksKeyStorePath)) {
+      jceksKeyStore.store(fileOutputStream, jceksKeyStorePassword);
+    }
   }
 
   /**
@@ -986,7 +992,9 @@ public final class X509Utils {
             privateKey,
             keyStorePassword,
             certificateChain);
-    keyStore.store(new FileOutputStream(keyStoreFilePath), keyStorePassword);
+    try (final FileOutputStream fileOutputStream = new FileOutputStream(keyStoreFilePath)) {
+      keyStore.store(fileOutputStream, keyStorePassword);
+    }
 
     //Postconditions
     assert keyStore != null : "keyStore must not be null";
@@ -1001,7 +1009,7 @@ public final class X509Utils {
    */
   protected static void resetSerialNumber() throws IOException {
     File serialNumberFile = new File("../X509Security/data/certificate-serial-nbr.txt");
-    try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(serialNumberFile))) {
+    try (final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(serialNumberFile), "UTF-8"))) {
       bufferedWriter.write("0");
     }
   }
@@ -1019,7 +1027,7 @@ public final class X509Utils {
     if (dataDirectoryFile.exists()) {
       serialNumberFile = new File("../X509Security/data/certificate-serial-nbr.txt");
       if (!serialNumberFile.exists()) {
-        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(serialNumberFile))) {
+        try (final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(serialNumberFile), "UTF-8"))) {
           bufferedWriter.write("0");
         }
       }
@@ -1029,17 +1037,20 @@ public final class X509Utils {
       assert dataDirectoryFile.exists();
       serialNumberFile = new File("data/certificate-serial-nbr.txt");
       if (!serialNumberFile.exists()) {
-        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(serialNumberFile))) {
+        try (final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(serialNumberFile), "UTF-8"))) {
           bufferedWriter.write("0");
         }
       }
     }
     final String line;
-    try (BufferedReader bufferedReader = new BufferedReader(new FileReader(serialNumberFile))) {
+    try (final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(serialNumberFile), "UTF-8"))) {
       line = bufferedReader.readLine();
     }
-    final Long nextSerialNumber = Long.valueOf(line.trim()) + 1L;
-    try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(serialNumberFile))) {
+    if (line == null) {
+      throw new TexaiException("serial number file cannot be read: " + serialNumberFile);
+    }
+    final long nextSerialNumber = Long.parseLong(line.trim())  + 1L;
+    try (final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(serialNumberFile), "UTF-8"))) {
       bufferedWriter.write(String.valueOf(nextSerialNumber));
     }
     return new BigInteger(String.valueOf(nextSerialNumber));

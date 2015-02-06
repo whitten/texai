@@ -22,6 +22,8 @@
  */
 package org.texai.util;
 
+import java.nio.charset.Charset;
+
 /**
  * This class is used to encode and decode data in Base64 format as described in RFC 1521.
  */
@@ -97,7 +99,7 @@ public final class Base64Coder {
    * @return A String with the Base64 encoded data.
    */
   public static String encodeString(final String s) {
-    return new String(encode(s.getBytes()));
+    return new String(encode(s.getBytes(Charset.forName("UTF-8"))));
   }
 
   /**
@@ -151,7 +153,7 @@ public final class Base64Coder {
    * @return A String containing the decoded data.
    */
   public static String decodeString(final String s) {
-    return new String(decode(s));
+    return new String(decode(s), Charset.forName("UTF-8"));
   }
 
   /**

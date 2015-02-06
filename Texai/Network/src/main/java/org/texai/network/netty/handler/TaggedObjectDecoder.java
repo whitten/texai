@@ -79,8 +79,8 @@ public class TaggedObjectDecoder extends FrameDecoder {
    * @param channelBuffer the cumulative buffer of received packets so far. Note that the buffer might be empty, which means you should not
    * make an assumption that the buffer contains at least one byte in your decoder implementation.
    *
-   * byte 0     ... 1 (object serialization protocol for port unification)
-   * bytes 1-5  ... 32 bit integer length, the maximum is a bit more than 8K
+   * byte 0 ... 1 (object serialization protocol for port unification) bytes 1-5 ... 32 bit integer length, the maximum is a bit more than
+   * 8K
    *
    * @return the object if all its bytes were contained in the buffer. null if there's not enough data in the buffer to decode an object.
    * @throws IOException if an input/output error occurs
@@ -121,6 +121,8 @@ public class TaggedObjectDecoder extends FrameDecoder {
     // skip over the data length
     channelBuffer.skipBytes(4);
     // return the deserialized object
-    return new CompactObjectInputStream(new ChannelBufferInputStream(channelBuffer, dataLen)).readObject();
+    try (final CompactObjectInputStream compactObjectInputStream = new CompactObjectInputStream(new ChannelBufferInputStream(channelBuffer, dataLen))) {
+      return compactObjectInputStream.readObject();
+    }
   }
 }

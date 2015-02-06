@@ -20,6 +20,7 @@
  */
 package org.texai.ssl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.net.ssl.SSLContext;
@@ -71,46 +72,42 @@ public class TexaiSSLContextFactoryTest {
   public void testConfigureSSLEngine() {
     LOGGER.info("configureSSLEngine");
     final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getServerX509SecurityInfo();
-    try {
-      final SSLContext sslContext = TexaiSSLContextFactory.getSSLContext(x509SecurityInfo);
-      SSLEngine sslEngine = sslContext.createSSLEngine();
-      assertFalse(sslEngine.getNeedClientAuth());
-      assertFalse(sslEngine.getUseClientMode());
-      final List<String> enabledCipherSuites = new ArrayList<>();
-      LOGGER.info("default ciphers ...");
-      for (final String enabledCipherSuite : sslEngine.getEnabledCipherSuites()) {
-        enabledCipherSuites.add(enabledCipherSuite);
-        LOGGER.info("  " + enabledCipherSuite);
-      }
+    final SSLContext sslContext = TexaiSSLContextFactory.getSSLContext(x509SecurityInfo);
+    SSLEngine sslEngine = sslContext.createSSLEngine();
+    assertFalse(sslEngine.getNeedClientAuth());
+    assertFalse(sslEngine.getUseClientMode());
+    final List<String> enabledCipherSuites = new ArrayList<>();
+    LOGGER.info("default ciphers ...");
+    for (final String enabledCipherSuite : sslEngine.getEnabledCipherSuites()) {
+      enabledCipherSuites.add(enabledCipherSuite);
+      LOGGER.info("  " + enabledCipherSuite);
+    }
 
-      // client SSL engine
-      boolean useClientMode = true;
-      TexaiSSLContextFactory.configureSSLEngine(sslEngine, useClientMode, true);
-      assertFalse(sslEngine.getNeedClientAuth());
-      assertTrue(sslEngine.getUseClientMode());
-      enabledCipherSuites.clear();
-      LOGGER.info("configured client ciphers ...");
-      for (final String enabledCipherSuite : sslEngine.getEnabledCipherSuites()) {
-        enabledCipherSuites.add(enabledCipherSuite);
-        LOGGER.info("  " + enabledCipherSuite);
-      }
+    // client SSL engine
+    boolean useClientMode = true;
+    TexaiSSLContextFactory.configureSSLEngine(sslEngine, useClientMode, true);
+    assertFalse(sslEngine.getNeedClientAuth());
+    assertTrue(sslEngine.getUseClientMode());
+    enabledCipherSuites.clear();
+    LOGGER.info("configured client ciphers ...");
+    for (final String enabledCipherSuite : sslEngine.getEnabledCipherSuites()) {
+      enabledCipherSuites.add(enabledCipherSuite);
+      LOGGER.info("  " + enabledCipherSuite);
+    }
 
-      // server SSL engine
-      sslEngine = sslContext.createSSLEngine();
-      assertFalse(sslEngine.getNeedClientAuth());
-      assertFalse(sslEngine.getUseClientMode());
-      useClientMode = false;
-      TexaiSSLContextFactory.configureSSLEngine(sslEngine, useClientMode, true);
-      assertTrue(sslEngine.getNeedClientAuth());
-      assertFalse(sslEngine.getUseClientMode());
-      enabledCipherSuites.clear();
-      LOGGER.info("configured server ciphers ...");
-      for (final String enabledCipherSuite : sslEngine.getEnabledCipherSuites()) {
-        enabledCipherSuites.add(enabledCipherSuite);
-        LOGGER.info("  " + enabledCipherSuite);
-      }
-    } catch (Exception ex) {
-      fail(ex.getMessage());
+    // server SSL engine
+    sslEngine = sslContext.createSSLEngine();
+    assertFalse(sslEngine.getNeedClientAuth());
+    assertFalse(sslEngine.getUseClientMode());
+    useClientMode = false;
+    TexaiSSLContextFactory.configureSSLEngine(sslEngine, useClientMode, true);
+    assertTrue(sslEngine.getNeedClientAuth());
+    assertFalse(sslEngine.getUseClientMode());
+    enabledCipherSuites.clear();
+    LOGGER.info("configured server ciphers ...");
+    for (final String enabledCipherSuite : sslEngine.getEnabledCipherSuites()) {
+      enabledCipherSuites.add(enabledCipherSuite);
+      LOGGER.info("  " + enabledCipherSuite);
     }
   }
 

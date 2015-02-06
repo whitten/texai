@@ -113,10 +113,10 @@ public class ByteUtilsTest {
     assertEquals(14, ByteUtils.fromHex('e'));
     assertEquals(15, ByteUtils.fromHex('f'));
 
-    assertEquals(new Byte((byte) 0), ByteUtils.fromHex("00"));
-    assertEquals(new Byte((byte) 1), ByteUtils.fromHex("01"));
-    assertEquals(new Byte((byte) 16), ByteUtils.fromHex("10"));
-    assertEquals(new Byte((byte) 255), ByteUtils.fromHex("ff"));
+    assertEquals(Byte.valueOf((byte) 0), ByteUtils.fromHex("00"));
+    assertEquals(Byte.valueOf((byte) 1), ByteUtils.fromHex("01"));
+    assertEquals(Byte.valueOf((byte) 16), ByteUtils.fromHex("10"));
+    assertEquals(Byte.valueOf((byte) 255), ByteUtils.fromHex("ff"));
   }
 
   /**

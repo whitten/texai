@@ -82,9 +82,11 @@ public class SerializableBufferedImageTest {
       try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream("data/image.ser"))) {
         objectOutputStream.writeObject(serializableBufferedImage);
       }
-      ObjectInputStream objectInputStream = new ObjectInputStream(
-              new FileInputStream("data/image.ser"));
-      SerializableBufferedImage serializableBufferedImage2 = (SerializableBufferedImage) objectInputStream.readObject();
+      SerializableBufferedImage serializableBufferedImage2;
+      try (ObjectInputStream objectInputStream = new ObjectInputStream(
+              new FileInputStream("data/image.ser"))) {
+        serializableBufferedImage2 = (SerializableBufferedImage) objectInputStream.readObject();
+      }
 
       assertEquals("[3 byte RGB 320x240]", serializableBufferedImage2.toString());
       BufferedImage bufferedImage3 = serializableBufferedImage.getImage();
@@ -119,9 +121,11 @@ public class SerializableBufferedImageTest {
       try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream("data/image.ser"))) {
         objectOutputStream.writeObject(serializableBufferedImage);
       }
-      ObjectInputStream objectInputStream = new ObjectInputStream(
-              new FileInputStream("data/image.ser"));
-      SerializableBufferedImage serializableBufferedImage2 = (SerializableBufferedImage) objectInputStream.readObject();
+      SerializableBufferedImage serializableBufferedImage2;
+      try (ObjectInputStream objectInputStream = new ObjectInputStream(
+              new FileInputStream("data/image.ser"))) {
+        serializableBufferedImage2 = (SerializableBufferedImage) objectInputStream.readObject();
+      }
 
       assertEquals("[greyscale 92x112]", serializableBufferedImage2.toString());
       BufferedImage bufferedImage3 = serializableBufferedImage.getImage();

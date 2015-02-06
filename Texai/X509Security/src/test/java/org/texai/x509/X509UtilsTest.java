@@ -134,7 +134,9 @@ public class X509UtilsTest {
       assertNotNull(x509SecurityInfo.getX509Certificate());
 
       LOGGER.info("aliases" + keyStore.aliases());
-      keyStore.store(new FileOutputStream(keyStoreFilePath), keyStorePassword);
+      try (final FileOutputStream fileOutputStream = new FileOutputStream(keyStoreFilePath)) {
+        keyStore.store(fileOutputStream, keyStorePassword);
+      }
       assertTrue(keyStore.containsAlias(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS));
       assertTrue(keyStore.isKeyEntry(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS));
 

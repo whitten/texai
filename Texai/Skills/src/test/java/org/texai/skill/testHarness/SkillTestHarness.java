@@ -30,11 +30,9 @@ public class SkillTestHarness {
   // the mock Node
   private final Node node;
   // the mock Role
-  private final Role role;
+  private final MockRole role;
   // the messages sent by the mock role
-  private List<Message> sentMessages = new ArrayList<>();
-  // the most recent operation and service information propagated by the mock role
-  private OperationAndServiceInfo operationAndServiceInfo;
+  private final List<Message> sentMessages = new ArrayList<>();
   // the indicator whether the JVM has been terminated by the application
   private boolean isTerminated = false;
 
@@ -84,7 +82,8 @@ public class SkillTestHarness {
             childQualifiedNames,
             skillClasses,
             variableNames,
-            areRemoteCommunicationsPermitted);
+            areRemoteCommunicationsPermitted,
+            sentMessages);
     roles.add(role);
 
     node = new MockNode(
@@ -106,7 +105,7 @@ public class SkillTestHarness {
    */
   public void reset() {
     sentMessages.clear();
-    operationAndServiceInfo = null;
+    role.operationAndServiceInfo = null;
     isTerminated = false;
   }
 
@@ -239,7 +238,7 @@ public class SkillTestHarness {
    * @return the most recent operation and service information propagated by the mock role
    */
   public OperationAndServiceInfo getOperationAndServiceInfo() {
-    return operationAndServiceInfo;
+    return role.operationAndServiceInfo;
   }
 
   class MockNodeRuntime extends NodeRuntime {
@@ -263,7 +262,7 @@ public class SkillTestHarness {
     }
   }
 
-  class MockNode extends Node {
+  static class MockNode extends Node {
 
     // the default serial version UID
     private static final long serialVersionUID = 1L;
@@ -287,12 +286,43 @@ public class SkillTestHarness {
               roles,
               isNetworkSingleton);
     }
+
+    /**
+     * Returns a hash code for this object.
+     *
+     * @return a hash code
+     */
+    @Override
+    public int hashCode() {
+      return super.hashCode();
+    }
+
+    /**
+     * Returns whether another object equals this one.
+     *
+     * @param obj the other object
+     *
+     * @return whether another object equals this one
+     */
+    @Override
+    public boolean equals(Object obj) {
+      if (this.getClass().equals(obj.getClass())) {
+        return false;
+      } else {
+        return super.equals(obj);
+      }
+    }
+
   }
 
-  class MockRole extends Role {
+  static class MockRole extends Role {
 
     // the default serial version UID
     private static final long serialVersionUID = 1L;
+    // the sent messages
+    final List<Message> sentMessages;
+    // the operation and service information
+    OperationAndServiceInfo operationAndServiceInfo;
 
     /**
      * Constructs a new MockRole instance.
@@ -307,6 +337,7 @@ public class SkillTestHarness {
      * @param variableNames the state variable names
      * @param areRemoteCommunicationsPermitted the indicator whether this role is permitted to send a message to a recipient in another
      * container, which requires an X.509 certificate
+     * @param sentMessages the sent messages
      */
     public MockRole(
             final String qualifiedName,
@@ -315,7 +346,8 @@ public class SkillTestHarness {
             final Set<String> childQualifiedNames,
             final Set<SkillClass> skillClasses,
             final Set<String> variableNames,
-            final boolean areRemoteCommunicationsPermitted) {
+            final boolean areRemoteCommunicationsPermitted,
+            final List<Message> sentMessages) {
       super(
               qualifiedName,
               description,
@@ -324,6 +356,7 @@ public class SkillTestHarness {
               skillClasses,
               variableNames,
               areRemoteCommunicationsPermitted);
+      this.sentMessages = sentMessages;
     }
 
     /**
@@ -390,6 +423,32 @@ public class SkillTestHarness {
       assert !senderService.isEmpty() : "senderService must not be empty";
 
       operationAndServiceInfo = new OperationAndServiceInfo(operation, senderService);
+    }
+
+    /**
+     * Returns a hash code for this object.
+     *
+     * @return a hash code
+     */
+    @Override
+    public int hashCode() {
+      return super.hashCode();
+    }
+
+    /**
+     * Returns whether another object equals this one.
+     *
+     * @param obj the other object
+     *
+     * @return whether another object equals this one
+     */
+    @Override
+    public boolean equals(Object obj) {
+      if (this.getClass().equals(obj.getClass())) {
+        return false;
+      } else {
+        return super.equals(obj);
+      }
     }
 
   }

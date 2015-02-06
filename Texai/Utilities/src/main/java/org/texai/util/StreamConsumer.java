@@ -11,6 +11,7 @@
 package org.texai.util;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -53,14 +54,15 @@ public class StreamConsumer extends Thread {
   @Override
   public void run() {
     try {
-      final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-      @SuppressWarnings("UnusedAssignment")
-      String line = null;
-      while ((line = bufferedReader.readLine()) != null) {
-        logger.info("> " + line);
+      try (final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"))) {
+        @SuppressWarnings("UnusedAssignment")
+        String line = null;
+        while ((line = bufferedReader.readLine()) != null) {
+          logger.info("> " + line);
+        }
       }
     } catch (IOException ioe) {
-        logger.info(ioe.getMessage());
+      logger.info(ioe.getMessage());
     }
   }
 }

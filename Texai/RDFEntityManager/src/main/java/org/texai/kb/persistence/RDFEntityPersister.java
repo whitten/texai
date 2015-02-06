@@ -1054,7 +1054,6 @@ public final class RDFEntityPersister extends AbstractRDFEntityAccessor {  // NO
 
     try {
       boolean haveCreatedTrueOrFalseClassTerm = false;
-      boolean isExport = writer != null;
       // check whether to define the true and false classes
       if (!definedClassAndPredicateURIs.contains(getClassURI())) {
         // query for existing definition of the true class
@@ -1354,6 +1353,7 @@ public final class RDFEntityPersister extends AbstractRDFEntityAccessor {  // NO
    * @return the set of asserted RDF values
    */
   @SuppressWarnings("unchecked")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings({"RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE"})
   private Set<Value> persistFieldValues(
           final RepositoryConnection repositoryConnection,
           final Collection<?> valueList,
@@ -1375,8 +1375,8 @@ public final class RDFEntityPersister extends AbstractRDFEntityAccessor {  // NO
     while (rdfValues_iter.hasNext()) {
       final Value rdfValue = rdfValues_iter.next();
       // weaker form of the membership test to determine equal RDF literals
-      boolean isNewValue = true;
       final String rdfValueString = rdfValue.toString();
+      boolean isNewValue = true;
       for (final Value existingRDFValue : existingRDFValues) {
         if (existingRDFValue.toString().equals(rdfValueString)) {
           isNewValue = false;

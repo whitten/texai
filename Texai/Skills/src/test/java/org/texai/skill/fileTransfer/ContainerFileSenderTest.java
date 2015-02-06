@@ -101,7 +101,7 @@ public class ContainerFileSenderTest {
    */
   @Test
   public void testInitializeTaskMessage() {
-    LOGGER.info("testing " + AHCSConstants.AHCS_INITIALIZE_TASK + " message");
+    LOGGER.info("testing " + AHCSConstants.INITIALIZE_TASK + " message");
 
     skillTestHarness.reset();
     skillTestHarness.setSkillState(AHCSConstants.State.UNINITIALIZED, skillClassName);
@@ -110,7 +110,7 @@ public class ContainerFileSenderTest {
             NetworkOperation.class.getName(), // senderService
             containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
             skillClassName, // recipientService
-            AHCSConstants.AHCS_INITIALIZE_TASK); // operation
+            AHCSConstants.INITIALIZE_TASK); // operation
 
     skillTestHarness.dispatchMessage(initializeMessage);
 
@@ -202,7 +202,7 @@ public class ContainerFileSenderTest {
             "[TestSender:deployment/nodes.xml --> TestRecipient:data/nodes.xml]",
             fileTransferInfo.toBriefString());
     assertEquals(
-            (int) sentMessage.get(AHCSConstants.MSG_PARM_BYTES_SIZE),
+            (long) sentMessage.get(AHCSConstants.MSG_PARM_BYTES_SIZE),
             FileTransferInfo.MAXIMUM_FILE_CHUNK_SIZE);
     final byte[] bytes = (byte[]) sentMessage.get(AHCSConstants.MSG_PARM_BYTES);
     assertNotNull(bytes);
@@ -334,8 +334,7 @@ public class ContainerFileSenderTest {
     final Message originalMessage = (Message) sentMessage.get(AHCSConstants.AHCS_ORIGINAL_MESSAGE);
     assertNotNull(originalMessage);
     assertEquals(originalMessage.toBriefString(), prepareToSendFileTaskMessage.toBriefString());
-    assertEquals(
-            (String) sentMessage.get(AHCSConstants.MSG_PARM_REASON),
+    assertEquals(sentMessage.get(AHCSConstants.MSG_PARM_REASON),
             "file does not exist: deployment/does-not-exist.txt");
   }
 

@@ -15,11 +15,12 @@ import java.util.Iterator;
 import java.util.List;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
+import org.openrdf.model.URI;
 import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.ahcsSupport.domainEntity.Role;
 import org.texai.ahcsSupport.domainEntity.SkillClass;
 import org.texai.kb.persistence.RDFEntityManager;
-import org.texai.util.StringUtils;
+import org.texai.kb.persistence.RDFUtility;
 import org.texai.util.TexaiException;
 
 /**
@@ -100,10 +101,14 @@ public final class NodeAccess {
     assert skillClassName != null : "skillClassName must not be null";
     assert !skillClassName.isEmpty() : "skillClassName must not be empty";
 
+    final URI predicate = RDFUtility.getDefaultPropertyURI(
+            SkillClass.class.getName(), // className
+            "skillClassName", // fieldName
+            String.class); // fieldType
     final List<SkillClass> skillClasses = rdfEntityManager.find(
-            AHCSConstants.SKILL_CLASS_SKILL_CLASS_NAME_TERM,
-            skillClassName,
-            SkillClass.class);
+            predicate,
+            skillClassName, // value
+            SkillClass.class); // clazz
 
     if (skillClasses.size() == 1) {
       return skillClasses.get(0);

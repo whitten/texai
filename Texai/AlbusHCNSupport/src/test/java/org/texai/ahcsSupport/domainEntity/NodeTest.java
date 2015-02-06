@@ -287,12 +287,60 @@ public class NodeTest {
   }
 
   /**
+   * Makes a test node with two roles.
+   *
+   * @return a test node
+   */
+  public static Node makeTestNode3() {
+    final String name = "TestContainer.XestAgent";
+    final String missionDescription = "a 3nd test node";
+    final Set<Role> roles = new HashSet<>();
+    Role testRole = makeTestRole();
+    roles.add(testRole);
+    Role testRole2 = makeTestRole2();
+    roles.add(testRole2);
+    Node testNode = new Node(
+            name,
+            missionDescription,
+            roles,
+            false); // isNetworkSingleton
+    testRole.setNode(testNode);
+    testNode.setStateValue("testVariable", 1);
+    return testNode;
+  }
+
+  /**
    * Makes a test role.
    *
    * @return a test role
    */
   private static Role makeTestRole() {
     final String qualifiedName = "TestContainer.TestAgent.TestRole";
+    final String description = "a test role";
+    final String parentQualifiedName = "TestContainer.TestParentAgent.TestParentRole";
+    final Set<String> childQualifiedNames = new HashSet<>();
+    final Set<SkillClass> skillClasses = new HashSet<>();
+    skillClasses.add(SkillClassTest.makeTestSkillClass());
+    final Set<String> variableNames = new HashSet<>();
+    variableNames.add("testVariable");
+    final boolean areRemoteCommunicationsPermitted = false;
+    return new Role(
+            qualifiedName,
+            description,
+            parentQualifiedName,
+            childQualifiedNames,
+            skillClasses,
+            variableNames,
+            areRemoteCommunicationsPermitted);
+  }
+
+  /**
+   * Makes a test role.
+   *
+   * @return a test role
+   */
+  private static Role makeTestRole2() {
+    final String qualifiedName = "TestContainer.TestAgent.TestRole2";
     final String description = "a test role";
     final String parentQualifiedName = "TestContainer.TestParentAgent.TestParentRole";
     final Set<String> childQualifiedNames = new HashSet<>();

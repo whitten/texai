@@ -393,7 +393,7 @@ public final class FileTransferInfo {
    * @return the last sent file chunk bytes
    */
   public byte[] getFileChunkBytes() {
-    return fileChunkBytes;
+    return fileChunkBytes.clone();
   }
 
   /** Sets the last sent file chunk bytes.
@@ -404,7 +404,7 @@ public final class FileTransferInfo {
     //Preconditions
     assert fileChunkBytes != null : "fileChunkBytes must not be null";
 
-    this.fileChunkBytes = fileChunkBytes;
+    this.fileChunkBytes = fileChunkBytes.clone();
   }
 
   /** Gets the requester qualified name.

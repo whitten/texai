@@ -67,4 +67,34 @@ public class Person extends Agent {
   public void setFamilyName(final String familyName) {
     this.familyName = familyName;
   }
+
+  /** Returns whether the given object is equal to this object.
+   *
+   * @param obj the given object
+   * @return whether the given object is equal to this object
+   */
+  @Override
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings({"EQ_OVERRIDING_EQUALS_NOT_SYMMETRIC"})
+  public boolean equals(final Object obj) {
+    if (obj instanceof Person) {
+      final Person that = (Person) obj;
+      return this.getId().equals(that.getId());
+    } else {
+      return false;
+    }
+  }
+
+  /** Returns a hash code for this object.
+   *
+   * @return a hash code for this object
+   */
+  @Override
+  public int hashCode() {
+    if (getId() == null) {
+      return super.hashCode();
+    } else {
+      return getId().hashCode();
+    }
+  }
+
 }

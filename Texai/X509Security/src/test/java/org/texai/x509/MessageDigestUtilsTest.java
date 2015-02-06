@@ -61,6 +61,7 @@ public class MessageDigestUtilsTest {
       MessageDigestUtils.verifyFileHash("data/SignatureTest.txt", wrongFileHashString);
       fail();
     } catch (Exception ex) {
+      LOGGER.info("expected exception occurred");
     }
   }
 

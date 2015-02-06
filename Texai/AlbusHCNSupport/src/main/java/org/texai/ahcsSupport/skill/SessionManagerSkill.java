@@ -81,7 +81,7 @@ public class SessionManagerSkill extends AbstractSkill {
       return;
     }
     switch (operation) {
-      case AHCSConstants.AHCS_INITIALIZE_TASK:
+      case AHCSConstants.INITIALIZE_TASK:
         assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
         getNodeRuntime().getTimer().scheduleAtFixedRate(
                 new SkillInfoJanitorProcess(), // task
@@ -161,7 +161,7 @@ public class SessionManagerSkill extends AbstractSkill {
                   getClassName(), // senderService
                   getQualifiedName(), // recipientQualifiedName
                   skillClass.getName(), // service
-                  AHCSConstants.AHCS_INITIALIZE_TASK); // operation
+                  AHCSConstants.INITIALIZE_TASK); // operation
           skill.receiveMessage(message);
         }
       } else {

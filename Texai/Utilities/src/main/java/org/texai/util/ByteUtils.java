@@ -35,10 +35,6 @@ public final class ByteUtils {
     'c', 'd', 'e', 'f'
   };
 
-  private static Exception TexaiException(UnsupportedEncodingException ex) {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
   /**
    * Hide constructor in this utility class.
    */

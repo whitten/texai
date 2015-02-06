@@ -3,6 +3,7 @@ package org.texai.util;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -341,11 +342,11 @@ public class StringUtilsTest {
   @Test
   public void testToHex() {
     System.out.println("toHex");
-    byte[] buffer = "".getBytes();
+    byte[] buffer = "".getBytes(Charset.forName("UTF-8"));
     assertEquals("", StringUtils.toHex(buffer));
-    buffer = "0".getBytes();
+    buffer = "0".getBytes(Charset.forName("UTF-8"));
     assertEquals("30", StringUtils.toHex(buffer));
-    buffer = "0123".getBytes();
+    buffer = "0123".getBytes(Charset.forName("UTF-8"));
     assertEquals("30313233", StringUtils.toHex(buffer));
     assertEquals("303132", StringUtils.toHex(buffer, 3));
   }

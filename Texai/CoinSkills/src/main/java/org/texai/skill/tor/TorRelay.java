@@ -53,7 +53,7 @@ public final class TorRelay extends AbstractSkill {
       return;
     }
     switch (operation) {
-      case AHCSConstants.AHCS_INITIALIZE_TASK:
+      case AHCSConstants.INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
         if (getNodeRuntime().isFirstContainerInNetwork()) {
           setSkillState(AHCSConstants.State.READY);
@@ -100,7 +100,7 @@ public final class TorRelay extends AbstractSkill {
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
-      AHCSConstants.AHCS_INITIALIZE_TASK
+      AHCSConstants.INITIALIZE_TASK
     };
   }
 

@@ -46,6 +46,7 @@ import org.texai.x509.X509SecurityInfo;
  * @author reed
  */
 @ThreadSafe
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "SE_TRANSIENT_FIELD_NOT_RESTORED", justification = "handled by NodesInitializer")
 @RDFEntity(context = "texai:AlbusHierarchicalControlSystemContext")
 public class Role implements CascadePersistence, MessageDispatcher, Comparable<Role> {
 
@@ -83,15 +84,15 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   private final boolean areRemoteCommunicationsPermitted;
   // the cached X.509 certificate information used to authenticate, sign and encrypt remote communications, or null if this
   // role performs only communications local to the container.
-  private X509SecurityInfo x509SecurityInfo;
+  private transient X509SecurityInfo x509SecurityInfo;
   // the node runtime
   private transient BasicNodeRuntime nodeRuntime;
-  // the role's skill dictionary, service (skill class name) --> skill
+  // the transient role's skill dictionary, service (skill class name) --> skill
   private transient final Map<String, AbstractSkill> skillDictionary = new HashMap<>();
   // the role state
-  private final AtomicReference<State> roleState = new AtomicReference<>(State.UNINITIALIZED);
+  private transient final AtomicReference<State> roleState = new AtomicReference<>(State.UNINITIALIZED);
   // the subskills dictionary, subskill class name --> subskill shared instance
-  private final Map<String, AbstractSubSkill> subSkillsDictionary = new HashMap<>();
+  private transient final Map<String, AbstractSubSkill> subSkillsDictionary = new HashMap<>();
 
   /**
    * Constructs a new Role instance. Used by the persistence framework.
@@ -282,6 +283,24 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
     }
   }
 
+  /** Gets the sibling role having the given role name.
+   *
+   * @param roleName the given role name
+   * @return the sibling role
+   */
+  public Role getSiblingRole(final String roleName) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(roleName) : "roleName must be a non-empty string";
+
+    for (final Role role :node.getRoles()) {
+      final String siblingRoleName = Role.extractRoleName(role.qualifiedName);
+      if (siblingRoleName.equals(roleName)) {
+        return role;
+      }
+    }
+    return null;
+  }
+
   /**
    * Finds the role's skill instance having the specified class name (service).
    *
@@ -443,8 +462,8 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
           skill = findSubSkill(message.getRecipientService());
         }
         assert skill != null :
-                "service not found " + message.getRecipientService() + "\n" + message.toDetailedString() +
-                "\n skillDictionary: " + skillDictionary;
+                "service not found " + message.getRecipientService() + "\n" + message.toDetailedString()
+                + "\n skillDictionary: " + skillDictionary;
       }
     }
 

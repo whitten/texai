@@ -9,8 +9,10 @@ package org.texai.skill.aicoin;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
@@ -71,7 +73,7 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
        * This task message is sent from the parent XAINetworkOperationAgent.XAINetworkOperationRole. It is expected to be the first task
        * message that this role receives and it results in the role being initialized.
        */
-      case AHCSConstants.AHCS_INITIALIZE_TASK:
+      case AHCSConstants.INITIALIZE_TASK:
         assert getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
         if (getNodeRuntime().isFirstContainerInNetwork()) {
           setSkillState(AHCSConstants.State.READY);
@@ -133,14 +135,17 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
     LOGGER.info("confFile: " + confFile);
     if (confFile.exists()) {
       LOGGER.info("deleting existing " + confFile);
-      confFile.delete();
+      final boolean isOK = confFile.delete();
+      if (!isOK) {
+        LOGGER.info("problem deleting " + confFile);
+      }
     }
 
     // create the .aicoin directory if not already present
     final File directory = new File(directoryPath);
     if (!directory.isDirectory()) {
-      directory.mkdir();
-      assert directory.isDirectory();
+      final boolean isOK = directory.mkdir();
+      assert isOK && directory.isDirectory();
     }
 
     //TODO implement a skill for XAIOperation that that verifies that each user is unique and that each password is unique.
@@ -154,7 +159,7 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
       throw new TexaiException("the RPC_PASSWORD environment variable must be assigned a value");
     }
     // emit the configuration file line by line
-    try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(confFile))) {
+    try (BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(confFile), "UTF-8"))) {
       bufferedWriter.write("# no proof-of-work after block height\n");
       bufferedWriter.write("nopowafter=1\n");
       bufferedWriter.write("# no dns seeds in the demo\n");
@@ -251,7 +256,7 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
-      AHCSConstants.AHCS_INITIALIZE_TASK,
+      AHCSConstants.INITIALIZE_TASK,
       AHCSConstants.BECOME_READY_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.WRITE_CONFIGURATION_FILE_TASK

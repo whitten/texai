@@ -46,7 +46,7 @@ public abstract class AbstractSkill {
   private static final Set<String> oneTimeOperations = new HashSet<>();
 
   static {
-    oneTimeOperations.add(AHCSConstants.AHCS_INITIALIZE_TASK);
+    oneTimeOperations.add(AHCSConstants.INITIALIZE_TASK);
     oneTimeOperations.add(AHCSConstants.PERFORM_MISSION_TASK);
     oneTimeOperations.add(AHCSConstants.SINGLETON_AGENT_HOSTS_INFO);
     oneTimeOperations.add(AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK);
@@ -102,7 +102,7 @@ public abstract class AbstractSkill {
     //Preconditions
     assert role != null : "role must not be null for " + this;
 
-    return role.getNodeRuntime().getRdfEntityManager();
+    return role.getNodeRuntime().getRDFEntityManager();
   }
 
   /**
@@ -588,7 +588,7 @@ public abstract class AbstractSkill {
   /**
    * Provides a container for message timeout information, indexed by the reply-with UUID.
    */
-  class MessageTimeOutInfo {
+  static class MessageTimeOutInfo {
 
     // the sent message
     private final Message message;
@@ -610,7 +610,7 @@ public abstract class AbstractSkill {
       //Preconditions
       assert message != null : "message must not be null";
       assert timeoutMillis >= 0 : "timeoutMillis must not be negative";
-      assert message != null : "message must not be null";
+      assert messageTimeoutTask != null : "messageTimeoutTask must not be null";
 
       this.message = message;
       this.timeoutMillis = timeoutMillis;
@@ -626,7 +626,11 @@ public abstract class AbstractSkill {
      */
     @Override
     public String toString() {
-      return "[Message timeout millis: " + timeoutMillis + ", " + message.toBriefString() + "]";
+      if (StringUtils.isNonEmptyString(recoveryAction)) {
+        return "[Message timeout millis: " + timeoutMillis + ", " + message.toBriefString() + ", recovery action: " + recoveryAction + "]";
+      } else {
+        return "[Message timeout millis: " + timeoutMillis + ", " + message.toBriefString() + "]";
+      }
     }
   }
 
@@ -819,7 +823,7 @@ public abstract class AbstractSkill {
 
     getLogger().info("join acknowledged from " + message.getSenderQualifiedName());
     final Message removeUnjoinedRoleInfoMessage = makeMessage(
-            getContainerName() + ".ContainerOperationAgent.ContainerOperationRole", // recipientQualifiedName
+            getContainerName() + ".ContainerOperationAgent.ContainerSingletonConfigurationRole", // recipientQualifiedName
             "org.texai.skill.network.ContainerOperation", // recipientService
             AHCSConstants.REMOVE_UNJOINED_ROLE_INFO); // operation
     sendMessageViaSeparateThread(removeUnjoinedRoleInfoMessage);

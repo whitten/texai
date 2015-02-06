@@ -48,7 +48,6 @@ public final class CacheInitializer {
 
     try {
       cacheAccessLock.lock();
-      assert namedCache != null : "namedCache must not be null";
       assert !namedCache.isEmpty() : "namedCache must not be empty";
       if (!dynamicallyNamedCacheList.contains(namedCache)) {
         initializeCache(namedCache);

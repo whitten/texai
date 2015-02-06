@@ -28,7 +28,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
-import net.jcip.annotations.Immutable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import net.jcip.annotations.NotThreadSafe;
 import org.joda.time.DateTime;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
@@ -39,7 +41,7 @@ import org.texai.x509.SerializableObjectSigner;
  *
  * @author Stephen L. Reed
  */
-@Immutable
+@NotThreadSafe
 public class Message implements Serializable, Comparable<Message> {
 
   // the serial version UID
@@ -418,36 +420,14 @@ public class Message implements Serializable, Comparable<Message> {
     assert receivedMessage != null : "receivedMessage must not be null";
     assert skill != null : "role must not be null";
 
-      final Message message = new Message(
-              skill.getQualifiedName(), // senderQualifiedName
-              skill.getClassName(), // senderService,
-              receivedMessage.getSenderQualifiedName(), // recipientQualifiedName
-              receivedMessage.getSenderService(), // recipientService
-              AHCSConstants.OPERATION_NOT_PERMITTED_INFO); // operation
+    final Message message = new Message(
+            skill.getQualifiedName(), // senderQualifiedName
+            skill.getClassName(), // senderService,
+            receivedMessage.getSenderQualifiedName(), // recipientQualifiedName
+            receivedMessage.getSenderService(), // recipientService
+            AHCSConstants.OPERATION_NOT_PERMITTED_INFO); // operation
     message.put(AHCSConstants.AHCS_ORIGINAL_MESSAGE, receivedMessage);
     return message;
-  }
-
-  /**
-   * Returns a clone of this object.
-   *
-   * @return a clone of this object
-   */
-  @Override
-  @SuppressWarnings({"CloneDeclaresCloneNotSupported", "CloneDoesntCallSuperClone"})
-  public Message clone() {
-    return new Message(
-            recipientQualifiedName, // senderQualifiedName
-            recipientService, // senderService,
-            recipientQualifiedName,
-            conversationId,
-            replyWith,
-            inReplyTo,
-            replyByDateTime,
-            recipientService,
-            operation,
-            new HashMap<>(parameterDictionary),
-            version);
   }
 
   /**
@@ -798,9 +778,12 @@ public class Message implements Serializable, Comparable<Message> {
             .append("[Message ...\n  senderQualifiedName:    ")
             .append(senderQualifiedName)
             .append("\n  senderService:          ")
-            .append(senderService)
-            .append("\n  signatureBytes:         ")
-            .append(signatureBytes)
+            .append(senderService);
+    if (signatureBytes != null) {
+      stringBuilder.append("\n  signatureBytes:         ");
+    }
+    stringBuilder
+            .append(Arrays.toString(signatureBytes))
             .append("\n  recipientQualifiedName: ")
             .append(recipientQualifiedName)
             .append("\n  conversationId:         ")
@@ -857,7 +840,7 @@ public class Message implements Serializable, Comparable<Message> {
    * @return whether some other object equals this one
    */
   @Override
-  public boolean equals(Object obj) {
+  public boolean equals(final Object obj) {
     if (obj == null) {
       return false;
     }
@@ -865,7 +848,7 @@ public class Message implements Serializable, Comparable<Message> {
       return false;
     }
     final Message other = (Message) obj;
-    if (!this.senderQualifiedName.equals(senderQualifiedName)) {
+    if (!this.senderQualifiedName.equals(other.senderQualifiedName)) {
       return false;
     }
     if (this.senderService != null && !this.senderService.equals(other.senderService)) {
@@ -1064,8 +1047,7 @@ public class Message implements Serializable, Comparable<Message> {
     //Preconditions
     assert StringUtils.isNonEmptyString(filePath) : "filePath must be a non-empty string";
 
-    try {
-      final ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(filePath));
+    try (final ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(filePath))) {
       final Object result = objectInputStream.readObject();
       assert result instanceof Message;
       return (Message) result;

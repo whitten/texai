@@ -27,7 +27,7 @@ import org.apache.log4j.Logger;
  * @since 1.2.1
  */
 @NotThreadSafe
-public class HtmlCharacterEntityReferences {
+public final class HtmlCharacterEntityReferences {
 
   // the logger
   private static final Logger LOGGER = Logger.getLogger(HtmlCharacterEntityReferences.class);

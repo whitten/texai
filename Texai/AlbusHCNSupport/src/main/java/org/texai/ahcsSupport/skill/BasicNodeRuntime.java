@@ -10,6 +10,7 @@
  */
 package org.texai.ahcsSupport.skill;
 
+import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.util.Collections;
@@ -192,7 +193,8 @@ public class BasicNodeRuntime implements MessageDispatcher {
     }
   }
 
-  /** Returns a formatted list of the keys of the localRoleDictionary.
+  /**
+   * Returns a formatted list of the keys of the localRoleDictionary.
    *
    * @return a formatted list of the keys of the localRoleDictionary
    */
@@ -207,13 +209,12 @@ public class BasicNodeRuntime implements MessageDispatcher {
     return stringBuilder.toString();
   }
 
-
   /**
    * Gets the node runtime RDF entity manager.
    *
    * @return the node runtime RDF entity manager
    */
-  public RDFEntityManager getRdfEntityManager() {
+  public RDFEntityManager getRDFEntityManager() {
     return rdfEntityManager;
   }
 
@@ -367,8 +368,9 @@ public class BasicNodeRuntime implements MessageDispatcher {
     return nodeRuntimeSkill;
   }
 
-  /** Returns whether this is the first container in the network. If so, then all the network singletons are in this container,
-   * and the procedure of joining the network can be skipped.
+  /**
+   * Returns whether this is the first container in the network. If so, then all the network singletons are in this container, and the
+   * procedure of joining the network can be skipped.
    *
    * @return whether this is the first container in the network
    */
@@ -380,7 +382,10 @@ public class BasicNodeRuntime implements MessageDispatcher {
     return isFirstContainerInNetworkCached;
   }
 
-  /** Terminates this JVM with a normal exit code that causes the bash wrapper script to restart the Java application. */
+  /**
+   * Terminates this JVM with a normal exit code that causes the bash wrapper script to restart the Java application.
+   */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "DM_EXIT", justification = "desired behavior")
   public void restartJVM() {
     System.exit(0);
   }

@@ -1,5 +1,5 @@
 /*
- * SingletonConfiguration.java
+ * ContainerSingletonConfiguration.java
  *
  * Created on Mar 14, 2012, 10:49:55 PM
  *
@@ -15,6 +15,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
@@ -41,10 +42,10 @@ import org.texai.x509.MessageDigestUtils;
  * @author reed
  */
 @ThreadSafe
-public class SingletonConfiguration extends AbstractSkill {
+public class ContainerSingletonConfiguration extends AbstractSkill {
 
   // the log4j logger
-  private static final Logger LOGGER = Logger.getLogger(SingletonConfiguration.class);
+  private static final Logger LOGGER = Logger.getLogger(ContainerSingletonConfiguration.class);
   // the locations and credentials for network seed nodes
   private Set<SeedNodeInfo> seedNodesInfos;
   // the SHA-512 hash of the seed node infos serialized file
@@ -52,11 +53,13 @@ public class SingletonConfiguration extends AbstractSkill {
           = "YUhf+GN2kmnkLzwDnkhibWxlbnfyW9UExRTg/c4njjP05jX0BvlunodyVz33dp8chbgSaheEEAqzyDtz2+bPcw==";
   // the indicator that network singleton configuration information has been received from a seed peer
   private final AtomicBoolean isSeedConfigurationInfoReceived = new AtomicBoolean(false);
+  // the unjoined child roles
+  private final Set<String> unjoinedChildQualifiedNames = new HashSet<>();
 
   /**
    * Constructs a new SingletonConfiguration instance.
    */
-  public SingletonConfiguration() {
+  public ContainerSingletonConfiguration() {
   }
 
   /**
@@ -88,10 +91,10 @@ public class SingletonConfiguration extends AbstractSkill {
       /**
        * Initialize Task
        *
-       * This task message is sent from the container-local parent NetworkConfigurationAgent.NetworkConfigurationRole. It is expected to be
+       * This task message is sent from the container-local parent NetworkOperationAgent.NetworkSingletonConfigurationRole. It is expected to be
        * the first task message that this role receives and it results in the role being initialized.
        */
-      case AHCSConstants.AHCS_INITIALIZE_TASK:
+      case AHCSConstants.INITIALIZE_TASK:
         assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
         initialization(message);
         if (getNodeRuntime().isFirstContainerInNetwork()) {
@@ -104,7 +107,7 @@ public class SingletonConfiguration extends AbstractSkill {
       /**
        * Join Network Task
        *
-       * This task message is sent from the container-local parent NetworkConfigurationAgent.NetworkConfigurationRole.
+       * This task message is sent from the container-local parent NetworkOperationAgent.NetworkConfigurationRole.
        *
        * The SingletonConfiguration agent/role requests the singleton agent dictionary, agent name --> hosting container name, from a seed
        * peer.
@@ -136,7 +139,7 @@ public class SingletonConfiguration extends AbstractSkill {
       /**
        * Join Acknowledged Task
        *
-       * This task message is sent from the network-singleton parent NetworkSingletonConfigurationAgent.NetworkSingletonConfigurationRole.
+       * This task message is sent from the network-singleton parent NetworkOperationAgent.NetworkSingletonConfigurationRole.
        * It indicates that the parent is ready to converse with this role as needed.
        */
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
@@ -148,7 +151,7 @@ public class SingletonConfiguration extends AbstractSkill {
       /**
        * Become Ready Task
        *
-       * This task message is sent from the network-singleton parent NetworkSingletonConfigurationAgent.NetworkSingletonConfigurationRole.
+       * This task message is sent from the network-singleton parent NetworkOperationAgent.NetworkSingletonConfigurationRole.
        *
        * It results in the skill set to the ready state
        */
@@ -161,7 +164,7 @@ public class SingletonConfiguration extends AbstractSkill {
       /**
        * Perform Mission Task
        *
-       * This task message is sent from the network-singleton parent NetworkSingletonConfigurationAgent.NetworkSingletonConfigurationRole.
+       * This task message is sent from the network-singleton parent NetworkOperationAgent.NetworkSingletonConfigurationRole.
        * It commands this network-connected role to begin performing its mission.
        */
       case AHCSConstants.PERFORM_MISSION_TASK:
@@ -198,10 +201,49 @@ public class SingletonConfiguration extends AbstractSkill {
         seedConnectionRequestTimeout(message);
         return;
 
-      case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
-        LOGGER.warn(message);
+      /**
+       * Configure Singleton Agent Hosts Task
+       *
+       * This task message is sent from the container-local parent NetworkOperationAgent.NetworkSingletonConfigurationRole.
+       *
+       * Its parameter is the SingletonAgentHosts object, which contains the the singleton agent dictionary, agent name --> hosting
+       * container name.
+       *
+       * It results in the Configure Singleton Agent Hosts Task being sent to all child ConfigureParentToSingletonRoles, which every agent
+       * has.
+       *
+       * As an exception to the rule whereby roles have child roles in subordinate agents, the ContainerOperationRole has a child
+       * ConfigureParentToSingletonRole in the same agent ContainerOperationAgent.
+       */
+      case AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK:
+        assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
+                "state must be isolated-from-network, but is " + getSkillState();
+        configureSingletonAgentHostsTask(message);
         return;
 
+      /**
+       * Add Unjoined Role Info
+       *
+       * This message is sent from a child role informing that it will attempt to join the network.
+       */
+      case AHCSConstants.ADD_UNJOINED_ROLE_INFO:
+        assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "state must be isolated-from-network";
+        addUnjoinedRole(message);
+        return;
+
+      /**
+       * Remove Unjoined Role Info
+       *
+       * This message is sent from a child role informing that has joined the network.
+       *
+       * As a result, when all child roles have joined the network, a Network Join Complete Info message is sent to network operations
+       */
+      case AHCSConstants.REMOVE_UNJOINED_ROLE_INFO:
+        assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "state must be isolated-from-network";
+        removeUnjoinedRole(message);
+        return;
+
+      case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
         return;
@@ -240,13 +282,15 @@ public class SingletonConfiguration extends AbstractSkill {
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
-      AHCSConstants.AHCS_INITIALIZE_TASK,
+      AHCSConstants.ADD_UNJOINED_ROLE_INFO,
+      AHCSConstants.INITIALIZE_TASK,
       AHCSConstants.BECOME_READY_TASK,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.JOIN_NETWORK_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.MESSAGE_TIMEOUT_INFO,
       AHCSConstants.PERFORM_MISSION_TASK,
+      AHCSConstants.REMOVE_UNJOINED_ROLE_INFO,
       AHCSConstants.SEED_CONNECTION_REQUEST_INFO,
       AHCSConstants.SINGLETON_AGENT_HOSTS_INFO,
       AHCSConstants.TASK_ACCOMPLISHED_INFO};
@@ -286,7 +330,7 @@ public class SingletonConfiguration extends AbstractSkill {
 
     final String seedNodeIPAddress = System.getenv("AICOIN_SEED_IP");
     if (StringUtils.isNonEmptyString(seedNodeIPAddress)) {
-
+      throw new TexaiException("AICOIN_SEED_IP is not defined in the environment");
     }
     LOGGER.info("initializing the seed node information ...");
 
@@ -459,13 +503,85 @@ public class SingletonConfiguration extends AbstractSkill {
   }
 
   /**
+   * Propagate the task to configure roles for singleton agent hosts.
+   *
+   * @param message the configure singleton agent hosts task message
+   */
+  private void configureSingletonAgentHostsTask(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+
+    LOGGER.info("configuring the child roles with singleton agent hosts");
+    final SingletonAgentHosts singletonAgentHosts
+            = (SingletonAgentHosts) message.get(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS); // parameterName
+    assert singletonAgentHosts != null;
+
+    getRole().getChildQualifiedNames().stream().sorted().forEach(childQualifiedName -> {
+      final Message configureSingletonAgentHostsTask = makeMessage(
+              childQualifiedName, // recipientQualifiedName
+              ConfigureParentToSingleton.class.getName(), // recipientService
+              AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK); // operation
+      configureSingletonAgentHostsTask.put(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS, singletonAgentHosts);
+      sendMessageViaSeparateThread(configureSingletonAgentHostsTask);
+    });
+  }
+
+  /**
+   * Adds the given sender to the set of roles which have not yet joined the network.
+   *
+   * @param message the Add Unjoined Role Info message sent by
+   */
+  private void addUnjoinedRole(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert StringUtils.isNonEmptyString((String) message.get(AHCSConstants.MSG_PARM_ROLE_QUALIFIED_NAME)) :
+            "message missing role qualified name parameter";
+    assert !unjoinedChildQualifiedNames.contains((String) message.get(AHCSConstants.MSG_PARM_ROLE_QUALIFIED_NAME)) :
+            "duplicate entry for " + message.getSenderQualifiedName();
+
+    synchronized (unjoinedChildQualifiedNames) {
+      unjoinedChildQualifiedNames.add((String) message.get(AHCSConstants.MSG_PARM_ROLE_QUALIFIED_NAME));
+    }
+    LOGGER.debug("added unjoined role " + message.getSenderQualifiedName() + ", count: " + unjoinedChildQualifiedNames.size());
+  }
+
+  /**
+   * Removes the given sender from the set of roles which have not yet joined the network.
+   *
+   * @param message the Add Unjoined Role Info message sent by
+   */
+  private void removeUnjoinedRole(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "state must be isolated-from-network";
+    assert unjoinedChildQualifiedNames.contains(message.getSenderQualifiedName()) : "missing entry for " + message.getSenderQualifiedName();
+
+    boolean isEmpty;
+    synchronized (unjoinedChildQualifiedNames) {
+      unjoinedChildQualifiedNames.remove(message.getSenderQualifiedName());
+      isEmpty = unjoinedChildQualifiedNames.isEmpty();
+      LOGGER.debug("removed unjoined role " + message.getSenderQualifiedName() + ", count remaining: " + unjoinedChildQualifiedNames.size());
+      //LOGGER.debug(unjoinedChildQualifiedNames);
+    }
+
+    if (isEmpty) {
+      LOGGER.info("all roles having network singleton parents, joined the network");
+      // send a Network Join Complete Info message to NetworkOperationAgent.NetworkSingletonConfigurationRole
+      sendMessageViaSeparateThread(makeMessage(
+              getRole().getParentQualifiedName(), // recipientQualifiedName
+              NetworkSingletonConfiguration.class.getName(), // recipientService
+              AHCSConstants.NETWORK_JOIN_COMPLETE_INFO)); // operation
+    }
+  }
+
+  /**
    * Returns a demo version of the singleton agent hosts assignments, which are all to the Mint peer.
    *
    * @return a demo version of the singleton agent hosts assignments
    */
   private SingletonAgentHosts singletonAgentHosts() {
     final Map<String, String> singletonAgentDictionary = new HashMap<>();
-    
+
     singletonAgentDictionary.put("NetworkLogControlAgent", "Mint");
     singletonAgentDictionary.put("NetworkDeploymentAgent", "Mint");
     singletonAgentDictionary.put("NetworkFileTransferAgent", "Mint");

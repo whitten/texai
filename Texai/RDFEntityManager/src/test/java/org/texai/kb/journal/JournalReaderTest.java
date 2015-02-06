@@ -55,7 +55,8 @@ public class JournalReaderTest extends TestCase {
     final File directory = new File("./journals/" + TEST_REPOSITORY_NAME);
     if (!directory.exists()) {
       try {
-        directory.createNewFile();
+        final boolean isOK = directory.createNewFile();
+        assertTrue(isOK);
       } catch (final IOException ex) {
         fail(ex.getMessage());
       }
@@ -66,7 +67,8 @@ public class JournalReaderTest extends TestCase {
       for (final File file : files) {
         if (!file.isHidden()) {
           LOGGER.info("deleting file: " + file);
-          file.delete();
+          final boolean isOK = file.delete();
+          assertTrue(isOK);
         }
       }
     }

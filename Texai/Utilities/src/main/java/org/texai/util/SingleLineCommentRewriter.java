@@ -12,9 +12,13 @@ package org.texai.util;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -48,6 +52,7 @@ public final class SingleLineCommentRewriter extends DirectoryWalker<String> {
    * @throws java.io.IOException
    */
   @Override
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings({"DMI_HARDCODED_ABSOLUTE_FILENAME"})
   protected void handleFile(final File file, final int depth, final Collection<String> results) throws IOException {
     //Preconditions
     assert file != null : "file must not be null";
@@ -87,8 +92,8 @@ public final class SingleLineCommentRewriter extends DirectoryWalker<String> {
     LOGGER.debug("input temporary file: " + temporaryFile);
     LOGGER.debug("output file:          " + file);
     try (
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(temporaryFile));
-            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file))) {
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(temporaryFile), "UTF-8"));
+            final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"))) {
 
       // copy input lines to output until the class header is found
       String line = bufferedReader.readLine();
@@ -102,7 +107,7 @@ public final class SingleLineCommentRewriter extends DirectoryWalker<String> {
           index = line.indexOf(" class ");
           if (index > -1) {
             className = line.substring(index + 7).split(" ")[0].trim();
-            index = className.indexOf("<");
+            index = className.indexOf('<');
             if (index > -1) {
               className = className.substring(0, index);
             }

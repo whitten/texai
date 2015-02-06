@@ -12,6 +12,7 @@ package org.texai.util;
 import com.jezhumble.javasysmon.JavaSysMon;
 import com.jezhumble.javasysmon.MemoryStats;
 import java.io.File;
+import java.util.Locale;
 import java.util.Map.Entry;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
@@ -48,7 +49,7 @@ public final class EnvironmentUtils {
    * @return whether the operating system is a version of Windows.
    */
   public static boolean isWindows() {
-    return System.getProperty("os.name").toLowerCase().startsWith("windows");
+    return System.getProperty("os.name").toLowerCase(Locale.ENGLISH).startsWith("windows");
   }
 
   /**
@@ -57,7 +58,7 @@ public final class EnvironmentUtils {
    * @return whether the operating system is a version of Linux.
    */
   public static boolean isLinux() {
-    return System.getProperty("os.name").toLowerCase().startsWith("linux");
+    return System.getProperty("os.name").toLowerCase(Locale.ENGLISH).startsWith("linux");
   }
 
   /**

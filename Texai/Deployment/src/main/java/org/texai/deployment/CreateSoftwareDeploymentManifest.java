@@ -4,6 +4,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -141,9 +142,9 @@ public class CreateSoftwareDeploymentManifest {
     LOGGER.info("Writing manifest " + manifestFilePath);
     try {
       try (BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(manifestFilePath))) {
-        bufferedOutputStream.write(formattedJSONString.getBytes());
+        bufferedOutputStream.write(formattedJSONString.getBytes(Charset.forName("UTF-8")));
       }
-    } catch (Exception ex) {
+    } catch (IOException ex) {
       throw new TexaiException(ex);
     }
   }

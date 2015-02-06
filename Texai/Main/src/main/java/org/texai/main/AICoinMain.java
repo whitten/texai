@@ -79,7 +79,7 @@ public class AICoinMain {
   private final String nodesPath = "data/nodes.xml";
   // the tamper-evident hash of the nodes path file, use "1234" after revsing the nodes.xml file
   private final String NODES_FILE_HASH =
-          "A9e1oCl+aT6fo0OIhB94n55XBq1cPAS1zu1diep+g9dwkXSY8pow+UKNJLx8Ykq8Jkaa0R88RXkPdnG2DZJsxw==";
+          "7R+DeCZO1GusxJxPaLH6nb0vbBNPw+ZqLquXZD7VyJ+2C69L7dMGIai2c5aO6FyXva8duA9Wtwaq2qh3xRQkzg==";
   /**
    * the node runtime application thread
    */
@@ -177,8 +177,8 @@ public class AICoinMain {
       timer.cancel();
     }
 
-    if (nodeRuntime.getRdfEntityManager() != null) {
-      nodeRuntime.getRdfEntityManager().close();
+    if (nodeRuntime.getRDFEntityManager() != null) {
+      nodeRuntime.getRDFEntityManager().close();
     }
 
     CacheManager.getInstance().shutdown();
@@ -226,12 +226,11 @@ public class AICoinMain {
       LOGGER.info("Starting the node runtime.");
 
       // configure the list of operations to be filtered from logging
-      nodeRuntime.addFilteredOperation(AHCSConstants.AHCS_INITIALIZE_TASK);
+      nodeRuntime.addFilteredOperation(AHCSConstants.INITIALIZE_TASK);
       nodeRuntime.addFilteredOperation(AHCSConstants.ADD_UNJOINED_ROLE_INFO);
       nodeRuntime.addFilteredOperation(AHCSConstants.BECOME_READY_TASK);
       nodeRuntime.addFilteredOperation(AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK);
       nodeRuntime.addFilteredOperation(AHCSConstants.DELEGATE_BECOME_READY_TASK);
-      nodeRuntime.addFilteredOperation(AHCSConstants.DELEGATE_CONFIGURE_SINGLETON_AGENT_HOSTS_TASK);
       nodeRuntime.addFilteredOperation(AHCSConstants.DELEGATE_PERFORM_MISSION_TASK);
       nodeRuntime.addFilteredOperation(AHCSConstants.DEPLOY_FILES_TASK);
       nodeRuntime.addFilteredOperation(AHCSConstants.JOIN_ACKNOWLEDGED_TASK);
@@ -251,7 +250,7 @@ public class AICoinMain {
               nodeRuntime.getNodeRuntimeSkill().getClassName(), // senderService
               recipientQualifiedName,
               null, // service
-              AHCSConstants.AHCS_INITIALIZE_TASK); // operation
+              AHCSConstants.INITIALIZE_TASK); // operation
       nodeRuntime.dispatchMessage(initializeMessage);
 
       while (!nodeRuntime.isQuit.get()) {

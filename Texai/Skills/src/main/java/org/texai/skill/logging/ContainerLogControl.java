@@ -52,17 +52,13 @@ public class ContainerLogControl extends AbstractSkill {
       return;
     }
     switch (operation) {
-      case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
-        LOGGER.warn(message);
-        return;
-
       /**
        * Initialize Task
        *
        * This task message is sent from the container-local parent NetworkLogControlAgent.NetworkLogControlRole. It is expected to be the
        * first task message that this role receives and it results in the role being initialized.
        */
-      case AHCSConstants.AHCS_INITIALIZE_TASK:
+      case AHCSConstants.INITIALIZE_TASK:
         assert this.getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
         initialization(message);
         return;
@@ -110,6 +106,7 @@ public class ContainerLogControl extends AbstractSkill {
         joinAcknowledgedTask(message);
         return;
 
+      case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
         LOGGER.warn(message);
         return;
@@ -196,7 +193,7 @@ public class ContainerLogControl extends AbstractSkill {
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
-      AHCSConstants.AHCS_INITIALIZE_TASK,
+      AHCSConstants.INITIALIZE_TASK,
       AHCSConstants.BECOME_READY_TASK,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.LOG_OPERATION_TASK,
@@ -257,7 +254,6 @@ public class ContainerLogControl extends AbstractSkill {
     assert !loggedOperation.isEmpty() : "loggedOperation must not be empty";
 
     LOGGER.info("logging " + loggedOperation);
-    assert loggedOperation != null;
     getNodeRuntime().addLoggedOperation(loggedOperation);
   }
 
@@ -285,7 +281,6 @@ public class ContainerLogControl extends AbstractSkill {
     assert !unloggedOperation.isEmpty() : "unloggedOperation must not be empty";
 
     LOGGER.info("unlogging " + unloggedOperation);
-    assert unloggedOperation != null;
     getNodeRuntime().removeLoggedOperation(unloggedOperation);
   }
 

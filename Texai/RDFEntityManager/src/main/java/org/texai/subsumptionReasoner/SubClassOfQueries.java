@@ -440,7 +440,7 @@ public class SubClassOfQueries {
   }
 
   /** Provides the direct super class cache. */
-  class DirectSuperClassCache extends ThreadLocal<Map<URI, Collection<URI>>> {
+  static class DirectSuperClassCache extends ThreadLocal<Map<URI, Collection<URI>>> {
 
     /** Returns the current thread's "initial value" for this thread-local variable.
      *
@@ -455,7 +455,7 @@ public class SubClassOfQueries {
   }
 
   /** Provides the super class cache. */
-  class SuperClassCache extends ThreadLocal<Map<URI, Set<URI>>> {
+  static class SuperClassCache extends ThreadLocal<Map<URI, Set<URI>>> {
 
     /** Returns the current thread's "initial value" for this thread-local variable.
      *

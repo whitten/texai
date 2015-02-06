@@ -112,7 +112,6 @@ public class RDFUtilityTest {
     final RDFEntityManager rdfEntityManager = new RDFEntityManager();
     RDFUtility instance = new RDFUtility(rdfEntityManager);
     final Object literal = instance.getLiteralForDate(date);
-    assertTrue(literal instanceof Literal);
     assertTrue(((Literal) literal).getLabel().startsWith("1969-12-31T"));
     rdfEntityManager.close();
   }
@@ -135,7 +134,6 @@ public class RDFUtilityTest {
     final RDFEntityManager rdfEntityManager = new RDFEntityManager();
     RDFUtility instance = new RDFUtility(rdfEntityManager);
     final Object literal = instance.getLiteralForCalendar(calendar);
-    assertTrue(literal instanceof Literal);
     assertTrue(((Literal) literal).getLabel().startsWith("2007-10-23T"));
     rdfEntityManager.close();
   }

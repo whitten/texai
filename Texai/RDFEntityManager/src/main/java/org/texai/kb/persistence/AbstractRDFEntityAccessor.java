@@ -1290,7 +1290,6 @@ public abstract class AbstractRDFEntityAccessor {          // NOPMD
               PERSISTENT_MAP_ENTRY_VALUE_URI, // predicate
               effectiveContextURI, // context
               repositoryConnection);
-      assert keyRDFValue != null : "\nsubject: " + bNode + "\npredicate: " + PERSISTENT_MAP_ENTRY_VALUE_URI + "\ncontext: " + effectiveContextURI;
 
       return new MapEntry(bNode, keyRDFValue, valueRDFValue);
     }

@@ -19,6 +19,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -145,20 +146,6 @@ public class NodeAccessTest {
   }
 
   /**
-   * Test of findSkillClass method, of class NodeAccess.
-   */
-  @Test
-  public void testFindSkillClass() {
-    LOGGER.info("findSkillClass");
-    SkillClass skillClass1 = makeTestSkillClass();
-    String skillClassName = skillClass1.getName();
-    NodeAccess instance = new NodeAccess(rdfEntityManager);
-    SkillClass expResult = null;
-    SkillClass result = instance.findSkillClass(skillClassName);
-    assertEquals(expResult, result);
-  }
-
-  /**
    * Test of persistSkillClass method, of class NodeAccess.
    */
   @Test
@@ -166,18 +153,18 @@ public class NodeAccessTest {
     LOGGER.info("persistSkillClass");
     SkillClass skillClass = makeTestSkillClass();
     NodeAccess instance = new NodeAccess(rdfEntityManager);
+    SkillClass result = instance.findSkillClass(skillClass.getSkillClassName());
+    assertNull(result);
+    Logger.getLogger(RDFEntityPersister.class).setLevel(Level.INFO);
     instance.persistSkillClass(skillClass);
-  }
-
-  /**
-   * Test of removeSkillClass method, of class NodeAccess.
-   */
-  @Test
-  public void testRemoveSkillClass() {
+    Logger.getLogger(RDFEntityPersister.class).setLevel(Level.WARN);
+    LOGGER.info("finding " + skillClass.getSkillClassName());
+    result = instance.findSkillClass(skillClass.getSkillClassName());
+    assertNotNull(result);
     LOGGER.info("removeSkillClass");
-    SkillClass skillClass = makeTestSkillClass();
-    NodeAccess instance = new NodeAccess(rdfEntityManager);
     instance.removeSkillClass(skillClass);
+    result = instance.findSkillClass(skillClass.getSkillClassName());
+    assertNull(result);
   }
 
   /**
@@ -197,7 +184,7 @@ public class NodeAccessTest {
    * @return a test skill class
    */
   public static SkillClass makeTestSkillClass() {
-    final String skillClassName = "org.texai.skill.governance.Governance";
+    final String skillClassName = "org.texai.skill.governance.MyClass";
     final boolean isClassExistsTested = false;
     return new SkillClass(
             skillClassName,

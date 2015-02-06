@@ -10,8 +10,10 @@
 package org.texai.kb.persistence;
 
 import java.io.BufferedWriter;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -129,7 +131,7 @@ public class RDFEntityManagerTest {
     rdfTestEntity1.setName("TestDomainEntity 1");
     rdfTestEntity1.setNumberOfCrew(1);
     final String[] comments1 = {"comment 1", "comment 2"};
-    rdfTestEntity1.setComment(comments1);
+    rdfTestEntity1.setComments(comments1);
     Set<String> cyclistNotes = new HashSet<>();
     cyclistNotes.add("note 1");
     cyclistNotes.add("note 2");
@@ -146,7 +148,7 @@ public class RDFEntityManagerTest {
     rdfTestEntity2.setName("TestDomainEntity 2");
     rdfTestEntity2.setNumberOfCrew(1);
     final String[] comments2 = {"comment 1", "comment 2"};
-    rdfTestEntity2.setComment(comments2);
+    rdfTestEntity2.setComments(comments2);
 
     // set XML datatype fields in the first test RDF entity
     rdfTestEntity1.setByteField((byte) 5);
@@ -192,10 +194,10 @@ public class RDFEntityManagerTest {
     assertEquals(rdfTestEntity1.getMyPeers(), rdfTestEntity1_Loaded.getMyPeers());
     assertNull(rdfTestEntity1_Loaded.getDontCareField());
     assertEquals(rdfTestEntity1.getFavoriteTestRDFEntityPeer(), rdfTestEntity1_Loaded.getFavoriteTestRDFEntityPeer());
-    assertNotNull(rdfTestEntity1_Loaded.getComment());
-    assertEquals(rdfTestEntity1.getComment().length, rdfTestEntity1_Loaded.getComment().length);
-    for (int i = 0; i < rdfTestEntity1.getComment().length; i++) {
-      assertEquals(rdfTestEntity1.getComment()[i], rdfTestEntity1_Loaded.getComment()[i]);
+    assertNotNull(rdfTestEntity1_Loaded.getComments());
+    assertEquals(rdfTestEntity1.getComments().length, rdfTestEntity1_Loaded.getComments().length);
+    for (int i = 0; i < rdfTestEntity1.getComments().length; i++) {
+      assertEquals(rdfTestEntity1.getComments()[i], rdfTestEntity1_Loaded.getComments()[i]);
     }
     // test that  XML datatype fields loaded OK
     assertEquals(rdfTestEntity1.getByteField(), rdfTestEntity1_Loaded.getByteField());
@@ -295,6 +297,7 @@ public class RDFEntityManagerTest {
 
     final RDFTestEntity rdfTestEntity = new RDFTestEntity();
     final URI id = RDFEntityManager.createId(rdfTestEntity);
+    assertNotNull(id);
     LOGGER.info("  createId OK");
   }
 
@@ -311,7 +314,7 @@ public class RDFEntityManagerTest {
     final RDFTestEntity rdfTestEntity2 = new RDFTestEntity();
     rdfTestEntity2.setName("test entity 2");
     try {
-      try (BufferedWriter writer = new BufferedWriter(new FileWriter("data/text-export.turtle"))) {
+      try (final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("data/text-export.turtle"), "UTF-8"))) {
         instance.export(rdfTestEntity1, writer);
         instance.export(rdfTestEntity2, writer);
       }

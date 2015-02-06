@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
@@ -164,22 +165,24 @@ public class DisjointWithQueries {
     }
 
     // detect disjoint relationship
-    for (final URI disjointWithTerm : disjointClassDictionary1.keySet()) {
+    for (final Entry<URI, URI> entry : disjointClassDictionary1.entrySet()) {
+      final URI disjointWithTerm = entry.getKey();
       if (classDictionary2.containsKey(disjointWithTerm)) {
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug("explanation why " + RDFUtility.formatResource(term1) + " is disjoint with " + RDFUtility.formatResource(term2) + " ...");
           LOGGER.debug("  " + RDFUtility.formatResources(classDictionary2.get(disjointWithTerm)));
-          LOGGER.debug("  " + RDFUtility.formatResources(classDictionary1.get(disjointClassDictionary1.get(disjointWithTerm))));
+          LOGGER.debug("  " + RDFUtility.formatResources(classDictionary1.get(entry.getValue())));
           return true;
         }
       }
     }
-    for (final URI disjointWithTerm : disjointClassDictionary2.keySet()) {
+    for (final Entry<URI, URI> entry : disjointClassDictionary2.entrySet()) {
+      final URI disjointWithTerm = entry.getKey();
       if (classDictionary1.containsKey(disjointWithTerm)) {
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug("explanation why " + RDFUtility.formatResource(term1) + " is disjoint with " + RDFUtility.formatResource(term2) + " ...");
           LOGGER.debug("  " + RDFUtility.formatResources(classDictionary2.get(disjointWithTerm)));
-          LOGGER.debug("  " + RDFUtility.formatResources(classDictionary1.get(disjointClassDictionary2.get(disjointWithTerm))));
+          LOGGER.debug("  " + RDFUtility.formatResources(classDictionary1.get(entry.getValue())));
           return true;
         }
       }
@@ -242,22 +245,24 @@ public class DisjointWithQueries {
       }
 
       // detect disjoint relationship
-      for (final URI disjointWithTerm : disjointClassDictionary1.keySet()) {
+      for (final Entry<URI, URI> entry : disjointClassDictionary1.entrySet()) {
+        final URI disjointWithTerm = entry.getKey();
         if (classDictionary2.containsKey(disjointWithTerm)) {
           if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("explanation why " + RDFUtility.formatResource(term1) + " is disjoint with " + RDFUtility.formatResource(term2) + " ...");
             LOGGER.debug("  " + RDFUtility.formatResources(classDictionary2.get(disjointWithTerm)));
-            LOGGER.debug("  " + RDFUtility.formatResources(classDictionary1.get(disjointClassDictionary1.get(disjointWithTerm))));
+            LOGGER.debug("  " + RDFUtility.formatResources(classDictionary1.get(entry.getValue())));
             return true;
           }
         }
       }
-      for (final URI disjointWithTerm : disjointClassDictionary2.keySet()) {
+      for (final Entry<URI, URI> entry : disjointClassDictionary2.entrySet()) {
+        final URI disjointWithTerm = entry.getKey();
         if (classDictionary1.containsKey(disjointWithTerm)) {
           if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("explanation why " + RDFUtility.formatResource(term1) + " is disjoint with " + RDFUtility.formatResource(term2) + " ...");
             LOGGER.debug("  " + RDFUtility.formatResources(classDictionary2.get(disjointWithTerm)));
-            LOGGER.debug("  " + RDFUtility.formatResources(classDictionary1.get(disjointClassDictionary2.get(disjointWithTerm))));
+            LOGGER.debug("  " + RDFUtility.formatResources(classDictionary1.get(entry.getValue())));
             return true;
           }
         }
@@ -278,7 +283,7 @@ public class DisjointWithQueries {
    * @param termPair the two ordered terms
    * @return whether the given terms are disjoint
    */
-  private boolean areDisjoint(final URI[] termPair) {
+  public boolean areDisjoint(final URI[] termPair) {
     //preconditions
     assert termPair != null : "termPair must not be null";
 
@@ -365,7 +370,7 @@ public class DisjointWithQueries {
   }
 
   /** Provides the disjointWith memoized cache. */
-  class DisjointWithMemoizationDictionary extends ThreadLocal<Map<List<URI>, Boolean>> {
+  static class DisjointWithMemoizationDictionary extends ThreadLocal<Map<List<URI>, Boolean>> {
 
     /** Returns the current thread's "initial value" for this thread-local variable.
      *

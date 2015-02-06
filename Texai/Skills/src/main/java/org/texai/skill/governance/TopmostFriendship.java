@@ -16,7 +16,6 @@ import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcs.skill.AbstractNetworkSingletonSkill;
 import org.texai.ahcsSupport.domainEntity.Node;
-import org.texai.skill.domainEntity.SingletonAgentHosts;
 import org.texai.skill.heartbeat.TopLevelHeartbeat;
 import org.texai.skill.network.NetworkOperation;
 import org.texai.util.TexaiException;
@@ -67,29 +66,9 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
        * If this is the first container in the network, then a Perform Mission Task message is sent to the child NetworkOperation
        * agent/role. Otherwise a Join Network Task message is sent.
        */
-      case AHCSConstants.AHCS_INITIALIZE_TASK:
+      case AHCSConstants.INITIALIZE_TASK:
         assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
         initialization(message);
-        return;
-
-      /**
-       * Singleton Agent Hosts Info
-       *
-       * This task message is sent from the SingletonConfigurationAgent.SingletonConfigurationRole.
-       *
-       * Its parameter is the SingletonAgentHosts object, which contains the the singleton agent dictionary, agent name --> hosting
-       * container name.
-       *
-       * A a result, a Delegate Configure Singleton Agent Hosts Task message is sent to network operations, which resends it to container
-       * operations, which in turn sends a Configure Singleton Agent Hosts Task to all child ConfigureParentToSingletonRoles, which includes
-       * every agent in the container.
-       *
-       * Each outbound message contains the singleton agent dictionary.
-       *
-       */
-      case AHCSConstants.SINGLETON_AGENT_HOSTS_INFO:
-        assert getSkillState().equals(State.ISOLATED_FROM_NETWORK) : "state must be ready";
-        singletonAgentHosts(message);
         return;
 
       /**
@@ -166,7 +145,7 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
-      AHCSConstants.AHCS_INITIALIZE_TASK,
+      AHCSConstants.INITIALIZE_TASK,
       AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.NETWORK_JOIN_COMPLETE_SENSATION,
@@ -203,33 +182,7 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
   }
 
   /**
-   * Receives a singleton agent hosts message from the SingletonConfiguration agent / role, whose contents map certain local agent/role
-   * addresses to their network singleton counterparts. The message is propagated to the roles, who update their parent roles if the parent
-   * is a network singleton. This action has the likely indirect effect of shutting this node off from the network.
-   *
-   * @param message the received singletonAgentHosts info message
-   */
-  private void singletonAgentHosts(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-
-    LOGGER.info("configuring the child roles with singleton agent hosts");
-    final SingletonAgentHosts singletonAgentHosts
-            = (SingletonAgentHosts) message.get(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS); // parameterName
-    assert singletonAgentHosts != null;
-
-    // send message to network operations --> resend to container operations --> child Configure roles.
-    final Message configureSingletonAgentHostsTask = makeMessage(
-            getRole().getChildQualifiedNameForAgentRole("NetworkOperationAgent.NetworkOperationRole"), // recipientQualifiedName
-            NetworkOperation.class.getName(), // recipientService
-            AHCSConstants.DELEGATE_CONFIGURE_SINGLETON_AGENT_HOSTS_TASK); // operation
-    configureSingletonAgentHostsTask.put(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS, singletonAgentHosts);
-
-    sendMessageViaSeparateThread(configureSingletonAgentHostsTask);
-  }
-
-  /**
-   * Joins the network by sending a Join Network Task message to the NetworkOperation agent / role.
+   * Joins the network by sending a Join Network Task message to the NetworkOperationAgent.NetworkSingletonConfigurationRole.
    */
   private void joinNetwork() {
     assert getSkillState().equals(State.ISOLATED_FROM_NETWORK) : "state must be isolated-from-network";
@@ -239,7 +192,7 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
     final Message performMissionMessage = new Message(
             getQualifiedName(), // senderQualifiedName
             getClassName(), // senderService,
-            getRole().getChildQualifiedNameForAgentRole("NetworkOperationAgent.NetworkOperationRole"), // recipientQualifiedName,
+            getRole().getChildQualifiedNameForAgentRole("NetworkOperationAgent.NetworkSingletonConfigurationRole"), // recipientQualifiedName,
             NetworkOperation.class.getName(), // recipientService
             AHCSConstants.JOIN_NETWORK_TASK); // operation
     sendMessage(performMissionMessage);

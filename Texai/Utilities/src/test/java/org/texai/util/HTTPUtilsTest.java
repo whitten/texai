@@ -25,6 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.io.PushbackInputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.Map;
 import org.apache.log4j.Logger;
 import org.junit.After;
@@ -40,7 +41,9 @@ import static org.junit.Assert.*;
  */
 public class HTTPUtilsTest {
 
-  /** the logger */
+  /**
+   * the logger
+   */
   private static final Logger LOGGER = Logger.getLogger(HTTPUtilsTest.class);
 
   public HTTPUtilsTest() {
@@ -68,23 +71,23 @@ public class HTTPUtilsTest {
   @Test
   public void testConsumeHTTPMessage() {
     LOGGER.info("consumeHTTPMessage");
-    final String message1 =
-            "HTTP/1.1 200 OK\r\n" +
-            "Content-Type: text/html; charset=utf-8\r\n" +
-            "Connection: keep-alive\r\n" +
-            "Content-Length: 25\r\n" +
-            "\r\n" +
-            "ignoring unnecessary peer";
+    final String message1
+            = "HTTP/1.1 200 OK\r\n"
+            + "Content-Type: text/html; charset=utf-8\r\n"
+            + "Connection: keep-alive\r\n"
+            + "Content-Length: 25\r\n"
+            + "\r\n"
+            + "ignoring unnecessary peer";
     PushbackInputStream pushbackInputStream;
     byte[] result;
-    pushbackInputStream = new PushbackInputStream(new ByteArrayInputStream(message1.getBytes()), HTTPUtils.HTTP_RESPONSE_BUFFER_SIZE);
+    pushbackInputStream = new PushbackInputStream(new ByteArrayInputStream(message1.getBytes(Charset.forName("UTF-8"))), HTTPUtils.HTTP_RESPONSE_BUFFER_SIZE);
     result = HTTPUtils.consumeHTTPMessage(pushbackInputStream);
-    assertEquals(message1, new String(result));
+    assertEquals(message1, new String(result, Charset.forName("UTF-8")));
 
     final String message2 = message1 + "extra bytes";
-    pushbackInputStream = new PushbackInputStream(new ByteArrayInputStream(message2.getBytes()), HTTPUtils.HTTP_RESPONSE_BUFFER_SIZE);
+    pushbackInputStream = new PushbackInputStream(new ByteArrayInputStream(message2.getBytes(Charset.forName("UTF-8"))), HTTPUtils.HTTP_RESPONSE_BUFFER_SIZE);
     result = HTTPUtils.consumeHTTPMessage(pushbackInputStream);
-    assertEquals(message1, new String(result));
+    assertEquals(message1, new String(result, Charset.forName("UTF-8")));
   }
 
   /**
@@ -189,52 +192,52 @@ public class HTTPUtilsTest {
   @Test
   public void testGetBotName() {
     LOGGER.info("getBotName");
-    assertNull(HTTPUtils.getBotName(""));
-    assertNull(HTTPUtils.getBotName("Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)"));
-    assertNull(HTTPUtils.getBotName("Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)"));
-    assertNull(HTTPUtils.getBotName("Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.0 )"));
-    assertNull(HTTPUtils.getBotName("Mozilla/4.0 (compatible; MSIE 5.5; Windows 98; Win 9x 4.90)"));
-    assertNull(HTTPUtils.getBotName("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1"));
-    assertNull(HTTPUtils.getBotName("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.14) Gecko/20080404 Firefox/2.0.0.14"));
-    assertNull(HTTPUtils.getBotName("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/525.13 (KHTML, like Gecko) Chrome/0.2.149.29 Safari/525.13"));
-    assertNull(HTTPUtils.getBotName("Mozilla/4.8 [en] (Windows NT 6.0; U)"));
-    assertNull(HTTPUtils.getBotName("Mozilla/4.8 [en] (Windows NT 5.1; U)"));
-    assertNull(HTTPUtils.getBotName("Opera/9.25 (Windows NT 6.0; U; en)"));
-    assertNull(HTTPUtils.getBotName("Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0; en) Opera 8.0"));
-    assertNull(HTTPUtils.getBotName("Opera/7.51 (Windows NT 5.1; U) [en]"));
-    assertNull(HTTPUtils.getBotName("Opera/7.50 (Windows XP; U)"));
-    assertNull(HTTPUtils.getBotName("Avant Browser/1.2.789rel1 (http://www.avantbrowser.com)"));
-    assertNull(HTTPUtils.getBotName("Mozilla/5.0 (Windows; U; Win98; en-US; rv:1.4) Gecko Netscape/7.1 (ax)"));
-    assertNull(HTTPUtils.getBotName("Mozilla/5.0 (Windows; U; Windows XP) Gecko MultiZilla/1.6.1.0a"));
-    assertNull(HTTPUtils.getBotName("Opera/7.50 (Windows ME; U) [en]"));
-    assertNull(HTTPUtils.getBotName("Mozilla/3.01Gold (Win95; I)"));
-    assertNull(HTTPUtils.getBotName("Mozilla/2.02E (Win95; U)"));
-    assertNull(HTTPUtils.getBotName("Mozilla/5.0 (Macintosh; U; PPC Mac OS X; en) AppleWebKit/125.2 (KHTML, like Gecko) Safari/125.8"));
-    assertNull(HTTPUtils.getBotName("Mozilla/5.0 (Macintosh; U; PPC Mac OS X; en) AppleWebKit/125.2 (KHTML, like Gecko) Safari/85.8"));
-    assertNull(HTTPUtils.getBotName("Mozilla/4.0 (compatible; MSIE 5.15; Mac_PowerPC)"));
-    assertNull(HTTPUtils.getBotName("Mozilla/5.0 (Macintosh; U; PPC Mac OS X Mach-O; en-US; rv:1.7a) Gecko/20050614 Firefox/0.9.0+"));
-    assertNull(HTTPUtils.getBotName("Mozilla/5.0 (Macintosh; U; PPC Mac OS X; en-US) AppleWebKit/125.4 (KHTML, like Gecko, Safari) OmniWeb/v563.15"));
-    assertNull(HTTPUtils.getBotName("Mozilla/5.0 (X11; U; Linux; i686; en-US; rv:1.6) Gecko Debian/1.6-7"));
-    assertNull(HTTPUtils.getBotName("Mozilla/5.0 (X11; U; Linux; i686; en-US; rv:1.6) Gecko Epiphany/1.2.5"));
-    assertNull(HTTPUtils.getBotName("Mozilla/5.0 (X11; U; Linux i586; en-US; rv:1.7.3) Gecko/20050924 Epiphany/1.4.4 (Ubuntu)"));
-    assertNull(HTTPUtils.getBotName("Mozilla/5.0 (compatible; Konqueror/3.5; Linux) KHTML/3.5.10 (like Gecko) (Kubuntu)"));
-    assertNull(HTTPUtils.getBotName("Mozilla/5.0 (X11; U; Linux; i686; en-US; rv:1.6) Gecko Galeon/1.3.14"));
-    assertNull(HTTPUtils.getBotName("Konqueror/3.0-rc4; (Konqueror/3.0-rc4; i686 Linux;;datecode)"));
-    assertNull(HTTPUtils.getBotName("Mozilla/5.0 (compatible; Konqueror/3.3; Linux 2.6.8-gentoo-r3; X11;"));
-    assertNull(HTTPUtils.getBotName("Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.6) Gecko/20050614 Firefox/0.8"));
-    assertNull(HTTPUtils.getBotName("ELinks/0.9.3 (textmode; Linux 2.6.9-kanotix-8 i686; 127x41)"));
-    assertNull(HTTPUtils.getBotName("ELinks (0.4pre5; Linux 2.6.10-ac7 i686; 80x33)"));
-    assertNull(HTTPUtils.getBotName("Links (2.1pre15; Linux 2.4.26 i686; 158x61)"));
-    assertNull(HTTPUtils.getBotName("Links/0.9.1 (Linux 2.4.24; i386;)"));
-    assertNull(HTTPUtils.getBotName("MSIE (MSIE 6.0; X11; Linux; i686) Opera 7.23"));
-    assertNull(HTTPUtils.getBotName("Opera/9.52 (X11; Linux i686; U; en)"));
-    assertNull(HTTPUtils.getBotName("Lynx/2.8.5rel.1 libwww-FM/2.14 SSL-MM/1.4.1 GNUTLS/0.8.12"));
-    assertNull(HTTPUtils.getBotName("w3m/0.5.1"));
-    assertNull(HTTPUtils.getBotName("Links (2.1pre15; FreeBSD 5.3-RELEASE i386; 196x84)"));
-    assertNull(HTTPUtils.getBotName("Mozilla/5.0 (X11; U; FreeBSD; i386; en-US; rv:1.7) Gecko"));
-    assertNull(HTTPUtils.getBotName("Mozilla/4.77 [en] (X11; I; IRIX;64 6.5 IP30)"));
-    assertNull(HTTPUtils.getBotName("Mozilla/4.8 [en] (X11; U; SunOS; 5.7 sun4u)"));
-    assertNull(HTTPUtils.getBotName("Mozilla/3.0 (compatible; NetPositive/2.1.1; BeOS)"));
+    assertEquals(0, HTTPUtils.getBotName("").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.0 )").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/4.0 (compatible; MSIE 5.5; Windows 98; Win 9x 4.90)").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.14) Gecko/20080404 Firefox/2.0.0.14").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/525.13 (KHTML, like Gecko) Chrome/0.2.149.29 Safari/525.13").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/4.8 [en] (Windows NT 6.0; U)").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/4.8 [en] (Windows NT 5.1; U)").length);
+    assertEquals(0, HTTPUtils.getBotName("Opera/9.25 (Windows NT 6.0; U; en)").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0; en) Opera 8.0").length);
+    assertEquals(0, HTTPUtils.getBotName("Opera/7.51 (Windows NT 5.1; U) [en]").length);
+    assertEquals(0, HTTPUtils.getBotName("Opera/7.50 (Windows XP; U)").length);
+    assertEquals(0, HTTPUtils.getBotName("Avant Browser/1.2.789rel1 (http://www.avantbrowser.com)").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/5.0 (Windows; U; Win98; en-US; rv:1.4) Gecko Netscape/7.1 (ax)").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/5.0 (Windows; U; Windows XP) Gecko MultiZilla/1.6.1.0a").length);
+    assertEquals(0, HTTPUtils.getBotName("Opera/7.50 (Windows ME; U) [en]").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/3.01Gold (Win95; I)").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/2.02E (Win95; U)").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/5.0 (Macintosh; U; PPC Mac OS X; en) AppleWebKit/125.2 (KHTML, like Gecko) Safari/125.8").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/5.0 (Macintosh; U; PPC Mac OS X; en) AppleWebKit/125.2 (KHTML, like Gecko) Safari/85.8").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/4.0 (compatible; MSIE 5.15; Mac_PowerPC)").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/5.0 (Macintosh; U; PPC Mac OS X Mach-O; en-US; rv:1.7a) Gecko/20050614 Firefox/0.9.0+").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/5.0 (Macintosh; U; PPC Mac OS X; en-US) AppleWebKit/125.4 (KHTML, like Gecko, Safari) OmniWeb/v563.15").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/5.0 (X11; U; Linux; i686; en-US; rv:1.6) Gecko Debian/1.6-7").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/5.0 (X11; U; Linux; i686; en-US; rv:1.6) Gecko Epiphany/1.2.5").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/5.0 (X11; U; Linux i586; en-US; rv:1.7.3) Gecko/20050924 Epiphany/1.4.4 (Ubuntu)").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/5.0 (compatible; Konqueror/3.5; Linux) KHTML/3.5.10 (like Gecko) (Kubuntu)").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/5.0 (X11; U; Linux; i686; en-US; rv:1.6) Gecko Galeon/1.3.14").length);
+    assertEquals(0, HTTPUtils.getBotName("Konqueror/3.0-rc4; (Konqueror/3.0-rc4; i686 Linux;;datecode)").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/5.0 (compatible; Konqueror/3.3; Linux 2.6.8-gentoo-r3; X11;").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.6) Gecko/20050614 Firefox/0.8").length);
+    assertEquals(0, HTTPUtils.getBotName("ELinks/0.9.3 (textmode; Linux 2.6.9-kanotix-8 i686; 127x41)").length);
+    assertEquals(0, HTTPUtils.getBotName("ELinks (0.4pre5; Linux 2.6.10-ac7 i686; 80x33)").length);
+    assertEquals(0, HTTPUtils.getBotName("Links (2.1pre15; Linux 2.4.26 i686; 158x61)").length);
+    assertEquals(0, HTTPUtils.getBotName("Links/0.9.1 (Linux 2.4.24; i386;)").length);
+    assertEquals(0, HTTPUtils.getBotName("MSIE (MSIE 6.0; X11; Linux; i686) Opera 7.23").length);
+    assertEquals(0, HTTPUtils.getBotName("Opera/9.52 (X11; Linux i686; U; en)").length);
+    assertEquals(0, HTTPUtils.getBotName("Lynx/2.8.5rel.1 libwww-FM/2.14 SSL-MM/1.4.1 GNUTLS/0.8.12").length);
+    assertEquals(0, HTTPUtils.getBotName("w3m/0.5.1").length);
+    assertEquals(0, HTTPUtils.getBotName("Links (2.1pre15; FreeBSD 5.3-RELEASE i386; 196x84)").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/5.0 (X11; U; FreeBSD; i386; en-US; rv:1.7) Gecko").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/4.77 [en] (X11; I; IRIX;64 6.5 IP30)").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/4.8 [en] (X11; U; SunOS; 5.7 sun4u)").length);
+    assertEquals(0, HTTPUtils.getBotName("Mozilla/3.0 (compatible; NetPositive/2.1.1; BeOS)").length);
     assertEquals("[Google, Google, Google2.1]", Arrays.asList(HTTPUtils.getBotName("Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)")).toString());
     assertEquals("[Google, Google, Google2.1]", Arrays.asList(HTTPUtils.getBotName("Googlebot/2.1 (+http://www.googlebot.com/bot.html)")).toString());
     assertEquals("[MSNBot, MSNBot, MSNBot1.0]", Arrays.asList(HTTPUtils.getBotName("msnbot/1.0 (+http://search.msn.com/msnbot.htm)")).toString());
@@ -243,11 +246,11 @@ public class HTTPUtilsTest {
     assertEquals("[Teoma, Teoma, Teoma]", Arrays.asList(HTTPUtils.getBotName("Mozilla/2.0 (compatible; Ask Jeeves/Teoma)")).toString());
     assertEquals("[ScoutJet, ScoutJet, ScoutJet]", Arrays.asList(HTTPUtils.getBotName("Mozilla/5.0 (compatible; ScoutJet; +http://www.scoutjet.com/)")).toString());
     assertEquals("[Gulper, Gulper, Gulper0.2.4]", Arrays.asList(HTTPUtils.getBotName("Gulper Web Bot 0.2.4 (www.ecsl.cs.sunysb.edu/~maxim/cgi-bin/Link/GulperBot)")).toString());
-    assertNull(HTTPUtils.getBotName("EmailWolf 1.00"));
-    assertNull(HTTPUtils.getBotName("grub-client-1.5.3; (grub-client-1.5.3; Crawl your own stuff with http://grub.org)"));
-    assertNull(HTTPUtils.getBotName("Download Demon/3.5.0.11"));
-    assertNull(HTTPUtils.getBotName("Microsoft URL Control - 6.00.8862"));
-    assertNull(HTTPUtils.getBotName("OmniWeb/2.7-beta-3 OWF/1.0"));
+    assertEquals(0, HTTPUtils.getBotName("EmailWolf 1.00").length);
+    assertEquals(0, HTTPUtils.getBotName("grub-client-1.5.3; (grub-client-1.5.3; Crawl your own stuff with http://grub.org)").length);
+    assertEquals(0, HTTPUtils.getBotName("Download Demon/3.5.0.11").length);
+    assertEquals(0, HTTPUtils.getBotName("Microsoft URL Control - 6.00.8862").length);
+    assertEquals(0, HTTPUtils.getBotName("OmniWeb/2.7-beta-3 OWF/1.0").length);
   }
 
   /**

@@ -258,32 +258,4 @@ public class NodeRuntime extends BasicNodeRuntime {
     return isOK;
   }
 
-  //TODO - use this method or delete it.
-  /**
-   * Resumes the thread that was suspended awaiting the reply message.
-   *
-   * @param message the reply message
-   */
-  private void resumeThread(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-
-    final UUID inReplyTo = message.getInReplyTo();
-    synchronized (inReplyToDictionary) {
-      inReplyToDictionary.put(inReplyTo, message);
-    }
-
-    @SuppressWarnings("UnusedAssignment")
-    Object threadLock = null;
-    synchronized (replyWithsDictionary) {
-      threadLock = replyWithsDictionary.get(inReplyTo);
-      replyWithsDictionary.remove(inReplyTo);
-    }
-    assert threadLock != null;
-    LOGGER.info("reply received, resuming suspended thread");
-    synchronized (threadLock) {
-      threadLock.notifyAll();
-    }
-  }
-
 }

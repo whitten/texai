@@ -34,7 +34,7 @@ import net.jcip.annotations.NotThreadSafe;
  * @author Emmanuel Bernard
  */
 @NotThreadSafe
-public class IdentitySet<E> extends AbstractSet<E> implements Cloneable, Serializable {
+public class IdentitySet<E> extends AbstractSet<E> implements Serializable {
 
   // the serial version UID
   private static final long serialVersionUID = 1L;

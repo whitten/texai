@@ -92,7 +92,7 @@ public class NetworkDeploymentTest {
    */
   @Test
   public void testInitializeTaskMessage() {
-    LOGGER.info("testing " + AHCSConstants.AHCS_INITIALIZE_TASK + " message");
+    LOGGER.info("testing " + AHCSConstants.INITIALIZE_TASK + " message");
 
     skillTestHarness.reset();
     skillTestHarness.setSkillState(AHCSConstants.State.UNINITIALIZED, skillClassName);
@@ -101,7 +101,7 @@ public class NetworkDeploymentTest {
             NetworkOperation.class.getName(), // senderService
             containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
             skillClassName, // recipientService
-            AHCSConstants.AHCS_INITIALIZE_TASK); // operation
+            AHCSConstants.INITIALIZE_TASK); // operation
 
     skillTestHarness.dispatchMessage(initializeMessage);
 
@@ -123,7 +123,8 @@ public class NetworkDeploymentTest {
     LOGGER.info("CheckForDeployment");
     final File deploymentLogFile = new File("deployment/deployment.log");
     if (deploymentLogFile.exists()) {
-      deploymentLogFile.delete();
+      final boolean isOK = deploymentLogFile.delete();
+      assertTrue(isOK);
     }
     assertFalse(deploymentLogFile.exists());
     skillTestHarness.reset();

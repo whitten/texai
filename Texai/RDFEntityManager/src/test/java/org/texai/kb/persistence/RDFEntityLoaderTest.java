@@ -139,7 +139,7 @@ public class RDFEntityLoaderTest {
     rdfTestEntity1.setName("TestDomainEntity 1");
     rdfTestEntity1.setNumberOfCrew(1);
     final String[] comments1 = {"comment 1", "comment 2"};
-    rdfTestEntity1.setComment(comments1);
+    rdfTestEntity1.setComments(comments1);
     Set<Integer> someIntegers = new HashSet<>();
     someIntegers.add(1);
     someIntegers.add(2);
@@ -160,7 +160,7 @@ public class RDFEntityLoaderTest {
     rdfTestEntity2.setName("TestDomainEntity 2");
     rdfTestEntity2.setNumberOfCrew(1);
     final String[] comments2 = {"comment 1", "comment 2"};
-    rdfTestEntity2.setComment(comments2);
+    rdfTestEntity2.setComments(comments2);
     rdfTestEntity1.setUuidField(testUUID);
 
     // set XML datatype fields in the first test RDF entity
@@ -355,8 +355,7 @@ public class RDFEntityLoaderTest {
     assertEquals(rdfTestEntity1.getMyPeers().size(), rdfTestEntity1_Loaded.getMyPeers().size());
     assertEquals(1, rdfTestEntity1.getMyPeers().size());
     assertEquals(1, rdfTestEntity1_Loaded.getMyPeers().size());
-    assertTrue(rdfTestEntity1.getMyPeers() instanceof List<?>);
-    assertTrue(rdfTestEntity1_Loaded.getMyPeers() instanceof List<?>);
+    assertNotNull(rdfTestEntity1.getMyPeers());
     assertTrue(rdfTestEntity1.getMyPeers().get(0) instanceof RDFTestEntity);
     LOGGER.info("rdfTestEntity1_Loaded.getMyPeers().get(0): " + rdfTestEntity1_Loaded.getMyPeers().get(0).getClass().getName());
     assertTrue(rdfTestEntity1_Loaded.getMyPeers().get(0) instanceof RDFTestEntity);
@@ -365,10 +364,10 @@ public class RDFEntityLoaderTest {
     assertEquals(rdfTestEntity1.getMyPeers(), rdfTestEntity1_Loaded.getMyPeers());
     LOGGER.info("loaded dontCareField: " + rdfTestEntity1_Loaded.getDontCareField());
     assertEquals(rdfTestEntity1.getFavoriteTestRDFEntityPeer(), rdfTestEntity1_Loaded.getFavoriteTestRDFEntityPeer());
-    assertNotNull(rdfTestEntity1_Loaded.getComment());
-    assertEquals(rdfTestEntity1.getComment().length, rdfTestEntity1_Loaded.getComment().length);
-    for (int i = 0; i < rdfTestEntity1.getComment().length; i++) {
-      assertEquals(rdfTestEntity1.getComment()[i], rdfTestEntity1_Loaded.getComment()[i]);
+    assertNotNull(rdfTestEntity1_Loaded.getComments());
+    assertEquals(rdfTestEntity1.getComments().length, rdfTestEntity1_Loaded.getComments().length);
+    for (int i = 0; i < rdfTestEntity1.getComments().length; i++) {
+      assertEquals(rdfTestEntity1.getComments()[i], rdfTestEntity1_Loaded.getComments()[i]);
     }
     assertEquals(testUUID, rdfTestEntity1.getUuidField());
 
@@ -496,11 +495,13 @@ public class RDFEntityLoaderTest {
     assertEquals("[]", loadedRDFTestEntity.getCyclistNotes().toString());
     loadedRDFTestEntity.getIntegerList().size();  // load the lazy-loaded field
     assertEquals("[]", loadedRDFTestEntity.getIntegerList().toString());
-    assertEquals("[comment 1, comment 2]", Arrays.asList(loadedRDFTestEntity.getComment()).toString());
+    assertEquals("[comment 1, comment 2]", Arrays.asList(loadedRDFTestEntity.getComments()).toString());
 
     loadedRDFTestEntity.getCyclistNotes().add("a");
     loadedRDFTestEntity.getIntegerList().add(1);
-    loadedRDFTestEntity.getComment()[1] = "modified comment 2";
+    final String[] comments = loadedRDFTestEntity.getComments();
+    comments[1] = "modified comment 2";
+    loadedRDFTestEntity.setComments(comments);
     RDFEntityPersister rdfEntityPersister = new RDFEntityPersister(rdfEntityManager);
     try {
       assertTrue(repositoryConnection.isAutoCommit());
@@ -521,14 +522,14 @@ public class RDFEntityLoaderTest {
     assertEquals("[a]", rdfTestEntity2.getCyclistNotes().toString());
     rdfTestEntity2.getIntegerList().size();  // load the lazy-loaded field
     assertEquals("[1]", rdfTestEntity2.getIntegerList().toString());
-    assertEquals("[comment 1, modified comment 2]", Arrays.asList(rdfTestEntity2.getComment()).toString());
+    assertEquals("[comment 1, modified comment 2]", Arrays.asList(rdfTestEntity2.getComments()).toString());
     Set<String> cyclistNotes = new ArraySet<>();
     cyclistNotes.add("x");
     cyclistNotes.add("y");
     cyclistNotes.add("z");
     rdfTestEntity2.setCyclistNotes(cyclistNotes);
     String[] comment = {"h", "i", "j", "k"};
-    rdfTestEntity2.setComment(comment);
+    rdfTestEntity2.setComments(comment);
     ArrayList<Integer> integerList = new ArrayList<>();
     integerList.add(101);
     integerList.add(102);
@@ -555,7 +556,7 @@ public class RDFEntityLoaderTest {
     assertEquals("[x, y, z]", rdfTestEntity3.getCyclistNotes().toString());
     rdfTestEntity3.getIntegerList().size();  // load the lazy-loaded field
     assertEquals("[101, 102, 104, 105, 106]", rdfTestEntity3.getIntegerList().toString());
-    assertEquals("[h, i, j, k]", Arrays.asList(rdfTestEntity3.getComment()).toString());
+    assertEquals("[h, i, j, k]", Arrays.asList(rdfTestEntity3.getComments()).toString());
     LOGGER.info("  list and array field edits OK");
   }
 }

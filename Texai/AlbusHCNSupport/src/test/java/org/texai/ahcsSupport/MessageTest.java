@@ -47,6 +47,7 @@ import org.texai.util.StringUtils;
  *
  * @author reed
  */
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "NP_LOAD_OF_KNOWN_NULL_VALUE", justification = "unit test")
 public class MessageTest {
 
   /**
@@ -139,7 +140,8 @@ public class MessageTest {
     final String serializedMessageFilePath = "data/test-message.ser";
     final File serializedMessageFile = new File(serializedMessageFilePath);
     if (serializedMessageFile.exists()) {
-      serializedMessageFile.delete();
+      final boolean isOK = serializedMessageFile.delete();
+      assertTrue(isOK);
     }
     assertFalse(serializedMessageFile.exists());
 

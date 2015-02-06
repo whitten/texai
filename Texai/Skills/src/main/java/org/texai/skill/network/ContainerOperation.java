@@ -1,17 +1,12 @@
 package org.texai.skill.network;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
-import org.texai.skill.domainEntity.SingletonAgentHosts;
-import org.texai.skill.singletonConfiguration.ConfigureParentToSingleton;
 import org.texai.skill.support.NodeRuntimeSkill;
-import org.texai.util.StringUtils;
 
 /**
  * Created on Sep 1, 2014, 1:48:49 PM.
@@ -25,8 +20,6 @@ public final class ContainerOperation extends AbstractSkill {
 
   // the logger
   private static final Logger LOGGER = Logger.getLogger(ContainerOperation.class);
-  // the unjoined child roles
-  private final Set<String> unjoinedChildQualifiedNames = new HashSet<>();
 
   /**
    * Constructs a new ContainerOperation instance.
@@ -64,7 +57,7 @@ public final class ContainerOperation extends AbstractSkill {
       return;
     }
     switch (operation) {
-      case AHCSConstants.AHCS_INITIALIZE_TASK:
+      case AHCSConstants.INITIALIZE_TASK:
         /**
          * Initialize Task
          *
@@ -78,26 +71,6 @@ public final class ContainerOperation extends AbstractSkill {
         } else {
           setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
         }
-        return;
-
-      /**
-       * Delegate Configure Singleton Agent Hosts Task
-       *
-       * This task message is sent from the container-local parent NetworkOperationAgent.NetworkOperationRole.
-       *
-       * Its parameter is the SingletonAgentHosts object, which contains the the singleton agent dictionary, agent name --> hosting
-       * container name.
-       *
-       * It results in the Configure Singleton Agent Hosts Task being sent to all child ConfigureParentToSingletonRoles, which every agent
-       * has.
-       *
-       * As an exception to the rule whereby roles have child roles in subordinate agents, the ContainerOperationRole has a child
-       * ConfigureParentToSingletonRole in the same agent ContainerOperationAgent.
-       */
-      case AHCSConstants.DELEGATE_CONFIGURE_SINGLETON_AGENT_HOSTS_TASK:
-        assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
-                "state must be isolated-from-network, but is " + getSkillState();
-        configureSingletonAgentHostsTask(message);
         return;
 
       /**
@@ -139,28 +112,6 @@ public final class ContainerOperation extends AbstractSkill {
         return;
 
       /**
-       * Add Unjoined Role Info
-       *
-       * This message is sent from a child role informing that it will attempt to join the network.
-       */
-      case AHCSConstants.ADD_UNJOINED_ROLE_INFO:
-        assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "state must be isolated-from-network";
-        addUnjoinedRole(message);
-        return;
-
-      /**
-       * Remove Unjoined Role Info
-       *
-       * This message is sent from a child role informing that has joined the network.
-       *
-       * As a result, when all child roles have joined the network, a Network Join Complete Info message is sent to network operations
-       */
-      case AHCSConstants.REMOVE_UNJOINED_ROLE_INFO:
-        assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "state must be isolated-from-network";
-        removeUnjoinedRole(message);
-        return;
-
-      /**
        * Restart Container Task
        *
        * This message is sent the parent NetworkOperationAgent.NetworkOperationRole instructing the container to restart following
@@ -174,9 +125,6 @@ public final class ContainerOperation extends AbstractSkill {
         return;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
-        LOGGER.warn(message);
-        return;
-
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
         return;
@@ -217,15 +165,12 @@ public final class ContainerOperation extends AbstractSkill {
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
-      AHCSConstants.ADD_UNJOINED_ROLE_INFO,
-      AHCSConstants.AHCS_INITIALIZE_TASK,
+      AHCSConstants.INITIALIZE_TASK,
       AHCSConstants.BECOME_READY_TASK,
-      AHCSConstants.DELEGATE_CONFIGURE_SINGLETON_AGENT_HOSTS_TASK,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.OPERATION_NOT_PERMITTED_INFO,
       AHCSConstants.PERFORM_MISSION_TASK,
-      AHCSConstants.REMOVE_UNJOINED_ROLE_INFO,
       AHCSConstants.RESTART_CONTAINER_TASK
     };
   }
@@ -248,77 +193,7 @@ public final class ContainerOperation extends AbstractSkill {
   }
 
   /**
-   * Propagate the task to configure roles for singleton agent hosts.
-   *
-   * @param message the configure singleton agent hosts task message
-   */
-  private void configureSingletonAgentHostsTask(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-
-    LOGGER.info("configuring the child roles with singleton agent hosts");
-    final SingletonAgentHosts singletonAgentHosts
-            = (SingletonAgentHosts) message.get(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS); // parameterName
-    assert singletonAgentHosts != null;
-
-    getRole().getChildQualifiedNames().stream().sorted().forEach(childQualifiedName -> {
-      final Message configureSingletonAgentHostsTask = makeMessage(
-              childQualifiedName, // recipientQualifiedName
-              ConfigureParentToSingleton.class.getName(), // recipientService
-              AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK); // operation
-      configureSingletonAgentHostsTask.put(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS, singletonAgentHosts);
-      sendMessageViaSeparateThread(configureSingletonAgentHostsTask);
-    });
-  }
-
-  /**
-   * Adds the given sender to the set of roles which have not yet joined the network.
-   *
-   * @param message the Add Unjoined Role Info message sent by
-   */
-  private void addUnjoinedRole(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-    assert StringUtils.isNonEmptyString((String) message.get(AHCSConstants.MSG_PARM_ROLE_QUALIFIED_NAME)) : "message missing role qualified name parameter";
-    assert !unjoinedChildQualifiedNames.contains((String) message.get(AHCSConstants.MSG_PARM_ROLE_QUALIFIED_NAME)) : "duplicate entry for " + message.getSenderQualifiedName();
-
-    synchronized (unjoinedChildQualifiedNames) {
-      unjoinedChildQualifiedNames.add((String) message.get(AHCSConstants.MSG_PARM_ROLE_QUALIFIED_NAME));
-    }
-    LOGGER.debug("added unjoined role " + message.getSenderQualifiedName() + ", count: " + unjoinedChildQualifiedNames.size());
-  }
-
-  /**
-   * Removes the given sender from the set of roles which have not yet joined the network.
-   *
-   * @param message the Add Unjoined Role Info message sent by
-   */
-  private void removeUnjoinedRole(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-    assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "state must be isolated-from-network";
-    assert unjoinedChildQualifiedNames.contains(message.getSenderQualifiedName()) : "missing entry for " + message.getSenderQualifiedName();
-
-    boolean isEmpty;
-    synchronized (unjoinedChildQualifiedNames) {
-      unjoinedChildQualifiedNames.remove(message.getSenderQualifiedName());
-      isEmpty = unjoinedChildQualifiedNames.isEmpty();
-      LOGGER.debug("removed unjoined role " + message.getSenderQualifiedName() + ", count remaining: " + unjoinedChildQualifiedNames.size());
-      //LOGGER.debug(unjoinedChildQualifiedNames);
-    }
-
-    if (isEmpty) {
-      LOGGER.info("all roles having network singleton parents, joined the network");
-      // send a Network Join Complete Info message to network operations
-      sendMessageViaSeparateThread(makeMessage(
-              getRole().getParentQualifiedName(), // recipientQualifiedName
-              NetworkOperation.class.getName(), // recipientService
-              AHCSConstants.NETWORK_JOIN_COMPLETE_INFO)); // operation
-    }
-  }
-
-  /**
-   * Removes the given sender from the set of roles which have not yet joined the network.
+   * Restarts the container after the specified delay.
    *
    * @param message the Add Unjoined Role Info message sent by
    */

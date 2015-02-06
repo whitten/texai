@@ -120,14 +120,12 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
             nodeRuntime.getKeyStore(),
             nodeRuntime.getKeyStorePassword(),
             nodeRuntime.getNodeRuntimeSkill().getQualifiedName()); // alias
-    final AbstractAlbusHCSMessageHandlerFactory albusHCSMessageHandlerFactory = new AlbusHCSMessageHandlerFactory(this);
-    final AbstractHTTPRequestHandlerFactory httpRequestHandlerFactory = null;
 
     serverBootstrap = ConnectionUtils.createPortUnificationServer(
             port,
             x509SecurityInfo,
-            albusHCSMessageHandlerFactory,
-            httpRequestHandlerFactory,
+            new AlbusHCSMessageHandlerFactory(this),
+            null, // httpRequestHandlerFactory
             nodeRuntime.getExecutor(), // bossExecutor,
             nodeRuntime.getExecutor()); // workerExecutor
   }

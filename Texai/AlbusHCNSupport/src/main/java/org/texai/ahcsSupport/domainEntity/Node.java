@@ -207,6 +207,21 @@ public class Node implements CascadePersistence, Comparable<Node> {
   }
 
   /**
+   * Gets the role having the given role name.
+   *
+   * @param roleName the given role name
+   * @return the role having the given role name if found, otherwise return null
+   */
+  public Role getRole(final String roleName) {
+    for (final Role role : roles) {
+      if (roleName.equals(Role.extractRoleName(role.getQualifiedName()))) {
+        return role;
+      }
+    }
+    return null;
+  }
+
+  /**
    * Returns whether this node is a singleton nomadic agent, in which case only one container in the network hosts the active node and all
    * other nodes having the same name are inactive.
    *

@@ -13,6 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PushbackInputStream;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
@@ -140,6 +141,7 @@ public final class HTTPUtils {
    * @return the version number
    */
   @SuppressWarnings("fallthrough")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings({"SF_SWITCH_FALLTHROUGH"})
   public static String getVersionNumber(final String userAgent, final int position) {
     int position1 = position;
     if (position1 < 0) {
@@ -194,17 +196,19 @@ public final class HTTPUtils {
    * @return
    */
   private static String getFirstVersionNumber(final String userAgent, final int position, final int numDigits) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(userAgent) : "userAgent must be a non-empty string";
+    assert position >= 0 : "position must not be negative";
+    assert numDigits >= 0 : "numDigits must not be negative";
+
     final String versionNumber = getVersionNumber(userAgent, position);
-    if (versionNumber == null) {
-      return "";
-    }
     int i = 0;
-    String truncatedVersionNumber = "";
+    final StringBuilder truncatedVersionNumber = new StringBuilder();
     while (i < versionNumber.length() && i < numDigits) {
-      truncatedVersionNumber += String.valueOf(versionNumber.charAt(i));
+      truncatedVersionNumber.append(String.valueOf(versionNumber.charAt(i)));
       i++;
     }
-    return truncatedVersionNumber;
+    return truncatedVersionNumber.toString();
   }
 
   /**
@@ -233,7 +237,7 @@ public final class HTTPUtils {
    */
   @SuppressWarnings("UnusedAssignment")
   public static String[] getBotName(final String userAgent) {
-    final String userAgentLowerCase = userAgent.toLowerCase();
+    final String userAgentLowerCase = userAgent.toLowerCase(Locale.ENGLISH);
     int position = 0;
     final String botName;
     if ((position = userAgentLowerCase.indexOf("google/")) > -1) {
@@ -265,7 +269,7 @@ public final class HTTPUtils {
       botName = "ScoutJet";
       position = -1;
     } else {
-      return null;
+      return new String[0];
     }
     return getArray(botName, botName, botName + getVersionNumber(userAgentLowerCase, position));
   }
@@ -279,7 +283,7 @@ public final class HTTPUtils {
    */
   @SuppressWarnings("UnusedAssignment")
   public static String[] getOS(final String userAgent) {
-    if (getBotName(userAgent) != null) {
+    if (getBotName(userAgent).length > 0) {
       return getArray("Bot", "Bot", "Bot");
     }
     String[] result = null;
@@ -301,9 +305,7 @@ public final class HTTPUtils {
         result = getArray("Win", "Win2003", "Win" + getVersionNumber(userAgent, position + 7));
       } else if ((position = userAgent.indexOf("Windows NT 4.0")) > -1) {
         result = getArray("Win", "WinNT4", "Win" + getVersionNumber(userAgent, position + 7));
-      } else if ((position = userAgent.indexOf("Windows NT)")) > -1) {
-        result = getArray("Win", "WinNT", "WinNT");
-      } else if ((position = userAgent.indexOf("Windows NT;")) > -1) {
+      } else if ((userAgent.indexOf("Windows NT;")) > -1) {
         result = getArray("Win", "WinNT", "WinNT");
       } else {
         result = getArray("Win", "<b>WinNT?</b>", "<b>WinNT?</b>");
@@ -430,7 +432,7 @@ public final class HTTPUtils {
   @SuppressWarnings("UnusedAssignment")
   public static String[] getBrowser(String userAgent) {
     final String[] botName;
-    if ((botName = getBotName(userAgent)) != null) {
+    if ((botName = getBotName(userAgent)).length > 0) {
       return botName;
     }
     final String[] result;

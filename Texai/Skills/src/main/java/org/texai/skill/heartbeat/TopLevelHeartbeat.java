@@ -77,7 +77,7 @@ public final class TopLevelHeartbeat extends AbstractNetworkSingletonSkill {
        * This task message is sent from the parent TopmostFriendship agent/role. It is expected to be the first task message
        * that this role receives and it results in the role being initialized.
        */
-      case AHCSConstants.AHCS_INITIALIZE_TASK:
+      case AHCSConstants.INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
         // initialize child governance roles
         propagateOperationToChildRoles(operation);
@@ -165,9 +165,6 @@ public final class TopLevelHeartbeat extends AbstractNetworkSingletonSkill {
         return;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
-        LOGGER.warn(message);
-        return;
-
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
         return;
@@ -205,7 +202,7 @@ public final class TopLevelHeartbeat extends AbstractNetworkSingletonSkill {
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
-      AHCSConstants.AHCS_INITIALIZE_TASK,
+      AHCSConstants.INITIALIZE_TASK,
       AHCSConstants.DELEGATE_BECOME_READY_TASK,
       AHCSConstants.DELEGATE_PERFORM_MISSION_TASK,
       AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO,

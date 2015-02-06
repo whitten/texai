@@ -72,7 +72,8 @@ public final class KeyStoreTestUtils {
       String filePath = "data/test-server-keystore.uber";
       File file = new File(filePath);
       if (file.exists()) {
-        file.delete();
+        final boolean isOK = file.delete();
+        assert isOK;
       }
       LOGGER.info("creating test-server-keystore.uber");
       assert X509Utils.isJCEUnlimitedStrengthPolicy();
@@ -82,7 +83,9 @@ public final class KeyStoreTestUtils {
               serverKeyPair.getPrivate(),
               SERVER_KEYSTORE_PASSWORD,
               new Certificate[]{serverX509Certificate});
-      serverKeyStoreUber.store(new FileOutputStream(filePath), SERVER_KEYSTORE_PASSWORD);
+      try (final FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
+        serverKeyStoreUber.store(fileOutputStream, SERVER_KEYSTORE_PASSWORD);
+      }
 
     } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | SignatureException | InvalidKeyException | IOException | KeyStoreException | CertificateException ex) {
       throw new TexaiException(ex);
@@ -103,6 +106,7 @@ public final class KeyStoreTestUtils {
     assert X509Utils.isJCEUnlimitedStrengthPolicy() : "JCE unlimited strength policy must be in effect";
 
     final X509Certificate clientX509Certificate;
+    FileOutputStream fileOutputStream = null;
     try {
       // the test client keystore consists of the single test client X.509 certificate, which is generated and signed by
       // the Texai root certificate on the developement system that has the root private key.
@@ -117,7 +121,10 @@ public final class KeyStoreTestUtils {
       String filePath = "data/test-client-keystore.uber";
       File file = new File(filePath);
       if (file.exists()) {
-        file.delete();
+        final boolean isOK = file.delete();
+        if (!isOK) {
+          throw new TexaiException("failed to delete " + file);
+        }
       }
       LOGGER.info("creating test-client-keystore.uber");
       assert X509Utils.isJCEUnlimitedStrengthPolicy();
@@ -127,11 +134,20 @@ public final class KeyStoreTestUtils {
               clientKeyPair.getPrivate(),
               CLIENT_KEYSTORE_PASSWORD,
               new Certificate[]{clientX509Certificate});
-      clientKeyStoreUber.store(new FileOutputStream(filePath), CLIENT_KEYSTORE_PASSWORD);
+      fileOutputStream = new FileOutputStream(filePath);
+      clientKeyStoreUber.store(fileOutputStream, CLIENT_KEYSTORE_PASSWORD);
       assert "UBER".equals(clientKeyStoreUber.getType());
 
     } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | SignatureException | InvalidKeyException | IOException | KeyStoreException | CertificateException ex) {
       throw new TexaiException(ex);
+    } finally {
+      if (fileOutputStream != null) {
+        try {
+          fileOutputStream.close();
+        } catch (IOException ex) {
+          throw new TexaiException(ex);
+        }
+      }
     }
 
     //Postconditions
@@ -206,7 +222,7 @@ public final class KeyStoreTestUtils {
    * @return the test server keystore password
    */
   public static char[] getServerKeyStorePassword() {
-    return SERVER_KEYSTORE_PASSWORD;
+    return SERVER_KEYSTORE_PASSWORD.clone();
   }
 
   /**
@@ -215,7 +231,7 @@ public final class KeyStoreTestUtils {
    * @return the test client keystore password
    */
   public static char[] getClientKeyStorePassword() {
-    return CLIENT_KEYSTORE_PASSWORD;
+    return CLIENT_KEYSTORE_PASSWORD.clone();
   }
 
 }

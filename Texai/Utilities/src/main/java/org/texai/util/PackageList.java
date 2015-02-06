@@ -23,12 +23,16 @@ package org.texai.util;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.jcip.annotations.NotThreadSafe;
 
-/** Merges two input comma-delimited lists into an ordered output list.
+/**
+ * Merges two input comma-delimited lists into an ordered output list.
  *
  * @author reed
  */
@@ -44,35 +48,45 @@ public class PackageList {
   // the ordered entries
   private final List<String> entries = new ArrayList<>();
 
-  /** Constructs a new PackageList instance. */
+  /**
+   * Constructs a new PackageList instance.
+   */
   public PackageList() {
   }
 
-  /** Merges two input comma-delimited lists into an ordered output list. */
+  /**
+   * Merges two input comma-delimited lists into an ordered output list.
+   */
   private void process() {
-    final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
-    System.out.println("Enter first comma-delimited list");
     try {
-      list1 = bufferedReader.readLine().trim();
-      System.out.println("Enter second comma-delimited list.");
-      list2 = bufferedReader.readLine().trim();
-      merge(list1);
-      merge(list2);
-      Collections.sort(entries);
-      boolean isFirst = true;
-      for (final String entry : entries) {
-        if (isFirst) {
-          isFirst = false;
-        } else {
-          stringBuilder.append(", ");
+      try (final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in, "UTF-8"))) {
+        System.out.println("Enter first comma-delimited list");
+        list1 = bufferedReader.readLine();
+        if (list1 == null) {
+          throw new TexaiException("must not be null");
         }
-        stringBuilder.append(entry);
+        System.out.println("Enter second comma-delimited list.");
+        list2 = bufferedReader.readLine();
+        if (list2 == null) {
+          throw new TexaiException("must not be null");
+        }
+        merge(list1.trim());
+        merge(list2.trim());
+        Collections.sort(entries);
+        boolean isFirst = true;
+        for (final String entry : entries) {
+          if (isFirst) {
+            isFirst = false;
+          } else {
+            stringBuilder.append(", ");
+          }
+          stringBuilder.append(entry);
+        }
+        System.out.println("\nMerged comma-delimited list ...\n" + stringBuilder.toString());
       }
-      System.out.println("\nMerged comma-delimited list ...\n" + stringBuilder.toString());
     } catch (IOException ex) {
       System.err.println(ex.getMessage());
       System.err.println(StringUtils.getStackTraceAsString(ex));
-      System.exit(1);
     }
   }
 
@@ -89,9 +103,8 @@ public class PackageList {
     }
   }
 
-
-
-  /** Executes this application.
+  /**
+   * Executes this application.
    *
    * @param args the command line arguments (unused)
    */

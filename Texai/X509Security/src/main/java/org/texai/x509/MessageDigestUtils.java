@@ -58,11 +58,10 @@ public class MessageDigestUtils {
     assert file.isFile() : "file must be a file, e.g. not a directory, " + file;
 
     final byte[] hashBytes;
-    try {
+    try (final FileInputStream fileInputStream = new FileInputStream(file)) {
       addBouncyCastleSecurityProvider();
       final MessageDigest messageDigest = MessageDigest.getInstance("SHA-512", BOUNCY_CASTLE_PROVIDER);
       messageDigest.reset();
-      final FileInputStream fileInputStream = new FileInputStream(file);
       final byte[] dataBytes = new byte[1024];
       int nread;
       while ((nread = fileInputStream.read(dataBytes)) != -1) {

@@ -70,6 +70,19 @@ public class RoleTest {
   }
 
   /**
+   * Test of getSiblingRole method, of class Role.
+   */
+  @Test
+  public void testGetSiblingRole() {
+    LOGGER.info("getSiblingRole");
+    Node node = NodeTest.makeTestNode3();
+    final Role role1 = node.getRole("TestRole");
+    assertEquals("TestContainer.TestAgent.TestRole", role1.getQualifiedName());
+    final Role role2 = role1.getSiblingRole("TestRole2");
+    assertEquals("TestContainer.TestAgent.TestRole2", role2.getQualifiedName());
+  }
+
+  /**
    * Test of getId method, of class Role.
    */
   @Test

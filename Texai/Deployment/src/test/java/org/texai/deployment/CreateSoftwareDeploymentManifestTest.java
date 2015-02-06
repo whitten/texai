@@ -1,5 +1,6 @@
 package org.texai.deployment;
 
+import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -32,7 +33,8 @@ public class CreateSoftwareDeploymentManifestTest {
     for (final File file : files) {
       if (!file.isHidden()) {
         LOGGER.info("deleting previous test file: " + file);
-        file.delete();
+        final boolean isOK = file.delete();
+        assertTrue(isOK);
       }
     }
 
@@ -137,6 +139,7 @@ public class CreateSoftwareDeploymentManifestTest {
    * Test of formRelativePath method, of class CreateSoftwareDeploymentManifest.
    */
   @Test
+  @SuppressWarnings(value = "DMI_HARDCODED_ABSOLUTE_FILENAME", justification = "unit test")
   public void testFormRelativePath() {
     LOGGER.info("formRelativePath");
 

@@ -14,10 +14,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import org.apache.log4j.Logger;
 
 /**
@@ -372,7 +374,7 @@ public final class StringUtils {
         if (nbrChars == -1) {
           break;
         }
-        stringBuilder.append(new String(buffer, 0, nbrChars));
+        stringBuilder.append(new String(buffer, 0, nbrChars, Charset.forName("UTF-8")));
       }
     } catch (IOException ex) {
       throw new TexaiException(ex);
@@ -478,7 +480,7 @@ public final class StringUtils {
     // predicates begin with a lower case letter, but class names are capitalized and may also begin with a accronym
     if (simpleClassName.length() == 1) {
       // trivial case
-      return simpleClassName.toLowerCase();
+      return simpleClassName.toLowerCase(Locale.ENGLISH);
     } else {
       final StringBuilder stringBuilder = new StringBuilder();
 

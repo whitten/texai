@@ -46,7 +46,7 @@ public class RepositoryContentDescription implements Comparable<RepositoryConten
   @RDFProperty(predicate = "texai:repositoryContextDescriptionItems", range = "texai:org.texai.kb.persistence.domainEntity.RepositoryContentDescriptionItem")
   private final Set<RepositoryContentDescriptionItem> repositoryContextDescriptionItems;
   /** the cached repository instance */
-  private Repository repository;
+  private transient Repository repository;
 
   //TODO externalize
 

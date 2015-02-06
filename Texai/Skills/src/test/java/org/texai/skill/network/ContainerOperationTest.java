@@ -99,7 +99,7 @@ public class ContainerOperationTest {
    */
   @Test
   public void testInitializeTaskMessage() {
-    LOGGER.info("testing " + AHCSConstants.AHCS_INITIALIZE_TASK + " message");
+    LOGGER.info("testing " + AHCSConstants.INITIALIZE_TASK + " message");
 
     skillTestHarness.reset();
     skillTestHarness.setSkillState(AHCSConstants.State.UNINITIALIZED, skillClassName);
@@ -108,7 +108,7 @@ public class ContainerOperationTest {
             NetworkOperation.class.getName(), // senderService
             containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
             skillClassName, // recipientService
-            AHCSConstants.AHCS_INITIALIZE_TASK); // operation
+            AHCSConstants.INITIALIZE_TASK); // operation
 
     skillTestHarness.dispatchMessage(initializeMessage);
 

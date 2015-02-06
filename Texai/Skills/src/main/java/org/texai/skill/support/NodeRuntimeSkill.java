@@ -86,7 +86,7 @@ public class NodeRuntimeSkill extends AbstractSkill {
        * This task message is sent from the container-local parent NetworkOperationAgent.NetworkOperationRole. It is expected to be the
        * first task message that this role receives and it results in the role being initialized.
        */
-      case AHCSConstants.AHCS_INITIALIZE_TASK:
+      case AHCSConstants.INITIALIZE_TASK:
         assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
         if (getNodeRuntime().isFirstContainerInNetwork()) {
           setSkillState(AHCSConstants.State.READY);
@@ -157,7 +157,7 @@ public class NodeRuntimeSkill extends AbstractSkill {
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
-      AHCSConstants.AHCS_INITIALIZE_TASK,
+      AHCSConstants.INITIALIZE_TASK,
       AHCSConstants.BECOME_READY_TASK,
       AHCSConstants.LISTEN_FOR_CONNECTIONS_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
@@ -172,6 +172,7 @@ public class NodeRuntimeSkill extends AbstractSkill {
   private void listenForConnections(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
+    assert nodeRuntime instanceof NodeRuntime;
 
     final String portString = System.getenv("LISTENING_PORT");
     if (!StringUtils.isNonEmptyString(portString)) {

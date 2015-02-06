@@ -78,7 +78,7 @@ public class Heartbeat extends AbstractSkill {
        * This task message is sent from the parent ContainerOperationAgent.ContainerHeartbeatRole. It is expected to be the first task
        * message that this role receives and it results in the role being initialized.
        */
-      case AHCSConstants.AHCS_INITIALIZE_TASK:
+      case AHCSConstants.INITIALIZE_TASK:
         assert this.getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
         initialization(message);
         return;
@@ -140,7 +140,7 @@ public class Heartbeat extends AbstractSkill {
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
-      AHCSConstants.AHCS_INITIALIZE_TASK,
+      AHCSConstants.INITIALIZE_TASK,
       AHCSConstants.BECOME_READY_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.PERFORM_MISSION_TASK,};

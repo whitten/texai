@@ -73,7 +73,7 @@ public class XAIFaucet extends AbstractNetworkSingletonSkill {
        * This task message is sent from the parent XAINetworkOperationAgent.XAINetworkOperationRole. It is expected to be the first task
        * message that this role receives and it results in the role being initialized.
        */
-      case AHCSConstants.AHCS_INITIALIZE_TASK:
+      case AHCSConstants.INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
         if (getNodeRuntime().isFirstContainerInNetwork()) {
           setSkillState(AHCSConstants.State.READY);
@@ -120,9 +120,6 @@ public class XAIFaucet extends AbstractNetworkSingletonSkill {
         return;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
-        LOGGER.warn(message);
-        return;
-
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(message);
         return;
@@ -160,7 +157,7 @@ public class XAIFaucet extends AbstractNetworkSingletonSkill {
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
-      AHCSConstants.AHCS_INITIALIZE_TASK,
+      AHCSConstants.INITIALIZE_TASK,
       AHCSConstants.BECOME_READY_TASK,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
@@ -190,50 +187,50 @@ public class XAIFaucet extends AbstractNetworkSingletonSkill {
    *
    * @param message the received faucet payment request sensation message
    */
-  private synchronized void faucetPaymentRequest(final Message message) {
-    //Preconditio
-    assert message != null : "message must not be null";
-    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
-
-    LOGGER.info("processing a faucet payment request");
-    final BigInteger requestedFaucetPaymentAmount = (BigInteger) message.get(AHCSConstants.MSG_PARM_CURRENCY_AMOUNT);
-    assert requestedFaucetPaymentAmount != null;
-    assert requestedFaucetPaymentAmount.compareTo(BigInteger.ZERO) > 0;
-    LOGGER.info("requested faucet payment amount: " + requestedFaucetPaymentAmount);
-    final String ipAddressString = (String) message.get(AHCSConstants.MSG_PARM_IP_ADDRESS_STRING);
-    assert StringUtils.isNonEmptyString(ipAddressString);
-    final BigInteger unclaimedAmount = getUnclaimedAmount(ipAddressString);
-    LOGGER.info("faucet payment unclaimed amount: " + unclaimedAmount);
-
-    final Message replyMessage;
-    if (isFaucetExhausted(requestedFaucetPaymentAmount)) {
-      // not enough remaining in the faucet to grant the request
-      replyMessage = makeMessage(
-              message.getSenderQualifiedName(), // recipientQualifiedName
-              message.getSenderService(), // recipientService
-              AHCSConstants.FAUCET_EXHAUSTED_TASK); // operation
-      replyMessage.put(AHCSConstants.FAUCET_PAYMENT_REQUEST_REFUSED_TASK_UNCLAIMED_CURRENCY_AMOUNT, unclaimedAmount);
-    } else if (unclaimedAmount.compareTo(requestedFaucetPaymentAmount) >= 0) {
-      // enough remaining, make the faucet payment
-      replyMessage = makeMessage(
-              message.getSenderQualifiedName(), // recipientQualifiedName
-              message.getSenderService(), // recipientService
-              AHCSConstants.FAUCET_PAYMENT_REQUEST_GRANTED_TASK); // operation
-      replyMessage.put(AHCSConstants.FAUCET_PAYMENT_REQUEST_GRANTED_TASK_UNCLAIMED_CURRENCY_AMOUNT, unclaimedAmount);
-
-    } else {
-      // not enough remaining - refuse the payment request
-      replyMessage = makeMessage(
-              message.getSenderQualifiedName(), // recipientQualifiedName
-              message.getSenderService(), // recipientService
-              AHCSConstants.FAUCET_PAYMENT_REQUEST_REFUSED_TASK); // operation
-      replyMessage.put(AHCSConstants.FAUCET_PAYMENT_REQUEST_REFUSED_TASK_UNCLAIMED_CURRENCY_AMOUNT, unclaimedAmount);
-    }
-    replyMessage.put(AHCSConstants.MSG_PARM_CURRENCY_AMOUNT, requestedFaucetPaymentAmount);
-    assert message.get(AHCSConstants.MSG_PARM_SESSION) != null;
-    replyMessage.put(AHCSConstants.MSG_PARM_SESSION, message.get(AHCSConstants.MSG_PARM_SESSION));
-    sendMessage(replyMessage);
-  }
+//  private synchronized void faucetPaymentRequest(final Message message) {
+//    //Preconditio
+//    assert message != null : "message must not be null";
+//    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+//
+//    LOGGER.info("processing a faucet payment request");
+//    final BigInteger requestedFaucetPaymentAmount = (BigInteger) message.get(AHCSConstants.MSG_PARM_CURRENCY_AMOUNT);
+//    assert requestedFaucetPaymentAmount != null;
+//    assert requestedFaucetPaymentAmount.compareTo(BigInteger.ZERO) > 0;
+//    LOGGER.info("requested faucet payment amount: " + requestedFaucetPaymentAmount);
+//    final String ipAddressString = (String) message.get(AHCSConstants.MSG_PARM_IP_ADDRESS_STRING);
+//    assert StringUtils.isNonEmptyString(ipAddressString);
+//    final BigInteger unclaimedAmount = getUnclaimedAmount(ipAddressString);
+//    LOGGER.info("faucet payment unclaimed amount: " + unclaimedAmount);
+//
+//    final Message replyMessage;
+//    if (isFaucetExhausted(requestedFaucetPaymentAmount)) {
+//      // not enough remaining in the faucet to grant the request
+//      replyMessage = makeMessage(
+//              message.getSenderQualifiedName(), // recipientQualifiedName
+//              message.getSenderService(), // recipientService
+//              AHCSConstants.FAUCET_EXHAUSTED_TASK); // operation
+//      replyMessage.put(AHCSConstants.FAUCET_PAYMENT_REQUEST_REFUSED_TASK_UNCLAIMED_CURRENCY_AMOUNT, unclaimedAmount);
+//    } else if (unclaimedAmount.compareTo(requestedFaucetPaymentAmount) >= 0) {
+//      // enough remaining, make the faucet payment
+//      replyMessage = makeMessage(
+//              message.getSenderQualifiedName(), // recipientQualifiedName
+//              message.getSenderService(), // recipientService
+//              AHCSConstants.FAUCET_PAYMENT_REQUEST_GRANTED_TASK); // operation
+//      replyMessage.put(AHCSConstants.FAUCET_PAYMENT_REQUEST_GRANTED_TASK_UNCLAIMED_CURRENCY_AMOUNT, unclaimedAmount);
+//
+//    } else {
+//      // not enough remaining - refuse the payment request
+//      replyMessage = makeMessage(
+//              message.getSenderQualifiedName(), // recipientQualifiedName
+//              message.getSenderService(), // recipientService
+//              AHCSConstants.FAUCET_PAYMENT_REQUEST_REFUSED_TASK); // operation
+//      replyMessage.put(AHCSConstants.FAUCET_PAYMENT_REQUEST_REFUSED_TASK_UNCLAIMED_CURRENCY_AMOUNT, unclaimedAmount);
+//    }
+//    replyMessage.put(AHCSConstants.MSG_PARM_CURRENCY_AMOUNT, requestedFaucetPaymentAmount);
+//    assert message.get(AHCSConstants.MSG_PARM_SESSION) != null;
+//    replyMessage.put(AHCSConstants.MSG_PARM_SESSION, message.get(AHCSConstants.MSG_PARM_SESSION));
+//    sendMessage(replyMessage);
+//  }
 
   /**
    * Returns the current unclaimed amount for the given IP address.
@@ -273,14 +270,14 @@ public class XAIFaucet extends AbstractNetworkSingletonSkill {
    *
    * @return whether the faucet wallet has sufficent funds
    */
-  private boolean isFaucetExhausted(final BigInteger requestedFaucetPaymentAmount) {
-    //Preconditions
-    assert requestedFaucetPaymentAmount != null;
-    assert requestedFaucetPaymentAmount.compareTo(BigInteger.ZERO) > 0;
-
-    //TODO
-    return true;
-  }
+//  private boolean isFaucetExhausted(final BigInteger requestedFaucetPaymentAmount) {
+//    //Preconditions
+//    assert requestedFaucetPaymentAmount != null;
+//    assert requestedFaucetPaymentAmount.compareTo(BigInteger.ZERO) > 0;
+//
+//    //TODO
+//    return true;
+//  }
 
   /** Converts an amount from the aicoind or aicoin-qt RPC interface to satoshis.
    *

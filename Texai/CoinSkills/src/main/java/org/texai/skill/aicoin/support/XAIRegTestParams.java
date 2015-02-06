@@ -19,6 +19,7 @@ import com.google.bitcoin.core.Block;
 import com.google.bitcoin.params.TestNet2Params;
 import static com.google.common.base.Preconditions.checkState;
 import java.math.BigInteger;
+import java.util.Locale;
 
 /**
  * Network parameters for the regression test mode of bitcoind in which all blocks are trivially solvable.
@@ -54,7 +55,7 @@ public class XAIRegTestParams extends TestNet2Params {
         genesis.setNonce(2);
         genesis.setDifficultyTarget(0x207fFFFFL);
         genesis.setTime(1296688602L);
-        checkState(genesis.getHashAsString().toLowerCase().equals("0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206"));
+        checkState(genesis.getHashAsString().toLowerCase(Locale.ENGLISH).equals("0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206"));
       }
       return genesis;
     }

@@ -9,8 +9,12 @@
  */
 package org.texai.kb.journal;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -109,7 +113,7 @@ public final class JournalWriter {
               throw new TexaiException("file was not created: " + journalFilePath);
             }
           }
-          journalFileWriter = new PrintWriter(journalFilePath);
+          journalFileWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(journalFilePath), "UTF-8"));
         } catch (final IOException ex) {
           LOGGER.error("problem with file " + journalFilePath);
           throw new TexaiException(ex);

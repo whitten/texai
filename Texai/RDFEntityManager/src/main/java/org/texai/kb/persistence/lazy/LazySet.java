@@ -37,6 +37,7 @@ import org.texai.util.TexaiException;
  * @author reed
  */
 @ThreadSafe
+@edu.umd.cs.findbugs.annotations.SuppressWarnings({"SE_BAD_FIELD", "SE_TRANSIENT_FIELD_NOT_RESTORED"})
 public final class LazySet implements Set, Serializable {
 
   /** the default serial version UID */

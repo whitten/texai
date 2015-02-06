@@ -11,8 +11,9 @@ package org.texai.util;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 /**
  *
@@ -88,31 +89,30 @@ public final class LinesOfCodeCounter {
    */
   private int getNumberOfLines(final String filePath) throws IOException {
     int numberOfLines;
-    final BufferedReader bufferedReader = new BufferedReader(new FileReader(new File(filePath)));
-    numberOfLines = 0;
-    try {
-      String line = bufferedReader.readLine();
-      boolean inComment = false;
-      while (line != null) {
-        if (inComment) {
-          if (line.contains("*/")) {
-            inComment = false;
-          }
-        } else if (!line.trim().startsWith("//")) {
-          if (line.contains("/*")) {
-            if (!line.contains("*/")) {
-              inComment = true;
+    try (final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(filePath), "UTF-8"))) {
+      numberOfLines = 0;
+      try {
+        String line = bufferedReader.readLine();
+        boolean inComment = false;
+        while (line != null) {
+          if (inComment) {
+            if (line.contains("*/")) {
+              inComment = false;
             }
-          } else if (!inComment && !line.trim().isEmpty()) {
-            numberOfLines++;
+          } else if (!line.trim().startsWith("//")) {
+            if (line.contains("/*")) {
+              if (!line.contains("*/")) {
+                inComment = true;
+              }
+            } else if (!inComment && !line.trim().isEmpty()) {
+              numberOfLines++;
+            }
           }
+          line = bufferedReader.readLine();
         }
-        line = bufferedReader.readLine();
+      } catch (final IOException ex) {
+        throw new IOException(ex);
       }
-    } catch (final IOException ex) {
-      throw new IOException(ex);
-    } finally {
-      bufferedReader.close();
     }
     System.out.println(filePath + ": " + numberOfLines);
     return numberOfLines;

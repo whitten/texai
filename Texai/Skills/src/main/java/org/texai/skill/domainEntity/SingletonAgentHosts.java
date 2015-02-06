@@ -49,7 +49,7 @@ public final class SingletonAgentHosts implements RDFPersistent, Serializable {
   private static final long serialVersionUID = 1L;
   // the id assigned by the persistence framework
   @Id
-  private URI id;
+  final private URI id = null;
   // the singleton agent dictionary, agent name  --> hosting container name
   @RDFProperty(mapKeyType = "java.lang.String", mapValueType = "java.lang.String")
   private final Map<String, String> singletonAgentDictionary;
@@ -116,7 +116,7 @@ public final class SingletonAgentHosts implements RDFPersistent, Serializable {
     this.terminationDateTime = terminationDateTime;
     this.authorQualifiedName = authorQualifiedName;
     this.createdDateTime = createdDateTime;
-    this.authorSignatureBytes = authorSignatureBytes;
+    this.authorSignatureBytes = authorSignatureBytes.clone();
   }
 
   //TODO work out a canonical serialization of the map, e.g. two lists of strings, sorted by key
@@ -406,6 +406,6 @@ public final class SingletonAgentHosts implements RDFPersistent, Serializable {
    * @return the authorSignatureBytes
    */
   public byte[] getAuthorSignatureBytes() {
-    return authorSignatureBytes;
+    return authorSignatureBytes.clone();
   }
 }

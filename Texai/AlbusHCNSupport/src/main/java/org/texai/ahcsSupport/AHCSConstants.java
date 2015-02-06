@@ -85,9 +85,6 @@ public final class AHCSConstants {
   // the addUnrecognizedFaceToTrainingSet_Task operation
   public static final String ADD_UNRECOGNIZED_FACE_TO_TRAINING_SET_TASK = "addUnrecognizedFaceToTrainingSet_Task";
   //
-  // the initialize_Task operation
-  public static final String AHCS_INITIALIZE_TASK = "AHCS initialize_Task";
-  //
   // the quiesce_Task operation
   public static final String AHCS_QUIESCE_TASK = "AHCS quiesce_Task";
   //
@@ -106,7 +103,7 @@ public final class AHCSConstants {
   // the becomeReady_Task operation
   public static final String BECOME_READY_TASK = "becomeReady_Task";
   //
-  // the delegateConfigureSingletonAgentHosts_Task operation
+  // the configureSingletonAgentHosts_Task operation
   public static final String CONFIGURE_SINGLETON_AGENT_HOSTS_TASK = "configureSingletonAgentHosts_Task";
   //
   // the connect child role to parent_Task operation
@@ -130,9 +127,6 @@ public final class AHCSConstants {
   // the delegateBecomeReady_Task operation
   public static final String DELEGATE_BECOME_READY_TASK = "delegateBecomeReady_Task";
   //
-  // the configureSingletonAgentHosts_Task operation
-  public static final String DELEGATE_CONFIGURE_SINGLETON_AGENT_HOSTS_TASK = "delegateConfigureSingletonAgentHosts_Task";
-  //
   // the delegatePerformMission_Task operation
   public static final String DELEGATE_PERFORM_MISSION_TASK = "delegatePerformMission_Task";
   //
@@ -143,14 +137,6 @@ public final class AHCSConstants {
   public static final String DEPLOY_FILES_TASK = "deployFile_Task";
   // the deployFile_Task manifest parameter, which is a JSON String specifying the deployment manifest
   public static final String DEPLOY_FILES_TASK_MANIFEST = "deployFile_Task_manifest";
-  // the deployFile_Task zipped bytes parameter, which is a byte array chunk of the deployed files zip archive
-  public static final String DEPLOY_FILES_TASK_ZIPPED_BYTES = "deployFile_Task_zippedBytes";
-   // the deployFile_Task zipped bytes hash parameter, which is a String that contains the SHA-256 hash of the deployed files zip archive
-  public static final String DEPLOY_FILES_TASK_ZIPPED_BYTES_HASH = "deployFile_Task_zippedBytesHash";
-  // the deployFile_Task chunk number parameter, which is an int that counts the chunks of the potentially very large zip archive bytes
-  public static final String DEPLOY_FILES_TASK_CHUNK_NUMBER = "deployFile_Task_chunkNumber";
-  // the deployFile_Task zipped bytes length, which is an int specifying the total length of the zip archive to be transferred
-  public static final String DEPLOY_FILES_TASK_ZIPPED_BYTES_LENGTH = "deployFile_Task_zippedBytesLength";
   //
   // the directNextUtteranceBackToSender_Task operation
   public static final String DIRECT_NEXT_UTTERANCE_BACK_TO_SENDER_TASK = "directNextUtteranceBackToSender_Task";
@@ -182,6 +168,9 @@ public final class AHCSConstants {
   public static final String INTERPRET_FACT_ACQUISITION_SCRIPT_TASK = "interpret fact acquisition script_Task";
   // the script name
   public static final String INTERPRET_FACT_ACQUISITION_SCRIPT_TASK_NAME = "interpret fact acquisition script_Task_name";
+  //
+  // the initialize_Task operation
+  public static final String INITIALIZE_TASK = "initialize_Task";
   //
   // the joinAcknowledged_Task operation
   public static final String JOIN_ACKNOWLEDGED_TASK = "joinAcknowledged_Task";

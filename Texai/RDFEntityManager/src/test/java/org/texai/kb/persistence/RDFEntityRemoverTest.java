@@ -106,7 +106,7 @@ public class RDFEntityRemoverTest {
     rdfTestEntity1.setName("TestDomainEntity 1");
     rdfTestEntity1.setNumberOfCrew(1);
     final String[] comments1 = {"comment 1", "comment 2"};
-    rdfTestEntity1.setComment(comments1);
+    rdfTestEntity1.setComments(comments1);
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     Set<String> cyclistNotes = new HashSet<>();
     cyclistNotes.add("note 1");
@@ -123,7 +123,7 @@ public class RDFEntityRemoverTest {
     rdfTestEntity2.setName("TestDomainEntity 2");
     rdfTestEntity2.setNumberOfCrew(1);
     final String[] comments2 = {"comment 1", "comment 2"};
-    rdfTestEntity2.setComment(comments2);
+    rdfTestEntity2.setComments(comments2);
 
     RDFEntityPersister rdfEntityPersister = new RDFEntityPersister(rdfEntityManager);
     rdfEntityPersister.persist(repositoryConnection, rdfTestEntity1);
