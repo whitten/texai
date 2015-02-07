@@ -228,9 +228,7 @@ public class AICoinMain {
       // configure the list of operations to be filtered from logging
       nodeRuntime.addFilteredOperation(AHCSConstants.INITIALIZE_TASK);
       nodeRuntime.addFilteredOperation(AHCSConstants.ADD_UNJOINED_ROLE_INFO);
-      nodeRuntime.addFilteredOperation(AHCSConstants.BECOME_READY_TASK);
       nodeRuntime.addFilteredOperation(AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK);
-      nodeRuntime.addFilteredOperation(AHCSConstants.DELEGATE_BECOME_READY_TASK);
       nodeRuntime.addFilteredOperation(AHCSConstants.DELEGATE_PERFORM_MISSION_TASK);
       nodeRuntime.addFilteredOperation(AHCSConstants.DEPLOY_FILES_TASK);
       nodeRuntime.addFilteredOperation(AHCSConstants.JOIN_ACKNOWLEDGED_TASK);

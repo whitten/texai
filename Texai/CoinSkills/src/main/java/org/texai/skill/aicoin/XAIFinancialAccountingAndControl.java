@@ -86,18 +86,6 @@ public class XAIFinancialAccountingAndControl extends AbstractNetworkSingletonSk
         return;
 
       /**
-       * Delegate Become Ready Task
-       *
-       * A container has completed joining the network. Propagate a Delegate Become Ready Task down the role command hierarchy.
-       *
-       * The container name is a parameter of the message.
-       */
-      case AHCSConstants.DELEGATE_BECOME_READY_TASK:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        handleDelegateBecomeReadyTask(message);
-        return;
-
-      /**
        * Delegate Perform Mission Task
        *
        * A container has completed joining the network. Propagate a Delegate Perform Mission Task down the role command hierarchy.
@@ -148,7 +136,6 @@ public class XAIFinancialAccountingAndControl extends AbstractNetworkSingletonSk
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.INITIALIZE_TASK,
-      AHCSConstants.DELEGATE_BECOME_READY_TASK,
       AHCSConstants.DELEGATE_PERFORM_MISSION_TASK,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO

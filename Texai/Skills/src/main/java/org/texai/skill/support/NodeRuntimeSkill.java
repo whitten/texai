@@ -96,27 +96,18 @@ public class NodeRuntimeSkill extends AbstractSkill {
         return;
 
       /**
-       * Become Ready Task
+       * Perform Mission Task
        *
-       * This task message is sent from the network-singleton parent NetworkOperationAgent.NetworkOperationRole.
+       * This task message is sent from the network-singleton parent ContainerOperationAgent.ContainerOperationRole.
        *
-       * It results in the skill set to the ready state
+       * It results in the skill listening for connections from peers.
        */
-      case AHCSConstants.BECOME_READY_TASK:
-        assert this.getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "prior state must be isolated-from-network";
-        setSkillState(AHCSConstants.State.READY);
-        LOGGER.info("now ready");
-        return;
-
-      /**
-       * Become Ready Task
-       *
-       * This task message is sent from the network-singleton parent NetworkOperationAgent.NetworkOperationRole.
-       *
-       * It results in the skill set to the ready state
-       */
-      case AHCSConstants.LISTEN_FOR_CONNECTIONS_TASK:
-        assert getSkillState().equals(State.READY) : "state must be ready";
+      case AHCSConstants.PERFORM_MISSION_TASK:
+        if (getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK)) {
+          setSkillState(AHCSConstants.State.READY);
+          LOGGER.info("now ready");
+        }
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
         listenForConnections(message);
         return;
 
@@ -158,9 +149,7 @@ public class NodeRuntimeSkill extends AbstractSkill {
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.INITIALIZE_TASK,
-      AHCSConstants.BECOME_READY_TASK,
-      AHCSConstants.LISTEN_FOR_CONNECTIONS_TASK,
-      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
+      AHCSConstants.PERFORM_MISSION_TASK
     };
   }
 

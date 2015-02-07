@@ -85,24 +85,6 @@ public final class AHCSConstants {
   // the addUnrecognizedFaceToTrainingSet_Task operation
   public static final String ADD_UNRECOGNIZED_FACE_TO_TRAINING_SET_TASK = "addUnrecognizedFaceToTrainingSet_Task";
   //
-  // the quiesce_Task operation
-  public static final String AHCS_QUIESCE_TASK = "AHCS quiesce_Task";
-  //
-  // the restart_Task operation
-  public static final String AHCS_RESTART_TASK = "AHCS restart_Task";
-  // the node runtime id
-  public static final String AHCS_RESTART_TASK_NODE_RUNTIME_ID = "AHCS restart_Task_nodeRuntimeId";
-  // the indicator whether repositories are backed up
-  public static final String AHCS_RESTART_TASK_ARE_REPOSITORIES_BACKED_UP = "AHCS restart_Task_areRepositoriesBackedUp";
-  // the indicator whether remote debugging is enabled
-  public static final String AHCS_RESTART_TASK_IS_REMOTE_DEBUGGING_ENABLED = "AHCS restart_Task_isRemoteDebuggingEnabled";
-  //
-  // the shutdown_Task operation
-  public static final String AHCS_SHUTDOWN_TASK = "AHCS shutdown_Task";
-  //
-  // the becomeReady_Task operation
-  public static final String BECOME_READY_TASK = "becomeReady_Task";
-  //
   // the configureSingletonAgentHosts_Task operation
   public static final String CONFIGURE_SINGLETON_AGENT_HOSTS_TASK = "configureSingletonAgentHosts_Task";
   //
@@ -123,9 +105,6 @@ public final class AHCSConstants {
   //
   // the defineNewRoleType_Task operation
   public static final String DEFINE_NEW_SKILL_CLASS_TASK = "defineNewSkillClass_Task";
-  //
-  // the delegateBecomeReady_Task operation
-  public static final String DELEGATE_BECOME_READY_TASK = "delegateBecomeReady_Task";
   //
   // the delegatePerformMission_Task operation
   public static final String DELEGATE_PERFORM_MISSION_TASK = "delegatePerformMission_Task";
@@ -180,9 +159,6 @@ public final class AHCSConstants {
   //
   // the learn faces_Task operation
   public static final String LEARN_FACES_TASK = "learn faces_Task";
-  //
-  // the listenForConnections_Task operation
-  public static final String LISTEN_FOR_CONNECTIONS_TASK = "listenForConnections_Task";
   //
   // the logOperation_Task operation
   public static final String LOG_OPERATION_TASK = "logOperation_Task";

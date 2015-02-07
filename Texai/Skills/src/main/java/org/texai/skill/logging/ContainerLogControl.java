@@ -64,19 +64,17 @@ public class ContainerLogControl extends AbstractSkill {
         return;
 
       /**
-       * Become Ready Task
+       * Perform Mission Task
        *
        * This task message is sent from the network-singleton parent NetworkLogControlAgent.NetworkLogControlRole.
        *
-       * It results in the skill set to the ready state
+       * It results in the skill set to the ready state and performing its mission.
        */
-      case AHCSConstants.BECOME_READY_TASK:
-        assert this.getSkillState().equals(State.ISOLATED_FROM_NETWORK) : "prior state must be isolated-from-network";
-        setSkillState(State.READY);
-        LOGGER.info("now ready");
-        return;
-
       case AHCSConstants.PERFORM_MISSION_TASK:
+        if (getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK)) {
+          setSkillState(AHCSConstants.State.READY);
+          LOGGER.info("now ready");
+        }
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
         performMission(message);
         return;
@@ -194,7 +192,6 @@ public class ContainerLogControl extends AbstractSkill {
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.INITIALIZE_TASK,
-      AHCSConstants.BECOME_READY_TASK,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.LOG_OPERATION_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,

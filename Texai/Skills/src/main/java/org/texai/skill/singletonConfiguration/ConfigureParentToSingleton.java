@@ -86,16 +86,19 @@ public class ConfigureParentToSingleton extends AbstractSkill {
         return;
 
       /**
-       * Become Ready Task
+       * Perform Mission Task
        *
-       * This task message is sent from the network-singleton parent ContainerOperationAgent.ContainerOperationRole.
+       * This task message is sent from the network-singleton parent ContainerOperationAgent.ContainerSingletonConfigurationRole.
        *
-       * It results in the skill set to the ready state
+       * It results in the skill set to the ready state, and the skill performing its mission.
        */
-      case AHCSConstants.BECOME_READY_TASK:
-        assert this.getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "prior state must be isolated-from-network";
-        setSkillState(AHCSConstants.State.READY);
-        LOGGER.info("now ready");
+      case AHCSConstants.PERFORM_MISSION_TASK:
+        if (getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK)) {
+          setSkillState(AHCSConstants.State.READY);
+          LOGGER.info("now ready");
+        }
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+        performMission(message);
         return;
 
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
@@ -137,9 +140,9 @@ public class ConfigureParentToSingleton extends AbstractSkill {
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.INITIALIZE_TASK,
-      AHCSConstants.BECOME_READY_TASK,
       AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK,
-      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.PERFORM_MISSION_TASK
     };
   }
 
@@ -223,4 +226,15 @@ public class ConfigureParentToSingleton extends AbstractSkill {
     });
   }
 
+
+  /** Handles the Perform Mission Task message.
+   *
+   * @param message  the Perform Mission Task message
+   */
+  private void performMission(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+
+
+  }
 }

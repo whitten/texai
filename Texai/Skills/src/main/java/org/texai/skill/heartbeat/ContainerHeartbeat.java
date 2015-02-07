@@ -115,19 +115,17 @@ public final class ContainerHeartbeat extends AbstractSkill {
         return;
 
       /**
-       * Become Ready Task
+       * Perform Mission Task
        *
        * This task message is sent from the network-singleton parent NetworkOperationAgent.TopLevelHeartbeatRole.
        *
-       * It results in the skill set to the ready state
+       * It results in the skill set to the ready state, and it performing its mission.
        */
-      case AHCSConstants.BECOME_READY_TASK:
-        assert this.getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "prior state must be isolated-from-network";
-        setSkillState(AHCSConstants.State.READY);
-        LOGGER.info("now ready");
-        return;
-
       case AHCSConstants.PERFORM_MISSION_TASK:
+        if (getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK)) {
+          setSkillState(AHCSConstants.State.READY);
+          LOGGER.info("now ready");
+        }
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
         performMission(message);
         return;
@@ -177,7 +175,6 @@ public final class ContainerHeartbeat extends AbstractSkill {
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.INITIALIZE_TASK,
-      AHCSConstants.BECOME_READY_TASK,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.KEEP_ALIVE_INFO,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,

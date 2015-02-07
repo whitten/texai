@@ -152,18 +152,6 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
         return;
 
       /**
-       * Delegate Become Ready Task
-       *
-       * A container has completed joining the network. Propagate a Delegate Become Ready Task down the role command hierarchy.
-       *
-       * The container name is a parameter of the message.
-       */
-      case AHCSConstants.DELEGATE_BECOME_READY_TASK:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        handleDelegateBecomeReadyTask(message);
-        return;
-
-      /**
        * Delegate Perform Mission Task
        *
        * A container has completed joining the network. Propagate a Delegate Perform Mission Task down the role command hierarchy.
@@ -243,7 +231,6 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.INITIALIZE_TASK,
-      AHCSConstants.DELEGATE_BECOME_READY_TASK,
       AHCSConstants.DELEGATE_PERFORM_MISSION_TASK,
       AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO,
       AHCSConstants.JOIN_NETWORK_TASK,

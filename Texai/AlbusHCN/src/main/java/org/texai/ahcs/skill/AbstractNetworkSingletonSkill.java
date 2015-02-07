@@ -8,7 +8,6 @@ import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.skill.BasicNodeRuntime;
 import org.texai.util.StringUtils;
-import org.texai.util.TexaiException;
 
 /**
  * AbstractNetworkSingletonSkill.java
@@ -78,59 +77,6 @@ public abstract class AbstractNetworkSingletonSkill extends AbstractSkill {
             AHCSConstants.MSG_PARM_X509_CERTIFICATE, // parameterName
             getRole().getX509Certificate()); // parameterValue
     sendMessage(acknowledgedInfoMessage);
-  }
-
-  /**
-   * Handles the Delegate Become Ready Task message by synchronously relaying it to child roles.
-   *
-   * @param message the received Delegate Become Ready Task message
-   */
-  protected void handleDelegateBecomeReadyTask(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
-
-    final String containerName = (String) message.get(AHCSConstants.MSG_PARM_CONTAINER_NAME);
-    assert StringUtils.isNonEmptyString(containerName);
-
-    getLogger().info("handling Delegate Become Ready Task message for joined container " + containerName + " ...");
-
-    if (getLogger().isDebugEnabled()) {
-      getRole().getChildQualifiedNames().stream().forEach(childQualifiedName -> {
-        getLogger().debug("  child role " + childQualifiedName);
-      });
-    }
-
-    // ensure that no child network-singleton roles belong to the joining container
-    getRole().getChildQualifiedNames().stream().forEach((String childQualifiedName) -> {
-      final boolean isNetworkSingletonRole
-              = getRole().isNetworkSingletonRole(getContainerName() + '.' + Node.extractAgentRoleName(childQualifiedName));
-      if (containerName.equals(Node.extractContainerName(childQualifiedName)) && isNetworkSingletonRole) {
-        throw new TexaiException("invalid network-singleton child role from joining container " + childQualifiedName);
-      }
-    });
-
-    getRole().getChildQualifiedNames().stream().forEach(childQualifiedName -> {
-      String operation = null;
-      // coerce remote role names to local role names for the purpose of determining network singletons
-      final boolean isNetworkSingletonRole
-              = getRole().isNetworkSingletonRole(getContainerName() + '.' + Node.extractAgentRoleName(childQualifiedName));
-      if (containerName.equals(Node.extractContainerName(childQualifiedName)) && !isNetworkSingletonRole) {
-        operation = AHCSConstants.BECOME_READY_TASK;
-        getLogger().info(" sending Become Ready Task to " + childQualifiedName);
-      } else if (isNetworkSingletonRole) {
-        operation = AHCSConstants.DELEGATE_BECOME_READY_TASK;
-        getLogger().info(" sending Delegate Become Ready Task to " + childQualifiedName);
-      }
-      if (operation != null) {
-        final Message outboundMessage = makeMessage(
-                childQualifiedName, // recipientQualifiedName
-                null, // recipientService
-                operation);
-        outboundMessage.put(AHCSConstants.MSG_PARM_CONTAINER_NAME, message.get(AHCSConstants.MSG_PARM_CONTAINER_NAME));
-        sendMessage(outboundMessage);
-      }
-    });
   }
 
   /**

@@ -13,10 +13,10 @@ csc:cpts.configureSingletonAgentHosts_Task(\\n  singletonAgentHosts)
 
 
 [c:loop container roles]
-cpts:csc.addUnjoinedRole_Info(\\n  roleQualifiedName)
-cpts:vns.joinNetworkSingletonAgent_Info(\\n  x509Certificate)
-vns:cpts.joinAcknowledged_Task(\\n  x509Certificate)
-cpts:csc.removeUnjoinedRole_Info(\\n  roleQualifiedName)
+  cpts:csc.addUnjoinedRole_Info(\\n  roleQualifiedName)
+  cpts:vns.joinNetworkSingletonAgent_Info(\\n  x509Certificate)
+  vns:cpts.joinAcknowledged_Task(\\n  x509Certificate)
+  cpts:csc.removeUnjoinedRole_Info(\\n  roleQualifiedName)
 [/c]
 
 csc:nscr.networkJoinComplete_info()

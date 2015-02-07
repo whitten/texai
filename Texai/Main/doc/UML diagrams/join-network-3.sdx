@@ -1,28 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <diagram>
-<source><![CDATA[#![ZipFile Deployment     ]
-nd:NetworkDeployment[rp] "NetworkDeployment"
-nft:NetworkFileTransfer[rp] "NetworkFileTransfer"
-cd:ContainerDeployment[rp] "ContainerDeployment"
-no:NetworkOperation[rp] "NetworkOperation"
-co:ContainerOperation[rp] "ContainerOperation"
+<source><![CDATA[#![Join Network part 3     ]
+nscr:NetworkSingletonConfiguration[rp] "NetworkSingletonConfiguration (remote)"
+t:TopmostFriendship[rp] "TopmostFriendship (remote)"
+ns:NetworkSingleton[rp] "Network Singletons (remote)"
+cr:ContainerRole[rp] "Container Roles"
 
-[c:loop all containers]
-  nd:nft.transferFileRequest_Info(\\n  senderFilePath,\\n  recipientFilePath,\\n  senderContainerName,\\n  recipientContainerName)
-  nft:nd.tastAccomplished_Info(\\n  duration)
+
+nscr:t.networkJoinComplete_Sensation(\\n  containerName)
+[c:loop child roles]
+  t:ns.delegatePerformMission_Task()
+  [c:loop child roles]
+    ns:cr.performMission_Task()
+  [/c]
 [/c]
-
-[c:loop all containers]
-  nd:cd.deployFiles_Task(\\n  filePath,\\n  fileHash,\\n  manifest)
-  cd:nd.taskAccomplished_Info()
-[/c]
-
-nd:no.networkRestartRequest_Info()
-
-[c:loop all containers]
-  no:co.restartContainer_Task(\\n  delay)
-[/c]
-
 ]]></source>
 <configuration>
 <property name="activationBarBorderThickness" value="1"/>

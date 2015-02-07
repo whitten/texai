@@ -245,30 +245,14 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
       }
     });
 
-    // synchronously propagate the Become Ready Task to the joined container's child roles
+    // synchronously propagate the Perform Mission Task to the joined container's child roles
     getRole().getChildQualifiedNames().stream().forEach((String childQualifiedName) -> {
       String operation = null;
       if (containerName.equals(Node.extractContainerName(childQualifiedName))) {
-        operation = AHCSConstants.BECOME_READY_TASK;
-      } else if (getRole().isNetworkSingletonRole(childQualifiedName)) {
-        operation = AHCSConstants.DELEGATE_BECOME_READY_TASK;
-      }
-      if (operation != null) {
-        final Message outboundMessage = makeMessage(
-                childQualifiedName, // recipientQualifiedName
-                null, // recipientService
-                operation);
-        outboundMessage.put(AHCSConstants.MSG_PARM_CONTAINER_NAME, message.get(AHCSConstants.MSG_PARM_CONTAINER_NAME));
-        sendMessage(outboundMessage);
-      }
-    });
-
-    // synchronously propagate the Become Ready Task to the joined container's child roles
-    getRole().getChildQualifiedNames().stream().forEach((String childQualifiedName) -> {
-      String operation = null;
-      if (containerName.equals(Node.extractContainerName(childQualifiedName))) {
+        // the joined container hosts this child role - make it ready and command it to perform its mission
         operation = AHCSConstants.PERFORM_MISSION_TASK;
       } else if (getRole().isNetworkSingletonRole(childQualifiedName)) {
+        // this role is a network singleton - it delegates the command to its child roles
         operation = AHCSConstants.DELEGATE_PERFORM_MISSION_TASK;
       }
       if (operation != null) {

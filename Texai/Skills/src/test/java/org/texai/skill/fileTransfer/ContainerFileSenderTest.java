@@ -202,7 +202,7 @@ public class ContainerFileSenderTest {
             "[TestSender:deployment/nodes.xml --> TestRecipient:data/nodes.xml]",
             fileTransferInfo.toBriefString());
     assertEquals(
-            (long) sentMessage.get(AHCSConstants.MSG_PARM_BYTES_SIZE),
+            (int) sentMessage.get(AHCSConstants.MSG_PARM_BYTES_SIZE),
             FileTransferInfo.MAXIMUM_FILE_CHUNK_SIZE);
     final byte[] bytes = (byte[]) sentMessage.get(AHCSConstants.MSG_PARM_BYTES);
     assertNotNull(bytes);
@@ -385,7 +385,7 @@ public class ContainerFileSenderTest {
     ContainerFileSender instance = new ContainerFileSender();
     final List<String> understoodOperations = new ArrayList<>(Arrays.asList(instance.getUnderstoodOperations()));
     Collections.sort(understoodOperations);
-    assertEquals("[AHCS initialize_Task, messageNotUnderstood_Info, performMission_Task, prepareToSendFile_Task, taskAccomplished_Info, transferFile_Task]", understoodOperations.toString());
+    assertEquals("[initialize_Task, messageNotUnderstood_Info, performMission_Task, prepareToSendFile_Task, taskAccomplished_Info, transferFile_Task]", understoodOperations.toString());
   }
 
 }

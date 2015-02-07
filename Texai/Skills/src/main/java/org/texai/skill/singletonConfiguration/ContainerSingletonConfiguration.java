@@ -149,25 +149,16 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
         return;
 
       /**
-       * Become Ready Task
-       *
-       * This task message is sent from the network-singleton parent NetworkOperationAgent.NetworkSingletonConfigurationRole.
-       *
-       * It results in the skill set to the ready state
-       */
-      case AHCSConstants.BECOME_READY_TASK:
-        assert this.getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "prior state must be isolated-from-network";
-        setSkillState(AHCSConstants.State.READY);
-        LOGGER.info("now ready");
-        return;
-
-      /**
        * Perform Mission Task
        *
        * This task message is sent from the network-singleton parent NetworkOperationAgent.NetworkSingletonConfigurationRole.
        * It commands this network-connected role to begin performing its mission.
        */
       case AHCSConstants.PERFORM_MISSION_TASK:
+        if (getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK)) {
+          setSkillState(AHCSConstants.State.READY);
+          LOGGER.info("now ready");
+        }
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
         performMission(message);
         return;
@@ -284,7 +275,6 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
     return new String[]{
       AHCSConstants.ADD_UNJOINED_ROLE_INFO,
       AHCSConstants.INITIALIZE_TASK,
-      AHCSConstants.BECOME_READY_TASK,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.JOIN_NETWORK_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,

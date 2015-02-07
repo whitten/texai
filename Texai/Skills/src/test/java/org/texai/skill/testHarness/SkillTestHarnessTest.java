@@ -91,7 +91,7 @@ public class SkillTestHarnessTest {
     skillTestHarness.dispatchMessage(initializeMessage);
     skillTestHarness.getSkillState(skillClassName);
     assertEquals("ISOLATED_FROM_NETWORK", skillTestHarness.getSkillState(skillClassName).toString());
-    assertEquals("[AHCS initialize_Task, org.texai.skill.deployment.NetworkDeployment]", skillTestHarness.getOperationAndServiceInfo().toString());
+    assertEquals("[initialize_Task, org.texai.skill.deployment.NetworkDeployment]", skillTestHarness.getOperationAndServiceInfo().toString());
   }
 
 }

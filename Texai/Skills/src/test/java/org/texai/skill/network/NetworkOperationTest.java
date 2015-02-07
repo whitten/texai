@@ -125,7 +125,7 @@ public class NetworkOperationTest {
       assertEquals("ISOLATED_FROM_NETWORK", skillTestHarness.getSkillState(skillClassName).toString());
     }
     assertNotNull(skillTestHarness.getOperationAndServiceInfo());
-    assertEquals("[AHCS initialize_Task, org.texai.skill.network.NetworkOperation]", skillTestHarness.getOperationAndServiceInfo().toString());
+    assertEquals("[initialize_Task, org.texai.skill.network.NetworkOperation]", skillTestHarness.getOperationAndServiceInfo().toString());
   }
 
   /**
@@ -232,7 +232,8 @@ public class NetworkOperationTest {
     NetworkOperation instance = new NetworkOperation();
     final List<String> understoodOperations = new ArrayList<>(Arrays.asList(instance.getUnderstoodOperations()));
     Collections.sort(understoodOperations);
-    assertEquals("[AHCS initialize_Task, delegateBecomeReady_Task, delegateConfigureSingletonAgentHosts_Task, delegatePerformMission_Task, joinAcknowledged_Task, joinNetworkSingletonAgent_Info, joinNetwork_Task, messageNotUnderstood_Info, networkJoinComplete_Info, networkRestartRequest_Info, performMission_Task]",
+    assertEquals(
+            "[delegatePerformMission_Task, initialize_Task, joinAcknowledged_Task, joinNetworkSingletonAgent_Info, messageNotUnderstood_Info, networkRestartRequest_Info, performMission_Task, transferFileRequest_Info]",
             understoodOperations.toString());
   }
 

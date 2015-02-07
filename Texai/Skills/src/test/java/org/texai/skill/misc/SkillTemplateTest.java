@@ -160,7 +160,7 @@ public class SkillTemplateTest {
     SkillTemplate instance = new SkillTemplate();
     final List<String> understoodOperations = new ArrayList<>(Arrays.asList(instance.getUnderstoodOperations()));
     Collections.sort(understoodOperations);
-    assertEquals("[AHCS initialize_Task, messageNotUnderstood_Info, performMission_Task]", understoodOperations.toString());
+    assertEquals("[initialize_Task, messageNotUnderstood_Info, performMission_Task]", understoodOperations.toString());
   }
 
 }

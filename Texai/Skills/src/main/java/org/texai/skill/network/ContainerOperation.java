@@ -86,19 +86,6 @@ public final class ContainerOperation extends AbstractSkill {
         return;
 
       /**
-       * Become Ready Task
-       *
-       * This task message is sent from the network-singleton parent NetworkOperationAgent.NetworkOperationRole.
-       *
-       * It results in the skill set to the ready state
-       */
-      case AHCSConstants.BECOME_READY_TASK:
-        assert this.getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "prior state must be isolated-from-network";
-        setSkillState(AHCSConstants.State.READY);
-        LOGGER.info("now ready");
-        return;
-
-      /**
        * Perform Mission Task
        *
        * This task message is sent from the network-singleton, parent NetworkOperationAgent.NetworkOperationRole. It commands this
@@ -107,7 +94,11 @@ public final class ContainerOperation extends AbstractSkill {
        * As a result, a Perform Mission Task message is sent to the node runtime, which will open a message listening port
        */
       case AHCSConstants.PERFORM_MISSION_TASK:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        if (getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK)) {
+          setSkillState(AHCSConstants.State.READY);
+          LOGGER.info("now ready");
+        }
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
         performMission(message);
         return;
 
@@ -166,7 +157,6 @@ public final class ContainerOperation extends AbstractSkill {
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.INITIALIZE_TASK,
-      AHCSConstants.BECOME_READY_TASK,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.OPERATION_NOT_PERMITTED_INFO,
@@ -184,10 +174,10 @@ public final class ContainerOperation extends AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
 
-    // send a Listen For Connections Task message to the node runtime, which will open a message listening port
+    // send a Perform Mission Task message to the node runtime, which will open a message listening port
     final Message performMissionMessage = makeMessage(
             NodeRuntimeSkill.class.getName(), // recipientService
-            AHCSConstants.LISTEN_FOR_CONNECTIONS_TASK, // operation
+            AHCSConstants.PERFORM_MISSION_TASK, // operation
             new HashMap<>()); // parameterDictionary
     sendMessageViaSeparateThread(performMissionMessage);
   }

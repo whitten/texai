@@ -81,6 +81,12 @@ public abstract class AbstractSkill {
         }
       }
     }
+    // verify consistency with the operations that this skill understands
+    for (final String understoodOperation : getUnderstoodOperations()) {
+      if (message.getOperation().equals(understoodOperation)) {
+        return true;
+      }
+    }
     return true;
   }
 
