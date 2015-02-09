@@ -67,7 +67,7 @@ public abstract class AbstractSkill {
    *
    * @return whether this skill permits the execution of the given operation
    */
-  public boolean isOperationPermitted(final Message message) {
+  protected boolean isOperationPermitted(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
 
@@ -104,7 +104,7 @@ public abstract class AbstractSkill {
    *
    * @return the RDF entity manager
    */
-  public RDFEntityManager getRDFEntityManager() {
+  protected RDFEntityManager getRDFEntityManager() {
     //Preconditions
     assert role != null : "role must not be null for " + this;
 
@@ -167,7 +167,7 @@ public abstract class AbstractSkill {
    *
    * @param message the given message
    */
-  public void sendMessage(final Message message) {
+  protected void sendMessage(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
     assert role != null : "role must not be null for " + this;
@@ -181,7 +181,7 @@ public abstract class AbstractSkill {
    *
    * @param message the given message
    */
-  public void sendMessageViaSeparateThread(final Message message) {
+  protected void sendMessageViaSeparateThread(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
     assert role != null : "role must not be null for " + this;
@@ -199,7 +199,7 @@ public abstract class AbstractSkill {
    *
    * @return
    */
-  public Message makeMessage(
+  protected Message makeMessage(
           final String recipientService,
           final String operation,
           final Map<String, Object> parameterDictionary) {
@@ -227,7 +227,7 @@ public abstract class AbstractSkill {
    *
    * @return
    */
-  public Message makeMessage(
+  protected Message makeMessage(
           final String recipientQualifiedName,
           final String recipientService,
           final String operation) {
@@ -256,7 +256,7 @@ public abstract class AbstractSkill {
    *
    * @return
    */
-  public Message makeMessage(
+  protected Message makeMessage(
           final String recipientQualifiedName,
           final UUID conversationId,
           final String recipientService,
@@ -291,7 +291,7 @@ public abstract class AbstractSkill {
    *
    * @return
    */
-  public Message makeMessage(
+  protected Message makeMessage(
           final String recipientQualifiedName,
           final String recipientService,
           final String operation,
@@ -319,7 +319,7 @@ public abstract class AbstractSkill {
    *
    * @return a reply message
    */
-  public Message makeReplyMessage(
+  protected Message makeReplyMessage(
           final Message receivedMessage,
           final String operation) {
     //Preconditions
@@ -348,7 +348,7 @@ public abstract class AbstractSkill {
    *
    * @return a reply message
    */
-  public Message makeExceptionMessage(
+  protected Message makeExceptionMessage(
           final Message receivedMessage,
           final String reason) {
     //Preconditions
@@ -437,7 +437,7 @@ public abstract class AbstractSkill {
    *
    * @param operation the given operation
    */
-  public void propagateOperationToChildRoles(final String operation) {
+  protected void propagateOperationToChildRoles(final String operation) {
     //Preconditions
     assert StringUtils.isNonEmptyString(operation) : "operation must be a non-empty string";
     assert role != null : "role must not be null for " + this;
@@ -452,7 +452,7 @@ public abstract class AbstractSkill {
    *
    * @param operation the given operation
    */
-  public void propagateOperationToChildRolesSeparateThreads(final String operation) {
+  protected void propagateOperationToChildRolesSeparateThreads(final String operation) {
     //Preconditions
     assert StringUtils.isNonEmptyString(operation) : "operation must be a non-empty string";
     assert role != null : "role must not be null for " + this;
@@ -540,7 +540,7 @@ public abstract class AbstractSkill {
   /**
    * Provides a message timeout task which executes unless this task is canceled beforehand.
    */
-  class MessageTimeoutTask extends TimerTask {
+  static class MessageTimeoutTask extends TimerTask {
 
     // the message timeout info
     private MessageTimeOutInfo messageTimeOutInfo;
@@ -567,7 +567,6 @@ public abstract class AbstractSkill {
       //Preconditions
       assert messageTimeOutInfo != null : "messageTimeOutInfo must not be null";
 
-      getLogger().info("Handling timeout while awaiting an expected reply message ...\n" + messageTimeOutInfo);
       skill.removeMessageTimeOut(messageTimeOutInfo.message.getReplyWith());
       final Message timeoutMessage;
       if (messageTimeOutInfo.isRecoverable) {
@@ -693,7 +692,7 @@ public abstract class AbstractSkill {
    *
    * @return a description of the given skill state
    */
-  public static String stateDescription(final State skillState) {
+  protected static String stateDescription(final State skillState) {
     //Preconditions
     assert skillState != null : "skillState must not be null";
 
@@ -724,7 +723,7 @@ public abstract class AbstractSkill {
    *
    * @return the state value associated with the given variable name
    */
-  public Object getStateValue(final String stateVariableName) {
+  protected Object getStateValue(final String stateVariableName) {
     //Preconditions
     assert StringUtils.isNonEmptyString(stateVariableName) : "stateVariableName must be a non-empty string";
     assert role != null : "role must not be null for " + this;
@@ -738,7 +737,7 @@ public abstract class AbstractSkill {
    * @param stateVariableName the given variable name
    * @param value the state value
    */
-  public void setStateValue(final String stateVariableName, final Object value) {
+  protected void setStateValue(final String stateVariableName, final Object value) {
     //Preconditions
     assert StringUtils.isNonEmptyString(stateVariableName) : "stateVariableName must be a non-empty string";
     assert role != null : "role must not be null for " + this;
@@ -751,7 +750,7 @@ public abstract class AbstractSkill {
    *
    * @param stateVariableName the variable name
    */
-  public void removeStateValueBinding(final String stateVariableName) {
+  protected void removeStateValueBinding(final String stateVariableName) {
     //Preconditions
     assert StringUtils.isNonEmptyString(stateVariableName) : "stateVariableName must be a non-empty string";
     assert role != null : "role must not be null for " + this;
@@ -764,7 +763,7 @@ public abstract class AbstractSkill {
    *
    * @return the container name
    */
-  public String getContainerName() {
+  protected String getContainerName() {
     return getNodeRuntime().getContainerName();
   }
 
@@ -773,7 +772,7 @@ public abstract class AbstractSkill {
    *
    * @return the session manager skill
    */
-  public SessionManagerSkill getSessionManagerSkill() {
+  protected SessionManagerSkill getSessionManagerSkill() {
     return sessionManagerSkill;
   }
 
@@ -782,7 +781,7 @@ public abstract class AbstractSkill {
    *
    * @param sessionManagerSkill the session manager skill
    */
-  public void setSessionManagerSkill(final SessionManagerSkill sessionManagerSkill) {
+  protected void setSessionManagerSkill(final SessionManagerSkill sessionManagerSkill) {
     //Preconditions
     assert sessionManagerSkill != null : "sessionManagerSkill must not be null";
 
@@ -796,7 +795,7 @@ public abstract class AbstractSkill {
    *
    * @return a sharable subskill instance
    */
-  public AbstractSubSkill findOrCreateSubSkill(final String subSkillClassName) {
+  protected AbstractSubSkill findOrCreateSubSkill(final String subSkillClassName) {
     //Preconditions
     assert StringUtils.isNonEmptyString(subSkillClassName) : "subSkillClassName must be a non-empty string";
     assert role != null : "role must not be null for " + this;
@@ -811,7 +810,7 @@ public abstract class AbstractSkill {
    *
    * @return a sharable subskill instance, or null if not found
    */
-  public AbstractSubSkill findSubSkill(final String subSkillClassName) {
+  protected AbstractSubSkill findSubSkill(final String subSkillClassName) {
     //Preconditions
     assert StringUtils.isNonEmptyString(subSkillClassName) : "subSkillClassName must be a non-empty string";
 
@@ -833,5 +832,16 @@ public abstract class AbstractSkill {
             "org.texai.skill.network.ContainerOperation", // recipientService
             AHCSConstants.REMOVE_UNJOINED_ROLE_INFO); // operation
     sendMessageViaSeparateThread(removeUnjoinedRoleInfoMessage);
+  }
+
+  /** Executes the given runnable on a separate thread.
+   *
+   * @param runnable the given runnable
+   */
+  protected void execute(final Runnable runnable) {
+    //Preconditions
+    assert runnable != null : "runnable must not be null";
+
+    getNodeRuntime().getExecutor().execute(runnable);
   }
 }

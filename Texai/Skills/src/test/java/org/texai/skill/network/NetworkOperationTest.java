@@ -124,8 +124,8 @@ public class NetworkOperationTest {
     } else {
       assertEquals("ISOLATED_FROM_NETWORK", skillTestHarness.getSkillState(skillClassName).toString());
     }
-    assertNotNull(skillTestHarness.getOperationAndServiceInfo());
-    assertEquals("[initialize_Task, org.texai.skill.network.NetworkOperation]", skillTestHarness.getOperationAndServiceInfo().toString());
+    assertNotNull(skillTestHarness.getOperationAndSenderServiceInfo());
+    assertEquals("[initialize_Task, org.texai.skill.network.NetworkOperation]", skillTestHarness.getOperationAndSenderServiceInfo().toString());
   }
 
   /**
@@ -175,7 +175,7 @@ public class NetworkOperationTest {
     skillTestHarness.dispatchMessage(taskAccomplishedInfoMessage);
 
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
-    assertNull(skillTestHarness.getOperationAndServiceInfo());
+    assertNull(skillTestHarness.getOperationAndSenderServiceInfo());
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
@@ -205,7 +205,7 @@ public class NetworkOperationTest {
     skillTestHarness.dispatchMessage(taskAccomplishedInfoMessage);
 
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
-    assertNull(skillTestHarness.getOperationAndServiceInfo());
+    assertNull(skillTestHarness.getOperationAndSenderServiceInfo());
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);

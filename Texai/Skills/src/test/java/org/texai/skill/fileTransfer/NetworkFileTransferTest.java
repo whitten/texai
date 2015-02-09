@@ -125,8 +125,8 @@ public class NetworkFileTransferTest {
     } else {
       assertEquals("ISOLATED_FROM_NETWORK", skillTestHarness.getSkillState(skillClassName).toString());
     }
-    assertNotNull(skillTestHarness.getOperationAndServiceInfo());
-    assertEquals("[initialize_Task, org.texai.skill.fileTransfer.NetworkFileTransfer]", skillTestHarness.getOperationAndServiceInfo().toString());
+    assertNotNull(skillTestHarness.getOperationAndSenderServiceInfo());
+    assertEquals("[initialize_Task, org.texai.skill.fileTransfer.NetworkFileTransfer]", skillTestHarness.getOperationAndSenderServiceInfo().toString());
   }
 
   /**
@@ -159,7 +159,7 @@ public class NetworkFileTransferTest {
     skillTestHarness.dispatchMessage(transferFileRequestInfoMessage);
 
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
-    assertNull(skillTestHarness.getOperationAndServiceInfo());
+    assertNull(skillTestHarness.getOperationAndSenderServiceInfo());
     Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
@@ -197,7 +197,7 @@ public class NetworkFileTransferTest {
     skillTestHarness.dispatchMessage(taskAccomplishedInfoMessage);
 
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
-    assertNull(skillTestHarness.getOperationAndServiceInfo());
+    assertNull(skillTestHarness.getOperationAndSenderServiceInfo());
     sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
@@ -230,7 +230,7 @@ public class NetworkFileTransferTest {
     skillTestHarness.dispatchMessage(taskAccomplishedInfoMessage);
 
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
-    assertNull(skillTestHarness.getOperationAndServiceInfo());
+    assertNull(skillTestHarness.getOperationAndSenderServiceInfo());
     sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
@@ -265,7 +265,7 @@ public class NetworkFileTransferTest {
     skillTestHarness.dispatchMessage(taskAccomplishedInfoMessage);
 
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
-    assertNull(skillTestHarness.getOperationAndServiceInfo());
+    assertNull(skillTestHarness.getOperationAndSenderServiceInfo());
     sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
@@ -301,7 +301,7 @@ public class NetworkFileTransferTest {
     skillTestHarness.dispatchMessage(taskAccomplishedInfoMessage);
 
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
-    assertNull(skillTestHarness.getOperationAndServiceInfo());
+    assertNull(skillTestHarness.getOperationAndSenderServiceInfo());
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);

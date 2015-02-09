@@ -121,7 +121,7 @@ public class ContainerFileReceiverTest {
     } else {
       assertEquals("ISOLATED_FROM_NETWORK", skillTestHarness.getSkillState(skillClassName).toString());
     }
-    assertNull(skillTestHarness.getOperationAndServiceInfo());
+    assertNull(skillTestHarness.getOperationAndSenderServiceInfo());
   }
 
   /**
@@ -157,7 +157,7 @@ public class ContainerFileReceiverTest {
 
     final ContainerFileReceiver containerFileReceiver = (ContainerFileReceiver) skillTestHarness.getSkill(skillClassName);
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
-    assertNull(skillTestHarness.getOperationAndServiceInfo());
+    assertNull(skillTestHarness.getOperationAndSenderServiceInfo());
     Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
@@ -187,7 +187,7 @@ public class ContainerFileReceiverTest {
 
     skillTestHarness.dispatchMessage(transferFileChunkInfoMessage);
 
-    assertNull(skillTestHarness.getOperationAndServiceInfo());
+    assertNull(skillTestHarness.getOperationAndSenderServiceInfo());
     sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
@@ -222,7 +222,7 @@ public class ContainerFileReceiverTest {
     skillTestHarness.dispatchMessage(taskAccomplishedInfoMessage);
 
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
-    assertNull(skillTestHarness.getOperationAndServiceInfo());
+    assertNull(skillTestHarness.getOperationAndSenderServiceInfo());
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);

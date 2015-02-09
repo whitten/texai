@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -31,6 +32,7 @@ import org.texai.ahcs.skill.AbstractNetworkSingletonSkill;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.Node;
+import org.texai.ahcsSupport.domainEntity.Role;
 import org.texai.skill.fileTransfer.NetworkFileTransfer;
 import org.texai.skill.network.NetworkOperation;
 import org.texai.util.StringUtils;
@@ -52,8 +54,20 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
   private static final long CHECK_FOR_DEPLOYMENT_PERIOD_MILLIS = 60 * 1000 * 1;
   // the indicator that a software deployment is in progress
   private final AtomicBoolean isSoftwareDeploymentUnderway = new AtomicBoolean(false);
+  // the names of containers which have not completed a file transfer task
+  protected final Set<String> pendingFileTransferContainerNames = new HashSet<>();
   // the names of containers which have not completed a software and data file deployment task
-  protected final Set<String> undeployedContainerNames = new HashSet<>();
+  protected final Set<String> pendingDeploymentContainerNames = new HashSet<>();
+  // the manifest JSON string
+  private String manifestJSONString;
+  // the zip archive file path
+  private static final String RECIPIENT_ZIP_ARCHIVE_FILE_PATH = "data/deployment.zip";
+  // the zip archive bytes hash
+  protected String zippedBytesHash;
+  // the deployment file transfer conversation dictionary, conversation id --> deployment file transfer info
+  private Map<UUID, DeploymentFileTransferInfo> deploymentFileTransferConversationDictionary = new HashMap<>();
+  // the indicator whether this instance is being unit tested, in which case certain actions are single-threaded
+  protected boolean isUnitTest = false;
 
   /**
    * Constructs a new SkillTemplate instance.
@@ -62,8 +76,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
   }
 
   /**
-   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
-   * with regard to the conversation.
+   * Receives and attempts to process the given message.
    *
    * @param message the given message
    */
@@ -155,11 +168,17 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
       /**
        * Task Accomplished Info
        *
-       * This information message is sent from the child ContainerDeploymentAgent.ContainerDeploymentRole. It notifies this network
-       * singleton role that the container has completed the software and data file deployment task.
+       * This message is received in two circumsances ...
        *
-       * When all the containers have responded, a Deployment Completed Info message is sent to the parent
-       * NetworkOperationAgent.NetworkOperationRole so that it can restart the network.
+       * (1) This information message is sent from the NetworkOperationAgent.NetworkFileTransferRole. It notifies this network
+       * singleton role that the specified container has received the deployment zip archive file.
+       *
+       * When all the containers have responded, then each container is tasked to deploy the files from their zip archive.
+       *
+       * (2) This information message is sent from a child ContainerOperationsAgent.ContainerDeploymentRole. It notifies this
+       * network singleton that the zip archive has been deployed.
+       *
+       * When all containers have responded, each container is tasked to restart after a specified delay
        */
       case AHCSConstants.TASK_ACCOMPLISHED_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
@@ -209,7 +228,8 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
       AHCSConstants.DELEGATE_PERFORM_MISSION_TASK,
       AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO,
       AHCSConstants.PERFORM_MISSION_TASK,
-      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.TASK_ACCOMPLISHED_INFO
     };
   }
 
@@ -227,7 +247,8 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
   }
 
   /**
-   * Receives notification a child container deployment has completed its software and data file deployment task.
+   * Receives notification that either a file transfer request has been completed, or that a child container has completed deploying the
+   * transferred zip file.
    *
    * @param message the received perform mission task message
    */
@@ -236,21 +257,45 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
-    final String containerName = message.getSenderContainerName();
-    int undeployedContainerNames_size;
-    LOGGER.info(containerName + " completed software and data file deployment");
-    synchronized (undeployedContainerNames) {
-      final boolean isRemoved = undeployedContainerNames.remove(containerName);
-      assert isRemoved : "container was not previously present: " + containerName;
-      undeployedContainerNames_size = undeployedContainerNames.size();
-    }
-    LOGGER.info("number of undeployed containers remaining: " + undeployedContainerNames_size);
-    if (undeployedContainerNames_size == 0) {
-      // notify network operations that the deployment is complete, and that the network should be restarted
-      final Message networkRestartRequestInfo = makeMessage(getRole().getParentQualifiedName(), // recipientQualifiedName
-              NetworkOperation.class.getName(), // recipientService
-              AHCSConstants.NETWORK_RESTART_REQUEST_INFO);
-      sendMessage(networkRestartRequestInfo);
+    final String senderRole = Role.extractRoleName(message.getSenderQualifiedName());
+    if (senderRole.equals("NetworkFileTransferRole")) {
+      final String recipientContainerName = deploymentFileTransferConversationDictionary.get(message.getConversationId()).recipientContainerName;
+      int pendingFileTransferContainerNames_size;
+      LOGGER.info(recipientContainerName + " completed a zip file transfer");
+      synchronized (pendingFileTransferContainerNames) {
+        final boolean isRemoved = pendingFileTransferContainerNames.remove(recipientContainerName);
+        assert isRemoved : "container was not previously present: " + recipientContainerName;
+        pendingFileTransferContainerNames_size = pendingFileTransferContainerNames.size();
+      }
+      LOGGER.info("number of pending transfer containers remaining: " + pendingFileTransferContainerNames_size);
+      if (pendingFileTransferContainerNames_size == 0) {
+      // task the child containers to deploy files from the zip archive that they received
+        final DeploymentFilesRunable deploymentFilesRunable = new DeploymentFilesRunable(
+                this); // networkDeployment
+        if (isUnitTest) {
+          // single threaded to completion
+          deploymentFilesRunable.run();
+        } else {
+          execute(deploymentFilesRunable);
+        }
+      }
+    } else {
+      assert senderRole.equals("ContainerDeploymentRole");
+      final String senderContainerName = message.getSenderContainerName();
+      LOGGER.info(senderContainerName + " completed deployment");
+      int pendingDeploymentContainerNames_size;
+      synchronized (pendingDeploymentContainerNames) {
+        final boolean isRemoved = pendingDeploymentContainerNames.remove(senderContainerName);
+        assert isRemoved : "container was not previously present: " + senderContainerName;
+        pendingDeploymentContainerNames_size = pendingDeploymentContainerNames.size();
+      }
+      if (pendingDeploymentContainerNames_size == 0) {
+        final Message networkRestartRequestInfo = makeMessage(
+                getContainerName() + ".NetworkOperationAgent.NetworkOperationRole", // recipientQualifiedName
+                NetworkOperation.class.getName(), // recipientService
+                AHCSConstants.NETWORK_RESTART_REQUEST_INFO);
+        sendMessage(networkRestartRequestInfo);
+      }
     }
   }
 
@@ -357,15 +402,15 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
       }
       if (isUnitTest) {
         // no timer thread when unit testing, and need to wait for the results
-        (new DeploymentRunable(networkDeployment, files)).run();
+        (new DeploymentFileTransferRunable(networkDeployment, files)).run();
       } else {
         // process the deployment in separate thread in order to immediately release the shared timer thread
-        networkDeployment.getNodeRuntime().getExecutor().execute(new DeploymentRunable(networkDeployment, files));
+        networkDeployment.getNodeRuntime().getExecutor().execute(new DeploymentFileTransferRunable(networkDeployment, files));
       }
     }
   }
 
-  class DeploymentRunable implements Runnable {
+  static final class DeploymentFileTransferRunable implements Runnable {
 
     // the network deployment skill
     final NetworkDeployment networkDeployment;
@@ -378,7 +423,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
      * @param networkDeployment the network deployment skill
      * @param files the deployment directory files
      */
-    DeploymentRunable(
+    DeploymentFileTransferRunable(
             final NetworkDeployment networkDeployment,
             final File[] files) {
       //Preconditions
@@ -391,12 +436,12 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
     }
 
     /**
-     * Runs the software deployment process.
+     * Runs the software file transfer process.
      */
     @Override
     @SuppressWarnings("SleepWhileInLoop")
     public void run() {
-      if (isSoftwareDeploymentUnderway.getAndSet(true)) {
+      if (networkDeployment.isSoftwareDeploymentUnderway.getAndSet(true)) {
         LOGGER.info("exiting thread because software deployment is underway");
         return;
       }
@@ -419,8 +464,8 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
       LOGGER.info("manifestFile: " + manifestFile);
       final StringBuilder stringBuilder = new StringBuilder();
       try {
-        final String manifestJSONString = FileUtils.readFileToString(manifestFile);
-        final JSONObject jsonObject = (JSONObject) JSONValue.parseWithException(manifestJSONString);
+        networkDeployment.manifestJSONString = FileUtils.readFileToString(manifestFile);
+        final JSONObject jsonObject = (JSONObject) JSONValue.parseWithException(networkDeployment.manifestJSONString);
         LOGGER.info("jsonObject: " + jsonObject);
         @SuppressWarnings("unchecked")
         final List<JSONObject> manifestItems = (List<JSONObject>) jsonObject.get("manifest");
@@ -428,8 +473,8 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
         // write to a temporary file, which can be accessed for debugging, e.g. open in archive manager to ensure its valid
         final ZipFile zipFile = ZipUtils.temporaryZipFile(zippedBytes);
         LOGGER.info("zipFile: " + zipFile.getName());
-        final String zippedBytesHash = MessageDigestUtils.bytesHashString(zippedBytes);
-        LOGGER.info("zippedBytes hash: " + zippedBytesHash);
+        networkDeployment.zippedBytesHash = MessageDigestUtils.bytesHashString(zippedBytes);
+        LOGGER.info("zippedBytes hash: " + networkDeployment.zippedBytesHash);
         LOGGER.info("verifying zip file");
         if (!ZipUtils.verify(zipFile.getName())) {
           LOGGER.info("corrupted zip file");
@@ -468,17 +513,15 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
 
           }
         }
+        networkDeployment.deploymentFileTransferConversationDictionary.clear();
         // make a copy of the child container deployment roles for multithreading safety
         final List<String> containerDeploymentRoleNames = new ArrayList<>(networkDeployment.getRole().getChildQualifiedNames());
         // send the manifest and zipped bytes to each child container deployment role
         containerDeploymentRoleNames.stream().sorted().forEach((String containerDeploymentRoleName) -> {
 
-          deployZipFile(
+          transferZipFile(
                   Node.extractContainerName(containerDeploymentRoleName), // containerName
-                  containerDeploymentRoleName,
-                  manifestJSONString,
-                  zipFile,
-                  zippedBytesHash,
+                  zipFile.getName(),
                   networkDeployment,
                   stringBuilder);
           // pause this thread to keep from creating too many long-running downstream threads
@@ -494,72 +537,159 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
         }
       } catch (IOException | ParseException ex) {
         throw new TexaiException(ex);
-      } finally {
-        isSoftwareDeploymentUnderway.set(false);
       }
     }
 
+    /**
+     * Transfers the given zip file to the given container.
+     *
+     * @param recipientContainerName the recipient container name
+     * @param zipFilePath the zip archive file path
+     * @param networkDeployment this skill
+     * @param stringBuilder the string builder for deployment log messages
+     */
+    private void transferZipFile(
+            final String recipientContainerName,
+            final String zipFilePath,
+            final NetworkDeployment networkDeployment,
+            final StringBuilder stringBuilder) {
+      //Preconditions
+      assert StringUtils.isNonEmptyString(recipientContainerName) : "recipientContainerName must not be null";
+      assert StringUtils.isNonEmptyString(zipFilePath) : "zipFilePath must not be null";
+      assert networkDeployment != null : "networkDeployment must not be null";
+      assert stringBuilder != null : "stringBuilder must not be null";
+
+      synchronized (networkDeployment.pendingFileTransferContainerNames) {
+        // track the containers to which the zip file has been transferred, so that when subsequent Task Accomplished messages are
+        // received, it can determine when all have have received the zip file
+        networkDeployment.pendingFileTransferContainerNames.add(recipientContainerName);
+        networkDeployment.pendingDeploymentContainerNames.add(recipientContainerName);
+      }
+
+      final UUID conversationId = UUID.randomUUID();
+      networkDeployment.deploymentFileTransferConversationDictionary.put(
+              conversationId,
+              new DeploymentFileTransferInfo(conversationId, recipientContainerName));
+      final Message transferFileRequestInfoMessage = new Message(
+              networkDeployment.getQualifiedName(), // senderQualifiedName
+              NetworkDeployment.class.getName(), // senderService
+              networkDeployment.getContainerName() + ".NetworkOperationAgent.NetworkFileTransferRole", // recipientQualifiedName
+              conversationId,
+              null, // replyWith
+              null, // inReplyTo
+              null, // replyByDateTime
+              NetworkFileTransfer.class.getName(), // recipientService
+              AHCSConstants.TRANSFER_FILE_REQUEST_INFO, // operation
+              new HashMap<>(), // parameterDictionary
+              Message.DEFAULT_VERSION); // version
+      transferFileRequestInfoMessage.put(AHCSConstants.MSG_PARM_SENDER_FILE_PATH, zipFilePath);
+      transferFileRequestInfoMessage.put(AHCSConstants.MSG_PARM_RECIPIENT_FILE_PATH, "data/deployment.zip");
+      transferFileRequestInfoMessage.put(AHCSConstants.MSG_PARM_SENDER_CONTAINER_NAME, networkDeployment.getContainerName());
+      transferFileRequestInfoMessage.put(AHCSConstants.MSG_PARM_RECIPIENT_CONTAINER_NAME, recipientContainerName);
+
+      networkDeployment.sendMessage(transferFileRequestInfoMessage);
+
+      stringBuilder
+              .append("deployed to ")
+              .append(recipientContainerName)
+              .append('\n').toString();
+
+    }
   }
 
   /**
-   * Deploys the files in chunks because the maximum message size is 1 MB.
-   *
-   * @param containerName the recipient container name
-   * @param containerDeploymentRoleName the recipient quantified name
-   * @param manifestJSONString the deployment manifest
-   * @param zipFile the zip archive file
-   * @param zippedBytesHash the SHA-256 hash of the zip archive bytes
-   * @param networkDeployment this skill
-   * @param stringBuilder the string builder for deployment log messages
+   * Provides a runnable that tasks each container to deploy the files it has recived.
    */
-  private void deployZipFile(
-          final String containerName,
-          final String containerDeploymentRoleName,
-          final String manifestJSONString,
-          final ZipFile zipFile,
-          final String zippedBytesHash,
-          final NetworkDeployment networkDeployment,
-          final StringBuilder stringBuilder) {
-    //Preconditions
-    assert StringUtils.isNonEmptyString(containerName) : "containerName must not be null";
-    assert StringUtils.isNonEmptyString(containerDeploymentRoleName) : "containerDeploymentRoleName must not be null";
-    assert StringUtils.isNonEmptyString(manifestJSONString) : "manifestJSONString must not be null";
-    assert zipFile != null : "zipFile must not be null";
-    assert StringUtils.isNonEmptyString(zippedBytesHash) : "zippedBytesHash must not be null";
-    assert networkDeployment != null : "networkDeployment must not be null";
-    assert stringBuilder != null : "stringBuilder must not be null";
+  static final class DeploymentFilesRunable implements Runnable {
 
-    synchronized (undeployedContainerNames) {
-      // track the containers that have been tasked to deploy, so that when subsequent Task Accomplished messages are
-      // received, it can determine when all have deployed and then restart the network
-      undeployedContainerNames.add(containerName);
+    // the network deployment instance
+    final NetworkDeployment networkDeployment;
+
+    /**
+     * Creates a new DeploymentFilesRunable instance.
+     *
+     * @param networkDeployment the network deployment instance
+     */
+    DeploymentFilesRunable(final NetworkDeployment networkDeployment) {
+      //Preconditions
+      assert networkDeployment != null : "networkDeployment must not be null";
+
+      this.networkDeployment = networkDeployment;
     }
 
-    final UUID conversationId = UUID.randomUUID();
-    final Message transferFileRequestInfoMessage = new Message(
-            networkDeployment.getQualifiedName(), // senderQualifiedName
-            NetworkDeployment.class.getName(), // senderService
-            networkDeployment.getRole().getParentQualifiedName(), // recipientQualifiedName
-            conversationId,
-            null, // replyWith
-            null, // inReplyTo
-            null, // replyByDateTime
-            NetworkFileTransfer.class.getName(), // recipientService
-            AHCSConstants.TRANSFER_FILE_REQUEST_INFO, // operation
-            new HashMap<>(), // parameterDictionary
-            Message.DEFAULT_VERSION); // version
-    transferFileRequestInfoMessage.put(AHCSConstants.MSG_PARM_SENDER_FILE_PATH, "deployment/nodes.xml");
-    transferFileRequestInfoMessage.put(AHCSConstants.MSG_PARM_RECIPIENT_FILE_PATH, "data/nodes.xml");
-    transferFileRequestInfoMessage.put(AHCSConstants.MSG_PARM_SENDER_CONTAINER_NAME, "TestSender");
-    transferFileRequestInfoMessage.put(AHCSConstants.MSG_PARM_RECIPIENT_CONTAINER_NAME, "TestRecipient");
+    /**
+     * Runs the process that tasks each container to deploy the files it has recived.
+     */
+    @Override
+    public void run() {
 
-    sendMessage(transferFileRequestInfoMessage);
+      // iterate over all pending containers
+      final List<String> containerNames = new ArrayList<>(networkDeployment.pendingDeploymentContainerNames);
+      containerNames.stream().sorted().forEach((String containerName) -> {
 
-    stringBuilder
-            .append("deployed to ")
-            .append(containerName)
-            .append('\n').toString();
+        final UUID conversationId = UUID.randomUUID();
+        final Message deployFilesTaskMessage = new Message(
+                networkDeployment.getQualifiedName(), // senderQualifiedName
+                NetworkDeployment.class.getName(), // senderService
+                containerName + ".ContainerOperationAgent.ContainerDeploymentRole", // recipientQualifiedName
+                conversationId,
+                null, // replyWith
+                null, // inReplyTo
+                null, // replyByDateTime
+                ContainerDeployment.class.getName(), // recipientService
+                AHCSConstants.DEPLOY_FILES_TASK, // operation
+                new HashMap<>(), // parameterDictionary
+                Message.DEFAULT_VERSION); // version
+        deployFilesTaskMessage.put(AHCSConstants.MSG_PARM_FILE_PATH, RECIPIENT_ZIP_ARCHIVE_FILE_PATH);
+        deployFilesTaskMessage.put(AHCSConstants.MSG_PARM_FILE_HASH, networkDeployment.zippedBytesHash);
+        deployFilesTaskMessage.put(AHCSConstants.DEPLOY_FILES_TASK_MANIFEST, networkDeployment.manifestJSONString);
 
+        networkDeployment.sendMessage(deployFilesTaskMessage);
+      });
+    }
   }
 
+  /**
+   * Clears the deployed file transfer conversation dictionary. For unit testing.
+   */
+  protected void clearDeploymentFileTransferConversationDictionary() {
+    deploymentFileTransferConversationDictionary.clear();
+  }
+
+  protected void putDeploymentFileTransferConversationDictionary(
+          final UUID conversationId,
+          final String recipientContainerName) {
+    //Preconditions
+    assert conversationId != null : "conversationId must not be null";
+    assert StringUtils.isNonEmptyString(recipientContainerName) : "recipientContainerName must be a non-empty string";
+
+    deploymentFileTransferConversationDictionary.put(conversationId, new DeploymentFileTransferInfo(
+            conversationId,
+            recipientContainerName));
+  }
+
+  /**
+   * Provides a container for deployment file transfer information.
+   */
+  static final class DeploymentFileTransferInfo {
+
+    // the file transfer conversation id
+    private final UUID conversationId;
+    // the recipient container name
+    private final String recipientContainerName;
+    // the file transfer duration milliseconds
+    private long duration;
+
+    DeploymentFileTransferInfo(
+            final UUID conversationId,
+            final String recipientContainerName) {
+      //Preconditions
+      assert conversationId != null : "conversationId must not be null";
+      assert StringUtils.isNonEmptyString(recipientContainerName) : "recipientContainerName must be a non-empty string";
+
+      this.conversationId = conversationId;
+      this.recipientContainerName = recipientContainerName;
+    }
+
+  }
 }

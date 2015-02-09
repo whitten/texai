@@ -189,14 +189,14 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
    *
    * @param qualifiedName the given qualified name string
    *
-   * @return the role name
+   * @return the role name, or null if not present
    */
   public static String extractRoleName(final String qualifiedName) {
     //Preconditions
     assert StringUtils.isNonEmptyString(qualifiedName) : "qualifiedName must be a non-empty string";
 
     final String[] names = qualifiedName.split("\\.");
-    assert names.length == 3;
+    assert names.length == 3 : "cannot find role in: " + qualifiedName;
 
     return names[2];
   }

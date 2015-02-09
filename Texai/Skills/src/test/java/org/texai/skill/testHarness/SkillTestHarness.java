@@ -237,7 +237,7 @@ public class SkillTestHarness {
    *
    * @return the most recent operation and service information propagated by the mock role
    */
-  public OperationAndServiceInfo getOperationAndServiceInfo() {
+  public OperationAndSenderServiceInfo getOperationAndSenderServiceInfo() {
     return role.operationAndServiceInfo;
   }
 
@@ -322,7 +322,7 @@ public class SkillTestHarness {
     // the sent messages
     final List<Message> sentMessages;
     // the operation and service information
-    OperationAndServiceInfo operationAndServiceInfo;
+    OperationAndSenderServiceInfo operationAndServiceInfo;
 
     /**
      * Constructs a new MockRole instance.
@@ -403,7 +403,7 @@ public class SkillTestHarness {
       assert senderService != null : "senderService must not be null";
       assert !senderService.isEmpty() : "senderService must not be empty";
 
-      operationAndServiceInfo = new OperationAndServiceInfo(operation, senderService);
+      operationAndServiceInfo = new OperationAndSenderServiceInfo(operation, senderService);
     }
 
     /**
@@ -422,7 +422,7 @@ public class SkillTestHarness {
       assert senderService != null : "senderService must not be null";
       assert !senderService.isEmpty() : "senderService must not be empty";
 
-      operationAndServiceInfo = new OperationAndServiceInfo(operation, senderService);
+      operationAndServiceInfo = new OperationAndSenderServiceInfo(operation, senderService);
     }
 
     /**
@@ -456,14 +456,14 @@ public class SkillTestHarness {
   /**
    * Provides a container for operation and sender service information.
    */
-  public static class OperationAndServiceInfo {
+  public static class OperationAndSenderServiceInfo {
 
     // the given operation
     final String operation;
     // the sender service
     final String senderService;
 
-    OperationAndServiceInfo(
+    OperationAndSenderServiceInfo(
             final String operation,
             final String senderService) {
       //Preconditions

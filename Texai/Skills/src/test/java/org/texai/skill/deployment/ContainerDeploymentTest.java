@@ -49,11 +49,11 @@ public class ContainerDeploymentTest {
   private static final Logger LOGGER = Logger.getLogger(ContainerDeploymentTest.class);
   private static final String containerName = "Test";
   // the test parent qualified name
-  private static final String parentQualifiedName = containerName + ".NetworkDeploymentAgent.NetworkDeploymentRole";
+  private static final String parentQualifiedName = containerName + ".NetworkOperationAgent.NetworkDeploymentRole";
   // the test parent service
   private static final String parentService = NetworkOperation.class.getName();
   private static final String skillClassName = ContainerDeployment.class.getName();
-  private static final String nodeName = "ContainerDeploymentAgent";
+  private static final String nodeName = "ContainerOperationAgent";
   private static final String roleName = "ContainerDeploymentRole";
   private static SkillTestHarness skillTestHarness;
 
@@ -70,14 +70,14 @@ public class ContainerDeploymentTest {
     skillClasses.add(skillClass);
     final Set<String> variableNames = new ArraySet<>();
     final Set<String> childQualifiedNames = new ArraySet<>();
-    childQualifiedNames.add(containerName + ".ContainerDeploymentAgent.ContainerDeploymentRole");
+    childQualifiedNames.add(containerName + ".ContainerOperationAgent.ContainerDeploymentRole");
     skillTestHarness = new SkillTestHarness(
             containerName + "." + nodeName, // name
             "test mission description", // missionDescription
             true, // isNetworkSingleton
             containerName + "." + nodeName + "." + roleName, // qualifiedName
             "test role description", // description
-            containerName + ".NetworkOperationAgent.NetworkOperationRole", // parentQualifiedName
+            containerName + ".NetworkOperationAgent.NetworkDeploymentRole", // parentQualifiedName
             childQualifiedNames,
             skillClasses,
             variableNames,
@@ -106,7 +106,7 @@ public class ContainerDeploymentTest {
     skillTestHarness.reset();
     skillTestHarness.setSkillState(AHCSConstants.State.UNINITIALIZED, skillClassName);
     final Message initializeMessage = new Message(
-            containerName + ".NetworkDeploymentAgent", // senderQualifiedName
+            parentQualifiedName, // senderQualifiedName
             NetworkDeployment.class.getName(), // senderService
             containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
             skillClassName, // recipientService
@@ -120,7 +120,7 @@ public class ContainerDeploymentTest {
     } else {
       assertEquals("ISOLATED_FROM_NETWORK", skillTestHarness.getSkillState(skillClassName).toString());
     }
-    assertNull(skillTestHarness.getOperationAndServiceInfo());
+    assertNull(skillTestHarness.getOperationAndSenderServiceInfo());
   }
 
   /**
@@ -144,7 +144,7 @@ public class ContainerDeploymentTest {
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
     Message deployFilesTaskMessage = Message.deserializeMessage("data/test-messages/deployFileTaskMessage0.ser");
     LOGGER.info(deployFilesTaskMessage.toString());
-    assertEquals("[deployFile_Task, Test.NetworkDeploymentAgent.NetworkDeploymentRole:NetworkDeployment --> Test.ContainerDeploymentAgent.ContainerDeploymentRole:ContainerDeployment]", deployFilesTaskMessage.toBriefString());
+    assertEquals("[deployFile_Task, Test.NetworkOperationAgent.NetworkDeploymentRole:NetworkDeployment --> Test.ContainerDeploymentAgent.ContainerDeploymentRole:ContainerDeployment]", deployFilesTaskMessage.toBriefString());
 
     skillTestHarness.dispatchMessage(deployFilesTaskMessage);
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
@@ -228,7 +228,7 @@ public class ContainerDeploymentTest {
     skillTestHarness.dispatchMessage(taskAccomplishedInfoMessage);
 
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
-    assertNull(skillTestHarness.getOperationAndServiceInfo());
+    assertNull(skillTestHarness.getOperationAndSenderServiceInfo());
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);

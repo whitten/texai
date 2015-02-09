@@ -359,6 +359,8 @@ public final class AHCSConstants {
   public static final String MSG_PARM_DURATION = "duration";
   // the message parameter for file hash, which is a string
   public static final String MSG_PARM_FILE_HASH = "fileHash";
+  // the message parameter for file hash, which is a string
+  public static final String MSG_PARM_FILE_PATH = "filePath";
   // the message parameter for file size in bytes, which is a long
   public static final String MSG_PARM_FILE_SIZE = "fileSize";
   // the formFillText

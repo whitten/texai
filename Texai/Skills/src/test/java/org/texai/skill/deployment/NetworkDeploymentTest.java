@@ -4,13 +4,13 @@
 package org.texai.skill.deployment;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.io.FileUtils;
+import java.util.UUID;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -22,6 +22,8 @@ import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.SkillClass;
 import org.texai.skill.deployment.NetworkDeployment.CheckForDeployment;
+import org.texai.skill.fileTransfer.NetworkFileTransfer;
+import org.texai.skill.governance.TopmostFriendship;
 import org.texai.skill.network.NetworkOperation;
 import org.texai.skill.testHarness.SkillTestHarness;
 import org.texai.util.ArraySet;
@@ -37,13 +39,13 @@ public class NetworkDeploymentTest {
   // the container name
   private static final String containerName = "Test";
   // the test parent qualified name
-  private static final String parentQualifiedName = containerName + ".NetworkOperationAgent.NetworkOperationRole";
+  private static final String parentQualifiedName = containerName + ".TopmostFriendshipAgent.TopmostFriendshipRole";
   // the test parent service
-  private static final String parentService = NetworkOperation.class.getName();
+  private static final String parentService = TopmostFriendship.class.getName();
   // the class name of the tested skill
   private static final String skillClassName = NetworkDeployment.class.getName();
   // the test node name
-  private static final String nodeName = "NetworkDeploymentAgent";
+  private static final String nodeName = "NetworkOperationAgent";
   // the test node name
   private static final String roleName = "NetworkDeploymentRole";
   // the skill test harness
@@ -61,7 +63,7 @@ public class NetworkDeploymentTest {
     skillClasses.add(skillClass);
     final Set<String> variableNames = new ArraySet<>();
     final Set<String> childQualifiedNames = new ArraySet<>();
-    childQualifiedNames.add(containerName + ".ContainerDeploymentAgent.ContainerDeploymentRole");
+    childQualifiedNames.add(containerName + ".ContainerOperationAgent.ContainerDeploymentRole");
     skillTestHarness = new SkillTestHarness(
             containerName + "." + nodeName, // name
             "test mission description", // missionDescription
@@ -73,6 +75,8 @@ public class NetworkDeploymentTest {
             skillClasses,
             variableNames,
             false); // areRemoteCommunicationsPermitted
+    final NetworkDeployment networkDeployment = (NetworkDeployment) skillTestHarness.getSkill(skillClassName);
+    networkDeployment.isUnitTest = true;
   }
 
   @AfterClass
@@ -111,8 +115,8 @@ public class NetworkDeploymentTest {
     } else {
       assertEquals("ISOLATED_FROM_NETWORK", skillTestHarness.getSkillState(skillClassName).toString());
     }
-    assertNotNull(skillTestHarness.getOperationAndServiceInfo());
-    assertEquals("[AHCS initialize_Task, org.texai.skill.deployment.NetworkDeployment]", skillTestHarness.getOperationAndServiceInfo().toString());
+    assertNotNull(skillTestHarness.getOperationAndSenderServiceInfo());
+    assertEquals("[initialize_Task, org.texai.skill.deployment.NetworkDeployment]", skillTestHarness.getOperationAndSenderServiceInfo().toString());
   }
 
   /**
@@ -130,32 +134,20 @@ public class NetworkDeploymentTest {
     skillTestHarness.reset();
     skillTestHarness.setSkillState(AHCSConstants.State.READY, skillClassName);
     final NetworkDeployment networkDeployment = (NetworkDeployment) skillTestHarness.getSkill(skillClassName);
-    networkDeployment.undeployedContainerNames.clear();
+    networkDeployment.pendingFileTransferContainerNames.clear();
 
     final CheckForDeployment checkForDeployment = networkDeployment.makeCheckForDeploymentForUnitTest();
 
     checkForDeployment.run();
 
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
-    assertNull(skillTestHarness.getOperationAndServiceInfo());
-    assertEquals("[Test]", networkDeployment.undeployedContainerNames.toString());
+    assertNull(skillTestHarness.getOperationAndSenderServiceInfo());
+    assertEquals("[Test]", networkDeployment.pendingFileTransferContainerNames.toString());
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertEquals("[deployFile_Task, Test.NetworkDeploymentAgent.NetworkDeploymentRole:NetworkDeployment --> Test.ContainerDeploymentAgent.ContainerDeploymentRole:ContainerDeployment]", sentMessage.toBriefString());
+    assertEquals("[transferFileRequest_Info, Test.NetworkOperationAgent.NetworkDeploymentRole:NetworkDeployment --> Test.NetworkOperationAgent.NetworkFileTransferRole:NetworkFileTransfer]", sentMessage.toBriefString());
     assertTrue(deploymentLogFile.exists());
-    try {
-      assertEquals(
-              "deployed to Test\n",
-              FileUtils.readFileToString(deploymentLogFile));
-      final List<Message> sentMessages = skillTestHarness.getSentMessages();
-      for (int i = 0; i < sentMessages.size(); i++) {
-        final Message sentMessage1 = sentMessages.get(i);
-        sentMessage1.serializeToFile("data/test-messages/deployFileTaskMessage" + i + ".ser");
-      }
-    } catch (IOException ex) {
-      fail();
-    }
   }
 
   /**
@@ -168,25 +160,81 @@ public class NetworkDeploymentTest {
     skillTestHarness.reset();
     skillTestHarness.setSkillState(AHCSConstants.State.READY, skillClassName);
     final NetworkDeployment networkDeployment = (NetworkDeployment) skillTestHarness.getSkill(skillClassName);
-    networkDeployment.undeployedContainerNames.add("Test");
+    networkDeployment.pendingFileTransferContainerNames.clear();
+    networkDeployment.pendingFileTransferContainerNames.add("TestRecipient");
+    networkDeployment.pendingDeploymentContainerNames.clear();
+    networkDeployment.pendingDeploymentContainerNames.add("TestRecipient");
+    networkDeployment.zippedBytesHash= "uuPRHZF6ivQaTwMXfBf3xJHTS1lrPFHmSOP0cC1tjL1vGhiOIdwbuYHhNt2SxuD9xdfjqS2vkMfaWDunk6ZbwA==";
+
+    final UUID conversationId = UUID.randomUUID();
     final Message taskAccomplishedInfoMessage = new Message(
-            containerName + ".NetworkOperationAgent", // senderQualifiedName
-            NetworkOperation.class.getName(), // senderService
+            containerName + ".NetworkOperationAgent.NetworkFileTransferRole", // senderQualifiedName
+            NetworkFileTransfer.class.getName(), // senderService
             containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
+            conversationId,
+            null, // replyWith
+            null, // inReplyTo
+            null, // replyByDateTime
             skillClassName, // recipientService
-            AHCSConstants.TASK_ACCOMPLISHED_INFO); // operation
+            AHCSConstants.TASK_ACCOMPLISHED_INFO, // operation
+            new HashMap<>(), // parameterDictionary
+            Message.DEFAULT_VERSION); // version
+    taskAccomplishedInfoMessage.put(AHCSConstants.MSG_PARM_DURATION, 120000L);
+
+    networkDeployment.clearDeploymentFileTransferConversationDictionary();
+    assertNotNull(taskAccomplishedInfoMessage.getConversationId());
+    networkDeployment.putDeploymentFileTransferConversationDictionary(
+            taskAccomplishedInfoMessage.getConversationId(),
+            "TestRecipient"); // recipientContainer
 
     skillTestHarness.dispatchMessage(taskAccomplishedInfoMessage);
 
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
-    assertNull(skillTestHarness.getOperationAndServiceInfo());
-    assertTrue(networkDeployment.undeployedContainerNames.isEmpty());
+    assertNull(skillTestHarness.getOperationAndSenderServiceInfo());
+    assertTrue(networkDeployment.pendingFileTransferContainerNames.isEmpty());
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertTrue(Message.areMessageStringsEqualIgnoringDate(
-            sentMessage.toString(),
-            "[networkRestartRequest_Info Test.NetworkDeploymentAgent.NetworkDeploymentRole:NetworkDeployment --> Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation 2015-01-22T15:16:22.534-06:00]"));
+    assertEquals("[deployFile_Task, Test.NetworkOperationAgent.NetworkDeploymentRole:NetworkDeployment --> TestRecipient.ContainerOperationAgent.ContainerDeploymentRole:ContainerDeployment]", sentMessage.toBriefString());
+  }
+
+  /**
+   * Test of class NetworkDeployment task accomplished task message.
+   */
+  @Test
+  public void testTaskAccomplishedInfo2() {
+    LOGGER.info("testing " + AHCSConstants.TASK_ACCOMPLISHED_INFO + " message");
+    skillTestHarness.reset();
+    skillTestHarness.setSkillState(AHCSConstants.State.READY, skillClassName);
+    final NetworkDeployment networkDeployment = (NetworkDeployment) skillTestHarness.getSkill(skillClassName);
+    networkDeployment.pendingFileTransferContainerNames.clear();
+    networkDeployment.pendingDeploymentContainerNames.clear();
+    networkDeployment.pendingDeploymentContainerNames.add("TestDeployer");
+    networkDeployment.zippedBytesHash= "uuPRHZF6ivQaTwMXfBf3xJHTS1lrPFHmSOP0cC1tjL1vGhiOIdwbuYHhNt2SxuD9xdfjqS2vkMfaWDunk6ZbwA==";
+
+    // receive a Task Accomplished Info message from the last remaining container that has completed deploying files
+    final UUID conversationId = UUID.randomUUID();
+    final Message taskAccomplishedInfoMessage = new Message(
+            "TestDeployer.ContainerOperationAgent.ContainerDeploymentRole", // senderQualifiedName
+            ContainerDeployment.class.getName(), // senderService
+            containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
+            conversationId,
+            null, // replyWith
+            null, // inReplyTo
+            null, // replyByDateTime
+            skillClassName, // recipientService
+            AHCSConstants.TASK_ACCOMPLISHED_INFO, // operation
+            new HashMap<>(), // parameterDictionary
+            Message.DEFAULT_VERSION); // version
+    skillTestHarness.dispatchMessage(taskAccomplishedInfoMessage);
+
+    assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
+    assertNull(skillTestHarness.getOperationAndSenderServiceInfo());
+    assertTrue(networkDeployment.pendingDeploymentContainerNames.isEmpty());
+    final Message sentMessage = skillTestHarness.getSentMessage();
+    assertNotNull(sentMessage);
+    LOGGER.info("sentMessage...\n" + sentMessage);
+    assertEquals("[networkRestartRequest_Info, Test.NetworkOperationAgent.NetworkDeploymentRole:NetworkDeployment --> Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation]", sentMessage.toBriefString());
   }
 
   /**
@@ -208,11 +256,11 @@ public class NetworkDeploymentTest {
     skillTestHarness.dispatchMessage(taskAccomplishedInfoMessage);
 
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
-    assertNull(skillTestHarness.getOperationAndServiceInfo());
+    assertNull(skillTestHarness.getOperationAndSenderServiceInfo());
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertTrue(sentMessage.toString().startsWith("[messageNotUnderstood_Info Test.NetworkDeploymentAgent.NetworkDeploymentRole:NetworkDeployment --> Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation "));
+    assertTrue(sentMessage.toString().startsWith("[messageNotUnderstood_Info Test.NetworkOperationAgent.NetworkDeploymentRole:NetworkDeployment --> Test.TopmostFriendshipAgent.TopmostFriendshipRole:TopmostFriendship "));
   }
 
   /**
@@ -224,7 +272,7 @@ public class NetworkDeploymentTest {
     NetworkDeployment instance = new NetworkDeployment();
     final List<String> understoodOperations = new ArrayList<>(Arrays.asList(instance.getUnderstoodOperations()));
     Collections.sort(understoodOperations);
-    assertEquals("[AHCS initialize_Task, delegateBecomeReady_Task, delegatePerformMission_Task, joinNetworkSingletonAgent_Info, messageNotUnderstood_Info, performMission_Task]", understoodOperations.toString());
+    assertEquals("[delegatePerformMission_Task, initialize_Task, joinNetworkSingletonAgent_Info, messageNotUnderstood_Info, performMission_Task, taskAccomplished_Info]", understoodOperations.toString());
   }
 
   /**

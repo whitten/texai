@@ -28,8 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.jcip.annotations.NotThreadSafe;
 import org.joda.time.DateTime;
 import org.texai.util.StringUtils;
@@ -618,7 +616,7 @@ public class Message implements Serializable, Comparable<Message> {
   public void put(final String parameterName, final Object parameterValue) {
     //Preconditions
     assert StringUtils.isNonEmptyString(parameterName) : "parameterName must be a non-empty string";
-    assert parameterValue != null : "parameterValue must not be null";
+    assert parameterValue != null : "parameterValue must not be null for " + parameterName;
 
     parameterDictionary.put(parameterName, parameterValue);
   }
