@@ -24,6 +24,7 @@ import org.json.simple.parser.ParseException;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 import org.texai.util.ZipUtils;
 import org.texai.x509.MessageDigestUtils;
@@ -39,14 +40,6 @@ public class ContainerDeployment extends AbstractSkill {
   private static final Logger LOGGER = Logger.getLogger(ContainerDeployment.class);
   // the indication that this skill is running in a unit test, with a development file arrangement
   private static boolean isUnitTest = false;
-  // the number of bytes in the zip archive to be received in chunks and deployed
-  private int zippedBytes_len = 0;
-  // the zip archive bytes which are received in chunks from Network Deployment
-  private byte[] zippedBytes;
-  // the index used to append received chunk bytes into the zip archive bytes
-  private int zippedBytesIndex = 0;
-  // the last received chunk number
-  private int previousChunkNumber = 0;
 
   /**
    * Constructs a new SkillTemplate instance.
@@ -77,7 +70,7 @@ public class ContainerDeployment extends AbstractSkill {
       /**
        * Initialize Task
        *
-       * This task message is sent from the parent NetworkDeploymentAgent.NetworkDeploymentRole. It is expected to be the first task message
+       * This task message is sent from the parent NetworkOperationAgent.NetworkDeploymentRole. It is expected to be the first task message
        * that this role receives and it results in the role being initialized.
        */
       case AHCSConstants.INITIALIZE_TASK:
@@ -92,7 +85,7 @@ public class ContainerDeployment extends AbstractSkill {
       /**
        * Join Acknowledged Task
        *
-       * This task message is sent from the network-singleton, parent NetworkDeploymentAgent.NetworkDeploymentRole. It indicates that the
+       * This task message is sent from the network-singleton, parent NetworkOperationAgent.NetworkDeploymentRole. It indicates that the
        * parent is ready to converse with this role as needed.
        */
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
@@ -104,7 +97,7 @@ public class ContainerDeployment extends AbstractSkill {
       /**
        * Perform Mission Task
        *
-       * This task message is sent from the network-singleton, parent NetworkDeploymentAgent.NetworkDeploymentRole. It commands this
+       * This task message is sent from the network-singleton, parent NetworkOperationAgent.NetworkDeploymentRole. It commands this
        * network-connected role to begin performing its mission.
        */
       case AHCSConstants.PERFORM_MISSION_TASK:
@@ -117,9 +110,9 @@ public class ContainerDeployment extends AbstractSkill {
         return;
 
       /**
-       * Perform Mission Task
+       * Deploy Files Task
        *
-       * This task message is sent from the network-singleton, parent NetworkDeploymentAgent.NetworkDeploymentRole. It commands this
+       * This task message is sent from the network-singleton, parent NetworkOperationAgent.NetworkDeploymentRole. It commands this
        * network-connected role to deploy included files according to the included manifest.
        *
        * When all the files are deployed, a Task Accomplished Info message is sent back to the NetworkDeployment skill as a response.
@@ -198,98 +191,39 @@ public class ContainerDeployment extends AbstractSkill {
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
-//    final int chunkNumber = (int) message.get(AHCSConstants.DEPLOY_FILES_TASK_CHUNK_NUMBER);
-//    if (chunkNumber == 1) {
-//      LOGGER.info("deploying files ...");
-//      // initialize the chunked file transfer
-//      zippedBytes_len = (int) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES_LENGTH);
-//      zippedBytes = new byte[zippedBytes_len];
-//      zippedBytesIndex = 0;
-//      previousChunkNumber = 1;
-//    } else {
-//      assert zippedBytes_len == (int) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES_LENGTH) :
-//              "zippedBytes_len: " + zippedBytes_len + ", msg parm: " + (int) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES_LENGTH);
-//      if (chunkNumber == previousChunkNumber + 1) {
-//        previousChunkNumber++;
-//      } else {
-//        LOGGER.info("received zip file chunk " + chunkNumber + ", but expected to receive chunk " + previousChunkNumber + 1);
-//
-//        //TODO retry
-//        return;
-//      }
-//
-//    }
-//    final byte[] zippedBytesReceived = (byte[]) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES);
-//    final int zippedBytesReceived_len = zippedBytesReceived.length;
-//
-//    System.arraycopy(
-//            zippedBytesReceived, // src
-//            0, // srcPos
-//            zippedBytes, // dest
-//            zippedBytesIndex, // destPos
-//            zippedBytesReceived_len); // length
-//    zippedBytesIndex = zippedBytesIndex + zippedBytesReceived_len;
-//    final int bytesRemainingCnt = zippedBytes_len - zippedBytesIndex;
-//    if (chunkNumber < 50 || chunkNumber % 10 == 0) {
-//      LOGGER.info("chunk " + chunkNumber + ", bytes remaining " + bytesRemainingCnt);
-//    }
-//    assert bytesRemainingCnt >= 0;
-//    if (bytesRemainingCnt == 0) {
-//      LOGGER.info("zip archive file transfer completed");
-//
-//      if (LOGGER.isDebugEnabled()) {
-//        // should match the bytes that were sent
-//        LOGGER.debug("zippedBytes[0]                   " + zippedBytes[0]);
-//        LOGGER.debug("zippedBytes[1]                   " + zippedBytes[1]);
-//        LOGGER.debug("zippedBytes[2]                   " + zippedBytes[2]);
-//        LOGGER.debug("zippedBytes[3]                   " + zippedBytes[3]);
-//
-//        LOGGER.debug("zippedBytes[zippedBytes_len - 4] " + zippedBytes[zippedBytes_len - 4]);
-//        LOGGER.debug("zippedBytes[zippedBytes_len - 3] " + zippedBytes[zippedBytes_len - 3]);
-//        LOGGER.debug("zippedBytes[zippedBytes_len - 2] " + zippedBytes[zippedBytes_len - 2]);
-//        LOGGER.debug("zippedBytes[zippedBytes_len - 1] " + zippedBytes[zippedBytes_len - 1]);
-//      }
-//
-//      deployFilesFromZipArchive(message);
-//      sendMessage(Message.replyTaskAccomplished(message));
-//      // release resources
-//      zippedBytes_len = 0;
-//      zippedBytes = new byte[0];
-//      zippedBytesIndex = 0;
-//    }
-  }
+    final String filePath = (String) message.get(AHCSConstants.MSG_PARM_FILE_PATH);
+    assert StringUtils.isNonEmptyString(filePath) : "filePath must be a non-empty string";
 
-  private void deployFilesFromZipArchive(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-
-    LOGGER.info("zippedBytes length: " + zippedBytes.length);
-    final ZipFile zipFile = ZipUtils.temporaryZipFile(zippedBytes);
-    LOGGER.info("zipFile: " + zipFile.getName());
-    LOGGER.info("verifying zip file");
-    if (!ZipUtils.verify(zipFile.getName())) {
-      LOGGER.info("corrupted zip file");
-
-      //TODO negative ack
-      return;
-    }
-
-    final String computedZippedBytesHash = MessageDigestUtils.bytesHashString(zippedBytes);
-    LOGGER.info("computed zippedBytes hash: " + computedZippedBytesHash);
-//    final String expectedZippedBytesHash = (String) message.get(AHCSConstants.DEPLOY_FILES_TASK_ZIPPED_BYTES_HASH);
-//    LOGGER.info("expected zippedBytes hash: " + expectedZippedBytesHash);
-//    if (computedZippedBytesHash.equals(expectedZippedBytesHash)) {
-//      LOGGER.info("zip archive bytes has the expected hash value");
-//    } else {
-//      LOGGER.info("zip archive bytes does not have the expected hash value");
-//
-//      //TODO negative ack
-//      return;
-//    }
+    final String fileHash = (String) message.get(AHCSConstants.MSG_PARM_FILE_HASH);
+    assert StringUtils.isNonEmptyString(fileHash) : "fileHash must be a non-empty string";
 
     final String manifestJSONString = (String) message.get(AHCSConstants.DEPLOY_FILES_TASK_MANIFEST);
-    LOGGER.info("  manifest:\n" + manifestJSONString);
+    assert StringUtils.isNonEmptyString(manifestJSONString) : "manifestJSONString must be a non-empty string";
+
     try {
+      final ZipFile zipFile = new ZipFile(filePath);
+      LOGGER.info("zipFile: " + zipFile.getName());
+      LOGGER.info("verifying zip file");
+      if (!ZipUtils.verify(zipFile.getName())) {
+        LOGGER.info("corrupted zip file");
+
+        //TODO negative ack
+        return;
+      }
+
+      final String computedZipFileHash = MessageDigestUtils.fileHashString(new File(filePath));
+      LOGGER.info("computed zip file hash: " + computedZipFileHash);
+      LOGGER.info("expected zip file hash: " + fileHash);
+      if (computedZipFileHash.equals(fileHash)) {
+        LOGGER.info("zip archive file has the expected hash value");
+      } else {
+        LOGGER.info("zip archive file does not have the expected hash value");
+
+        //TODO negative ack
+        return;
+      }
+
+      LOGGER.info("  manifest:\n" + manifestJSONString);
       final JSONObject jsonObject = (JSONObject) JSONValue.parseWithException(manifestJSONString);
       LOGGER.info("jsonObject: " + jsonObject);
       @SuppressWarnings("unchecked")
@@ -339,9 +273,14 @@ public class ContainerDeployment extends AbstractSkill {
             assert false;
         }
       }
-    } catch (ParseException ex) {
+    } catch (IOException | ParseException ex) {
       throw new TexaiException(ex);
     }
+
+    // send a Task Accomplished Info message back to NetworkOperationAgent.NetworkDeploymentRole.
+    final Message taskAccomplishedInfoMessage = makeReplyMessage(message, // receivedMessage
+            AHCSConstants.TASK_ACCOMPLISHED_INFO); // operation
+    sendMessage(taskAccomplishedInfoMessage);
   }
 
   /**
@@ -398,7 +337,8 @@ public class ContainerDeployment extends AbstractSkill {
     return LOGGER;
   }
 
-  /** Gets whether this skill is running in a unit test, with a development file arrangement.
+  /**
+   * Gets whether this skill is running in a unit test, with a development file arrangement.
    *
    * @return whether this skill is running in a unit test
    */
@@ -406,7 +346,8 @@ public class ContainerDeployment extends AbstractSkill {
     return isUnitTest;
   }
 
-  /** Sets whether this skill is running in a unit test, with a development file arrangement.
+  /**
+   * Sets whether this skill is running in a unit test, with a development file arrangement.
    *
    * @param aIsUnitTest whether this skill is running in a unit test, with a development file arrangement
    */

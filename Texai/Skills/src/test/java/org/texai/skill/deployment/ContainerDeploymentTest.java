@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -34,7 +35,6 @@ import static org.junit.Assert.*;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.SkillClass;
-import org.texai.skill.network.NetworkOperation;
 import org.texai.skill.testHarness.SkillTestHarness;
 import org.texai.util.ArraySet;
 import org.texai.x509.X509Utils;
@@ -49,9 +49,9 @@ public class ContainerDeploymentTest {
   private static final Logger LOGGER = Logger.getLogger(ContainerDeploymentTest.class);
   private static final String containerName = "Test";
   // the test parent qualified name
-  private static final String parentQualifiedName = containerName + ".NetworkOperationAgent.NetworkDeploymentRole";
+  private static final String parentQualifiedName = "TestNO.NetworkOperationAgent.NetworkDeploymentRole";
   // the test parent service
-  private static final String parentService = NetworkOperation.class.getName();
+  private static final String parentService = NetworkDeployment.class.getName();
   private static final String skillClassName = ContainerDeployment.class.getName();
   private static final String nodeName = "ContainerOperationAgent";
   private static final String roleName = "ContainerDeploymentRole";
@@ -142,26 +142,64 @@ public class ContainerDeploymentTest {
             AHCSConstants.State.READY, // state
             skillClassName);
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
-    Message deployFilesTaskMessage = Message.deserializeMessage("data/test-messages/deployFileTaskMessage0.ser");
+
+//    [Message ...
+//      senderQualifiedName:    Test.NetworkOperationAgent.NetworkDeploymentRole
+//      senderService:          org.texai.skill.deployment.NetworkDeploymentnull
+//      recipientQualifiedName: TestRecipient.ContainerOperationAgent.ContainerDeploymentRole
+//      conversationId:         61c01972-67c4-4818-91b7-d0fb1751d0cf
+//      replyWith:              null
+//      inReplyTo:              null
+//      dateTime:               2015-02-09T23:04:52.051-06:00
+//      replyByDateTime:        null
+//      recipientService:       org.texai.skill.deployment.ContainerDeployment
+//      operation:              deployFile_Task
+//        parameter: deployFile_Task_manifest={"manifest":[
+//    {"path":"Main-1.0\/data\/nodes.xml",
+//      "command":"replace",
+//      "hash":"fukO5UNFNxNm61Lc13blxrDnipjbNHh+1o\/\/\/wsAQvpB+2nQWLa7PI41gUFDQMzbQuFJ4Mu3QSiQRkSvghIsMA=="},
+//
+//    {"path":"Main-1.0\/lib\/TamperEvidentLog-1.0.jar",
+//      "command":"replace",
+//      "hash":"Xf2hZN+vwWhYShIKX75IUO5iGDXi177n9tNkeyLmBTiMKp8LKBwlfzkzWaohKnwUBKhevjmzsQSX0ZT4DeeJKw=="},
+//
+//    {"path":"Main-1.0\/lib\/UPNPLib-1.0.jar",
+//      "command":"replace",
+//      "hash":"otrR8RCJrBlu9gIxDl+B7TMuUfpgtkdNKNLQkDiUOA7zDxhw\/NhHD8F5hpg8IJJm2hu1Pcpsn1fRR5ijWuapNQ=="}]}
+//    ,
+//        parameter: filePath=data/deployment.zip,
+//        parameter: fileHash=uuPRHZF6ivQaTwMXfBf3xJHTS1lrPFHmSOP0cC1tjL1vGhiOIdwbuYHhNt2SxuD9xdfjqS2vkMfaWDunk6ZbwA==
+//    ]
+    final Message deployFilesTaskMessage = new Message(
+            parentQualifiedName, // senderQualifiedName
+            parentService, // senderService
+            containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
+            UUID.fromString("61c01972-67c4-4818-91b7-d0fb1751d0cf"), // conversationId
+            (UUID) null, // replyWith
+            (UUID) null, // inReplyTo
+            skillClassName, // recipientService
+            AHCSConstants.DEPLOY_FILES_TASK); // operation
+    final String manifestJSONString = "{\"manifest\":[\n"
+            + "{\"path\":\"Main-1.0/data/nodes.xml\",\n"
+            + "  \"command\":\"replace\",\n"
+            + "  \"hash\":\"fukO5UNFNxNm61Lc13blxrDnipjbNHh+1o///wsAQvpB+2nQWLa7PI41gUFDQMzbQuFJ4Mu3QSiQRkSvghIsMA==\"},\n"
+            + "\n"
+            + "{\"path\":\"Main-1.0/lib/TamperEvidentLog-1.0.jar\",\n"
+            + "  \"command\":\"replace\",\n"
+            + "  \"hash\":\"Xf2hZN+vwWhYShIKX75IUO5iGDXi177n9tNkeyLmBTiMKp8LKBwlfzkzWaohKnwUBKhevjmzsQSX0ZT4DeeJKw==\"},\n"
+            + "\n"
+            + " {\"path\":\"Main-1.0/lib/UPNPLib-1.0.jar\",\n"
+            + "  \"command\":\"replace\",\n"
+            + "  \"hash\":\"otrR8RCJrBlu9gIxDl+B7TMuUfpgtkdNKNLQkDiUOA7zDxhw/NhHD8F5hpg8IJJm2hu1Pcpsn1fRR5ijWuapNQ==\"}]}";
+    deployFilesTaskMessage.put(AHCSConstants.MSG_PARM_FILE_PATH, "data/deployment.zip");
+    deployFilesTaskMessage.put(AHCSConstants.MSG_PARM_FILE_HASH, "Aj4bjulM+XjGAVmFNSsdcLY/V0fw9VTjT19UIOupuD3TnKjhwBownfMHaWbYZSTGOf2bEtQJBnHcDeRoDQ14Fg==");
+    deployFilesTaskMessage.put(AHCSConstants.DEPLOY_FILES_TASK_MANIFEST, manifestJSONString);
+
     LOGGER.info(deployFilesTaskMessage.toString());
-    assertEquals("[deployFile_Task, Test.NetworkOperationAgent.NetworkDeploymentRole:NetworkDeployment --> Test.ContainerDeploymentAgent.ContainerDeploymentRole:ContainerDeployment]", deployFilesTaskMessage.toBriefString());
+    assertEquals("[deployFile_Task, TestNO.NetworkOperationAgent.NetworkDeploymentRole:NetworkDeployment --> Test.ContainerOperationAgent.ContainerDeploymentRole:ContainerDeployment]", deployFilesTaskMessage.toBriefString());
 
     skillTestHarness.dispatchMessage(deployFilesTaskMessage);
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
-
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage1.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage2.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage3.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage4.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage5.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage6.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage7.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage8.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage9.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage10.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage11.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage12.ser"));
-    skillTestHarness.dispatchMessage(Message.deserializeMessage("data/test-messages/deployFileTaskMessage13.ser"));
 
     final File mainDirectory = new File("Main-1.0");
     assert mainDirectory.exists();
@@ -184,9 +222,9 @@ public class ContainerDeploymentTest {
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertTrue(Message.areMessageStringsEqualIgnoringDate(
-            sentMessage.toString(),
-            "[taskAccomplished_Info Test.ContainerDeploymentAgent.ContainerDeploymentRole:ContainerDeployment --> Test.NetworkDeploymentAgent.NetworkDeploymentRole:NetworkDeployment 2015-01-22T15:27:28.990-06:00]"));
+    assertEquals(
+            "[taskAccomplished_Info, Test.ContainerOperationAgent.ContainerDeploymentRole:ContainerDeployment --> TestNO.NetworkOperationAgent.NetworkDeploymentRole:NetworkDeployment]",
+            sentMessage.toBriefString());
   }
 
   /**
@@ -244,7 +282,7 @@ public class ContainerDeploymentTest {
     ContainerDeployment instance = new ContainerDeployment();
     final List<String> understoodOperations = new ArrayList<>(Arrays.asList(instance.getUnderstoodOperations()));
     Collections.sort(understoodOperations);
-    assertEquals("[AHCS initialize_Task, becomeReady_Task, deployFile_Task, joinAcknowledged_Task, messageNotUnderstood_Info, performMission_Task]", understoodOperations.toString());
+    assertEquals("[deployFile_Task, initialize_Task, joinAcknowledged_Task, messageNotUnderstood_Info, performMission_Task]", understoodOperations.toString());
   }
 
   /**
