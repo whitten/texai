@@ -65,7 +65,6 @@ public final class ContainerOperation extends AbstractSkill {
          * first task message that this role receives and it results in the role being initialized.
          */
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
-        propagateOperationToChildRoles(operation);
         if (getNodeRuntime().isFirstContainerInNetwork()) {
           setSkillState(AHCSConstants.State.READY);
         } else {

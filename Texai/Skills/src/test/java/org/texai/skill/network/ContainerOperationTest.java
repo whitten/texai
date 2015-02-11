@@ -118,8 +118,7 @@ public class ContainerOperationTest {
     } else {
       assertEquals("ISOLATED_FROM_NETWORK", skillTestHarness.getSkillState(skillClassName).toString());
     }
-    assertNotNull(skillTestHarness.getOperationAndSenderServiceInfo());
-    assertEquals("[initialize_Task, org.texai.skill.network.ContainerOperation]", skillTestHarness.getOperationAndSenderServiceInfo().toString());
+    assertNull(skillTestHarness.getOperationAndSenderServiceInfo());
   }
 
   /**

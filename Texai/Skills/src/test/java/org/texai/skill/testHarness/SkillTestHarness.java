@@ -402,6 +402,7 @@ public class SkillTestHarness {
       assert !operation.isEmpty() : "operation must not be empty";
       assert senderService != null : "senderService must not be null";
       assert !senderService.isEmpty() : "senderService must not be empty";
+      assert !getChildQualifiedNames().isEmpty() : "childQualifiedRoles must not be empty";
 
       operationAndServiceInfo = new OperationAndSenderServiceInfo(operation, senderService);
     }
@@ -421,6 +422,7 @@ public class SkillTestHarness {
       assert !operation.isEmpty() : "operation must not be empty";
       assert senderService != null : "senderService must not be null";
       assert !senderService.isEmpty() : "senderService must not be empty";
+      assert !getChildQualifiedNames().isEmpty() : "childQualifiedRoles must not be empty";
 
       operationAndServiceInfo = new OperationAndSenderServiceInfo(operation, senderService);
     }
