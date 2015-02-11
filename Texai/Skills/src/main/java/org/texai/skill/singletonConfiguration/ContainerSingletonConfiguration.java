@@ -572,13 +572,8 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
   private SingletonAgentHosts singletonAgentHosts() {
     final Map<String, String> singletonAgentDictionary = new HashMap<>();
 
-    singletonAgentDictionary.put("NetworkLogControlAgent", "Mint");
-    singletonAgentDictionary.put("NetworkDeploymentAgent", "Mint");
-    singletonAgentDictionary.put("NetworkFileTransferAgent", "Mint");
     singletonAgentDictionary.put("NetworkOperationAgent", "Mint");
     singletonAgentDictionary.put("NetworkSingletonConfigurationAgent", "Mint");
-    singletonAgentDictionary.put("TopLevelGovernanceAgent", "Mint");
-    singletonAgentDictionary.put("TopLevelHeartbeatAgent", "Mint");
     singletonAgentDictionary.put("TopmostFriendshipAgent", "Mint");
     singletonAgentDictionary.put("XAIFinancialAccountingAndControlAgent", "Mint");
     singletonAgentDictionary.put("XAIMintAgent", "Mint");
@@ -590,12 +585,12 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
     singletonAgentDictionary.put("XAIRewardAllocationAgent", "Mint");
 
     final DateTime effectiveDateTime = new DateTime(
-            2014, // year
-            11, // monthOfYear,
-            14, // dayOfMonth
-            12, // hourOfDay
-            15, // minuteOfHour,
-            5, // secondOfMinute,
+            2015, // year
+            02, // monthOfYear,
+            11, // dayOfMonth
+            11, // hourOfDay
+            38, // minuteOfHour,
+            0, // secondOfMinute,
             0, // millisOfSecond,
             DateTimeZone.forTimeZone(TimeZone.getTimeZone("CST"))); // zone
     final DateTime terminationDateTime = new DateTime(
