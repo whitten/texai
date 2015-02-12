@@ -17,6 +17,7 @@ import org.texai.ahcsSupport.Message;
 import org.texai.ahcs.skill.AbstractNetworkSingletonSkill;
 import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.skill.network.NetworkOperation;
+import org.texai.skill.singletonConfiguration.NetworkSingletonConfiguration;
 import org.texai.util.TexaiException;
 
 /**
@@ -193,7 +194,7 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
             getQualifiedName(), // senderQualifiedName
             getClassName(), // senderService,
             getRole().getChildQualifiedNameForAgentRole("NetworkOperationAgent.NetworkSingletonConfigurationRole"), // recipientQualifiedName,
-            NetworkOperation.class.getName(), // recipientService
+            NetworkSingletonConfiguration.class.getName(), // recipientService
             AHCSConstants.JOIN_NETWORK_TASK); // operation
     sendMessage(performMissionMessage);
   }
