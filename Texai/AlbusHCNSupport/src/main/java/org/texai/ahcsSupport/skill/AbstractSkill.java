@@ -865,7 +865,7 @@ public abstract class AbstractSkill {
     getLogger().info("join acknowledged from " + message.getSenderQualifiedName());
     final Message removeUnjoinedRoleInfoMessage = makeMessage(
             getContainerName() + ".ContainerOperationAgent.ContainerSingletonConfigurationRole", // recipientQualifiedName
-            "org.texai.skill.network.ContainerOperation", // recipientService
+            "org.texai.skill.singletonConfiguration.ContainerSingletonConfiguration", // recipientService
             AHCSConstants.REMOVE_UNJOINED_ROLE_INFO); // operation
     sendMessageViaSeparateThread(removeUnjoinedRoleInfoMessage);
   }
