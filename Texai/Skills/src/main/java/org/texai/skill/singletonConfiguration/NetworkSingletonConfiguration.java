@@ -9,7 +9,6 @@ import org.texai.ahcsSupport.Message;
 import org.texai.ahcs.skill.AbstractNetworkSingletonSkill;
 import org.texai.skill.domainEntity.SingletonAgentHosts;
 import org.texai.skill.governance.TopmostFriendship;
-import org.texai.skill.network.ContainerOperation;
 
 /**
  * Created on Aug 29, 2014, 6:44:08 PM.
@@ -107,7 +106,7 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
        *
        */
       case AHCSConstants.SINGLETON_AGENT_HOSTS_INFO:
-        assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "state must be isolated from network";
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
         handleSingletonAgentHostsInfo(message);
         return;
 
@@ -278,8 +277,8 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
 
     // send message to container operations to configure parent roles throughout the container.
     final Message configureSingletonAgentHostsTask = makeMessage(
-            getRole().getChildQualifiedNameForAgentRole("ContainerOperationAgent.ContainerSingletonConfigurationRole"), // recipientQualifiedName
-            ContainerOperation.class.getName(), // recipientService
+            message.getSenderQualifiedName(), // recipientQualifiedName
+            message.getSenderService(), // recipientService
             AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK); // operation
     configureSingletonAgentHostsTask.put(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS, singletonAgentHosts);
 
