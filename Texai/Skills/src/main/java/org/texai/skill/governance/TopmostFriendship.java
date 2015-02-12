@@ -54,16 +54,16 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
     }
     switch (operation) {
       /**
-       * Initialize Task
+       * Initialize Info
        *
-       * This task message is sent from AIMain via the ContainerOperationAgent.ContainerOperationRole. It is expected to be the first task
-       * message that this topmost role receives and it results in the role being initialized and propagation of that message to all agent /
-       * roles.
+       * This information message is sent from AIMain via the ContainerOperationAgent.ContainerOperationRole. It is expected to be the first
+       * task message that this topmost role receives and it results in the role being initialized and propagation of that message to all
+       * agent / roles.
        *
        * If this is the first container in the network, then a Perform Mission Task message is sent to the child NetworkOperation
        * agent/role. Otherwise a Join Network Task message is sent.
        */
-      case AHCSConstants.INITIALIZE_TASK:
+      case AHCSConstants.INITIALIZE_INFO:
         assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
         initialization(receivedMessage);
         return;
@@ -113,8 +113,8 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
     sendMessage(
             receivedMessage,
             Message.notUnderstoodMessage(
-            receivedMessage, // receivedMessage
-            this)); // skill
+                    receivedMessage, // receivedMessage
+                    this)); // skill
   }
 
   /**
@@ -144,7 +144,7 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
   @Override
   public String[] getUnderstoodOperations() {
     return new String[]{
-      AHCSConstants.INITIALIZE_TASK,
+      AHCSConstants.INITIALIZE_INFO,
       AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.NETWORK_JOIN_COMPLETE_SENSATION,
@@ -155,7 +155,7 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
   /**
    * Performs the initialization operation.
    *
-   * @param receivedMessage the received initialization task message
+   * @param receivedMessage the received initialization information message
    */
   private void initialization(final Message receivedMessage) {
     //Preconditions
@@ -164,7 +164,16 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
 
     // initialize the child roles
     LOGGER.info("initializing child roles");
-    propagateOperationToChildRoles(receivedMessage);
+
+    getRole().getChildQualifiedNames().stream().forEach((String childQualifiedName) -> {
+      final Message initializeTaskMessage = new Message(
+              getRole().getQualifiedName(), // senderQualifiedName
+              getClassName(), // senderService
+              childQualifiedName, // recipientQualifiedName
+              null, // service
+              AHCSConstants.INITIALIZE_TASK);
+      sendMessage(receivedMessage, initializeTaskMessage);
+    });
 
     if (getNodeRuntime().isFirstContainerInNetwork()) {
       setSkillState(State.READY);
@@ -174,7 +183,15 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
         Thread.sleep(2000);
       } catch (InterruptedException ex) {
       }
-      performMission(receivedMessage);
+      getRole().getChildQualifiedNames().stream().forEach((childQualifiedName) -> {
+        final Message performMissionTaskMessage = new Message(
+                getRole().getQualifiedName(), // senderQualifiedName
+                getClassName(), // senderService
+                childQualifiedName, // recipientQualifiedName
+                null, // service
+                AHCSConstants.PERFORM_MISSION_TASK);
+        sendMessage(receivedMessage, performMissionTaskMessage);
+      });
     } else {
       setSkillState(State.ISOLATED_FROM_NETWORK);
       joinNetwork(receivedMessage);
@@ -191,7 +208,7 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
     assert getSkillState().equals(State.ISOLATED_FROM_NETWORK) : "state must be isolated-from-network";
 
     LOGGER.info("joining the network");
-    // send a performMission task message to the NetworkOperationAgent
+    // send a Join Network Task message to the NetworkOperationAgent
     final Message performMissionMessage = new Message(
             getQualifiedName(), // senderQualifiedName
             getClassName(), // senderService,
@@ -199,20 +216,6 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
             NetworkSingletonConfiguration.class.getName(), // recipientService
             AHCSConstants.JOIN_NETWORK_TASK); // operation
     sendMessage(receivedMessage, performMissionMessage);
-  }
-
-  /**
-   * Perform this role's mission, which is to provide topmost perception and friendship behavior.
-   *
-   * @param receivedMessage the received message
-   */
-  private void performMission(final Message receivedMessage) {
-    assert receivedMessage != null : "receivedMessage must not be null";
-    assert getSkillState().equals(State.READY) : "state must be ready";
-    assert !getRole().getChildQualifiedNames().isEmpty() : "must have at least one child role";
-
-    LOGGER.info("performing the mission");
-    propagateOperationToChildRolesSeparateThreads(receivedMessage);
   }
 
   /**

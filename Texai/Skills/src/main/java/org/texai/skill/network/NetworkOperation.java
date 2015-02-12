@@ -61,6 +61,9 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
        */
       case AHCSConstants.INITIALIZE_TASK:
         assert getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
+
+        LOGGER.info("initializing with: " + receivedMessage);
+
         propagateOperationToChildRoles(receivedMessage);
         if (getNodeRuntime().isFirstContainerInNetwork()) {
           setSkillState(AHCSConstants.State.READY);

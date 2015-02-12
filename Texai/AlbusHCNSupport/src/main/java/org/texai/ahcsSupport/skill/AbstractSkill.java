@@ -47,6 +47,7 @@ public abstract class AbstractSkill {
   private static final Set<String> oneTimeOperations = new HashSet<>();
 
   static {
+    oneTimeOperations.add(AHCSConstants.INITIALIZE_INFO);
     oneTimeOperations.add(AHCSConstants.INITIALIZE_TASK);
     oneTimeOperations.add(AHCSConstants.PERFORM_MISSION_TASK);
     oneTimeOperations.add(AHCSConstants.SINGLETON_AGENT_HOSTS_INFO);

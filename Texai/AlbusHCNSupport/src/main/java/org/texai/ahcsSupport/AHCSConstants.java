@@ -271,6 +271,9 @@ public final class AHCSConstants {
   // the exception information operation
   public static final String EXCEPTION_INFO = "exception_Info";
   //
+  // the initialize_Info operation, used to bootstrap the TopmostFriendShipRole.
+  public static final String INITIALIZE_INFO = "initialize_Info";
+  //
   // the joinNetworkSingleton_Info operation
   public static final String JOIN_NETWORK_SINGLETON_AGENT_INFO = "joinNetworkSingletonAgent_Info";
   //

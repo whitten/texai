@@ -30,6 +30,7 @@ import org.texai.kb.persistence.RDFEntityPersister;
 import org.texai.network.netty.handler.PortUnificationHandler;
 import org.texai.network.netty.pipeline.AlbusHCNMessageClientPipelineFactory;
 import org.texai.network.netty.pipeline.PortUnificationChannelPipelineFactory;
+import org.texai.skill.governance.TopmostFriendship;
 import org.texai.ssl.TexaiSSLContextFactory;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
@@ -247,8 +248,8 @@ public class AICoinMain {
               nodeRuntime.getNodeRuntimeSkill().getQualifiedName(), // senderQualifiedName
               nodeRuntime.getNodeRuntimeSkill().getClassName(), // senderService
               recipientQualifiedName,
-              null, // service
-              AHCSConstants.INITIALIZE_TASK); // operation
+              TopmostFriendship.class.getName(), // service
+              AHCSConstants.INITIALIZE_INFO); // operation
       nodeRuntime.dispatchMessage(initializeMessage);
 
       while (!nodeRuntime.isQuit.get()) {
