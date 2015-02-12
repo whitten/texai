@@ -43,7 +43,7 @@ public class SeedNodeInfosInitializer {
 
     try {
       // the demo mint peer
-      String qualifiedName = "Mint.SingletonConfigurationAgent.SingletonConfigurationRole";
+      String qualifiedName = "Mint.ContainerOperationAgent.ContainerSingletonConfigurationRole";
       int port = 5048;
       String cerfificateFilePath = "../Main/data/SingletonConfiguration.crt";
       if (!(new File(cerfificateFilePath)).exists()) {

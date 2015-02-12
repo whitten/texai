@@ -339,7 +339,7 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
       if (!getContainerName().equals(Node.extractContainerName(seedNodeInfo.getQualifiedName()))) {
         LOGGER.info("Connecting to seed " + seedNodeInfo);
         connectToSeedPeer(
-                seedNodeInfo.getQualifiedName(),
+                seedNodeInfo.getQualifiedName(), // peerQualifiedName
                 seedNodeInfo.getHostName(),
                 seedNodeInfo.getPort());
       }
