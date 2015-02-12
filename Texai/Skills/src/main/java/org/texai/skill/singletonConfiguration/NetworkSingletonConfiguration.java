@@ -281,6 +281,7 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
             message.getSenderService(), // recipientService
             AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK); // operation
     configureSingletonAgentHostsTask.put(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS, singletonAgentHosts);
+    configureSingletonAgentHostsTask.put(AHCSConstants.MSG_PARM_X509_CERTIFICATE, getRole().getX509Certificate());
 
     sendMessageViaSeparateThread(configureSingletonAgentHostsTask);
   }

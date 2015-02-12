@@ -23,6 +23,7 @@ package org.texai.ahcs;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import net.jcip.annotations.NotThreadSafe;
@@ -31,6 +32,7 @@ import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.skill.BasicNodeRuntime;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.Role;
+import org.texai.util.ArraySet;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 
@@ -44,36 +46,29 @@ public class NodeRuntime extends BasicNodeRuntime {
 
   // the logger
   private static final Logger LOGGER = Logger.getLogger(NodeRuntime.class);
-  /**
-   * the dictionary of replyWith values used to suspend message-sending threads while awaiting response messages, replyWith --> lock object
-   */
+  // the dictionary of replyWith values used to suspend message-sending threads while awaiting response messages, replyWith --> lock object
   private final Map<UUID, Object> replyWithsDictionary = new HashMap<>();
-
-  /**
-   * the in-reply-to message dictionary, in-reply-to UUID --> message
-   */
+  // the in-reply-to message dictionary, in-reply-to UUID --> message
   private final Map<UUID, Message> inReplyToDictionary = new HashMap<>();
-
-  /* the X.509 certificate dictionary, role qualified name --> X.509 certificate */
+  // the X.509 certificate dictionary, role qualified name --> X.509 certificate */
   private final Map<String, X509Certificate> x509CertificateDictionary = new HashMap<>();
-
-  /**
-   * the name of the cache for the X.509 certificates, remote role id --> X.509 certificate
-   */
+  // the name of the cache for the X.509 certificates, remote role id --> X.509 certificate
   public static final String CACHE_X509_CERTIFICATES = "X.509 certificates";
-
-  /**
-   * the message router
-   */
+  // the message router
   private final MessageRouter messageRouter;
-  /**
-   * the indicator to quit this application
-   */
+  // the indicator to quit this application
   public final AtomicBoolean isQuit = new AtomicBoolean(false);
-  /**
-   * the indicator whether finalization has occurred
-   */
+  // the indicator whether finalization has occurred
   private final AtomicBoolean isFinalized = new AtomicBoolean(false);
+  // the between-container operations in which the sender informs the receiver of its public X.509 certificate
+  private static final Set<String> certificateIntroducingOperations = new ArraySet<>();
+  static {
+    certificateIntroducingOperations.add(AHCSConstants.SEED_CONNECTION_REQUEST_INFO);
+    certificateIntroducingOperations.add(AHCSConstants.SINGLETON_AGENT_HOSTS_INFO);
+    certificateIntroducingOperations.add(AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK);
+    certificateIntroducingOperations.add(AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO);
+    certificateIntroducingOperations.add(AHCSConstants.JOIN_ACKNOWLEDGED_TASK);
+  }
 
   /**
    * Constructs a new singleton NodeRuntime instance.
@@ -237,11 +232,8 @@ public class NodeRuntime extends BasicNodeRuntime {
     X509Certificate x509Certificate = getX509Certificate(message.getSenderQualifiedName());
     if (x509Certificate == null) {
       // both sides provide their certificate as a parameter, when a new peer joins the network
-      if (message.getOperation().equals(AHCSConstants.SEED_CONNECTION_REQUEST_INFO)
-              || message.getOperation().equals(AHCSConstants.SINGLETON_AGENT_HOSTS_INFO)
-              || message.getOperation().equals(AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO)
-              || message.getOperation().equals(AHCSConstants.JOIN_ACKNOWLEDGED_TASK)) {
-        LOGGER.debug("adding certificate for " + message.getSenderQualifiedName());
+      if (certificateIntroducingOperations.contains(message.getOperation())) {
+        LOGGER.info("adding certificate for " + message.getSenderQualifiedName());
         x509Certificate = (X509Certificate) message.get(AHCSConstants.MSG_PARM_X509_CERTIFICATE);
         assert x509Certificate != null;
         addX509Certificate(
