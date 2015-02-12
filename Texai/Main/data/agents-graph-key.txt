@@ -39,7 +39,7 @@ XAINetworkOperationAgent
   Manages the AICoin agent network. Interacts with human operators.
 
 XAINetworkSeedAgent
-  Coordinates the bittorrent seeding of large blockchain and data files to new full nodes
+  Coordinates the seeding of large blockchain and data files to new full nodes
       when they join the network.
 
 XAIOperationAgent
