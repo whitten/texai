@@ -366,7 +366,7 @@ public class Message implements Serializable, Comparable<Message> {
   public static Message replyTaskAccomplished(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
-    assert message.isTask() : "message must be a task";
+    assert message.isTask() || message.isInfo(): "message must be a task or info";
 
     return new Message(
             message.recipientQualifiedName, // senderQualifiedName

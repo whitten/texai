@@ -187,7 +187,9 @@ public class Heartbeat extends AbstractSkill {
     assert message != null : "message must not be null";
     assert getRole().getChildQualifiedNames().isEmpty() : "must not have child roles";
 
-    LOGGER.info("performing the mission");
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("performing the mission");
+    }
   }
 
   /**
