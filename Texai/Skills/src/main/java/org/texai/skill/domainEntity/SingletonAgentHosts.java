@@ -40,7 +40,7 @@ import org.texai.x509.SerializableObjectSigner;
  *
  * @author reed
  */
-@RDFEntity(context = "texai:BootstrapSkills")
+ @RDFEntity(context = "texai:BootstrapSkills")
 @Immutable
 @ThreadSafe
 public final class SingletonAgentHosts implements RDFPersistent, Serializable {
@@ -266,6 +266,15 @@ public final class SingletonAgentHosts implements RDFPersistent, Serializable {
    */
   public Map<String, String> getSingletonAgentDictionary() {
     return new HashMap<>(singletonAgentDictionary);
+  }
+
+  /** Returns the container hosting the given agent.
+   *
+   * @param agentName the given agent name
+   * @return the container hosting the given agent
+   */
+  public String getContainer(final String agentName) {
+    return singletonAgentDictionary.get(agentName);
   }
 
   /**

@@ -140,6 +140,17 @@ public class SingletonAgentHostsTest {
   }
 
   /**
+   * Test of getContainer method, of class SingletonAgentHosts.
+   */
+  @Test
+  public void testGetContainer() {
+    LOGGER.info("getContainer");
+    SingletonAgentHosts instance = makeSingletonAgentHosts();
+    assertEquals("Test3Container", instance.getContainer("MintAgent"));
+    assertNull(instance.getContainer("NonexistentAgent"));
+  }
+
+  /**
    * Test of toString method, of class SingletonAgentHosts.
    */
   @Test
