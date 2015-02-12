@@ -7,7 +7,6 @@
  *
  * Copyright (C) 2014 Stephen L. Reed
  */
-
 package org.texai.skill.heartbeat;
 
 import java.util.HashMap;
@@ -42,9 +41,10 @@ public final class TopLevelHeartbeat extends AbstractNetworkSingletonSkill {
   public TopLevelHeartbeat() {
   }
 
-  /** Gets the logger.
+  /**
+   * Gets the logger.
    *
-   * @return  the logger
+   * @return the logger
    */
   @Override
   protected Logger getLogger() {
@@ -52,8 +52,8 @@ public final class TopLevelHeartbeat extends AbstractNetworkSingletonSkill {
   }
 
   /**
-   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries
-   * are single threaded with regard to the conversation.
+   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
+   * with regard to the conversation.
    *
    * @param message the given message
    */
@@ -74,8 +74,8 @@ public final class TopLevelHeartbeat extends AbstractNetworkSingletonSkill {
       /**
        * Initialize Task
        *
-       * This task message is sent from the parent TopmostFriendship agent/role. It is expected to be the first task message
-       * that this role receives and it results in the role being initialized.
+       * This task message is sent from the parent TopmostFriendship agent/role. It is expected to be the first task message that this role
+       * receives and it results in the role being initialized.
        */
       case AHCSConstants.INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
@@ -91,8 +91,8 @@ public final class TopLevelHeartbeat extends AbstractNetworkSingletonSkill {
       /**
        * Join Acknowledged Task
        *
-       * This task message is sent from the network-singleton, parent TopmostFriendship agent/role. It indicates that the
-       * parent is ready to converse with this role as needed.
+       * This task message is sent from the network-singleton, parent TopmostFriendship agent/role. It indicates that the parent is ready to
+       * converse with this role as needed.
        */
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
@@ -125,7 +125,9 @@ public final class TopLevelHeartbeat extends AbstractNetworkSingletonSkill {
       case AHCSConstants.PERFORM_MISSION_TASK:
         assert getSkillState().equals(AHCSConstants.State.READY) :
                 "state must be ready, but is " + getSkillState();
+        assert !getRole().getChildQualifiedNames().isEmpty() : "must have at least one child role";
         //TODO
+        propagateOperationToChildRolesSeparateThreads(AHCSConstants.PERFORM_MISSION_TASK);
         return;
 
       /**
@@ -164,8 +166,8 @@ public final class TopLevelHeartbeat extends AbstractNetworkSingletonSkill {
   }
 
   /**
-   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single
-   * threaded with regard to the conversation.
+   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single threaded with regard
+   * to the conversation.
    *
    * @param message the given message
    *
@@ -200,7 +202,6 @@ public final class TopLevelHeartbeat extends AbstractNetworkSingletonSkill {
     };
   }
 
-
   /**
    * Records a keep-alive message sent from a role.
    *
@@ -227,8 +228,7 @@ public final class TopLevelHeartbeat extends AbstractNetworkSingletonSkill {
   }
 
   /**
-   * Periodically processes the outbound and inbound heartbeat information
-   * objects.
+   * Periodically processes the outbound and inbound heartbeat information objects.
    */
   protected class HeartbeatProcessor extends TimerTask {
 
@@ -352,8 +352,7 @@ public final class TopLevelHeartbeat extends AbstractNetworkSingletonSkill {
   }
 
   /**
-   * Notices that an expected heartbeat message has not yet been received from
-   * the given role.
+   * Notices that an expected heartbeat message has not yet been received from the given role.
    *
    * @param inboundHeartbeatInfo the given role heartbeat information
    */

@@ -5,7 +5,6 @@ import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcs.skill.AbstractNetworkSingletonSkill;
-import org.texai.skill.deployment.NetworkDeployment;
 
 /**
  * Created on Aug 30, 2014, 11:30:19 PM.
@@ -200,44 +199,11 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
     //Preconditions
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+    assert !getRole().getChildQualifiedNames().isEmpty() : "must have at least one child role";
 
     LOGGER.info("performing the mission");
 
-    // send the perform mission task to the XAINetworkOperationAgent
-    Message performMissionMessage = new Message(
-            getQualifiedName(), // senderQualifiedName
-            getClassName(), // senderService,
-            getRole().getChildQualifiedNameForAgent("XAINetworkOperationAgent"), // recipientQualifiedName,
-            "org.texai.skill.aicoin.XAINetworkOperation", // recipientService
-            AHCSConstants.PERFORM_MISSION_TASK); // operation
-    sendMessageViaSeparateThread(performMissionMessage);
-
-    // send the perform mission task to the NetworkSingletonConfigurationAgent
-    performMissionMessage = new Message(
-            getQualifiedName(), // senderQualifiedName
-            getClassName(), // senderService,
-            getRole().getChildQualifiedNameForAgent("NetworkSingletonConfigurationAgent"), // recipientQualifiedName,
-            "org.texai.skill.singletonConfiguration.NetworkSingletonConfiguration", // recipientService
-            AHCSConstants.PERFORM_MISSION_TASK); // operation
-    sendMessageViaSeparateThread(performMissionMessage);
-
-    // send the perform mission task to the ContainerOperationAgent
-    performMissionMessage = new Message(
-            getQualifiedName(), // senderQualifiedName
-            getClassName(), // senderService,
-            getRole().getChildQualifiedNameForAgent("ContainerOperationAgent"), // recipientQualifiedName,
-            ContainerOperation.class.getName(), // recipientService
-            AHCSConstants.PERFORM_MISSION_TASK); // operation
-    sendMessageViaSeparateThread(performMissionMessage);
-
-    // send the perform mission task to the NetworkDeploymentAgent
-    performMissionMessage = new Message(
-            getQualifiedName(), // senderQualifiedName
-            getClassName(), // senderService,
-            getRole().getChildQualifiedNameForAgent("NetworkDeploymentAgent"), // recipientQualifiedName,
-            NetworkDeployment.class.getName(), // recipientService
-            AHCSConstants.PERFORM_MISSION_TASK); // operation
-    sendMessageViaSeparateThread(performMissionMessage);
+    propagateOperationToChildRolesSeparateThreads(AHCSConstants.PERFORM_MISSION_TASK);
   }
 
   /**

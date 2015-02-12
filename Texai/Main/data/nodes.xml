@@ -431,7 +431,7 @@
 
   <node>
     <name>XAINetworkSeedAgent</name>
-    <missionDescription>Coordinates the bittorrent seeding of large blockchain and data files to new full nodes
+    <missionDescription>Coordinates the seeding of large blockchain and data files to new full nodes
       when they join the network.</missionDescription>
     <isNetworkSingleton>true</isNetworkSingleton>
     <prototypeNodeNames>
@@ -440,7 +440,7 @@
     <roles>
       <role>
         <qualifiedName>XAINetworkSeedAgent.XAINetworkSeedRole</qualifiedName>
-        <description>Coordinates the bittorrent seeding of large blockchain and data files to new full nodes
+        <description>Coordinates the seeding of large blockchain and data files to new full nodes
       when they join the network.</description>
         <parentQualifiedName>XAINetworkOperationAgent.XAINetworkOperationRole</parentQualifiedName>
         <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>

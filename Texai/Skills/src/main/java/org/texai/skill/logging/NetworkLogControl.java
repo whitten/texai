@@ -104,6 +104,22 @@ public class NetworkLogControl extends AbstractNetworkSingletonSkill {
         return;
 
       /**
+       * Perform Mission Task
+       *
+       * This task message is sent from the network-singleton parent TopmostFriendshipAgent.TopmostFriendshipRole.
+       *
+       * It results in the skill set to the ready state, and it performing its mission.
+       */
+      case AHCSConstants.PERFORM_MISSION_TASK:
+        if (getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK)) {
+          setSkillState(AHCSConstants.State.READY);
+          LOGGER.info("now ready");
+        }
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+        performMission(message);
+        return;
+
+      /**
        * Delegate Perform Mission Task
        *
        * A container has completed joining the network. Propagate a Delegate Perform Mission Task down the role command hierarchy.
@@ -158,7 +174,8 @@ public class NetworkLogControl extends AbstractNetworkSingletonSkill {
       AHCSConstants.DELEGATE_PERFORM_MISSION_TASK,
       AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
-      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.PERFORM_MISSION_TASK
     };
   }
 
@@ -179,6 +196,19 @@ public class NetworkLogControl extends AbstractNetworkSingletonSkill {
     } else {
       setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
     }
+  }
+
+  /**
+   * Perform this role's mission.
+   *
+   * @param message the received perform mission task message
+   */
+  private void performMission(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert !getRole().getChildQualifiedNames().isEmpty() : "must have at least one child role";
+
+    propagateOperationToChildRolesSeparateThreads(AHCSConstants.PERFORM_MISSION_TASK);
   }
 
 }

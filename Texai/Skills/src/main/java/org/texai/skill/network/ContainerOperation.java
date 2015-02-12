@@ -104,8 +104,8 @@ public final class ContainerOperation extends AbstractSkill {
       /**
        * Restart Container Task
        *
-       * This message is sent the parent NetworkOperationAgent.NetworkOperationRole instructing the container to restart following
-       * a given delay.
+       * This message is sent the parent NetworkOperationAgent.NetworkOperationRole instructing the container to restart following a given
+       * delay.
        *
        * As a result, this JVM exits, and the wrapping bash script restarts it
        */
@@ -172,8 +172,9 @@ public final class ContainerOperation extends AbstractSkill {
   private void performMission(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
+    assert getRole().getChildQualifiedNames().isEmpty() : "must not have child roles";
 
-    // send a Perform Mission Task message to the node runtime, which will open a message listening port
+    // send a Perform Mission Task message to the sibling node runtime skill, which will open a message listening port
     final Message performMissionMessage = makeMessage(
             NodeRuntimeSkill.class.getName(), // recipientService
             AHCSConstants.PERFORM_MISSION_TASK, // operation
@@ -197,7 +198,6 @@ public final class ContainerOperation extends AbstractSkill {
     assert delay > 0 : AHCSConstants.RESTART_CONTAINER_TASK_DELAY + " must be positive";
 
     //TODO send message to XAIOperation to shutdown
-
     try {
       Thread.sleep(delay);
     } catch (InterruptedException ex) {

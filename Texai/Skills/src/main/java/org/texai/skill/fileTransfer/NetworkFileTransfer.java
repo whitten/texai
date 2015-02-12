@@ -228,8 +228,10 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
     //Preconditions
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready: " + stateDescription(getSkillState());
+    assert !getRole().getChildQualifiedNames().isEmpty() : "must have at least one child role";
 
     LOGGER.info("performing the mission");
+    propagateOperationToChildRolesSeparateThreads(AHCSConstants.PERFORM_MISSION_TASK);
 
   }
 

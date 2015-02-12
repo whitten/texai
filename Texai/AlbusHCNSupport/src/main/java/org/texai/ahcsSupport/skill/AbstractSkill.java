@@ -16,6 +16,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TimerTask;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
@@ -53,6 +54,8 @@ public abstract class AbstractSkill {
   }
   // the used one-time operations
   private final Set<String> usedOneTimeOperations = new HashSet<>();
+  // the indicator whether this skill is undergoing unit test, in which case single threading is preferred
+  private final AtomicBoolean isUnitTest = new AtomicBoolean(false);
 
   /**
    * Constructs a new Skill instance.
@@ -457,9 +460,15 @@ public abstract class AbstractSkill {
     assert StringUtils.isNonEmptyString(operation) : "operation must be a non-empty string";
     assert role != null : "role must not be null for " + this;
 
-    role.propagateOperationToChildRolesSeparateThreads(
-            operation,
-            getClassName()); // senderService
+    if (isUnitTest.get()) {
+      role.propagateOperationToChildRoles(
+              operation,
+              getClassName()); // senderService
+    } else {
+      role.propagateOperationToChildRolesSeparateThreads(
+              operation,
+              getClassName()); // senderService
+    }
   }
 
   /**
@@ -536,6 +545,24 @@ public abstract class AbstractSkill {
    * @return the logger
    */
   abstract protected Logger getLogger();
+
+  /**
+   * Gets whether this skill is undergoing unit test, in which case single threading is preferred.
+   *
+   * @return whether this skill is undergoing unit test
+   */
+  public boolean isUnitTest() {
+    return isUnitTest.get();
+  }
+
+  /**
+   * Sets whether this skill is undergoing unit test, in which case single threading is preferred.
+   *
+   * @param isUnitTest whether this skill is undergoing unit test
+   */
+  public void setIsUnitTest(final boolean isUnitTest) {
+    this.isUnitTest.set(isUnitTest);
+  }
 
   /**
    * Provides a message timeout task which executes unless this task is canceled beforehand.
@@ -834,7 +861,8 @@ public abstract class AbstractSkill {
     sendMessageViaSeparateThread(removeUnjoinedRoleInfoMessage);
   }
 
-  /** Executes the given runnable on a separate thread.
+  /**
+   * Executes the given runnable on a separate thread.
    *
    * @param runnable the given runnable
    */

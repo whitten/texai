@@ -150,6 +150,7 @@ public class SkillTemplate extends AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+    assert getRole().getChildQualifiedNames().isEmpty() : "must not have child roles";
 
   }
 

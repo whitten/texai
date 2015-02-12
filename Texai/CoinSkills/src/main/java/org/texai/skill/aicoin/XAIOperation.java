@@ -193,8 +193,11 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
     //Preconditions
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+    assert !getRole().getChildQualifiedNames().isEmpty() : "must have child roles";
 
     LOGGER.info("performing the mission");
+    propagateOperationToChildRoles(AHCSConstants.PERFORM_MISSION_TASK);
+
     // write the aicoind configuration file
     final Message writeConfigurationFileTaskmessage = new Message(
             getQualifiedName(), // senderQualifiedName

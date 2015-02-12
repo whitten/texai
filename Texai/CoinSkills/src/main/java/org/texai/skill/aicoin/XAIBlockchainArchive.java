@@ -146,13 +146,14 @@ public final class XAIBlockchainArchive extends AbstractSkill {
   }
 
   /**
-   * Perform this role's mission, which is to manage the network, the containers, and the A.I. Coin agents within the containers.
+   * Perform this role's mission.
    *
    * @param message the received perform mission task message
    */
   private void performMission(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
+    assert getRole().getChildQualifiedNames().isEmpty() : "must not have child roles";
 
   }
 

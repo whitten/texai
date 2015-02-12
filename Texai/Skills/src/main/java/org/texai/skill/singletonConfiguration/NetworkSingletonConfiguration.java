@@ -294,17 +294,10 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
   private void performMission(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
+    assert !getRole().getChildQualifiedNames().isEmpty() : "must have at least one child role";
 
     LOGGER.info("performing the mission");
-
-    final String recipientQualifiedName = getRole().getFirstChildQualifiedNameForAgent("SingletonConfigurationAgent");
-    final Message performMissionMessage = makeMessage(
-            recipientQualifiedName,
-            ContainerSingletonConfiguration.class.getName(), // recipientService
-            AHCSConstants.PERFORM_MISSION_TASK); // operation
-    sendMessageViaSeparateThread(performMissionMessage);
-
-    //TODO parent of this role should be NetworkOperations
+    propagateOperationToChildRolesSeparateThreads(AHCSConstants.PERFORM_MISSION_TASK);
   }
 
   /**

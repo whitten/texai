@@ -69,7 +69,7 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
       /**
        * Initialize Task
        *
-       * This task message is sent from the parent XAINetworkOperationAgent.XAINetworkOperationRole. It is expected to be the first task
+       * This task message is sent from the parent XAIOperationAgent.XAIOperationRole. It is expected to be the first task
        * message that this role receives and it results in the role being initialized.
        */
       case AHCSConstants.INITIALIZE_TASK:
@@ -273,6 +273,7 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+    assert getRole().getChildQualifiedNames().isEmpty() : "must not have child roles";
 
     LOGGER.info("performing the mission");
   }

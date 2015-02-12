@@ -164,6 +164,7 @@ public class XAIFaucet extends AbstractNetworkSingletonSkill {
     //Preconditions
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+    assert getRole().getChildQualifiedNames().isEmpty() : "must not have child roles";
 
     LOGGER.info("performing the mission");
 

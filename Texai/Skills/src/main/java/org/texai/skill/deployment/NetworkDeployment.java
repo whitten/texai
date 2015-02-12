@@ -66,8 +66,6 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
   protected String zippedBytesHash;
   // the deployment file transfer conversation dictionary, conversation id --> deployment file transfer info
   private Map<UUID, DeploymentFileTransferInfo> deploymentFileTransferConversationDictionary = new HashMap<>();
-  // the indicator whether this instance is being unit tested, in which case certain actions are single-threaded
-  protected boolean isUnitTest = false;
 
   /**
    * Constructs a new SkillTemplate instance.
@@ -242,7 +240,9 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
     //Preconditions
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+    assert !getRole().getChildQualifiedNames().isEmpty() : "must have at least one child role";
 
+    propagateOperationToChildRolesSeparateThreads(AHCSConstants.PERFORM_MISSION_TASK);
     createCheckForDeploymentTimerTask();
   }
 
@@ -256,6 +256,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
     //Preconditions
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+    assert StringUtils.isNonEmptyString(manifestJSONString);
 
     final String senderRole = Role.extractRoleName(message.getSenderQualifiedName());
     if (senderRole.equals("NetworkFileTransferRole")) {
@@ -272,7 +273,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
       // task the child containers to deploy files from the zip archive that they received
         final DeploymentFilesRunable deploymentFilesRunable = new DeploymentFilesRunable(
                 this); // networkDeployment
-        if (isUnitTest) {
+        if (isUnitTest()) {
           // single threaded to completion
           deploymentFilesRunable.run();
         } else {
@@ -622,6 +623,9 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
      */
     @Override
     public void run() {
+      //Preconditions
+      assert StringUtils.isNonEmptyString(networkDeployment.manifestJSONString);
+
 
       // iterate over all pending containers
       final List<String> containerNames = new ArrayList<>(networkDeployment.pendingDeploymentContainerNames);

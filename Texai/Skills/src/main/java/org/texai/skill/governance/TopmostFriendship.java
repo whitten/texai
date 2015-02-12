@@ -16,7 +16,6 @@ import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcs.skill.AbstractNetworkSingletonSkill;
 import org.texai.ahcsSupport.domainEntity.Node;
-import org.texai.skill.heartbeat.TopLevelHeartbeat;
 import org.texai.skill.network.NetworkOperation;
 import org.texai.util.TexaiException;
 
@@ -161,6 +160,7 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
   private void initialization(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
+    assert !getRole().getChildQualifiedNames().isEmpty() : "must have at least one child role";
 
     // initialize the child roles
     LOGGER.info("initializing child roles");
@@ -203,25 +203,10 @@ public final class TopmostFriendship extends AbstractNetworkSingletonSkill {
    */
   private void performMission() {
     assert getSkillState().equals(State.READY) : "state must be ready";
+    assert !getRole().getChildQualifiedNames().isEmpty() : "must have at least one child role";
 
-    LOGGER.info("performing the mission, propagating the task to the NetworkOperationAgent.NetworkOperationRole");
-    Message performMissionMessage = new Message(
-            getQualifiedName(), // senderQualifiedName
-            getClassName(), // senderService,
-            getRole().getChildQualifiedNameForAgentRole("NetworkOperationAgent.NetworkOperationRole"), // recipientQualifiedName,
-            NetworkOperation.class.getName(), // recipientService
-            AHCSConstants.PERFORM_MISSION_TASK); // operation
-    sendMessage(performMissionMessage);
-
-    LOGGER.info("performing the mission, propagating the task to the NetworkOperationAgent.TopLevelHeartbeatRole");
-    performMissionMessage = new Message(
-            getQualifiedName(), // senderQualifiedName
-            getClassName(), // senderService,
-            getRole().getChildQualifiedNameForAgentRole("NetworkOperationAgent.TopLevelHeartbeatRole"), // recipientQualifiedName,
-            TopLevelHeartbeat.class.getName(), // recipientService
-            AHCSConstants.PERFORM_MISSION_TASK); // operation
-    sendMessage(performMissionMessage);
-
+    LOGGER.info("performing the mission");
+    propagateOperationToChildRolesSeparateThreads(AHCSConstants.PERFORM_MISSION_TASK);
   }
 
   /**

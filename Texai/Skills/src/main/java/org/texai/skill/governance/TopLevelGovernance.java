@@ -110,6 +110,22 @@ public final class TopLevelGovernance extends AbstractNetworkSingletonSkill {
         handleDelegatePerformMissionTask(message);
         return;
 
+      /**
+       * Perform Mission Task
+       *
+       * This task message is sent from the network-singleton parent TopmostFriendshipAgent.TopmostFriendshipRole.
+       *
+       * It results in the skill set to the ready state, and then performing its mission.
+       */
+      case AHCSConstants.PERFORM_MISSION_TASK:
+        if (getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK)) {
+          setSkillState(AHCSConstants.State.READY);
+          LOGGER.info("now ready");
+        }
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+        performMission(message);
+        return;
+
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
         LOGGER.warn(message);
@@ -154,7 +170,8 @@ public final class TopLevelGovernance extends AbstractNetworkSingletonSkill {
       AHCSConstants.DELEGATE_PERFORM_MISSION_TASK,
       AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
-      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.PERFORM_MISSION_TASK
     };
   }
 
@@ -167,4 +184,18 @@ public final class TopLevelGovernance extends AbstractNetworkSingletonSkill {
   protected Logger getLogger() {
     return LOGGER;
   }
+
+  /**
+   * Perform this role's mission.
+   *
+   * @param message the received perform mission task message
+   */
+  private void performMission(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert !getRole().getChildQualifiedNames().isEmpty() : "must have at least one child role";
+
+    propagateOperationToChildRolesSeparateThreads(AHCSConstants.PERFORM_MISSION_TASK);
+  }
+
 }

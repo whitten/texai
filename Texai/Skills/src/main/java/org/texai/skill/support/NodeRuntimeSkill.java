@@ -108,6 +108,7 @@ public class NodeRuntimeSkill extends AbstractSkill {
           LOGGER.info("now ready");
         }
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+        assert getRole().getChildQualifiedNames().isEmpty() : "must not have child roles";
         listenForConnections(message);
         return;
 

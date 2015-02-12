@@ -178,22 +178,16 @@ public class Heartbeat extends AbstractSkill {
   }
 
   /**
-   * Perform this role's mission, which is to manage the network, the containers, and the A.I. Coin agents within the containers.
+   * Perform this role's mission.
    *
    * @param message the received perform mission task message
    */
   private void performMission(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
+    assert getRole().getChildQualifiedNames().isEmpty() : "must not have child roles";
 
     LOGGER.info("performing the mission");
-    final Message performMissionMessage = new Message(
-            getQualifiedName(), // senderQualifiedName
-            getClassName(), // senderService,
-            getRole().getChildQualifiedNameForAgent("XAINetworkOperationAgent"), // recipientQualifiedName,
-            "org.texai.skill.aicoin.XAINetworkOperation", // recipientService
-            AHCSConstants.PERFORM_MISSION_TASK); // operation
-    sendMessage(performMissionMessage);
   }
 
   /**

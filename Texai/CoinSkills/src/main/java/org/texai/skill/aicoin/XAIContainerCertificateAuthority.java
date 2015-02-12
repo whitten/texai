@@ -155,6 +155,7 @@ public class XAIContainerCertificateAuthority extends AbstractSkill {
   private void performMission(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
+    assert getRole().getChildQualifiedNames().isEmpty() : "must not have child roles";
 
   }
 

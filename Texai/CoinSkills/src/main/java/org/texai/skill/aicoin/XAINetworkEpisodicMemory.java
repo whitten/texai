@@ -105,6 +105,17 @@ public class XAINetworkEpisodicMemory extends AbstractNetworkSingletonSkill {
         return;
 
       /**
+       * Perform Mission Task
+       *
+       * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.NetworkOperationRole. It commands this
+       * network-connected role to begin performing its mission.
+       */
+      case AHCSConstants.PERFORM_MISSION_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+        performMission(message);
+        return;
+
+      /**
        * Delegate Perform Mission Task
        *
        * A container has completed joining the network. Propagate a Delegate Perform Mission Task down the role command hierarchy.
@@ -156,8 +167,24 @@ public class XAINetworkEpisodicMemory extends AbstractNetworkSingletonSkill {
       AHCSConstants.DELEGATE_PERFORM_MISSION_TASK,
       AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
-      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.PERFORM_MISSION_TASK
     };
+  }
+
+  /**
+   * Perform this role's mission.
+   *
+   * @param message the received perform mission task message
+   */
+  private void performMission(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready: " + stateDescription(getSkillState());
+
+    LOGGER.info("performing the mission");
+    propagateOperationToChildRolesSeparateThreads(AHCSConstants.PERFORM_MISSION_TASK);
+
   }
 
 }

@@ -38,8 +38,6 @@ public class ContainerDeployment extends AbstractSkill {
 
   // the log4j logger
   private static final Logger LOGGER = Logger.getLogger(ContainerDeployment.class);
-  // the indication that this skill is running in a unit test, with a development file arrangement
-  private static boolean isUnitTest = false;
 
   /**
    * Constructs a new SkillTemplate instance.
@@ -178,6 +176,7 @@ public class ContainerDeployment extends AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+    assert getRole().getChildQualifiedNames().isEmpty() : "must not have child roles";
 
   }
 
@@ -235,7 +234,7 @@ public class ContainerDeployment extends AbstractSkill {
         final String command = (String) manifestItem.get("command");
         LOGGER.info("  command: " + command);
         String fileToDeployPath;
-        if (isUnitTest) {
+        if (isUnitTest()) {
           // development and unit tests run with Main-1.0 as the working directory
           fileToDeployPath = (String) manifestItem.get("path");
         } else {
@@ -337,21 +336,4 @@ public class ContainerDeployment extends AbstractSkill {
     return LOGGER;
   }
 
-  /**
-   * Gets whether this skill is running in a unit test, with a development file arrangement.
-   *
-   * @return whether this skill is running in a unit test
-   */
-  public static boolean isUnitTest() {
-    return isUnitTest;
-  }
-
-  /**
-   * Sets whether this skill is running in a unit test, with a development file arrangement.
-   *
-   * @param aIsUnitTest whether this skill is running in a unit test, with a development file arrangement
-   */
-  protected static void setIsUnitTest(boolean aIsUnitTest) {
-    isUnitTest = aIsUnitTest;
-  }
 }

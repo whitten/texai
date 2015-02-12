@@ -91,8 +91,8 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
       /**
        * Initialize Task
        *
-       * This task message is sent from the container-local parent NetworkOperationAgent.NetworkSingletonConfigurationRole. It is expected to be
-       * the first task message that this role receives and it results in the role being initialized.
+       * This task message is sent from the container-local parent NetworkOperationAgent.NetworkSingletonConfigurationRole. It is expected
+       * to be the first task message that this role receives and it results in the role being initialized.
        */
       case AHCSConstants.INITIALIZE_TASK:
         assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
@@ -139,8 +139,8 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
       /**
        * Join Acknowledged Task
        *
-       * This task message is sent from the network-singleton parent NetworkOperationAgent.NetworkSingletonConfigurationRole.
-       * It indicates that the parent is ready to converse with this role as needed.
+       * This task message is sent from the network-singleton parent NetworkOperationAgent.NetworkSingletonConfigurationRole. It indicates
+       * that the parent is ready to converse with this role as needed.
        */
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
@@ -151,8 +151,8 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
       /**
        * Perform Mission Task
        *
-       * This task message is sent from the network-singleton parent NetworkOperationAgent.NetworkSingletonConfigurationRole.
-       * It commands this network-connected role to begin performing its mission.
+       * This task message is sent from the network-singleton parent NetworkOperationAgent.NetworkSingletonConfigurationRole. It commands
+       * this network-connected role to begin performing its mission.
        */
       case AHCSConstants.PERFORM_MISSION_TASK:
         if (getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK)) {
@@ -638,9 +638,10 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
   private void performMission(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
+    assert !getRole().getChildQualifiedNames().isEmpty() : "must have at least one child role";
 
     LOGGER.info("performing the mission");
-
+    propagateOperationToChildRoles(AHCSConstants.PERFORM_MISSION_TASK);
   }
 
 }

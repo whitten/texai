@@ -31,6 +31,7 @@ import static org.junit.Assert.*;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.SkillClass;
+import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.skill.governance.TopmostFriendship;
 import org.texai.skill.testHarness.SkillTestHarness;
 import org.texai.util.ArraySet;
@@ -86,6 +87,11 @@ public class NetworkOperationTest {
             skillClasses,
             variableNames,
             false); // areRemoteCommunicationsPermitted
+    final AbstractSkill networkOperation = skillTestHarness.getSkill(NetworkOperation.class.getName());
+    assertNotNull(networkOperation);
+    assertTrue(networkOperation instanceof NetworkOperation);
+    assertTrue(networkOperation.isUnitTest());
+    assertEquals(4, networkOperation.getRole().getChildQualifiedNames().size());
   }
 
   @AfterClass
@@ -137,6 +143,11 @@ public class NetworkOperationTest {
 
     skillTestHarness.reset();
     skillTestHarness.setSkillState(AHCSConstants.State.READY, skillClassName);
+    final AbstractSkill networkOperation = skillTestHarness.getSkill(NetworkOperation.class.getName());
+    assertNotNull(networkOperation);
+    assertTrue(networkOperation instanceof NetworkOperation);
+    assertTrue(networkOperation.isUnitTest());
+    assertEquals(4, networkOperation.getRole().getChildQualifiedNames().size());
     final Message performTaskMessage = new Message(
             parentQualifiedName, // senderQualifiedName
             TopmostFriendship.class.getName(), // senderService
@@ -148,12 +159,7 @@ public class NetworkOperationTest {
     skillTestHarness.dispatchMessage(performTaskMessage);
 
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
-    final List<Message> sentMessages = skillTestHarness.getSentMessages();
-    LOGGER.info("messages send as a result of receiving " + AHCSConstants.PERFORM_MISSION_TASK + " ...");
-    sentMessages.stream().sorted().forEach((Message message) -> {
-      LOGGER.info(message);
-    });
-    assertEquals(4, sentMessages.size());
+    assertEquals("[performMission_Task, org.texai.skill.network.NetworkOperation]", skillTestHarness.getOperationAndSenderServiceInfo().toString());
   }
 
   /**

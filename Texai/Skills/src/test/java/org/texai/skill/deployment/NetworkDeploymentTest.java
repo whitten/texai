@@ -76,7 +76,7 @@ public class NetworkDeploymentTest {
             variableNames,
             false); // areRemoteCommunicationsPermitted
     final NetworkDeployment networkDeployment = (NetworkDeployment) skillTestHarness.getSkill(skillClassName);
-    networkDeployment.isUnitTest = true;
+    networkDeployment.setIsUnitTest(true);
   }
 
   @AfterClass

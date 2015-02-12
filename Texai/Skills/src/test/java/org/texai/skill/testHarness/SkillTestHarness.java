@@ -98,6 +98,9 @@ public class SkillTestHarness {
     role.initialize(
             nodeRuntime,
             null); // x509SecurityInfo
+    role.getSkillDictionary().values().forEach((AbstractSkill skill) -> {
+      skill.setIsUnitTest(true);
+    });
   }
 
   /**
@@ -180,7 +183,12 @@ public class SkillTestHarness {
     assert role.getSkillDictionary().containsKey(skillClassName) :
             "skillClassName is not a skill for this role, skillDictonary ...\n " + role.getSkillDictionary();
 
-    return role.getSkill(skillClassName);
+    final AbstractSkill skill = role.getSkill(skillClassName);
+
+    //Postconditions
+    assert skill.isUnitTest() : "skill must be running in unit test mode " + skillClassName;
+
+    return skill;
   }
 
   /**

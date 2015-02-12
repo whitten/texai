@@ -86,6 +86,17 @@ public class XAIFinancialAccountingAndControl extends AbstractNetworkSingletonSk
         return;
 
       /**
+       * Perform Mission Task
+       *
+       * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.XAINetworkOperationRole. It commands this
+       * network-connected role to begin performing its mission.
+       */
+      case AHCSConstants.PERFORM_MISSION_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+        performMission(message);
+        return;
+
+      /**
        * Delegate Perform Mission Task
        *
        * A container has completed joining the network. Propagate a Delegate Perform Mission Task down the role command hierarchy.
@@ -138,8 +149,24 @@ public class XAIFinancialAccountingAndControl extends AbstractNetworkSingletonSk
       AHCSConstants.INITIALIZE_TASK,
       AHCSConstants.DELEGATE_PERFORM_MISSION_TASK,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
-      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
+      AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.PERFORM_MISSION_TASK
     };
+  }
+
+  /**
+   * Perform this role's mission, which is to manage the containers.
+   *
+   * @param message the received perform mission task message
+   */
+  private void performMission(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready: " + stateDescription(getSkillState());
+    assert getRole().getChildQualifiedNames().isEmpty() : "must not have child roles";
+
+    LOGGER.info("performing the mission");
+
   }
 
 }
