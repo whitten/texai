@@ -91,7 +91,6 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
           LOGGER.info("now ready");
         }
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
-        performMission(receivedMessage);
         return;
 
       /**
@@ -103,6 +102,10 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
        * XAIOperation skill as a response.
        */
       case AHCSConstants.WRITE_CONFIGURATION_FILE_INFO:
+        if (getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK)) {
+          setSkillState(AHCSConstants.State.READY);
+          LOGGER.info("now ready");
+        }
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
         writeConfigurationFile(receivedMessage);
         return;
@@ -260,17 +263,4 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
     };
   }
 
-  /**
-   * Perform this role's mission.
-   *
-   * @param message the received perform mission task message
-   */
-  private void performMission(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
-    assert getRole().getChildQualifiedNames().isEmpty() : "must not have child roles";
-
-    LOGGER.info("performing the mission");
-  }
 }

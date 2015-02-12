@@ -728,7 +728,7 @@ public abstract class AbstractSkill {
    *
    * @return the skill state
    */
-  public State getSkillState() {
+  public synchronized State getSkillState() {
     return skillState;
   }
 
@@ -737,7 +737,7 @@ public abstract class AbstractSkill {
    *
    * @param skillState the skill state
    */
-  public void setSkillState(final State skillState) {
+  public synchronized void setSkillState(final State skillState) {
     //Preconditions
     assert skillState != null : "skillState must not be null";
 

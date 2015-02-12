@@ -97,7 +97,7 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
       /**
        * Perform Mission Task
        *
-       * This task message is sent from the network-singleton, parent TopmostFriendshipAgent.TopmostFriendshipRole. It commands this
+       * This task message is sent from the parent role. It commands this
        * network-connected role to begin performing its mission.
        */
       case AHCSConstants.PERFORM_MISSION_TASK:
