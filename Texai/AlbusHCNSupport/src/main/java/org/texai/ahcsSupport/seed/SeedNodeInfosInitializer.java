@@ -13,6 +13,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.texai.util.ArraySet;
 import org.texai.util.TexaiException;
+import org.texai.x509.MessageDigestUtils;
 import org.texai.x509.X509Utils;
 
 /**
@@ -87,6 +88,7 @@ public class SeedNodeInfosInitializer {
       try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(seedNodeInfosFilePath))) {
         objectOutputStream.writeObject(seedNodeInfos);
       }
+      LOGGER.info("fileHashString: " + MessageDigestUtils.fileHashString(seedNodeInfosFilePath));
     } catch (CertificateException | NoSuchProviderException | IOException ex) {
       throw new TexaiException(ex);
     }

@@ -50,7 +50,7 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
   private Set<SeedNodeInfo> seedNodesInfos;
   // the SHA-512 hash of the seed node infos serialized file
   private final String seedNodeInfosFileHashString
-          = "YUhf+GN2kmnkLzwDnkhibWxlbnfyW9UExRTg/c4njjP05jX0BvlunodyVz33dp8chbgSaheEEAqzyDtz2+bPcw==";
+          = "1W/LzFwaJHmb/qTVqlcrIF8uaGV4I6NrQJWqah6gt9Sv/kvXHfyeN0hNpaPUyiVsHctaK83gLLWjAjAC56r0fQ==";
   // the indicator that network singleton configuration information has been received from a seed peer
   private final AtomicBoolean isSeedConfigurationInfoReceived = new AtomicBoolean(false);
   // the unjoined child roles
