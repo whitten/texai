@@ -440,7 +440,7 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
       final String recipientContainer = singletonAgentHosts.getContainer("NetworkOperationAgent");
       assert recipientContainer != null;
       final String recipientQualifiedName =
-              recipientContainer + ".NetworkOperationsAgent.NetworkSingletonConfigurationRole";
+              recipientContainer + ".NetworkOperationAgent.NetworkSingletonConfigurationRole";
 
       final Message singletonAgentHostsMessage = makeMessage(
               recipientQualifiedName,
