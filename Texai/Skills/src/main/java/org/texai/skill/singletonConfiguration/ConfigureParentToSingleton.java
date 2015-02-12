@@ -8,7 +8,6 @@ import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.ahcsSupport.domainEntity.Role;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.skill.domainEntity.SingletonAgentHosts;
-import org.texai.skill.network.ContainerOperation;
 import org.texai.util.StringUtils;
 
 /**
@@ -202,7 +201,7 @@ public class ConfigureParentToSingleton extends AbstractSkill {
             // synchronously send an Add Unjoined Role Info message to the ContainerOperation.ContainerSingletonConfiguration
             final Message addUnjoinedRoleInfoMessage = makeMessage(
                     getRole().getParentQualifiedName(), // recipientQualifiedName
-                    ContainerOperation.class.getName(), // recipientService
+                    ContainerSingletonConfiguration.class.getName(), // recipientService
                     AHCSConstants.ADD_UNJOINED_ROLE_INFO); // operation
             addUnjoinedRoleInfoMessage.put(AHCSConstants.MSG_PARM_ROLE_QUALIFIED_NAME, role.getQualifiedName());
             sendMessage(addUnjoinedRoleInfoMessage);

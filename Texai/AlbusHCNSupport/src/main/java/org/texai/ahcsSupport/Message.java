@@ -366,7 +366,7 @@ public class Message implements Serializable, Comparable<Message> {
   public static Message replyTaskAccomplished(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
-    assert message.isTask() || message.isInfo(): "message must be a task or info";
+    assert message.isTask() || message.isInfo() : "message must be a task or info";
 
     return new Message(
             message.recipientQualifiedName, // senderQualifiedName
@@ -778,10 +778,11 @@ public class Message implements Serializable, Comparable<Message> {
             .append("\n  senderService:          ")
             .append(senderService);
     if (signatureBytes != null) {
-      stringBuilder.append("\n  signatureBytes:         ");
+      stringBuilder
+              .append("\n  signatureBytes:         ")
+              .append(Arrays.toString(signatureBytes));
     }
     stringBuilder
-            .append(Arrays.toString(signatureBytes))
             .append("\n  recipientQualifiedName: ")
             .append(recipientQualifiedName)
             .append("\n  conversationId:         ")
