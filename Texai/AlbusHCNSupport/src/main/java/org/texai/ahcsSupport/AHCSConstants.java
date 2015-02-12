@@ -244,12 +244,6 @@ public final class AHCSConstants {
   // the want_the_dialog_initiative_Task operation
   public static final String WANT_THE_DIALOG_INITIATIVE_TASK = "want_the_dialog_initiative_Task";
   //
-  //
-  // the writeConfigurationFile_Task operation
-  public static final String WRITE_CONFIGURATION_FILE_TASK = "writeConfigurationFile_Task";
-  // the configuration file directory path parameter
-  public static final String WRITE_CONFIGURATION_FILE_TASK_DIRECTORY_PATH = "writeConfigurationFile_Task_directoryPath";
-  //
   // the writeFormFillTextToUser_Task operation
   public static final String WRITE_FORM_FILL_TEXT_TO_USER_TASK = "writeFormFillTextToUser_Task";
   // the text parameter of the the writeFormFillTextToUser_Task
@@ -325,6 +319,11 @@ public final class AHCSConstants {
   //
   // the transfer file request information operation
   public static final String TRANSFER_FILE_REQUEST_INFO = "transferFileRequest_Info";
+  //
+  // the writeConfigurationFile_Info operation
+  public static final String WRITE_CONFIGURATION_FILE_INFO = "writeConfigurationFile_Info";
+  // the configuration file directory path parameter
+  public static final String WRITE_CONFIGURATION_FILE_INFO_DIRECTORY_PATH = "writeConfigurationFile_Task_directoryPath";
 
   // Sensation messages end with _Sensation
 

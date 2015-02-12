@@ -97,14 +97,14 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
         return;
 
       /**
-       * Write Configuration File Task
+       * Write Configuration File Info
        *
-       * This task message is sent from the parent XAIOperation skill.
+       * This request message is sent from the sibling XAIOperation skill.
        *
        * As a result, the aicoin.conf is generated and written to disk, and a Task Accomplished Info message is sent back to the
        * XAIOperation skill as a response.
        */
-      case AHCSConstants.WRITE_CONFIGURATION_FILE_TASK:
+      case AHCSConstants.WRITE_CONFIGURATION_FILE_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
         writeConfigurationFile(message);
         return;
@@ -128,7 +128,7 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
 
-    final String directoryPath = (String) message.get(AHCSConstants.WRITE_CONFIGURATION_FILE_TASK_DIRECTORY_PATH);
+    final String directoryPath = (String) message.get(AHCSConstants.WRITE_CONFIGURATION_FILE_INFO_DIRECTORY_PATH);
     assert StringUtils.isNonEmptyString(directoryPath);
     LOGGER.info("The aicoin-qt configuration directory is " + directoryPath);
     // delete the old version of the configuration file
@@ -260,7 +260,7 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
       AHCSConstants.INITIALIZE_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.PERFORM_MISSION_TASK,
-      AHCSConstants.WRITE_CONFIGURATION_FILE_TASK
+      AHCSConstants.WRITE_CONFIGURATION_FILE_INFO
     };
   }
 

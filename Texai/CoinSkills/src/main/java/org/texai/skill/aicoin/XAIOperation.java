@@ -193,12 +193,10 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
     //Preconditions
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
-    assert !getRole().getChildQualifiedNames().isEmpty() : "must have child roles";
+    assert getRole().getChildQualifiedNames().isEmpty() : "must not have child roles";
 
     LOGGER.info("performing the mission");
-    propagateOperationToChildRoles(AHCSConstants.PERFORM_MISSION_TASK);
-
-    // write the aicoind configuration file
+    // request that the sibling skill write the aicoind configuration file
     final Message writeConfigurationFileTaskmessage = new Message(
             getQualifiedName(), // senderQualifiedName
             getClassName(), // senderService
@@ -206,8 +204,8 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
             UUID.randomUUID(), // conversationId,
             UUID.randomUUID(), // replyWith,
             XAIWriteConfigurationFile.class.getName(), // recipientService
-            AHCSConstants.WRITE_CONFIGURATION_FILE_TASK); // operation
-    writeConfigurationFileTaskmessage.put(AHCSConstants.WRITE_CONFIGURATION_FILE_TASK_DIRECTORY_PATH, AICOIN_DIRECTORY_PATH);
+            AHCSConstants.WRITE_CONFIGURATION_FILE_INFO); // operation
+    writeConfigurationFileTaskmessage.put(AHCSConstants.WRITE_CONFIGURATION_FILE_INFO_DIRECTORY_PATH, AICOIN_DIRECTORY_PATH);
     // set timeout
     setMessageReplyTimeout(
             writeConfigurationFileTaskmessage,
