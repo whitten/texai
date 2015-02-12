@@ -49,19 +49,17 @@ public class ContainerDeployment extends AbstractSkill {
    * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
    * with regard to the conversation.
    *
-   * @param message the given message
+   * @param receivedMessage the given message
    */
   @Override
-  public void receiveMessage(Message message) {
+  public void receiveMessage(Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
     assert getRole().getNode().getNodeRuntime() != null;
 
-    final String operation = message.getOperation();
-    if (!isOperationPermitted(message)) {
-      sendMessage(Message.operationNotPermittedMessage(
-              message, // receivedMessage
-              this)); // skill
+    final String operation = receivedMessage.getOperation();
+    if (!isOperationPermitted(receivedMessage)) {
+      sendOperationNotPermittedInfoMessage(receivedMessage);
       return;
     }
     switch (operation) {
@@ -89,7 +87,7 @@ public class ContainerDeployment extends AbstractSkill {
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
                 "state must be isolated-from-network, but is " + getSkillState();
-        joinAcknowledgedTask(message);
+        joinAcknowledgedTask(receivedMessage);
         return;
 
       /**
@@ -104,7 +102,7 @@ public class ContainerDeployment extends AbstractSkill {
           LOGGER.info("now ready");
         }
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
-        performMission(message);
+        performMission(receivedMessage);
         return;
 
       /**
@@ -117,18 +115,20 @@ public class ContainerDeployment extends AbstractSkill {
        */
       case AHCSConstants.DEPLOY_FILES_TASK:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        deployFiles(message);
+        deployFiles(receivedMessage);
         return;
 
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
-        LOGGER.warn(message);
+        LOGGER.warn(receivedMessage);
         return;
 
       // handle other operations ...
     }
     // otherwise, the message is not understood
-    sendMessage(Message.notUnderstoodMessage(
-            message, // receivedMessage
+    sendMessage(
+            receivedMessage,
+            Message.notUnderstoodMessage(
+            receivedMessage, // receivedMessage
             this)); // skill
   }
 
@@ -181,22 +181,22 @@ public class ContainerDeployment extends AbstractSkill {
   }
 
   /**
-   * Perform the specified file deployment task, and reply with a task accomplished message when done.
+   * Perform the specified file deployment task, and reply with a task receivedMessage message when done.
    *
-   * @param message the received perform mission task message
+   * @param receivedMessage the received perform mission task message
    */
-  private void deployFiles(final Message message) {
+  private void deployFiles(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
-    final String filePath = (String) message.get(AHCSConstants.MSG_PARM_FILE_PATH);
+    final String filePath = (String) receivedMessage.get(AHCSConstants.MSG_PARM_FILE_PATH);
     assert StringUtils.isNonEmptyString(filePath) : "filePath must be a non-empty string";
 
-    final String fileHash = (String) message.get(AHCSConstants.MSG_PARM_FILE_HASH);
+    final String fileHash = (String) receivedMessage.get(AHCSConstants.MSG_PARM_FILE_HASH);
     assert StringUtils.isNonEmptyString(fileHash) : "fileHash must be a non-empty string";
 
-    final String manifestJSONString = (String) message.get(AHCSConstants.DEPLOY_FILES_TASK_MANIFEST);
+    final String manifestJSONString = (String) receivedMessage.get(AHCSConstants.DEPLOY_FILES_TASK_MANIFEST);
     assert StringUtils.isNonEmptyString(manifestJSONString) : "manifestJSONString must be a non-empty string";
 
     try {
@@ -277,9 +277,9 @@ public class ContainerDeployment extends AbstractSkill {
     }
 
     // send a Task Accomplished Info message back to NetworkOperationAgent.NetworkDeploymentRole.
-    final Message taskAccomplishedInfoMessage = makeReplyMessage(message, // receivedMessage
+    final Message taskAccomplishedInfoMessage = makeReplyMessage(receivedMessage, // receivedMessage
             AHCSConstants.TASK_ACCOMPLISHED_INFO); // operation
-    sendMessage(taskAccomplishedInfoMessage);
+    sendMessage(receivedMessage, taskAccomplishedInfoMessage);
   }
 
   /**

@@ -64,23 +64,21 @@ public final class ContainerHeartbeat extends AbstractSkill {
    * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
    * with regard to the conversation.
    *
-   * @param message the given message
+   * @param receivedMessage the given message
    */
   @Override
-  public void receiveMessage(Message message) {
+  public void receiveMessage(Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
     assert getRole().getNode().getNodeRuntime() != null;
 
-    final String operation = message.getOperation();
-    if (!isOperationPermitted(message)) {
-      sendMessage(Message.operationNotPermittedMessage(
-              message, // receivedMessage
-              this)); // skill
+    final String operation = receivedMessage.getOperation();
+    if (!isOperationPermitted(receivedMessage)) {
+      sendOperationNotPermittedInfoMessage(receivedMessage);
       return;
     }
     if (operation.equals(AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO)) {
-      LOGGER.warn(message);
+      LOGGER.warn(receivedMessage);
       return;
     }
     switch (operation) {
@@ -92,9 +90,9 @@ public final class ContainerHeartbeat extends AbstractSkill {
        */
       case AHCSConstants.INITIALIZE_TASK:
         assert getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
-        initialization(message);
+        initialization(receivedMessage);
         // initialize child heartbeat roles
-        propagateOperationToChildRoles(operation);
+        propagateOperationToChildRoles(receivedMessage);
         if (getNodeRuntime().isFirstContainerInNetwork()) {
           setSkillState(AHCSConstants.State.READY);
         } else {
@@ -111,7 +109,7 @@ public final class ContainerHeartbeat extends AbstractSkill {
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
                 "state must be isolated-from-network, but is " + getSkillState();
-        joinAcknowledgedTask(message);
+        joinAcknowledgedTask(receivedMessage);
         return;
 
       /**
@@ -127,23 +125,25 @@ public final class ContainerHeartbeat extends AbstractSkill {
           LOGGER.info("now ready");
         }
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
-        performMission(message);
+        performMission(receivedMessage);
         return;
 
       case AHCSConstants.KEEP_ALIVE_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
-        recordKeepAlive(message);
+        recordKeepAlive(receivedMessage);
         return;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
-        LOGGER.warn(message);
+        LOGGER.warn(receivedMessage);
         return;
     }
 
     // other operations ...
-    sendMessage(Message.notUnderstoodMessage(
-            message, // receivedMessage
+    sendMessage(
+            receivedMessage,
+            Message.notUnderstoodMessage(
+            receivedMessage, // receivedMessage
             this)); // skill
   }
 
@@ -211,14 +211,14 @@ public final class ContainerHeartbeat extends AbstractSkill {
   /**
    * Perform this role's mission, which is to manage the network, the containers, and the A.I. Coin agents within the containers.
    *
-   * @param message the received perform mission task message
+   * @param receivedMessage the received perform mission task message
    */
-  private void performMission(final Message message) {
+  private void performMission(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "message must not be null";
     assert !getRole().getChildQualifiedNames().isEmpty() : "must have at least one child role";
 
-    propagateOperationToChildRolesSeparateThreads(AHCSConstants.PERFORM_MISSION_TASK);
+    propagateOperationToChildRolesSeparateThreads(receivedMessage);
   }
 
   /**
@@ -504,7 +504,9 @@ public final class ContainerHeartbeat extends AbstractSkill {
             outboundHeartbeatInfo.service,
             AHCSConstants.KEEP_ALIVE_INFO); // operation
     LOGGER.info(getContainerName() + " sending keep-alive to " + Node.extractContainerName(outboundHeartbeatInfo.role.getParentQualifiedName()));
-    sendMessage(keepAliveInfoMessage);
+    sendMessage(
+            null, // received message, which is null because this sent message is triggered by a timer
+            keepAliveInfoMessage);
 
     outboundHeartbeatInfo.heartbeatSentMillis = System.currentTimeMillis();
   }

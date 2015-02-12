@@ -76,19 +76,17 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
   /**
    * Receives and attempts to process the given message.
    *
-   * @param message the given message
+   * @param receivedMessage the given message
    */
   @Override
-  public void receiveMessage(Message message) {
+  public void receiveMessage(Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
     assert getRole().getNode().getNodeRuntime() != null;
 
-    final String operation = message.getOperation();
-    if (!isOperationPermitted(message)) {
-      sendMessage(Message.operationNotPermittedMessage(
-              message, // receivedMessage
-              this)); // skill
+    final String operation = receivedMessage.getOperation();
+    if (!isOperationPermitted(receivedMessage)) {
+      sendOperationNotPermittedInfoMessage(receivedMessage);
       return;
     }
     switch (operation) {
@@ -102,7 +100,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
         assert getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
 
         // initialize child roles
-        propagateOperationToChildRoles(operation);
+        propagateOperationToChildRoles(receivedMessage);
 
         if (getNodeRuntime().isFirstContainerInNetwork()) {
           setSkillState(AHCSConstants.State.READY);
@@ -125,7 +123,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
        */
       case AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        joinNetworkSingletonAgent(message);
+        joinNetworkSingletonAgent(receivedMessage);
         return;
 
       /**
@@ -137,7 +135,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
                 "state must be isolated-from-network, but is " + getSkillState();
-        joinAcknowledgedTask(message);
+        joinAcknowledgedTask(receivedMessage);
         return;
 
       /**
@@ -149,7 +147,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
        */
       case AHCSConstants.DELEGATE_PERFORM_MISSION_TASK:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        handleDelegatePerformMissionTask(message);
+        handleDelegatePerformMissionTask(receivedMessage);
         return;
 
       /**
@@ -160,7 +158,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
        */
       case AHCSConstants.PERFORM_MISSION_TASK:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        performMission(message);
+        performMission(receivedMessage);
         return;
 
       /**
@@ -180,18 +178,20 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
        */
       case AHCSConstants.TASK_ACCOMPLISHED_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        handleTaskAccomplishedInfo(message);
+        handleTaskAccomplishedInfo(receivedMessage);
         return;
 
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
-        LOGGER.warn(message);
+        LOGGER.warn(receivedMessage);
         return;
 
       // handle other operations ...
     }
     // otherwise, the message is not understood
-    sendMessage(Message.notUnderstoodMessage(
-            message, // receivedMessage
+    sendMessage(
+            receivedMessage,
+            Message.notUnderstoodMessage(
+            receivedMessage, // receivedMessage
             this)); // skill
   }
 
@@ -234,15 +234,15 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
   /**
    * Performs this role's mission. It starts a timer task that periodically checks for files to deploy to the network.
    *
-   * @param message the received perform mission task message
+   * @param receivedMessage the received perform mission task message
    */
-  private void performMission(final Message message) {
+  private void performMission(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
     assert !getRole().getChildQualifiedNames().isEmpty() : "must have at least one child role";
 
-    propagateOperationToChildRolesSeparateThreads(AHCSConstants.PERFORM_MISSION_TASK);
+    propagateOperationToChildRolesSeparateThreads(receivedMessage);
     createCheckForDeploymentTimerTask();
   }
 
@@ -250,17 +250,17 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
    * Receives notification that either a file transfer request has been completed, or that a child container has completed deploying the
    * transferred zip file.
    *
-   * @param message the received perform mission task message
+   * @param receivedMessage the received perform mission task message
    */
-  private void handleTaskAccomplishedInfo(final Message message) {
+  private void handleTaskAccomplishedInfo(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
     assert StringUtils.isNonEmptyString(manifestJSONString);
 
-    final String senderRole = Role.extractRoleName(message.getSenderQualifiedName());
+    final String senderRole = Role.extractRoleName(receivedMessage.getSenderQualifiedName());
     if (senderRole.equals("NetworkFileTransferRole")) {
-      final String recipientContainerName = deploymentFileTransferConversationDictionary.get(message.getConversationId()).recipientContainerName;
+      final String recipientContainerName = deploymentFileTransferConversationDictionary.get(receivedMessage.getConversationId()).recipientContainerName;
       int pendingFileTransferContainerNames_size;
       LOGGER.info(recipientContainerName + " completed a zip file transfer");
       synchronized (pendingFileTransferContainerNames) {
@@ -272,6 +272,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
       if (pendingFileTransferContainerNames_size == 0) {
       // task the child containers to deploy files from the zip archive that they received
         final DeploymentFilesRunable deploymentFilesRunable = new DeploymentFilesRunable(
+                receivedMessage,
                 this); // networkDeployment
         if (isUnitTest()) {
           // single threaded to completion
@@ -282,7 +283,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
       }
     } else {
       assert senderRole.equals("ContainerDeploymentRole");
-      final String senderContainerName = message.getSenderContainerName();
+      final String senderContainerName = receivedMessage.getSenderContainerName();
       LOGGER.info(senderContainerName + " completed deployment");
       int pendingDeploymentContainerNames_size;
       synchronized (pendingDeploymentContainerNames) {
@@ -295,7 +296,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
                 getContainerName() + ".NetworkOperationAgent.NetworkOperationRole", // recipientQualifiedName
                 NetworkOperation.class.getName(), // recipientService
                 AHCSConstants.NETWORK_RESTART_REQUEST_INFO);
-        sendMessage(networkRestartRequestInfo);
+        sendMessage(receivedMessage, networkRestartRequestInfo);
       }
     }
   }
@@ -588,7 +589,9 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
       transferFileRequestInfoMessage.put(AHCSConstants.MSG_PARM_SENDER_CONTAINER_NAME, networkDeployment.getContainerName());
       transferFileRequestInfoMessage.put(AHCSConstants.MSG_PARM_RECIPIENT_CONTAINER_NAME, recipientContainerName);
 
-      networkDeployment.sendMessage(transferFileRequestInfoMessage);
+      networkDeployment.sendMessage(
+              null, // receivedMessage, triggered by a timer, not a received message
+              transferFileRequestInfoMessage);
 
       stringBuilder
               .append("deployed to ")
@@ -603,18 +606,24 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
    */
   static final class DeploymentFilesRunable implements Runnable {
 
+    // the received message
+    final Message receivedMessage;
     // the network deployment instance
     final NetworkDeployment networkDeployment;
 
     /**
      * Creates a new DeploymentFilesRunable instance.
      *
+     * @param receivedMessage the received message
      * @param networkDeployment the network deployment instance
      */
-    DeploymentFilesRunable(final NetworkDeployment networkDeployment) {
+    DeploymentFilesRunable(
+            final Message receivedMessage,
+            final NetworkDeployment networkDeployment) {
       //Preconditions
       assert networkDeployment != null : "networkDeployment must not be null";
 
+      this.receivedMessage = receivedMessage;
       this.networkDeployment = networkDeployment;
     }
 
@@ -648,7 +657,9 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
         deployFilesTaskMessage.put(AHCSConstants.MSG_PARM_FILE_HASH, networkDeployment.zippedBytesHash);
         deployFilesTaskMessage.put(AHCSConstants.DEPLOY_FILES_TASK_MANIFEST, networkDeployment.manifestJSONString);
 
-        networkDeployment.sendMessage(deployFilesTaskMessage);
+        networkDeployment.sendMessage(
+                receivedMessage,
+                deployFilesTaskMessage);
       });
     }
   }

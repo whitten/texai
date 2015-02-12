@@ -283,16 +283,18 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
     }
   }
 
-  /** Gets the sibling role having the given role name.
+  /**
+   * Gets the sibling role having the given role name.
    *
    * @param roleName the given role name
+   *
    * @return the sibling role
    */
   public Role getSiblingRole(final String roleName) {
     //Preconditions
     assert StringUtils.isNonEmptyString(roleName) : "roleName must be a non-empty string";
 
-    for (final Role role :node.getRoles()) {
+    for (final Role role : node.getRoles()) {
       final String siblingRoleName = Role.extractRoleName(role.qualifiedName);
       if (siblingRoleName.equals(roleName)) {
         return role;
@@ -493,14 +495,14 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
           LOGGER.info(getNode().getName() + ": skillDictionary:\n  " + skillDictionary);
         }
         // not understood
-        final Message message1 = new Message(
+        final Message notUnderstoodInfoMessage = new Message(
                 qualifiedName, // senderQualifiedName
                 getClass().getName(), // senderService,
                 message.getSenderQualifiedName(), // recipientQualifiedName
                 message.getSenderService(), // service
                 AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO); // operation
-        message1.put(AHCSConstants.AHCS_ORIGINAL_MESSAGE, message);
-        sendMessage(message1);
+        notUnderstoodInfoMessage.put(AHCSConstants.MSG_PARM_ORIGINAL_MESSAGE, message);
+        sendMessage(message, notUnderstoodInfoMessage);
       }
 
     } else {
@@ -512,14 +514,16 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   /**
    * Sends the given message via the node runtime.
    *
+   * @param receivedMessage the received message which invoked the skill, which may be null
    * @param message the given message
    */
-  public void sendMessageViaSeparateThread(final Message message) {
+  public void sendMessageViaSeparateThread(final Message receivedMessage, final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
     assert nodeRuntime != null : "nodeRuntime must not be null";
 
     getNodeRuntime().getExecutor().execute(new MessageSendingRunnable(
+            receivedMessage,
             message,
             this));
   }
@@ -527,9 +531,12 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   /**
    * Sends the given message via the node runtime.
    *
+   * @param receivedMessage the received message which invoked the skill, which may be null
    * @param message the given message
    */
-  public void sendMessage(final Message message) {
+  public void sendMessage(
+          final Message receivedMessage,
+          final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
     assert nodeRuntime != null : "nodeRuntime must not be null";
@@ -538,6 +545,8 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
       LOGGER.warn("cannot send message for which this role is not the sender role " + message.toDetailedString());
       throw new TexaiException("cannot send message for which this role is not the sender " + message.toDetailedString());
     }
+
+    traceMessage(receivedMessage, message);
 
     if (areRemoteCommunicationsPermitted && message.isBetweenContainers()) {
       // sign messages sent between containers
@@ -551,55 +560,73 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
     nodeRuntime.dispatchMessage(message);
   }
 
+  protected void traceMessage(
+          final Message receivedMessage,
+          final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+
+    final StringBuilder newStringBuilder = new StringBuilder();
+    final StringBuilder oldStringBuilder;
+    if (receivedMessage != null) {
+      oldStringBuilder = (StringBuilder) receivedMessage.get(AHCSConstants.MSG_PARM_MESSAGE_TRACE);
+      if (oldStringBuilder != null) {
+        newStringBuilder.append(oldStringBuilder);
+      }
+      newStringBuilder.append(receivedMessage.toBriefString()).append('\n');
+    }
+    message.put(
+            AHCSConstants.MSG_PARM_MESSAGE_TRACE, // parameterName
+            newStringBuilder); // parameterValue
+  }
+
   /**
    * Propagates the given operation to the child roles.
    *
-   * @param operation the given operation
+   * @param receivedMessage the received message
    * @param senderService the sender service
    */
   public void propagateOperationToChildRoles(
-          final String operation,
+          final Message receivedMessage,
           final String senderService) {
     //Preconditions
-    assert operation != null : "operation must not be null";
-    assert !operation.isEmpty() : "operation must not be empty";
-    assert senderService != null : "senderService must not be null";
-    assert !senderService.isEmpty() : "senderService must not be empty";
+    assert receivedMessage != null : "receivedMessage must not be null";
+    assert StringUtils.isNonEmptyString(senderService) : "senderService must not be null";
     assert !childQualifiedNames.isEmpty() : "childQualifiedNames must not be empty in " + this;
 
     childQualifiedNames.stream().forEach((childQualifiedName) -> {
-      sendMessage(new Message(
+      final Message propagatedMessage = new Message(
               qualifiedName, // senderQualifiedName
               senderService,
               childQualifiedName, // recipientQualifiedName
               null, // service
-              operation)); // operation
+              receivedMessage.getOperation());
+      sendMessage(receivedMessage, propagatedMessage);
     });
   }
 
   /**
    * Propagates the given operation to the child roles, using separate threads.
    *
-   * @param operation the given operation
+   * @param receivedMessage the received message
    * @param senderService the sender service
    */
   public void propagateOperationToChildRolesSeparateThreads(
-          final String operation,
+          final Message receivedMessage,
           final String senderService) {
     //Preconditions
-    assert operation != null : "operation must not be null";
-    assert !operation.isEmpty() : "operation must not be empty";
-    assert senderService != null : "senderService must not be null";
-    assert !senderService.isEmpty() : "senderService must not be empty";
+    assert receivedMessage != null : "receivedMessage must not be null";
+    assert StringUtils.isNonEmptyString(senderService) : "senderService must not be null";
     assert !childQualifiedNames.isEmpty() : "childQualifiedNames must not be empty";
 
     childQualifiedNames.stream().forEach((childQualifiedName) -> {
-      sendMessage(new Message(
+      final Message propagatedMessage = new Message(
               qualifiedName, // senderQualifiedName
               senderService,
               childQualifiedName, // recipientQualifiedName
               null, // service
-              operation)); // operation
+              receivedMessage.getOperation());
+      sendMessageViaSeparateThread(receivedMessage, propagatedMessage);
     });
   }
 
@@ -981,28 +1008,29 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
    */
   public static class MessageSendingRunnable implements Runnable {
 
-    /**
-     * the message to send
-     */
+    // the received message which invoked the skill, or null
+    final Message receivedMessage;
+    // the message to send
     final Message message;
-    /**
-     * the sender role
-     */
+    // the sender role
     final Role role;
 
     /**
      * Constructs a new MessageSendingRunnable instance.
      *
+     * @param receivedMessage the received message which invoked the skill, or null
      * @param message the message to send
      * @param role the sender role
      */
     public MessageSendingRunnable(
+            final Message receivedMessage,
             final Message message,
             final Role role) {
       //Preconditions
       assert message != null : "message must not be null";
       assert role != null : "role must not be null";
 
+      this.receivedMessage = receivedMessage;
       this.message = message;
       this.role = role;
     }
@@ -1013,7 +1041,7 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
     @Override
     public void run() {
       try {
-        role.sendMessage(message);
+        role.sendMessage(receivedMessage, message);
       } catch (Throwable ex) {
         LOGGER.info("Caught exception " + ex.getMessage() + ", processing the message " + message);
         LOGGER.info("Stack trace ...\n" + StringUtils.getStackTraceAsString(ex));

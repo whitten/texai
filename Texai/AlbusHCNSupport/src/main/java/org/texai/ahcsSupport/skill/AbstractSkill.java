@@ -168,29 +168,35 @@ public abstract class AbstractSkill {
   /**
    * Sends the given message via the node runtime.
    *
+   * @param receivedMessage the received message which invoked the skill, which may be null
    * @param message the given message
    */
-  protected void sendMessage(final Message message) {
+  protected void sendMessage(
+          final Message receivedMessage,
+          final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
     assert role != null : "role must not be null for " + this;
     assert message.getSenderQualifiedName().equals(getQualifiedName()) : "message sender must match this role " + message + "\nrole: " + getRole();
 
-    role.sendMessage(message);
+    role.sendMessage(receivedMessage, message);
   }
 
   /**
    * Sends the given message via the node runtime, via a separate thread.
    *
+   * @param receivedMessage the received message which invoked the skill, which may be null
    * @param message the given message
    */
-  protected void sendMessageViaSeparateThread(final Message message) {
+  protected void sendMessageViaSeparateThread(
+          final Message receivedMessage,
+          final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
     assert role != null : "role must not be null for " + this;
     assert message.getSenderQualifiedName().equals(getQualifiedName()) : "message sender must match this role " + message + "\nrole: " + getRole();
 
-    role.sendMessageViaSeparateThread(message);
+    role.sendMessageViaSeparateThread(receivedMessage, message);
   }
 
   /**
@@ -359,7 +365,7 @@ public abstract class AbstractSkill {
     assert StringUtils.isNonEmptyString(reason) : "reason must be a non-empty string";
 
     final Map<String, Object> parameterDictionary = new HashMap<>();
-    parameterDictionary.put(AHCSConstants.AHCS_ORIGINAL_MESSAGE, receivedMessage);
+    parameterDictionary.put(AHCSConstants.MSG_PARM_ORIGINAL_MESSAGE, receivedMessage);
     parameterDictionary.put(AHCSConstants.MSG_PARM_REASON, reason);
     return new Message(
             receivedMessage.getRecipientQualifiedName(), // senderQualifiedName
@@ -438,36 +444,36 @@ public abstract class AbstractSkill {
   /**
    * Propagates the given operation to the child roles, and to any service that understands the operation.
    *
-   * @param operation the given operation
+   * @param receivedMessage the given received message
    */
-  protected void propagateOperationToChildRoles(final String operation) {
+  protected void propagateOperationToChildRoles(final Message receivedMessage) {
     //Preconditions
-    assert StringUtils.isNonEmptyString(operation) : "operation must be a non-empty string";
+    assert receivedMessage != null : "receivedMessage must not be null";
     assert role != null : "role must not be null for " + this;
 
     role.propagateOperationToChildRoles(
-            operation,
-            getClassName()); // senderService
+            receivedMessage,
+            this.getClassName()); // senderService
   }
 
   /**
    * Propagates the given operation to the child roles, and to any service that understands the operation, using separate threads.
    *
-   * @param operation the given operation
+   * @param receivedMessage the given received message
    */
-  protected void propagateOperationToChildRolesSeparateThreads(final String operation) {
+  protected void propagateOperationToChildRolesSeparateThreads(final Message receivedMessage) {
     //Preconditions
-    assert StringUtils.isNonEmptyString(operation) : "operation must be a non-empty string";
+    assert receivedMessage != null : "receivedMessage must not be null";
     assert role != null : "role must not be null for " + this;
 
     if (isUnitTest.get()) {
       role.propagateOperationToChildRoles(
-              operation,
-              getClassName()); // senderService
+              receivedMessage,
+            this.getClassName()); // senderService
     } else {
       role.propagateOperationToChildRolesSeparateThreads(
-              operation,
-              getClassName()); // senderService
+              receivedMessage,
+            this.getClassName()); // senderService
     }
   }
 
@@ -476,25 +482,43 @@ public abstract class AbstractSkill {
    *
    * @param receivedMessage the received message
    */
-  protected void sendDoNotUnderstandMessage(final Message receivedMessage) {
+  protected void sendDoNotUnderstandInfoMessage(final Message receivedMessage) {
     //Preconditions
     assert receivedMessage != null : "receivedMessage must not be null";
 
-    sendMessage(Message.notUnderstoodMessage(
+    final Message notUnderstoodInfoMessage = Message.notUnderstoodMessage(
             receivedMessage,
-            this)); // skill
+            this); // skill
+    sendMessage(receivedMessage, notUnderstoodInfoMessage);
   }
+
+  /**
+   * Sends a not-understood message in response to the received message.
+   *
+   * @param receivedMessage the received message
+   */
+  protected void sendOperationNotPermittedInfoMessage(final Message receivedMessage) {
+    //Preconditions
+    assert receivedMessage != null : "receivedMessage must not be null";
+
+    final Message operationNotPermittedInfoMessage = Message.operationNotPermittedMessage(
+              receivedMessage, // receivedMessage
+              this); // skill
+    sendMessage(receivedMessage, operationNotPermittedInfoMessage);
+}
 
   /**
    * Sets a message reply timeout for the given sent-by-self message. Usually the reply is received before the timeout has elapsed, and
    * cancels the timer which is looked up by message reply-with.
    *
+   * @param receivedMessage the received message which invoked the skill which sent the message
    * @param message the given sent message
    * @param timeoutMillis the number of milliseconds to wait before
    * @param isRecoverable the indicator whether to send a timeout status message back to the message sender.
    * @param recoveryAction an optional tag which indicates the recovery action
    */
   protected void setMessageReplyTimeout(
+          final Message receivedMessage,
           final Message message,
           final long timeoutMillis,
           final boolean isRecoverable,
@@ -507,6 +531,7 @@ public abstract class AbstractSkill {
 
     final MessageTimeoutTask messageTimeoutTask = new MessageTimeoutTask(this);
     final MessageTimeOutInfo messageTimeOutInfo = new MessageTimeOutInfo(
+            receivedMessage,
             message,
             timeoutMillis,
             isRecoverable,
@@ -612,7 +637,9 @@ public abstract class AbstractSkill {
                 AHCSConstants.MESSAGE_TIMEOUT_INFO); // operation
       }
       timeoutMessage.put(AHCSConstants.MESSAGE_TIMEOUT_INFO_ORIGINAL_MESSAGE, messageTimeOutInfo.message);
-      skill.sendMessageViaSeparateThread(timeoutMessage);
+      skill.sendMessageViaSeparateThread(
+              messageTimeOutInfo.receivedMessage,
+              timeoutMessage);
     }
 
   }
@@ -622,6 +649,8 @@ public abstract class AbstractSkill {
    */
   static class MessageTimeOutInfo {
 
+    // the received message which invoked the skill which sent the message
+    private final Message receivedMessage;
     // the sent message
     private final Message message;
     // the timeout milliseconds
@@ -634,6 +663,7 @@ public abstract class AbstractSkill {
     private final MessageTimeoutTask messageTimeoutTask;
 
     MessageTimeOutInfo(
+            final Message receivedMessage,
             final Message message,
             final long timeoutMillis,
             final boolean isRecoverable,
@@ -644,6 +674,7 @@ public abstract class AbstractSkill {
       assert timeoutMillis >= 0 : "timeoutMillis must not be negative";
       assert messageTimeoutTask != null : "messageTimeoutTask must not be null";
 
+      this.receivedMessage = receivedMessage;
       this.message = message;
       this.timeoutMillis = timeoutMillis;
       this.isRecoverable = isRecoverable;
@@ -856,18 +887,20 @@ public abstract class AbstractSkill {
   /**
    * Receive the new parent role's acknowledgement of joining the network.
    *
-   * @param message the received perform mission task message
+   * @param receivedMessage the received perform mission task message
    */
-  protected void joinAcknowledgedTask(final Message message) {
+  protected void joinAcknowledgedTask(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "message must not be null";
 
-    getLogger().info("join acknowledged from " + message.getSenderQualifiedName());
+    getLogger().info("join acknowledged from " + receivedMessage.getSenderQualifiedName());
     final Message removeUnjoinedRoleInfoMessage = makeMessage(
             getContainerName() + ".ContainerOperationAgent.ContainerSingletonConfigurationRole", // recipientQualifiedName
             "org.texai.skill.singletonConfiguration.ContainerSingletonConfiguration", // recipientService
             AHCSConstants.REMOVE_UNJOINED_ROLE_INFO); // operation
-    sendMessageViaSeparateThread(removeUnjoinedRoleInfoMessage);
+    sendMessageViaSeparateThread(
+            receivedMessage,
+            removeUnjoinedRoleInfoMessage);
   }
 
   /**

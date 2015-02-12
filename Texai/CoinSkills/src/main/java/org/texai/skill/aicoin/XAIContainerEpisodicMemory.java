@@ -42,19 +42,17 @@ public class XAIContainerEpisodicMemory extends AbstractSkill {
   /** Receives and attempts to process the given message.  The skill is thread safe, given that any contained libraries are single threaded
    * with regard to the conversation.
    *
-   * @param message the given message
+   * @param receivedMessage the given message
    */
   @Override
-  public void receiveMessage(final Message message) {
+  public void receiveMessage(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "message must not be null";
     assert getRole().getNode().getNodeRuntime() != null;
 
-    final String operation = message.getOperation();
-    if (!isOperationPermitted(message)) {
-      sendMessage(Message.operationNotPermittedMessage(
-              message, // receivedMessage
-              this)); // skill
+    final String operation = receivedMessage.getOperation();
+    if (!isOperationPermitted(receivedMessage)) {
+      sendOperationNotPermittedInfoMessage(receivedMessage);
       return;
     }
     switch (operation) {
@@ -82,7 +80,7 @@ public class XAIContainerEpisodicMemory extends AbstractSkill {
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
                 "state must be isolated-from-network, but is " + getSkillState();
-        joinAcknowledgedTask(message);
+        joinAcknowledgedTask(receivedMessage);
         return;
 
       /**
@@ -98,19 +96,17 @@ public class XAIContainerEpisodicMemory extends AbstractSkill {
           LOGGER.info("now ready");
         }
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
-        performMission(message);
+        performMission(receivedMessage);
         return;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
-        LOGGER.warn(message);
+        LOGGER.warn(receivedMessage);
         return;
     }
 
 
-    sendMessage(Message.notUnderstoodMessage(
-            message, // receivedMessage
-            this)); // skill
+    sendDoNotUnderstandInfoMessage(receivedMessage);
   }
 
   /** Synchronously processes the given message.  The skill is thread safe, given that any contained libraries are single threaded

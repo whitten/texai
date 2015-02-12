@@ -65,24 +65,22 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
    * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
    * with regard to the conversation.
    *
-   * @param message the given message
+   * @param receivedMessage the given message
    */
   @Override
-  public void receiveMessage(Message message) {
+  public void receiveMessage(Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
     assert getRole().getNode().getNodeRuntime() != null;
 
-    final String operation = message.getOperation();
-    if (!isOperationPermitted(message)) {
-      if (message.getOperation().equals(AHCSConstants.SINGLETON_AGENT_HOSTS_INFO)) {
+    final String operation = receivedMessage.getOperation();
+    if (!isOperationPermitted(receivedMessage)) {
+      if (receivedMessage.getOperation().equals(AHCSConstants.SINGLETON_AGENT_HOSTS_INFO)) {
         LOGGER.info("Ignoring a reply from a subsequent seeding peer.");
-        removeMessageTimeOut(message.getInReplyTo());
+        removeMessageTimeOut(receivedMessage.getInReplyTo());
         return;
       } else {
-        sendMessage(Message.operationNotPermittedMessage(
-                message, // receivedMessage
-                this)); // skill
+        sendOperationNotPermittedInfoMessage(receivedMessage);
         return;
       }
     }
@@ -95,7 +93,7 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
        */
       case AHCSConstants.INITIALIZE_TASK:
         assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
-        propagateOperationToChildRoles(operation);
+        propagateOperationToChildRoles(receivedMessage);
         if (getNodeRuntime().isFirstContainerInNetwork()) {
           setSkillState(AHCSConstants.State.READY);
         } else {
@@ -114,7 +112,7 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
       case AHCSConstants.JOIN_NETWORK_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
                 "state must be isolated-from-network, but is " + getSkillState();
-        joinNetwork(message);
+        joinNetwork(receivedMessage);
         return;
 
       /**
@@ -132,7 +130,7 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
       case AHCSConstants.SINGLETON_AGENT_HOSTS_INFO:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
                 "state must be isolated-from-network, but is " + getSkillState();
-        handleSeedConnectionReply(message);
+        handleSeedConnectionReply(receivedMessage);
         return;
 
       /**
@@ -144,7 +142,7 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
                 "state must be isolated-from-network, but is " + getSkillState();
-        joinAcknowledgedTask(message);
+        joinAcknowledgedTask(receivedMessage);
         return;
 
       /**
@@ -159,7 +157,7 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
           LOGGER.info("now ready");
         }
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
-        performMission(message);
+        performMission(receivedMessage);
         return;
 
       /**
@@ -174,7 +172,7 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
        */
       case AHCSConstants.SEED_CONNECTION_REQUEST_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
-        seedConnectionRequest(message);
+        seedConnectionRequest(receivedMessage);
         return;
 
       /**
@@ -188,7 +186,7 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
        */
       case AHCSConstants.MESSAGE_TIMEOUT_INFO:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) || getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
-        seedConnectionRequestTimeout(message);
+        seedConnectionRequestTimeout(receivedMessage);
         return;
 
       /**
@@ -208,7 +206,7 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
       case AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
                 "state must be isolated-from-network, but is " + getSkillState();
-        configureSingletonAgentHostsTask(message);
+        configureSingletonAgentHostsTask(receivedMessage);
         return;
 
       /**
@@ -218,7 +216,7 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
        */
       case AHCSConstants.ADD_UNJOINED_ROLE_INFO:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "state must be isolated-from-network";
-        addUnjoinedRole(message);
+        addUnjoinedRole(receivedMessage);
         return;
 
       /**
@@ -230,19 +228,17 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
        */
       case AHCSConstants.REMOVE_UNJOINED_ROLE_INFO:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "state must be isolated-from-network";
-        removeUnjoinedRole(message);
+        removeUnjoinedRole(receivedMessage);
         return;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
-        LOGGER.warn(message);
+        LOGGER.warn(receivedMessage);
         return;
 
     }
     // otherwise, the message is not understood
-    sendMessage(Message.notUnderstoodMessage(
-            message, // receivedMessage
-            this)); // skill
+    sendDoNotUnderstandInfoMessage(receivedMessage);
   }
 
   /**
@@ -298,10 +294,10 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
   /**
    * Joins the network.
    *
-   * @param message the received Join Network Task message
+   * @param receivedMessage the received Join Network Task message
    */
   @SuppressWarnings("unchecked")
-  private void joinNetwork(final Message message) {
+  private void joinNetwork(final Message receivedMessage) {
     //Preconditions
     assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "state must be isolated-from-network";
 
@@ -338,6 +334,7 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
       if (!getContainerName().equals(Node.extractContainerName(seedNodeInfo.getQualifiedName()))) {
         LOGGER.info("Connecting to seed " + seedNodeInfo);
         connectToSeedPeer(
+                receivedMessage,
                 seedNodeInfo.getQualifiedName(), // peerQualifiedName
                 seedNodeInfo.getHostName(),
                 seedNodeInfo.getPort());
@@ -348,11 +345,13 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
   /**
    * Connects to the given seed peer.
    *
+   * @param receivedMessage the received message
    * @param peerQualifiedName the seed peer name
    * @param hostName the host name
    * @param port the port
    */
   private void connectToSeedPeer(
+          final Message receivedMessage,
           final String peerQualifiedName,
           final String hostName,
           final int port) {
@@ -383,64 +382,65 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
             getRole().getX509Certificate());
     // set timeout
     setMessageReplyTimeout(
+            receivedMessage,
             connectionRequestMessage,
             10000, // timeoutMillis
             true, // isRecoverable
             null); // recoveryAction
-    sendMessageViaSeparateThread(connectionRequestMessage);
+    sendMessageViaSeparateThread(receivedMessage, connectionRequestMessage);
   }
 
   /**
    * Process the received connection request by responding with the current network configuration.
    *
-   * @param message the received seed connection request message
+   * @param receivedMessage the received seed connection request message
    */
-  private void seedConnectionRequest(final Message message) {
+  private void seedConnectionRequest(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "Preconditions must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
-    LOGGER.info("received a seed connection request from " + message.getSenderContainerName());
+    LOGGER.info("received a seed connection request from " + receivedMessage.getSenderContainerName());
 
     final SingletonAgentHosts singletonAgentHosts = singletonAgentHosts();
     LOGGER.info(singletonAgentHosts.toDetailedString());
 
     final Message singletonAgentHostsMessage = makeReplyMessage(
-            message, // receivedMessage
+            receivedMessage, // receivedMessage
             AHCSConstants.SINGLETON_AGENT_HOSTS_INFO); // operation
     singletonAgentHostsMessage.put(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS, singletonAgentHosts);
     singletonAgentHostsMessage.put(AHCSConstants.MSG_PARM_X509_CERTIFICATE, getRole().getX509Certificate());
 
     LOGGER.info("singletonAgentHostsMessage");
 
-    sendMessage(singletonAgentHostsMessage);
+    sendMessage(receivedMessage, singletonAgentHostsMessage);
   }
 
   /**
    * Handles the received connection reply.
    *
-   * @param message the received seed connection reply message
+   * @param receivedMessage the received seed connection reply message
    */
-  private void handleSeedConnectionReply(final Message message) {
+  private void handleSeedConnectionReply(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
-    assert message.getInReplyTo() != null : "message in-reply-to must not be null\n" + message;
+    assert receivedMessage != null : "message must not be null";
+    assert receivedMessage.getInReplyTo() != null : "message in-reply-to must not be null\n" + receivedMessage;
 
-    removeMessageTimeOut(message.getInReplyTo());
-    LOGGER.info("received a seed connection reply from " + message.getSenderContainerName());
+    removeMessageTimeOut(receivedMessage.getInReplyTo());
+    LOGGER.info("received a seed connection reply from " + receivedMessage.getSenderContainerName());
 
     if (isSeedConfigurationInfoReceived.getAndSet(true)) {
-      LOGGER.info("ignoring a redundant seed connection reply from " + message.getSenderContainerName());
+      LOGGER.info("ignoring a redundant seed connection reply from " + receivedMessage.getSenderContainerName());
     } else {
       final SingletonAgentHosts singletonAgentHosts
-              = (SingletonAgentHosts) message.get(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS);
+              = (SingletonAgentHosts) receivedMessage.get(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS);
       LOGGER.info(singletonAgentHosts.toDetailedString());
 
       // send an singletonAgentHosts_Info message to the NetworkOperationsAgent.
       final String recipientContainer = singletonAgentHosts.getContainer("NetworkOperationAgent");
       assert recipientContainer != null;
-      final String recipientQualifiedName =
-              recipientContainer + ".NetworkOperationAgent.NetworkSingletonConfigurationRole";
+      final String recipientQualifiedName
+              = recipientContainer + ".NetworkOperationAgent.NetworkSingletonConfigurationRole";
 
       final Message singletonAgentHostsMessage = makeMessage(
               recipientQualifiedName,
@@ -451,31 +451,32 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
               AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS, // parameterName
               singletonAgentHosts); // parameterValue
 
-      sendMessageViaSeparateThread(singletonAgentHostsMessage);
+      sendMessageViaSeparateThread(receivedMessage, singletonAgentHostsMessage);
     }
   }
 
   /**
    * Handles a seed connection request timeout message.
    *
-   * @param message the timeout message
+   * @param receivedMessage the timeout message
    */
-  private void seedConnectionRequestTimeout(final Message message) {
+  private void seedConnectionRequestTimeout(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
 
     if (isSeedConfigurationInfoReceived.get()) {
       // no need to retry the seed peer connection as the configuration was provided by another seed peer
       return;
     }
 
-    final Message connectionRequestMessage = (Message) message.get(AHCSConstants.MESSAGE_TIMEOUT_INFO_ORIGINAL_MESSAGE);
+    final Message connectionRequestMessage = (Message) receivedMessage.get(AHCSConstants.MESSAGE_TIMEOUT_INFO_ORIGINAL_MESSAGE);
     assert connectionRequestMessage.getOperation().equals(AHCSConstants.SEED_CONNECTION_REQUEST_INFO);
     final String peerQualifiedName = connectionRequestMessage.getRecipientQualifiedName();
     final String hostName = (String) connectionRequestMessage.get(AHCSConstants.MSG_PARM_HOST_NAME);
     final int port = (int) connectionRequestMessage.get(AHCSConstants.SEED_CONNECTION_REQUEST_INFO_PORT);
 
     connectToSeedPeer(
+            receivedMessage,
             peerQualifiedName,
             hostName,
             port);
@@ -484,15 +485,15 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
   /**
    * Propagate the task to configure roles for singleton agent hosts.
    *
-   * @param message the configure singleton agent hosts task message
+   * @param receivedMessage the configure singleton agent hosts task message
    */
-  private void configureSingletonAgentHostsTask(final Message message) {
+  private void configureSingletonAgentHostsTask(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
 
     LOGGER.info("configuring the child roles with singleton agent hosts");
     final SingletonAgentHosts singletonAgentHosts
-            = (SingletonAgentHosts) message.get(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS); // parameterName
+            = (SingletonAgentHosts) receivedMessage.get(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS); // parameterName
     assert singletonAgentHosts != null;
 
     getRole().getChildQualifiedNames().stream().sorted().forEach(childQualifiedName -> {
@@ -501,52 +502,54 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
               ConfigureParentToSingleton.class.getName(), // recipientService
               AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK); // operation
       configureSingletonAgentHostsTask.put(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS, singletonAgentHosts);
-      sendMessageViaSeparateThread(configureSingletonAgentHostsTask);
+      sendMessageViaSeparateThread(receivedMessage, configureSingletonAgentHostsTask);
     });
   }
 
   /**
    * Adds the given sender to the set of roles which have not yet joined the network.
    *
-   * @param message the Add Unjoined Role Info message sent by
+   * @param receivedMessage the Add Unjoined Role Info message sent by
    */
-  private void addUnjoinedRole(final Message message) {
+  private void addUnjoinedRole(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
-    assert StringUtils.isNonEmptyString((String) message.get(AHCSConstants.MSG_PARM_ROLE_QUALIFIED_NAME)) :
+    assert receivedMessage != null : "receivedMessage must not be null";
+    assert StringUtils.isNonEmptyString((String) receivedMessage.get(AHCSConstants.MSG_PARM_ROLE_QUALIFIED_NAME)) :
             "message missing role qualified name parameter";
-    assert !unjoinedChildQualifiedNames.contains((String) message.get(AHCSConstants.MSG_PARM_ROLE_QUALIFIED_NAME)) :
-            "duplicate entry for " + message.getSenderQualifiedName();
+    assert !unjoinedChildQualifiedNames.contains((String) receivedMessage.get(AHCSConstants.MSG_PARM_ROLE_QUALIFIED_NAME)) :
+            "duplicate entry for " + receivedMessage.getSenderQualifiedName();
 
     synchronized (unjoinedChildQualifiedNames) {
-      unjoinedChildQualifiedNames.add((String) message.get(AHCSConstants.MSG_PARM_ROLE_QUALIFIED_NAME));
+      unjoinedChildQualifiedNames.add((String) receivedMessage.get(AHCSConstants.MSG_PARM_ROLE_QUALIFIED_NAME));
     }
-    LOGGER.debug("added unjoined role " + message.getSenderQualifiedName() + ", count: " + unjoinedChildQualifiedNames.size());
+    LOGGER.debug("added unjoined role " + receivedMessage.getSenderQualifiedName() + ", count: " + unjoinedChildQualifiedNames.size());
   }
 
   /**
    * Removes the given sender from the set of roles which have not yet joined the network.
    *
-   * @param message the Add Unjoined Role Info message sent by
+   * @param receivedMessage the Add Unjoined Role Info message sent by
    */
-  private void removeUnjoinedRole(final Message message) {
+  private void removeUnjoinedRole(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
     assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) : "state must be isolated-from-network";
-    assert unjoinedChildQualifiedNames.contains(message.getSenderQualifiedName()) : "missing entry for " + message.getSenderQualifiedName();
+    assert unjoinedChildQualifiedNames.contains(receivedMessage.getSenderQualifiedName()) : "missing entry for " + receivedMessage.getSenderQualifiedName();
 
     boolean isEmpty;
     synchronized (unjoinedChildQualifiedNames) {
-      unjoinedChildQualifiedNames.remove(message.getSenderQualifiedName());
+      unjoinedChildQualifiedNames.remove(receivedMessage.getSenderQualifiedName());
       isEmpty = unjoinedChildQualifiedNames.isEmpty();
-      LOGGER.debug("removed unjoined role " + message.getSenderQualifiedName() + ", count remaining: " + unjoinedChildQualifiedNames.size());
+      LOGGER.debug("removed unjoined role " + receivedMessage.getSenderQualifiedName() + ", count remaining: " + unjoinedChildQualifiedNames.size());
       //LOGGER.debug(unjoinedChildQualifiedNames);
     }
 
     if (isEmpty) {
       LOGGER.info("all roles having network singleton parents, joined the network");
       // send a Network Join Complete Info message to NetworkOperationAgent.NetworkSingletonConfigurationRole
-      sendMessageViaSeparateThread(makeMessage(
+      sendMessageViaSeparateThread(
+              receivedMessage,
+              makeMessage(
               getRole().getParentQualifiedName(), // recipientQualifiedName
               NetworkSingletonConfiguration.class.getName(), // recipientService
               AHCSConstants.NETWORK_JOIN_COMPLETE_INFO)); // operation
@@ -621,16 +624,16 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
    * Perform this role's mission, which is to configure the roles in this container whose parents are nomadic singleton roles hosted on a
    * probably remote super-peer.
    *
-   * @param message the received perform mission task message
+   * @param receivedMessage the received perform mission task message
    */
   @SuppressWarnings("unchecked")
-  private void performMission(final Message message) {
+  private void performMission(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "message must not be null";
     assert !getRole().getChildQualifiedNames().isEmpty() : "must have at least one child role";
 
     LOGGER.info("performing the mission");
-    propagateOperationToChildRoles(AHCSConstants.PERFORM_MISSION_TASK);
+    propagateOperationToChildRoles(receivedMessage);
   }
 
 }

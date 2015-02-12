@@ -331,7 +331,7 @@ public class ContainerFileSenderTest {
     assertNotNull(sentMessage.getConversationId());
     assertEquals(sentMessage.getConversationId().toString(), conversationId.toString());
     assertNull(containerFileSender.getFileTransferRequestInfo(conversationId));
-    final Message originalMessage = (Message) sentMessage.get(AHCSConstants.AHCS_ORIGINAL_MESSAGE);
+    final Message originalMessage = (Message) sentMessage.get(AHCSConstants.MSG_PARM_ORIGINAL_MESSAGE);
     assertNotNull(originalMessage);
     assertEquals(originalMessage.toBriefString(), prepareToSendFileTaskMessage.toBriefString());
     assertEquals(sentMessage.get(AHCSConstants.MSG_PARM_REASON),
@@ -385,7 +385,7 @@ public class ContainerFileSenderTest {
     ContainerFileSender instance = new ContainerFileSender();
     final List<String> understoodOperations = new ArrayList<>(Arrays.asList(instance.getUnderstoodOperations()));
     Collections.sort(understoodOperations);
-    assertEquals("[initialize_Task, messageNotUnderstood_Info, performMission_Task, prepareToSendFile_Task, taskAccomplished_Info, transferFile_Task]", understoodOperations.toString());
+    assertEquals("[initialize_Task, joinAcknowledged_Task, messageNotUnderstood_Info, performMission_Task, prepareToSendFile_Task, taskAccomplished_Info, transferFile_Task]", understoodOperations.toString());
   }
 
 }

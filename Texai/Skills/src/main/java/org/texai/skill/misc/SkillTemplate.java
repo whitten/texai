@@ -37,19 +37,17 @@ public class SkillTemplate extends AbstractSkill {
    * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
    * with regard to the conversation.
    *
-   * @param message the given message
+   * @param receivedMessage the given message
    */
   @Override
-  public void receiveMessage(Message message) {
+  public void receiveMessage(Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
     assert getRole().getNode().getNodeRuntime() != null;
 
-    final String operation = message.getOperation();
-    if (!isOperationPermitted(message)) {
-      sendMessage(Message.operationNotPermittedMessage(
-              message, // receivedMessage
-              this)); // skill
+    final String operation = receivedMessage.getOperation();
+    if (!isOperationPermitted(receivedMessage)) {
+      sendOperationNotPermittedInfoMessage(receivedMessage);
       return;
     }
     switch (operation) {
@@ -78,7 +76,7 @@ public class SkillTemplate extends AbstractSkill {
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
                 "state must be isolated-from-network, but is " + getSkillState();
-        joinAcknowledgedTask(message);
+        joinAcknowledgedTask(receivedMessage);
         return;
 
       /**
@@ -93,19 +91,17 @@ public class SkillTemplate extends AbstractSkill {
           LOGGER.info("now ready");
         }
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
-        performMission(message);
+        performMission(receivedMessage);
         return;
 
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
-        LOGGER.warn(message);
+        LOGGER.warn(receivedMessage);
         return;
 
       // handle other operations ...
 
     }
-    sendMessage(Message.notUnderstoodMessage(
-            message, // receivedMessage
-            this)); // skill
+    sendDoNotUnderstandInfoMessage(receivedMessage);
   }
 
   /**
@@ -136,6 +132,7 @@ public class SkillTemplate extends AbstractSkill {
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.INITIALIZE_TASK,
+      AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.PERFORM_MISSION_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO
     };

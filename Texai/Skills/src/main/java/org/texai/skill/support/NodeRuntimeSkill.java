@@ -65,18 +65,16 @@ public class NodeRuntimeSkill extends AbstractSkill {
    * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
    * with regard to the conversation.
    *
-   * @param message the given message
+   * @param receivedMessage the given message
    */
   @Override
-  public void receiveMessage(final Message message) {
+  public void receiveMessage(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "message must not be null";
 
-    final String operation = message.getOperation();
-    if (!isOperationPermitted(message)) {
-      sendMessage(Message.operationNotPermittedMessage(
-              message, // receivedMessage
-              this)); // skill
+    final String operation = receivedMessage.getOperation();
+    if (!isOperationPermitted(receivedMessage)) {
+      sendOperationNotPermittedInfoMessage(receivedMessage);
       return;
     }
     switch (operation) {
@@ -109,17 +107,15 @@ public class NodeRuntimeSkill extends AbstractSkill {
         }
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
         assert getRole().getChildQualifiedNames().isEmpty() : "must not have child roles";
-        listenForConnections(message);
+        listenForConnections(receivedMessage);
         return;
 
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
-        LOGGER.warn(message);
+        LOGGER.warn(receivedMessage);
         return;
 
     }
-    sendMessage(Message.notUnderstoodMessage(
-            message, // receivedMessage
-            this)); // skill
+    sendDoNotUnderstandInfoMessage(receivedMessage);
   }
 
   /**

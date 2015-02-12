@@ -87,7 +87,7 @@ public class SkillTemplateTest {
   }
 
   /**
-   * Test of class NetworkDeployment initialize task message.
+   * Test of class SkillTemplate initialize task message.
    */
   @Test
   public void testInitializeTaskMessage() {
@@ -97,7 +97,7 @@ public class SkillTemplateTest {
     skillTestHarness.setSkillState(AHCSConstants.State.UNINITIALIZED, skillClassName);
     final Message initializeMessage = new Message(
             parentQualifiedName, // senderQualifiedName
-            NetworkOperation.class.getName(), // senderService
+            parentService, // senderService
             containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
             skillClassName, // recipientService
             AHCSConstants.INITIALIZE_TASK); // operation
@@ -141,6 +141,34 @@ public class SkillTemplateTest {
   }
 
   /**
+   * Test of class SkillTemplate - Join Acknowledged Task.
+   */
+  @Test
+  public void testJoinAcknowledgedTask() {
+    LOGGER.info("testing " + AHCSConstants.JOIN_ACKNOWLEDGED_TASK + " message");
+
+    skillTestHarness.reset();
+    skillTestHarness.setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK, skillClassName);
+    final Message joinAcknowledgedTaskMessage = new Message(
+            parentQualifiedName, // senderQualifiedName
+            parentService, // senderService
+            containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
+            skillClassName, // recipientService
+            AHCSConstants.JOIN_ACKNOWLEDGED_TASK); // operation
+
+    skillTestHarness.dispatchMessage(joinAcknowledgedTaskMessage);
+
+    assertEquals("ISOLATED_FROM_NETWORK", skillTestHarness.getSkillState(skillClassName).toString());
+    assertNull(skillTestHarness.getOperationAndSenderServiceInfo());
+    final Message sentMessage = skillTestHarness.getSentMessage();
+    assertNotNull(sentMessage);
+    LOGGER.info("sentMessage...\n" + sentMessage);
+    assertEquals(
+            "[removeUnjoinedRole_Info, Test.SkillTemplateAgent.SkillTemplateRole:SkillTemplate --> Test.ContainerOperationAgent.ContainerSingletonConfigurationRole:ContainerSingletonConfiguration]",
+            sentMessage.toBriefString());
+  }
+
+  /**
    * Test of getLogger method, of class SkillTemplate.
    */
   @Test
@@ -160,7 +188,7 @@ public class SkillTemplateTest {
     SkillTemplate instance = new SkillTemplate();
     final List<String> understoodOperations = new ArrayList<>(Arrays.asList(instance.getUnderstoodOperations()));
     Collections.sort(understoodOperations);
-    assertEquals("[initialize_Task, messageNotUnderstood_Info, performMission_Task]", understoodOperations.toString());
+    assertEquals("[initialize_Task, joinAcknowledged_Task, messageNotUnderstood_Info, performMission_Task]", understoodOperations.toString());
   }
 
 }

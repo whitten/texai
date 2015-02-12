@@ -66,18 +66,19 @@ public class SessionManagerSkill extends AbstractSkill {
   /** Receives and attempts to process the given message.  The skill is thread safe, given that any contained libraries are single threaded
    * with regard to the conversation.
    *
-   * @param message the given message
+   * @param receivedMessage the given message
    */
   @Override
-  public void receiveMessage(final Message message) {
+  public void receiveMessage(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "message must not be null";
 
-    final String operation = message.getOperation();
-    if (!isOperationPermitted(message)) {
-      sendMessage(Message.operationNotPermittedMessage(
-              message, // receivedMessage
-              this)); // skill
+    final String operation = receivedMessage.getOperation();
+    if (!isOperationPermitted(receivedMessage)) {
+      final Message operationNotPermittedInfoMessage = Message.operationNotPermittedMessage(
+              receivedMessage, // receivedMessage
+              this); // skill
+      sendMessage(receivedMessage, operationNotPermittedInfoMessage);
       return;
     }
     switch (operation) {
@@ -88,9 +89,9 @@ public class SessionManagerSkill extends AbstractSkill {
                 3_600_000, // delay - one hour
                 3_600_000); // period - one hour
         // initialize a dummy instance of the role
-        getSkillInstance(DUMMY_SESSION_HANDLE).receiveMessage(message);
+        getSkillInstance(DUMMY_SESSION_HANDLE).receiveMessage(receivedMessage);
         // initialize child roles
-        propagateOperationToChildRoles(operation);
+        propagateOperationToChildRoles(receivedMessage);
         if (getNodeRuntime().isFirstContainerInNetwork()) {
           setSkillState(AHCSConstants.State.READY);
         } else {
@@ -99,17 +100,17 @@ public class SessionManagerSkill extends AbstractSkill {
         return;
 
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
-        LOGGER.warn(message);
+        LOGGER.warn(receivedMessage);
         return;
     }
     assert operation.equals(AHCSConstants.REGISTER_SENSED_UTTERANCE_PROCESSOR_TASK)
             || getSkillState().equals(State.READY) : "must be in the ready state, but is " + stateDescription(getSkillState())
-            + "\nmessage: " + message;
+            + "\nmessage: " + receivedMessage;
 
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.info("delegating " + message.getOperation() + " to " + getSkillInstance(getSessionHandle(message)));
+      LOGGER.info("delegating " + receivedMessage.getOperation() + " to " + getSkillInstance(getSessionHandle(receivedMessage)));
     }
-    getSkillInstance(getSessionHandle(message)).receiveMessage(message);
+    getSkillInstance(getSessionHandle(receivedMessage)).receiveMessage(receivedMessage);
   }
 
   /** Synchronously processes the given message.  The skill is thread safe, given that any contained libraries are single threaded
@@ -200,7 +201,7 @@ public class SessionManagerSkill extends AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
 
-    String sessionHandle = (String) message.get(AHCSConstants.SESSION);
+    String sessionHandle = (String) message.get(AHCSConstants.MSG_PARM_USER_SESSION);
     if (sessionHandle == null) {
       sessionHandle = UUID.randomUUID().toString();
     }

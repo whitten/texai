@@ -399,7 +399,7 @@ public class Message implements Serializable, Comparable<Message> {
             receivedMessage.getSenderQualifiedName(), // recipientQualifiedName
             receivedMessage.getSenderService(), // service
             AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO); // operation
-    message.put(AHCSConstants.AHCS_ORIGINAL_MESSAGE, receivedMessage);
+    message.put(AHCSConstants.MSG_PARM_ORIGINAL_MESSAGE, receivedMessage);
     return message;
   }
 
@@ -424,7 +424,7 @@ public class Message implements Serializable, Comparable<Message> {
             receivedMessage.getSenderQualifiedName(), // recipientQualifiedName
             receivedMessage.getSenderService(), // recipientService
             AHCSConstants.OPERATION_NOT_PERMITTED_INFO); // operation
-    message.put(AHCSConstants.AHCS_ORIGINAL_MESSAGE, receivedMessage);
+    message.put(AHCSConstants.MSG_PARM_ORIGINAL_MESSAGE, receivedMessage);
     return message;
   }
 
@@ -763,6 +763,25 @@ public class Message implements Serializable, Comparable<Message> {
     }
     stringBuilder.append(']');
     return stringBuilder.toString();
+  }
+
+  /**
+   * Returns a brief string representation of this object, including its trace.
+   *
+   * @return a brief string representation of this object
+   */
+  public String toTraceString() {
+    final StringBuilder oldStringBuilder = (StringBuilder) get(AHCSConstants.MSG_PARM_MESSAGE_TRACE);
+    if (oldStringBuilder == null) {
+      return "no trace for " + this.toBriefString();
+    } else {
+      final StringBuilder newStringBuilder = new StringBuilder();
+      newStringBuilder
+              .append(oldStringBuilder)
+              .append(toBriefString())
+              .append('\n');
+      return newStringBuilder.toString();
+    }
   }
 
   /**

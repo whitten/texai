@@ -39,19 +39,17 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
    * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
    * with regard to the conversation.
    *
-   * @param message the given message
+   * @param receivedMessage the given message
    */
   @Override
-  public void receiveMessage(Message message) {
+  public void receiveMessage(Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
     assert getRole().getNode().getNodeRuntime() != null;
 
-    final String operation = message.getOperation();
-    if (!isOperationPermitted(message)) {
-      sendMessage(Message.operationNotPermittedMessage(
-              message, // receivedMessage
-              this)); // skill
+    final String operation = receivedMessage.getOperation();
+    if (!isOperationPermitted(receivedMessage)) {
+      sendOperationNotPermittedInfoMessage(receivedMessage);
       return;
     }
     switch (operation) {
@@ -63,7 +61,7 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
        */
       case AHCSConstants.INITIALIZE_TASK:
         assert getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
-        propagateOperationToChildRoles(operation);
+        propagateOperationToChildRoles(receivedMessage);
         if (getNodeRuntime().isFirstContainerInNetwork()) {
           setSkillState(AHCSConstants.State.READY);
         } else {
@@ -80,7 +78,7 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
                 "state must be isolated-from-network, but is " + getSkillState();
-        joinAcknowledgedTask(message);
+        joinAcknowledgedTask(receivedMessage);
         return;
 
       /**
@@ -91,7 +89,7 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
        */
       case AHCSConstants.PERFORM_MISSION_TASK:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        performMission(message);
+        performMission(receivedMessage);
         return;
 
       /**
@@ -108,7 +106,7 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
        */
       case AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        joinNetworkSingletonAgent(message);
+        joinNetworkSingletonAgent(receivedMessage);
         return;
 
       /**
@@ -120,7 +118,7 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
        */
       case AHCSConstants.DELEGATE_PERFORM_MISSION_TASK:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        handleDelegatePerformMissionTask(message);
+        handleDelegatePerformMissionTask(receivedMessage);
         return;
 
       /**
@@ -134,12 +132,12 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
        */
       case AHCSConstants.NETWORK_RESTART_REQUEST_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        handleNetworkRestartRequestInfo(message);
+        handleNetworkRestartRequestInfo(receivedMessage);
         return;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
-        LOGGER.warn(message);
+        LOGGER.warn(receivedMessage);
         return;
 
       // handle other operations ...
@@ -147,9 +145,7 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
 
     assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
 
-    sendMessage(Message.notUnderstoodMessage(
-            message, // receivedMessage
-            this)); // skill
+    sendDoNotUnderstandInfoMessage(receivedMessage);
   }
 
   /**
@@ -193,27 +189,27 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
   /**
    * Perform this role's mission, which is to manage the network, the containers, and the A.I. Coin agents within the containers.
    *
-   * @param message the received perform mission task message
+   * @param receivedMessage the received perform mission task message
    */
-  private void performMission(final Message message) {
+  private void performMission(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
     assert !getRole().getChildQualifiedNames().isEmpty() : "must have at least one child role";
 
     LOGGER.info("performing the mission");
 
-    propagateOperationToChildRolesSeparateThreads(AHCSConstants.PERFORM_MISSION_TASK);
+    propagateOperationToChildRolesSeparateThreads(receivedMessage);
   }
 
   /**
    * Perform this role's mission, which is to manage the network, the containers, and the A.I. Coin agents within the containers.
    *
-   * @param message the received perform mission task message
+   * @param receivedMessage the received perform mission task message
    */
-  private void handleNetworkRestartRequestInfo(final Message message) {
+  private void handleNetworkRestartRequestInfo(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
     LOGGER.info("Handling a network restart request");
@@ -227,7 +223,7 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
               ContainerOperation.class.getName(), // recipientService
               AHCSConstants.RESTART_CONTAINER_TASK); // operation
       restartContainerTaskMessage.put(AHCSConstants.RESTART_CONTAINER_TASK_DELAY, 5000L);
-      sendMessage(restartContainerTaskMessage);
+      sendMessage(receivedMessage, restartContainerTaskMessage);
     });
   }
 

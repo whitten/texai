@@ -33,19 +33,17 @@ public class ConfigureParentToSingleton extends AbstractSkill {
    * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
    * with regard to the conversation.
    *
-   * @param message the given message
+   * @param receivedMessage the given message
    */
   @Override
-  public void receiveMessage(Message message) {
+  public void receiveMessage(Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
     assert getRole().getNode().getNodeRuntime() != null;
 
-    final String operation = message.getOperation();
-    if (!isOperationPermitted(message)) {
-      sendMessage(Message.operationNotPermittedMessage(
-              message, // receivedMessage
-              this)); // skill
+    final String operation = receivedMessage.getOperation();
+    if (!isOperationPermitted(receivedMessage)) {
+      sendOperationNotPermittedInfoMessage(receivedMessage);
       return;
     }
     switch (operation) {
@@ -81,7 +79,7 @@ public class ConfigureParentToSingleton extends AbstractSkill {
       case AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
                 "state must be isolated-from-network, but is " + getSkillState() + ", in " + getQualifiedName();
-        configureSingletonAgentHosts(message);
+        configureSingletonAgentHosts(receivedMessage);
         return;
 
       /**
@@ -97,19 +95,17 @@ public class ConfigureParentToSingleton extends AbstractSkill {
           LOGGER.info("now ready");
         }
         assert getSkillState().equals(AHCSConstants.State.READY) :
-                "state must be ready, but was " + stateDescription() + '\n' + message.toBriefString();
-        performMission(message);
+                "state must be ready, but was " + stateDescription() + '\n' + receivedMessage.toBriefString();
+        performMission(receivedMessage);
         return;
 
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
-        LOGGER.warn(message);
+        LOGGER.warn(receivedMessage);
         return;
 
     }
     // otherwise, the message is not understood
-    sendMessage(Message.notUnderstoodMessage(
-            message, // receivedMessage
-            this)); // skill
+    sendDoNotUnderstandInfoMessage(receivedMessage);
   }
 
   /**
@@ -159,11 +155,11 @@ public class ConfigureParentToSingleton extends AbstractSkill {
   /**
    * Configures the parent roles of this agent with regard to network singleton agent/roles.
    *
-   * @param message the configure singleton agent hosts task message
+   * @param receivedMessage the configure singleton agent hosts task message
    */
-  private void configureSingletonAgentHosts(final Message message) {
+  private void configureSingletonAgentHosts(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "message must not be null";
 
     final StringBuilder stringBuilder = new StringBuilder();
     stringBuilder
@@ -175,7 +171,7 @@ public class ConfigureParentToSingleton extends AbstractSkill {
       LOGGER.info(stringBuilder.toString());
     }
     final SingletonAgentHosts singletonAgentHosts
-            = (SingletonAgentHosts) message.get(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS); // parameterName
+            = (SingletonAgentHosts) receivedMessage.get(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS); // parameterName
     assert singletonAgentHosts != null;
 
     // iterate over all roles of this agent
@@ -204,7 +200,7 @@ public class ConfigureParentToSingleton extends AbstractSkill {
                     ContainerSingletonConfiguration.class.getName(), // recipientService
                     AHCSConstants.ADD_UNJOINED_ROLE_INFO); // operation
             addUnjoinedRoleInfoMessage.put(AHCSConstants.MSG_PARM_ROLE_QUALIFIED_NAME, role.getQualifiedName());
-            sendMessage(addUnjoinedRoleInfoMessage);
+            sendMessage(receivedMessage, addUnjoinedRoleInfoMessage);
 
             // send a join info message to the new parent agent/role
             final Message joinMessage = new Message(
@@ -217,7 +213,7 @@ public class ConfigureParentToSingleton extends AbstractSkill {
             joinMessage.put(AHCSConstants.MSG_PARM_X509_CERTIFICATE, role.getX509Certificate());
 
             //TODO set and handle timeout
-            role.sendMessageViaSeparateThread(joinMessage);
+            role.sendMessageViaSeparateThread(receivedMessage, joinMessage);
           }
         }
       } else {

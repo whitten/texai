@@ -47,17 +47,17 @@ public abstract class AbstractNetworkSingletonSkill extends AbstractSkill {
   /**
    * Handles the sender's request to join the network as child of this role..
    *
-   * @param message the Join Network Singleton Agent Info message
+   * @param receivedMessage the Join Network Singleton Agent Info message
    */
   @SuppressWarnings("unchecked")
-  protected void joinNetworkSingletonAgent(final Message message) {
+  protected void joinNetworkSingletonAgent(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
-    getLogger().info("child role joining this network singleton " + message.getSenderQualifiedName());
-    final String childQualifiedName = message.getSenderQualifiedName();
-    final X509Certificate x509Certificate = (X509Certificate) message.get(AHCSConstants.MSG_PARM_X509_CERTIFICATE);
+    getLogger().info("child role joining this network singleton " + receivedMessage.getSenderQualifiedName());
+    final String childQualifiedName = receivedMessage.getSenderQualifiedName();
+    final X509Certificate x509Certificate = (X509Certificate) receivedMessage.get(AHCSConstants.MSG_PARM_X509_CERTIFICATE);
     assert x509Certificate != null;
 
     getRole().getChildQualifiedNames().add(childQualifiedName);
@@ -70,26 +70,26 @@ public abstract class AbstractNetworkSingletonSkill extends AbstractSkill {
 
     // send a acknowledged_info message to the joined peer agent/role
     final Message acknowledgedInfoMessage = makeMessage(
-            message.getSenderQualifiedName(), // recipientQualifiedName
-            message.getSenderService(), // recipientService
+            receivedMessage.getSenderQualifiedName(), // recipientQualifiedName
+            receivedMessage.getSenderService(), // recipientService
             AHCSConstants.JOIN_ACKNOWLEDGED_TASK); // operation
     acknowledgedInfoMessage.put(
             AHCSConstants.MSG_PARM_X509_CERTIFICATE, // parameterName
             getRole().getX509Certificate()); // parameterValue
-    sendMessage(acknowledgedInfoMessage);
+    sendMessage(receivedMessage, acknowledgedInfoMessage);
   }
 
   /**
-   * Handles the Delegate Perform Mission Task message by synchronously relaying it to child roles.
-   *
-   * @param message the received Delegate Become Ready Task message
+   * Handles the Delegate Perform Mission Task message by synchronously relaying it to child roles.receivedMessage.
+   * 
+   * @param receivedMessage the received Delegate Become Ready Task message
    */
-  protected void handleDelegatePerformMissionTask(final Message message) {
+  protected void handleDelegatePerformMissionTask(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
 
-    final String containerName = (String) message.get(AHCSConstants.MSG_PARM_CONTAINER_NAME);
+    final String containerName = (String) receivedMessage.get(AHCSConstants.MSG_PARM_CONTAINER_NAME);
     assert StringUtils.isNonEmptyString(containerName);
 
     getLogger().info("handling Delegate Perform Mission Task message for joined container " + containerName + " ...");
@@ -111,8 +111,8 @@ public abstract class AbstractNetworkSingletonSkill extends AbstractSkill {
                 childQualifiedName, // recipientQualifiedName
                 null, // recipientService
                 operation);
-        outboundMessage.put(AHCSConstants.MSG_PARM_CONTAINER_NAME, message.get(AHCSConstants.MSG_PARM_CONTAINER_NAME));
-        sendMessage(outboundMessage);
+        outboundMessage.put(AHCSConstants.MSG_PARM_CONTAINER_NAME, receivedMessage.get(AHCSConstants.MSG_PARM_CONTAINER_NAME));
+        sendMessage(receivedMessage, outboundMessage);
       }
     });
   }

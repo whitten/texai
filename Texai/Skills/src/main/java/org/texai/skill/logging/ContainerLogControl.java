@@ -36,19 +36,17 @@ public class ContainerLogControl extends AbstractSkill {
    * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
    * with regard to the conversation.
    *
-   * @param message the given message
+   * @param receivedMessage the given message
    */
   @Override
-  public void receiveMessage(final Message message) {
+  public void receiveMessage(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
     assert getRole().getNode().getNodeRuntime() != null;
 
-    final String operation = message.getOperation();
-    if (!isOperationPermitted(message)) {
-      sendMessage(Message.operationNotPermittedMessage(
-              message, // receivedMessage
-              this)); // skill
+    final String operation = receivedMessage.getOperation();
+    if (!isOperationPermitted(receivedMessage)) {
+      sendOperationNotPermittedInfoMessage(receivedMessage);
       return;
     }
     switch (operation) {
@@ -60,7 +58,7 @@ public class ContainerLogControl extends AbstractSkill {
        */
       case AHCSConstants.INITIALIZE_TASK:
         assert this.getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
-        initialization(message);
+        initialization(receivedMessage);
         return;
 
       /**
@@ -76,20 +74,20 @@ public class ContainerLogControl extends AbstractSkill {
           LOGGER.info("now ready");
         }
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
-        performMission(message);
+        performMission(receivedMessage);
         return;
 
       case AHCSConstants.SET_LOGGING_LEVEL:
-        setLoggingLevel((String) message.get(AHCSConstants.MSG_PARM_CLASS_NAME), // className
-                (String) message.get(AHCSConstants.MSG_PARM_LOGGING_LEVEL)); // loggingLevel
+        setLoggingLevel((String) receivedMessage.get(AHCSConstants.MSG_PARM_CLASS_NAME), // className
+                (String) receivedMessage.get(AHCSConstants.MSG_PARM_LOGGING_LEVEL)); // loggingLevel
         return;
 
       case AHCSConstants.LOG_OPERATION_TASK:
-        logOperation(message);
+        logOperation(receivedMessage);
         return;
 
       case AHCSConstants.UNLOG_OPERATION_TASK:
-        unlogOperation(message);
+        unlogOperation(receivedMessage);
         return;
 
       /**
@@ -101,19 +99,21 @@ public class ContainerLogControl extends AbstractSkill {
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
                 "state must be isolated-from-network, but is " + getSkillState();
-        joinAcknowledgedTask(message);
+        joinAcknowledgedTask(receivedMessage);
         return;
 
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
-        LOGGER.warn(message);
+        LOGGER.warn(receivedMessage);
         return;
 
     }
 
     // otherwise not understood
-    sendMessage(Message.notUnderstoodMessage(
-            message, // receivedMessage
+    sendMessage(
+            receivedMessage,
+            Message.notUnderstoodMessage(
+            receivedMessage, // receivedMessage
             this)); // skill
   }
 

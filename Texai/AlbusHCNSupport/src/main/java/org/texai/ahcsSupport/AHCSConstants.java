@@ -334,22 +334,18 @@ public final class AHCSConstants {
   //
   // shared message parameters
   //
-  // the AHCS originalMessage parameter
-  public static final String AHCS_ORIGINAL_MESSAGE = "AHCS originalMessage";
-  // the message parameter naming the session value
-  public static final String SESSION = "AHCS session";
   // the message parameter for bytes, which is a byte array
   public static final String MSG_PARM_BYTES = "bytes";
   // the message parameter for bytes size, which is an int
   public static final String MSG_PARM_BYTES_SIZE = "bytesSize";
   // the message parameter for the child role ID
-  public static final String MSG_PARM_CHILD_ROLE_ID = "child role id";
+  public static final String MSG_PARM_CHILD_ROLE_ID = "childRoleId";
   // the message parameter for file chunks count, which is an int
   public static final String MSG_PARM_FILE_CHUNKS_CNT = "fileChunksCnt";
   // the message parameter for currency amount in Satoshis as a BigInteger
-  public static final String MSG_PARM_CURRENCY_AMOUNT = "currency amount";
+  public static final String MSG_PARM_CURRENCY_AMOUNT = "currencyAmount";
   // the message parameter for class name
-  public static final String MSG_PARM_CLASS_NAME = "class name";
+  public static final String MSG_PARM_CLASS_NAME = "className";
   // the message parameter for conversation ID
   public static final String MSG_PARM_CONTAINER_NAME = "containerName";
   // the message parameter for conversation ID
@@ -371,15 +367,19 @@ public final class AHCSConstants {
   // the message parameter for the IP address
   public static final String MSG_PARM_IP_ADDRESS_STRING = "ipAddress";
   // the message parameter for logging level
-  public static final String MSG_PARM_LOGGING_LEVEL = "logging level";
+  public static final String MSG_PARM_LOGGING_LEVEL = "loggingLevel";
+  // the message parameter for message trace, which is a StringBuilder
+  public static final String MSG_PARM_MESSAGE_TRACE = "messageTrace";
   // the message parameter for the node type name
   public static final String MSG_PARM_OPERATION = "operation";
+  // the originalMessage parameter
+  public static final String MSG_PARM_ORIGINAL_MESSAGE = "originalMessage";
   // the message parameter for the role type name
-  public static final String MSG_PARM_ROLE_QUALIFIED_NAME = "role qualified name";
+  public static final String MSG_PARM_ROLE_QUALIFIED_NAME = "roleQualifiedName";
   // the message parameter for the singleton agent hosts
-  public static final String MSG_PARM_SINGLETON_AGENT_HOSTS = "singleton agent hosts";
+  public static final String MSG_PARM_SINGLETON_AGENT_HOSTS = "singletonAgentHosts";
   // the message parameter for the skill class name
-  public static final String MSG_PARM_SKILL_CLASS_NAME = "skill class name";
+  public static final String MSG_PARM_SKILL_CLASS_NAME = "skillClassName";
   // the spokenText parameter
   public static final String MSG_PARM_SPOKEN_TEXT = "spokenText";
   // the message parameter for reason, which is a string
@@ -393,7 +393,7 @@ public final class AHCSConstants {
   // the message parameter indicating the number of milliseconds to pause before retrying a message sent to a remote peer
   public static final String MSG_PARM_RETRY_DELAY = "retryPauseDuration";
   // the message parameter for the role id
-  public static final String MSG_PARM_ROLE_ID = "role id";
+  public static final String MSG_PARM_ROLE_ID = "roleId";
   // the message parameter for sender container name, which is a string
   public static final String MSG_PARM_SENDER_CONTAINER_NAME = "senderContainerName";
   // the message parameter for sender file path, which is a string
@@ -404,8 +404,10 @@ public final class AHCSConstants {
   public static final String MSG_PARM_SERVICE = "service";
   // the text parameter
   public static final String MSG_PARM_TEXT = "text";
+  // the message parameter naming the session value
+  public static final String MSG_PARM_USER_SESSION = "userSession";
   // the message parameter for a X.509 certificate
-  public static final String MSG_PARM_X509_CERTIFICATE = "X.509 Certificate";
+  public static final String MSG_PARM_X509_CERTIFICATE = "x509Certificate";
   //
   // the Albus Hierarchical Control System Levels
   //

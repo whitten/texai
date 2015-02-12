@@ -72,9 +72,9 @@ public class NetworkOperationTest {
     final Set<String> variableNames = new ArraySet<>();
     final Set<String> childQualifiedNames = new ArraySet<>();
     childQualifiedNames.add(containerName + ".XAINetworkOperationAgent.XAINetworkOperationRole");
-    childQualifiedNames.add(containerName + ".NetworkSingletonConfigurationAgent.NetworkSingletonConfigurationRole");
+    childQualifiedNames.add(containerName + ".NetworkOperationAgent.NetworkSingletonConfigurationRole");
     childQualifiedNames.add(containerName + ".ContainerOperationAgent.ContainerOperationRole");
-    childQualifiedNames.add(containerName + ".NetworkDeploymentAgent.NetworkDeploymentRole");
+    childQualifiedNames.add(containerName + ".NetworkOperationAgent.NetworkDeploymentRole");
 
     skillTestHarness = new SkillTestHarness(
             containerName + "." + nodeName, // name
@@ -160,6 +160,19 @@ public class NetworkOperationTest {
 
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
     assertEquals("[performMission_Task, org.texai.skill.network.NetworkOperation]", skillTestHarness.getOperationAndSenderServiceInfo().toString());
+
+    LOGGER.info("traced sent messages ...");
+    skillTestHarness.getSentMessages().stream().sorted().forEach((Message sentMessage) -> {
+      LOGGER.info(sentMessage.toTraceString());
+      LOGGER.info("");
+    });
+    Collections.sort(skillTestHarness.getSentMessages());
+    LOGGER.info(skillTestHarness.getSentMessages().get(0).toTraceString());
+    assertEquals(
+            "[performMission_Task, Test.TopmostFriendshipAgent.TopmostFriendshipRole:TopmostFriendship --> Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation]\n"
+            + "[performMission_Task, Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation --> Test.ContainerOperationAgent.ContainerOperationRole:]\n",
+            skillTestHarness.getSentMessages().get(0).toTraceString());
+    LOGGER.info("break here");
   }
 
   /**
@@ -187,7 +200,9 @@ public class NetworkOperationTest {
     LOGGER.info("sentMessage...\n" + sentMessage);
     assertTrue(Message.areMessageStringsEqualIgnoringDate(
             sentMessage.toString(),
-            "[restartContainer_Task Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation --> Test.ContainerOperationAgent.ContainerOperationRole:ContainerOperation 2015-01-22T19:35:57.159-06:00\n"
+            "[restartContainer_Task Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation --> Test.ContainerOperationAgent.ContainerOperationRole:ContainerOperation 2015-02-12T14:48:28.154-06:00\n"
+            + "  messageTrace=[networkRestartRequest_Info, Test.TopmostFriendshipAgent.TopmostFriendshipRole:TopmostFriendship --> Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation]\n"
+            + ",\n"
             + "  restartContainer_Task_delay=5000\n"
             + "]"));
   }

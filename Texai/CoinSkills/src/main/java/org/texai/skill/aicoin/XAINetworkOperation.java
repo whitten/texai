@@ -47,19 +47,17 @@ public final class XAINetworkOperation extends AbstractNetworkSingletonSkill {
    * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
    * with regard to the conversation.
    *
-   * @param message the given message
+   * @param receivedMessage the given message
    */
   @Override
-  public void receiveMessage(Message message) {
+  public void receiveMessage(Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "message must not be null";
     assert getRole().getNode().getNodeRuntime() != null;
 
-    final String operation = message.getOperation();
-    if (!isOperationPermitted(message)) {
-      sendMessage(Message.operationNotPermittedMessage(
-              message, // receivedMessage
-              this)); // skill
+    final String operation = receivedMessage.getOperation();
+    if (!isOperationPermitted(receivedMessage)) {
+      sendOperationNotPermittedInfoMessage(receivedMessage);
       return;
     }
     switch (operation) {
@@ -71,7 +69,7 @@ public final class XAINetworkOperation extends AbstractNetworkSingletonSkill {
        */
       case AHCSConstants.INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
-        propagateOperationToChildRoles(operation);
+        propagateOperationToChildRoles(receivedMessage);
         if (getNodeRuntime().isFirstContainerInNetwork()) {
           setSkillState(AHCSConstants.State.READY);
         } else {
@@ -88,7 +86,7 @@ public final class XAINetworkOperation extends AbstractNetworkSingletonSkill {
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
                 "state must be isolated-from-network, but is " + getSkillState();
-        joinAcknowledgedTask(message);
+        joinAcknowledgedTask(receivedMessage);
         return;
 
       /**
@@ -98,7 +96,7 @@ public final class XAINetworkOperation extends AbstractNetworkSingletonSkill {
        * It commands this network-connected role to begin performing its mission.
        */
       case AHCSConstants.PERFORM_MISSION_TASK:
-        performMission(message);
+        performMission(receivedMessage);
         return;
 
       /**
@@ -115,7 +113,7 @@ public final class XAINetworkOperation extends AbstractNetworkSingletonSkill {
        */
       case AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        joinNetworkSingletonAgent(message);
+        joinNetworkSingletonAgent(receivedMessage);
         return;
 
       /**
@@ -127,19 +125,17 @@ public final class XAINetworkOperation extends AbstractNetworkSingletonSkill {
        */
       case AHCSConstants.DELEGATE_PERFORM_MISSION_TASK:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        handleDelegatePerformMissionTask(message);
+        handleDelegatePerformMissionTask(receivedMessage);
         return;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
-        LOGGER.warn(message);
+        LOGGER.warn(receivedMessage);
         return;
       // handle other operations ...
     }
 
-    sendMessage(Message.notUnderstoodMessage(
-            message, // receivedMessage
-            this)); // skill
+    sendDoNotUnderstandInfoMessage(receivedMessage);
   }
 
   /**
@@ -181,16 +177,16 @@ public final class XAINetworkOperation extends AbstractNetworkSingletonSkill {
   /**
    * Perform this role's mission, which is to manage the containers.
    *
-   * @param message the received perform mission task message
+   * @param receivedMessage the received perform mission task message
    */
-  private void performMission(final Message message) {
+  private void performMission(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready: " + stateDescription(getSkillState());
     assert !getRole().getChildQualifiedNames().isEmpty() : "must have at least one child role";
 
     LOGGER.info("performing the mission");
-    propagateOperationToChildRolesSeparateThreads(AHCSConstants.PERFORM_MISSION_TASK);
+    propagateOperationToChildRolesSeparateThreads(receivedMessage);
   }
 
 }

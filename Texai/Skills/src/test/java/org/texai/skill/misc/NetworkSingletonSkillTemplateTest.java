@@ -127,6 +127,34 @@ public class NetworkSingletonSkillTemplateTest {
   }
 
   /**
+   * Test of class NetworkSingletonSkillTemplate - Join Acknowledged Task.
+   */
+  @Test
+  public void testJoinAcknowledgedTask() {
+    LOGGER.info("testing " + AHCSConstants.JOIN_ACKNOWLEDGED_TASK + " message");
+
+    skillTestHarness.reset();
+    skillTestHarness.setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK, skillClassName);
+    final Message joinAcknowledgedTaskMessage = new Message(
+            parentQualifiedName, // senderQualifiedName
+            parentService, // senderService
+            containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
+            skillClassName, // recipientService
+            AHCSConstants.JOIN_ACKNOWLEDGED_TASK); // operation
+
+    skillTestHarness.dispatchMessage(joinAcknowledgedTaskMessage);
+
+    assertEquals("ISOLATED_FROM_NETWORK", skillTestHarness.getSkillState(skillClassName).toString());
+    assertNull(skillTestHarness.getOperationAndSenderServiceInfo());
+    final Message sentMessage = skillTestHarness.getSentMessage();
+    assertNotNull(sentMessage);
+    LOGGER.info("sentMessage...\n" + sentMessage);
+    assertEquals(
+            "[removeUnjoinedRole_Info, Test.NetworkSingletonSkillTemplateAgent.NetworkSingletonSkillTemplateRole:NetworkSingletonSkillTemplate --> Test.ContainerOperationAgent.ContainerSingletonConfigurationRole:ContainerSingletonConfiguration]",
+            sentMessage.toBriefString());
+  }
+
+  /**
    * Test of class NetworkSingletonSkillTemplate - Message Not Understood Info.
    */
   @Test

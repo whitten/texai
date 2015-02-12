@@ -44,18 +44,18 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
   /**
    * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
    * with regard to the conversation.
+   *
+   * @param receivedMessage the received message
    */
   @Override
-  public void receiveMessage(Message message) {
+  public void receiveMessage(Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "message must not be null";
     assert getRole().getNode().getNodeRuntime() != null;
 
-    final String operation = message.getOperation();
-    if (!isOperationPermitted(message)) {
-      sendMessage(Message.operationNotPermittedMessage(
-              message, // receivedMessage
-              this)); // skill
+    final String operation = receivedMessage.getOperation();
+    if (!isOperationPermitted(receivedMessage)) {
+      sendOperationNotPermittedInfoMessage(receivedMessage);
       return;
     }
     switch (operation) {
@@ -67,7 +67,7 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
        */
       case AHCSConstants.INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
-        propagateOperationToChildRoles(operation);
+        propagateOperationToChildRoles(receivedMessage);
         if (getNodeRuntime().isFirstContainerInNetwork()) {
           setSkillState(AHCSConstants.State.READY);
           containerNames.add(getContainerName());
@@ -88,7 +88,7 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
       case AHCSConstants.JOIN_NETWORK_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
                 "state must be isolated-from-network, but is " + getSkillState();
-        joinNetwork(message);
+        joinNetwork(receivedMessage);
         return;
 
       /**
@@ -107,7 +107,7 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
        */
       case AHCSConstants.SINGLETON_AGENT_HOSTS_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
-        handleSingletonAgentHostsInfo(message);
+        handleSingletonAgentHostsInfo(receivedMessage);
         return;
 
       /**
@@ -119,7 +119,7 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
                 "state must be isolated-from-network, but is " + getSkillState();
-        joinAcknowledgedTask(message);
+        joinAcknowledgedTask(receivedMessage);
         return;
 
       /**
@@ -130,7 +130,7 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
        */
       case AHCSConstants.PERFORM_MISSION_TASK:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
-        performMission(message);
+        performMission(receivedMessage);
         return;
 
       /**
@@ -147,7 +147,7 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
        */
       case AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        joinNetworkSingletonAgent(message);
+        joinNetworkSingletonAgent(receivedMessage);
         return;
 
       /**
@@ -159,7 +159,7 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
        */
       case AHCSConstants.DELEGATE_PERFORM_MISSION_TASK:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        handleDelegatePerformMissionTask(message);
+        handleDelegatePerformMissionTask(receivedMessage);
         return;
 
       /**
@@ -174,7 +174,7 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
        */
       case AHCSConstants.MESSAGE_TIMEOUT_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
-        LOGGER.info("Ignoring a configuration information timeout reported by " + message.getSenderQualifiedName());
+        LOGGER.info("Ignoring a configuration information timeout reported by " + receivedMessage.getSenderQualifiedName());
         return;
 
       /**
@@ -186,20 +186,18 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
        */
       case AHCSConstants.NETWORK_JOIN_COMPLETE_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        handleNetworkJoinCompleteInfo(message);
+        handleNetworkJoinCompleteInfo(receivedMessage);
         return;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
-        LOGGER.warn(message);
+        LOGGER.warn(receivedMessage);
         return;
 
       // REQUEST_TO_JOIN_INFO message from new node wanting to join the network.
     }
 
-    sendMessage(Message.notUnderstoodMessage(
-            message, // receivedMessage
-            this)); // skill
+    sendDoNotUnderstandInfoMessage(receivedMessage);
   }
 
   /**
@@ -246,16 +244,18 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
   /**
    * Joins the network.
    *
-   * @param message the Join Network Task message
+   * @param receivedMessage the Join Network Task message
    */
-  private void joinNetwork(final Message message) {
+  private void joinNetwork(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
 
     LOGGER.info("joining the network");
 
     // send the join network task to the SingletonConfigurationAgent
-    sendMessageViaSeparateThread(makeMessage(
+    sendMessageViaSeparateThread(
+            receivedMessage,
+            makeMessage(
             getRole().getChildQualifiedNameForAgentRole("ContainerOperationAgent.ContainerSingletonConfigurationRole"), // recipientQualifiedName
             ContainerSingletonConfiguration.class.getName(), // recipientService
             AHCSConstants.JOIN_NETWORK_TASK)); // operation
@@ -264,40 +264,40 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
   /**
    * Pass down the task to configure roles for singleton agent hosts.
    *
-   * @param message the configure singleton agent hosts task message
+   * @param receivedMessage the configure singleton agent hosts task message
    */
-  private void handleSingletonAgentHostsInfo(final Message message) {
+  private void handleSingletonAgentHostsInfo(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
 
     LOGGER.info("configuring the child roles with singleton agent hosts");
     final SingletonAgentHosts singletonAgentHosts
-            = (SingletonAgentHosts) message.get(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS); // parameterName
+            = (SingletonAgentHosts) receivedMessage.get(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS); // parameterName
     assert singletonAgentHosts != null;
 
     // send message to container operations to configure parent roles throughout the container.
     final Message configureSingletonAgentHostsTask = makeMessage(
-            message.getSenderQualifiedName(), // recipientQualifiedName
-            message.getSenderService(), // recipientService
+            receivedMessage.getSenderQualifiedName(), // recipientQualifiedName
+            receivedMessage.getSenderService(), // recipientService
             AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK); // operation
     configureSingletonAgentHostsTask.put(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS, singletonAgentHosts);
     configureSingletonAgentHostsTask.put(AHCSConstants.MSG_PARM_X509_CERTIFICATE, getRole().getX509Certificate());
 
-    sendMessageViaSeparateThread(configureSingletonAgentHostsTask);
+    sendMessageViaSeparateThread(receivedMessage, configureSingletonAgentHostsTask);
   }
 
   /**
    * Perform this role's mission, which is to configure the various singleton nomadic agents on containers.
    *
-   * @param message the received perform mission task message
+   * @param receivedMessage the received perform mission task message
    */
-  private void performMission(final Message message) {
+  private void performMission(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
     assert !getRole().getChildQualifiedNames().isEmpty() : "must have at least one child role";
 
     LOGGER.info("performing the mission");
-    propagateOperationToChildRolesSeparateThreads(AHCSConstants.PERFORM_MISSION_TASK);
+    propagateOperationToChildRolesSeparateThreads(receivedMessage);
   }
 
   /**
@@ -305,17 +305,17 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
    * the network. Each role in the joined container having a network singleton agent/role as a parent, now refers to the corresponding
    * network singleton agent / role and has exchanged X.509 certificates with it.
    *
-   * @param message the received Network Join Complete Info message
+   * @param receivedMessage the received Network Join Complete Info message
    */
-  private void handleNetworkJoinCompleteInfo(final Message message) {
+  private void handleNetworkJoinCompleteInfo(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
-    if (containerNames.contains(message.getSenderContainerName())) {
-      LOGGER.info(new StringBuilder().append("Container ").append(message.getSenderContainerName()).append(" has rejoined the Network.").toString());
+    if (containerNames.contains(receivedMessage.getSenderContainerName())) {
+      LOGGER.info(new StringBuilder().append("Container ").append(receivedMessage.getSenderContainerName()).append(" has rejoined the Network.").toString());
     } else {
-      LOGGER.info(new StringBuilder().append("Container ").append(message.getSenderContainerName()).append(" has joined the Network.").toString());
-      containerNames.add(message.getSenderContainerName());
+      LOGGER.info(new StringBuilder().append("Container ").append(receivedMessage.getSenderContainerName()).append(" has joined the Network.").toString());
+      containerNames.add(receivedMessage.getSenderContainerName());
     }
 
     /**
@@ -327,8 +327,8 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
             getRole().getParentQualifiedName(), // recipientQualifiedName
             TopmostFriendship.class.getName(), // recipientService
             AHCSConstants.NETWORK_JOIN_COMPLETE_SENSATION); // operation
-    networkJoinCompleteSensationMessage.put(AHCSConstants.MSG_PARM_CONTAINER_NAME, message.getSenderContainerName());
-    sendMessageViaSeparateThread(networkJoinCompleteSensationMessage);
+    networkJoinCompleteSensationMessage.put(AHCSConstants.MSG_PARM_CONTAINER_NAME, receivedMessage.getSenderContainerName());
+    sendMessageViaSeparateThread(receivedMessage, networkJoinCompleteSensationMessage);
   }
 
 }

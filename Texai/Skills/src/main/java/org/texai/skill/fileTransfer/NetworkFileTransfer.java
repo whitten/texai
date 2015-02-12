@@ -47,19 +47,17 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
    * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
    * with regard to the conversation.
    *
-   * @param message the given message
+   * @param receivedMessage the given message
    */
   @Override
-  public void receiveMessage(Message message) {
+  public void receiveMessage(Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
     assert getRole().getNode().getNodeRuntime() != null;
 
-    final String operation = message.getOperation();
-    if (!isOperationPermitted(message)) {
-      sendMessage(Message.operationNotPermittedMessage(
-              message, // receivedMessage
-              this)); // skill
+    final String operation = receivedMessage.getOperation();
+    if (!isOperationPermitted(receivedMessage)) {
+      sendOperationNotPermittedInfoMessage(receivedMessage);
       return;
     }
     switch (operation) {
@@ -72,7 +70,7 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
       case AHCSConstants.INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
 
-        propagateOperationToChildRoles(operation);
+        propagateOperationToChildRoles(receivedMessage);
         if (getNodeRuntime().isFirstContainerInNetwork()) {
           setSkillState(AHCSConstants.State.READY);
         } else {
@@ -89,7 +87,7 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
                 "state must be isolated-from-network, but is " + getSkillState();
-        joinAcknowledgedTask(message);
+        joinAcknowledgedTask(receivedMessage);
         return;
 
       /**
@@ -99,7 +97,7 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
        * network-connected role to begin performing its mission.
        */
       case AHCSConstants.PERFORM_MISSION_TASK:
-        performMission(message);
+        performMission(receivedMessage);
         return;
 
       /**
@@ -116,7 +114,7 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
        */
       case AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        joinNetworkSingletonAgent(message);
+        joinNetworkSingletonAgent(receivedMessage);
         return;
 
       /**
@@ -128,7 +126,7 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
        */
       case AHCSConstants.DELEGATE_PERFORM_MISSION_TASK:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        handleDelegatePerformMissionTask(message);
+        handleDelegatePerformMissionTask(receivedMessage);
         return;
 
       /**
@@ -144,7 +142,7 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
        */
       case AHCSConstants.TRANSFER_FILE_REQUEST_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        handleTransferFileRequestTask(message);
+        handleTransferFileRequestTask(receivedMessage);
         return;
 
       /**
@@ -167,17 +165,19 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
        */
       case AHCSConstants.TASK_ACCOMPLISHED_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        handleTaskAccomplishedInfo(message);
+        handleTaskAccomplishedInfo(receivedMessage);
         return;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
-        LOGGER.warn(message);
+        LOGGER.warn(receivedMessage);
         return;
       // handle other operations ...
     }
-    sendMessage(Message.notUnderstoodMessage(
-            message, // receivedMessage
+    sendMessage(
+            receivedMessage,
+            Message.notUnderstoodMessage(
+            receivedMessage, // receivedMessage
             this)); // skill
   }
 
@@ -222,35 +222,35 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
   /**
    * Perform this role's mission, which is to manage the containers.
    *
-   * @param message the received perform mission task message
+   * @param receivedMessage the received perform mission task message
    */
-  private void performMission(final Message message) {
+  private void performMission(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready: " + stateDescription(getSkillState());
     assert !getRole().getChildQualifiedNames().isEmpty() : "must have at least one child role";
 
     LOGGER.info("performing the mission");
-    propagateOperationToChildRolesSeparateThreads(AHCSConstants.PERFORM_MISSION_TASK);
+    propagateOperationToChildRolesSeparateThreads(receivedMessage);
 
   }
 
   /**
    * Handles a file transfer request task message.
    *
-   * @param message the received file transfer request task message
+   * @param receivedMessage the received file transfer request task message
    */
-  private void handleTransferFileRequestTask(final Message message) {
+  private void handleTransferFileRequestTask(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready: " + stateDescription(getSkillState());
 
     LOGGER.info("handling a file transfer request");
-    final UUID conversationId = message.getConversationId();
-    final String senderFilePath = (String) message.get(AHCSConstants.MSG_PARM_SENDER_FILE_PATH);
-    final String recipientFilePath = (String) message.get(AHCSConstants.MSG_PARM_RECIPIENT_FILE_PATH);
-    final String senderContainerName = (String) message.get(AHCSConstants.MSG_PARM_SENDER_CONTAINER_NAME);
-    final String recipientContainerName = (String) message.get(AHCSConstants.MSG_PARM_RECIPIENT_CONTAINER_NAME);
+    final UUID conversationId = receivedMessage.getConversationId();
+    final String senderFilePath = (String) receivedMessage.get(AHCSConstants.MSG_PARM_SENDER_FILE_PATH);
+    final String recipientFilePath = (String) receivedMessage.get(AHCSConstants.MSG_PARM_RECIPIENT_FILE_PATH);
+    final String senderContainerName = (String) receivedMessage.get(AHCSConstants.MSG_PARM_SENDER_CONTAINER_NAME);
+    final String recipientContainerName = (String) receivedMessage.get(AHCSConstants.MSG_PARM_RECIPIENT_CONTAINER_NAME);
 
     // record the file transfer information for use with subsequent messages in the conversation
     final FileTransferInfo fileTransferRequestInfo = new FileTransferInfo(
@@ -259,8 +259,8 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
             recipientFilePath,
             senderContainerName,
             recipientContainerName);
-    fileTransferRequestInfo.setRequesterQualifiedName(message.getSenderQualifiedName());
-    fileTransferRequestInfo.setRequesterService(message.getSenderService());
+    fileTransferRequestInfo.setRequesterQualifiedName(receivedMessage.getSenderQualifiedName());
+    fileTransferRequestInfo.setRequesterService(receivedMessage.getSenderService());
 
     synchronized (fileTransferDictionary) {
       fileTransferDictionary.put(
@@ -278,7 +278,7 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
     prepareToSendFileTaskMessage.put(AHCSConstants.MSG_PARM_RECIPIENT_FILE_PATH, recipientFilePath);
     prepareToSendFileTaskMessage.put(AHCSConstants.MSG_PARM_RECIPIENT_CONTAINER_NAME, recipientContainerName);
 
-    sendMessage(prepareToSendFileTaskMessage);
+    sendMessage(receivedMessage, prepareToSendFileTaskMessage);
   }
 
   /**
@@ -310,20 +310,20 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
   /**
    * Handles a task accomplished information message, which is a reply from a Prepare To Send File Task.
    *
-   * @param message the receved task accomplished information message
+   * @param receivedMessage the receved task accomplished information message
    * @param fileTransferInfo the file transfer information
    */
   private void handleReplyFromPreparedFileSender(
-          final Message message,
+          final Message receivedMessage,
           final FileTransferInfo fileTransferInfo) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
     assert fileTransferInfo != null : "fileTransferRequestInfo must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready: " + stateDescription(getSkillState());
 
     fileTransferInfo.setFileTransferState(FileTransferState.OK_TO_SEND);
-    fileTransferInfo.setFileHash((String) message.get(AHCSConstants.MSG_PARM_FILE_HASH));
-    fileTransferInfo.setFileSize((long) message.get(AHCSConstants.MSG_PARM_FILE_SIZE));
+    fileTransferInfo.setFileHash((String) receivedMessage.get(AHCSConstants.MSG_PARM_FILE_HASH));
+    fileTransferInfo.setFileSize((long) receivedMessage.get(AHCSConstants.MSG_PARM_FILE_SIZE));
 
     LOGGER.info("handling a reply from a prepared file sender, " + fileTransferInfo);
 
@@ -340,20 +340,20 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
     prepareToReceiveFileTaskMessage.put(AHCSConstants.MSG_PARM_FILE_HASH, fileTransferInfo.getFileHash());
     prepareToReceiveFileTaskMessage.put(AHCSConstants.MSG_PARM_FILE_SIZE, fileTransferInfo.getFileSize());
 
-    sendMessage(prepareToReceiveFileTaskMessage);
+    sendMessage(receivedMessage, prepareToReceiveFileTaskMessage);
   }
 
   /**
    * Handles a task accomplished information message, which is a reply from a Prepare To Receive File Task.
    *
-   * @param message the receved task accomplished information message
+   * @param receivedMessage the receved task accomplished information message
    * @param fileTransferInfo the file transfer information
    */
   private void handleReplyFromPreparedFileRecipient(
-          final Message message,
+          final Message receivedMessage,
           final FileTransferInfo fileTransferInfo) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "message must not be null";
     assert fileTransferInfo != null : "fileTransferRequestInfo must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready: " + stateDescription(getSkillState());
 
@@ -368,20 +368,20 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
             ContainerFileSender.class.getName(), // recipientService
             AHCSConstants.TRANSFER_FILE_TASK); // operation
 
-    sendMessage(prepareToReceiveFileTaskMessage);
+    sendMessage(receivedMessage, prepareToReceiveFileTaskMessage);
   }
 
   /**
    * Handles a task accomplished information message, which is a reply from a Transfer File Task.
    *
-   * @param message the receved task accomplished information message
+   * @param receivedMessage the receved task accomplished information message
    * @param fileTransferInfo the file transfer information
    */
   private void handleReplyFromTransferFileTask(
-          final Message message,
+          final Message receivedMessage,
           final FileTransferInfo fileTransferInfo) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
     assert fileTransferInfo != null : "fileTransferRequestInfo must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready: " + stateDescription(getSkillState());
 
@@ -392,7 +392,7 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
     // continue the file transfer conversation by replying to the original requestor
     final Message taskAccomplishedInfoMessage = makeMessage(
             fileTransferInfo.getRequesterQualifiedName(), // recipientQualifiedName
-            message.getConversationId(),
+            receivedMessage.getConversationId(),
             fileTransferInfo.getRequesterService(), // recipientService
             AHCSConstants.TASK_ACCOMPLISHED_INFO); // operation
     final long durationMillis = System.currentTimeMillis() - fileTransferInfo.getStartingDateTime().getMillis();
@@ -400,11 +400,11 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
     LOGGER.info("File transfer completed in " + (durationMillis / 1000) + " seconds.");
 
     if (isFileTransferDictionaryCleaned) {
-      final FileTransferInfo removedFileTransferInfo = fileTransferDictionary.remove(message.getConversationId());
+      final FileTransferInfo removedFileTransferInfo = fileTransferDictionary.remove(receivedMessage.getConversationId());
       assert removedFileTransferInfo != null;
     }
 
-    sendMessage(taskAccomplishedInfoMessage);
+    sendMessage(receivedMessage, taskAccomplishedInfoMessage);
   }
 
   /**

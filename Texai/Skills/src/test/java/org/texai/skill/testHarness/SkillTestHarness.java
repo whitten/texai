@@ -373,12 +373,12 @@ public class SkillTestHarness {
      * @param message the given message
      */
     @Override
-    public void sendMessageViaSeparateThread(final Message message) {
+    public void sendMessageViaSeparateThread(final Message receivedMessage, final Message message) {
       //Preconditions
       assert message != null : "message must not be null";
       assert getNodeRuntime() != null : "nodeRuntime must not be null";
 
-      sentMessages.add(message);
+      sendMessage(receivedMessage, message);
     }
 
     /**
@@ -387,52 +387,58 @@ public class SkillTestHarness {
      * @param message the given message
      */
     @Override
-    public void sendMessage(final Message message) {
+    public void sendMessage(final Message receivedMessage, final Message message) {
       //Preconditions
       assert message != null : "message must not be null";
       assert getNodeRuntime() != null : "nodeRuntime must not be null";
 
+      traceMessage(receivedMessage, message);
       sentMessages.add(message);
     }
 
     /**
      * Propagates the given operation to the child roles.
      *
-     * @param operation the given operation
+     * @param receivedMessage the received message
      * @param senderService the sender service
      */
     @Override
     public void propagateOperationToChildRoles(
-            final String operation,
+            final Message receivedMessage,
             final String senderService) {
       //Preconditions
-      assert operation != null : "operation must not be null";
-      assert !operation.isEmpty() : "operation must not be empty";
-      assert senderService != null : "senderService must not be null";
-      assert !senderService.isEmpty() : "senderService must not be empty";
+      assert receivedMessage != null : "operation must not be null";
+      assert StringUtils.isNonEmptyString(senderService) : "senderService must not be null";
       assert !getChildQualifiedNames().isEmpty() : "childQualifiedRoles must not be empty";
 
-      operationAndServiceInfo = new OperationAndSenderServiceInfo(operation, senderService);
+      operationAndServiceInfo = new OperationAndSenderServiceInfo(
+              receivedMessage.getOperation(),
+              senderService);
+
+      super.propagateOperationToChildRoles(receivedMessage, senderService);
     }
 
     /**
      * Propagates the given operation to the child roles, using separate threads.
      *
-     * @param operation the given operation
+     * @param receivedMessage the received message
      * @param senderService the sender service
      */
     @Override
     public void propagateOperationToChildRolesSeparateThreads(
-            final String operation,
+            final Message receivedMessage,
             final String senderService) {
       //Preconditions
-      assert operation != null : "operation must not be null";
-      assert !operation.isEmpty() : "operation must not be empty";
-      assert senderService != null : "senderService must not be null";
-      assert !senderService.isEmpty() : "senderService must not be empty";
+      assert receivedMessage != null : "operation must not be null";
+      assert StringUtils.isNonEmptyString(senderService) : "senderService must not be null";
       assert !getChildQualifiedNames().isEmpty() : "childQualifiedRoles must not be empty";
 
-      operationAndServiceInfo = new OperationAndSenderServiceInfo(operation, senderService);
+      operationAndServiceInfo = new OperationAndSenderServiceInfo(
+              receivedMessage.getOperation(),
+              senderService);
+
+      super.propagateOperationToChildRolesSeparateThreads(receivedMessage, senderService);
+
     }
 
     /**

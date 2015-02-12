@@ -252,7 +252,7 @@ public class ContainerFileReceiverTest {
     final List<String> understoodOperations = new ArrayList<>(Arrays.asList(instance.getUnderstoodOperations()));
     Collections.sort(understoodOperations);
     assertEquals(
-            "[initialize_Task, messageNotUnderstood_Info, performMission_Task, prepareToReceiveFile_Task, transferFileChunk_Info]",
+            "[initialize_Task, joinAcknowledged_Task, messageNotUnderstood_Info, performMission_Task, prepareToReceiveFile_Task, transferFileChunk_Info]",
             understoodOperations.toString());
   }
 
