@@ -32,7 +32,6 @@ import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.ahcsSupport.seed.SeedNodeInfo;
 import org.texai.skill.domainEntity.SingletonAgentHosts;
-import org.texai.skill.governance.TopmostFriendship;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 import org.texai.x509.MessageDigestUtils;
@@ -439,7 +438,7 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
 
       // send an singletonAgentHosts_Info message to the NetworkOperationsAgent.
       final String recipientQualifiedName =
-              getRole().getNode().getNodeRuntime().getContainerName() + "NetworkOperationsAgent.NetworkSingletonConfigurationRole";
+              getRole().getNode().getNodeRuntime().getContainerName() + ".NetworkOperationsAgent.NetworkSingletonConfigurationRole";
 
       final Message singletonAgentHostsMessage = makeMessage(
               recipientQualifiedName,
