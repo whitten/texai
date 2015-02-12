@@ -437,7 +437,8 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
       LOGGER.info(singletonAgentHosts.toDetailedString());
 
       // send an singletonAgentHosts_Info message to the NetworkOperationsAgent.
-      final String recipientContainer = singletonAgentHosts.getContainer("NetworkOperationsAgent");
+      final String recipientContainer = singletonAgentHosts.getContainer("NetworkOperationAgent");
+      assert recipientContainer != null;
       final String recipientQualifiedName =
               recipientContainer + ".NetworkOperationsAgent.NetworkSingletonConfigurationRole";
 
