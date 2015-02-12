@@ -437,13 +437,13 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
               = (SingletonAgentHosts) message.get(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS);
       LOGGER.info(singletonAgentHosts.toDetailedString());
 
-      // send an singletonAgentHosts_Info message to the TopmostFriendshipAgent.
-      final String recipientQualifiedName = getRole().getNode().getNodeRuntime().getContainerName() + '.'
-              + AHCSConstants.NODE_NAME_TOPMOST_FRIENDSHIP_ROLE;
+      // send an singletonAgentHosts_Info message to the NetworkOperationsAgent.
+      final String recipientQualifiedName =
+              getRole().getNode().getNodeRuntime().getContainerName() + "NetworkOperationsAgent.NetworkSingletonConfigurationRole";
 
       final Message singletonAgentHostsMessage = makeMessage(
               recipientQualifiedName,
-              TopmostFriendship.class.getName(), // recipientService
+              NetworkSingletonConfiguration.class.getName(), // recipientService
               AHCSConstants.SINGLETON_AGENT_HOSTS_INFO); // operation
 
       singletonAgentHostsMessage.put(
