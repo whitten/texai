@@ -257,7 +257,7 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
 
     // send the join network task to the SingletonConfigurationAgent
     sendMessageViaSeparateThread(makeMessage(
-            getRole().getChildQualifiedNameForAgentRole("ContainerOperationAgent.SingletonConfigurationRole"), // recipientQualifiedName
+            getRole().getChildQualifiedNameForAgentRole("ContainerOperationAgent.ContainerSingletonConfigurationRole"), // recipientQualifiedName
             ContainerSingletonConfiguration.class.getName(), // recipientService
             AHCSConstants.JOIN_NETWORK_TASK)); // operation
   }
