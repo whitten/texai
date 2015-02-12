@@ -191,18 +191,6 @@ public final class XAINetworkOperation extends AbstractNetworkSingletonSkill {
 
     LOGGER.info("performing the mission");
     propagateOperationToChildRolesSeparateThreads(AHCSConstants.PERFORM_MISSION_TASK);
-
-    // the operation agent launches the aicoin-qt instance in each container
-    sendMessageViaSeparateThread(makeMessage(
-            getRole().getFirstChildQualifiedNameForAgent("XAIOperationAgent"), // recipientQualifiedName
-            "org.texai.skill.aicoin.XAIOperation", // recipientService
-            AHCSConstants.PERFORM_MISSION_TASK)); // operation
-
-    // the mint agent commands its aicoin-qt instance to generate a block every 10 minutes
-    sendMessageViaSeparateThread(makeMessage(
-            getRole().getFirstChildQualifiedNameForAgent("XAIMintAgent"), // recipientQualifiedName
-            "org.texai.skill.aicoin.XAIMint", // recipientService
-            AHCSConstants.PERFORM_MISSION_TASK)); // operation
   }
 
 }
