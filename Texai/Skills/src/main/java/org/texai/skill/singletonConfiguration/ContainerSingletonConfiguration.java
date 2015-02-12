@@ -96,7 +96,7 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
        */
       case AHCSConstants.INITIALIZE_TASK:
         assert getSkillState().equals(State.UNINITIALIZED) : "prior state must be non-initialized";
-        initialization(message);
+        propagateOperationToChildRoles(operation);
         if (getNodeRuntime().isFirstContainerInNetwork()) {
           setSkillState(AHCSConstants.State.READY);
         } else {
@@ -294,18 +294,6 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
   @Override
   protected Logger getLogger() {
     return LOGGER;
-  }
-
-  /**
-   * Initializes the seed node information.
-   *
-   * @param message the received initialization task message
-   */
-  private void initialization(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-
-    //TODO
   }
 
   /**

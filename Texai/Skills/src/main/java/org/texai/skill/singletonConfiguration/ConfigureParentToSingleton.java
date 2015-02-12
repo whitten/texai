@@ -97,7 +97,8 @@ public class ConfigureParentToSingleton extends AbstractSkill {
           setSkillState(AHCSConstants.State.READY);
           LOGGER.info("now ready");
         }
-        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+        assert getSkillState().equals(AHCSConstants.State.READY) :
+                "state must be ready, but was " + stateDescription() + '\n' + message.toBriefString();
         performMission(message);
         return;
 

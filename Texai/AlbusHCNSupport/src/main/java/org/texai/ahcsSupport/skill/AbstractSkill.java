@@ -713,6 +713,15 @@ public abstract class AbstractSkill {
   }
 
   /**
+   * Returns a description of the skill state for logging.
+   *
+   * @return a description of the given skill state
+   */
+  public String stateDescription() {
+    return stateDescription(skillState);
+  }
+
+  /**
    * Returns a description of the given skill state for logging.
    *
    * @param skillState the given skill state
