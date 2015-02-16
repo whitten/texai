@@ -127,7 +127,7 @@ public class ContainerFileSender extends AbstractSkill {
        * network-connected role to send a file, for which it is prepared.
        *
        * As a result, the first Transfer File Chunk Information message is sent to the receiving container's
-       * ContainerFileTransferAgent.ContainerFileRecipientRole.
+       * ContainerOperationAgent.ContainerFileRecipientRole.
        */
       case AHCSConstants.TRANSFER_FILE_TASK:
         handleTransferFileTask(receivedMessage);
@@ -136,13 +136,13 @@ public class ContainerFileSender extends AbstractSkill {
       /**
        * Task Accomplished Information.
        *
-       * This information message is sent from the ContainerFileTransferAgent.ContainerFileRecipientRole. It confirms that the file chunk
+       * This information message is sent from the ContainerOperationAgent.ContainerFileRecipientRole. It confirms that the file chunk
        * has been written to the output path.
        *
        * The number of processed file chunks is a parameter of this message.
        *
        * As a result, either the file transfer is completed, or the nextg Transfer File Chunk Information message is sent to the receiving
-       * container's ContainerFileTransferAgent.ContainerFileRecipientRole.
+       * container's ContainerOperationAgent.ContainerFileRecipientRole.
        */
       case AHCSConstants.TASK_ACCOMPLISHED_INFO:
         handleTaskAccomplishedInfo(receivedMessage);
@@ -376,9 +376,9 @@ public class ContainerFileSender extends AbstractSkill {
       LOGGER.info(StringUtils.getStackTraceAsString(ex));
       //TODO send exception message back to NetworkFileTransfer
     }
-    // send a transfer file chunk information message to the receipient ContainerFileTransferAgent.ContainerFileRecipientRole.
+    // send a transfer file chunk information message to the receipient ContainerOperationAgent.ContainerFileRecipientRole.
     final Message transferFileChunkInfoMessage = makeMessage(
-            fileTransferInfo.getRecipientContainerName() + ".ContainerFileTransferAgent.ContainerFileRecipientRole", // recipientQualifiedName
+            fileTransferInfo.getRecipientContainerName() + ".ContainerOperationAgent.ContainerFileRecipientRole", // recipientQualifiedName
             receivedMessage.getConversationId(),
             ContainerFileReceiver.class.getName(), // recipientService
             AHCSConstants.TRANSFER_FILE_CHUNK_INFO); // operation

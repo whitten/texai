@@ -224,7 +224,7 @@ public final class X509Utils {
     } else {
       final boolean isOK = file.getParentFile().mkdirs();
       if (!isOK) {
-        throw new TexaiException("problem making directories: " + file);
+        LOGGER.info("problem making directories: " + file);
       }
       serializeSecureRandom(path);
     }

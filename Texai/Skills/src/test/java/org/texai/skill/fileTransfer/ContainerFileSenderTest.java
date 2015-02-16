@@ -53,7 +53,7 @@ public class ContainerFileSenderTest {
   // the class name of the tested skill
   private static final String skillClassName = ContainerFileSender.class.getName();
   // the test node name
-  private static final String nodeName = "ContainerFileTransferAgent";
+  private static final String nodeName = "ContainerOperationAgent";
   // the test role name
   private static final String roleName = "ContainerFileSenderRole";
   // the skill test harness
@@ -137,7 +137,7 @@ public class ContainerFileSenderTest {
     final Message prepareToSendFileTaskMessage = new Message(
             "Test.NetworkFileTransferAgent.NetworkFileTransferRole", // senderQualifiedName
             NetworkFileTransfer.class.getName(), // senderService
-            "TestSender.ContainerFileTransferAgent.ContainerFileSenderRole", // recipientQualifiedName
+            "TestSender.ContainerOperationAgent.ContainerFileSenderRole", // recipientQualifiedName
             conversationId,
             null, // replyWith
             null, // inReplyTo
@@ -156,7 +156,7 @@ public class ContainerFileSenderTest {
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
     assertEquals(
-            "[taskAccomplished_Info, TestSender.ContainerFileTransferAgent.ContainerFileSenderRole:ContainerFileSender --> Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer]",
+            "[taskAccomplished_Info, TestSender.ContainerOperationAgent.ContainerFileSenderRole:ContainerFileSender --> Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer]",
             sentMessage.toBriefString());
     assertNotNull(sentMessage.getConversationId());
     assertEquals(sentMessage.getConversationId().toString(), conversationId.toString());
@@ -176,7 +176,7 @@ public class ContainerFileSenderTest {
     final Message transferFileTaskMessage = new Message(
             "Test.NetworkFileTransferAgent.NetworkFileTransferRole", // senderQualifiedName
             NetworkFileTransfer.class.getName(), // senderService
-            "TestSender.ContainerFileTransferAgent.ContainerFileSenderRole", // recipientQualifiedName
+            "TestSender.ContainerOperationAgent.ContainerFileSenderRole", // recipientQualifiedName
             conversationId,
             null, // replyWith
             null, // inReplyTo
@@ -192,7 +192,7 @@ public class ContainerFileSenderTest {
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
     assertEquals(
-            "[transferFileChunk_Info, TestSender.ContainerFileTransferAgent.ContainerFileSenderRole:ContainerFileSender --> TestRecipient.ContainerFileTransferAgent.ContainerFileRecipientRole:ContainerFileReceiver]",
+            "[transferFileChunk_Info, TestSender.ContainerOperationAgent.ContainerFileSenderRole:ContainerFileSender --> TestRecipient.ContainerOperationAgent.ContainerFileRecipientRole:ContainerFileReceiver]",
             sentMessage.toBriefString());
     assertNotNull(sentMessage.getConversationId());
     assertEquals(sentMessage.getConversationId().toString(), conversationId.toString());
@@ -212,9 +212,9 @@ public class ContainerFileSenderTest {
     // test the received Task Accomplished Info message
     skillTestHarness.reset();
     Message taskAccomplishedInfoMessage = new Message(
-            "TestRecipient.ContainerFileTransferAgent.ContainerFileRecipientRole", // senderQualifiedName
+            "TestRecipient.ContainerOperationAgent.ContainerFileRecipientRole", // senderQualifiedName
             ContainerFileReceiver.class.getName(), // senderService
-            "TestSender.ContainerFileTransferAgent.ContainerFileSenderRole", // recipientQualifiedName
+            "TestSender.ContainerOperationAgent.ContainerFileSenderRole", // recipientQualifiedName
             conversationId,
             null, // replyWith
             null, // inReplyTo
@@ -230,7 +230,7 @@ public class ContainerFileSenderTest {
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
     assertEquals(
-            "[transferFileChunk_Info, TestSender.ContainerFileTransferAgent.ContainerFileSenderRole:ContainerFileSender --> TestRecipient.ContainerFileTransferAgent.ContainerFileRecipientRole:ContainerFileReceiver]",
+            "[transferFileChunk_Info, TestSender.ContainerOperationAgent.ContainerFileSenderRole:ContainerFileSender --> TestRecipient.ContainerOperationAgent.ContainerFileRecipientRole:ContainerFileReceiver]",
             sentMessage.toBriefString());
     assertNotNull(sentMessage.getConversationId());
     assertEquals(sentMessage.getConversationId().toString(), conversationId.toString());
@@ -243,9 +243,9 @@ public class ContainerFileSenderTest {
     while (true) {
       skillTestHarness.reset();
       taskAccomplishedInfoMessage = new Message(
-              "TestRecipient.ContainerFileTransferAgent.ContainerFileRecipientRole", // senderQualifiedName
+              "TestRecipient.ContainerOperationAgent.ContainerFileRecipientRole", // senderQualifiedName
               ContainerFileReceiver.class.getName(), // senderService
-              "TestSender.ContainerFileTransferAgent.ContainerFileSenderRole", // recipientQualifiedName
+              "TestSender.ContainerOperationAgent.ContainerFileSenderRole", // recipientQualifiedName
               conversationId,
               null, // replyWith
               null, // inReplyTo
@@ -266,9 +266,9 @@ public class ContainerFileSenderTest {
     skillTestHarness.reset();
     containerFileSender.setIsFileTransferDictionaryCleaned(false);
     taskAccomplishedInfoMessage = new Message(
-            "TestRecipient.ContainerFileTransferAgent.ContainerFileRecipientRole", // senderQualifiedName
+            "TestRecipient.ContainerOperationAgent.ContainerFileRecipientRole", // senderQualifiedName
             ContainerFileReceiver.class.getName(), // senderService
-            "TestSender.ContainerFileTransferAgent.ContainerFileSenderRole", // recipientQualifiedName
+            "TestSender.ContainerOperationAgent.ContainerFileSenderRole", // recipientQualifiedName
             conversationId,
             null, // replyWith
             null, // inReplyTo
@@ -284,7 +284,7 @@ public class ContainerFileSenderTest {
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
     assertEquals(
-            "[taskAccomplished_Info, TestSender.ContainerFileTransferAgent.ContainerFileSenderRole:ContainerFileSender --> Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer]",
+            "[taskAccomplished_Info, TestSender.ContainerOperationAgent.ContainerFileSenderRole:ContainerFileSender --> Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer]",
             sentMessage.toBriefString());
     assertNotNull(sentMessage.getConversationId());
     assertEquals(sentMessage.getConversationId().toString(), conversationId.toString());
@@ -308,7 +308,7 @@ public class ContainerFileSenderTest {
     final Message prepareToSendFileTaskMessage = new Message(
             "Test.NetworkFileTransferAgent.NetworkFileTransferRole", // senderQualifiedName
             NetworkFileTransfer.class.getName(), // senderService
-            "TestSender.ContainerFileTransferAgent.ContainerFileSenderRole", // recipientQualifiedName
+            "TestSender.ContainerOperationAgent.ContainerFileSenderRole", // recipientQualifiedName
             conversationId,
             null, // replyWith
             null, // inReplyTo
@@ -326,7 +326,7 @@ public class ContainerFileSenderTest {
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertEquals("[exception_Info, TestSender.ContainerFileTransferAgent.ContainerFileSenderRole:ContainerFileSender --> Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer]",
+    assertEquals("[exception_Info, TestSender.ContainerOperationAgent.ContainerFileSenderRole:ContainerFileSender --> Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer]",
             sentMessage.toBriefString());
     assertNotNull(sentMessage.getConversationId());
     assertEquals(sentMessage.getConversationId().toString(), conversationId.toString());
@@ -361,7 +361,7 @@ public class ContainerFileSenderTest {
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertEquals("[messageNotUnderstood_Info, TestSender.ContainerFileTransferAgent.ContainerFileSenderRole:ContainerFileSender --> Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer]",
+    assertEquals("[messageNotUnderstood_Info, TestSender.ContainerOperationAgent.ContainerFileSenderRole:ContainerFileSender --> Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer]",
             sentMessage.toBriefString());
   }
 

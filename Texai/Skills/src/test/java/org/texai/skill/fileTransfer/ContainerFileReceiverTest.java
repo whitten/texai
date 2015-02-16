@@ -54,7 +54,7 @@ public class ContainerFileReceiverTest {
   // the class name of the tested skill
   private static final String skillClassName = ContainerFileReceiver.class.getName();
   // the test node name
-  private static final String nodeName = "ContainerFileTransferAgent";
+  private static final String nodeName = "ContainerOperationAgent";
   // the test role name
   private static final String roleName = "ContainerFileRecipientRole";
   // the skill test harness
@@ -138,7 +138,7 @@ public class ContainerFileReceiverTest {
     final Message prepareToReceiveFileTaskMessage = new Message(
             "Test.NetworkFileTransferAgent.NetworkFileTransferRole", // senderQualifiedName
             NetworkFileTransfer.class.getName(), // senderService
-            "TestRecipient.ContainerFileTransferAgent.ContainerFileRecipientRole", // recipientQualifiedName
+            "TestRecipient.ContainerOperationAgent.ContainerFileRecipientRole", // recipientQualifiedName
             conversationId,
             null, // replyWith
             null, // inReplyTo
@@ -161,7 +161,7 @@ public class ContainerFileReceiverTest {
     Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertEquals("[taskAccomplished_Info, TestRecipient.ContainerFileTransferAgent.ContainerFileRecipientRole:ContainerFileReceiver --> Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer]",
+    assertEquals("[taskAccomplished_Info, TestRecipient.ContainerOperationAgent.ContainerFileRecipientRole:ContainerFileReceiver --> Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer]",
             sentMessage.toBriefString());
     assertNotNull(sentMessage.getConversationId());
     assertEquals(sentMessage.getConversationId().toString(), conversationId.toString());
@@ -173,9 +173,9 @@ public class ContainerFileReceiverTest {
     skillTestHarness.reset();
     containerFileReceiver.setIsFileTransferDictionaryCleaned(false);
     final Message transferFileChunkInfoMessage = new Message(
-            "TestSender.ContainerFileTransferAgent.ContainerFileSenderRole", // senderQualifiedName
+            "TestSender.ContainerOperationAgent.ContainerFileSenderRole", // senderQualifiedName
             ContainerFileSender.class.getName(), // senderService
-            "TestRecipient.ContainerFileTransferAgent.ContainerFileRecipientRole", // recipientQualifiedName
+            "TestRecipient.ContainerOperationAgent.ContainerFileRecipientRole", // recipientQualifiedName
             conversationId,
             null, // replyWith
             null, // inReplyTo
@@ -191,7 +191,7 @@ public class ContainerFileReceiverTest {
     sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertEquals("[taskAccomplished_Info, TestRecipient.ContainerFileTransferAgent.ContainerFileRecipientRole:ContainerFileReceiver --> TestSender.ContainerFileTransferAgent.ContainerFileSenderRole:ContainerFileSender]",
+    assertEquals("[taskAccomplished_Info, TestRecipient.ContainerOperationAgent.ContainerFileRecipientRole:ContainerFileReceiver --> TestSender.ContainerOperationAgent.ContainerFileSenderRole:ContainerFileSender]",
             sentMessage.toBriefString());
     assertNotNull(sentMessage.getConversationId());
     assertEquals(sentMessage.getConversationId().toString(), conversationId.toString());
@@ -227,7 +227,7 @@ public class ContainerFileReceiverTest {
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
     assertEquals(
-            "[messageNotUnderstood_Info, TestRecipient.ContainerFileTransferAgent.ContainerFileRecipientRole:ContainerFileReceiver --> Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkOperation]",
+            "[messageNotUnderstood_Info, TestRecipient.ContainerOperationAgent.ContainerFileRecipientRole:ContainerFileReceiver --> Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkOperation]",
             sentMessage.toBriefString());
   }
 

@@ -77,7 +77,7 @@ public class CreateSoftwareDeploymentManifest {
     }
 
     ignoredDirectoryPaths.add(".aicoin");
-    ignoredDirectoryPaths.add("journals");
+    ignoredDirectoryPaths.add("Main-1.0/journals");
     ignoredDirectoryPaths.add("repositories");
 
     ignoredFilePaths.add("agents-graph.dot");

@@ -121,14 +121,14 @@ public class ContainerFileReceiver extends AbstractSkill {
       /**
        * Transfer File Chunk Information
        *
-       * This information message is sent from the peer ContainerFileTransferAgent.ContainerFileSenderRole. It requests this
+       * This information message is sent from the peer ContainerOperationAgent.ContainerFileSenderRole. It requests this
        * network-connected role to accept the chunk of bytes in the message and write them to the output file. If the number of bytes is
        * less than the maximum buffer size, then the output file is closed and the file transfer operation completed.
        *
        * Parameters of the message are: file chunk bytes and the size of the chunk.
        *
        * As a result, a Task Accomplished Information message is replied back to the sending
-       * ContainerFileTransferAgent.ContainerFileSenderRole, which continues the file transfer conversation.
+       * ContainerOperationAgent.ContainerFileSenderRole, which continues the file transfer conversation.
        */
       case AHCSConstants.TRANSFER_FILE_CHUNK_INFO:
         transferFileChunkTask(receivedMessage);
@@ -314,7 +314,7 @@ public class ContainerFileReceiver extends AbstractSkill {
       }
     } catch (IOException ex) {
       LOGGER.info(StringUtils.getStackTraceAsString(ex));
-      //TODO send exception message back to the sending ContainerFileTransferAgent.ContainerFileSenderRole.
+      //TODO send exception message back to the sending ContainerOperationAgent.ContainerFileSenderRole.
     }
 
     final Message taskAccomplishedInfoMessage = makeReplyMessage(

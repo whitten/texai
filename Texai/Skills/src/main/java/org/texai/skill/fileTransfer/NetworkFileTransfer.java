@@ -270,7 +270,7 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
 
     // continue the file transfer conversation by preparing the sending container to send the file
     final Message prepareToSendFileTaskMessage = makeMessage(
-            senderContainerName + ".ContainerFileTransferAgent.ContainerFileSenderRole", // recipientQualifiedName
+            senderContainerName + ".ContainerOperationAgent.ContainerFileSenderRole", // recipientQualifiedName
             conversationId,
             ContainerFileSender.class.getName(), // recipientService
             AHCSConstants.PREPARE_TO_SEND_FILE_TASK); // operation
@@ -329,7 +329,7 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
 
     // continue the file transfer conversation by preparing the receiveing container to receive the file
     final Message prepareToReceiveFileTaskMessage = makeMessage(
-            fileTransferInfo.getRecipientContainerName() + ".ContainerFileTransferAgent.ContainerFileRecipientRole", // recipientQualifiedName
+            fileTransferInfo.getRecipientContainerName() + ".ContainerOperationAgent.ContainerFileRecipientRole", // recipientQualifiedName
             fileTransferInfo.getConversationId(),
             ContainerFileReceiver.class.getName(), // recipientService
             AHCSConstants.PREPARE_TO_RECEIVE_FILE_TASK); // operation
@@ -363,7 +363,7 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
 
     // continue the file transfer conversation by starting the file transfer process
     final Message prepareToReceiveFileTaskMessage = makeMessage(
-            fileTransferInfo.getSenderContainerName() + ".ContainerFileTransferAgent.ContainerFileSenderRole", // recipientQualifiedName
+            fileTransferInfo.getSenderContainerName() + ".ContainerOperationAgent.ContainerFileSenderRole", // recipientQualifiedName
             fileTransferInfo.getConversationId(),
             ContainerFileSender.class.getName(), // recipientService
             AHCSConstants.TRANSFER_FILE_TASK); // operation
