@@ -7,8 +7,8 @@ nscr:NetworkSingletonConfiguration[rp] "NetworkSingletonConfiguration (remote)"
 vns:VariousNetworkSingletons[rp] "VariousNetworkSingletons (remote)"
 
 
-csc:nscr.singletonAgentHosts_Info(\\n  singletonAgentHosts)
-nscr:csc.configureSingletonAgentHosts_Task(\\n  singletonAgentHosts)
+csc:nscr.configureSingletonAgentHostsRequest_Info(\\n  singletonAgentHosts)
+nscr:csc.configureSingletonAgentHosts_Task(\\n  singletonAgentHosts,\\n  x509Certificate)
 csc:cpts.configureSingletonAgentHosts_Task(\\n  singletonAgentHosts)
 
 

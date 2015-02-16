@@ -169,8 +169,8 @@ public class NetworkOperationTest {
     Collections.sort(skillTestHarness.getSentMessages());
     LOGGER.info(skillTestHarness.getSentMessages().get(0).toTraceString());
     assertEquals(
-            "[performMission_Task, Test.TopmostFriendshipAgent.TopmostFriendshipRole:TopmostFriendship --> Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation]\n"
-            + "[performMission_Task, Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation --> Test.ContainerOperationAgent.ContainerOperationRole:]\n",
+            "\n    [performMission_Task, Test.TopmostFriendshipAgent.TopmostFriendshipRole:TopmostFriendship --> Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation]\n"
+            + "    [performMission_Task, Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation --> Test.ContainerOperationAgent.ContainerOperationRole:]",
             skillTestHarness.getSentMessages().get(0).toTraceString());
     LOGGER.info("break here");
   }
@@ -201,7 +201,7 @@ public class NetworkOperationTest {
     assertTrue(Message.areMessageStringsEqualIgnoringDate(
             sentMessage.toString(),
             "[restartContainer_Task Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation --> Test.ContainerOperationAgent.ContainerOperationRole:ContainerOperation 2015-02-12T14:48:28.154-06:00\n"
-            + "  messageTrace=[networkRestartRequest_Info, Test.TopmostFriendshipAgent.TopmostFriendshipRole:TopmostFriendship --> Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation]\n"
+            + "  messageTrace=\n    [networkRestartRequest_Info, Test.TopmostFriendshipAgent.TopmostFriendshipRole:TopmostFriendship --> Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation]"
             + ",\n"
             + "  restartContainer_Task_delay=5000\n"
             + "]"));

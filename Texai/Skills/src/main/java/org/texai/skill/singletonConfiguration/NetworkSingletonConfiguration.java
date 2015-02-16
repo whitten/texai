@@ -92,20 +92,20 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
         return;
 
       /**
-       * Singleton Agent Hosts Info
+       * Configure Singleton Agent Hosts Request Info
        *
-       * This task message is sent from the ContainerOperationAgent.SingletonConfigurationRole.
+       * This information message is sent from the ContainerOperationAgent.SingletonConfigurationRole.
        *
        * Its parameter is the SingletonAgentHosts object, which contains the the singleton agent dictionary, agent name --> hosting
        * container name.
        *
-       * A a result, a Delegate Configure Singleton Agent Hosts Task message is sent to container operations, which in turn sends a
+       * A a result, aConfigure Singleton Agent Hosts Task message is sent to container operations, which in turn sends a
        * Configure Singleton Agent Hosts Task to all child ConfigureParentToSingletonRoles, which includes every agent in the container.
        *
        * Each outbound message contains the singleton agent dictionary.
        *
        */
-      case AHCSConstants.SINGLETON_AGENT_HOSTS_INFO:
+      case AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_REQUEST_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
         handleSingletonAgentHostsInfo(receivedMessage);
         return;
@@ -228,6 +228,7 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.INITIALIZE_TASK,
+      AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_REQUEST_INFO,
       AHCSConstants.DELEGATE_PERFORM_MISSION_TASK,
       AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO,
       AHCSConstants.JOIN_NETWORK_TASK,
@@ -236,7 +237,6 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
       AHCSConstants.MESSAGE_TIMEOUT_INFO,
       AHCSConstants.NETWORK_JOIN_COMPLETE_INFO,
       AHCSConstants.PERFORM_MISSION_TASK,
-      AHCSConstants.SINGLETON_AGENT_HOSTS_INFO,
       AHCSConstants.TASK_ACCOMPLISHED_INFO
     };
   }

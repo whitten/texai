@@ -268,6 +268,9 @@ public final class AHCSConstants {
   // the acknowledged_Info operation
   public static final String ACKNOWLEDGED_INFO = "acknowledged_Info";
   //
+  // the configureSingletonAgentHostsRequest_Info operation
+  public static final String CONFIGURE_SINGLETON_AGENT_HOSTS_REQUEST_INFO = "configureSingletonAgentHostsRequest_Info";
+  //
   // the exception information operation
   public static final String EXCEPTION_INFO = "exception_Info";
   //

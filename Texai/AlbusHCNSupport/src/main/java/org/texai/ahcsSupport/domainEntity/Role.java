@@ -573,7 +573,9 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
       if (oldStringBuilder != null) {
         newStringBuilder.append(oldStringBuilder);
       }
-      newStringBuilder.append(receivedMessage.toBriefString()).append('\n');
+      newStringBuilder
+              .append("\n    ")
+              .append(receivedMessage.toBriefString());
     }
     message.put(
             AHCSConstants.MSG_PARM_MESSAGE_TRACE, // parameterName

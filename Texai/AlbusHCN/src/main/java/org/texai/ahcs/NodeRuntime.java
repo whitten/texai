@@ -240,7 +240,7 @@ public class NodeRuntime extends BasicNodeRuntime {
                 message.getSenderQualifiedName(), // qualifiedName
                 x509Certificate);
       } else {
-        throw new TexaiException("X.509 certificate not found for sender " + message.getSenderQualifiedName());
+        throw new TexaiException("X.509 certificate not found for sender " + message.getSenderQualifiedName() + "\n" + message.toString());
       }
     }
     final boolean isOK = message.verify(x509Certificate);

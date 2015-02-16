@@ -53,6 +53,12 @@ public abstract class AbstractSkill {
     oneTimeOperations.add(AHCSConstants.SINGLETON_AGENT_HOSTS_INFO);
     oneTimeOperations.add(AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK);
   }
+  // the one-time operations - to receive one of these a second time is not an error, it is silently dropped
+  private static final Set<String> oneTimeOperationsIgnoringRepeats = new HashSet<>();
+
+  static {
+    oneTimeOperationsIgnoringRepeats.add(AHCSConstants.SINGLETON_AGENT_HOSTS_INFO);
+  }
   // the used one-time operations
   private final Set<String> usedOneTimeOperations = new HashSet<>();
   // the indicator whether this skill is undergoing unit test, in which case single threading is preferred
@@ -92,6 +98,18 @@ public abstract class AbstractSkill {
       }
     }
     return true;
+  }
+
+  /** Returns whether the message should be silently dropped in the case that it is a redundant one-time operation.
+   *
+   * @param message the given message specifying the operation
+   * @return whether the message should be silently dropped in the case that it is a redundant one-time operation
+   */
+  protected boolean isRedundantOneTimeOperationSilentlyDropped(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+
+    return oneTimeOperationsIgnoringRepeats.contains(message.getOperation());
   }
 
   /**

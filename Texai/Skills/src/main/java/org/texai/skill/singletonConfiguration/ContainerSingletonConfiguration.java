@@ -75,7 +75,7 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
 
     final String operation = receivedMessage.getOperation();
     if (!isOperationPermitted(receivedMessage)) {
-      if (receivedMessage.getOperation().equals(AHCSConstants.SINGLETON_AGENT_HOSTS_INFO)) {
+      if (this.isRedundantOneTimeOperationSilentlyDropped(receivedMessage)) {
         LOGGER.info("Ignoring a reply from a subsequent seeding peer.");
         removeMessageTimeOut(receivedMessage.getInReplyTo());
         return;
@@ -436,7 +436,7 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
               = (SingletonAgentHosts) receivedMessage.get(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS);
       LOGGER.info(singletonAgentHosts.toDetailedString());
 
-      // send an singletonAgentHosts_Info message to the NetworkOperationsAgent.
+      // send a configureSingletonAgentHostsRequest_Info message to the NetworkOperationsAgent.
       final String recipientContainer = singletonAgentHosts.getContainer("NetworkOperationAgent");
       assert recipientContainer != null;
       final String recipientQualifiedName
@@ -445,7 +445,7 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
       final Message singletonAgentHostsMessage = makeMessage(
               recipientQualifiedName,
               NetworkSingletonConfiguration.class.getName(), // recipientService
-              AHCSConstants.SINGLETON_AGENT_HOSTS_INFO); // operation
+              AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_REQUEST_INFO); // operation
 
       singletonAgentHostsMessage.put(
               AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS, // parameterName

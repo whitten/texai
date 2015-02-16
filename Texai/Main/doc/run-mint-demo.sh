@@ -15,9 +15,9 @@ sudo docker ps -a | grep 'aicoin-mint' | awk '{print $1}' | xargs --no-run-if-em
 # port 10000 is for Java remote debugging, not included for normal production
 
 sudo docker run --name Mint -t -i \
-  -p 127.0.1.1:35048:5048 \
+  -p 5048:5048 \
   -p 127.0.1.1:5903:5900 \
-  -p 8336:8333 \
+  -p 8333:8333 \
   -p 127.0.1.1:10003:10000 \
   -v /home/reed/docker/Mint:/aicoin \
   -v /etc/localtime:/etc/localtime:ro \

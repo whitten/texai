@@ -778,8 +778,8 @@ public class Message implements Serializable, Comparable<Message> {
       final StringBuilder newStringBuilder = new StringBuilder();
       newStringBuilder
               .append(oldStringBuilder)
-              .append(toBriefString())
-              .append('\n');
+              .append("\n    ")
+              .append(toBriefString());
       return newStringBuilder.toString();
     }
   }
