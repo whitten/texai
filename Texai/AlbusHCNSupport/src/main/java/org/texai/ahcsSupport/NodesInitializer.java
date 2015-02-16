@@ -563,6 +563,7 @@ public final class NodesInitializer {
                   keyStorePassword, // keyStorePassword
                   role.getQualifiedName()); // alias
           assert x509SecurityInfo != null;
+          assert x509SecurityInfo.getX509Certificate() != null;
         }
         role.initialize(nodeRuntime, x509SecurityInfo);
       }

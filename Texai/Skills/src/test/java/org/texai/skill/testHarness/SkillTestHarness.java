@@ -1,5 +1,16 @@
 package org.texai.skill.testHarness;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyPair;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -13,6 +24,9 @@ import org.texai.ahcsSupport.domainEntity.SkillClass;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.util.ArraySet;
 import org.texai.util.StringUtils;
+import org.texai.util.TexaiException;
+import org.texai.x509.X509SecurityInfo;
+import org.texai.x509.X509Utils;
 
 /**
  * SkillTestHarness.java
@@ -331,6 +345,10 @@ public class SkillTestHarness {
     final List<Message> sentMessages;
     // the operation and service information
     OperationAndSenderServiceInfo operationAndServiceInfo;
+    // the X.509 security information
+    private X509SecurityInfo x509SecurityInfo;
+    // the test keystore path
+    private final static String KEY_STORE_FILE_PATH = "data/test-keystore.uber";
 
     /**
      * Constructs a new MockRole instance.
@@ -439,6 +457,56 @@ public class SkillTestHarness {
 
       super.propagateOperationToChildRolesSeparateThreads(receivedMessage, senderService);
 
+    }
+
+    /**
+     * Returns the X.509 certificate belonging to this role, or null if this role is not permitted to communicate with another container.
+     *
+     * @return the X.509 certificate belonging to this role
+     */
+    @Override
+    public X509Certificate getX509Certificate() {
+      if (areRemoteCommunicationsPermitted()) {
+        if (x509SecurityInfo == null) {
+          KeyStore keyStore;
+          final char[] keyStorePassword = "test-password".toCharArray();
+          try {
+            LOGGER.debug("getting the keystore " + KEY_STORE_FILE_PATH);
+            keyStore = X509Utils.findOrCreateUberKeyStore(
+                    KEY_STORE_FILE_PATH, // keyStoreFilePath
+                    keyStorePassword);
+            try (final FileOutputStream keyStoreOutputStream = new FileOutputStream(new File(KEY_STORE_FILE_PATH))) {
+              keyStore.store(keyStoreOutputStream, keyStorePassword);
+            }
+            if (!X509Utils.keyStoreContains(
+                    KEY_STORE_FILE_PATH,
+                    keyStorePassword,
+                    getQualifiedName())) {
+              LOGGER.debug("    generating a new certificate");
+              final KeyPair keyPair;
+              keyPair = X509Utils.generateRSAKeyPair3072();
+              x509SecurityInfo = X509Utils.generateX509SecurityInfo(
+                      keyStore,
+                      keyStorePassword,
+                      keyPair,
+                      null, // uid
+                      getQualifiedName(), // domainComponent
+                      getQualifiedName()); // certificateAlias
+            }
+
+            x509SecurityInfo = X509Utils.getX509SecurityInfo(
+                    keyStore,
+                    keyStorePassword, // keyStorePassword
+                    getQualifiedName()); // alias
+          } catch (InvalidAlgorithmParameterException | KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | NoSuchProviderException ex) {
+            LOGGER.error(StringUtils.getStackTraceAsString(ex));
+            throw new TexaiException(ex);
+          }
+        }
+        return x509SecurityInfo.getX509Certificate();
+      } else {
+        return null;
+      }
     }
 
     /**

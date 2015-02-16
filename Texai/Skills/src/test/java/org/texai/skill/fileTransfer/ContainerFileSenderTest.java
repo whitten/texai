@@ -81,7 +81,7 @@ public class ContainerFileSenderTest {
             childQualifiedNames,
             skillClasses,
             variableNames,
-            false); // areRemoteCommunicationsPermitted
+            true); // areRemoteCommunicationsPermitted
   }
 
   @AfterClass

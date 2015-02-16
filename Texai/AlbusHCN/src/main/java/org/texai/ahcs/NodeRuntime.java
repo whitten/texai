@@ -63,11 +63,12 @@ public class NodeRuntime extends BasicNodeRuntime {
   // the between-container operations in which the sender informs the receiver of its public X.509 certificate
   private static final Set<String> certificateIntroducingOperations = new ArraySet<>();
   static {
+    certificateIntroducingOperations.add(AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK);
+    certificateIntroducingOperations.add(AHCSConstants.JOIN_ACKNOWLEDGED_TASK);
+    certificateIntroducingOperations.add(AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO);
     certificateIntroducingOperations.add(AHCSConstants.SEED_CONNECTION_REQUEST_INFO);
     certificateIntroducingOperations.add(AHCSConstants.SINGLETON_AGENT_HOSTS_INFO);
-    certificateIntroducingOperations.add(AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK);
-    certificateIntroducingOperations.add(AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO);
-    certificateIntroducingOperations.add(AHCSConstants.JOIN_ACKNOWLEDGED_TASK);
+    certificateIntroducingOperations.add(AHCSConstants.TRANSFER_FILE_CHUNK_INFO);
   }
 
   /**

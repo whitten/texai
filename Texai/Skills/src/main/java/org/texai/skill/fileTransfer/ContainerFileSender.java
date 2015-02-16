@@ -136,8 +136,8 @@ public class ContainerFileSender extends AbstractSkill {
       /**
        * Task Accomplished Information.
        *
-       * This information message is sent from the ContainerOperationAgent.ContainerFileRecipientRole. It confirms that the file chunk
-       * has been written to the output path.
+       * This information message is sent from the ContainerOperationAgent.ContainerFileRecipientRole. It confirms that the file chunk has
+       * been written to the output path.
        *
        * The number of processed file chunks is a parameter of this message.
        *
@@ -157,8 +157,8 @@ public class ContainerFileSender extends AbstractSkill {
     sendMessage(
             receivedMessage,
             Message.notUnderstoodMessage(
-            receivedMessage, // receivedMessage
-            this)); // skill
+                    receivedMessage, // receivedMessage
+                    this)); // skill
   }
 
   /**
@@ -231,16 +231,16 @@ public class ContainerFileSender extends AbstractSkill {
       sendMessage(
               receivedMessage,
               makeExceptionMessage(
-              receivedMessage, // receivedMessage
-              "file does not exist: " + file)); // reason
+                      receivedMessage, // receivedMessage
+                      "file does not exist: " + file)); // reason
       return;
     } else if (file.isDirectory()) {
       LOGGER.info("file is a directory - not an ordinary file: " + file);
       sendMessage(
               receivedMessage,
               makeExceptionMessage(
-              receivedMessage, // receivedMessage
-              "file is a directory - not an ordinary file: " + file)); // reason
+                      receivedMessage, // receivedMessage
+                      "file is a directory - not an ordinary file: " + file)); // reason
       return;
     }
 
@@ -262,8 +262,8 @@ public class ContainerFileSender extends AbstractSkill {
       sendMessage(
               receivedMessage,
               makeExceptionMessage(
-              receivedMessage, // receivedMessage
-              "file does not exist: " + file)); // reason
+                      receivedMessage, // receivedMessage
+                      "file does not exist: " + file)); // reason
       return;
     }
     fileTransferInfo.setFileTransferState(FileTransferState.OK_TO_SEND);
@@ -393,6 +393,9 @@ public class ContainerFileSender extends AbstractSkill {
     final byte[] truncatedBuffer = Arrays.copyOf(buffer, bytesSize);
     transferFileChunkInfoMessage.put(AHCSConstants.MSG_PARM_BYTES, truncatedBuffer);
     transferFileChunkInfoMessage.put(AHCSConstants.MSG_PARM_BYTES_SIZE, bytesSize);
+    if (fileTransferInfo.getFileChunksCnt() == 0) {
+      transferFileChunkInfoMessage.put(AHCSConstants.MSG_PARM_X509_CERTIFICATE, getRole().getX509Certificate());
+    }
 
     fileTransferInfo.setFileChunkBytes(truncatedBuffer);
     fileTransferInfo.incrementFileChunksCnt();

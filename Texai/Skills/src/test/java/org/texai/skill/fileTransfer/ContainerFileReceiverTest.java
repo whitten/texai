@@ -82,7 +82,7 @@ public class ContainerFileReceiverTest {
             childQualifiedNames,
             skillClasses,
             variableNames,
-            false); // areRemoteCommunicationsPermitted
+            true); // areRemoteCommunicationsPermitted
   }
 
   @AfterClass
