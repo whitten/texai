@@ -56,7 +56,7 @@ public class NodesInitializerTest {
   // the test keystore path
   private final static String KEY_STORE_FILE_NAME = "data/test-keystore.uber";
   // the test configuration certificate path
-  private final static String SINGLETON_CONFIGURATION_FILE_PATH = "data/test-SingletonConfiguration.crt";
+  private final static String CONTAINER_SINGLETON_CONFIGURATION_CERTIFICATE_PATH = "data/test-ContainerSingletonConfiguration.crt";
   // the hash of nodes-test.xml
   public final static String NODES_TEST_HASH
           = "BwqO9m7Gctyrc5+pw+XcJCDe3Xn+O4Ol/SGovQntsjB+H9Seq1x1Zh1ELDbDbsSCEMmMv/M+ETPmUNuDpFOR+A==";
@@ -109,7 +109,7 @@ public class NodesInitializerTest {
                     keystorePassword,
                     nodeRuntime,
                     KEY_STORE_FILE_NAME, // keyStoreFilePath
-                    SINGLETON_CONFIGURATION_FILE_PATH); // configurationCertificateFilePath
+                    CONTAINER_SINGLETON_CONFIGURATION_CERTIFICATE_PATH); // containerConfigurationCertificateFilePath
     nodesInitializer.process(
             "data/nodes-test.xml", // nodesPath
             NODES_TEST_HASH); // nodesFileHashString
@@ -134,7 +134,7 @@ public class NodesInitializerTest {
     final String containerName = "TestContainer";
     final BasicNodeRuntime nodeRuntime = new BasicNodeRuntime(containerName);
     final char[] keystorePassword = "test-password".toCharArray();
-    final File singletonConfigurationFile = new File(SINGLETON_CONFIGURATION_FILE_PATH);
+    final File singletonConfigurationFile = new File(CONTAINER_SINGLETON_CONFIGURATION_CERTIFICATE_PATH);
     if (singletonConfigurationFile.exists()) {
       final boolean isOk = singletonConfigurationFile.delete();
       if (!isOk) {
@@ -147,7 +147,7 @@ public class NodesInitializerTest {
                     keystorePassword,
                     nodeRuntime,
                     KEY_STORE_FILE_NAME, // keyStoreFilePath
-                    SINGLETON_CONFIGURATION_FILE_PATH); // configurationCertificateFilePath
+                    CONTAINER_SINGLETON_CONFIGURATION_CERTIFICATE_PATH); // containerConfigurationCertificateFilePath
     nodesInitializer.process(
             "data/nodes-test.xml", // nodesPath
             NODES_TEST_HASH); // nodesFileHashString

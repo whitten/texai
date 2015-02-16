@@ -91,7 +91,7 @@ public class AICoinMain {
    */
   private final AtomicBoolean isInitialized = new AtomicBoolean(false);
   // the configuration certificate path
-  private final static String SINGLETON_CONFIGURATION_FILE_PATH = "data/SingletonConfiguration.crt";
+  private final static String CONTAINER_SINGLETON_CONFIGURATION_CERTIFICATE_PATH = "data/ContainerSingletonConfiguration.crt";
 
   /**
    * Constructs a new TexaiMain instance.
@@ -156,7 +156,7 @@ public class AICoinMain {
             keyStorePassword,
             nodeRuntime,
             "data/keystore.uber", // keyStoreFilePath
-            SINGLETON_CONFIGURATION_FILE_PATH); // configurationCertificateFilePath
+            CONTAINER_SINGLETON_CONFIGURATION_CERTIFICATE_PATH); // containerConfigurationCertificateFilePath
     nodesInitializer.process(
             nodesPath,
             NODES_FILE_HASH); // nodesFileHashString

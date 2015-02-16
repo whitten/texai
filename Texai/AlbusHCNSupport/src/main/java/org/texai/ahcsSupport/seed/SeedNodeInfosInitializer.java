@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.net.InetAddress;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -46,7 +45,7 @@ public class SeedNodeInfosInitializer {
       // the demo mint peer
       String qualifiedName = "Mint.ContainerOperationAgent.ContainerSingletonConfigurationRole";
       int port = 5048;
-      String cerfificateFilePath = "../Main/data/SingletonConfiguration.crt";
+      String cerfificateFilePath = "../Main/data/ContainerSingletonConfiguration.crt";
       if (!(new File(cerfificateFilePath)).exists()) {
         throw new TexaiException("cerfificate path not found " + cerfificateFilePath);
       }

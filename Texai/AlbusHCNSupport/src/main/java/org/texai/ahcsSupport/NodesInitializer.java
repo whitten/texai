@@ -109,27 +109,27 @@ public final class NodesInitializer {
    * @param keyStorePassword the keystore password, which is not persisted
    * @param nodeRuntime the node runtime
    * @param keyStoreFilePath the keystore path, which is different for test vs production
-   * @param configurationCertificateFilePath the output path for the configuration role's certificate, which is different for test vs
-   * production
+   * @param containerConfigurationCertificateFilePath the output path for the container configuration role's certificate,
+   * which is different for test vs production
    */
   public NodesInitializer(
           final boolean isClassExistsTested,
           final char[] keyStorePassword,
           final BasicNodeRuntime nodeRuntime,
           final String keyStoreFilePath,
-          final String configurationCertificateFilePath) {
+          final String containerConfigurationCertificateFilePath) {
     //Preconditions
     assert keyStorePassword != null : "keyStorePassword must not be null";
     assert keyStorePassword.length > 0 : "keyStorePassword must not be empty";
     assert nodeRuntime != null : "nodeRuntime must not be null";
     assert StringUtils.isNonEmptyString(keyStoreFilePath) : "keyStoreFilePath must be a non-empty string";
-    assert StringUtils.isNonEmptyString(configurationCertificateFilePath) : "configurationCertificateFilePath must be a non-empty string";
+    assert StringUtils.isNonEmptyString(containerConfigurationCertificateFilePath) : "containerConfigurationCertificateFilePath must be a non-empty string";
 
     this.isClassExistsTested = isClassExistsTested;
     this.keyStorePassword = keyStorePassword.clone();
     this.nodeRuntime = nodeRuntime;
     this.keyStoreFilePath = keyStoreFilePath;
-    this.configurationCertificateFilePath = configurationCertificateFilePath;
+    this.configurationCertificateFilePath = containerConfigurationCertificateFilePath;
     containerName = nodeRuntime.getContainerName();
     nodeAccess = nodeRuntime.getNodeAccess();
   }

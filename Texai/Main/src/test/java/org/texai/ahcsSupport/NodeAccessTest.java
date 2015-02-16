@@ -50,7 +50,7 @@ public class NodeAccessTest {
   // the test keystore path
   private final static String KEY_STORE_FILE_NAME = "data/test-keystore.uber";
   // the test configuration certificate path
-  private final static String SINGLETON_CONFIGURATION_FILE_NAME = "data/test-SingletonConfiguration.crt";
+  private final static String CONTAINER_SINGLETON_CONFIGURATION_CERTIFICATE_PATH = "data/test-ContainerSingletonConfiguration.crt";
 
   public NodeAccessTest() {
   }
@@ -78,7 +78,7 @@ public class NodeAccessTest {
                     keystorePassword,
                     nodeRuntime,
                     KEY_STORE_FILE_NAME, // keyStoreFilePath
-                    SINGLETON_CONFIGURATION_FILE_NAME); // configurationCertificateFilePath
+                    CONTAINER_SINGLETON_CONFIGURATION_CERTIFICATE_PATH); // configurationCertificateFilePath
     nodesInitializer.process(
             "data/nodes-test.xml", // nodesPath
             NodesInitializerTest.NODES_TEST_HASH); // nodesFileHashString
