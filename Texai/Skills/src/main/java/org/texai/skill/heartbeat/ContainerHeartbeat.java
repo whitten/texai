@@ -504,7 +504,7 @@ public final class ContainerHeartbeat extends AbstractSkill {
             outboundHeartbeatInfo.service,
             AHCSConstants.KEEP_ALIVE_INFO); // operation
     LOGGER.info(getContainerName() + " sending keep-alive to " + Node.extractContainerName(outboundHeartbeatInfo.role.getParentQualifiedName()));
-    sendMessage(
+    sendMessageViaSeparateThread(
             null, // received message, which is null because this sent message is triggered by a timer
             keepAliveInfoMessage);
 

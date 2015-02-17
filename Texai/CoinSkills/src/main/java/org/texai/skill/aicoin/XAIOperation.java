@@ -27,6 +27,8 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
   private static final Logger LOGGER = Logger.getLogger(XAIOperation.class);
   // the path to the aicoin-qt configuration and data directory
   private static final String AICOIN_DIRECTORY_PATH = "../.aicoin";
+  // the insight process
+  private Process insightProcess;
 
   /**
    * Constructs a new XTCOperation instance.
@@ -97,8 +99,7 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
       /**
        * Perform Mission Task
        *
-       * This task message is sent from the parent role. It commands this
-       * network-connected role to begin performing its mission.
+       * This task message is sent from the parent role. It commands this network-connected role to begin performing its mission.
        */
       case AHCSConstants.PERFORM_MISSION_TASK:
         if (getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK)) {
@@ -290,7 +291,7 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
     cmdArray[2] = stringBuilder.toString();
     LOGGER.info("Launching the Insight blockchain explorer instance.");
     LOGGER.info("  shell cmd: " + cmdArray[2]);
-    AICoinUtils.executeHostCommandWithoutWaitForCompletion(cmdArray);
+    insightProcess = AICoinUtils.executeHostCommandWithoutWaitForCompletion(cmdArray);
   }
 
   /**
@@ -300,20 +301,10 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
     if (!EnvironmentUtils.isLinux()) {
       throw new TexaiException("Operating system must be Linux");
     }
-
-    final String display = System.getenv("DISPLAY");
-    LOGGER.info("X11 DISPLAY=" + display);
-    String[] cmdArray = {
-      "sh",
-      "-c",
-      ""
-    };
-    final StringBuilder stringBuilder = new StringBuilder();
-    stringBuilder.append("cd /root/insight && npm stop");
-    cmdArray[2] = stringBuilder.toString();
-    LOGGER.info("Shutting down the Insight blockchain explorer instance.");
-    LOGGER.info("  shell cmd: " + cmdArray[2]);
-    AICoinUtils.executeHostCommandWithoutWaitForCompletion(cmdArray);
+    if (insightProcess != null) {
+      LOGGER.info("Destroying the Insight process.");
+      insightProcess.destroy();
+    }
   }
 
   /**

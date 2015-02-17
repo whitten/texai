@@ -56,9 +56,10 @@ public class AICoinUtils {
    * Executes a host command using the specified command strings, without waiting for the command to finish.
    *
    * @param cmdArray the specified command strings
+   * @return the started host process
    *
     */
-  public synchronized static void executeHostCommandWithoutWaitForCompletion(final String[] cmdArray) {
+  public synchronized static Process executeHostCommandWithoutWaitForCompletion(final String[] cmdArray) {
     //Preconditions
     assert cmdArray != null : "cmdArray must not be null";
     assert cmdArray.length > 0 : "cmdArray must not be empty";
@@ -70,7 +71,7 @@ public class AICoinUtils {
       final ProcessBuilder processBuilder = new ProcessBuilder(cmdArray);
       processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
       processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
-      processBuilder.start();
+      return processBuilder.start();
     } catch (final IOException ex) {
       throw new TexaiException(ex);
     }

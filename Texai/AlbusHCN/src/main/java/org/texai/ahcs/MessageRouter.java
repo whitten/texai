@@ -463,6 +463,12 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
       LOGGER.info("peer has shutdown " + message.getRecipientQualifiedName());
       return;
     }
+    if (!channel.isConnected() || !channel.isReadable() || !channel.isWritable()) {
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException ex) {
+      }
+    }
     assert channel.isConnected() : "channel must be connected";
     assert channel.isReadable() : "channel must be readable";
     assert channel.isWritable() : "channel must be writable";
