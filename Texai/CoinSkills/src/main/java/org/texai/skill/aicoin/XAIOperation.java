@@ -260,10 +260,10 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
     @Override
     public void run() {
       try {
-        LOGGER.info("Waiting 5 minutes before launching the block explorer ...");
-        Thread.sleep(5 * 60 * 1000);
-//        LOGGER.info("Waiting 1 minute before launching the block explorer ...");
-//        Thread.sleep(60 * 1000);
+//        LOGGER.info("Waiting 5 minutes before launching the block explorer ...");
+//        Thread.sleep(5 * 60 * 1000);
+        LOGGER.info("Waiting 1 minute before launching the block explorer ...");
+        Thread.sleep(60 * 1000);
       } catch (InterruptedException ex) {
       }
       launchInsight();
@@ -295,19 +295,6 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
   }
 
   /**
-   * Shuts down the Insight blockchain explorer instance.
-   */
-  private void shutdownInsight() {
-    if (!EnvironmentUtils.isLinux()) {
-      throw new TexaiException("Operating system must be Linux");
-    }
-    if (insightProcess != null) {
-      LOGGER.info("Destroying the Insight process.");
-      insightProcess.destroy();
-    }
-  }
-
-  /**
    * Shuts down the aicoind instance.
    */
   private void shutdownAicoind() {
@@ -330,6 +317,19 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
     cmdArray[2] = stringBuilder.toString();
     LOGGER.info("shell cmd: " + cmdArray[2]);
     AICoinUtils.executeHostCommandWithoutWaitForCompletion(cmdArray);
+  }
+
+  /**
+   * Shuts down the Insight blockchain explorer instance.
+   */
+  private void shutdownInsight() {
+    if (!EnvironmentUtils.isLinux()) {
+      throw new TexaiException("Operating system must be Linux");
+    }
+    if (insightProcess != null) {
+      LOGGER.info("Destroying the Insight process.");
+      insightProcess.destroy();
+    }
   }
 
   @Override

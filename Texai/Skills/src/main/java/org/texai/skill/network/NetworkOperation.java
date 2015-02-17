@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcs.skill.AbstractNetworkSingletonSkill;
+import org.texai.ahcsSupport.domainEntity.Node;
 
 /**
  * Created on Aug 30, 2014, 11:30:19 PM.
@@ -218,15 +219,15 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
     LOGGER.info("Handling a network restart request");
 
     // send the restart container task to XAI network operation which will task each XAI operation role to shut down aicoind instances.
-    final String recipientQualifiedName =
-            getRole().getChildQualifiedNameForAgentRole("XAINetworkOperationAgent.XAINetworkOperationRole");
+    final String recipientQualifiedName
+            = getRole().getChildQualifiedNameForAgentRole("XAINetworkOperationAgent.XAINetworkOperationRole");
     final Message restartContainerTaskMessage1 = new Message(
-              getQualifiedName(), // senderQualifiedName
-              getClassName(), // senderService
-              recipientQualifiedName,
-              "org.texai.skill.aicoin.XAINetworkOperation", // recipientService
-              AHCSConstants.RESTART_CONTAINER_TASK); // operation
-      sendMessage(receivedMessage, restartContainerTaskMessage1);
+            getQualifiedName(), // senderQualifiedName
+            getClassName(), // senderService
+            recipientQualifiedName,
+            "org.texai.skill.aicoin.XAINetworkOperation", // recipientService
+            AHCSConstants.RESTART_CONTAINER_TASK); // operation
+    sendMessage(receivedMessage, restartContainerTaskMessage1);
 
     // send the restart container task to every child container operation role.
     getRole().getChildQualifiedNamesForAgent("ContainerOperationAgent").forEach((String childQualifiedName) -> {
@@ -236,7 +237,13 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
               childQualifiedName, // recipientQualifiedName
               ContainerOperation.class.getName(), // recipientService
               AHCSConstants.RESTART_CONTAINER_TASK); // operation
-      restartContainerTaskMessage2.put(AHCSConstants.RESTART_CONTAINER_TASK_DELAY, 5000L);
+      if (Node.extractContainerName(childQualifiedName).equals("Mint")) {
+        // restart the demonstration Mint in 15 seconds
+        restartContainerTaskMessage2.put(AHCSConstants.RESTART_CONTAINER_TASK_DELAY, 15000L);
+      } else {
+        // restart the every other container in 60 seconds
+        restartContainerTaskMessage2.put(AHCSConstants.RESTART_CONTAINER_TASK_DELAY, 60000L);
+      }
       sendMessage(receivedMessage, restartContainerTaskMessage2);
     });
   }

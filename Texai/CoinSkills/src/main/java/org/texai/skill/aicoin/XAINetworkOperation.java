@@ -220,7 +220,6 @@ public final class XAINetworkOperation extends AbstractNetworkSingletonSkill {
               childQualifiedName, // recipientQualifiedName
               XAIOperation.class.getName(), // recipientService
               AHCSConstants.SHUTDOWN_AICOIND_TASK); // operation
-      restartContainerTaskMessage2.put(AHCSConstants.RESTART_CONTAINER_TASK_DELAY, 5000L);
       sendMessage(receivedMessage, restartContainerTaskMessage2);
     });
   }

@@ -181,8 +181,11 @@ public final class ContainerOperation extends AbstractSkill {
     assert receivedMessage.get(AHCSConstants.RESTART_CONTAINER_TASK_DELAY) != null :
             "the " + AHCSConstants.RESTART_CONTAINER_TASK_DELAY + " parameter must be present ...\n" + receivedMessage;
 
+    LOGGER.info("Cancelling scheduled tasks.");
+    getNodeRuntime().getTimer().cancel();
+
     final long delay = (long) receivedMessage.get(AHCSConstants.RESTART_CONTAINER_TASK_DELAY);
-    LOGGER.info("Restarting the application after a pause of " + delay + " microseconds");
+    LOGGER.info("Restarting the application after a pause of " + (delay/1000) + " seconds.");
     assert delay > 0 : AHCSConstants.RESTART_CONTAINER_TASK_DELAY + " must be positive";
 
     try {

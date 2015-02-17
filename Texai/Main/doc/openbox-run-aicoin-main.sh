@@ -136,7 +136,7 @@ fi
 #java -ea -Dlog4j.configuration=file://$PWD/log4j.properties -classpath $CLASSPATH -Djavax.net.debug=all org.texai.main.AICoinMain
 
 # restart automatically following an automatic software deployment
-while java -ea -Dlog4j.configuration=file://$PWD/log4j.properties -classpath $CLASSPATH org.texai.main.AICoinMain 2>&1 | tee ../console.log ; do
+while java -ea -Dlog4j.configuration=file://$PWD/log4j.properties -classpath $CLASSPATH org.texai.main.AICoinMain 2>&1 | tee -a ../console.log ; do
   echo "Restarting AI Coin Peer"
   sleep 1
 done
