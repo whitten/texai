@@ -199,10 +199,10 @@ public class NetworkOperationTest {
     LOGGER.info("sentMessage...\n" + sentMessage);
     assertTrue(Message.areMessageStringsEqualIgnoringDate(
             sentMessage.toString(),
-            "[restartContainer_Task Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation --> Test.ContainerOperationAgent.ContainerOperationRole:ContainerOperation 2015-02-12T14:48:28.154-06:00\n"
-            + "  messageTrace=\n    [networkRestartRequest_Info, Test.TopmostFriendshipAgent.TopmostFriendshipRole:TopmostFriendship --> Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation]"
-            + ",\n"
-            + "  restartContainer_Task_delay=5000\n"
+            "[restartContainer_Task Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation --> Test.ContainerOperationAgent.ContainerOperationRole:ContainerOperation 2015-02-17T15:51:31.504-06:00\n"
+            + "  messageTrace=\n"
+            + "    [networkRestartRequest_Info, Test.TopmostFriendshipAgent.TopmostFriendshipRole:TopmostFriendship --> Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation],\n"
+            + "  restartContainer_Task_delay=60000\n"
             + "]"));
     assertEquals(
             "[restartContainer_Task, Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation --> Test.ContainerOperationAgent.ContainerOperationRole:ContainerOperation]\n"

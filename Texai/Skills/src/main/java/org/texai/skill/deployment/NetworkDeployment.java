@@ -168,13 +168,13 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
        *
        * This message is received in two circumsances ...
        *
-       * (1) This information message is sent from the NetworkOperationAgent.NetworkFileTransferRole. It notifies this network
-       * singleton role that the specified container has received the deployment zip archive file.
+       * (1) This information message is sent from the NetworkOperationAgent.NetworkFileTransferRole. It notifies this network singleton
+       * role that the specified container has received the deployment zip archive file.
        *
        * When all the containers have responded, then each container is tasked to deploy the files from their zip archive.
        *
-       * (2) This information message is sent from a child ContainerOperationsAgent.ContainerDeploymentRole. It notifies this
-       * network singleton that the zip archive has been deployed.
+       * (2) This information message is sent from a child ContainerOperationsAgent.ContainerDeploymentRole. It notifies this network
+       * singleton that the zip archive has been deployed.
        *
        * When all containers have responded, each container is tasked to restart after a specified delay
        */
@@ -193,8 +193,8 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
     sendMessage(
             receivedMessage,
             Message.notUnderstoodMessage(
-            receivedMessage, // receivedMessage
-            this)); // skill
+                    receivedMessage, // receivedMessage
+                    this)); // skill
   }
 
   /**
@@ -272,7 +272,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
       }
       LOGGER.info("number of pending transfer containers remaining: " + pendingFileTransferContainerNames_size);
       if (pendingFileTransferContainerNames_size == 0) {
-      // task the child containers to deploy files from the zip archive that they received
+        // task the child containers to deploy files from the zip archive that they received
         final DeploymentFilesRunable deploymentFilesRunable = new DeploymentFilesRunable(
                 receivedMessage,
                 this); // networkDeployment
@@ -340,7 +340,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
   /**
    * Periodically checks for a manifest to deploy.
    */
-  protected class CheckForDeployment extends TimerTask {
+  static protected class CheckForDeployment extends TimerTask {
 
     // the network deployment skill
     final NetworkDeployment networkDeployment;
@@ -404,9 +404,9 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
           return;
         }
       }
-      LOGGER.info("Software and data deployment underway, cancelling further checks for files to deployment.");
-      synchronized (checkForDeploymentTimerTask) {
-        final boolean isScheduled = checkForDeploymentTimerTask.cancel();
+      LOGGER.info("Software and data deployment underway, cancelling further checks for files to deploy.");
+      synchronized (networkDeployment.checkForDeploymentTimerTask) {
+        final boolean isScheduled = networkDeployment.checkForDeploymentTimerTask.cancel();
         assert isScheduled;
       }
       if (isUnitTest) {
@@ -425,6 +425,8 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
     final NetworkDeployment networkDeployment;
     // the deployment directory files
     final File[] files;
+    // the deployment container dictionary, container name --> conversation id
+    private final Map<String, UUID> deploymentContainerDictionary = new HashMap<>();
 
     /**
      * Creates a new CheckForDeployment instance.
@@ -451,8 +453,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
     @SuppressWarnings("SleepWhileInLoop")
     public void run() {
       if (networkDeployment.isSoftwareDeploymentUnderway.getAndSet(true)) {
-        LOGGER.info("exiting thread because software deployment is underway");
-        return;
+        assert false;
       }
       final File deploymentDirectory = new File("deployment");
       LOGGER.info("Software and data deployment starting ...");
@@ -527,7 +528,14 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
         final List<String> containerDeploymentRoleNames = new ArrayList<>(networkDeployment.getRole().getChildQualifiedNames());
         // send the manifest and zipped bytes to each child container deployment role
         containerDeploymentRoleNames.stream().sorted().forEach((String containerDeploymentRoleName) -> {
-
+          final UUID conversationId = UUID.randomUUID();
+          final String containerName = Node.extractContainerName(containerDeploymentRoleName);
+          deploymentContainerDictionary.put(containerName, conversationId);
+          networkDeployment.deploymentFileTransferConversationDictionary.put(
+                  conversationId,
+                  new DeploymentFileTransferInfo(conversationId, containerName));
+        });
+        containerDeploymentRoleNames.stream().sorted().forEach((String containerDeploymentRoleName) -> {
           transferZipFile(
                   Node.extractContainerName(containerDeploymentRoleName), // containerName
                   zipFile.getName(),
@@ -575,10 +583,8 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
         networkDeployment.pendingDeploymentContainerNames.add(recipientContainerName);
       }
 
-      final UUID conversationId = UUID.randomUUID();
-      networkDeployment.deploymentFileTransferConversationDictionary.put(
-              conversationId,
-              new DeploymentFileTransferInfo(conversationId, recipientContainerName));
+      final UUID conversationId = deploymentContainerDictionary.get(recipientContainerName);
+      assert conversationId != null;
       final Message transferFileRequestInfoMessage = new Message(
               networkDeployment.getQualifiedName(), // senderQualifiedName
               NetworkDeployment.class.getName(), // senderService
@@ -641,7 +647,6 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
     public void run() {
       //Preconditions
       assert StringUtils.isNonEmptyString(networkDeployment.manifestJSONString);
-
 
       // iterate over all pending containers
       final List<String> containerNames = new ArrayList<>(networkDeployment.pendingDeploymentContainerNames);

@@ -188,8 +188,10 @@ public class NodeRuntime extends BasicNodeRuntime {
     if (!isMessageLogged && isMessageLogged(message)) {
       isMessageLogged = true;
     }
-    if (isMessageLogged || LOGGER.isDebugEnabled()) {
+    if (LOGGER.isDebugEnabled()) {
       LOGGER.info(message);
+    } else if (isMessageLogged) {
+      LOGGER.info(message.toBriefString());
     }
 //    LOGGER.info(message);
     if (message.isBetweenContainers()) {
