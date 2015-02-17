@@ -173,19 +173,18 @@ public final class ContainerOperation extends AbstractSkill {
   /**
    * Restarts the container after the specified delay.
    *
-   * @param message the Add Unjoined Role Info message sent by
+   * @param receivedMessage the Restart Container Task message
    */
-  private void handleRestartContainerTask(final Message message) {
+  private void handleRestartContainerTask(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
-    assert message.get(AHCSConstants.RESTART_CONTAINER_TASK_DELAY) != null :
-            "the " + AHCSConstants.RESTART_CONTAINER_TASK_DELAY + " parameter must be present ...\n" + message;
+    assert receivedMessage != null : "receivedMessage must not be null";
+    assert receivedMessage.get(AHCSConstants.RESTART_CONTAINER_TASK_DELAY) != null :
+            "the " + AHCSConstants.RESTART_CONTAINER_TASK_DELAY + " parameter must be present ...\n" + receivedMessage;
 
-    final long delay = (long) message.get(AHCSConstants.RESTART_CONTAINER_TASK_DELAY);
+    final long delay = (long) receivedMessage.get(AHCSConstants.RESTART_CONTAINER_TASK_DELAY);
     LOGGER.info("Restarting the application after a pause of " + delay + " microseconds");
     assert delay > 0 : AHCSConstants.RESTART_CONTAINER_TASK_DELAY + " must be positive";
 
-    //TODO send message to XAIOperation to shutdown
     try {
       Thread.sleep(delay);
     } catch (InterruptedException ex) {

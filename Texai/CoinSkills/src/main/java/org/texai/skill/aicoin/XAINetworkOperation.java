@@ -128,6 +128,19 @@ public final class XAINetworkOperation extends AbstractNetworkSingletonSkill {
         handleDelegatePerformMissionTask(receivedMessage);
         return;
 
+      /**
+       * Restart Container Task
+       *
+       * This message is sent the parent XAINetworkOperationAgent.XAINetworkOperationRole instructing the container to restart following a given
+       * delay.
+       *
+       * As a result, a Shutdown Aicoind Task is sent to each child XAIOperationRole.
+       */
+      case AHCSConstants.RESTART_CONTAINER_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        handleRestartContainerTask(receivedMessage);
+        return;
+
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(receivedMessage);
@@ -170,7 +183,8 @@ public final class XAINetworkOperation extends AbstractNetworkSingletonSkill {
       AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
-      AHCSConstants.PERFORM_MISSION_TASK
+      AHCSConstants.PERFORM_MISSION_TASK,
+      AHCSConstants.RESTART_CONTAINER_TASK
     };
   }
 
@@ -187,6 +201,28 @@ public final class XAINetworkOperation extends AbstractNetworkSingletonSkill {
 
     LOGGER.info("performing the mission");
     propagateOperationToChildRolesSeparateThreads(receivedMessage);
+  }
+
+  /**
+   * Handles the received Restart Container Task by sending a Shutdown Aicoind Task to each child XAIOperationRole.
+   *
+   * @param receivedMessage the received Restart Container Task message
+   */
+  private void handleRestartContainerTask(final Message receivedMessage) {
+    //Preconditions
+    assert receivedMessage != null : "receivedMessage must not be null";
+
+    // send the restart container task to every child container operation role.
+    getRole().getChildQualifiedNamesForAgent("XAIOperationAgent").forEach((String childQualifiedName) -> {
+      final Message restartContainerTaskMessage2 = new Message(
+              getQualifiedName(), // senderQualifiedName
+              getClassName(), // senderService
+              childQualifiedName, // recipientQualifiedName
+              XAIOperation.class.getName(), // recipientService
+              AHCSConstants.SHUTDOWN_AICOIND_TASK); // operation
+      restartContainerTaskMessage2.put(AHCSConstants.RESTART_CONTAINER_TASK_DELAY, 5000L);
+      sendMessage(receivedMessage, restartContainerTaskMessage2);
+    });
   }
 
 }

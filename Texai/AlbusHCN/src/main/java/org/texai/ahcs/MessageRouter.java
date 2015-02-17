@@ -23,13 +23,11 @@
 package org.texai.ahcs;
 
 import java.io.IOException;
-import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.nio.channels.ClosedChannelException;
-import java.nio.channels.UnresolvedAddressException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import net.sbbi.upnp.impls.InternetGatewayDevice;
 import net.sbbi.upnp.messages.ActionResponse;
 import net.sbbi.upnp.messages.UPNPResponseException;
@@ -314,12 +312,28 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
     assert exceptionEvent != null : "exceptionEvent must not be null";
 
     final Throwable throwable = exceptionEvent.getCause();
-    if ((throwable instanceof ConnectException)
-            || throwable instanceof ClosedChannelException
-            || throwable instanceof UnresolvedAddressException) {
-      LOGGER.info(throwable.getMessage());
-    } else {
-      throw new TexaiException(throwable);
+    LOGGER.info(throwable.getMessage());
+
+    // remove the channel from the container channel dictionary
+    final Channel channel = channelHandlerContext.getChannel();
+    if (channel == null) {
+      LOGGER.info("channel is null, cannot remove from the container channel dictionary");
+      return;
+    }
+    String containerName = null;
+    synchronized (containerChannelDictionary) {
+      for (final Entry<String, Channel> entry : containerChannelDictionary.entrySet()) {
+        if (entry.getValue().equals(channel)) {
+          containerName = entry.getKey();
+        }
+      }
+      if (containerName != null) {
+        LOGGER.info("removing channel to " + containerName);
+        containerChannelDictionary.remove(containerName);
+      }
+    }
+    synchronized (channel) {
+      channel.close();
     }
   }
 

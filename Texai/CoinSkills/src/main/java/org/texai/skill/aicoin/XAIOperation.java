@@ -175,6 +175,7 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.PERFORM_MISSION_TASK,
+      AHCSConstants.RESTART_CONTAINER_TASK,
       AHCSConstants.SHUTDOWN_AICOIND_TASK,
       AHCSConstants.TASK_ACCOMPLISHED_INFO
     };
@@ -294,7 +295,7 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
   }
 
   /**
-   * Launches the Insight blockchain explorer instance.
+   * Shuts down the Insight blockchain explorer instance.
    */
   private void shutdownInsight() {
     if (!EnvironmentUtils.isLinux()) {
@@ -311,7 +312,7 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
     final StringBuilder stringBuilder = new StringBuilder();
     stringBuilder.append("cd /root/insight && npm stop");
     cmdArray[2] = stringBuilder.toString();
-    LOGGER.info("Launching the Insight blockchain explorer instance.");
+    LOGGER.info("Shutting down the Insight blockchain explorer instance.");
     LOGGER.info("  shell cmd: " + cmdArray[2]);
     AICoinUtils.executeHostCommandWithoutWaitForCompletion(cmdArray);
   }
@@ -325,7 +326,7 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
       throw new TexaiException("Operating system must be Linux");
     }
 
-    LOGGER.info("generate a new block");
+    LOGGER.info("Shutting down the aicoind instance.");
     String[] cmdArray = {
       "sh",
       "-c",

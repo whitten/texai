@@ -30,6 +30,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
 import org.texai.network.netty.NetworkConstants;
+import org.texai.util.TexaiException;
 
 /**
  * Provides a tagged object decoder. A tagged object is a serialized object with a protocol identification byte prepended.
@@ -103,7 +104,9 @@ public class TaggedObjectDecoder extends FrameDecoder {
       return null;
     }
     final byte protocolByte = channelBuffer.readByte();
-    assert protocolByte == NetworkConstants.OBJECT_SERIALIZATION_PROTOCOL : "protocolByte: " + protocolByte;
+    if (protocolByte != NetworkConstants.OBJECT_SERIALIZATION_PROTOCOL) {
+      throw new TexaiException("wrong protocol byte");
+    }
 
     final int dataLen = channelBuffer.getInt(channelBuffer.readerIndex());
     if (dataLen <= 0) {

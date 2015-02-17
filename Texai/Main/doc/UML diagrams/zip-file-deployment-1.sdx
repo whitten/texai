@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <diagram>
-<source><![CDATA[#![ZipFile Deployment     ]
+<source><![CDATA[#![ZipFile Deployment part 1      ]
 nd:NetworkDeployment[rp] "NetworkDeployment"
 nft:NetworkFileTransfer[rp] "NetworkFileTransfer"
 cd:ContainerDeployment[rp] "ContainerDeployment"
-no:NetworkOperation[rp] "NetworkOperation"
-co:ContainerOperation[rp] "ContainerOperation"
 
 [c:loop all containers]
   nd:nft.transferFileRequest_Info(\\n  senderFilePath,\\n  recipientFilePath,\\n  senderContainerName,\\n  recipientContainerName)
@@ -15,12 +13,6 @@ co:ContainerOperation[rp] "ContainerOperation"
 [c:loop all containers]
   nd:cd.deployFiles_Task(\\n  filePath,\\n  fileHash,\\n  manifest)
   cd:nd.taskAccomplished_Info()
-[/c]
-
-nd:no.networkRestartRequest_Info()
-
-[c:loop all containers]
-  no:co.restartContainer_Task(\\n  delay)
 [/c]
 
 ]]></source>

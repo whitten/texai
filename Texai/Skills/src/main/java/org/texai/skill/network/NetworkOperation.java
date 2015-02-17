@@ -217,16 +217,27 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
 
     LOGGER.info("Handling a network restart request");
 
+    // send the restart container task to XAI network operation which will task each XAI operation role to shut down aicoind instances.
+    final String recipientQualifiedName =
+            getRole().getChildQualifiedNameForAgentRole("XAINetworkOperationAgent.XAINetworkOperationRole");
+    final Message restartContainerTaskMessage1 = new Message(
+              getQualifiedName(), // senderQualifiedName
+              getClassName(), // senderService
+              recipientQualifiedName,
+              "org.texai.skill.aicoin.XAINetworkOperation", // recipientService
+              AHCSConstants.RESTART_CONTAINER_TASK); // operation
+      sendMessage(receivedMessage, restartContainerTaskMessage1);
+
     // send the restart container task to every child container operation role.
     getRole().getChildQualifiedNamesForAgent("ContainerOperationAgent").forEach((String childQualifiedName) -> {
-      final Message restartContainerTaskMessage = new Message(
+      final Message restartContainerTaskMessage2 = new Message(
               getQualifiedName(), // senderQualifiedName
               getClassName(), // senderService
               childQualifiedName, // recipientQualifiedName
               ContainerOperation.class.getName(), // recipientService
               AHCSConstants.RESTART_CONTAINER_TASK); // operation
-      restartContainerTaskMessage.put(AHCSConstants.RESTART_CONTAINER_TASK_DELAY, 5000L);
-      sendMessage(receivedMessage, restartContainerTaskMessage);
+      restartContainerTaskMessage2.put(AHCSConstants.RESTART_CONTAINER_TASK_DELAY, 5000L);
+      sendMessage(receivedMessage, restartContainerTaskMessage2);
     });
   }
 
