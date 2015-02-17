@@ -66,8 +66,8 @@ public final class XAINetworkOperation extends AbstractNetworkSingletonSkill {
       /**
        * Initialize Task
        *
-       * This task message is sent from the parent NetworkOperationAgent.NetworkOperationRole. It is expected to be the first
-       * task message that this role receives and it results in the role being initialized.
+       * This task message is sent from the parent NetworkOperationAgent.NetworkOperationRole. It is expected to be the first task message
+       * that this role receives and it results in the role being initialized.
        */
       case AHCSConstants.INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
@@ -82,8 +82,8 @@ public final class XAINetworkOperation extends AbstractNetworkSingletonSkill {
       /**
        * Join Acknowledged Task
        *
-       * This task message is sent from the network-singleton, parent NetworkOperationAgent.NetworkOperationRole.
-       * It indicates that the parent is ready to converse with this role as needed.
+       * This task message is sent from the network-singleton, parent NetworkOperationAgent.NetworkOperationRole. It indicates that the
+       * parent is ready to converse with this role as needed.
        */
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
@@ -94,8 +94,8 @@ public final class XAINetworkOperation extends AbstractNetworkSingletonSkill {
       /**
        * Perform Mission Task
        *
-       * This task message is sent from the network-singleton, parent NetworkOperationAgent.NetworkOperationRole.
-       * It commands this network-connected role to begin performing its mission.
+       * This task message is sent from the network-singleton, parent NetworkOperationAgent.NetworkOperationRole. It commands this
+       * network-connected role to begin performing its mission.
        */
       case AHCSConstants.PERFORM_MISSION_TASK:
         performMission(receivedMessage);
@@ -110,8 +110,8 @@ public final class XAINetworkOperation extends AbstractNetworkSingletonSkill {
        *
        * The message parameter is the X.509 certificate belonging to the sender agent / role.
        *
-       * The result is the sending of a Join Acknowleged Task message to the requesting child role, with this role's X.509
-       * certificate as the message parameter.
+       * The result is the sending of a Join Acknowleged Task message to the requesting child role, with this role's X.509 certificate as
+       * the message parameter.
        */
       case AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
@@ -133,8 +133,8 @@ public final class XAINetworkOperation extends AbstractNetworkSingletonSkill {
       /**
        * Restart Container Task
        *
-       * This message is sent the parent XAINetworkOperationAgent.XAINetworkOperationRole instructing the container to restart following a given
-       * delay.
+       * This message is sent the parent XAINetworkOperationAgent.XAINetworkOperationRole instructing the container to restart following a
+       * given delay.
        *
        * As a result, a Shutdown Aicoind Task is sent to each child XAIOperationRole.
        */
@@ -215,11 +215,13 @@ public final class XAINetworkOperation extends AbstractNetworkSingletonSkill {
     assert receivedMessage != null : "receivedMessage must not be null";
 
     // send the restart container task to every child container operation role.
-    final List<String> childQualifiedNames = new ArrayList<>(getRole().getChildQualifiedNames());
-    LOGGER.info("childQualifiedNames...");
-    childQualifiedNames.stream().sorted().forEach((String childQualifiedName) -> {
-      LOGGER.info("  " + childQualifiedName);
-    });
+    if (LOGGER.isDebugEnabled()) {
+      final List<String> childQualifiedNames = new ArrayList<>(getRole().getChildQualifiedNames());
+      LOGGER.debug("childQualifiedNames...");
+      childQualifiedNames.stream().sorted().forEach((String childQualifiedName) -> {
+        LOGGER.debug("  " + childQualifiedName);
+      });
+    }
     getRole().getChildQualifiedNamesForAgent("XAIOperationAgent").forEach((String childQualifiedName) -> {
       final Message restartContainerTaskMessage2 = new Message(
               getQualifiedName(), // senderQualifiedName

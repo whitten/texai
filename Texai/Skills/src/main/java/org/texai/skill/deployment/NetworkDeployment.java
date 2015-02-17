@@ -527,14 +527,20 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
         // make a copy of the child container deployment roles for multithreading safety
         final List<String> containerDeploymentRoleNames = new ArrayList<>(networkDeployment.getRole().getChildQualifiedNames());
         // send the manifest and zipped bytes to each child container deployment role
-        containerDeploymentRoleNames.stream().sorted().forEach((String containerDeploymentRoleName) -> {
-          final UUID conversationId = UUID.randomUUID();
-          final String containerName = Node.extractContainerName(containerDeploymentRoleName);
-          deploymentContainerDictionary.put(containerName, conversationId);
-          networkDeployment.deploymentFileTransferConversationDictionary.put(
-                  conversationId,
-                  new DeploymentFileTransferInfo(conversationId, containerName));
-        });
+        synchronized (networkDeployment.pendingFileTransferContainerNames) {
+          containerDeploymentRoleNames.stream().sorted().forEach((String containerDeploymentRoleName) -> {
+            final UUID conversationId = UUID.randomUUID();
+            final String containerName = Node.extractContainerName(containerDeploymentRoleName);
+            deploymentContainerDictionary.put(containerName, conversationId);
+            networkDeployment.deploymentFileTransferConversationDictionary.put(
+                    conversationId,
+                    new DeploymentFileTransferInfo(conversationId, containerName));
+            // track the containers to which the zip file has been transferred, so that when subsequent Task Accomplished messages are
+            // received, it can determine when all have have received the zip file
+            networkDeployment.pendingFileTransferContainerNames.add(containerName);
+            networkDeployment.pendingDeploymentContainerNames.add(containerName);
+          });
+        }
         containerDeploymentRoleNames.stream().sorted().forEach((String containerDeploymentRoleName) -> {
           transferZipFile(
                   Node.extractContainerName(containerDeploymentRoleName), // containerName
@@ -575,13 +581,6 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
       assert StringUtils.isNonEmptyString(zipFilePath) : "zipFilePath must not be null";
       assert networkDeployment != null : "networkDeployment must not be null";
       assert stringBuilder != null : "stringBuilder must not be null";
-
-      synchronized (networkDeployment.pendingFileTransferContainerNames) {
-        // track the containers to which the zip file has been transferred, so that when subsequent Task Accomplished messages are
-        // received, it can determine when all have have received the zip file
-        networkDeployment.pendingFileTransferContainerNames.add(recipientContainerName);
-        networkDeployment.pendingDeploymentContainerNames.add(recipientContainerName);
-      }
 
       final UUID conversationId = deploymentContainerDictionary.get(recipientContainerName);
       assert conversationId != null;

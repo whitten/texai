@@ -239,11 +239,13 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
     }
 
     // send the restart container task to every child container operation role.
-    final List<String> childQualifiedNames = new ArrayList<>(getRole().getChildQualifiedNames());
-    LOGGER.info("childQualifiedNames...");
-    childQualifiedNames.stream().sorted().forEach((String childQualifiedName) -> {
-      LOGGER.info("  " + childQualifiedName);
-    });
+    if (LOGGER.isDebugEnabled()) {
+      final List<String> childQualifiedNames = new ArrayList<>(getRole().getChildQualifiedNames());
+      LOGGER.debug("childQualifiedNames...");
+      childQualifiedNames.stream().sorted().forEach((String childQualifiedName) -> {
+        LOGGER.debug("  " + childQualifiedName);
+      });
+    }
     getRole().getChildQualifiedNamesForAgent("ContainerOperationAgent").forEach((String childQualifiedName) -> {
       final Message restartContainerTaskMessage2 = new Message(
               getQualifiedName(), // senderQualifiedName
