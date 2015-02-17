@@ -27,6 +27,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
@@ -41,6 +42,7 @@ import org.texai.kb.Constants;
 import org.texai.util.ByteUtils;
 import org.texai.x509.X509Utils;
 import static org.junit.Assert.*;
+import org.texai.util.ArraySet;
 import org.texai.util.StringUtils;
 
 /**
@@ -151,6 +153,44 @@ public class MessageTest {
     assertTrue(serializedMessageFile.isFile());
     final Message deserializedMessage = Message.deserializeMessage(serializedMessageFilePath);
     assertEquals(message, deserializedMessage);
+  }
+
+  /**
+   * Test of toBriefString method, of class Message.
+   */
+  @Test
+  public void testToBriefString2() {
+    LOGGER.info("toBriefString");
+    String senderQualifiedName = "container1.agent1.role1";
+    String recipientQualifiedName = "container2.agent2.role2";
+    final Message message1 = new Message(
+            senderQualifiedName,
+            "SenderService", // senderService
+            recipientQualifiedName,
+            "org.texai.kb.persistence.domainEntity.RepositoryContentDescription", // recipientService
+            "ABC_Task"); // operation
+    final Message message2 = new Message(
+            senderQualifiedName,
+            "SenderService", // senderService
+            recipientQualifiedName,
+            "org.texai.kb.persistence.domainEntity.RepositoryContentDescription", // recipientService
+            "DEF_Task"); // operation
+    final String message2String = message2.toString();
+    final Message message3 = new Message(
+            senderQualifiedName,
+            "SenderService", // senderService
+            recipientQualifiedName,
+            "org.texai.kb.persistence.domainEntity.RepositoryContentDescription", // recipientService
+            "XYZ_Task"); // operation
+    final Set<Message> messages = new ArraySet<>();
+    messages.add(message1);
+    messages.add(message2);
+    messages.add(message3);
+    assertEquals(
+            "[ABC_Task, container1.agent1.role1:SenderService --> container2.agent2.role2:RepositoryContentDescription]\n" +
+            "[DEF_Task, container1.agent1.role1:SenderService --> container2.agent2.role2:RepositoryContentDescription]\n" +
+            "[XYZ_Task, container1.agent1.role1:SenderService --> container2.agent2.role2:RepositoryContentDescription]\n",
+            Message.toBriefString(messages));
   }
 
   /**

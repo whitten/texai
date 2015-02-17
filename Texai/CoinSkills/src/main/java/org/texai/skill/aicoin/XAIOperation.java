@@ -175,7 +175,6 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.PERFORM_MISSION_TASK,
-      AHCSConstants.RESTART_CONTAINER_TASK,
       AHCSConstants.SHUTDOWN_AICOIND_TASK,
       AHCSConstants.TASK_ACCOMPLISHED_INFO
     };

@@ -23,6 +23,7 @@ import java.security.PrivateKey;
 import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -762,6 +763,22 @@ public class Message implements Serializable, Comparable<Message> {
       }
     }
     stringBuilder.append(']');
+    return stringBuilder.toString();
+  }
+
+  /** Returns a brief string representation of the given messages.
+   *
+   * @param messages the given messages
+   * @return a brief string representation of the given messages
+   */
+  public static String toBriefString(final Collection<Message> messages) {
+    //Preconditions
+    assert messages != null : "messages must not be null";
+
+    final StringBuilder stringBuilder = new StringBuilder();
+    messages.stream().sorted().forEach((Message message) -> {
+      stringBuilder.append(message.toBriefString()).append('\n');
+    });
     return stringBuilder.toString();
   }
 
