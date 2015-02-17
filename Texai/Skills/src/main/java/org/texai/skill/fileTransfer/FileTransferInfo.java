@@ -162,12 +162,6 @@ public final class FileTransferInfo {
               .append(fileHash)
               .append('\n');
     }
-    if (fileHash != null) {
-      stringBuilder
-              .append("file hash: ")
-              .append(fileHash)
-              .append('\n');
-    }
     if (fileSize > -1) {
       stringBuilder
               .append("file size: ")

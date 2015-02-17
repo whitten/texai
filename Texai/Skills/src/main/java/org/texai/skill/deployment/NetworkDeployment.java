@@ -294,6 +294,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
         pendingDeploymentContainerNames_size = pendingDeploymentContainerNames.size();
       }
       if (pendingDeploymentContainerNames_size == 0) {
+        LOGGER.info("Deployment is completed, requesting network restart.");
         final Message networkRestartRequestInfo = makeMessage(
                 getContainerName() + ".NetworkOperationAgent.NetworkOperationRole", // recipientQualifiedName
                 NetworkOperation.class.getName(), // recipientService
@@ -476,16 +477,22 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
       try {
         networkDeployment.manifestJSONString = FileUtils.readFileToString(manifestFile);
         final JSONObject jsonObject = (JSONObject) JSONValue.parseWithException(networkDeployment.manifestJSONString);
-        LOGGER.info("jsonObject: " + jsonObject);
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("jsonObject: " + jsonObject);
+        }
         @SuppressWarnings("unchecked")
         final List<JSONObject> manifestItems = (List<JSONObject>) jsonObject.get("manifest");
         final byte[] zippedBytes = ZipUtils.archiveFilesToByteArray(deploymentDirectory);
         // write to a temporary file, which can be accessed for debugging, e.g. open in archive manager to ensure its valid
         final ZipFile zipFile = ZipUtils.temporaryZipFile(zippedBytes);
-        LOGGER.info("zipFile: " + zipFile.getName());
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("zipFile: " + zipFile.getName());
+        }
         networkDeployment.zippedBytesHash = MessageDigestUtils.bytesHashString(zippedBytes);
-        LOGGER.info("zippedBytes hash: " + networkDeployment.zippedBytesHash);
-        LOGGER.info("verifying zip file");
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("zippedBytes hash: " + networkDeployment.zippedBytesHash);
+          LOGGER.debug("verifying zip file ...");
+        }
         if (!ZipUtils.verify(zipFile.getName())) {
           LOGGER.info("corrupted zip file");
           //TODO report to network operations
@@ -507,22 +514,25 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
           LOGGER.debug("zippedBytes[zippedBytes_len - 1] " + zippedBytes[zippedBytes_len - 1]);
         }
 
-        LOGGER.info("manifestItems: " + manifestItems);
-        for (final JSONObject manifestItem : manifestItems) {
-          LOGGER.info(manifestItem);
-          final String command = (String) manifestItem.get("command");
-          LOGGER.info("  command: " + command);
-          final String fileToDeployPath = (String) manifestItem.get("path");
-          LOGGER.info("  path: " + fileToDeployPath);
-          final File fileToDeploy = new File(fileToDeployPath);
-          final File fileToSend = new File("deployment/" + fileToDeploy.getName());
-          LOGGER.info("  fileToSend: " + fileToSend);
-          if (command.equals("add") || command.equals("change")) {
-            final String hash = (String) manifestItem.get("hash");
-            LOGGER.info("  hash: " + hash);
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("manifestItems: " + manifestItems);
+          for (final JSONObject manifestItem : manifestItems) {
+            LOGGER.debug(manifestItem);
+            final String command = (String) manifestItem.get("command");
+            LOGGER.debug("  command: " + command);
+            final String fileToDeployPath = (String) manifestItem.get("path");
+            LOGGER.debug("  path: " + fileToDeployPath);
+            final File fileToDeploy = new File(fileToDeployPath);
+            final File fileToSend = new File("deployment/" + fileToDeploy.getName());
+            LOGGER.debug("  fileToSend: " + fileToSend);
+            if (command.equals("add") || command.equals("change")) {
+              final String hash = (String) manifestItem.get("hash");
+              LOGGER.debug("  hash: " + hash);
 
+            }
           }
         }
+        LOGGER.info("deploying to containers ...");
         networkDeployment.deploymentFileTransferConversationDictionary.clear();
         // make a copy of the child container deployment roles for multithreading safety
         final List<String> containerDeploymentRoleNames = new ArrayList<>(networkDeployment.getRole().getChildQualifiedNames());
@@ -531,6 +541,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
           containerDeploymentRoleNames.stream().sorted().forEach((String containerDeploymentRoleName) -> {
             final UUID conversationId = UUID.randomUUID();
             final String containerName = Node.extractContainerName(containerDeploymentRoleName);
+            LOGGER.info("  " + containerName);
             deploymentContainerDictionary.put(containerName, conversationId);
             networkDeployment.deploymentFileTransferConversationDictionary.put(
                     conversationId,

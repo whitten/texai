@@ -245,12 +245,12 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
     assert receivedMessage != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready: " + stateDescription(getSkillState());
 
-    LOGGER.info("handling a file transfer request");
     final UUID conversationId = receivedMessage.getConversationId();
     final String senderFilePath = (String) receivedMessage.get(AHCSConstants.MSG_PARM_SENDER_FILE_PATH);
     final String recipientFilePath = (String) receivedMessage.get(AHCSConstants.MSG_PARM_RECIPIENT_FILE_PATH);
     final String senderContainerName = (String) receivedMessage.get(AHCSConstants.MSG_PARM_SENDER_CONTAINER_NAME);
     final String recipientContainerName = (String) receivedMessage.get(AHCSConstants.MSG_PARM_RECIPIENT_CONTAINER_NAME);
+    LOGGER.info("handling a file transfer request, sender " + senderContainerName + ", receipient: " + recipientContainerName);
 
     // record the file transfer information for use with subsequent messages in the conversation
     final FileTransferInfo fileTransferRequestInfo = new FileTransferInfo(
@@ -291,7 +291,9 @@ public final class NetworkFileTransfer extends AbstractNetworkSingletonSkill {
     assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready: " + stateDescription(getSkillState());
 
-    LOGGER.info("handling a task accomplished reply");
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("handling a task accomplished reply");
+    }
     final UUID conversationId = message.getConversationId();
     final FileTransferInfo fileTransferInfo;
     synchronized (fileTransferDictionary) {

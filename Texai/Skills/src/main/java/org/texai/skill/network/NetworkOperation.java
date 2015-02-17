@@ -246,6 +246,11 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
         LOGGER.debug("  " + childQualifiedName);
       });
     }
+    final List<String> childQualifiedNames = new ArrayList<>(getRole().getChildQualifiedNames());
+    LOGGER.info("childQualifiedNames...");
+    childQualifiedNames.stream().sorted().forEach((String childQualifiedName) -> {
+      LOGGER.info("  " + childQualifiedName);
+    });
     getRole().getChildQualifiedNamesForAgent("ContainerOperationAgent").forEach((String childQualifiedName) -> {
       final Message restartContainerTaskMessage2 = new Message(
               getQualifiedName(), // senderQualifiedName
