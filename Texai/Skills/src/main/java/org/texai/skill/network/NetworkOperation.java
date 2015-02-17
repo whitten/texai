@@ -251,6 +251,7 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
     childQualifiedNames.stream().sorted().forEach((String childQualifiedName) -> {
       LOGGER.info("  " + childQualifiedName);
     });
+   // restart every other container with a 60 second delay
     getRole().getChildQualifiedNamesForAgent("ContainerOperationAgent").forEach((String childQualifiedName) -> {
       final Message restartContainerTaskMessage2 = new Message(
               getQualifiedName(), // senderQualifiedName
@@ -258,15 +259,26 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
               childQualifiedName, // recipientQualifiedName
               ContainerOperation.class.getName(), // recipientService
               AHCSConstants.RESTART_CONTAINER_TASK); // operation
-      if (Node.extractContainerName(childQualifiedName).equals("Mint")) {
-        // restart the demonstration Mint in 15 seconds
-        restartContainerTaskMessage2.put(AHCSConstants.RESTART_CONTAINER_TASK_DELAY, 15000L);
-      } else {
-        // restart the every other container in 60 seconds
+      if (!Node.extractContainerName(childQualifiedName).equals(getContainerName())) {
         restartContainerTaskMessage2.put(AHCSConstants.RESTART_CONTAINER_TASK_DELAY, 60000L);
       }
-      sendMessage(receivedMessage, restartContainerTaskMessage2);
+      sendMessageViaSeparateThread(receivedMessage, restartContainerTaskMessage2);
     });
+    try {
+      // pause 10 seconds to ensure that the restart messages all get sent
+      Thread.sleep(10000);
+    } catch (InterruptedException ex) {
+      //ignore
+    }
+   // restart this container with a 15 second delay
+    final Message restartContainerTaskMessage2 = new Message(
+            getQualifiedName(), // senderQualifiedName
+            getClassName(), // senderService
+            getContainerName() + ".ContainerOperationAgent.ContainerOperationRole", // recipientQualifiedName
+            ContainerOperation.class.getName(), // recipientService
+            AHCSConstants.RESTART_CONTAINER_TASK); // operation
+    restartContainerTaskMessage2.put(AHCSConstants.RESTART_CONTAINER_TASK_DELAY, 15000L);
+    sendMessageViaSeparateThread(receivedMessage, restartContainerTaskMessage2);
   }
 
 }
