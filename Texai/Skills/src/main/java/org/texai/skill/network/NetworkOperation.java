@@ -1,5 +1,7 @@
 package org.texai.skill.network;
 
+import java.util.ArrayList;
+import java.util.List;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
@@ -229,7 +231,19 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
             AHCSConstants.RESTART_CONTAINER_TASK); // operation
     sendMessage(receivedMessage, restartContainerTaskMessage1);
 
+    try {
+      // pause 10 seconds
+      Thread.sleep(10000);
+    } catch (InterruptedException ex) {
+      // ignore
+    }
+
     // send the restart container task to every child container operation role.
+    final List<String> childQualifiedNames = new ArrayList<>(getRole().getChildQualifiedNames());
+    LOGGER.info("childQualifiedNames...");
+    childQualifiedNames.stream().sorted().forEach((String childQualifiedName) -> {
+      LOGGER.info("  " + childQualifiedName);
+    });
     getRole().getChildQualifiedNamesForAgent("ContainerOperationAgent").forEach((String childQualifiedName) -> {
       final Message restartContainerTaskMessage2 = new Message(
               getQualifiedName(), // senderQualifiedName

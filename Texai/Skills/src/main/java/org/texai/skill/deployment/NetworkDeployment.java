@@ -66,6 +66,8 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
   protected String zippedBytesHash;
   // the deployment file transfer conversation dictionary, conversation id --> deployment file transfer info
   private Map<UUID, DeploymentFileTransferInfo> deploymentFileTransferConversationDictionary = new HashMap<>();
+  // the timer task that checks for deployment
+  private final CheckForDeployment checkForDeploymentTimerTask = new CheckForDeployment(this);
 
   /**
    * Constructs a new SkillTemplate instance.
@@ -308,7 +310,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
     final Timer timer = getNodeRuntime().getTimer();
     synchronized (timer) {
       timer.scheduleAtFixedRate(
-              new CheckForDeployment(this), // task
+              checkForDeploymentTimerTask, // task
               CHECK_FOR_DEPLOYMENT_PERIOD_MILLIS, // delay
               CHECK_FOR_DEPLOYMENT_PERIOD_MILLIS); // period
     }
@@ -401,6 +403,11 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
           LOGGER.info("Files in the deployment directory have already been deployed.");
           return;
         }
+      }
+      LOGGER.info("Software and data deployment underway, cancelling further checks for files to deployment.");
+      synchronized (checkForDeploymentTimerTask) {
+        final boolean isScheduled = checkForDeploymentTimerTask.cancel();
+        assert isScheduled;
       }
       if (isUnitTest) {
         // no timer thread when unit testing, and need to wait for the results

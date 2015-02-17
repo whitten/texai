@@ -10,6 +10,8 @@
  */
 package org.texai.skill.aicoin;
 
+import java.util.ArrayList;
+import java.util.List;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
@@ -213,6 +215,11 @@ public final class XAINetworkOperation extends AbstractNetworkSingletonSkill {
     assert receivedMessage != null : "receivedMessage must not be null";
 
     // send the restart container task to every child container operation role.
+    final List<String> childQualifiedNames = new ArrayList<>(getRole().getChildQualifiedNames());
+    LOGGER.info("childQualifiedNames...");
+    childQualifiedNames.stream().sorted().forEach((String childQualifiedName) -> {
+      LOGGER.info("  " + childQualifiedName);
+    });
     getRole().getChildQualifiedNamesForAgent("XAIOperationAgent").forEach((String childQualifiedName) -> {
       final Message restartContainerTaskMessage2 = new Message(
               getQualifiedName(), // senderQualifiedName
