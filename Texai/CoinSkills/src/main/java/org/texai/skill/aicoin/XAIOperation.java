@@ -7,7 +7,7 @@ import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 import org.texai.skill.aicoin.support.AICoinUtils;
-import org.texai.skill.aicoin.support.XAIBitcoinMessageReceiver;
+import org.texai.skill.aicoin.support.BitcoinMessageReceiver;
 import org.texai.util.EnvironmentUtils;
 import org.texai.util.TexaiException;
 
@@ -21,7 +21,7 @@ import org.texai.util.TexaiException;
  * @author reed
  */
 @ThreadSafe
-public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessageReceiver {
+public final class XAIOperation extends AbstractSkill implements BitcoinMessageReceiver {
 
   // the logger
   private static final Logger LOGGER = Logger.getLogger(XAIOperation.class);
@@ -334,12 +334,12 @@ public final class XAIOperation extends AbstractSkill implements XAIBitcoinMessa
 
   @Override
   /**
-   * Receives an outbound bitcoin message from the slave peer.
+   * Receives an outbound bitcoin message from the local peer.
    *
    * @param message the given bitcoin protocol message
    */
-  public void receiveBitcoinMessageFromSlave(final com.google.bitcoin.core.Message message) {
-    // send the outbound bitcoin message from the slave peer to the Texai network recipient.
+  public void receiveMessageFromLocalBitcoind(final com.google.bitcoin.core.Message message) {
+    // send the outbound bitcoin message from the local peer to the Texai network recipient.
 
   }
 

@@ -24,24 +24,24 @@ import org.texai.util.TexaiException;
 /**
  * Created on Sep 9, 2014, 7:41:47 AM.
  *
- * Description: Provides a Bitcoin protocol adapter to the slaved bitcoind instance.
+ * Description: Provides a Bitcoin protocol adapter to the local bitcoind instance.
  *
  * Copyright (C) Sep 9, 2014, Stephen L. Reed, Texai.org.
  */
 @NotThreadSafe
-public class XAISlavedBitcoindAdapter implements PeerEventListener {
+public class LocalBitcoindAdapter implements PeerEventListener {
 
   // the logger
-  public static final Logger LOGGER = Logger.getLogger(XAISlavedBitcoindAdapter.class);
-  // the bitcoind slave
-  private Peer slavePeer;
-  // the bitcoin message receiver, which is the skill that handles outbound bitcoin messages from the slave peer
-  private final XAIBitcoinMessageReceiver bitcoinMessageReceiver;
+  public static final Logger LOGGER = Logger.getLogger(LocalBitcoindAdapter.class);
+  // the bitcoind local instance
+  private Peer localPeer;
+  // the bitcoin message receiver, which is the skill that handles outbound bitcoin messages from the local peer
+  private final BitcoinMessageReceiver bitcoinMessageReceiver;
   // the client connection manager
   private final ClientConnectionManager clientConnectionManager;
   // the version message to use for the bitcoind connection
   private final VersionMessage versionMessage;
-  // the minimum protocol version allowed for the bitcoind slave instance
+  // the minimum protocol version allowed for the bitcoind local instance
   private volatile int vMinRequiredProtocolVersion = FilteredBlock.MIN_PROTOCOL_VERSION;
   // Runs a background thread that we use for scheduling pings to our peers, so we can measure their performance and network latency. We
   // ping peers every pingIntervalMsec milliseconds.
@@ -56,15 +56,15 @@ public class XAISlavedBitcoindAdapter implements PeerEventListener {
   private final NetworkParameters networkParameters;
 
   /**
-   * Constructs a new SlavedBitcoindAdapter instance.
+   * Constructs a new LocalBitcoindAdapter instance.
    *
    * @param networkParameters the network parameters, main net, test net, or regression test net
    * @param bitcoinMessageReceiver the bitcoin message receiver, which is the skill that handles outbound bitcoin messages from the
-   * slave peer
+   * local peer
    */
-  public XAISlavedBitcoindAdapter(
+  public LocalBitcoindAdapter(
           final NetworkParameters networkParameters,
-          final XAIBitcoinMessageReceiver bitcoinMessageReceiver) {
+          final BitcoinMessageReceiver bitcoinMessageReceiver) {
     // Preconditions
     assert networkParameters != null : "networkParameters must not be null";
     assert bitcoinMessageReceiver != null : "bitcoinMessageReceiver must not be null";
@@ -81,18 +81,18 @@ public class XAISlavedBitcoindAdapter implements PeerEventListener {
   }
 
   /**
-   * Starts up this adapter by connecting to the slaved bitcoind instance and beginning to ping it.
+   * Starts up this adapter by connecting to the local bitcoind instance and beginning to ping it.
    */
   protected void startUp() {
     clientConnectionManager.startAndWait();
-    connectToSlave();
+    connectToLocalBitcoind();
     pingTimer = new Timer(
             "Peer pinging thread", // name
             true); // isDaemon
   }
 
   /**
-   * Shuts down this adapter by disconnecting from the slaved bitcoind instance.
+   * Shuts down this adapter by disconnecting from the local bitcoind instance.
    */
   protected void shutDown() {
     pingTimer.cancel();
@@ -101,51 +101,51 @@ public class XAISlavedBitcoindAdapter implements PeerEventListener {
   }
 
   /**
-   * Connects to the slave bitcoind instance.
+   * Connects to the local bitcoind instance.
    */
-  protected void connectToSlave() {
-    final PeerAddress slavePeerAddress = PeerAddress.localhost(networkParameters);
+  protected void connectToLocalBitcoind() {
+    final PeerAddress localPeerAddress = PeerAddress.localhost(networkParameters);
     versionMessage.time = Utils.currentTimeMillis() / 1000;
 
-    slavePeer = new Peer(
+    localPeer = new Peer(
             networkParameters,
             versionMessage,
-            slavePeerAddress,
+            localPeerAddress,
             null, // chain
             null); // memoryPool
     // process the peer event listener methods on the same thread to keep them ordered and synchronous
-    slavePeer.addEventListener(this, Threading.SAME_THREAD);
-    slavePeer.setMinProtocolVersion(vMinRequiredProtocolVersion);
+    localPeer.addEventListener(this, Threading.SAME_THREAD);
+    localPeer.setMinProtocolVersion(vMinRequiredProtocolVersion);
 
     try {
-      clientConnectionManager.openConnection(slavePeerAddress.toSocketAddress(), slavePeer);
+      clientConnectionManager.openConnection(localPeerAddress.toSocketAddress(), localPeer);
     } catch (Exception e) {
-      throw new TexaiException("Failed to connect to " + slavePeerAddress + ": " + e.getMessage());
+      throw new TexaiException("Failed to connect to " + localPeerAddress + ": " + e.getMessage());
     }
-    slavePeer.setSocketTimeout(connectTimeoutMillis);
+    localPeer.setSocketTimeout(connectTimeoutMillis);
   }
 
-  /** Sends the given bitcoin message to the slave peer.
+  /** Sends the given bitcoin message to the local peer.
    *
    * @param message the given bitcoin protocol message
    */
-  public void sendBitcoinMessageToSlave(final Message message) {
+  public void sendBitcoinMessageToLocalBitcionCore(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
 
-    slavePeer.sendMessage(message);
+    localPeer.sendMessage(message);
   }
 
-  /** Receives the given message from the slave peer.
+  /** Receives the given message from the local peer.
    *
    * @param message the given bitcoin protocol message
    */
-//  private void receiveBitcoinMessageFromSlave(final Message message) {
-//    //Preconditions
-//    assert message != null : "message must not be null";
-//
-//    bitcoinMessageReceiver.receiveBitcoinMessageFromSlave(message);
-//  }
+  public void receiveBitcoinMessageFromLocalBitcionCore(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+
+    bitcoinMessageReceiver.receiveMessageFromLocalBitcoind(message);
+  }
 
   /**
    * Called on a Peer thread when a block is received.<p>
