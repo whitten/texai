@@ -181,6 +181,7 @@ public class AICoinMain {
     if (nodeRuntime.getRDFEntityManager() != null) {
       nodeRuntime.getRDFEntityManager().close();
     }
+    nodeRuntime.finalization();
 
     CacheManager.getInstance().shutdown();
     DistributedRepositoryManager.shutDown();
@@ -191,7 +192,7 @@ public class AICoinMain {
     }
     X509Utils.serializeSecureRandom(X509Utils.DEFAULT_SECURE_RANDOM_PATH);
 
-    LOGGER.info("Node runtime completed.");
+    LOGGER.info("Node runtime finalized.");
   }
 
   /**

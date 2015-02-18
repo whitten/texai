@@ -258,7 +258,6 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
     //Preconditions
     assert receivedMessage != null : "receivedMessage must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
-    assert StringUtils.isNonEmptyString(manifestJSONString);
 
     final String senderRole = Role.extractRoleName(receivedMessage.getSenderQualifiedName());
     if (senderRole.equals("NetworkFileTransferRole")) {
@@ -307,7 +306,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
   /**
    * Creates a timer that periodically checks for software / data deployments.
    */
-  private void createCheckForDeploymentTimerTask() {
+  protected void createCheckForDeploymentTimerTask() {
     final Timer timer = getNodeRuntime().getTimer();
     synchronized (timer) {
       timer.scheduleAtFixedRate(
@@ -408,7 +407,9 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
       LOGGER.info("Software and data deployment underway, cancelling further checks for files to deploy.");
       synchronized (networkDeployment.checkForDeploymentTimerTask) {
         final boolean isScheduled = networkDeployment.checkForDeploymentTimerTask.cancel();
-        assert isScheduled;
+        if (!isUnitTest) {
+          assert isScheduled;
+        }
       }
       if (isUnitTest) {
         // no timer thread when unit testing, and need to wait for the results

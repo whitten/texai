@@ -229,6 +229,7 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
             recipientQualifiedName,
             "org.texai.skill.aicoin.XAINetworkOperation", // recipientService
             AHCSConstants.RESTART_CONTAINER_TASK); // operation
+    restartContainerTaskMessage1.put(AHCSConstants.RESTART_CONTAINER_TASK_DELAY, 0L);
     sendMessage(receivedMessage, restartContainerTaskMessage1);
 
     try {
@@ -251,7 +252,7 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
     childQualifiedNames.stream().sorted().forEach((String childQualifiedName) -> {
       LOGGER.info("  " + childQualifiedName);
     });
-   // restart every other container with a 60 second delay
+    // restart every other container with a 60 second delay
     getRole().getChildQualifiedNamesForAgent("ContainerOperationAgent").forEach((String childQualifiedName) -> {
       final Message restartContainerTaskMessage2 = new Message(
               getQualifiedName(), // senderQualifiedName
@@ -270,7 +271,7 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
     } catch (InterruptedException ex) {
       //ignore
     }
-   // restart this container with a 15 second delay
+    // restart this container with a 15 second delay
     final Message restartContainerTaskMessage2 = new Message(
             getQualifiedName(), // senderQualifiedName
             getClassName(), // senderService
