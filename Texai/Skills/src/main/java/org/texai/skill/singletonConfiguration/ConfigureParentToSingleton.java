@@ -92,7 +92,7 @@ public class ConfigureParentToSingleton extends AbstractSkill {
       case AHCSConstants.PERFORM_MISSION_TASK:
         if (getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK)) {
           setSkillState(AHCSConstants.State.READY);
-          LOGGER.info("now ready");
+          LOGGER.info(getQualifiedName() + " now ready");
         }
         assert getSkillState().equals(AHCSConstants.State.READY) :
                 "state must be ready, but was " + stateDescription() + '\n' + receivedMessage.toBriefString();

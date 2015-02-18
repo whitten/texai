@@ -91,7 +91,7 @@ public class Heartbeat extends AbstractSkill {
       case AHCSConstants.PERFORM_MISSION_TASK:
         if (getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK)) {
           setSkillState(AHCSConstants.State.READY);
-          LOGGER.info("now ready");
+          LOGGER.info(getQualifiedName() + " now ready");
         }
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
         performMission(receivedMessage);

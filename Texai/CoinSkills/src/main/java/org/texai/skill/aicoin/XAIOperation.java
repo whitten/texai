@@ -248,7 +248,11 @@ public final class XAIOperation extends AbstractSkill implements BitcoinMessageR
       ""
     };
     final StringBuilder stringBuilder = new StringBuilder();
-    stringBuilder.append("../bin/aicoin-qt -debug -shrinkdebugfile=1 -datadir=").append(AICOIN_DIRECTORY_PATH);
+    if (this.getContainerName().equals("TestContainer")) {
+      stringBuilder.append("~/docker/SuperPeer/bin/aicoin-qt -debug -shrinkdebugfile=1 -datadir=").append("~/.aicoin");
+    } else {
+      stringBuilder.append("../bin/aicoin-qt -debug -shrinkdebugfile=1 -datadir=").append(AICOIN_DIRECTORY_PATH);
+    }
     cmdArray[2] = stringBuilder.toString();
     LOGGER.info("Launching the slave aicoin-qt instance");
     LOGGER.info("  shell cmd: " + cmdArray[2]);
