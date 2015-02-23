@@ -362,7 +362,7 @@ public final class NodesInitializer {
 
     //TODO create a write-only keystore
     try {
-      LOGGER.debug("getting the keystore " + keyStoreFilePath);
+      LOGGER.info("  getting the keystore " + keyStoreFilePath);
       keyStore = X509Utils.findOrCreateUberKeyStore(keyStoreFilePath, keyStorePassword);
       try (final FileOutputStream keyStoreOutputStream = new FileOutputStream(new File(keyStoreFilePath))) {
         keyStore.store(keyStoreOutputStream, keyStorePassword);
@@ -372,7 +372,7 @@ public final class NodesInitializer {
       throw new TexaiException(ex);
     }
 
-    LOGGER.debug("getting self-signed X.509 certificates for roles ...");
+    LOGGER.debug("  getting self-signed X.509 certificates for roles ...");
     roleFieldsHolderDictionary.values().stream().sorted().forEach(roleFieldsHolder1 -> {
       LOGGER.debug("  " + roleFieldsHolder1.qualifiedName);
       if (roleFieldsHolder1.areRemoteCommunicationsPermitted) {
@@ -393,7 +393,7 @@ public final class NodesInitializer {
         }
 
         if (!isFound) {
-          LOGGER.debug("    generating a new certificate");
+          LOGGER.info("    generating a new certificate for " + roleFieldsHolder1.qualifiedName);
           final KeyPair keyPair;
           try {
             keyPair = X509Utils.generateRSAKeyPair3072();
@@ -412,7 +412,7 @@ public final class NodesInitializer {
               keyStorePassword,
               roleFieldsHolder1.qualifiedName)) {  // alias
         try {
-          LOGGER.debug("    deleting unwanted certificate from the keystore: " + roleFieldsHolder1.qualifiedName);
+          LOGGER.info("    deleting unwanted certificate from the keystore: " + roleFieldsHolder1.qualifiedName);
           keyStore.deleteEntry(roleFieldsHolder1.qualifiedName); // alias
         } catch (KeyStoreException ex) {
           throw new TexaiException(ex);

@@ -8,6 +8,8 @@ import com.google.bitcoin.core.NetworkParameters;
 import com.google.bitcoin.core.Peer;
 import com.google.bitcoin.core.PeerAddress;
 import com.google.bitcoin.core.PeerEventListener;
+import com.google.bitcoin.core.PeerGroup;
+import com.google.bitcoin.core.Pong;
 import com.google.bitcoin.core.Transaction;
 import com.google.bitcoin.core.Utils;
 import com.google.bitcoin.core.VersionMessage;
@@ -16,6 +18,7 @@ import com.google.bitcoin.net.NioClientManager;
 import com.google.bitcoin.utils.Threading;
 import java.util.List;
 import java.util.Timer;
+import java.util.TimerTask;
 import javax.annotation.Nullable;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
@@ -59,8 +62,8 @@ public class LocalBitcoindAdapter implements PeerEventListener {
    * Constructs a new LocalBitcoindAdapter instance.
    *
    * @param networkParameters the network parameters, main net, test net, or regression test net
-   * @param bitcoinMessageReceiver the bitcoin message receiver, which is the skill that handles outbound bitcoin messages from the
-   * local peer
+   * @param bitcoinMessageReceiver the bitcoin message receiver, which is the skill that handles outbound bitcoin messages from the local
+   * peer
    */
   public LocalBitcoindAdapter(
           final NetworkParameters networkParameters,
@@ -83,7 +86,8 @@ public class LocalBitcoindAdapter implements PeerEventListener {
   /**
    * Starts up this adapter by connecting to the local bitcoind instance and beginning to ping it.
    */
-  protected void startUp() {
+  public void startUp() {
+    LOGGER.info("startUp");
     clientConnectionManager.startAndWait();
     connectToLocalBitcoind();
     pingTimer = new Timer(
@@ -94,8 +98,11 @@ public class LocalBitcoindAdapter implements PeerEventListener {
   /**
    * Shuts down this adapter by disconnecting from the local bitcoind instance.
    */
-  protected void shutDown() {
-    pingTimer.cancel();
+  public void shutDown() {
+    LOGGER.info("shutDown");
+    if (pingTimer != null) { // unit testing will not have started the ping timer
+      pingTimer.cancel();
+    }
     // Blocking close of all sockets.
     clientConnectionManager.stopAndWait();
   }
@@ -107,6 +114,7 @@ public class LocalBitcoindAdapter implements PeerEventListener {
     final PeerAddress localPeerAddress = PeerAddress.localhost(networkParameters);
     versionMessage.time = Utils.currentTimeMillis() / 1000;
 
+    LOGGER.info("connectToLocalBitcoind");
     localPeer = new Peer(
             networkParameters,
             versionMessage,
@@ -123,9 +131,11 @@ public class LocalBitcoindAdapter implements PeerEventListener {
       throw new TexaiException("Failed to connect to " + localPeerAddress + ": " + e.getMessage());
     }
     localPeer.setSocketTimeout(connectTimeoutMillis);
+    //setupPingingLocalPeer();
   }
 
-  /** Sends the given bitcoin message to the local peer.
+  /**
+   * Sends the given bitcoin message to the local peer.
    *
    * @param message the given bitcoin protocol message
    */
@@ -133,10 +143,12 @@ public class LocalBitcoindAdapter implements PeerEventListener {
     //Preconditions
     assert message != null : "message must not be null";
 
+    LOGGER.info("sendBitcoinMessageToLocalBitcionCore: " + message);
     localPeer.sendMessage(message);
   }
 
-  /** Receives the given message from the local peer.
+  /**
+   * Receives the given message from the local peer.
    *
    * @param message the given bitcoin protocol message
    */
@@ -144,6 +156,7 @@ public class LocalBitcoindAdapter implements PeerEventListener {
     //Preconditions
     assert message != null : "message must not be null";
 
+    LOGGER.info("receiveBitcoinMessageFromLocalBitcionCore: " + message);
     bitcoinMessageReceiver.receiveMessageFromLocalBitcoind(message);
   }
 
@@ -158,7 +171,7 @@ public class LocalBitcoindAdapter implements PeerEventListener {
    */
   @Override
   public void onBlocksDownloaded(final Peer peer, final Block block, final int blocksLeft) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    LOGGER.info("onChainDownloadStarted: " + blocksLeft);
   }
 
   /**
@@ -169,7 +182,7 @@ public class LocalBitcoindAdapter implements PeerEventListener {
    */
   @Override
   public void onChainDownloadStarted(final Peer peer, final int blocksLeft) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    LOGGER.info("onChainDownloadStarted: " + blocksLeft);
   }
 
   /**
@@ -181,7 +194,7 @@ public class LocalBitcoindAdapter implements PeerEventListener {
    */
   @Override
   public void onPeerConnected(final Peer peer, final int peerCount) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    LOGGER.info("onPeerDisconnected: " + peerCount);
   }
 
   /**
@@ -194,6 +207,7 @@ public class LocalBitcoindAdapter implements PeerEventListener {
    */
   @Override
   public void onPeerDisconnected(final Peer peer, final int peerCount) {
+    LOGGER.info("onPeerDisconnected: " + peerCount);
   }
 
   /**
@@ -208,6 +222,7 @@ public class LocalBitcoindAdapter implements PeerEventListener {
    */
   @Override
   public Message onPreMessageReceived(final Peer peer, final Message message) {
+    LOGGER.info("onPreMessageReceived: " + message);
     return message;
   }
 
@@ -219,6 +234,7 @@ public class LocalBitcoindAdapter implements PeerEventListener {
    */
   @Override
   public void onTransaction(final Peer peer, final Transaction transaction) {
+    LOGGER.info("onTransaction: " + transaction);
   }
 
   /**
@@ -238,7 +254,59 @@ public class LocalBitcoindAdapter implements PeerEventListener {
   @Nullable
   @Override
   public List<Message> getData(final Peer peer, final GetDataMessage message) {
+    LOGGER.info("getData: " + message);
     return null;
   }
 
+  /** Setup pinging for the local peer. */
+  private void setupPingingLocalPeer() {
+    if (localPeer.getPeerVersionMessage().clientVersion < Pong.MIN_PROTOCOL_VERSION) {
+      return;
+    }
+    // Start the process of pinging the peer. Do a ping right now and then ensure there's a fixed delay between
+    // each ping. If the peer is taken out of the peers list then the cycle will stop.
+    //
+    // TODO: This should really be done by a timer integrated with the network thread to avoid races.
+    final Runnable[] pingRunnable = new Runnable[1];
+    pingRunnable[0] = new Runnable() {
+      private boolean firstRun = true;
+
+      @Override
+      public void run() {
+        // Ensure that the first ping happens immediately and later pings after the requested delay.
+        if (firstRun) {
+          firstRun = false;
+          try {
+            localPeer.ping().addListener(this, Threading.SAME_THREAD);
+          } catch (Exception e) {
+            LOGGER.warn("Exception whilst trying to ping peer: " + localPeer + "\n" + e.toString());
+            return;
+          }
+          return;
+        }
+
+        final long interval = 10000L; // 10 seconds
+        if (interval <= 0) {
+          return;  // Disabled.
+        }
+        final TimerTask task = new TimerTask() {
+          @Override
+          public void run() {
+            try {
+              localPeer.ping().addListener(pingRunnable[0], Threading.SAME_THREAD);
+            } catch (Exception e) {
+            LOGGER.warn("Exception whilst trying to ping peer: " + localPeer + "\n" + e.toString());
+             }
+          }
+        };
+        try {
+          pingTimer.schedule(task, interval);
+        } catch (IllegalStateException ignored) {
+                    // This can happen if there's a shutdown race and this runnable is executing whilst the timer is
+          // simultaneously cancelled.
+        }
+      }
+    };
+    pingRunnable[0].run();
+  }
 }

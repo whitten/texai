@@ -8,6 +8,8 @@ import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 import org.texai.skill.aicoin.support.AICoinUtils;
 import org.texai.skill.aicoin.support.BitcoinMessageReceiver;
+import org.texai.skill.aicoin.support.LocalBitcoindAdapter;
+import org.texai.skill.aicoin.support.XAIMainNetParams;
 import org.texai.util.EnvironmentUtils;
 import org.texai.util.TexaiException;
 
@@ -29,6 +31,8 @@ public final class XAIOperation extends AbstractSkill implements BitcoinMessageR
   private static final String AICOIN_DIRECTORY_PATH = "../.aicoin";
   // the insight process
   private Process insightProcess;
+  // the local bitcoind (aicoind) instance adapter
+  private LocalBitcoindAdapter localBitcoindAdapter;
 
   /**
    * Constructs a new XTCOperation instance.
@@ -226,9 +230,46 @@ public final class XAIOperation extends AbstractSkill implements BitcoinMessageR
     removeMessageTimeOut(message.getInReplyTo());
     LOGGER.info("The bitcoind configuration file has been written");
     launchAicoind();
+    // after a pause, launch the local bitcoind (aicoind) adapter
+    getNodeRuntime().getExecutor().execute(new LocalBitcoinAdapterRunner(
+            this)); // xaiOperation
     if ("BlockchainExplorer".equals(getContainerName())) {
       // after a pause, launch the Insight blockchain explorer instance
       getNodeRuntime().getExecutor().execute(new InsightRunner());
+    }
+  }
+
+  static class LocalBitcoinAdapterRunner implements Runnable {
+
+    // the XAIOperation skill instance
+    final XAIOperation xaiOperation;
+
+    /**
+     * Creates a new LocalBitcoinAdapterRunner intance.
+     *
+     * @param xaiOperation the XAIOperation skill instance
+     */
+    LocalBitcoinAdapterRunner(final XAIOperation xaiOperation) {
+      this.xaiOperation = xaiOperation;
+    }
+
+    @Override
+    public void run() {
+      try {
+        LOGGER.info("Waiting 5 seconds before launching the block explorer ...");
+        Thread.sleep(5 * 1000);
+      } catch (InterruptedException ex) {
+      }
+      try {
+        // pause two seconds to wait for aicoind to launch.
+        Thread.sleep(2000);
+      } catch (InterruptedException ex) {
+        // ignore
+      }
+      xaiOperation.localBitcoindAdapter = new LocalBitcoindAdapter(
+              new XAIMainNetParams(), // networkParameters
+              xaiOperation); // bitcoinMessageReceiver);
+      xaiOperation.localBitcoindAdapter.startUp();
     }
   }
 
@@ -249,7 +290,7 @@ public final class XAIOperation extends AbstractSkill implements BitcoinMessageR
     };
     final StringBuilder stringBuilder = new StringBuilder();
     if (this.getContainerName().equals("TestContainer")) {
-      stringBuilder.append("~/docker/SuperPeer/bin/aicoin-qt -debug -shrinkdebugfile=1 -datadir=").append("~/.aicoin");
+      stringBuilder.append("~/docker/SuperPeer/bin/aicoin-qt -debug -shrinkdebugfile=1 -datadir=").append(System.getProperty("user.home")).append("/.aicoin");
     } else {
       stringBuilder.append("../bin/aicoin-qt -debug -shrinkdebugfile=1 -datadir=").append(AICOIN_DIRECTORY_PATH);
     }
@@ -308,6 +349,9 @@ public final class XAIOperation extends AbstractSkill implements BitcoinMessageR
     }
 
     LOGGER.info("Shutting down the aicoind instance.");
+    if (localBitcoindAdapter != null) {
+      localBitcoindAdapter.shutDown();
+    }
     String[] cmdArray = {
       "sh",
       "-c",
