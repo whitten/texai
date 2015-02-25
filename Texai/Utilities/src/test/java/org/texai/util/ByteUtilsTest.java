@@ -312,6 +312,22 @@ public class ByteUtilsTest {
   }
 
   /**
+   * Test of toUint32LittleEndian method, of class ByteUtils.
+   */
+  @Test
+  public void testToUint32LittleEndian() {
+    LOGGER.info("toUint32LittleEndian");
+    byte[] byteArray1 = {0, 0, 0, 0};
+    long expResult1 = 0L;
+    long result1 = ByteUtils.toUint32LittleEndian(byteArray1);
+    assertEquals(expResult1, result1);
+    byte[] byteArray2 = {0x55, 0, 0, 0};
+    long expResult2 = 85L;
+    long result2 = ByteUtils.toUint32LittleEndian(byteArray2);
+    assertEquals(expResult2, result2);
+  }
+
+  /**
    * Test of toBytes method, of class ByteUtils.
    */
   @Test

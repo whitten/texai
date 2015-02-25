@@ -57,7 +57,7 @@ public final class ByteUtils {
   }
 
   /**
-   * Returns the corresponding bytes of the given compact string.  The 8-bit character set is specified to retain byte values.
+   * Returns the corresponding bytes of the given compact string. The 8-bit character set is specified to retain byte values.
    *
    * @param string the given string
    *
@@ -335,6 +335,22 @@ public final class ByteUtils {
             + ((((long) bytes[2]) & 0xFF) << 40)
             + ((((long) bytes[1]) & 0xFF) << 48)
             + ((((long) bytes[0]) & 0xFF) << 56));
+  }
+
+  /** Returns a non-negative long from the given 4 byte array, which is represented in a little-endian manner.
+   *
+   * @param bytes the given 4 byte little-endian array
+   * @return a non-negative long
+   */
+  public static long toUint32LittleEndian(byte[] bytes) {
+    //Preconditions
+    assert bytes != null : "bytes must not be null";
+    assert bytes.length == 4 : "the byte array must be length 4";
+
+    return (bytes[0] & 0xFFL)
+            | ((bytes[1] & 0xFFL) << 8)
+            | ((bytes[2] & 0xFFL) << 16)
+            | ((bytes[3] & 0xFFL) << 24);
   }
 
   /**
