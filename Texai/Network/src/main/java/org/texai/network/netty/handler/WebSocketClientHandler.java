@@ -5,7 +5,7 @@
  *
  * Description: Provides a web socket client handler.
  *
- * Copyright (C) Jan 29, 2012, Stephen L. Reed, Texai.org.
+ * Copyright (C) Jan 29, 2012, Stephen L. Reed.
  *
  */
 package org.texai.network.netty.handler;
@@ -28,19 +28,21 @@ import org.jboss.netty.util.CharsetUtil;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 
-/** Provides a web socket client handler.
+/**
+ * Provides a web socket client handler.
  *
  * @author reed
  */
 @NotThreadSafe
 public class WebSocketClientHandler extends SimpleChannelUpstreamHandler {
 
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(WebSocketClientHandler.class);
-  /** the web socket client handshaker */
+  // the web socket client handshaker
   private final WebSocketClientHandshaker webSocketClientHandshaker;
 
-  /** Constructs a new WebSocketClientHandler instance.
+  /**
+   * Constructs a new WebSocketClientHandler instance.
    *
    * @param webSocketClientHandshaker the web socket client handshaker
    */
@@ -51,10 +53,12 @@ public class WebSocketClientHandler extends SimpleChannelUpstreamHandler {
     this.webSocketClientHandshaker = webSocketClientHandshaker;
   }
 
-  /** Notifies when a {@link Channel} was closed and all its related resources
-   * were released.
+  /**
+   * Notifies when a {@link Channel} was closed and all its related resources were released.
+   *
    * @param ctx the channel handler context
-   * @param e  the channel state event
+   * @param e the channel state event
+   *
    * @throws Exception when an exception occurs
    */
   @Override
@@ -64,10 +68,12 @@ public class WebSocketClientHandler extends SimpleChannelUpstreamHandler {
     LOGGER.info("WebSocket Client disconnected!");
   }
 
-  /** Receives a message object from a remote peer.
+  /**
+   * Receives a message object from a remote peer.
    *
    * @param ctx the channel handler context
-   * @param e  the channel state event
+   * @param e the channel state event
+   *
    * @throws Exception
    */
   @Override
@@ -99,10 +105,12 @@ public class WebSocketClientHandler extends SimpleChannelUpstreamHandler {
     }
   }
 
-    /** Receives a raised exception.
+  /**
+   * Receives a raised exception.
    *
    * @param ctx the channel handler context
-   * @param e  the channel state event
+   * @param e the channel state event
+   *
    * @throws Exception
    */
   @Override

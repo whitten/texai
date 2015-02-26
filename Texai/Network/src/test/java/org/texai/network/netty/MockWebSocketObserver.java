@@ -1,8 +1,6 @@
 /*
  * MockWebSocketObserver.java
  *
- * Created on Apr 10, 2012, 5:32:29 PM
- *
  * Description: .
  *
  * Copyright (C) Apr 10, 2012, Stephen L. Reed, Texai.org.
@@ -23,17 +21,20 @@ import org.texai.util.StringUtils;
 @NotThreadSafe
 public class MockWebSocketObserver implements WebSocketObserver {
 
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(MockWebSocketObserver.class);
 
-  /** Constructs a new MockWebSocketObserver instance. */
+  /**
+   * Constructs a new MockWebSocketObserver instance.
+   */
   public MockWebSocketObserver() {
   }
 
-  /** Receives notification that the web socket connects and is ready for reading and writing.
+  /**
+   * Receives notification that the web socket connects and is ready for reading and writing.
    *
    * @param aProtocol the protocol
-   * @param aExtensions  the extensions
+   * @param aExtensions the extensions
    */
   @Override
   public void onOpen(
@@ -42,7 +43,8 @@ public class MockWebSocketObserver implements WebSocketObserver {
     LOGGER.info("onOpen");
   }
 
-  /** Receives notification that the web socket closes. anError will be null if it closes cleanly.
+  /**
+   * Receives notification that the web socket closes. anError will be null if it closes cleanly.
    *
    * @param aStatusCode the status code
    * @param aMessage the web socket message
@@ -56,8 +58,8 @@ public class MockWebSocketObserver implements WebSocketObserver {
     LOGGER.info("onClose");
   }
 
-  /** Receives notification that the web socket receives an error. Such an error can result in the
-  socket being closed.
+  /**
+   * Receives notification that the web socket receives an error. Such an error can result in the socket being closed.
    *
    * @param aException
    */
@@ -66,7 +68,8 @@ public class MockWebSocketObserver implements WebSocketObserver {
     LOGGER.info("onError...\n" + StringUtils.getStackTraceAsString(aException));
   }
 
-  /** Receives notification that the web socket receives a message.
+  /**
+   * Receives notification that the web socket receives a message.
    *
    * @param aMessage the web socket message
    */
@@ -76,7 +79,8 @@ public class MockWebSocketObserver implements WebSocketObserver {
     LOGGER.info("onTextMessage: " + aMessage);
   }
 
-  /** Receives notification that the web socket receives a message.
+  /**
+   * Receives notification that the web socket receives a message.
    *
    * @param aMessage the web socket message
    */
@@ -85,7 +89,8 @@ public class MockWebSocketObserver implements WebSocketObserver {
     LOGGER.info("onBinaryMessage");
   }
 
-  /** Receives notification that pong is sent... For keep-alive optimization.
+  /**
+   * Receives notification that pong is sent... For keep-alive optimization.
    *
    * @param aMessage the web socket message
    */

@@ -1,11 +1,9 @@
 /*
  * WebSocketServerPipelineFactory.java
  *
- * Created on Jul 8, 2012, 8:07:03 PM
- *
  * Description: Initializes the ChannelPipeline of the child channel accepted by a ServerChannel.
  *
- * Copyright (C) Jul 8, 2012, Stephen L. Reed, Texai.org.
+ * Copyright (C) Jul 8, 2012, Stephen L. Reed.
  *
  */
 package org.texai.network.netty.pipeline;
@@ -20,20 +18,21 @@ import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.texai.network.netty.handler.AbstractHTTPRequestHandlerFactory;
 import static org.jboss.netty.channel.Channels.pipeline;
 
-/** Initializes the ChannelPipeline of the child channel accepted by a ServerChannel.
+/**
+ * Initializes the ChannelPipeline of the child channel accepted by a ServerChannel.
  *
  * @author reed
  */
 @NotThreadSafe
 public class WebSocketServerPipelineFactory implements ChannelPipelineFactory {
 
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(WebSocketServerPipelineFactory.class);
-  /** the HTTP request handler factory */
+  // the HTTP request handler factory
   private final AbstractHTTPRequestHandlerFactory httpRequestHandlerFactory;
 
-
-  /** Constructs a new WebSocketServerPipelineFactory instance.
+  /**
+   * Constructs a new WebSocketServerPipelineFactory instance.
    *
    * @param httpRequestHandlerFactory the HTTP request handler factory
    */
@@ -44,7 +43,8 @@ public class WebSocketServerPipelineFactory implements ChannelPipelineFactory {
     this.httpRequestHandlerFactory = httpRequestHandlerFactory;
   }
 
-  /** Returns a newly created {@link ChannelPipeline}.
+  /**
+   * Returns a newly created {@link ChannelPipeline}.
    *
    * @return a channel pipeline for the child channel accepted by a server channel
    */

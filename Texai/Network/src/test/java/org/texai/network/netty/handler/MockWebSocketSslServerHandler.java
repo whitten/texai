@@ -5,7 +5,7 @@
  *
  * Description: .
  *
- * Copyright (C) Jan 30, 2012, Stephen L. Reed, Texai.org.
+ * Copyright (C) Jan 30, 2012, Stephen L. Reed.
  *
  */
 package org.texai.network.netty.handler;
@@ -35,14 +35,15 @@ import org.texai.util.TexaiException;
 @NotThreadSafe
 public class MockWebSocketSslServerHandler extends WebSocketSslServerHandler {
 
-  /** the logger */
+  // the logger */
   private static final Logger LOGGER = Logger.getLogger(MockWebSocketSslServerHandler.class);
-  /** the web socket path */
+  // the web socket path
   private static final String WEBSOCKET_PATH = "/websocket";
-  /** the web socket server handshaker */
+  // the web socket server handshaker
   private WebSocketServerHandshaker webSocketServerHandshaker;
 
-  /** Constructs a new MockWebSocketSslServerHandler instance.
+  /**
+   * Constructs a new MockWebSocketSslServerHandler instance.
    *
    * @param httpRequestHandler the parent HTTP request handler
    */
@@ -50,7 +51,8 @@ public class MockWebSocketSslServerHandler extends WebSocketSslServerHandler {
     super(httpRequestHandler);
   }
 
-  /** Performs the web socket handshake to upgrade the protocol from HTTP to web socket.
+  /**
+   * Performs the web socket handshake to upgrade the protocol from HTTP to web socket.
    *
    * @param httpRequest the HTTP request
    * @param channelHandlerContext the channel handler context
@@ -79,10 +81,12 @@ public class MockWebSocketSslServerHandler extends WebSocketSslServerHandler {
     }
   }
 
-  /** Receives a message from a remote peer.
+  /**
+   * Receives a message from a remote peer.
    *
    * @param channelHandlerContext the channel handler context
    * @param messageEvent the message event
+   *
    * @throws Exception when an exception occurs
    */
   @Override
@@ -101,10 +105,11 @@ public class MockWebSocketSslServerHandler extends WebSocketSslServerHandler {
     }
   }
 
-  /** Handles a received web socket frame.
+  /**
+   * Handles a received web socket frame.
    *
    * @param channelHandlerContext the channel handler context
-   * @param webSocketFrame  the web socket frame
+   * @param webSocketFrame the web socket frame
    */
   private void handleWebSocketFrame(
           final ChannelHandlerContext channelHandlerContext,
@@ -134,10 +139,12 @@ public class MockWebSocketSslServerHandler extends WebSocketSslServerHandler {
     channelHandlerContext.getChannel().write(new TextWebSocketFrame(request.toUpperCase(Locale.ENGLISH)));
   }
 
-  /** Processes an exception not otherwise caught.
+  /**
+   * Processes an exception not otherwise caught.
    *
    * @param channelHandlerContext the channel handler context
    * @param exceptionEvent the exception event
+   *
    * @throws Exception when an exception occurs
    */
   @Override

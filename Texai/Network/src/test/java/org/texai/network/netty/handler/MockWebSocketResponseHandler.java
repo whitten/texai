@@ -5,7 +5,7 @@
  *
  * Description: .
  *
- * Copyright (C) Jan 30, 2012, Stephen L. Reed, Texai.org.
+ * Copyright (C) Jan 30, 2012, Stephen L. Reed.
  *
  */
 package org.texai.network.netty.handler;
@@ -34,14 +34,15 @@ import org.texai.util.TexaiException;
 @NotThreadSafe
 public class MockWebSocketResponseHandler extends AbstractWebSocketResponseHandler {
 
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(MockWebSocketResponseHandler.class);
-  /** the web socket client handshaker */
+  // the web socket client handshaker
   private final WebSocketClientHandshaker webSocketClientHandshaker;
-  /** the synchronization lock to resume the client when the handshake is completed */
+  // the synchronization lock to resume the client when the handshake is completed
   final Object clientResume_lock;
 
-  /** Constructs a new MockWebSocketResponseHandler instance.
+  /**
+   * Constructs a new MockWebSocketResponseHandler instance.
    *
    * @param webSocketClientHandshaker the web socket client handshaker
    * @param clientResume_lock the synchronization lock to resume the client when the handshake is completed
@@ -57,10 +58,12 @@ public class MockWebSocketResponseHandler extends AbstractWebSocketResponseHandl
     this.clientResume_lock = clientResume_lock;
   }
 
-  /** Handles a received web socket message.
+  /**
+   * Handles a received web socket message.
    *
    * @param channelHandlerContext the channel handler context
    * @param messageEvent the message event
+   *
    * @throws Exception when an exception occurs
    */
   @Override
@@ -103,10 +106,12 @@ public class MockWebSocketResponseHandler extends AbstractWebSocketResponseHandl
     }
   }
 
-  /** Closes the channel.
+  /**
+   * Closes the channel.
    *
    * @param channelHandlerContext the channel handler context
    * @param channelStateEvent the channel state event
+   *
    * @throws Exception when an exception occurs
    */
   @Override
@@ -116,10 +121,12 @@ public class MockWebSocketResponseHandler extends AbstractWebSocketResponseHandl
     LOGGER.info("web socket client disconnected");
   }
 
-  /** Catches an otherwise uncaught exception.
+  /**
+   * Catches an otherwise uncaught exception.
    *
    * @param channelHandlerContext the channel handler context
    * @param exceptionEvent
+   *
    * @throws Exception
    */
   @Override

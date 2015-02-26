@@ -1,22 +1,10 @@
 /*
  * ConnectionUtilsTest.java
  *
- * Created on Jun 30, 2008, 9:42:31 AM
- *
  * Description: .
  *
- * Copyright (C) Apr 1, 2010 reed.
+ * Copyright (C) Apr 1, 2010 Stephen Reed.
  *
- * This program is free software; you can redistribute it and/or modify it under the terms
- * of the GNU General Public License as published by the Free Software Foundation; either
- * version 3 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with this program;
- * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 package org.texai.network.netty;
 
@@ -51,13 +39,13 @@ import org.texai.x509.X509SecurityInfo;
  */
 public class ConnectionUtilsTest {
 
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(ConnectionUtilsTest.class);
-  /** the server bootstrap */
+  // the server bootstrap
   private static ServerBootstrap serverBootstrap;
-  /** the server port */
+  // the server port
   private static final int SERVER_PORT = 8088;
-  /** the executor */
+  // the executor
   private static final Executor EXECUTOR = Executors.newCachedThreadPool();
 
   public ConnectionUtilsTest() {
@@ -70,12 +58,12 @@ public class ConnectionUtilsTest {
     final AbstractHTTPRequestHandlerFactory httpRequestHandlerFactory = new MockHTTPRequestHandlerFactory();
     final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getServerX509SecurityInfo();
     serverBootstrap = ConnectionUtils.createPortUnificationServer(
-          SERVER_PORT,
-          x509SecurityInfo,
-          albusHCSMessageHandlerFactory,
-          httpRequestHandlerFactory,
-          EXECUTOR, // bossExecutor
-          EXECUTOR); // workerExecutor
+            SERVER_PORT,
+            x509SecurityInfo,
+            albusHCSMessageHandlerFactory,
+            httpRequestHandlerFactory,
+            EXECUTOR, // bossExecutor
+            EXECUTOR); // workerExecutor
   }
 
   @AfterClass

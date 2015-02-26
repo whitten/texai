@@ -1,22 +1,10 @@
 /*
  * SSLPipelineFactoryTest.java
  *
- * Created on Jun 30, 2008, 6:49:43 PM
- *
  * Description: .
  *
  * Copyright (C) Feb 4, 2010 reed.
  *
- * This program is free software; you can redistribute it and/or modify it under the terms
- * of the GNU General Public License as published by the Free Software Foundation; either
- * version 3 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with this program;
- * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 package org.texai.network.netty.pipeline;
 
@@ -38,9 +26,8 @@ import static org.junit.Assert.*;
  */
 public class SSLPipelineFactoryTest {
 
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(SSLPipelineFactoryTest.class);
-
 
   public SSLPipelineFactoryTest() {
   }
@@ -73,10 +60,10 @@ public class SSLPipelineFactoryTest {
     final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
     LOGGER.info("getting channelPipeline");
     ChannelPipeline channelPipeline = SSLPipelineFactory.getPipeline(
-          useClientMode,
-          x509SecurityInfo,
-          true); // needClientAuth
+            useClientMode,
+            x509SecurityInfo,
+            true); // needClientAuth
     assertEquals("DefaultChannelPipeline{(ssl = org.jboss.netty.handler.ssl.SslHandler)}", channelPipeline.toString());
   }
 
- }
+}

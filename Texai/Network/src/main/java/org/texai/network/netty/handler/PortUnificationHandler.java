@@ -32,34 +32,38 @@ import org.texai.network.netty.NetworkConstants;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 
-/** Manipulates the current pipeline dynamically to switch protocols that share the single port. Web socket protocol
- * switching is performed within the HTTP request handler.
+/**
+ * Manipulates the current pipeline dynamically to switch protocols that share the single port. Web socket protocol switching is performed
+ * within the HTTP request handler.
  *
  * @author reed
  *
  */
 public class PortUnificationHandler extends FrameDecoder {
 
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(PortUnificationHandler.class);
   // dependency injection of the business logic handlers enables the substitution of stubs for unit testing this class
-  /** the Albus hierarchical control network channel handler */
+  // the Albus hierarchical control network channel handler
   private AbstractAlbusHCSMessageHandler albusHCNMessageHandler;
-  /** the HTTP request handler */
+  // the HTTP request handler
   private AbstractHTTPRequestHandler httpRequestHandler;
 
-  /** Constructs a new PortUnificationHandler instance. */
+  /**
+   * Constructs a new PortUnificationHandler instance.
+   */
   public PortUnificationHandler() {
   }
 
-  /** Recognizes the protocol and switches the pipeline to handle it.
+  /**
+   * Recognizes the protocol and switches the pipeline to handle it.
    *
    * @param channelHandlerContext the context of this handler
-   * @param channel  the current channel
+   * @param channel the current channel
    * @param channelBuffer the cumulative buffer of received packets so far.
    *
-   * @return the channel buffer after reading a possible object serialization protocol identification byte.
-   *         {@code null} if there's not enough data in the buffer to recognize the protocol.
+   * @return the channel buffer after reading a possible object serialization protocol identification byte. {@code null} if there's not
+   * enough data in the buffer to recognize the protocol.
    */
   @Override
   protected Object decode(
@@ -70,8 +74,8 @@ public class PortUnificationHandler extends FrameDecoder {
     final int readableBytes = channelBuffer.readableBytes();
     LOGGER.info("readable bytes: " + readableBytes);
 
-    // use the first five bytes of the channel buffer to detect the protocol
-    if (readableBytes < 5) {
+    // use the first two bytes of the channel buffer to detect the protocol
+    if (readableBytes < 2) {
       return null;
     }
 
@@ -94,19 +98,23 @@ public class PortUnificationHandler extends FrameDecoder {
     return channelBuffer.readBytes(channelBuffer.readableBytes());
   }
 
-  /** Returns whether this is a serialized object, e.g. a Texai node-to-node message.
+  /**
+   * Returns whether this is a serialized object, e.g. a Texai node-to-node message.
    *
    * @param magic1 the first byte of the message
+   *
    * @return whether this is a serialized object
    */
   private boolean isSerializedObject(final int magic1) {
     return magic1 == NetworkConstants.OBJECT_SERIALIZATION_PROTOCOL;
   }
 
-  /** Returns whether this is an HTTP message.
+  /**
+   * Returns whether this is an HTTP message.
    *
    * @param magic1 the first byte of the message
    * @param magic2 the second byte of the message
+   *
    * @return whether this is an HTTP message
    */
   private boolean isHttp(final int magic1, final int magic2) {
@@ -119,9 +127,10 @@ public class PortUnificationHandler extends FrameDecoder {
             magic1 == 'D' && magic2 == 'E' || // DELETE
             magic1 == 'T' && magic2 == 'R' || // TRACE
             magic1 == 'C' && magic2 == 'O';   // CONNECT
-    }
+  }
 
-  /** Dynamically switches the channel pipeline to handle an HTTP message.
+  /**
+   * Dynamically switches the channel pipeline to handle an HTTP message.
    *
    * @param channelHandlerContext the channel handler context
    */
@@ -133,8 +142,8 @@ public class PortUnificationHandler extends FrameDecoder {
     LOGGER.info("switching to HTTP channel pipeline from: " + channelPipeline);
     final Collection<ChannelHandler> channelHandlers = channelPipeline.toMap().values();
     for (final ChannelHandler channelHandler : channelHandlers) {
-      if (!(channelHandler instanceof SslHandler ||
-              channelHandler instanceof PortUnificationHandler)) {
+      if (!(channelHandler instanceof SslHandler
+              || channelHandler instanceof PortUnificationHandler)) {
         channelPipeline.remove(channelHandler);
       }
     }
@@ -146,8 +155,33 @@ public class PortUnificationHandler extends FrameDecoder {
     LOGGER.info("HTTP channel pipeline: " + channelPipeline);
   }
 
-  /** Dynamically switches the channel pipeline to handle a serialized object message sent from one node to another
-   * in an Albus hierarchical control network.
+  /**
+   * Dynamically switches the channel pipeline to handle an HTTP message.
+   *
+   * @param channelHandlerContext the channel handler context
+   */
+  private void switchToBitcoinProtocol(final ChannelHandlerContext channelHandlerContext) {
+    //Preconditions
+    assert channelHandlerContext != null : "channelHandlerContext must not be null";
+
+    final ChannelPipeline channelPipeline = channelHandlerContext.getPipeline();
+    LOGGER.info("switching to Bitcoin protocol channel pipeline from: " + channelPipeline);
+    final Collection<ChannelHandler> channelHandlers = channelPipeline.toMap().values();
+    for (final ChannelHandler channelHandler : channelHandlers) {
+      if (!(channelHandler instanceof SslHandler
+              || channelHandler instanceof PortUnificationHandler)) {
+        channelPipeline.remove(channelHandler);
+      }
+    }
+    channelPipeline.addLast("encoder", new BitcoinProtocolEncoder());
+    channelPipeline.addLast("decoder", new BitcoinProtocolDecoder());
+    channelPipeline.remove(this);
+    LOGGER.info("Bitcoin protocol channel pipeline: " + channelPipeline);
+  }
+
+  /**
+   * Dynamically switches the channel pipeline to handle a serialized object message sent from one node to another in an Albus hierarchical
+   * control network.
    *
    * @param channelHandlerContext the channel handler context
    */
@@ -160,8 +194,8 @@ public class PortUnificationHandler extends FrameDecoder {
     LOGGER.info("switching to Albus HCN channel pipeline from: " + channelPipeline);
     final Collection<ChannelHandler> channelHandlers = channelPipeline.toMap().values();
     for (final ChannelHandler channelHandler : channelHandlers) {
-      if (!(channelHandler instanceof SslHandler ||
-              channelHandler instanceof PortUnificationHandler)) {
+      if (!(channelHandler instanceof SslHandler
+              || channelHandler instanceof PortUnificationHandler)) {
         channelPipeline.remove(channelHandler);
       }
     }
@@ -173,7 +207,8 @@ public class PortUnificationHandler extends FrameDecoder {
     LOGGER.info("Albus HCN pipeline: " + channelPipeline.toString());
   }
 
-  /** Handles a caught exception.
+  /**
+   * Handles a caught exception.
    *
    * @param channelHandlerContext the channel handler context
    * @param exceptionEvent the exception event
@@ -203,7 +238,8 @@ public class PortUnificationHandler extends FrameDecoder {
     }
   }
 
-  /** Sets the Albus hierarchical control network channel handler.
+  /**
+   * Sets the Albus hierarchical control network channel handler.
    *
    * @param albusHCNMessageHandler the Albus hierarchical control network channel handler
    */
@@ -214,7 +250,8 @@ public class PortUnificationHandler extends FrameDecoder {
     this.albusHCNMessageHandler = albusHCNMessageHandler;
   }
 
-  /** Sets the HTTP request handler.
+  /**
+   * Sets the HTTP request handler.
    *
    * @param httpRequestHandler the HTTP request handler
    */

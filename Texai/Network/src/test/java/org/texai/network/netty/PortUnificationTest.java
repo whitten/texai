@@ -1,22 +1,10 @@
 /*
  * PortUnificationTest.java
  *
- * Created on Feb 2, 2010, 10:26:58 AM
- *
  * Description: .
  *
- * Copyright (C) Feb 2, 2010 reed.
+ * Copyright (C) Feb 2, 2010 by Stephen Reed.
  *
- * This program is free software; you can redistribute it and/or modify it under the terms
- * of the GNU General Public License as published by the Free Software Foundation; either
- * version 3 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with this program;
- * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 package org.texai.network.netty;
 
@@ -37,7 +25,6 @@ import org.texai.util.StringUtils;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -61,9 +48,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openrdf.model.impl.URIImpl;
 import org.texai.ahcsSupport.Message;
-import org.texai.kb.Constants;
 import org.texai.network.netty.handler.AbstractAlbusHCSMessageHandler;
 import org.texai.network.netty.handler.AbstractAlbusHCSMessageHandlerFactory;
 import org.texai.network.netty.handler.AbstractHTTPRequestHandlerFactory;
@@ -83,17 +68,11 @@ import static org.junit.Assert.*;
  */
 public final class PortUnificationTest {
 
-  /**
-   * the logger
-   */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(PortUnificationTest.class);
-  /**
-   * the server port
-   */
+  // the server port
   private static final int SERVER_PORT = 8088;
-  /**
-   * the client executor
-   */
+  // the client executor
   private final Executor clientExecutor = Executors.newCachedThreadPool();
 
   /**
@@ -470,8 +449,4 @@ public final class PortUnificationTest {
     clientBootstrap.releaseExternalResources();
   }
 
-  public static org.openrdf.model.URI randomURI() {
-    return new URIImpl(Constants.TEXAI_NAMESPACE + UUID.randomUUID().toString());
-  }
-  private final Map<UUID, X509Certificate> certificateDictionary = new HashMap<>();
 }

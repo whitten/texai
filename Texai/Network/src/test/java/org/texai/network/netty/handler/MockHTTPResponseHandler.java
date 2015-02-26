@@ -1,22 +1,10 @@
 /*
  * MockHTTPResponseHandler.java
  *
- * Created on Feb 4, 2010, 9:30:41 AM
- *
  * Description: .
  *
- * Copyright (C) Feb 4, 2010 reed.
+ * Copyright (C) Feb 4, 2010 by Stephen Reed.
  *
- * This program is free software; you can redistribute it and/or modify it under the terms
- * of the GNU General Public License as published by the Free Software Foundation; either
- * version 3 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with this program;
- * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 package org.texai.network.netty.handler;
 
@@ -37,21 +25,23 @@ import org.texai.util.TexaiException;
 @NotThreadSafe
 public final class MockHTTPResponseHandler extends AbstractHTTPResponseHandler {
 
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(MockHTTPResponseHandler.class);
-  /** the lock that allows the client to resume when the messaging is done */
+  // the lock that allows the client to resume when the messaging is done
   final Object clientResume_lock;
 
-  /** Constructs a new MockHTTPResponseHandler instance.
+  /**
+   * Constructs a new MockHTTPResponseHandler instance.
    *
-   * @param clientResume_lock the lock that allows the client to resume when the messaging is done, or
-   * null if this is the client side handler
+   * @param clientResume_lock the lock that allows the client to resume when the messaging is done, or null if this is the client side
+   * handler
    */
   public MockHTTPResponseHandler(final Object clientResume_lock) {
     this.clientResume_lock = clientResume_lock;
   }
 
-  /** Receives a message object from a remote peer.
+  /**
+   * Receives a message object from a remote peer.
    *
    * @param channelHandlerContext the channel handler context
    * @param messageEvent the message event
@@ -92,7 +82,8 @@ public final class MockHTTPResponseHandler extends AbstractHTTPResponseHandler {
     }
   }
 
-  /** Handles a caught exception.
+  /**
+   * Handles a caught exception.
    *
    * @param channelHandlerContext the channel handler event
    * @param exceptionEvent the exception event

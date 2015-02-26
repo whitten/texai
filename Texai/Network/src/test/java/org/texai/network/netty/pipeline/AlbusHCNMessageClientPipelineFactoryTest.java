@@ -1,23 +1,11 @@
 /*
  * AlbusHCNMessageClientPipelineFactoryTest.java
  *
- * Created on Jun 30, 2008, 9:50:09 PM
- *
  * Description: Configures a given pipeline, or initializes a new pipeline, so that it consists of two handlers:
  * (1) SslHandler, (2) AlbusHCNMessageHandler.
  *
- * Copyright (C) Feb 4, 2010 reed.
+ * Copyright (C) Feb 4, 2010 by Stephen Reed.
  *
- * This program is free software; you can redistribute it and/or modify it under the terms
- * of the GNU General Public License as published by the Free Software Foundation; either
- * version 3 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with this program;
- * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 package org.texai.network.netty.pipeline;
 
@@ -39,7 +27,7 @@ import static org.junit.Assert.*;
  */
 public class AlbusHCNMessageClientPipelineFactoryTest {
 
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(AlbusHCNMessageClientPipelineFactoryTest.class);
 
   public AlbusHCNMessageClientPipelineFactoryTest() {
@@ -70,7 +58,7 @@ public class AlbusHCNMessageClientPipelineFactoryTest {
     // test creation of new pipeline
     final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
     ChannelPipeline channelPipeline = AlbusHCNMessageClientPipelineFactory.getPipeline(
-           new MockAlbusHCSMessageHandler(null, 0),
+            new MockAlbusHCSMessageHandler(null, 0),
             x509SecurityInfo);
     assertEquals("DefaultChannelPipeline{(ssl = org.jboss.netty.handler.ssl.SslHandler), (decoder = org.texai.network.netty.handler.TaggedObjectDecoder), (encoder = org.texai.network.netty.handler.TaggedObjectEncoder), (albus-handler = org.texai.network.netty.handler.MockAlbusHCSMessageHandler)}", channelPipeline.toString());
 

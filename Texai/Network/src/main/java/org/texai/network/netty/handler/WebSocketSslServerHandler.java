@@ -5,7 +5,7 @@
  *
  * Description: Provides a web socket SSL server handler.
  *
- * Copyright (C) Jan 30, 2012, Stephen L. Reed, Texai.org.
+ * Copyright (C) Jan 30, 2012, Stephen L. Reed.
  *
  */
 package org.texai.network.netty.handler;
@@ -29,24 +29,25 @@ import org.jboss.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFa
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 
-/** Provides a web socket SSL server handler. Each web socket connection has its own handler instance because the
- * handshaker is not shared.
+/**
+ * Provides a web socket SSL server handler. Each web socket connection has its own handler instance because the handshaker is not shared.
  *
  * @author reed
  */
 @NotThreadSafe
 public class WebSocketSslServerHandler extends SimpleChannelUpstreamHandler {
 
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(WebSocketSslServerHandler.class);
-  /** the web socket path */
+  // the web socket path
   private static final String WEBSOCKET_PATH = "/websocket";
-  /** the web socket server handshaker */
+  // the web socket server handshaker
   private WebSocketServerHandshaker webSocketServerHandshaker;
-  /** the parent HTTP request handler, that knows about the Texai HTTP request handler chain */
+  // the parent HTTP request handler, that knows about the Texai HTTP request handler chain
   private final HTTPRequestHandler httpRequestHandler;
 
-  /** Constructs a new WebSocketSslServerHandler instance.
+  /**
+   * Constructs a new WebSocketSslServerHandler instance.
    *
    * @param httpRequestHandler the parent HTTP request handler, that knows about the Texai HTTP request handler chain
    */
@@ -54,7 +55,8 @@ public class WebSocketSslServerHandler extends SimpleChannelUpstreamHandler {
     this.httpRequestHandler = httpRequestHandler;
   }
 
-  /** Performs the web socket handshake to upgrade the protocol from HTTP to web socket.
+  /**
+   * Performs the web socket handshake to upgrade the protocol from HTTP to web socket.
    *
    * @param httpRequest the HTTP request
    * @param channelHandlerContext the channel handler context
@@ -84,10 +86,12 @@ public class WebSocketSslServerHandler extends SimpleChannelUpstreamHandler {
     }
   }
 
-  /** Receives a message from a remote peer.
+  /**
+   * Receives a message from a remote peer.
    *
    * @param channelHandlerContext the channel handler context
    * @param messageEvent the message event
+   *
    * @throws Exception when an exception occurs
    */
   @Override
@@ -106,10 +110,11 @@ public class WebSocketSslServerHandler extends SimpleChannelUpstreamHandler {
     }
   }
 
-  /** Handles a received web socket frame.
+  /**
+   * Handles a received web socket frame.
    *
    * @param channelHandlerContext the channel handler context
-   * @param webSocketFrame  the web socket frame
+   * @param webSocketFrame the web socket frame
    */
   private void handleWebSocketFrame(
           final ChannelHandlerContext channelHandlerContext,
@@ -149,10 +154,12 @@ public class WebSocketSslServerHandler extends SimpleChannelUpstreamHandler {
     }
   }
 
-  /** Processes an exception not otherwise caught.
+  /**
+   * Processes an exception not otherwise caught.
    *
    * @param channelHandlerContext the channel handler context
    * @param exceptionEvent the exception event
+   *
    * @throws Exception when an exception occurs
    */
   @Override
@@ -164,8 +171,8 @@ public class WebSocketSslServerHandler extends SimpleChannelUpstreamHandler {
     assert channelHandlerContext != null : "channelHandlerContext must not be null";
     assert exceptionEvent != null : "e must not be null";
 
-    LOGGER.warn(channelHandlerContext.getChannel() + "\n" +
-            StringUtils.getStackTraceAsString(exceptionEvent.getCause()));
+    LOGGER.warn(channelHandlerContext.getChannel() + "\n"
+            + StringUtils.getStackTraceAsString(exceptionEvent.getCause()));
     exceptionEvent.getChannel().close();
     throw new TexaiException(exceptionEvent.getCause());
   }

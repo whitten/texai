@@ -49,7 +49,8 @@ import org.jboss.netty.handler.ssl.SslHandler;
 import org.jboss.netty.util.CharsetUtil;
 import org.texai.util.StringUtils;
 
-/** A HTTPS request handler.
+/**
+ * A HTTPS request handler.
  *
  * @author The Netty Project (netty-dev@lists.jboss.org)
  * @author Andy Taylor (andy.taylor@jboss.org)
@@ -59,20 +60,24 @@ import org.texai.util.StringUtils;
  */
 public final class MockHTTPRequestHandler extends AbstractHTTPRequestHandler {
 
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(MockHTTPRequestHandler.class);
-  /** the HTTP request */
+  // the HTTP request
   private volatile HttpRequest httpRequest;
-  /** the indicator that we are reading chunks */
+  // the indicator that we are reading chunks
   private volatile boolean isReadingChunks;
-  /** the response content */
+  // the response content
   private final StringBuilder responseContent = new StringBuilder();
 
-  /** Constructs a new MockHTTPRequestHandler instance. */
+  /**
+   * Constructs a new MockHTTPRequestHandler instance.
+   */
   public MockHTTPRequestHandler() {
   }
 
-  /** Handles the message object (e.g: {@link ChannelBuffer}) that was received from a remote peer.
+  /**
+   * Handles the message object (e.g: {@link ChannelBuffer}) that was received from a remote peer.
+   *
    * @param channelHandlerContext the channel handler context
    * @param messageEvent the message event
    */
@@ -160,7 +165,8 @@ public final class MockHTTPRequestHandler extends AbstractHTTPRequestHandler {
     }
   }
 
-  /** Writes the response.
+  /**
+   * Writes the response.
    *
    * @param messageEvent the message event
    */
@@ -173,8 +179,8 @@ public final class MockHTTPRequestHandler extends AbstractHTTPRequestHandler {
     responseContent.setLength(0);
 
     // decide whether to close the connection or not
-    final boolean isConnectionToBeClosed =
-            HttpHeaders.Values.CLOSE.equalsIgnoreCase(httpRequest.getHeader(HttpHeaders.Names.CONNECTION))
+    final boolean isConnectionToBeClosed
+            = HttpHeaders.Values.CLOSE.equalsIgnoreCase(httpRequest.getHeader(HttpHeaders.Names.CONNECTION))
             || httpRequest.getProtocolVersion().equals(HttpVersion.HTTP_1_0)
             && !HttpHeaders.Values.KEEP_ALIVE.equalsIgnoreCase(httpRequest.getHeader(HttpHeaders.Names.CONNECTION));
 
@@ -212,7 +218,8 @@ public final class MockHTTPRequestHandler extends AbstractHTTPRequestHandler {
     }
   }
 
-  /** Handles an exception that was raised by an I/O thread or a {@link ChannelHandler}.
+  /**
+   * Handles an exception that was raised by an I/O thread or a {@link ChannelHandler}.
    *
    * @param channelHandlerContext the channel handler context
    * @param exceptionEvent the exception event
@@ -223,7 +230,8 @@ public final class MockHTTPRequestHandler extends AbstractHTTPRequestHandler {
     //exceptionEvent.getChannel().close();
   }
 
-  /** Dynamically switches the channel pipeline to handle the web socket protocol.
+  /**
+   * Dynamically switches the channel pipeline to handle the web socket protocol.
    *
    * @param httpRequest the HTTP request
    * @param channelHandlerContext the channel handler context

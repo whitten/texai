@@ -1,22 +1,10 @@
 /*
  * NettyHTTPUtils.java
  *
- * Created on Mar 5, 2010, 12:12:19 PM
- *
  * Description: Netty-related HTTP utilities.
  *
- * Copyright (C) Mar 5, 2010 reed.
+ * Copyright (C) Mar 5, 2010 Stephen Reed.
  *
- * This program is free software; you can redistribute it and/or modify it under the terms
- * of the GNU General Public License as published by the Free Software Foundation; either
- * version 3 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with this program;
- * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 package org.texai.network.netty.utils;
 
@@ -36,23 +24,28 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.util.CharsetUtil;
 
-/** Netty-related HTTP utilities.
+/**
+ * Netty-related HTTP utilities.
  *
  * @author reed
  */
 @NotThreadSafe
 public final class NettyHTTPUtils {
 
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(NettyHTTPUtils.class);
 
-  /** Prevents the instantiation of this utility class. */
+  /**
+   * Prevents the instantiation of this utility class.
+   */
   private NettyHTTPUtils() {
   }
 
-  /** Returns the Texai session cookie from the given HTTP request, or null if not found.
+  /**
+   * Returns the Texai session cookie from the given HTTP request, or null if not found.
    *
    * @param httpRequest the given HTTP request
+   *
    * @return the Texai session cookie or null if not found
    */
   public static String getTexaiSessionCookie(final HttpRequest httpRequest) {
@@ -69,7 +62,8 @@ public final class NettyHTTPUtils {
     return null;
   }
 
-  /** Writes a HTML text response.
+  /**
+   * Writes a HTML text response.
    *
    * @param httpRequest the HTTP request
    * @param responseContent the response content
@@ -92,8 +86,8 @@ public final class NettyHTTPUtils {
             null); // sessionCookie
   }
 
-
-  /** Writes a HTML response.
+  /**
+   * Writes a HTML response.
    *
    * @param httpRequest the HTTP request
    * @param responseContent the response content
@@ -115,10 +109,10 @@ public final class NettyHTTPUtils {
     final ChannelBuffer channelBuffer = ChannelBuffers.copiedBuffer(responseContent, CharsetUtil.UTF_8);
 
     // decide whether to close the connection or not
-    final boolean isConnectionToBeClosed =
-            HttpHeaders.Values.CLOSE.equalsIgnoreCase(httpRequest.getHeader(HttpHeaders.Names.CONNECTION)) ||
-            httpRequest.getProtocolVersion().equals(HttpVersion.HTTP_1_0) &&
-            !HttpHeaders.Values.KEEP_ALIVE.equalsIgnoreCase(httpRequest.getHeader(HttpHeaders.Names.CONNECTION));
+    final boolean isConnectionToBeClosed
+            = HttpHeaders.Values.CLOSE.equalsIgnoreCase(httpRequest.getHeader(HttpHeaders.Names.CONNECTION))
+            || httpRequest.getProtocolVersion().equals(HttpVersion.HTTP_1_0)
+            && !HttpHeaders.Values.KEEP_ALIVE.equalsIgnoreCase(httpRequest.getHeader(HttpHeaders.Names.CONNECTION));
 
     // build the response object
     final HttpResponse httpResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
@@ -142,7 +136,8 @@ public final class NettyHTTPUtils {
     }
   }
 
-  /** Writes a text response.
+  /**
+   * Writes a text response.
    *
    * @param httpRequest the HTTP request
    * @param responseContent the response content
@@ -162,10 +157,10 @@ public final class NettyHTTPUtils {
     final ChannelBuffer channelBuffer = ChannelBuffers.copiedBuffer(responseContent, CharsetUtil.UTF_8);
 
     // decide whether to close the connection or not
-    final boolean isConnectionToBeClosed =
-            HttpHeaders.Values.CLOSE.equalsIgnoreCase(httpRequest.getHeader(HttpHeaders.Names.CONNECTION)) ||
-            httpRequest.getProtocolVersion().equals(HttpVersion.HTTP_1_0) &&
-            !HttpHeaders.Values.KEEP_ALIVE.equalsIgnoreCase(httpRequest.getHeader(HttpHeaders.Names.CONNECTION));
+    final boolean isConnectionToBeClosed
+            = HttpHeaders.Values.CLOSE.equalsIgnoreCase(httpRequest.getHeader(HttpHeaders.Names.CONNECTION))
+            || httpRequest.getProtocolVersion().equals(HttpVersion.HTTP_1_0)
+            && !HttpHeaders.Values.KEEP_ALIVE.equalsIgnoreCase(httpRequest.getHeader(HttpHeaders.Names.CONNECTION));
 
     // build the response object
     final HttpResponse httpResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
@@ -183,7 +178,8 @@ public final class NettyHTTPUtils {
     }
   }
 
-  /** Writes a CSS response.
+  /**
+   * Writes a CSS response.
    *
    * @param httpRequest the HTTP request
    * @param responseContent the response content
@@ -203,10 +199,10 @@ public final class NettyHTTPUtils {
     final ChannelBuffer channelBuffer = ChannelBuffers.copiedBuffer(responseContent, CharsetUtil.UTF_8);
 
     // decide whether to close the connection or not
-    final boolean isConnectionToBeClosed =
-            HttpHeaders.Values.CLOSE.equalsIgnoreCase(httpRequest.getHeader(HttpHeaders.Names.CONNECTION)) ||
-            httpRequest.getProtocolVersion().equals(HttpVersion.HTTP_1_0) &&
-            !HttpHeaders.Values.KEEP_ALIVE.equalsIgnoreCase(httpRequest.getHeader(HttpHeaders.Names.CONNECTION));
+    final boolean isConnectionToBeClosed
+            = HttpHeaders.Values.CLOSE.equalsIgnoreCase(httpRequest.getHeader(HttpHeaders.Names.CONNECTION))
+            || httpRequest.getProtocolVersion().equals(HttpVersion.HTTP_1_0)
+            && !HttpHeaders.Values.KEEP_ALIVE.equalsIgnoreCase(httpRequest.getHeader(HttpHeaders.Names.CONNECTION));
 
     // build the response object
     final HttpResponse httpResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
@@ -224,7 +220,8 @@ public final class NettyHTTPUtils {
     }
   }
 
-  /** Writes a binary response.
+  /**
+   * Writes a binary response.
    *
    * @param httpRequest the HTTP request
    * @param responseContentBytes the response content bytes
@@ -246,10 +243,10 @@ public final class NettyHTTPUtils {
     final ChannelBuffer channelBuffer = ChannelBuffers.wrappedBuffer(responseContentBytes);
 
     // decide whether to close the connection or not
-    final boolean isConnectionToBeClosed =
-            HttpHeaders.Values.CLOSE.equalsIgnoreCase(httpRequest.getHeader(HttpHeaders.Names.CONNECTION)) ||
-            httpRequest.getProtocolVersion().equals(HttpVersion.HTTP_1_0) &&
-            !HttpHeaders.Values.KEEP_ALIVE.equalsIgnoreCase(httpRequest.getHeader(HttpHeaders.Names.CONNECTION));
+    final boolean isConnectionToBeClosed
+            = HttpHeaders.Values.CLOSE.equalsIgnoreCase(httpRequest.getHeader(HttpHeaders.Names.CONNECTION))
+            || httpRequest.getProtocolVersion().equals(HttpVersion.HTTP_1_0)
+            && !HttpHeaders.Values.KEEP_ALIVE.equalsIgnoreCase(httpRequest.getHeader(HttpHeaders.Names.CONNECTION));
 
     // build the response object
     final HttpResponse httpResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
@@ -273,7 +270,8 @@ public final class NettyHTTPUtils {
     }
   }
 
-  /** Set access control headers on the HTTP response.
+  /**
+   * Set access control headers on the HTTP response.
    *
    * @param httpRequest the HTTP request
    * @param httpResponse the HTTP response

@@ -20,7 +20,8 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.io.OutputStream;
 
-/** A compact object output stream.
+/**
+ * A compact object output stream.
  *
  * @author <a href="http://www.jboss.org/netty/">The Netty Project</a>
  * @author <a href="http://gleamynode.net/">Trustin Lee</a>
@@ -29,35 +30,38 @@ import java.io.OutputStream;
  */
 class CompactObjectOutputStream extends ObjectOutputStream {
 
-  /** the fat type descriptor */
+  // the fat type descriptor
   static final int TYPE_FAT_DESCRIPTOR = 0;
-  /** the thin type descriptor */
+  // the thin type descriptor
   static final int TYPE_THIN_DESCRIPTOR = 1;
 
-  /** Constructs a new CompactObjectOutputStream instance.
+  /**
+   * Constructs a new CompactObjectOutputStream instance.
    *
    * @param outputStream the output stream
+   *
    * @throws IOException if an input/output error occurs
    */
   public CompactObjectOutputStream(final OutputStream outputStream) throws IOException {
     super(outputStream);
   }
 
-  /** Writes the magic number and version to the stream.
+  /**
+   * Writes the magic number and version to the stream.
    *
-   * @throws IOException if I/O errors occur while writing to the underlying
-   *   stream
+   * @throws IOException if I/O errors occur while writing to the underlying stream
    */
   @Override
   protected void writeStreamHeader() throws IOException {
     writeByte(STREAM_VERSION);
   }
 
-  /** Write the specified class descriptor to the ObjectOutputStream.  Class
-   * descriptors are used to identify the classes of objects written to the
-   * stream.
+  /**
+   * Write the specified class descriptor to the ObjectOutputStream. Class descriptors are used to identify the classes of objects written
+   * to the stream.
    *
    * @param objectStreamClass class descriptor to write to the stream
+   *
    * @throws IOException If an I/O error has occurred.
    */
   @Override

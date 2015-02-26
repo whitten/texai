@@ -31,19 +31,21 @@ import java.io.StreamCorruptedException;
  */
 public final class CompactObjectInputStream extends ObjectInputStream {
 
-  /** Constructs a new CompactObjectInputStream instance.
+  /**
+   * Constructs a new CompactObjectInputStream instance.
    *
    * @param inputStream the input stream
+   *
    * @throws IOException if an input/output error occurs
    */
   public CompactObjectInputStream(final InputStream inputStream) throws IOException {
     super(inputStream);
   }
 
-  /** Reads and verifies the magic number and version number.
+  /**
+   * Reads and verifies the magic number and version number.
    *
-   * @throws IOException if there are I/O errors while reading from the
-   *   underlying <code>InputStream</code>
+   * @throws IOException if there are I/O errors while reading from the underlying <code>InputStream</code>
    */
   @Override
   protected void readStreamHeader() throws IOException {
@@ -53,14 +55,13 @@ public final class CompactObjectInputStream extends ObjectInputStream {
     }
   }
 
-  /** Reads a class descriptor from the serialization stream.  This method is
-   * called when the ObjectInputStream expects a class descriptor as the next
-   * item in the serialization stream.
+  /**
+   * Reads a class descriptor from the serialization stream. This method is called when the ObjectInputStream expects a class descriptor as
+   * the next item in the serialization stream.
    *
    * @return the class descriptor read
    * @throws IOException If an I/O error has occurred.
-   * @throws ClassNotFoundException If the Class of a serialized object used
-   *   in the class descriptor representation cannot be found
+   * @throws ClassNotFoundException If the Class of a serialized object used in the class descriptor representation cannot be found
    */
   @Override
   protected ObjectStreamClass readClassDescriptor() throws IOException, ClassNotFoundException {
@@ -80,14 +81,14 @@ public final class CompactObjectInputStream extends ObjectInputStream {
     }
   }
 
-  /** Loads the local class equivalent of the specified stream class
-   * description.
+  /**
+   * Loads the local class equivalent of the specified stream class description.
    *
-   * @param   objectStreamClass an instance of class <code>ObjectStreamClass</code>
-   * @return  a <code>Class</code> object corresponding to <code>desc</code>
-   * @throws  IOException any of the usual Input/Output exceptions.
-   * @throws  ClassNotFoundException if class of a serialized object cannot
-   *          be found.
+   * @param objectStreamClass an instance of class <code>ObjectStreamClass</code>
+   *
+   * @return a <code>Class</code> object corresponding to <code>desc</code>
+   * @throws IOException any of the usual Input/Output exceptions.
+   * @throws ClassNotFoundException if class of a serialized object cannot be found.
    */
   @Override
   protected Class<?> resolveClass(final ObjectStreamClass objectStreamClass) throws IOException, ClassNotFoundException {
@@ -99,9 +100,11 @@ public final class CompactObjectInputStream extends ObjectInputStream {
     }
   }
 
-  /** Loads the class.
+  /**
+   * Loads the class.
    *
    * @param className the class name
+   *
    * @return the loaded class
    * @throws ClassNotFoundException if the class cannot be found
    */

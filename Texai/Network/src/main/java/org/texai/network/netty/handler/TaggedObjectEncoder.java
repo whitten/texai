@@ -30,8 +30,8 @@ import org.jboss.netty.channel.ChannelHandler.Sharable;
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
 import org.texai.network.netty.NetworkConstants;
 
-/** An encoder which prepends a protocol identification byte and
- * serializes a Java object into a {@link ChannelBuffer}.
+/**
+ * An encoder which prepends a protocol identification byte and serializes a Java object into a {@link ChannelBuffer}.
  * <p>
  *
  * @author <a href="http://www.jboss.org/netty/">The Netty Project</a>
@@ -42,27 +42,26 @@ import org.texai.network.netty.NetworkConstants;
 @Sharable
 public class TaggedObjectEncoder extends OneToOneEncoder {
 
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(TaggedObjectEncoder.class);
-  /** the length placeholder bytes */
+  // the length placeholder bytes
   private static final byte[] LENGTH_PLACEHOLDER = new byte[4];
-  /** the estimated length of the encoded output */
+  // the estimated length of the encoded output
   private final int estimatedLength;
 
-  /** Creates a new encoder with the estimated length of 512 bytes. */
+  /**
+   * Creates a new encoder with the estimated length of 512 bytes.
+   */
   public TaggedObjectEncoder() {
     this(512);
   }
 
-  /** Creates a new encoder.
+  /**
+   * Creates a new encoder.
    *
-   * @param estimatedLength
-   *        the estimated byte length of the serialized form of an object.
-   *        If the length of the serialized form exceeds this value, the
-   *        internal buffer will be expanded automatically at the cost of
-   *        memory bandwidth.  If this value is too big, it will also waste
-   *        memory bandwidth.  To avoid unnecessary memory copy or allocation
-   *        cost, please specify the properly estimated value.
+   * @param estimatedLength the estimated byte length of the serialized form of an object. If the length of the serialized form exceeds this
+   * value, the internal buffer will be expanded automatically at the cost of memory bandwidth. If this value is too big, it will also waste
+   * memory bandwidth. To avoid unnecessary memory copy or allocation cost, please specify the properly estimated value.
    */
   public TaggedObjectEncoder(final int estimatedLength) {
     //Preconditions
@@ -73,14 +72,16 @@ public class TaggedObjectEncoder extends OneToOneEncoder {
     this.estimatedLength = estimatedLength;
   }
 
-  /** Encodes the given object into the channel buffer.  A protocol identification byte is prepended.
+  /**
+   * Encodes the given object into the channel buffer. A protocol identification byte is prepended.
    *
-   * byte 0     ... 1 (object serialization protocol for port unification)
-   * bytes 1-5  ... 32 bit integer length, the maximum is a bit more than 8K
+   * byte 0 ... 1 (object serialization protocol for port unification) bytes 1-5 ... 32 bit integer length, the maximum is a bit more than
+   * 8K
    *
    * @param channelHandlerContext the channel handler context
    * @param channel the channel
    * @param obj the serializable object to encode
+   *
    * @return a channel buffer containing the protocol byte and encoded object.
    * @throws IOException when an input/output error occurs
    */

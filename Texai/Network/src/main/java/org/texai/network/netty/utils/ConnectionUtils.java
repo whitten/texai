@@ -1,22 +1,10 @@
 /*
  * ConnectionUtils.java
  *
- * Created on Apr 1, 2010, 8:59:22 AM
- *
  * Description: Provides convenient static methods to establish server and client Netty SSL channels.
  *
  * Copyright (C) Apr 1, 2010, Stephen L. Reed.
  *
- * This program is free software; you can redistribute it and/or modify it under the terms
- * of the GNU General Public License as published by the Free Software Foundation; either
- * version 3 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with this program;
- * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 package org.texai.network.netty.utils;
 
@@ -38,9 +26,13 @@ import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.texai.network.netty.handler.AbstractAlbusHCSMessageHandler;
 import org.texai.network.netty.handler.AbstractAlbusHCSMessageHandlerFactory;
+import org.texai.network.netty.handler.AbstractBitcoinProtocolMessageHandler;
+import org.texai.network.netty.handler.AbstractBitcoinProtocolMessageHandlerFactory;
 import org.texai.network.netty.handler.AbstractHTTPRequestHandlerFactory;
 import org.texai.network.netty.handler.AbstractHTTPResponseHandler;
 import org.texai.network.netty.pipeline.AlbusHCNMessageClientPipelineFactory;
+import org.texai.network.netty.pipeline.BitcoinProtocolChannelPipelineFactory;
+import org.texai.network.netty.pipeline.BitcoinProtocolMessageClientPipelineFactory;
 import org.texai.network.netty.pipeline.HTTPClientPipelineFactory;
 import org.texai.network.netty.pipeline.PortUnificationChannelPipelineFactory;
 import org.texai.util.TexaiException;
@@ -54,13 +46,9 @@ import org.texai.x509.X509SecurityInfo;
 @NotThreadSafe
 public final class ConnectionUtils {
 
-  /**
-   * the logger
-   */
+  //the logger
   private static final Logger LOGGER = Logger.getLogger(ConnectionUtils.class);
-  /**
-   * the connected channel dictionary, channel latch --> channel
-   */
+  // the connected channel dictionary, channel latch --> channel
   private final static Map<Object, Channel> connectedChannelDictionary = new HashMap<>();
 
   /**
@@ -156,6 +144,109 @@ public final class ConnectionUtils {
     final ChannelPipeline channelPipeline = AlbusHCNMessageClientPipelineFactory.getPipeline(
             albusHCSMessageHandler,
             x509SecurityInfo);
+    clientBootstrap.setPipeline(channelPipeline);
+
+    // start the connection attempt
+    final Semaphore channelConnection_lock = new Semaphore(
+            0); // permits
+    bossExecutor.execute(new ChannelConnector(
+            clientBootstrap,
+            inetSocketAddress,
+            channelConnection_lock));
+
+    LOGGER.info("waiting for connection to " + inetSocketAddress);
+    try {
+      channelConnection_lock.acquire();
+    } catch (InterruptedException ex) {
+      // ignore
+    }
+    final Channel channel;
+    synchronized (connectedChannelDictionary) {
+      channel = connectedChannelDictionary.get(channelConnection_lock);
+      if (channel != null) {
+        connectedChannelDictionary.remove(channelConnection_lock);
+        LOGGER.info("completed opening the channel to " + inetSocketAddress);
+      }
+    }
+    return channel;
+  }
+
+  /**
+   * Creates a Bitcoin protocol server.
+   *
+   * @param port the server port
+   * @param bitcoinProtocolMessageHandlerFactory the Bitcoin protocol message handler factory
+   * @param bossExecutor the Executor which will execute the boss threads
+   * @param workerExecutor the Executor which will execute the I/O worker threads
+   *
+   * @return the server bootstrap, which contains a new server-side channel and accepts incoming connections
+   */
+  public static ServerBootstrap createBitcoinProtocolServer(
+          final int port,
+          final AbstractBitcoinProtocolMessageHandlerFactory bitcoinProtocolMessageHandlerFactory,
+          final Executor bossExecutor,
+          final Executor workerExecutor) {
+    //Preconditions
+    assert port >= 0 && port <= 65535 : "invalid port number";
+    assert bossExecutor != null : "bossExecutor must not be null";
+    assert workerExecutor != null : "workerExecutor must not be null";
+
+    // configure the server channel pipeline factory
+    final ChannelPipelineFactory channelPipelineFactory
+            = new BitcoinProtocolChannelPipelineFactory(bitcoinProtocolMessageHandlerFactory);
+
+    // configure the server
+    final ServerBootstrap serverBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
+            bossExecutor,
+            workerExecutor));
+
+    serverBootstrap.setPipelineFactory(channelPipelineFactory);
+
+    // bind and start to accept incoming connections
+    serverBootstrap.bind(new InetSocketAddress(port));
+    LOGGER.info("accepting connections on port " + port);
+    return serverBootstrap;
+  }
+
+  /**
+   * Releases the resources held by the Bitcoin protocol server, and closes its associated thread pools.
+   *
+   * @param serverBootstrap the server bootstrap
+   */
+  public static void closeBitcoinProtocolServer(final ServerBootstrap serverBootstrap) {
+    serverBootstrap.releaseExternalResources();
+  }
+
+  /**
+   * Opens a Bitcoin protocol message connection.
+   *
+   * @param inetSocketAddress the IP socket address, host & port
+   * @param bitcoinProtocolMessageHandler the Bitcoin protocol message handler
+   * @param bossExecutor the Executor which will execute the boss threads
+   * @param workerExecutor the Executor which will execute the I/O worker threads
+   *
+   * @return the communication channel
+   */
+  public static Channel openBitcoinProtocolConnection(
+          final InetSocketAddress inetSocketAddress,
+          final AbstractBitcoinProtocolMessageHandler bitcoinProtocolMessageHandler,
+          final Executor bossExecutor,
+          final Executor workerExecutor) {
+    //Preconditions
+    assert inetSocketAddress != null : "inetSocketAddress must not be null";
+    assert bitcoinProtocolMessageHandler != null : "bitcoinProtocolMessageHandler must not be null";
+    assert bossExecutor != null : "bossExecutor must not be null";
+    assert workerExecutor != null : "workerExecutor must not be null";
+
+    LOGGER.info("creating Bitcoin protocol client bootstrap");
+    final ClientBootstrap clientBootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(
+            bossExecutor,
+            workerExecutor));
+
+    // configure the client pipeline
+    LOGGER.info("configuring the client pipeline connecting to " + inetSocketAddress);
+    final ChannelPipeline channelPipeline = BitcoinProtocolMessageClientPipelineFactory.getPipeline(bitcoinProtocolMessageHandler);
+    LOGGER.info(channelPipeline);
     clientBootstrap.setPipeline(channelPipeline);
 
     // start the connection attempt

@@ -1,22 +1,10 @@
 /*
  * HTTPRequestHandler.java
  *
- * Created on Feb 11, 2010, 7:58:40 PM
- *
  * Description: Provides a multiplexed HTTP request handler.
  *
- * Copyright (C) Feb 11, 2010 reed.
+ * Copyright (C) Feb 11, 2010 by Stephen Reed
  *
- * This program is free software; you can redistribute it and/or modify it under the terms
- * of the GNU General Public License as published by the Free Software Foundation; either
- * version 3 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with this program;
- * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 package org.texai.network.netty.handler;
 
@@ -40,25 +28,29 @@ import org.jboss.netty.handler.ssl.SslHandler;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 
-/** Provides a multiplexed HTTP request handler.
+/**
+ * Provides a multiplexed HTTP request handler.
  *
  * @author reed
  */
 @NotThreadSafe
 public final class HTTPRequestHandler extends AbstractHTTPRequestHandler {
 
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(HTTPRequestHandler.class);
-  /** the Texai HTTP request handler chain */
+  // the Texai HTTP request handler chain
   private final List<TexaiHTTPRequestHandler> texaiHTTPRequestHandlers = new ArrayList<>();
-  /**  the singleton HTTP request handler instance */
+  //  the singleton HTTP request handler instanc
   private static final HTTPRequestHandler httpRequestHandler = new HTTPRequestHandler();
 
-  /** Constructs a new HTTPRequestHandler instance. */
+  /**
+   * Constructs a new HTTPRequestHandler instance.
+   */
   private HTTPRequestHandler() {
   }
 
-  /** Gets the singleton HTTP request handler instance.
+  /**
+   * Gets the singleton HTTP request handler instance.
    *
    * @return the singleton HTTP request handler instance
    */
@@ -66,7 +58,8 @@ public final class HTTPRequestHandler extends AbstractHTTPRequestHandler {
     return httpRequestHandler;
   }
 
-  /** Handles the message object that was received from a remote peer.
+  /**
+   * Handles the message object that was received from a remote peer.
    *
    * @param channelHandlerContext the channel handler context
    * @param messageEvent the message event
@@ -113,7 +106,8 @@ public final class HTTPRequestHandler extends AbstractHTTPRequestHandler {
     throw new TexaiException("no handler for the request: " + httpRequest);
   }
 
-  /** Registers the given Texai HTTP request handler.
+  /**
+   * Registers the given Texai HTTP request handler.
    *
    * @param texaiHTTPRequestHandler the given Texai HTTP request handler
    */
@@ -126,7 +120,8 @@ public final class HTTPRequestHandler extends AbstractHTTPRequestHandler {
     }
   }
 
-  /** Deregisters the given Texai HTTP request handler.
+  /**
+   * Deregisters the given Texai HTTP request handler.
    *
    * @param texaiHTTPRequestHandler the given Texai HTTP request handler
    */
@@ -139,7 +134,8 @@ public final class HTTPRequestHandler extends AbstractHTTPRequestHandler {
     }
   }
 
-  /** Handles an exception that was raised by an I/O thread or a {@link ChannelHandler}.
+  /**
+   * Handles an exception that was raised by an I/O thread or a {@link ChannelHandler}.
    *
    * @param channelHandlerContext the channel handler context
    * @param exceptionEvent the exception event
@@ -156,7 +152,8 @@ public final class HTTPRequestHandler extends AbstractHTTPRequestHandler {
     exceptionEvent.getChannel().close();
   }
 
-  /** Dynamically switches the channel pipeline to handle the web socket protocol.
+  /**
+   * Dynamically switches the channel pipeline to handle the web socket protocol.
    *
    * @param httpRequest the HTTP request
    * @param channelHandlerContext the channel handler context
@@ -190,7 +187,8 @@ public final class HTTPRequestHandler extends AbstractHTTPRequestHandler {
     webSocketSslServerHandler.handshake(httpRequest, channelHandlerContext);
   }
 
-  /** Gets the Texai HTTP request handler chain. Caller should synchronized on this.
+  /**
+   * Gets the Texai HTTP request handler chain. Caller should synchronized on this.
    *
    * @return the Texai HTTP request handler chain
    */

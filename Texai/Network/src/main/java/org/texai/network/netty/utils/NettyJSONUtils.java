@@ -1,11 +1,9 @@
 /*
  * NettyJSONUtils.java
  *
- * Created on Jan 31, 2012, 3:06:09 PM
- *
  * Description: Provides JSON utilities.
  *
- * Copyright (C) Jan 31, 2012, Stephen L. Reed, Texai.org.
+ * Copyright (C) Jan 31, 2012, Stephen L. Reed.
  *
  */
 package org.texai.network.netty.utils;
@@ -18,23 +16,28 @@ import org.json.simple.parser.ParseException;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 
-/** Provides JSON utilities.
+/**
+ * Provides JSON utilities.
  *
  * @author reed
  */
 @ThreadSafe
 public class NettyJSONUtils {
 
-  /** the logger */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(NettyJSONUtils.class);
 
-  /** Prevents the instantiation of this utility class. */
+  /**
+   * Prevents the instantiation of this utility class.
+   */
   private NettyJSONUtils() {
   }
 
-  /** gets the session cookie from the given JSON text.
+  /**
+   * gets the session cookie from the given JSON text.
    *
    * @param jsonText the given JSON text
+   *
    * @return the session cookie
    */
   public static String getTexaiSessionCookie(final String jsonText) {
@@ -43,9 +46,7 @@ public class NettyJSONUtils {
 
     //    {"type":"xxxx",
     //     "data":{"cookie":"9fcad0a9-f2cc-4b5c-9438-c3f2439ecb56"}}
-
     //LOGGER.info("jsonText: '" + jsonText + "'");
-
     final JSONObject jsonObject;
     try {
       jsonObject = (JSONObject) new JSONParser().parse(jsonText);
