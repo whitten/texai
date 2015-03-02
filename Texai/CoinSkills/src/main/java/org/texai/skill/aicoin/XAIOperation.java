@@ -255,21 +255,11 @@ public final class XAIOperation extends AbstractSkill implements BitcoinMessageR
 
     @Override
     public void run() {
-      try {
-        LOGGER.info("Waiting 5 seconds before launching the block explorer ...");
-        Thread.sleep(5 * 1000);
-      } catch (InterruptedException ex) {
-      }
-      try {
-        // pause two seconds to wait for aicoind to launch.
-        Thread.sleep(2000);
-      } catch (InterruptedException ex) {
-        // ignore
-      }
-      xaiOperation.localBitcoindAdapter = new LocalBitcoindAdapter(
-              new XAIMainNetParams(), // networkParameters
-              xaiOperation); // bitcoinMessageReceiver);
-      xaiOperation.localBitcoindAdapter.startUp();
+      //TODO
+//      xaiOperation.localBitcoindAdapter = new LocalBitcoindAdapter(
+//              new XAIMainNetParams(), // networkParameters
+//              xaiOperation); // bitcoinMessageReceiver);
+//      xaiOperation.localBitcoindAdapter.startUp();
     }
   }
 

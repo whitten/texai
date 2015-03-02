@@ -161,7 +161,7 @@ public class NodeRuntime extends BasicNodeRuntime {
     //Preconditions
     assert port > 1024 : "port must not be a reserved port 1-1024";
 
-    messageRouter.listenForIncommingConnections(port);
+    messageRouter.listenForIncomingConnections(port);
   }
 
   /**

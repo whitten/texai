@@ -22,6 +22,7 @@
  */
 package org.texai.ahcs;
 
+import org.texai.network.netty.handler.AlbusHCSMessageHandlerFactory;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -104,11 +105,11 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
   }
 
   /**
-   * Listens for incomming messages on the given port.
+   * Listens for incoming messages on the given port.
    *
    * @param port the given TCP port
    */
-  public void listenForIncommingConnections(final int port) {
+  public void listenForIncomingConnections(final int port) {
     //Preconditions
     assert port > 1024 : "port must not be a reserved port 1-1024";
 

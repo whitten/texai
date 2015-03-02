@@ -16,12 +16,20 @@ import com.google.bitcoin.core.VersionMessage;
 import com.google.bitcoin.net.ClientConnectionManager;
 import com.google.bitcoin.net.NioClientManager;
 import com.google.bitcoin.utils.Threading;
+import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import javax.annotation.Nullable;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
+import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.ExceptionEvent;
+import org.jboss.netty.channel.MessageEvent;
+import org.texai.ahcs.NodeRuntime;
+import org.texai.network.netty.handler.AbstractBitcoinProtocolMessageHandler;
+import org.texai.network.netty.utils.ConnectionUtils;
 import org.texai.util.TexaiException;
 
 /**
@@ -40,8 +48,6 @@ public class LocalBitcoindAdapter implements PeerEventListener {
   private Peer localPeer;
   // the bitcoin message receiver, which is the skill that handles outbound bitcoin messages from the local peer
   private final BitcoinMessageReceiver bitcoinMessageReceiver;
-  // the client connection manager
-  private final ClientConnectionManager clientConnectionManager;
   // the version message to use for the bitcoind connection
   private final VersionMessage versionMessage;
   // the minimum protocol version allowed for the bitcoind local instance
@@ -57,6 +63,12 @@ public class LocalBitcoindAdapter implements PeerEventListener {
   private volatile int connectTimeoutMillis = DEFAULT_CONNECT_TIMEOUT_MILLIS;
   // the network parameters, main net, test net, or regression test net
   private final NetworkParameters networkParameters;
+  // the Bitcoin protocol message handler
+  private final BitcoinProtocolMessageHandler bitcoinProtocolMessageHandler;
+  // the node runtime
+  private final NodeRuntime nodeRuntime;
+  // the communications channel with the local bitcoind instance
+  private Channel channel;
 
   /**
    * Constructs a new LocalBitcoindAdapter instance.
@@ -64,23 +76,27 @@ public class LocalBitcoindAdapter implements PeerEventListener {
    * @param networkParameters the network parameters, main net, test net, or regression test net
    * @param bitcoinMessageReceiver the bitcoin message receiver, which is the skill that handles outbound bitcoin messages from the local
    * peer
+   * @param nodeRuntime the node runtime, used to supply executors
    */
   public LocalBitcoindAdapter(
           final NetworkParameters networkParameters,
-          final BitcoinMessageReceiver bitcoinMessageReceiver) {
+          final BitcoinMessageReceiver bitcoinMessageReceiver,
+          final NodeRuntime nodeRuntime) {
     // Preconditions
     assert networkParameters != null : "networkParameters must not be null";
     assert bitcoinMessageReceiver != null : "bitcoinMessageReceiver must not be null";
+    assert nodeRuntime != null : "nodeRuntime must not be null";
 
     this.networkParameters = networkParameters;
     this.bitcoinMessageReceiver = bitcoinMessageReceiver;
+    this.nodeRuntime = nodeRuntime;
+
     // We never request that the remote node wait for a bloom filter yet, as we have no wallets
     this.versionMessage = new VersionMessage(
             networkParameters,
             0, // newBestHeight
             true); // relayTxesBeforeFilter
-
-    clientConnectionManager = new NioClientManager();
+    bitcoinProtocolMessageHandler = new BitcoinProtocolMessageHandler(this);
   }
 
   /**
@@ -88,7 +104,6 @@ public class LocalBitcoindAdapter implements PeerEventListener {
    */
   public void startUp() {
     LOGGER.info("startUp");
-    clientConnectionManager.startAndWait();
     connectToLocalBitcoind();
     pingTimer = new Timer(
             "Peer pinging thread", // name
@@ -104,34 +119,82 @@ public class LocalBitcoindAdapter implements PeerEventListener {
       pingTimer.cancel();
     }
     // Blocking close of all sockets.
-    clientConnectionManager.stopAndWait();
+  }
+
+  /** Provides a Bitcoin protocol message handler. */
+  static class BitcoinProtocolMessageHandler extends AbstractBitcoinProtocolMessageHandler {
+
+    // the parent local bitcoind adapter
+    final LocalBitcoindAdapter localBitcoindAdapter;
+
+    /** Constructs a new BitcoinProtocolMessageHandler instance.
+     *
+     * @param localBitcoindAdapter the parent local bitcoind adapter
+     */
+    BitcoinProtocolMessageHandler(final LocalBitcoindAdapter localBitcoindAdapter) {
+      //Preconditions
+      assert localBitcoindAdapter != null : "localBitcoindAdapter must not be null";
+
+      this.localBitcoindAdapter = localBitcoindAdapter;
+    }
+
+
+    /**
+     * Catches a channel exception.
+     *
+     * @param channelHandlerContext the channel handler context
+     * @param exceptionEvent the exception event
+     */
+    @Override
+    @SuppressWarnings("ThrowableResultIgnored")
+    public void exceptionCaught(final ChannelHandlerContext channelHandlerContext, final ExceptionEvent exceptionEvent) {
+      //Preconditions
+      assert channelHandlerContext != null : "channelHandlerContext must not be null";
+      assert exceptionEvent != null : "exceptionEvent must not be null";
+
+      final Throwable throwable = exceptionEvent.getCause();
+      LOGGER.info(throwable.getMessage());
+
+    }
+
+    /**
+     * Receives a Netty message object from a remote message router peer. The received message is verified before relaying to the role.
+     *
+     * @param channelHandlerContext the channel handler context
+     * @param messageEvent the message event
+     */
+    @Override
+    public void messageReceived(
+            final ChannelHandlerContext channelHandlerContext,
+            final MessageEvent messageEvent) {
+      //Preconditions
+      assert messageEvent != null : "messageEvent must not be null";
+      assert messageEvent.getMessage() instanceof Message;
+
+      final Message message = (Message) messageEvent.getMessage();
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("***** received from remote message router: " + message);
+      }
+    }
   }
 
   /**
    * Connects to the local bitcoind instance.
+   * @return the communications channel with the local bitcoind instance
    */
-  protected void connectToLocalBitcoind() {
-    final PeerAddress localPeerAddress = PeerAddress.localhost(networkParameters);
+  protected  Channel connectToLocalBitcoind() {
+
+    final InetSocketAddress inetSocketAddress = PeerAddress.localhost(networkParameters).toSocketAddress();
+    final Channel channel = ConnectionUtils.openBitcoinProtocolConnection(
+          inetSocketAddress,
+          bitcoinProtocolMessageHandler,
+          nodeRuntime.getExecutor(), // bossExecutor
+          nodeRuntime.getExecutor()); // workerExecutor
+
     versionMessage.time = Utils.currentTimeMillis() / 1000;
 
-    LOGGER.info("connectToLocalBitcoind");
-    localPeer = new Peer(
-            networkParameters,
-            versionMessage,
-            localPeerAddress,
-            null, // chain
-            null); // memoryPool
-    // process the peer event listener methods on the same thread to keep them ordered and synchronous
-    localPeer.addEventListener(this, Threading.SAME_THREAD);
-    localPeer.setMinProtocolVersion(vMinRequiredProtocolVersion);
-
-    try {
-      clientConnectionManager.openConnection(localPeerAddress.toSocketAddress(), localPeer);
-    } catch (Exception e) {
-      throw new TexaiException("Failed to connect to " + localPeerAddress + ": " + e.getMessage());
-    }
-    localPeer.setSocketTimeout(connectTimeoutMillis);
-    //setupPingingLocalPeer();
+    LOGGER.info("connected to aicoined");
+    return channel;
   }
 
   /**
@@ -258,7 +321,9 @@ public class LocalBitcoindAdapter implements PeerEventListener {
     return null;
   }
 
-  /** Setup pinging for the local peer. */
+  /**
+   * Setup pinging for the local peer.
+   */
   private void setupPingingLocalPeer() {
     if (localPeer.getPeerVersionMessage().clientVersion < Pong.MIN_PROTOCOL_VERSION) {
       return;
@@ -295,14 +360,14 @@ public class LocalBitcoindAdapter implements PeerEventListener {
             try {
               localPeer.ping().addListener(pingRunnable[0], Threading.SAME_THREAD);
             } catch (Exception e) {
-            LOGGER.warn("Exception whilst trying to ping peer: " + localPeer + "\n" + e.toString());
-             }
+              LOGGER.warn("Exception whilst trying to ping peer: " + localPeer + "\n" + e.toString());
+            }
           }
         };
         try {
           pingTimer.schedule(task, interval);
         } catch (IllegalStateException ignored) {
-                    // This can happen if there's a shutdown race and this runnable is executing whilst the timer is
+          // This can happen if there's a shutdown race and this runnable is executing whilst the timer is
           // simultaneously cancelled.
         }
       }

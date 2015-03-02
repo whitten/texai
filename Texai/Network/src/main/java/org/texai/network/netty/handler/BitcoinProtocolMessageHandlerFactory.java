@@ -18,18 +18,16 @@
  * You should have received a copy of the GNU General Public License along with this program;
  * if not, write to the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-package org.texai.ahcs;
+package org.texai.network.netty.handler;
 
 import net.jcip.annotations.ThreadSafe;
-import org.texai.network.netty.handler.AbstractAlbusHCSMessageHandler;
-import org.texai.network.netty.handler.AbstractAlbusHCSMessageHandlerFactory;
 
 /** Provides an Albus hierarchical control system message handler factory, that returns the singleton handler.
  *
  * @author reed
  */
 @ThreadSafe
-public class AlbusHCSMessageHandlerFactory extends AbstractAlbusHCSMessageHandlerFactory {
+public class BitcoinProtocolMessageHandlerFactory extends AbstractAlbusHCSMessageHandlerFactory {
 
   /** the Albus hierarchical control system message handler */
   private final AbstractAlbusHCSMessageHandler albusHCSMessageHandler;
@@ -38,7 +36,7 @@ public class AlbusHCSMessageHandlerFactory extends AbstractAlbusHCSMessageHandle
    *
    * @param albusHCSMessageHandler the Albus hierarchical control system message handler
    */
-  public AlbusHCSMessageHandlerFactory(final AbstractAlbusHCSMessageHandler albusHCSMessageHandler) {
+  public BitcoinProtocolMessageHandlerFactory(final AbstractAlbusHCSMessageHandler albusHCSMessageHandler) {
     //Preconditions
     assert albusHCSMessageHandler != null : "albusHCSMessageHandler must not be null";
 
