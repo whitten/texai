@@ -1,7 +1,6 @@
 package org.texai.ahcsSupport.seed;
 
 import java.io.Serializable;
-import java.security.cert.X509Certificate;
 import java.util.Objects;
 import org.texai.ahcsSupport.domainEntity.Role;
 import org.texai.util.StringUtils;
@@ -24,32 +23,26 @@ public class SeedNodeInfo implements Serializable {
   private final String hostName;
   // the TCP port
   private final int port;
-  // the configuration role's certificate
-  private final X509Certificate x509Certificate;
 
   /**
    * Creates a new instance of SeedNodesInfo.
    * @param qualifiedName the qualified name of the role, container.agent.role
    * @param hostName the internet host name
    * @param port the TCP port
-   * @param x509Certificate the configuration role's certificate
    */
   public SeedNodeInfo(
           final String qualifiedName,
           final String hostName,
-          final int port,
-          final X509Certificate x509Certificate) {
+          final int port) {
     //Preconditions
     assert StringUtils.isNonEmptyString(qualifiedName) : "qualifiedName must be a non-empty string";
-    assert Role.extractRoleName(qualifiedName).equals("SingletonConfigurationRole") : "must be SingletonConfigurationRole";
+    assert Role.extractRoleName(qualifiedName).equals("ContainerSingletonConfigurationRole") : "must be ContainerSingletonConfigurationRole";
     assert StringUtils.isNonEmptyString(hostName) : "hostName must be a non-empty string";
     assert port > 1024 : "port must be greater than 1024";
-    assert x509Certificate != null : "x509Certificate must not be null";
 
     this.qualifiedName = qualifiedName;
     this.hostName = hostName;
     this.port = port;
-    this.x509Certificate = x509Certificate;
   }
 
   /** Gets the qualified name of the role, container.agent.role.
@@ -74,14 +67,6 @@ public class SeedNodeInfo implements Serializable {
    */
   public int getPort() {
     return port;
-  }
-
-  /** Gets the configuration role's certificate.
-   *
-   * @return the configuration role's certificate
-   */
-  public X509Certificate getX509Certificate() {
-    return x509Certificate;
   }
 
   /** Returns a hash code for this object.

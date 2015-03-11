@@ -1,19 +1,17 @@
 package org.texai.ahcsSupport.seed;
 
-import java.io.File;
+import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.security.NoSuchProviderException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import org.apache.log4j.Logger;
 import org.texai.util.ArraySet;
+import org.texai.util.NetworkUtils;
+import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
-import org.texai.x509.MessageDigestUtils;
-import org.texai.x509.X509Utils;
 
 /**
  * SeedNodeInfosInitializer.java
@@ -28,6 +26,10 @@ public class SeedNodeInfosInitializer {
   private static final Logger LOGGER = Logger.getLogger(SeedNodeInfosInitializer.class);
   // the seed node infos
   private final Set<SeedNodeInfo> seedNodeInfos = new ArraySet<>();
+  // the network name, mainnet or testnet
+  private String networkName;
+  // the seed containers and host names
+  private final List<SeedInfo> seedInfos = new ArrayList<>();
 
   /**
    * Creates a new instance of SeedNodeInfosInitializer.
@@ -36,60 +38,124 @@ public class SeedNodeInfosInitializer {
   }
 
   /**
-   * Initializes the locations and credentials of the network seed nodes.
+   * Initializes the locations of the network seed nodes.
    *
+   * @return
    */
-  private void process() {
+  public Set<SeedNodeInfo> process() {
 
-    try {
-      // the demo mint peer
-      String qualifiedName = "Mint.ContainerOperationAgent.ContainerSingletonConfigurationRole";
-      int port = 5048;
-      String cerfificateFilePath = "../Main/data/ContainerSingletonConfiguration.crt";
-      if (!(new File(cerfificateFilePath)).exists()) {
-        throw new TexaiException("cerfificate path not found " + cerfificateFilePath);
+    LOGGER.info("Reading network.conf file...");
+    try (
+            final BufferedReader bufferedReader
+            = new BufferedReader(new InputStreamReader(new FileInputStream("network.conf"), "UTF-8"))) {
+      int lineCnt = 0;
+      while (true) {
+        String line = bufferedReader.readLine();
+        if (line == null) {
+          break;
+        }
+        lineCnt++;
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("input: '" + line + "'");
+        }
+        line = line.trim();
+        if (line.startsWith("#") || line.isEmpty()) {
+          continue;
+        }
+        if (line.indexOf('=') == -1) {
+          throw new TexaiException("invalid network.conf line, missing '=' (" + lineCnt + "): " + line);
+        }
+        final String[] parts = line.split("=");
+        if (parts.length != 2) {
+          throw new TexaiException("invalid network.conf line, one '=' required (" + lineCnt + "): " + line);
+        }
+        final String command = parts[0].trim();
+        final String operand = parts[1].trim();
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("command: '" + command + "'");
+          LOGGER.debug("operand: '" + operand + "'");
+        }
+        if (command.isEmpty()) {
+          throw new TexaiException("invalid network.conf line, operator is missing (" + lineCnt + "): " + line);
+        }
+        if (operand.isEmpty()) {
+          throw new TexaiException("invalid network.conf line, operand is missing (" + lineCnt + "): " + line);
+        }
+
+        switch (command) {
+          case "network":
+            if (operand.equals(NetworkUtils.TEXAI_MAINNET) || operand.equals(NetworkUtils.TEXAI_TESTNET)) {
+              networkName = operand;
+            } else {
+              throw new TexaiException("invalid network.conf line, network must be either mainnet or testnet (" + lineCnt + "): " + line);
+            }
+            break;
+          case "seed":
+            if (!operand.contains(",")) {
+              throw new TexaiException("invalid network.conf line, seed info missing ',' (" + lineCnt + "): " + line);
+            }
+            final String seedInfoParts[] = operand.split(",");
+            final String containerName = seedInfoParts[0].trim();
+            final String hostName = seedInfoParts[1].trim();
+            if (LOGGER.isDebugEnabled()) {
+              LOGGER.debug("containerName: '" + containerName + "'");
+              LOGGER.debug("hostName: '" + hostName + "'");
+            }
+            if (containerName.isEmpty()) {
+              throw new TexaiException("invalid network.conf line, containerName is missing (" + lineCnt + "): " + line);
+            }
+            if (hostName.isEmpty()) {
+              throw new TexaiException("invalid network.conf line, hostName is missing (" + lineCnt + "): " + line);
+            }
+
+            seedInfos.add(new SeedInfo(containerName, hostName));
+            break;
+          default:
+            throw new TexaiException("invalid network.conf line, invalid command (" + lineCnt + "): " + line);
+        }
+        final int port = NetworkUtils.toNetworkPort(networkName);
+        seedInfos.stream().sorted().forEach((SeedInfo seedInfo) -> {
+          final String qualifiedName = seedInfo.containerName + ".ContainerOperationAgent.ContainerSingletonConfigurationRole";
+          final SeedNodeInfo seedNodeInfo = new SeedNodeInfo(
+                  qualifiedName,
+                  seedInfo.hostName,
+                  port);
+          LOGGER.info(seedNodeInfo);
+          seedNodeInfos.add(seedNodeInfo);
+        });
+
       }
-      X509Certificate x509Certificate = X509Utils.readX509Certificate(new FileInputStream(cerfificateFilePath));
-
-      // Within a set of docker containers hosted on the development server, the hostname Mint resolves to the
-      // docker subnet IP address of the Mint container in that set.
-      SeedNodeInfo seedNodeInfo = new SeedNodeInfo(
-              qualifiedName,
-              "Mint", // hostName,
-              port,
-              x509Certificate);
-      seedNodeInfos.add(seedNodeInfo);
-      LOGGER.info(seedNodeInfo);
-
-      // Otherwise Within the development LAN, the IP address is for the docker host, one of whose containers is the Mint
-      // container.
-      seedNodeInfo = new SeedNodeInfo(
-              qualifiedName,
-              "192.168.0.7", // hostName,
-              port,
-              x509Certificate);
-      seedNodeInfos.add(seedNodeInfo);
-      LOGGER.info(seedNodeInfo);
-
-      // On the internet the texai.dyndns.org name resolves to the IP address of the docker host, one of whose containers is the Mint
-      // container.
-      seedNodeInfo = new SeedNodeInfo(
-              qualifiedName,
-              "texai.dyndns.org", // hostName,
-              port,
-              x509Certificate);
-      seedNodeInfos.add(seedNodeInfo);
-      LOGGER.info(seedNodeInfo);
-
-      // other seeds ...
-      final String seedNodeInfosFilePath = "../Main/data/SeedNodeInfos.ser";
-      LOGGER.info("writing " + seedNodeInfosFilePath);
-      try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(seedNodeInfosFilePath))) {
-        objectOutputStream.writeObject(seedNodeInfos);
-      }
-      LOGGER.info("fileHashString: " + MessageDigestUtils.fileHashString(seedNodeInfosFilePath));
-    } catch (CertificateException | NoSuchProviderException | IOException ex) {
+    } catch (IOException ex) {
       throw new TexaiException(ex);
+    }
+    return seedNodeInfos;
+  }
+
+  /**
+   * Provides a container for seed information.
+   */
+  class SeedInfo {
+
+    // the container name
+    private final String containerName;
+    // the host name
+    private final String hostName;
+
+    /**
+     * Creates a new SeedInfo instance.
+     *
+     * @param containerName the container name
+     * @param hostName the host name
+     */
+    SeedInfo(
+            final String containerName,
+            final String hostName) {
+      //Preconditions
+      assert StringUtils.isNonEmptyString(containerName) : "containerName must not be null";
+      assert StringUtils.isNonEmptyString(hostName) : "hostName must not be null";
+
+      this.containerName = containerName;
+      this.hostName = hostName;
     }
   }
 

@@ -1,17 +1,6 @@
 package org.texai.ahcsSupport;
 
 import org.texai.ahcsSupport.seed.SeedNodeInfo;
-import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SignatureException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateParsingException;
-import java.security.cert.X509Certificate;
-import java.util.UUID;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -20,8 +9,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.texai.util.NetworkUtils;
-import org.texai.util.TexaiException;
-import org.texai.x509.X509Utils;
 
 /**
  *
@@ -59,7 +46,7 @@ public class SeedNodesInfoTest {
   @Test
   public void testGetQualifiedName() {
     LOGGER.info("getQualifiedName");
-    assertEquals("TestContainer.SingletonConfigurationAgent.SingletonConfigurationRole", instance.getQualifiedName());
+    assertEquals("TestContainer.ContainerOperationAgent.ContainerSingletonConfigurationRole", instance.getQualifiedName());
   }
 
   /**
@@ -81,21 +68,12 @@ public class SeedNodesInfoTest {
   }
 
   /**
-   * Test of getX509Certificate method, of class SeedNodeInfo.
-   */
-  @Test
-  public void testGetX509Certificate() {
-    LOGGER.info("getX509Certificate");
-    assertTrue(instance.getX509Certificate().getSubjectDN().toString().startsWith("CN=texai.org, DC=TestContainer.SingletonConfigurationAgent.SingletonConfigurationRole, UID="));
-  }
-
-  /**
    * Test of hashCode method, of class SeedNodeInfo.
    */
   @Test
   public void testHashCode() {
     LOGGER.info("hashCode");
-    assertEquals(445624413, instance.hashCode());
+    assertEquals(-71049763, instance.hashCode());
   }
 
   /**
@@ -114,29 +92,17 @@ public class SeedNodesInfoTest {
   @Test
   public void testToString() {
     LOGGER.info("toString");
-    assertEquals("[Seed TestContainer.SingletonConfigurationAgent.SingletonConfigurationRole gandalf:5048]", instance.toString());
+    assertEquals("[Seed TestContainer.ContainerOperationAgent.ContainerSingletonConfigurationRole gandalf:5048]", instance.toString());
   }
 
   private static SeedNodeInfo makeSeedNodesInfo() {
-    final String qualifiedName = "TestContainer.SingletonConfigurationAgent.SingletonConfigurationRole";
+    final String qualifiedName = "TestContainer.ContainerOperationAgent.ContainerSingletonConfigurationRole";
     final String hostName= "gandalf";
-    final int port = NetworkUtils.TEXAI_PORT;
-    final X509Certificate x509Certificate;
-    final KeyPair keyPair;
-    try {
-      keyPair = X509Utils.generateRSAKeyPair3072();
-      x509Certificate = X509Utils.generateSelfSignedEndEntityX509Certificate(
-              keyPair,
-              UUID.randomUUID(), // uid
-              qualifiedName); // domainComponent
-    } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | CertificateParsingException | CertificateEncodingException | SignatureException | InvalidKeyException | IOException ex) {
-      throw new TexaiException(ex);
-    }
+    final int port = NetworkUtils.TEXAI_MAINNET_PORT;
 
     return new SeedNodeInfo(
             qualifiedName,
             hostName,
-            port,
-            x509Certificate);
+            port);
   }
 }

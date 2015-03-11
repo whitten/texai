@@ -309,6 +309,9 @@ public final class AHCSConstants {
   // the request accomplished accomplished operation
   public static final String REQUEST_ACCOMPLISHED_INFO = "requestAccomplished_Info";
   //
+  // the request container restart information operation
+  public static final String RESTART_CONTAINER_REQUEST_INFO = "restartContainerRequest_Info";
+  //
   // the seedConnectionRequest_Info operation
   public static final String SEED_CONNECTION_REQUEST_INFO = "seedConnectionRequest_Info";
   // the port parameter of the seedConnectionRequest_Info
