@@ -61,6 +61,38 @@ public class NetworkUtilsTest {
   }
 
   /**
+   * Test of toNetworkName method, of class NetworkUtils.
+   */
+  @Test
+  public void testToNetworkName() {
+    LOGGER.info("toNetworkName");
+    assertEquals(NetworkUtils.TEXAI_MAINNET, NetworkUtils.toNetworkName(NetworkUtils.TEXAI_MAINNET_PORT));
+    assertEquals(NetworkUtils.TEXAI_TESTNET, NetworkUtils.toNetworkName(NetworkUtils.TEXAI_TESTNET_PORT));
+    try {
+      NetworkUtils.toNetworkName(0);
+      fail();
+    } catch (TexaiException ex) {
+      // ignore
+    }
+  }
+
+  /**
+   * Test of toNetworkPort method, of class NetworkUtils.
+   */
+  @Test
+  public void testToNetworkPort() {
+    LOGGER.info("toNetworkPort");
+    assertEquals(NetworkUtils.TEXAI_MAINNET_PORT, NetworkUtils.toNetworkPort(NetworkUtils.TEXAI_MAINNET));
+    assertEquals(NetworkUtils.TEXAI_TESTNET_PORT, NetworkUtils.toNetworkPort(NetworkUtils.TEXAI_TESTNET));
+    try {
+      NetworkUtils.toNetworkPort("");
+      fail();
+    } catch (TexaiException ex) {
+      // ignore
+    }
+  }
+
+  /**
    * Test of getLocalHostAddress method, of class NetworkUtils.
    */
   @Test

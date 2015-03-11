@@ -14,7 +14,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -49,9 +48,13 @@ public final class NetworkUtils {
   // the server port number file path
   static final String SERVER_PORT_PATH = "data/server-port.txt";
   // the IANA registered service port for Texai: http://www.iana.org/assignments/port-numbers
-  public static final int TEXAI_PORT = 5048;
-  // the launcher port
-  public static final int LAUNCHER_PORT = 5049;
+  public static final int TEXAI_MAINNET_PORT = 5048;
+  // the main network name
+  public static final String TEXAI_MAINNET = "mainnet";
+  // the test network port
+  public static final int TEXAI_TESTNET_PORT = 45048;
+  // the test network name
+  public static final String TEXAI_TESTNET = "testnet";
   // the socket connection timeout
   public static final int CONNECTION_TIMEOUT = 10000;
 
@@ -60,6 +63,37 @@ public final class NetworkUtils {
    */
   private NetworkUtils() {
   }
+
+  /** Returns the name of the given port, either mainnet or testnet.
+   *
+   * @param port the given port
+   * @return the name of the given port
+   */
+  public static String toNetworkName(final int port) {
+    if (port == TEXAI_MAINNET_PORT) {
+      return TEXAI_MAINNET;
+    } else if (port == TEXAI_TESTNET_PORT) {
+      return TEXAI_TESTNET;
+    } else {
+      throw new TexaiException("invalid port number: " + port + ", must be " + TEXAI_MAINNET_PORT + " or " + TEXAI_TESTNET_PORT);
+    }
+  }
+
+  /** Returns the port number of the given network name, either 5048 or 45048.
+   *
+   * @param networkName the given network name
+   * @return the port number of the given network name
+   */
+  public static int toNetworkPort(final String networkName) {
+    if (TEXAI_MAINNET.equals(networkName)) {
+      return TEXAI_MAINNET_PORT;
+    } else if (TEXAI_TESTNET.equals(networkName)) {
+      return TEXAI_TESTNET_PORT;
+    } else {
+      throw new TexaiException("invalid network name: " + networkName + ", must be " + TEXAI_MAINNET + " or " + TEXAI_TESTNET);
+    }
+  }
+
 
   /**
    * Returns whether this set of nodes is running as a cloud service.
