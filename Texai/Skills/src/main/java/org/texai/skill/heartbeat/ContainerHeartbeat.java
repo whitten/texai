@@ -3,7 +3,8 @@
  *
  * Created on Sep 18, 2014, 8:04:36 AM
  *
- * Description: Manages a container's agents to ensure liveness.
+ * Description: Manages a container's agents to ensure liveness. It also sends keep-alive messages to the network operation agent,
+ * and requests a container restart in case of timeout.
  *
  * Copyright (C) 2014 Stephen L. Reed
  */
@@ -14,6 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
@@ -23,6 +25,7 @@ import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.ahcsSupport.domainEntity.Role;
+import org.texai.skill.network.ContainerOperation;
 import org.texai.util.StringUtils;
 
 /**
@@ -128,9 +131,43 @@ public final class ContainerHeartbeat extends AbstractSkill {
         performMission(receivedMessage);
         return;
 
+      /**
+       * Keep Alive Info
+       *
+       * This information message is sent from a HearbeatRole belonging to an agent in this container.
+       *
+       * The keep alive is recorded.
+       */
       case AHCSConstants.KEEP_ALIVE_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
         recordKeepAlive(receivedMessage);
+        return;
+
+      /**
+       * Keep Alive Acknowledged Task
+       *
+       * This task message is sent from the network-singleton parent NetworkOperationAgent.TopLevelHeartbeatRole.
+       *
+       * It is sent in reply to the Keep Alive Info message that is sent every minute. If this message is not
+       * received as expected, then this container is restarted.
+       */
+      case AHCSConstants.KEEP_ALIVE_ACKNOWLEDGED_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+        processKeepAliveAcknowledgedTask(receivedMessage);
+        return;
+
+      /**
+       * Message Timeout Info
+       *
+       * This information message is sent from a this skill to itself when an expected reply from a seed peer has not been received.
+       *
+       * The original Keep Alive Info message is included as a parameter.
+       *
+       * As a result, this container is restarted.
+       */
+      case AHCSConstants.MESSAGE_TIMEOUT_INFO:
+        assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) || getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
+        keepAliveInfoMessageTimeout(receivedMessage);
         return;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
@@ -176,8 +213,10 @@ public final class ContainerHeartbeat extends AbstractSkill {
     return new String[]{
       AHCSConstants.INITIALIZE_TASK,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
+      AHCSConstants.KEEP_ALIVE_ACKNOWLEDGED_TASK,
       AHCSConstants.KEEP_ALIVE_INFO,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
+      AHCSConstants.MESSAGE_TIMEOUT_INFO,
       AHCSConstants.PERFORM_MISSION_TASK
     };
   }
@@ -245,6 +284,39 @@ public final class ContainerHeartbeat extends AbstractSkill {
       LOGGER.debug("    from " + senderQualifiedName);
       LOGGER.debug("    to " + getQualifiedName());
     }
+  }
+
+  /**
+   * Processes a keep-alive acknowledged reply task message sent from network operation top level heartbeat.
+   *
+   * @param message the keep-alive acknowledged message
+   */
+  protected void processKeepAliveAcknowledgedTask(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+
+    LOGGER.info(" received keep-alive acknowledgement from " + message.getSenderContainerName());
+    removeMessageTimeOut(message.getInReplyTo());
+  }
+
+  /**
+   * Processes a message timeout information message sent from this role to itself.
+   *
+   * @param message the message timeout info message
+   */
+  protected void keepAliveInfoMessageTimeout(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+
+    LOGGER.info("The expected acknowledgement of the keep-alive message timed out. Requesting restart of this container.");
+
+    final Message restartRequestInfoMessage = makeMessage(
+            getContainerName() + "ContainerOperationAgent.ContainerOperationRole", // recipientQualifiedName
+            ContainerOperation.class.getName(), // recipientService
+            AHCSConstants.RESTART_CONTAINER_REQUEST_INFO); // operation
+    sendMessage(
+            message, // receivedMessage
+            restartRequestInfoMessage); // message
   }
 
   /**
@@ -473,7 +545,7 @@ public final class ContainerHeartbeat extends AbstractSkill {
   }
 
   /**
-   * Notices that an expected heartbeat message has not yet been received from the given role.
+   * Notices that an expected heartbeat message has not yet been received from the given role in this container.
    *
    * @param inboundHeartbeatInfo the given role heartbeat information
    */
@@ -498,11 +570,20 @@ public final class ContainerHeartbeat extends AbstractSkill {
     assert heartbeat != null : "heartbeat must not be null";
 
     final Message keepAliveInfoMessage = new Message(
-            heartbeat.getQualifiedName(), // senderQualifiedName
-            heartbeat.getClass().getName(), // senderService
+            getQualifiedName(), // senderQualifiedName
+            getClassName(), // senderService
             outboundHeartbeatInfo.role.getParentQualifiedName(), // recipentQualifiedName,
-            outboundHeartbeatInfo.service,
+            UUID.randomUUID(), // conversationId,
+            UUID.randomUUID(), // replyWith,
+            outboundHeartbeatInfo.service, // recipientService
             AHCSConstants.KEEP_ALIVE_INFO); // operation
+    // set timeout
+    setMessageReplyTimeout(
+            null, // receivedMessage
+            keepAliveInfoMessage,
+            10000, // timeoutMillis
+            false, // isRecoverable
+            null); // recoveryAction
     LOGGER.info(getContainerName() + " sending keep-alive to " + Node.extractContainerName(outboundHeartbeatInfo.role.getParentQualifiedName()));
     sendMessageViaSeparateThread(
             null, // received message, which is null because this sent message is triggered by a timer

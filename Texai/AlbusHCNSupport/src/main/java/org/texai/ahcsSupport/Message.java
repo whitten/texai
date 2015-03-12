@@ -155,13 +155,13 @@ public class Message implements Serializable, Comparable<Message> {
     this.senderQualifiedName = senderQualifiedName;
     this.senderService = senderService;
     this.recipientQualifiedName = recipientQualifiedName;
-    this.conversationId = null;
+    this.conversationId = UUID.randomUUID();
     this.replyWith = null;
     this.inReplyTo = null;
     this.replyByDateTime = null;
     this.recipientService = recipientService;
     this.operation = operation;
-    parameterDictionary.entrySet().stream().forEach((parameter) -> {
+    parameterDictionary.entrySet().stream().forEach((Entry<String, Object> parameter) -> {
       final String name = parameter.getKey();
       final Object value = parameter.getValue();
       assert value instanceof Serializable : "parameter value must be marked serializable: " + value;

@@ -9,11 +9,12 @@ xaio:XAIOperation[rp] "XAIOperation"
 
 [c:alt normal operation]
 chb:tlhb.keepAlive_Info()
+tlhb:chb.keepAliveAcknowledged_Task()
 [/c]
 
 [c:alt connection failure]
 chb:co.restartContainerRequest_Info()
-chb:xaio.restartContainerRequest_Info()
+co:xaio.restartContainerRequest_Info()
 [/c]
 ]]></source>
 <configuration>

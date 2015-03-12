@@ -133,7 +133,9 @@ public final class TopLevelHeartbeat extends AbstractNetworkSingletonSkill {
        *
        * This task message is sent to this network singleton agent/role from a child ContainerHeartbeat agent/role.
        *
-       * The result is the recording of the liveness of the sending container.
+       * The result is the recording of the liveness of the sending container, and a Keep Alive Acknowledged Task message
+       * is sent back as a reply message.
+       *
        */
       case AHCSConstants.KEEP_ALIVE_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
@@ -225,6 +227,13 @@ public final class TopLevelHeartbeat extends AbstractNetworkSingletonSkill {
       inboundHeartbeatInfos.put(senderQualifiedName, inboundHeartBeatInfo);
     }
     inboundHeartBeatInfo.heartbeatReceivedMillis = System.currentTimeMillis();
+
+    final Message keepAliveAcknowledgedTaskMessage = makeReplyMessage(
+            message,
+            getQualifiedName()); // senderQualifiedName
+    sendMessage(
+            message, // receivedMessage
+            keepAliveAcknowledgedTaskMessage); // message
   }
 
   /**
@@ -360,7 +369,7 @@ public final class TopLevelHeartbeat extends AbstractNetworkSingletonSkill {
     //Preconditions
     assert inboundHeartbeatInfo != null : "inboundHeartbeatInfo must not be null";
 
-    LOGGER.warn("heartbeat missing for " + inboundHeartbeatInfo);
+    LOGGER.warn("Heartbeat missing for " + inboundHeartbeatInfo + ".");
   }
 
 }

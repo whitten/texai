@@ -157,6 +157,9 @@ public final class AHCSConstants {
   // the joinNetwork_Task operation
   public static final String JOIN_NETWORK_TASK = "joinNetwork_Task";
   //
+  // the keepAliveAcknowledged_Task operation
+  public static final String KEEP_ALIVE_ACKNOWLEDGED_TASK = "keepAliveAcknowledged_Task";
+  //
   // the learn faces_Task operation
   public static final String LEARN_FACES_TASK = "learn faces_Task";
   //
