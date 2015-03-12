@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.util.NetworkUtils;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 
@@ -67,8 +68,8 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
       /**
        * Initialize Task
        *
-       * This task message is sent from the parent XAIOperationAgent.XAIOperationRole. It is expected to be the first task
-       * message that this role receives and it results in the role being initialized.
+       * This task message is sent from the parent XAIOperationAgent.XAIOperationRole. It is expected to be the first task message that this
+       * role receives and it results in the role being initialized.
        */
       case AHCSConstants.INITIALIZE_TASK:
         assert getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
@@ -173,11 +174,12 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
           bufferedWriter.write("listen=1\n");
           break;
         case "Alice":
+        case "Bob":
           bufferedWriter.write("# this instance accepts incoming connections\n");
           bufferedWriter.write("listen=1\n");
           bufferedWriter.write("# connect to the mint\n");
           // on the same host in the development LAN
-          bufferedWriter.write("connect=Mint:8333\n");
+          bufferedWriter.write("connect=TestMint:8333\n");
           break;
         case "BlockchainExplorer":
           bufferedWriter.write("# this instance accepts incoming connections\n");
@@ -187,20 +189,45 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
           // on the same host in the development LAN
           bufferedWriter.write("connect=Mint:8333\n");
           break;
+        case "TestMint":
+          bufferedWriter.write("# this instance accepts incoming connections\n");
+          bufferedWriter.write("listen=1\n");
+          break;
+        case "TestAlice":
+        case "TestBob":
+          bufferedWriter.write("# this instance accepts incoming connections\n");
+          bufferedWriter.write("listen=1\n");
+          bufferedWriter.write("# connect to the mint on testnet\n");
+          // on the same host in the development LAN
+          bufferedWriter.write("connect=TestMint:18333\n");
+          break;
+        case "TestBlockchainExplorer":
+          bufferedWriter.write("# this instance accepts incoming connections\n");
+          bufferedWriter.write("listen=1\n");
+          bufferedWriter.write("# connect to the mint on testnet\n");
+          // on the same host in the development LAN
+          bufferedWriter.write("connect=TestMint:18333\n");
+          break;
         default:
+          // peer on the internet
           bufferedWriter.write("# this instance does not accept incoming connections\n");
           bufferedWriter.write("listen=0\n");
           bufferedWriter.write("# connect to the mint\n");
-          if (getContainerName().equals("Bob")) {
-            // on the same host in the development LAN
-            bufferedWriter.write("connect=Mint:8333\n");
-          } else {
-            // the Mint address exposed to the internet
+          if (getNodeRuntime().getNetworkName().equals(NetworkUtils.TEXAI_MAINNET)) {
             bufferedWriter.write("connect=texai.dyndns.org:8333\n");
-          } break;
+          } else {
+            // testnet
+            bufferedWriter.write("connect=texai.dyndns.org:18333\n");
+          }
+          break;
       }
-      bufferedWriter.write("# listening port\n");
-      bufferedWriter.write("port=8333\n");
+      if (getNodeRuntime().getNetworkName().equals(NetworkUtils.TEXAI_MAINNET)) {
+        bufferedWriter.write("# mainnet listening port\n");
+        bufferedWriter.write("port=8333\n");
+      } else {
+        bufferedWriter.write("# testnet listening port\n");
+        bufferedWriter.write("port=18333\n");
+      }
       bufferedWriter.write("# how many blocks to verify upon startup\n");
       bufferedWriter.write("checkblocks=5\n");
       bufferedWriter.write("# do not generate a block unless commanded to\n");

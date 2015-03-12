@@ -11,9 +11,6 @@
  */
 package org.texai.skill.singletonConfiguration;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -31,10 +28,10 @@ import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.ahcsSupport.seed.SeedNodeInfo;
+import org.texai.ahcsSupport.seed.SeedNodeInfosInitializer;
 import org.texai.skill.domainEntity.SingletonAgentHosts;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
-import org.texai.x509.MessageDigestUtils;
 
 /**
  *
@@ -307,20 +304,7 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
     }
     LOGGER.info("initializing the seed node information ...");
 
-    // deserialize the set of SeedNodeInfo objects from the specified file
-    final String seedNodeInfosFilePath = "data/SeedNodeInfos.ser";
-    LOGGER.info("seedNodeInfosFileHashString\n" + seedNodeInfosFileHashString);
-    MessageDigestUtils.verifyFileHash(
-            seedNodeInfosFilePath, // filePath
-            seedNodeInfosFileHashString); // fileHashString
-    try {
-      try (ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(seedNodeInfosFilePath))) {
-        seedNodesInfos = (Set<SeedNodeInfo>) objectInputStream.readObject();
-      }
-    } catch (IOException | ClassNotFoundException ex) {
-      throw new TexaiException("cannot find " + seedNodeInfosFilePath);
-    }
-
+    seedNodesInfos = (new SeedNodeInfosInitializer(getNodeRuntime().getNetworkName())).process();
     LOGGER.info("The locations and credentials of the " + seedNodesInfos.size() + " network seed nodes ...");
     seedNodesInfos.stream().forEach((SeedNodeInfo seedNodeInfo) -> {
       if (getContainerName().equals(Node.extractContainerName(seedNodeInfo.getQualifiedName()))) {

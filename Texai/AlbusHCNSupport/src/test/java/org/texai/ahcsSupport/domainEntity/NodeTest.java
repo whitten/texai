@@ -27,6 +27,7 @@ import org.texai.kb.journal.JournalWriter;
 import org.texai.kb.persistence.DistributedRepositoryManager;
 import org.texai.kb.persistence.RDFEntityManager;
 import org.texai.kb.persistence.RDFEntityPersister;
+import org.texai.util.NetworkUtils;
 
 /**
  *
@@ -183,7 +184,8 @@ public class NodeTest {
     LOGGER.info("getNodeRuntime");
     Node instance = makeTestNode();
     assertNull(instance.getNodeRuntime());
-    final BasicNodeRuntime nodeRuntime = new BasicNodeRuntime("TestContainer");
+    final String networkName = NetworkUtils.TEXAI_TESTNET;
+    final BasicNodeRuntime nodeRuntime = new BasicNodeRuntime("TestContainer", networkName);
     instance.setNodeRuntime(nodeRuntime);
     assertNotNull(instance.getNodeRuntime());
     assertEquals(instance.getNodeRuntime(), nodeRuntime);

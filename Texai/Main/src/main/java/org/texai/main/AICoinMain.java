@@ -32,6 +32,7 @@ import org.texai.network.netty.pipeline.AlbusHCNMessageClientPipelineFactory;
 import org.texai.network.netty.pipeline.PortUnificationChannelPipelineFactory;
 import org.texai.skill.governance.TopmostFriendship;
 import org.texai.ssl.TexaiSSLContextFactory;
+import org.texai.util.NetworkUtils;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 import org.texai.x509.X509Utils;
@@ -79,15 +80,14 @@ public class AICoinMain {
   // the path to the XML file which defines the nodes, roles and skills
   private final String nodesPath = "data/nodes.xml";
   // the tamper-evident hash of the nodes path file, use "1234" after revsing the nodes.xml file
-  private final String NODES_FILE_HASH =
-          "BwqO9m7Gctyrc5+pw+XcJCDe3Xn+O4Ol/SGovQntsjB+H9Seq1x1Zh1ELDbDbsSCEMmMv/M+ETPmUNuDpFOR+A==";
+  private final String NODES_FILE_HASH
+          = "BwqO9m7Gctyrc5+pw+XcJCDe3Xn+O4Ol/SGovQntsjB+H9Seq1x1Zh1ELDbDbsSCEMmMv/M+ETPmUNuDpFOR+A==";
   /**
    * the node runtime application thread
    */
   private Thread nodeRuntimeApplicationThread;
   /**
-   * the indicator that initialization has completed, and that the node runtime
-   * should be persisted upon shutdown
+   * the indicator that initialization has completed, and that the node runtime should be persisted upon shutdown
    */
   private final AtomicBoolean isInitialized = new AtomicBoolean(false);
   // the configuration certificate path
@@ -121,8 +121,12 @@ public class AICoinMain {
     Logger.getLogger(X509Utils.class).setLevel(Level.WARN);
 
     LOGGER.info("A.I. Coin version " + VERSION + ".");
-    LOGGER.info("Starting the software agents in the container named " + containerName + ".");
-    nodeRuntime = new NodeRuntime(containerName);
+    final String networkName = System.getenv("NETWORK");
+    if (!NetworkUtils.TEXAI_MAINNET.equals(networkName) && !NetworkUtils.TEXAI_TESTNET.equals(networkName)) {
+      throw new TexaiException("invalid network name: '" + networkName + "', must be " + NetworkUtils.TEXAI_MAINNET + " or " + NetworkUtils.TEXAI_TESTNET);
+    }
+    LOGGER.info("Starting the software agents in the container named " + containerName + " on " + networkName + ".");
+    nodeRuntime = new NodeRuntime(containerName, networkName);
     // configure a shutdown hook to run the finalization method in case the JVM is abnormally ended
     shutdownHook = new ShutdownHook();
     Runtime.getRuntime().addShutdownHook(shutdownHook);
@@ -196,8 +200,8 @@ public class AICoinMain {
   }
 
   /**
-   * Provides a thread to run the node runtime application, by initializing it
-   * and thereafter sleeping to keep the it from otherwise terminating.
+   * Provides a thread to run the node runtime application, by initializing it and thereafter sleeping to keep the it from otherwise
+   * terminating.
    */
   static class RunApplication implements Runnable {
 
@@ -265,8 +269,7 @@ public class AICoinMain {
   }
 
   /**
-   * Provides a shutdown hook to finalize resources when the JVM is unexpectedly
-   * shutdown.
+   * Provides a shutdown hook to finalize resources when the JVM is unexpectedly shutdown.
    */
   class ShutdownHook extends Thread {
 

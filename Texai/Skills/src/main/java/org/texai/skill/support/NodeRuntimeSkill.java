@@ -17,8 +17,7 @@ import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.skill.BasicNodeRuntime;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.Role;
-import org.texai.util.StringUtils;
-import org.texai.util.TexaiException;
+import org.texai.util.NetworkUtils;
 
 /**
  *
@@ -160,19 +159,7 @@ public class NodeRuntimeSkill extends AbstractSkill {
     assert message != null : "message must not be null";
     assert nodeRuntime instanceof NodeRuntime;
 
-    final String portString = System.getenv("LISTENING_PORT");
-    if (!StringUtils.isNonEmptyString(portString)) {
-      throw new TexaiException("missing the environment variable LISTENING_PORT");
-    }
-    final int port;
-    try {
-      port = Integer.parseInt(portString);
-    } catch (NumberFormatException ex) {
-      throw new TexaiException("LISTENING_PORT not a valid number " + portString);
-    }
-    if (port < 1025) {
-      throw new TexaiException("LISTENING_PORT must have a value higher than 1024, was " + port);
-    }
+    final int port = NetworkUtils.toNetworkPort(nodeRuntime.getNetworkName());
     LOGGER.info("listening for inbound connections on port " + port);
     ((NodeRuntime) nodeRuntime).listenForIncommingConnections(port);
   }

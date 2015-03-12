@@ -28,6 +28,7 @@ import org.texai.ahcsSupport.NodeAccess;
 import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.ahcsSupport.domainEntity.Role;
 import org.texai.kb.persistence.RDFEntityManager;
+import org.texai.util.NetworkUtils;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 import org.texai.x509.X509SecurityInfo;
@@ -46,6 +47,8 @@ public class BasicNodeRuntime implements MessageDispatcher {
   private final NodeAccess nodeAccess;
   // the container name
   private final String containerName;
+  // the network name, mainnet or testnet
+  private final String networkName;
   // the local node dictionary, container-name.node-name --> node
   private final Map<String, Node> nodeDictionary = new HashMap<>();
   // the local role dictionary, container-name.node-name.role-name --> role
@@ -69,12 +72,18 @@ public class BasicNodeRuntime implements MessageDispatcher {
    * Constructs a new BasicNodeRuntime instance.
    *
    * @param containerName the container name
+   * @param networkName the network name, mainnet or testnet
    */
-  public BasicNodeRuntime(final String containerName) {
+  public BasicNodeRuntime(
+          final String containerName,
+          final String networkName) {
     //Preconditions
     assert StringUtils.isNonEmptyString(containerName) : "container name must be a non-empty string";
+    assert NetworkUtils.TEXAI_MAINNET.equals(networkName) || NetworkUtils.TEXAI_TESTNET.equals(networkName) :
+            "network name must be " + NetworkUtils.TEXAI_MAINNET + " or " + NetworkUtils.TEXAI_TESTNET;
 
     this.containerName = containerName;
+    this.networkName = networkName;
     nodeAccess = new NodeAccess(rdfEntityManager);
   }
 
@@ -387,6 +396,14 @@ public class BasicNodeRuntime implements MessageDispatcher {
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "DM_EXIT", justification = "desired behavior")
   public void restartJVM() {
     System.exit(0);
+  }
+
+  /** Gets the network name, mainnet or testnet.
+   *
+   * @return the network name
+   */
+  public String getNetworkName() {
+    return networkName;
   }
 
 }

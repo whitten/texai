@@ -47,7 +47,7 @@ public class SeedNodeInfosInitializerTest {
   @Test
   public void testProcess() {
     LOGGER.info("process");
-    SeedNodeInfosInitializer instance = new SeedNodeInfosInitializer();
+    SeedNodeInfosInitializer instance = new SeedNodeInfosInitializer("testnet");
     Set<SeedNodeInfo> result = instance.process();
     assertEquals("[[Seed Mint.ContainerOperationAgent.ContainerSingletonConfigurationRole Mint:45048]]", result.toString());
   }

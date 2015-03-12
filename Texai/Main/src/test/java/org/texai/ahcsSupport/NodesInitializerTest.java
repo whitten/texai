@@ -37,6 +37,7 @@ import org.texai.kb.journal.JournalWriter;
 import org.texai.kb.persistence.DistributedRepositoryManager;
 import org.texai.kb.persistence.RDFEntityManager;
 import org.texai.kb.persistence.RDFEntityPersister;
+import org.texai.util.NetworkUtils;
 import org.texai.util.TexaiException;
 
 /**
@@ -101,7 +102,8 @@ public class NodesInitializerTest {
   public void testVerifyNodesFileHash() {
     LOGGER.info("verifyNodesFileHash");
     final String containerName = "TestContainer";
-    final BasicNodeRuntime nodeRuntime = new BasicNodeRuntime(containerName);
+    final String networkName = NetworkUtils.TEXAI_TESTNET;
+    final BasicNodeRuntime nodeRuntime = new BasicNodeRuntime(containerName,  networkName);
     final char[] keystorePassword = "test-password".toCharArray();
     final NodesInitializer nodesInitializer
             = new NodesInitializer(
@@ -132,8 +134,9 @@ public class NodesInitializerTest {
     LOGGER.info("beginning test");
     Logger.getLogger(NodesInitializer.class).setLevel(Level.DEBUG);
     final String containerName = "TestContainer";
-    final BasicNodeRuntime nodeRuntime = new BasicNodeRuntime(containerName);
-    final char[] keystorePassword = "test-password".toCharArray();
+    final String networkName = NetworkUtils.TEXAI_TESTNET;
+    final BasicNodeRuntime nodeRuntime = new BasicNodeRuntime(containerName,  networkName);
+   final char[] keystorePassword = "test-password".toCharArray();
     final File singletonConfigurationFile = new File(CONTAINER_SINGLETON_CONFIGURATION_CERTIFICATE_PATH);
     if (singletonConfigurationFile.exists()) {
       final boolean isOk = singletonConfigurationFile.delete();

@@ -23,6 +23,7 @@ import org.texai.ahcsSupport.domainEntity.Role;
 import org.texai.ahcsSupport.domainEntity.SkillClass;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.util.ArraySet;
+import org.texai.util.NetworkUtils;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 import org.texai.x509.X509SecurityInfo;
@@ -86,7 +87,9 @@ public class SkillTestHarness {
     assert variableNames != null : "variableNames must not be null";
 
     final String containerName = Node.extractContainerName(qualifiedName);
-    nodeRuntime = new MockNodeRuntime(containerName); // containerName
+    nodeRuntime = new MockNodeRuntime(
+            containerName,
+            NetworkUtils.TEXAI_TESTNET); // networkName
 
     final Set<Role> roles = new ArraySet<>();
     role = new MockRole(
@@ -269,9 +272,12 @@ public class SkillTestHarness {
      * Constructs a new singleton NodeRuntime instance.
      *
      * @param containerName the container name
+     * @param networkName the network name, mainnet or testnet
      */
-    MockNodeRuntime(final String containerName) {
-      super(containerName);
+    MockNodeRuntime(
+            final String containerName,
+            final String networkName) {
+      super(containerName, networkName);
     }
 
     /**

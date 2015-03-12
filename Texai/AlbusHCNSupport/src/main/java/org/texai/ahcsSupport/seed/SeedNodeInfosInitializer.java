@@ -27,14 +27,20 @@ public class SeedNodeInfosInitializer {
   // the seed node infos
   private final Set<SeedNodeInfo> seedNodeInfos = new ArraySet<>();
   // the network name, mainnet or testnet
-  private String networkName;
+  private final String networkName;
   // the seed containers and host names
   private final List<SeedInfo> seedInfos = new ArrayList<>();
 
   /**
-   * Creates a new instance of SeedNodeInfosInitializer.
+   * Creates a new instance of SeedNodeInfosInitializer.\
+   *
+   * @param networkName the network name, mainnet or testnet
    */
-  public SeedNodeInfosInitializer() {
+  public SeedNodeInfosInitializer(final String networkName) {
+    assert NetworkUtils.TEXAI_MAINNET.equals(networkName) || NetworkUtils.TEXAI_TESTNET.equals(networkName) :
+            "network name must be " + NetworkUtils.TEXAI_MAINNET + " or " + NetworkUtils.TEXAI_TESTNET;
+
+    this.networkName = networkName;
   }
 
   /**
@@ -84,10 +90,8 @@ public class SeedNodeInfosInitializer {
 
         switch (command) {
           case "network":
-            if (operand.equals(NetworkUtils.TEXAI_MAINNET) || operand.equals(NetworkUtils.TEXAI_TESTNET)) {
-              networkName = operand;
-            } else {
-              throw new TexaiException("invalid network.conf line, network must be either mainnet or testnet (" + lineCnt + "): " + line);
+            if (!operand.equals(networkName)) {
+              throw new TexaiException("invalid network.conf line, network must be " + networkName + " (" + lineCnt + "): " + line);
             }
             break;
           case "seed":
@@ -157,15 +161,5 @@ public class SeedNodeInfosInitializer {
       this.containerName = containerName;
       this.hostName = hostName;
     }
-  }
-
-  /**
-   * Executes this application.
-   *
-   * @param args the command line arguments - unused
-   */
-  public static void main(final String[] args) {
-    final SeedNodeInfosInitializer seedNodeInfosInitializer = new SeedNodeInfosInitializer();
-    seedNodeInfosInitializer.process();
   }
 }

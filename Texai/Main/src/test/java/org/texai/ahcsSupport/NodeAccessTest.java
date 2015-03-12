@@ -32,6 +32,7 @@ import org.texai.kb.journal.JournalWriter;
 import org.texai.kb.persistence.DistributedRepositoryManager;
 import org.texai.kb.persistence.RDFEntityManager;
 import org.texai.kb.persistence.RDFEntityPersister;
+import org.texai.util.NetworkUtils;
 
 /**
  *
@@ -70,7 +71,8 @@ public class NodeAccessTest {
 //    LOGGER.info("deleting " + KEY_STORE_FILE_NAME);
 //    (new File(KEY_STORE_FILE_NAME)).delete();
     final String containerName = "TestContainer";
-    final BasicNodeRuntime nodeRuntime = new BasicNodeRuntime(containerName);
+    final String networkName = NetworkUtils.TEXAI_TESTNET;
+    final BasicNodeRuntime nodeRuntime = new BasicNodeRuntime(containerName,  networkName);
     final char[] keystorePassword = "test-password".toCharArray();
     final NodesInitializer nodesInitializer
             = new NodesInitializer(

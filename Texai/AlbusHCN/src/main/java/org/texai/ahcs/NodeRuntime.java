@@ -75,10 +75,13 @@ public class NodeRuntime extends BasicNodeRuntime {
    * Constructs a new singleton NodeRuntime instance.
    *
    * @param containerName the container name
+   * @param networkName
    */
   @SuppressWarnings("CallToThreadStartDuringObjectConstruction")
-  public NodeRuntime(final String containerName) {
-    super(containerName);
+  public NodeRuntime(
+          final String containerName,
+          final String networkName) {
+    super(containerName, networkName);
     messageRouter = new MessageRouter(this);
   }
 
