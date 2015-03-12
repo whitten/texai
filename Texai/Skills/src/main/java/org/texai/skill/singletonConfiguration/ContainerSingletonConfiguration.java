@@ -305,6 +305,9 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
     LOGGER.info("initializing the seed node information ...");
 
     seedNodesInfos = (new SeedNodeInfosInitializer(getNodeRuntime().getNetworkName())).process();
+    if (seedNodesInfos.isEmpty()) {
+      throw new TexaiException("no seed nodes defined in network.conf");
+    }
     LOGGER.info("The locations and credentials of the " + seedNodesInfos.size() + " network seed nodes ...");
     seedNodesInfos.stream().forEach((SeedNodeInfo seedNodeInfo) -> {
       if (getContainerName().equals(Node.extractContainerName(seedNodeInfo.getQualifiedName()))) {

@@ -225,8 +225,12 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
         bufferedWriter.write("# mainnet listening port\n");
         bufferedWriter.write("port=8333\n");
       } else {
+        bufferedWriter.write("# testnet\n");
+        bufferedWriter.write("testnet=1\n");
         bufferedWriter.write("# testnet listening port\n");
         bufferedWriter.write("port=18333\n");
+        bufferedWriter.write("# testnet rpc port\n");
+        bufferedWriter.write("rpcport=18332\n");
       }
       bufferedWriter.write("# how many blocks to verify upon startup\n");
       bufferedWriter.write("checkblocks=5\n");

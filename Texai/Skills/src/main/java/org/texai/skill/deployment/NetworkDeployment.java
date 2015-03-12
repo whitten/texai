@@ -385,7 +385,9 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
 
       // scan the deployment directory looking for "deployed.log"
       final File deploymentDirectory = new File("deployment");
-      LOGGER.info("checking for a new deployment in " + deploymentDirectory.getAbsolutePath());
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("checking for a new deployment in " + deploymentDirectory.getAbsolutePath());
+      }
       if (!deploymentDirectory.exists()) {
         LOGGER.info("creating the deployment directory");
         deploymentDirectory.mkdir();
@@ -395,7 +397,9 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
 
       final File[] files = deploymentDirectory.listFiles();
       if (files.length == 0) {
-        LOGGER.info("No files in the deployment directory to deploy");
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("No files in the deployment directory to deploy");
+        }
         return;
       }
       for (final File file : files) {

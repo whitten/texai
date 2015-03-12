@@ -53,7 +53,7 @@ public class SeedNodeInfosInitializer {
     LOGGER.info("Reading network.conf file...");
     try (
             final BufferedReader bufferedReader
-            = new BufferedReader(new InputStreamReader(new FileInputStream("network.conf"), "UTF-8"))) {
+            = new BufferedReader(new InputStreamReader(new FileInputStream("../network.conf"), "UTF-8"))) {
       int lineCnt = 0;
       while (true) {
         String line = bufferedReader.readLine();

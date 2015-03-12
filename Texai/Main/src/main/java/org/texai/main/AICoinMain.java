@@ -22,6 +22,7 @@ import static org.texai.ahcs.NodeRuntime.CACHE_X509_CERTIFICATES;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.NodesInitializer;
+import org.texai.ahcsSupport.seed.SeedNodeInfosInitializer;
 import org.texai.kb.CacheInitializer;
 import org.texai.kb.journal.JournalWriter;
 import org.texai.kb.persistence.DistributedRepositoryManager;
@@ -117,6 +118,7 @@ public class AICoinMain {
     Logger.getLogger(PortUnificationHandler.class).setLevel(Level.WARN);
     Logger.getLogger(PortUnificationChannelPipelineFactory.class).setLevel(Level.WARN);
     Logger.getLogger(RDFEntityPersister.class).setLevel(Level.WARN);
+    Logger.getLogger(SeedNodeInfosInitializer.class).setLevel(Level.DEBUG);
     Logger.getLogger(TexaiSSLContextFactory.class).setLevel(Level.WARN);
     Logger.getLogger(X509Utils.class).setLevel(Level.WARN);
 

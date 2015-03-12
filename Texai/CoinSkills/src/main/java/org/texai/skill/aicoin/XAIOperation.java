@@ -9,7 +9,6 @@ import org.texai.ahcsSupport.Message;
 import org.texai.skill.aicoin.support.AICoinUtils;
 import org.texai.skill.aicoin.support.BitcoinMessageReceiver;
 import org.texai.skill.aicoin.support.LocalBitcoindAdapter;
-import org.texai.skill.aicoin.support.XAIMainNetParams;
 import org.texai.util.EnvironmentUtils;
 import org.texai.util.TexaiException;
 
@@ -285,7 +284,7 @@ public final class XAIOperation extends AbstractSkill implements BitcoinMessageR
       stringBuilder.append("../bin/aicoin-qt -debug -shrinkdebugfile=1 -datadir=").append(AICOIN_DIRECTORY_PATH);
     }
     cmdArray[2] = stringBuilder.toString();
-    LOGGER.info("Launching the slave aicoin-qt instance");
+    LOGGER.info("Launching the aicoin-qt instance.");
     LOGGER.info("  shell cmd: " + cmdArray[2]);
     AICoinUtils.executeHostCommandWithoutWaitForCompletion(cmdArray);
   }
