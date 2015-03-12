@@ -50,8 +50,8 @@ if [ $(hostname) = "minsky" ]; then
   chmod a+x openbox-run-aicoin-main.sh
 
   echo "installing TestAlice ..."
-  cp Main-1.0/data/keystore.uber .
   cd /home/reed/docker/TestAlice
+  cp Main-1.0/data/keystore.uber .
   rm -fr Main-1.0
   unzip -ouK /home/reed/git/texai/Texai/Main/target/Main-1.0.zip
   cp keystore.uber Main-1.0/data

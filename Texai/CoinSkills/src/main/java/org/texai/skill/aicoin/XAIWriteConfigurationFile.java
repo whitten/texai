@@ -179,34 +179,27 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
           bufferedWriter.write("listen=1\n");
           bufferedWriter.write("# connect to the mint\n");
           // on the same host in the development LAN
-          bufferedWriter.write("connect=TestMint:8333\n");
+          if (getNodeRuntime().getNetworkName().equals(NetworkUtils.TEXAI_MAINNET)) {
+            bufferedWriter.write("connect=Mint:8333\n");
+          } else {
+            // testnet
+            bufferedWriter.write("connect=TestMint:18333\n");
+          }
           break;
         case "BlockchainExplorer":
           bufferedWriter.write("# this instance accepts incoming connections\n");
           bufferedWriter.write("listen=1\n");
-          //        // on a separate host in the development LAN
-//        bufferedWriter.write("connect=192.168.0.7:8333\n");
           // on the same host in the development LAN
-          bufferedWriter.write("connect=Mint:8333\n");
-          break;
-        case "TestMint":
-          bufferedWriter.write("# this instance accepts incoming connections\n");
-          bufferedWriter.write("listen=1\n");
-          break;
-        case "TestAlice":
-        case "TestBob":
-          bufferedWriter.write("# this instance accepts incoming connections\n");
-          bufferedWriter.write("listen=1\n");
-          bufferedWriter.write("# connect to the mint on testnet\n");
-          // on the same host in the development LAN
-          bufferedWriter.write("connect=TestMint:18333\n");
-          break;
-        case "TestBlockchainExplorer":
-          bufferedWriter.write("# this instance accepts incoming connections\n");
-          bufferedWriter.write("listen=1\n");
-          bufferedWriter.write("# connect to the mint on testnet\n");
-          // on the same host in the development LAN
-          bufferedWriter.write("connect=TestMint:18333\n");
+          if (getNodeRuntime().getNetworkName().equals(NetworkUtils.TEXAI_MAINNET)) {
+            bufferedWriter.write("connect=Mint:8333\n");
+            // on a separate host in the development LAN
+            //bufferedWriter.write("connect=192.168.0.7:8333\n");
+          } else {
+            // testnet
+            bufferedWriter.write("connect=TestMint:18333\n");
+            // on a separate host in the development LAN
+            //bufferedWriter.write("connect=192.168.0.7:18333\n");
+          }
           break;
         default:
           // peer on the internet

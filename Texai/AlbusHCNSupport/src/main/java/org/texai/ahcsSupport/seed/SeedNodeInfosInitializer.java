@@ -93,6 +93,7 @@ public class SeedNodeInfosInitializer {
             if (!operand.equals(networkName)) {
               throw new TexaiException("invalid network.conf line, network must be " + networkName + " (" + lineCnt + "): " + line);
             }
+            LOGGER.info("network.conf is consistent with the network defined in the Dockerfile");
             break;
           case "seed":
             if (!operand.contains(",")) {

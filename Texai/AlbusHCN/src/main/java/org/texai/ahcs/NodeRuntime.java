@@ -62,6 +62,7 @@ public class NodeRuntime extends BasicNodeRuntime {
   private final AtomicBoolean isFinalized = new AtomicBoolean(false);
   // the between-container operations in which the sender informs the receiver of its public X.509 certificate
   private static final Set<String> certificateIntroducingOperations = new ArraySet<>();
+
   static {
     certificateIntroducingOperations.add(AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK);
     certificateIntroducingOperations.add(AHCSConstants.JOIN_ACKNOWLEDGED_TASK);
@@ -115,6 +116,10 @@ public class NodeRuntime extends BasicNodeRuntime {
     }
 
     synchronized (x509CertificateDictionary) {
+      X509Certificate previousX509Certificate = x509CertificateDictionary.get(qualifiedName);
+      if (previousX509Certificate != null && !x509Certificate.equals(previousX509Certificate)) {
+        LOGGER.info("Replacing previous X.509 certificate for " + qualifiedName);
+      }
       x509CertificateDictionary.put(qualifiedName, x509Certificate);
     }
   }
@@ -224,30 +229,31 @@ public class NodeRuntime extends BasicNodeRuntime {
   }
 
   /**
-   * Verifies a message sent between roles in the Albus hierarchical control system network, returning whether the message signature
-   * is OK.
+   * Verifies a message sent between roles in the Albus hierarchical control system network, returning whether the message signature is OK.
    *
    * @param message the message
-   * @return whether the message signature
-   * is OK
+   *
+   * @return whether the message signature is OK
    */
   protected boolean verifyMessage(Message message) {
     //Preconditions
     assert message != null : "message must not be null";
 
-    X509Certificate x509Certificate = getX509Certificate(message.getSenderQualifiedName());
-    if (x509Certificate == null) {
+    //TODO when the certificate agent is written, ensure that duplicate peers cannot join the network
+    X509Certificate x509Certificate;
+    if (certificateIntroducingOperations.contains(message.getOperation())) {
       // both sides provide their certificate as a parameter, when a new peer joins the network
-      if (certificateIntroducingOperations.contains(message.getOperation())) {
-        LOGGER.info("adding certificate for " + message.getSenderQualifiedName());
-        x509Certificate = (X509Certificate) message.get(AHCSConstants.MSG_PARM_X509_CERTIFICATE);
-        assert x509Certificate != null;
-        addX509Certificate(
-                message.getSenderQualifiedName(), // qualifiedName
-                x509Certificate);
-      } else {
-        throw new TexaiException("X.509 certificate not found for sender " + message.getSenderQualifiedName() + "\n" + message.toString());
-      }
+      LOGGER.info("adding certificate for " + message.getSenderQualifiedName());
+      x509Certificate = (X509Certificate) message.get(AHCSConstants.MSG_PARM_X509_CERTIFICATE);
+      assert x509Certificate != null;
+      addX509Certificate(
+              message.getSenderQualifiedName(), // qualifiedName
+              x509Certificate);
+    }
+    x509Certificate = getX509Certificate(message.getSenderQualifiedName());
+    if (x509Certificate == null) {
+      throw new TexaiException("X.509 certificate not found for sender " + message.getSenderQualifiedName() + "\n" + message.toString());
+
     }
     final boolean isOK = message.verify(x509Certificate);
     if (LOGGER.isDebugEnabled()) {
