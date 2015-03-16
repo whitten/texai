@@ -127,10 +127,23 @@ public final class XAIOperation extends AbstractSkill implements BitcoinMessageR
       /**
        * Shutdown Aicoind Task
        *
-       * This task message is sent from ContainerOperationAgent.ContainerOperationRole when the application is shutting down. The child
+       * This task message is sent from XAINetworkOperationAgent.XAINetworkOperationRole when the application is shutting down. The child
        * processes must be shutdown to enable the Java application to exit.
        */
       case AHCSConstants.SHUTDOWN_AICOIND_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
+        shutdownAicoind();
+        shutdownInsight();
+        return;
+
+      /**
+       * Shutdown Aicoind Request Info
+       *
+       * This information message is sent from ContainerOperationAgent.ContainerOperationRole when the application is shutting down,
+       * as a result of a loss of heartbeat communications.
+       * The child processes must be shutdown to enable the Java application to exit.
+       */
+      case AHCSConstants.SHUTDOWN_AICOIND_REQUEST_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
         shutdownAicoind();
         shutdownInsight();
@@ -179,6 +192,7 @@ public final class XAIOperation extends AbstractSkill implements BitcoinMessageR
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.PERFORM_MISSION_TASK,
+      AHCSConstants.SHUTDOWN_AICOIND_REQUEST_INFO,
       AHCSConstants.SHUTDOWN_AICOIND_TASK,
       AHCSConstants.TASK_ACCOMPLISHED_INFO
     };

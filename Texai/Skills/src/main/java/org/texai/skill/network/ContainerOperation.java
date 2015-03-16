@@ -100,7 +100,7 @@ public final class ContainerOperation extends AbstractSkill {
       /**
        * Restart Container Task
        *
-       * This message is sent the parent NetworkOperationAgent.NetworkOperationRole instructing the container to restart following a given
+       * This message is sent from the parent NetworkOperationAgent.NetworkOperationRole instructing the container to restart following a given
        * delay.
        *
        * As a result, this JVM exits, and the wrapping bash script restarts it
@@ -108,6 +108,18 @@ public final class ContainerOperation extends AbstractSkill {
       case AHCSConstants.RESTART_CONTAINER_TASK:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
         handleRestartContainerTask(receivedMessage);
+        return;
+
+      /**
+       * Restart Container Request Info
+       *
+       * This request message is sent from the ContainerHeartbeatRole when communications are lost with the Network Operation agent.
+       *
+       * As a result, this JVM exits, and the wrapping bash script restarts it
+       */
+      case AHCSConstants.RESTART_CONTAINER_REQUEST_INFO:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        handleRestartContainerRequestInfo(receivedMessage);
         return;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
@@ -154,6 +166,7 @@ public final class ContainerOperation extends AbstractSkill {
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.OPERATION_NOT_PERMITTED_INFO,
       AHCSConstants.PERFORM_MISSION_TASK,
+      AHCSConstants.RESTART_CONTAINER_REQUEST_INFO,
       AHCSConstants.RESTART_CONTAINER_TASK
     };
   }
@@ -187,6 +200,39 @@ public final class ContainerOperation extends AbstractSkill {
     final long delay = (long) receivedMessage.get(AHCSConstants.RESTART_CONTAINER_TASK_DELAY);
     LOGGER.info("Restarting the application after a pause of " + (delay/1000) + " seconds.");
     assert delay > 0 : AHCSConstants.RESTART_CONTAINER_TASK_DELAY + " must be positive";
+
+    try {
+      Thread.sleep(delay);
+    } catch (InterruptedException ex) {
+      // ignore
+    }
+    getNodeRuntime().restartJVM();
+  }
+
+  /**
+   * Restarts the container after shutting down the aicoind instance.
+   *
+   * @param receivedMessage the Restart Container Task message
+   */
+  private void handleRestartContainerRequestInfo(final Message receivedMessage) {
+    //Preconditions
+    assert receivedMessage != null : "receivedMessage must not be null";
+
+    LOGGER.info("Cancelling scheduled tasks.");
+    getNodeRuntime().getTimer().cancel();
+
+    // send a Shutdown Aicoind Request Info message to XAIOperation
+    final Message shutdownAicoindRequestMessage = makeMessage(
+            getContainerName()+ ".XAIOperationAgent.XAIOperationRole",
+            "org.texai.skill.aicoin.XAIOperation",
+            AHCSConstants.SHUTDOWN_AICOIND_REQUEST_INFO); // operation
+    sendMessage(
+            receivedMessage,
+            shutdownAicoindRequestMessage); // message
+
+
+    final long delay = 10000L;
+    LOGGER.info("Restarting the application after a pause of " + (delay/1000) + " seconds.");
 
     try {
       Thread.sleep(delay);

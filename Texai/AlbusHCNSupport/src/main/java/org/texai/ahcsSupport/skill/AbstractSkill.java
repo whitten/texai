@@ -261,7 +261,6 @@ public abstract class AbstractSkill {
           final String operation) {
     //Preconditions
     assert recipientQualifiedName != null : "recipientQualifiedName must not be null";
-    assert recipientService == null || Message.isValidService(recipientService) : "the recipient service is not a found Java class " + recipientService;
     assert operation != null : "operation must not be null";
 
     return new Message(

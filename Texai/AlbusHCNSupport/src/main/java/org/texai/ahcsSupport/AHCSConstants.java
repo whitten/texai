@@ -320,6 +320,9 @@ public final class AHCSConstants {
   // the port parameter of the seedConnectionRequest_Info
   public static final String SEED_CONNECTION_REQUEST_INFO_PORT = "seedConnectionRequest_Info_Port";
   //
+  // the shutdownAicoindRequest_Info operation
+  public static final String SHUTDOWN_AICOIND_REQUEST_INFO = "shutdownAicoindRequest_Info";
+  //
   // the singletonAgentHosts_Info operation
   public static final String SINGLETON_AGENT_HOSTS_INFO = "singletonAgentHosts_Info";
   //

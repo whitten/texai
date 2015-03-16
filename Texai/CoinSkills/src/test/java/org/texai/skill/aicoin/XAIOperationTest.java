@@ -21,6 +21,7 @@ import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.SkillClass;
 import org.texai.ahcsSupport.skill.AbstractSkill;
+import org.texai.skill.network.ContainerOperation;
 import org.texai.skill.testHarness.SkillTestHarness;
 import org.texai.util.ArraySet;
 
@@ -185,6 +186,33 @@ public class XAIOperationTest {
   }
 
   /**
+   * Test of class XAINetworkOperation - Shutdown Aicoind Task.
+   */
+  @Test
+  public void testShutdownAicoindRequestInfo() {
+    LOGGER.info("testing " + AHCSConstants.SHUTDOWN_AICOIND_REQUEST_INFO + " message");
+
+    skillTestHarness.reset();
+    skillTestHarness.setSkillState(AHCSConstants.State.READY, skillClassName);
+    final Message taskAccomplishedInfoMessage = new Message(
+            "Test.ContainerOperationAgent.ContainerOperationRole", // senderQualifiedName
+            ContainerOperation.class.getName(), // senderService
+            containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
+            skillClassName, // recipientService
+            AHCSConstants.SHUTDOWN_AICOIND_REQUEST_INFO); // operation
+
+    skillTestHarness.dispatchMessage(taskAccomplishedInfoMessage);
+
+    assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
+    assertNull(skillTestHarness.getOperationAndSenderServiceInfo());
+    final Message sentMessage = skillTestHarness.getSentMessage();
+    assertNull(sentMessage);
+    assertEquals(
+            "",
+            Message.toBriefString(skillTestHarness.getSentMessages()));
+  }
+
+  /**
    * Test of class XAIOperation - Message Not Understood Info.
    */
   @Test
@@ -231,7 +259,7 @@ public class XAIOperationTest {
     final List<String> understoodOperations = new ArrayList<>(Arrays.asList(instance.getUnderstoodOperations()));
     Collections.sort(understoodOperations);
     assertEquals(
-            "[initialize_Task, joinAcknowledged_Task, messageNotUnderstood_Info, performMission_Task, shutdownAicoind_Task, taskAccomplished_Info]",
+            "[initialize_Task, joinAcknowledged_Task, messageNotUnderstood_Info, performMission_Task, shutdownAicoindRequest_Info, shutdownAicoind_Task, taskAccomplished_Info]",
             understoodOperations.toString());
   }
 

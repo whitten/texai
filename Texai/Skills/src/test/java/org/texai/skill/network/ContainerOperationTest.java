@@ -31,6 +31,7 @@ import static org.junit.Assert.*;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.SkillClass;
+import org.texai.skill.heartbeat.ContainerHeartbeat;
 import org.texai.skill.testHarness.SkillTestHarness;
 import org.texai.util.ArraySet;
 
@@ -175,6 +176,33 @@ public class ContainerOperationTest {
   }
 
   /**
+   * Test of class ContainerOperation - Restart Container Request Info.
+   */
+  @Test
+  public void testRestartContainerRequestInfo() {
+    LOGGER.info("testing " + AHCSConstants.RESTART_CONTAINER_REQUEST_INFO + " message");
+
+    skillTestHarness.reset();
+    assertFalse(skillTestHarness.isTerminated());
+    skillTestHarness.setSkillState(AHCSConstants.State.READY, skillClassName);
+    final Message restartContainerTaskMessage = new Message(
+            "Test.ContainerOperationAgent.ContainerHeartbeatRole", // senderQualifiedName
+            ContainerHeartbeat.class.getName(), // senderService
+            containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
+            skillClassName, // recipientService
+            AHCSConstants.RESTART_CONTAINER_REQUEST_INFO); // operation
+    restartContainerTaskMessage.put(AHCSConstants.RESTART_CONTAINER_TASK_DELAY, 5000L);
+
+    skillTestHarness.dispatchMessage(restartContainerTaskMessage);
+
+    assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
+    assertNull(skillTestHarness.getOperationAndSenderServiceInfo());
+    final Message sentMessage = skillTestHarness.getSentMessage();
+    assertEquals("[shutdownAicoindRequest_Info, Test.ContainerOperationAgent.ContainerOperationRole:ContainerOperation --> Test.XAIOperationAgent.XAIOperationRole:XAIOperation]", sentMessage.toBriefString());
+    assertTrue(skillTestHarness.isTerminated());
+  }
+
+  /**
    * Test of getLogger method, of class ContainerOperation.
    */
   @Test
@@ -194,7 +222,7 @@ public class ContainerOperationTest {
     ContainerOperation instance = new ContainerOperation();
     final List<String> understoodOperations = new ArrayList<>(Arrays.asList(instance.getUnderstoodOperations()));
     Collections.sort(understoodOperations);
-    assertEquals("[initialize_Task, joinAcknowledged_Task, messageNotUnderstood_Info, operationNotPermitted_Info, performMission_Task, restartContainer_Task]", understoodOperations.toString());
+    assertEquals("[initialize_Task, joinAcknowledged_Task, messageNotUnderstood_Info, operationNotPermitted_Info, performMission_Task, restartContainerRequest_Info, restartContainer_Task]", understoodOperations.toString());
   }
 
 }

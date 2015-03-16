@@ -12,9 +12,9 @@ chb:tlhb.keepAlive_Info()
 tlhb:chb.keepAliveAcknowledged_Task()
 [/c]
 
-[c:alt connection failure]
+[c:alt reply timeout]
 chb:co.restartContainerRequest_Info()
-co:xaio.restartContainerRequest_Info()
+co:xaio.shutdownAicondRequest_Info()
 [/c]
 ]]></source>
 <configuration>

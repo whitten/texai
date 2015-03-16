@@ -144,7 +144,6 @@ public class Message implements Serializable, Comparable<Message> {
     //Preconditions
     assert senderQualifiedName != null : "senderQualifiedName must not be null";
     assert recipientQualifiedName != null : "recipientQualifiedName must not be null";
-    assert recipientService == null || isValidService(recipientService) : "the recipient service is not a found Java class " + recipientService;
     assert operation != null : "operation must not be null";
     assert operation.endsWith("_Info")
             || operation.endsWith("_Sensation")
@@ -301,7 +300,6 @@ public class Message implements Serializable, Comparable<Message> {
     //Preconditions
     assert senderQualifiedName != null : "senderQualifiedName must not be null";
     assert recipientQualifiedName != null : "recipientQualifiedName must not be null";
-    assert recipientService == null || isValidService(recipientService) : "the recipient service is not a found Java class: " + recipientService;
     assert operation != null : "operation must not be null";
     assert operation.endsWith("_Info")
             || operation.endsWith("_Sensation")
