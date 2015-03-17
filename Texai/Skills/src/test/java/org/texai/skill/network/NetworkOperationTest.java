@@ -197,13 +197,6 @@ public class NetworkOperationTest {
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertTrue(Message.areMessageStringsEqualIgnoringDate(
-            sentMessage.toString(),
-            "[restartContainer_Task Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation --> Test.ContainerOperationAgent.ContainerOperationRole:ContainerOperation 2015-02-18T09:47:11.286-06:00\n"
-            + "  messageTrace=\n"
-            + "    [networkRestartRequest_Info, Test.TopmostFriendshipAgent.TopmostFriendshipRole:TopmostFriendship --> Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation],\n"
-            + "  restartContainer_Task_delay=15000\n"
-            + "]"));
     assertEquals(
             "[restartContainer_Task, Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation --> Test.ContainerOperationAgent.ContainerOperationRole:ContainerOperation]\n"
             + "[restartContainer_Task, Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation --> Test.ContainerOperationAgent.ContainerOperationRole:ContainerOperation]\n"

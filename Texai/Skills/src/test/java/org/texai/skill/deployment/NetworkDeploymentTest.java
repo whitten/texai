@@ -4,6 +4,7 @@
 package org.texai.skill.deployment;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -164,7 +166,38 @@ public class NetworkDeploymentTest {
     networkDeployment.pendingFileTransferContainerNames.add("TestRecipient");
     networkDeployment.pendingDeploymentContainerNames.clear();
     networkDeployment.pendingDeploymentContainerNames.add("TestRecipient");
-    networkDeployment.zippedBytesHash= "uuPRHZF6ivQaTwMXfBf3xJHTS1lrPFHmSOP0cC1tjL1vGhiOIdwbuYHhNt2SxuD9xdfjqS2vkMfaWDunk6ZbwA==";
+    networkDeployment.zippedBytesHash = "uuPRHZF6ivQaTwMXfBf3xJHTS1lrPFHmSOP0cC1tjL1vGhiOIdwbuYHhNt2SxuD9xdfjqS2vkMfaWDunk6ZbwA==";
+
+    final File deploymentDirectory = new File("deployment");
+    if (!deploymentDirectory.exists()) {
+      fail();
+    }
+    assertTrue(deploymentDirectory.isDirectory());
+
+    final File[] files = deploymentDirectory.listFiles();
+    if (files.length == 0) {
+      fail();
+    }
+    LOGGER.info("Software and data deployment starting ...");
+    LOGGER.info(files.length + " files");
+    // find the manifest and verify it is non empty
+    File manifestFile = null;
+    for (final File file : files) {
+      if (file.getName().startsWith("manifest-")) {
+        manifestFile = file;
+        break;
+      }
+    }
+    if (manifestFile == null) {
+      fail();
+    }
+    LOGGER.info("manifestFile: " + manifestFile);
+
+    try {
+    networkDeployment.manifestJSONString = FileUtils.readFileToString(manifestFile);
+    } catch (IOException ex) {
+      fail();
+    }
 
     final UUID conversationId = UUID.randomUUID();
     final Message taskAccomplishedInfoMessage = new Message(
@@ -210,7 +243,38 @@ public class NetworkDeploymentTest {
     networkDeployment.pendingFileTransferContainerNames.clear();
     networkDeployment.pendingDeploymentContainerNames.clear();
     networkDeployment.pendingDeploymentContainerNames.add("TestDeployer");
-    networkDeployment.zippedBytesHash= "uuPRHZF6ivQaTwMXfBf3xJHTS1lrPFHmSOP0cC1tjL1vGhiOIdwbuYHhNt2SxuD9xdfjqS2vkMfaWDunk6ZbwA==";
+    networkDeployment.zippedBytesHash = "uuPRHZF6ivQaTwMXfBf3xJHTS1lrPFHmSOP0cC1tjL1vGhiOIdwbuYHhNt2SxuD9xdfjqS2vkMfaWDunk6ZbwA==";
+    final File deploymentDirectory = new File("deployment");
+    if (!deploymentDirectory.exists()) {
+      fail();
+    }
+    assertTrue(deploymentDirectory.isDirectory());
+
+    final File[] files = deploymentDirectory.listFiles();
+    if (files.length == 0) {
+      fail();
+    }
+    LOGGER.info("Software and data deployment starting ...");
+    LOGGER.info(files.length + " files");
+    // find the manifest and verify it is non empty
+    File manifestFile = null;
+    for (final File file : files) {
+      if (file.getName().startsWith("manifest-")) {
+        manifestFile = file;
+        break;
+      }
+    }
+    if (manifestFile == null) {
+      fail();
+    }
+    LOGGER.info("manifestFile: " + manifestFile);
+
+    try {
+    networkDeployment.manifestJSONString = FileUtils.readFileToString(manifestFile);
+    } catch (IOException ex) {
+      fail();
+    }
+
 
     // receive a Task Accomplished Info message from the last remaining container that has completed deploying files
     final UUID conversationId = UUID.randomUUID();

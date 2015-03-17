@@ -59,7 +59,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
   // the names of containers which have not completed a software and data file deployment task
   protected final Set<String> pendingDeploymentContainerNames = new HashSet<>();
   // the manifest JSON string
-  private String manifestJSONString;
+  protected String manifestJSONString;
   // the zip archive file path
   private static final String RECIPIENT_ZIP_ARCHIVE_FILE_PATH = "data/deployment.zip";
   // the zip archive bytes hash
@@ -258,6 +258,7 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
     //Preconditions
     assert receivedMessage != null : "receivedMessage must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+    assert StringUtils.isNonEmptyString(manifestJSONString) : "manifestJSONString must be a non-empty string";
 
     final String senderRole = Role.extractRoleName(receivedMessage.getSenderQualifiedName());
     if (senderRole.equals("NetworkFileTransferRole")) {
