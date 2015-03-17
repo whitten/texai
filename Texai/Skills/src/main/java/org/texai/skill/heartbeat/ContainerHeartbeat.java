@@ -16,6 +16,7 @@ import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
@@ -148,8 +149,8 @@ public final class ContainerHeartbeat extends AbstractSkill {
        *
        * This task message is sent from the network-singleton parent NetworkOperationAgent.TopLevelHeartbeatRole.
        *
-       * It is sent in reply to the Keep Alive Info message that is sent every minute. If this message is not
-       * received as expected, then this container is restarted.
+       * It is sent in reply to the Keep Alive Info message that is sent every minute. If this message is not received as expected, then
+       * this container is restarted.
        */
       case AHCSConstants.KEEP_ALIVE_ACKNOWLEDGED_TASK:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
@@ -180,8 +181,8 @@ public final class ContainerHeartbeat extends AbstractSkill {
     sendMessage(
             receivedMessage,
             Message.notUnderstoodMessage(
-            receivedMessage, // receivedMessage
-            this)); // skill
+                    receivedMessage, // receivedMessage
+                    this)); // skill
   }
 
   /**
@@ -276,9 +277,11 @@ public final class ContainerHeartbeat extends AbstractSkill {
     InboundHeartbeatInfo inboundHeartBeatInfo = inboundHeartbeatInfos.get(senderQualifiedName);
     if (inboundHeartBeatInfo == null) {
       inboundHeartBeatInfo = new InboundHeartbeatInfo(senderQualifiedName);
-      inboundHeartbeatInfos.put(senderQualifiedName, inboundHeartBeatInfo);
+      synchronized (inboundHeartbeatInfos) {
+        inboundHeartbeatInfos.put(senderQualifiedName, inboundHeartBeatInfo);
+      }
     }
-    inboundHeartBeatInfo.heartbeatReceivedMillis = System.currentTimeMillis();
+    inboundHeartBeatInfo.heartbeatReceivedMillis.set(System.currentTimeMillis());
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("  received keep-alive message " + (new DateTime()).toString("MM/dd/yyyy hh:mm a"));
       LOGGER.debug("    from " + senderQualifiedName);
@@ -295,7 +298,9 @@ public final class ContainerHeartbeat extends AbstractSkill {
     //Preconditions
     assert message != null : "message must not be null";
 
-    LOGGER.info(" received keep-alive acknowledgement from " + message.getSenderContainerName());
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug(" received keep-alive acknowledgement from " + message.getSenderContainerName());
+    }
     removeMessageTimeOut(message.getInReplyTo());
   }
 
@@ -311,7 +316,7 @@ public final class ContainerHeartbeat extends AbstractSkill {
     LOGGER.info("The expected acknowledgement of the keep-alive message timed out. Requesting restart of this container.");
 
     final Message restartRequestInfoMessage = makeMessage(
-            getContainerName() + "ContainerOperationAgent.ContainerOperationRole", // recipientQualifiedName
+            getContainerName() + ".ContainerOperationAgent.ContainerOperationRole", // recipientQualifiedName
             ContainerOperation.class.getName(), // recipientService
             AHCSConstants.RESTART_CONTAINER_REQUEST_INFO); // operation
     sendMessage(
@@ -358,14 +363,14 @@ public final class ContainerHeartbeat extends AbstractSkill {
       // notice if any expected heartbeats are timed-out
       final long inboundHeartbeatReceivedThresholdMillis = currentTimeMillis - INBOUND_HEARTBEAT_PERIOD_MILLIS;
       synchronized (inboundHeartbeatInfos) {
-        inboundHeartbeatInfos.values().stream().map((inboundHeartbeatInfo) -> {
+        for (final InboundHeartbeatInfo inboundHeartbeatInfo : inboundHeartbeatInfos.values()) {
           if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("  " + inboundHeartbeatInfo);
           }
-          return inboundHeartbeatInfo;
-        }).filter((inboundHeartbeatInfo) -> (inboundHeartbeatInfo.heartbeatReceivedMillis < inboundHeartbeatReceivedThresholdMillis)).forEach((inboundHeartbeatInfo) -> {
-          missingHeartbeat(inboundHeartbeatInfo);
-        });
+          if (inboundHeartbeatInfo.heartbeatReceivedMillis.get() < inboundHeartbeatReceivedThresholdMillis) {
+            missingHeartbeat(inboundHeartbeatInfo);
+          }
+        }
       }
 
       if (outboundParentHeartbeatInfo != null) {
@@ -393,7 +398,7 @@ public final class ContainerHeartbeat extends AbstractSkill {
     /**
      * the millisecond time at which the most recent heartbeat was received
      */
-    protected long heartbeatReceivedMillis;
+    protected AtomicLong heartbeatReceivedMillis = new AtomicLong(0);
 
     /**
      * Constructs a new InboundHeartbeatInfo instance.
@@ -448,9 +453,9 @@ public final class ContainerHeartbeat extends AbstractSkill {
       final StringBuilder stringBuilder = new StringBuilder();
       stringBuilder.append("[Inbound heartbeat, role: ");
       stringBuilder.append(senderQualifiedName);
-      if (heartbeatReceivedMillis > 0) {
+      if (heartbeatReceivedMillis.get() > 0) {
         stringBuilder.append(", last received ");
-        final long secondsAgo = (System.currentTimeMillis() - heartbeatReceivedMillis) / 1000;
+        final long secondsAgo = (System.currentTimeMillis() - heartbeatReceivedMillis.get()) / 1000;
         stringBuilder.append(secondsAgo);
         stringBuilder.append(" seconds ago]");
       }
@@ -582,7 +587,7 @@ public final class ContainerHeartbeat extends AbstractSkill {
             null, // receivedMessage
             keepAliveInfoMessage,
             10000, // timeoutMillis
-            false, // isRecoverable
+            true, // isRecoverable, timeout handled by self
             null); // recoveryAction
     LOGGER.info(getContainerName() + " sending keep-alive to " + Node.extractContainerName(outboundHeartbeatInfo.role.getParentQualifiedName()));
     sendMessageViaSeparateThread(

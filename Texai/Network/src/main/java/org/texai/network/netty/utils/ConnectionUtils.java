@@ -8,7 +8,9 @@
  */
 package org.texai.network.netty.utils;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -96,8 +98,13 @@ public final class ConnectionUtils {
     serverBootstrap.setPipelineFactory(channelPipelineFactory);
 
     // bind and start to accept incoming connections
-    serverBootstrap.bind(new InetSocketAddress(port));
-    LOGGER.info("accepting connections on port " + port);
+    final InetSocketAddress inetSocketAddress = new InetSocketAddress(port);
+    serverBootstrap.bind(inetSocketAddress);
+    try {
+      LOGGER.info("accepting connections on " + InetAddress.getLocalHost() + ":" + inetSocketAddress.getPort());
+    } catch (UnknownHostException ex) {
+      // ignore
+    }
     return serverBootstrap;
   }
 
@@ -134,13 +141,17 @@ public final class ConnectionUtils {
     assert bossExecutor != null : "bossExecutor must not be null";
     assert workerExecutor != null : "workerExecutor must not be null";
 
-    LOGGER.info("creating Albus client bootstrap");
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("creating Albus client bootstrap");
+    }
     final ClientBootstrap clientBootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(
             bossExecutor,
             workerExecutor));
 
     // configure the client pipeline
-    LOGGER.info("configuring the client pipeline connecting to " + inetSocketAddress);
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("configuring the client pipeline connecting to " + inetSocketAddress);
+    }
     final ChannelPipeline channelPipeline = AlbusHCNMessageClientPipelineFactory.getPipeline(
             albusHCSMessageHandler,
             x509SecurityInfo);
@@ -154,7 +165,9 @@ public final class ConnectionUtils {
             inetSocketAddress,
             channelConnection_lock));
 
-    LOGGER.info("waiting for connection to " + inetSocketAddress);
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("waiting for connection to " + inetSocketAddress);
+    }
     try {
       channelConnection_lock.acquire();
     } catch (InterruptedException ex) {
@@ -165,7 +178,9 @@ public final class ConnectionUtils {
       channel = connectedChannelDictionary.get(channelConnection_lock);
       if (channel != null) {
         connectedChannelDictionary.remove(channelConnection_lock);
-        LOGGER.info("completed opening the channel to " + inetSocketAddress);
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("completed opening the channel to " + inetSocketAddress);
+        }
       }
     }
     return channel;

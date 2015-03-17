@@ -230,7 +230,7 @@ public final class TopLevelHeartbeat extends AbstractNetworkSingletonSkill {
 
     final Message keepAliveAcknowledgedTaskMessage = makeReplyMessage(
             message,
-            getQualifiedName()); // senderQualifiedName
+            AHCSConstants.KEEP_ALIVE_ACKNOWLEDGED_TASK); // operation
     sendMessage(
             message, // receivedMessage
             keepAliveAcknowledgedTaskMessage); // message

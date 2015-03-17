@@ -313,6 +313,14 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
     assert exceptionEvent != null : "exceptionEvent must not be null";
 
     final Throwable throwable = exceptionEvent.getCause();
+    if (throwable.getMessage().contains("Connection refused")) {
+      LOGGER.info("Connection refused");
+      return;
+    }
+    if (throwable.getMessage().contains("No route to host")) {
+      LOGGER.info("No route to host");
+      return;
+    }
     LOGGER.info(throwable.getMessage());
 
     // remove the channel from the container channel dictionary
@@ -324,7 +332,7 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
     String containerName = null;
     synchronized (containerChannelDictionary) {
       for (final Entry<String, Channel> entry : containerChannelDictionary.entrySet()) {
-        if (entry.getValue().equals(channel)) {
+        if (entry != null && entry.getValue().equals(channel)) {
           containerName = entry.getKey();
         }
       }
@@ -350,8 +358,7 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
           final MessageEvent messageEvent) {
     //Preconditions
     assert messageEvent != null : "messageEvent must not be null";
-    assert messageEvent.getMessage() instanceof Message;
-
+    assert Message.class.isAssignableFrom(messageEvent.getMessage().getClass());
     final Message message = (Message) messageEvent.getMessage();
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("***** received from remote message router: " + message);
@@ -424,7 +431,15 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
       if (reconnectionInfo == null) {
         LOGGER.info("no reconnection information for remote peer at " + message.getRecipientContainerName());
       } else {
-        LOGGER.info("peer has shutdown " + message.getRecipientQualifiedName() + " - attempting reconnection to " + reconnectionInfo.containerName);
+        final long waitMillis = 15000;
+        LOGGER.info("peer has shutdown " + message.getRecipientQualifiedName()
+                + " - attempting reconnection to " + reconnectionInfo.containerName
+                + " in " + ((int) (waitMillis/1000)) + " seconds");
+        try {
+          Thread.sleep(waitMillis);
+        } catch (InterruptedException ex) {
+          // ignore
+        }
         channel = reopenChannelToPeerContainer(reconnectionInfo);
       }
     }
@@ -432,7 +447,9 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
       if (message.getOperation().equals(AHCSConstants.SEED_CONNECTION_REQUEST_INFO)) {
         final String hostName = message.get(AHCSConstants.MSG_PARM_HOST_NAME).toString();
         final int port = (Integer) message.get(AHCSConstants.SEED_CONNECTION_REQUEST_INFO_PORT);
-        LOGGER.info("retrieving X.509 security info for " + message.getSenderQualifiedName());
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("retrieving X.509 security info for " + message.getSenderQualifiedName());
+        }
         final X509SecurityInfo x509SecurityInfo;
         try {
           x509SecurityInfo = X509Utils.getX509SecurityInfo(

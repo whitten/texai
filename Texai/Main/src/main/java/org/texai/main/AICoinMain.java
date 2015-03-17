@@ -241,6 +241,7 @@ public class AICoinMain {
       nodeRuntime.addFilteredOperation(AHCSConstants.DEPLOY_FILES_TASK);
       nodeRuntime.addFilteredOperation(AHCSConstants.JOIN_ACKNOWLEDGED_TASK);
       nodeRuntime.addFilteredOperation(AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO);
+      nodeRuntime.addFilteredOperation(AHCSConstants.KEEP_ALIVE_ACKNOWLEDGED_TASK);
       nodeRuntime.addFilteredOperation(AHCSConstants.KEEP_ALIVE_INFO);
       nodeRuntime.addFilteredOperation(AHCSConstants.NETWORK_JOIN_COMPLETE_INFO);
       nodeRuntime.addFilteredOperation(AHCSConstants.NETWORK_JOIN_COMPLETE_SENSATION);

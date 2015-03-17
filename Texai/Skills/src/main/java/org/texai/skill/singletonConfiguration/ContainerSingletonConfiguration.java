@@ -369,7 +369,7 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
             getRole().getX509Certificate());
     // set timeout
     setMessageReplyTimeout(
-            receivedMessage,
+            null, // receivedMessage, null to prevent too-long messages
             connectionRequestMessage,
             10000, // timeoutMillis
             true, // isRecoverable

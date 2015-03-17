@@ -163,7 +163,7 @@ public class Message implements Serializable, Comparable<Message> {
     parameterDictionary.entrySet().stream().forEach((Entry<String, Object> parameter) -> {
       final String name = parameter.getKey();
       final Object value = parameter.getValue();
-      assert value instanceof Serializable : "parameter value must be marked serializable: " + value;
+      assert Serializable.class.isAssignableFrom(value.getClass()) : "parameter value must be marked serializable: " + value;
       this.parameterDictionary.put(name, value);
     });
     this.version = version;
@@ -318,7 +318,7 @@ public class Message implements Serializable, Comparable<Message> {
     parameterDictionary.entrySet().stream().forEach((parameter) -> {
       final String name = parameter.getKey();
       final Object value = parameter.getValue();
-      assert value instanceof Serializable : "parameter value must be marked serializable: " + value;
+      assert Serializable.class.isAssignableFrom(value.getClass()) : "parameter value must be marked serializable: " + value;
       this.parameterDictionary.put(name, value);
     });
     this.version = version;
@@ -714,7 +714,7 @@ public class Message implements Serializable, Comparable<Message> {
                 .append(entry.getKey())
                 .append('=');
         final Object value = entry.getValue();
-        if (value instanceof X509Certificate) {
+        if (X509Certificate.class.isAssignableFrom(value.getClass())) {
           stringBuilder.append('[').append(((X509Certificate) value).getSubjectDN()).append(']');
         } else if (value instanceof byte[]) {
           stringBuilder.append("byte[](length=").append(((byte[]) entry.getValue()).length).append(")");
@@ -764,9 +764,11 @@ public class Message implements Serializable, Comparable<Message> {
     return stringBuilder.toString();
   }
 
-  /** Returns a brief string representation of the given messages.
+  /**
+   * Returns a brief string representation of the given messages.
    *
    * @param messages the given messages
+   *
    * @return a brief string representation of the given messages
    */
   public static String toBriefString(final Collection<Message> messages) {
@@ -1082,7 +1084,7 @@ public class Message implements Serializable, Comparable<Message> {
 
     try (final ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(filePath))) {
       final Object result = objectInputStream.readObject();
-      assert result instanceof Message;
+      assert Message.class.isAssignableFrom(result.getClass());
       return (Message) result;
     } catch (IOException | ClassNotFoundException ex) {
       throw new TexaiException(ex);

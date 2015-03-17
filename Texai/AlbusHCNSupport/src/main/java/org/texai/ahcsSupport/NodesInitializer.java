@@ -109,8 +109,8 @@ public final class NodesInitializer {
    * @param keyStorePassword the keystore password, which is not persisted
    * @param nodeRuntime the node runtime
    * @param keyStoreFilePath the keystore path, which is different for test vs production
-   * @param containerConfigurationCertificateFilePath the output path for the container configuration role's certificate,
-   * which is different for test vs production
+   * @param containerConfigurationCertificateFilePath the output path for the container configuration role's certificate, which is different
+   * for test vs production
    */
   public NodesInitializer(
           final boolean isClassExistsTested,
@@ -362,7 +362,9 @@ public final class NodesInitializer {
 
     //TODO create a write-only keystore
     try {
-      LOGGER.info("  getting the keystore " + keyStoreFilePath);
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("  getting the keystore " + keyStoreFilePath);
+      }
       keyStore = X509Utils.findOrCreateUberKeyStore(keyStoreFilePath, keyStorePassword);
       try (final FileOutputStream keyStoreOutputStream = new FileOutputStream(new File(keyStoreFilePath))) {
         keyStore.store(keyStoreOutputStream, keyStorePassword);
@@ -749,7 +751,7 @@ public final class NodesInitializer {
   /**
    * Contains the fields required to construct a node instance.
    */
-static  class NodeFieldsHolder implements Comparable<NodeFieldsHolder> {
+  static class NodeFieldsHolder implements Comparable<NodeFieldsHolder> {
 
     // the node qualifiedName which must end in "Agent"
     String name;
@@ -765,7 +767,9 @@ static  class NodeFieldsHolder implements Comparable<NodeFieldsHolder> {
     // the active node and all other nodes having the same name are inactive
     boolean isNetworkSingleton;
 
-    /** Constructs a new NodeFieldsHolder instance. */
+    /**
+     * Constructs a new NodeFieldsHolder instance.
+     */
     NodeFieldsHolder() {
       name = null;
       missionDescription = null;
@@ -784,7 +788,8 @@ static  class NodeFieldsHolder implements Comparable<NodeFieldsHolder> {
       return this.name.compareTo(other.name);
     }
 
-    /** Returns a hash code for this object.
+    /**
+     * Returns a hash code for this object.
      *
      * @return a hash code for this object
      */
@@ -795,9 +800,11 @@ static  class NodeFieldsHolder implements Comparable<NodeFieldsHolder> {
       return hash;
     }
 
-    /** Returns whether some other object equals this one.
+    /**
+     * Returns whether some other object equals this one.
      *
      * @param obj the other object
+     *
      * @return whether some other object equals this one
      */
     @Override
@@ -841,7 +848,7 @@ static  class NodeFieldsHolder implements Comparable<NodeFieldsHolder> {
   /**
    * Contains the fields required to construct a role instance.
    */
-static  class RoleFieldsHolder implements Comparable<RoleFieldsHolder> {
+  static class RoleFieldsHolder implements Comparable<RoleFieldsHolder> {
 
     // the qualified role name, i.e. container.nodename.rolename
     String qualifiedName;
@@ -862,7 +869,9 @@ static  class RoleFieldsHolder implements Comparable<RoleFieldsHolder> {
     // during remote communication
     X509SecurityInfo x509SecurityInfo;
 
-    /** Constructs a new RoleFieldsHolder instance. */
+    /**
+     * Constructs a new RoleFieldsHolder instance.
+     */
     RoleFieldsHolder() {
       qualifiedName = null;
       description = null;
@@ -887,7 +896,8 @@ static  class RoleFieldsHolder implements Comparable<RoleFieldsHolder> {
       return this.qualifiedName.compareTo(other.qualifiedName);
     }
 
-    /** Returns a hash code for this object.
+    /**
+     * Returns a hash code for this object.
      *
      * @return a hash code for this object
      */
@@ -898,9 +908,11 @@ static  class RoleFieldsHolder implements Comparable<RoleFieldsHolder> {
       return hash;
     }
 
-    /** Returns whether some other object equals this one.
+    /**
+     * Returns whether some other object equals this one.
      *
      * @param obj the other object
+     *
      * @return whether some other object equals this one
      */
     @Override

@@ -100,9 +100,11 @@ public abstract class AbstractSkill {
     return true;
   }
 
-  /** Returns whether the message should be silently dropped in the case that it is a redundant one-time operation.
+  /**
+   * Returns whether the message should be silently dropped in the case that it is a redundant one-time operation.
    *
    * @param message the given message specifying the operation
+   *
    * @return whether the message should be silently dropped in the case that it is a redundant one-time operation
    */
   protected boolean isRedundantOneTimeOperationSilentlyDropped(final Message message) {
@@ -487,11 +489,11 @@ public abstract class AbstractSkill {
     if (isUnitTest.get()) {
       role.propagateOperationToChildRoles(
               receivedMessage,
-            this.getClassName()); // senderService
+              this.getClassName()); // senderService
     } else {
       role.propagateOperationToChildRolesSeparateThreads(
               receivedMessage,
-            this.getClassName()); // senderService
+              this.getClassName()); // senderService
     }
   }
 
@@ -520,10 +522,10 @@ public abstract class AbstractSkill {
     assert receivedMessage != null : "receivedMessage must not be null";
 
     final Message operationNotPermittedInfoMessage = Message.operationNotPermittedMessage(
-              receivedMessage, // receivedMessage
-              this); // skill
+            receivedMessage, // receivedMessage
+            this); // skill
     sendMessage(receivedMessage, operationNotPermittedInfoMessage);
-}
+  }
 
   /**
    * Sets a message reply timeout for the given sent-by-self message. Usually the reply is received before the timeout has elapsed, and
@@ -577,7 +579,9 @@ public abstract class AbstractSkill {
       final MessageTimeOutInfo messageTimeOutInfo = messageTimeOutInfoDictionary.remove(replyWith);
       assert messageTimeOutInfo != null : "inReplyTo: " + replyWith
               + "\nmessageTimeOutInfoDictionary: " + messageTimeOutInfoDictionary;
-      getLogger().info("removed message timeout for " + messageTimeOutInfo + ", \nkey replyWith: " + replyWith);
+      if (getLogger().isDebugEnabled()) {
+        getLogger().debug("removed message timeout for " + messageTimeOutInfo + ", \nkey replyWith: " + replyWith);
+      }
       messageTimeOutInfo.messageTimeoutTask.cancel();
     }
   }
