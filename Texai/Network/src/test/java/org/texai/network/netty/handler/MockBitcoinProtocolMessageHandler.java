@@ -9,6 +9,7 @@
 package org.texai.network.netty.handler;
 
 import com.google.bitcoin.core.Message;
+import com.google.bitcoin.core.NetworkParameters;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
 import org.jboss.netty.channel.Channel;
@@ -33,10 +34,14 @@ public final class MockBitcoinProtocolMessageHandler extends AbstractBitcoinProt
   /**
    * Constructs a new MockBitcoinProtocolMessageHandler instance.
    *
+   * @param networkParameters the network parameters, e.g. MainNetParams or TestNet3Params
    * @param clientResume_lock the lock that allows the client to resume when the messaging is done, or null if this is the client side
    * handler
    */
-  public MockBitcoinProtocolMessageHandler(final Object clientResume_lock) {
+  public MockBitcoinProtocolMessageHandler(
+          final NetworkParameters networkParameters,
+          final Object clientResume_lock) {
+    super(networkParameters);
 
     this.clientResume_lock = clientResume_lock;
   }

@@ -12,6 +12,7 @@ package org.texai.network.netty;
 
 import com.google.bitcoin.core.BitcoinSerializer;
 import com.google.bitcoin.core.Message;
+import com.google.bitcoin.core.NetworkParameters;
 import com.google.bitcoin.core.VersionMessage;
 import com.google.bitcoin.params.MainNetParams;
 import org.texai.network.netty.utils.ConnectionUtils;
@@ -61,11 +62,13 @@ public class ConnectionUtils2Test {
   @BeforeClass
   public static void setUpClass() throws Exception {
     LOGGER.info("createBitcoinProtocolServer");
+    final NetworkParameters networkParameters = new MainNetParams();
     final AbstractBitcoinProtocolMessageHandlerFactory bitcoinProtocolMessageHandlerFactory
-            = new MockBitcoinProtocolMessageHandlerFactory(clientResume_lock);
+            = new MockBitcoinProtocolMessageHandlerFactory(networkParameters, clientResume_lock);
     serverBootstrap = ConnectionUtils.createBitcoinProtocolServer(
             SERVER_PORT,
             bitcoinProtocolMessageHandlerFactory,
+            networkParameters,
             EXECUTOR, // bossExecutor
             EXECUTOR); // workerExecutor
     Logger.getLogger(BitcoinProtocolEncoder.class).setLevel(Level.DEBUG);
@@ -96,8 +99,11 @@ public class ConnectionUtils2Test {
   public void testOpenBitcoinProtocolConnection() {
     LOGGER.info("openBitcoinProtocolConnection");
     InetSocketAddress inetSocketAddress = new InetSocketAddress("localhost", SERVER_PORT);
+    final NetworkParameters networkParameters = new MainNetParams();
     final AbstractBitcoinProtocolMessageHandler bitcoinProtocolMessageHandler
-            = new MockBitcoinProtocolMessageHandler(null);
+            = new MockBitcoinProtocolMessageHandler(
+                    networkParameters,
+                    null);
     final Channel channel = ConnectionUtils.openBitcoinProtocolConnection(
             inetSocketAddress,
             bitcoinProtocolMessageHandler,

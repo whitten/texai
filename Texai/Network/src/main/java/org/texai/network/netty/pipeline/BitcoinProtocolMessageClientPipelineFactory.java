@@ -8,6 +8,7 @@
  */
 package org.texai.network.netty.pipeline;
 
+import com.google.bitcoin.core.NetworkParameters;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
 import org.jboss.netty.channel.ChannelPipeline;
@@ -45,8 +46,8 @@ public final class BitcoinProtocolMessageClientPipelineFactory {
     assert bitcoinProtcolMessageHandler != null : "bitcoinProtcolMessageHandler must not be null";
 
     final ChannelPipeline channelPipeline = Channels.pipeline();
-    channelPipeline.addLast("decoder", new BitcoinProtocolDecoder());
-    channelPipeline.addLast("encoder", new BitcoinProtocolEncoder());
+    channelPipeline.addLast("decoder", new BitcoinProtocolDecoder(bitcoinProtcolMessageHandler.getNetworkParameters()));
+    channelPipeline.addLast("encoder", new BitcoinProtocolEncoder(bitcoinProtcolMessageHandler.getNetworkParameters()));
     channelPipeline.addLast("bitcoin-handler", bitcoinProtcolMessageHandler);
     LOGGER.info("configured Bitcoin protocol message pipeline: " + channelPipeline);
     return channelPipeline;

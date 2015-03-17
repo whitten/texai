@@ -142,9 +142,8 @@ public class PortUnificationHandler extends FrameDecoder {
     LOGGER.info("switching to HTTP channel pipeline from: " + channelPipeline);
     final Collection<ChannelHandler> channelHandlers = channelPipeline.toMap().values();
     for (final ChannelHandler channelHandler : channelHandlers) {
-      if (!(channelHandler instanceof SslHandler
-              || channelHandler instanceof PortUnificationHandler)) {
-        channelPipeline.remove(channelHandler);
+      if (!(SslHandler.class.isAssignableFrom(channelHandler.getClass())
+              || PortUnificationHandler.class.isAssignableFrom(channelHandler.getClass()))) {
       }
     }
     channelPipeline.addLast("encoder", new HttpResponseEncoder());
@@ -153,30 +152,6 @@ public class PortUnificationHandler extends FrameDecoder {
     channelPipeline.addLast("http-request-handler", httpRequestHandler);
     channelPipeline.remove(this);
     LOGGER.info("HTTP channel pipeline: " + channelPipeline);
-  }
-
-  /**
-   * Dynamically switches the channel pipeline to handle an HTTP message.
-   *
-   * @param channelHandlerContext the channel handler context
-   */
-  private void switchToBitcoinProtocol(final ChannelHandlerContext channelHandlerContext) {
-    //Preconditions
-    assert channelHandlerContext != null : "channelHandlerContext must not be null";
-
-    final ChannelPipeline channelPipeline = channelHandlerContext.getPipeline();
-    LOGGER.info("switching to Bitcoin protocol channel pipeline from: " + channelPipeline);
-    final Collection<ChannelHandler> channelHandlers = channelPipeline.toMap().values();
-    for (final ChannelHandler channelHandler : channelHandlers) {
-      if (!(channelHandler instanceof SslHandler
-              || channelHandler instanceof PortUnificationHandler)) {
-        channelPipeline.remove(channelHandler);
-      }
-    }
-    channelPipeline.addLast("encoder", new BitcoinProtocolEncoder());
-    channelPipeline.addLast("decoder", new BitcoinProtocolDecoder());
-    channelPipeline.remove(this);
-    LOGGER.info("Bitcoin protocol channel pipeline: " + channelPipeline);
   }
 
   /**
@@ -194,8 +169,8 @@ public class PortUnificationHandler extends FrameDecoder {
     LOGGER.info("switching to Albus HCN channel pipeline from: " + channelPipeline);
     final Collection<ChannelHandler> channelHandlers = channelPipeline.toMap().values();
     for (final ChannelHandler channelHandler : channelHandlers) {
-      if (!(channelHandler instanceof SslHandler
-              || channelHandler instanceof PortUnificationHandler)) {
+      if (!(SslHandler.class.isAssignableFrom(channelHandler.getClass())
+              || PortUnificationHandler.class.isAssignableFrom(channelHandler.getClass()))) {
         channelPipeline.remove(channelHandler);
       }
     }

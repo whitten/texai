@@ -68,7 +68,7 @@ public final class MockAlbusHCSMessageHandler extends AbstractAlbusHCSMessageHan
       LOGGER.info("server received messageEvent: " + messageEvent);
     }
     final Channel channel = channelHandlerContext.getChannel();
-    assert messageEvent.getMessage() instanceof Message;
+    assert Message.class.isAssignableFrom(messageEvent.getMessage().getClass());
     final Message message = (Message) messageEvent.getMessage();
     int count = (Integer) message.get("count");
     LOGGER.info("count: " + count);

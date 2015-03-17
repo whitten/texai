@@ -13,8 +13,6 @@ import com.google.bitcoin.core.Pong;
 import com.google.bitcoin.core.Transaction;
 import com.google.bitcoin.core.Utils;
 import com.google.bitcoin.core.VersionMessage;
-import com.google.bitcoin.net.ClientConnectionManager;
-import com.google.bitcoin.net.NioClientManager;
 import com.google.bitcoin.utils.Threading;
 import java.net.InetSocketAddress;
 import java.util.List;
@@ -30,7 +28,6 @@ import org.jboss.netty.channel.MessageEvent;
 import org.texai.ahcs.NodeRuntime;
 import org.texai.network.netty.handler.AbstractBitcoinProtocolMessageHandler;
 import org.texai.network.netty.utils.ConnectionUtils;
-import org.texai.util.TexaiException;
 
 /**
  * Created on Sep 9, 2014, 7:41:47 AM.
@@ -96,7 +93,9 @@ public class LocalBitcoindAdapter implements PeerEventListener {
             networkParameters,
             0, // newBestHeight
             true); // relayTxesBeforeFilter
-    bitcoinProtocolMessageHandler = new BitcoinProtocolMessageHandler(this);
+    bitcoinProtocolMessageHandler = new BitcoinProtocolMessageHandler(
+            this,
+            networkParameters);
   }
 
   /**
@@ -121,23 +120,29 @@ public class LocalBitcoindAdapter implements PeerEventListener {
     // Blocking close of all sockets.
   }
 
-  /** Provides a Bitcoin protocol message handler. */
+  /**
+   * Provides a Bitcoin protocol message handler.
+   */
   static class BitcoinProtocolMessageHandler extends AbstractBitcoinProtocolMessageHandler {
 
     // the parent local bitcoind adapter
     final LocalBitcoindAdapter localBitcoindAdapter;
 
-    /** Constructs a new BitcoinProtocolMessageHandler instance.
+    /**
+     * Constructs a new BitcoinProtocolMessageHandler instance.
      *
      * @param localBitcoindAdapter the parent local bitcoind adapter
+     * @param networkParameters the network parameters, e.g. MainNetParams or TestNet3Params
      */
-    BitcoinProtocolMessageHandler(final LocalBitcoindAdapter localBitcoindAdapter) {
+    BitcoinProtocolMessageHandler(
+            final LocalBitcoindAdapter localBitcoindAdapter,
+            final NetworkParameters networkParameters) {
+      super(networkParameters);
       //Preconditions
       assert localBitcoindAdapter != null : "localBitcoindAdapter must not be null";
 
       this.localBitcoindAdapter = localBitcoindAdapter;
     }
-
 
     /**
      * Catches a channel exception.
@@ -169,7 +174,7 @@ public class LocalBitcoindAdapter implements PeerEventListener {
             final MessageEvent messageEvent) {
       //Preconditions
       assert messageEvent != null : "messageEvent must not be null";
-      assert messageEvent.getMessage() instanceof Message;
+      assert Message.class.isAssignableFrom(messageEvent.getMessage().getClass());
 
       final Message message = (Message) messageEvent.getMessage();
       if (LOGGER.isDebugEnabled()) {
@@ -180,21 +185,22 @@ public class LocalBitcoindAdapter implements PeerEventListener {
 
   /**
    * Connects to the local bitcoind instance.
+   *
    * @return the communications channel with the local bitcoind instance
    */
-  protected  Channel connectToLocalBitcoind() {
+  protected Channel connectToLocalBitcoind() {
 
     final InetSocketAddress inetSocketAddress = PeerAddress.localhost(networkParameters).toSocketAddress();
-    final Channel channel = ConnectionUtils.openBitcoinProtocolConnection(
-          inetSocketAddress,
-          bitcoinProtocolMessageHandler,
-          nodeRuntime.getExecutor(), // bossExecutor
-          nodeRuntime.getExecutor()); // workerExecutor
+    final Channel channel1 = ConnectionUtils.openBitcoinProtocolConnection(
+            inetSocketAddress,
+            bitcoinProtocolMessageHandler,
+            nodeRuntime.getExecutor(), // bossExecutor
+            nodeRuntime.getExecutor()); // workerExecutor
 
     versionMessage.time = Utils.currentTimeMillis() / 1000;
 
     LOGGER.info("connected to aicoined");
-    return channel;
+    return channel1;
   }
 
   /**

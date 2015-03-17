@@ -8,6 +8,7 @@
  */
 package org.texai.network.netty.pipeline;
 
+import com.google.bitcoin.core.NetworkParameters;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
 import org.jboss.netty.channel.ChannelPipeline;
@@ -29,18 +30,26 @@ public class BitcoinProtocolChannelPipelineFactory implements ChannelPipelineFac
   private static final Logger LOGGER = Logger.getLogger(BitcoinProtocolChannelPipelineFactory.class);
   // the Bitcoin protocol message handler factory
   private final AbstractBitcoinProtocolMessageHandlerFactory bitcoinProtocolMessageHandlerFactory;
+  // the network parameters, e.g. MainNetParams or TestNet3Params
+  private final NetworkParameters networkParameters;
 
   /**
    * Constructs a new PortUnificationChannelPipelineFactory instance.
    *
    * @param bitcoinProtocolMessageHandlerFactory the Bitcoin protocol message handler factory
+   * @param networkParameters the network parameters, e.g. MainNetParams or TestNet3Params
    *
    */
-  public BitcoinProtocolChannelPipelineFactory(final AbstractBitcoinProtocolMessageHandlerFactory bitcoinProtocolMessageHandlerFactory) {
+  public BitcoinProtocolChannelPipelineFactory(
+          final AbstractBitcoinProtocolMessageHandlerFactory bitcoinProtocolMessageHandlerFactory,
+          final NetworkParameters networkParameters
+  ) {
     //Preconditions
     assert bitcoinProtocolMessageHandlerFactory != null : "x509SecurityInfo must not be null";
+    assert networkParameters != null : "networkParameters must not be null";
 
     this.bitcoinProtocolMessageHandlerFactory = bitcoinProtocolMessageHandlerFactory;
+    this.networkParameters = networkParameters;
   }
 
   /**
@@ -51,8 +60,8 @@ public class BitcoinProtocolChannelPipelineFactory implements ChannelPipelineFac
   @Override
   public ChannelPipeline getPipeline() {
     final ChannelPipeline channelPipeline = Channels.pipeline();
-    channelPipeline.addLast("encoder", new BitcoinProtocolEncoder());
-    channelPipeline.addLast("decoder", new BitcoinProtocolDecoder());
+    channelPipeline.addLast("encoder", new BitcoinProtocolEncoder(networkParameters));
+    channelPipeline.addLast("decoder", new BitcoinProtocolDecoder(networkParameters));
     channelPipeline.addLast("bitcoin-handler", bitcoinProtocolMessageHandlerFactory.getHandler());
     LOGGER.info(channelPipeline);
     return channelPipeline;

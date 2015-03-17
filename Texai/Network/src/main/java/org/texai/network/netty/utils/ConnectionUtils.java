@@ -8,6 +8,7 @@
  */
 package org.texai.network.netty.utils;
 
+import com.google.bitcoin.core.NetworkParameters;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -191,6 +192,7 @@ public final class ConnectionUtils {
    *
    * @param port the server port
    * @param bitcoinProtocolMessageHandlerFactory the Bitcoin protocol message handler factory
+   * @param networkParameters the network parameters, e.g. MainNetParams or TestNet3Params
    * @param bossExecutor the Executor which will execute the boss threads
    * @param workerExecutor the Executor which will execute the I/O worker threads
    *
@@ -199,6 +201,7 @@ public final class ConnectionUtils {
   public static ServerBootstrap createBitcoinProtocolServer(
           final int port,
           final AbstractBitcoinProtocolMessageHandlerFactory bitcoinProtocolMessageHandlerFactory,
+          final NetworkParameters networkParameters,
           final Executor bossExecutor,
           final Executor workerExecutor) {
     //Preconditions
@@ -208,7 +211,9 @@ public final class ConnectionUtils {
 
     // configure the server channel pipeline factory
     final ChannelPipelineFactory channelPipelineFactory
-            = new BitcoinProtocolChannelPipelineFactory(bitcoinProtocolMessageHandlerFactory);
+            = new BitcoinProtocolChannelPipelineFactory(
+                    bitcoinProtocolMessageHandlerFactory,
+            networkParameters);
 
     // configure the server
     final ServerBootstrap serverBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(

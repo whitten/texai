@@ -5,6 +5,7 @@ package org.texai.network.netty.handler;
 
 import com.google.bitcoin.core.BitcoinSerializer;
 import com.google.bitcoin.core.Message;
+import com.google.bitcoin.core.NetworkParameters;
 import com.google.bitcoin.params.MainNetParams;
 import java.io.IOException;
 import static org.jboss.netty.buffer.ChannelBuffers.dynamicBuffer;
@@ -36,9 +37,13 @@ public class BitcoinProtocolEncoder extends OneToOneEncoder {
   /**
    * Creates a new BitcoinProtocolEncoder instance.
    *
+   * @param networkParameters the network parameters, e.g. MainNetParams or TestNet3Params
    */
-  public BitcoinProtocolEncoder() {
-    bitcoinSerializer = new BitcoinSerializer(new MainNetParams());
+  public BitcoinProtocolEncoder(final NetworkParameters networkParameters) {
+    //Preconditions
+    assert networkParameters != null : "networkParameters must not be null";
+
+    bitcoinSerializer = new BitcoinSerializer(networkParameters);
   }
 
   /**

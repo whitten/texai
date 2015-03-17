@@ -11,6 +11,7 @@
 package org.texai.network.netty.handler;
 
 import com.google.bitcoin.core.BitcoinSerializer;
+import com.google.bitcoin.core.NetworkParameters;
 import static com.google.bitcoin.core.Utils.bytesToHexString;
 import com.google.bitcoin.params.MainNetParams;
 import java.io.IOException;
@@ -40,8 +41,12 @@ public class BitcoinProtocolDecoder extends FrameDecoder {
   /**
    * Creates a new decoder with the specified maximum object size.
    *
+   * @param networkParameters the network parameters, e.g. MainNetParams or TestNet3Params
    */
-  public BitcoinProtocolDecoder() {
+  public BitcoinProtocolDecoder(final NetworkParameters networkParameters) {
+    //Preconditions
+    assert networkParameters != null : "networkParameters must not be null";
+
     bitcoinSerializer = new BitcoinSerializer(new MainNetParams());
   }
 
@@ -79,15 +84,22 @@ public class BitcoinProtocolDecoder extends FrameDecoder {
       // indicate that this frame is incomplete
       return null;
     }
-    // mainnet magic bytes
+    // network magic bytes
     final byte protocolByte1 = channelBuffer.readByte();
     final byte protocolByte2 = channelBuffer.readByte();
     final byte protocolByte3 = channelBuffer.readByte();
     final byte protocolByte4 = channelBuffer.readByte();
-    if (protocolByte1 != -7
+    if ( // mainnet
+            (protocolByte1 != -7
             && protocolByte2 != -66
             && protocolByte3 != -76
-            && protocolByte4 != -39) {
+            && protocolByte4 != -39)
+            || //TODO
+            // testnet
+            (protocolByte1 != -7
+            && protocolByte2 != -66
+            && protocolByte3 != -76
+            && protocolByte4 != -39)) {
       LOGGER.warn("wrong Bitcoin protocol bytes");
     }
 
