@@ -489,7 +489,9 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
     }
     assert channel.isConnected() : "channel must be connected";
     assert channel.isReadable() : "channel must be readable";
-    assert channel.isWritable() : "channel must be writable";
+    if (!channel.isWritable()) {
+      LOGGER.info("queuing outbound message until the channel is writable");
+    }
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("transmitting outbound message on channel " + channel);
     }

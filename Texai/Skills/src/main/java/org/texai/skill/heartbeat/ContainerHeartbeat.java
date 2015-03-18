@@ -589,7 +589,9 @@ public final class ContainerHeartbeat extends AbstractSkill {
             10000, // timeoutMillis
             true, // isRecoverable, timeout handled by self
             null); // recoveryAction
-    LOGGER.info(getContainerName() + " sending keep-alive to " + Node.extractContainerName(outboundHeartbeatInfo.role.getParentQualifiedName()));
+    LOGGER.info(getContainerName() + " sending keep-alive to "
+            + Node.extractContainerName(outboundHeartbeatInfo.role.getParentQualifiedName())
+            + " at " + (new DateTime()).toString("MM/dd/yyyy hh:mm a"));
     sendMessageViaSeparateThread(
             null, // received message, which is null because this sent message is triggered by a timer
             keepAliveInfoMessage);

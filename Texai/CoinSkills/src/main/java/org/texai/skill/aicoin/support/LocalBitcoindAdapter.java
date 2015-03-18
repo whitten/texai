@@ -163,7 +163,7 @@ public class LocalBitcoindAdapter implements PeerEventListener {
     }
 
     /**
-     * Receives a Netty message object from a remote message router peer. The received message is verified before relaying to the role.
+     * Receives a bitcoin protocol message.
      *
      * @param channelHandlerContext the channel handler context
      * @param messageEvent the message event
@@ -199,7 +199,7 @@ public class LocalBitcoindAdapter implements PeerEventListener {
 
     versionMessage.time = Utils.currentTimeMillis() / 1000;
 
-    LOGGER.info("connected to aicoined");
+    LOGGER.info("Connected to aicoind.");
     return channel1;
   }
 

@@ -405,7 +405,9 @@ public class NetworkDeployment extends AbstractNetworkSingletonSkill {
       }
       for (final File file : files) {
         if (file.getName().equals("deployment.log")) {
-          LOGGER.info("Files in the deployment directory have already been deployed.");
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Files in the deployment directory have already been deployed.");
+          }
           return;
         }
       }

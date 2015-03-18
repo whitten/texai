@@ -74,7 +74,7 @@ public class XAIOperationTest {
             false); // areRemoteCommunicationsPermitted
     final AbstractSkill xaiOperation = skillTestHarness.getSkill(skillClassName);
     assertNotNull(xaiOperation);
-    assertTrue(xaiOperation instanceof XAIOperation);
+    assertTrue(XAIOperation.class.isAssignableFrom(xaiOperation.getClass()));
     assertTrue(xaiOperation.isUnitTest());
     assertEquals(0, xaiOperation.getRole().getChildQualifiedNames().size());
   }
@@ -132,7 +132,7 @@ public class XAIOperationTest {
     skillTestHarness.setSkillState(AHCSConstants.State.READY, skillClassName);
     final AbstractSkill xaiOperation = skillTestHarness.getSkill(XAIOperation.class.getName());
     assertNotNull(xaiOperation);
-    assertTrue(xaiOperation instanceof XAIOperation);
+    assertTrue(XAIOperation.class.isAssignableFrom(xaiOperation.getClass()));
     assertTrue(xaiOperation.isUnitTest());
     assertEquals(0, xaiOperation.getRole().getChildQualifiedNames().size());
     final Message performTaskMessage = new Message(
