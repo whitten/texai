@@ -8,7 +8,6 @@
  */
 package org.texai.network.netty.pipeline;
 
-import com.google.bitcoin.core.NetworkParameters;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
 import org.jboss.netty.channel.ChannelPipeline;
