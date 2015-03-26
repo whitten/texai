@@ -5,11 +5,8 @@
  */
 package org.texai.skill.aicoin.support;
 
-import com.google.bitcoin.core.AddressMessage;
 import com.google.bitcoin.core.Message;
-import com.google.bitcoin.core.PeerAddress;
-import com.google.bitcoin.core.Pong;
-import com.google.bitcoin.core.VersionMessage;
+import com.google.bitcoin.params.MainNetParams;
 import java.io.File;
 import org.apache.log4j.Logger;
 import org.junit.After;
@@ -17,7 +14,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.texai.ahcs.NodeRuntime;
 import org.texai.util.NetworkUtils;
 
@@ -31,10 +27,6 @@ public class LocalBitcoindAdapterTest implements BitcoinMessageReceiver {
   public static final Logger LOGGER = Logger.getLogger(LocalBitcoindAdapterTest.class);
   // the indicator whether the test computer is configured to run this unit test
   private static boolean isConfiguredForTestSuperPeer;
-  // the received message from bitcoind
-  private Message receivedMessage;
-  // the message response lock
-  private final Object response_lock = new Object();
 
   public LocalBitcoindAdapterTest() {
   }
@@ -110,7 +102,7 @@ public class LocalBitcoindAdapterTest implements BitcoinMessageReceiver {
             NetworkUtils.TEXAI_MAINNET); // networkName
 
     final LocalBitcoindAdapter localBitcoindAdapter = new LocalBitcoindAdapter(
-            new XAIMainNetParams(), // networkParameters
+            new MainNetParams(), // networkParameters
             this, // bitcoinMessageReceiver
             nodeRuntime);
     LOGGER.info("opening channel to aicoind");
@@ -118,68 +110,31 @@ public class LocalBitcoindAdapterTest implements BitcoinMessageReceiver {
 
     // exchange version messages with bitcoind
     localBitcoindAdapter.sendVersionMessageToLocalBitcoinCore();
-    synchronized (response_lock) {
-      try {
-        // wait at most 5 seconds for a response message
-        response_lock.wait(5000);
-      } catch (InterruptedException ex) {
-        // ignore
-      }
-    }
-    LOGGER.info("receivedMessage: (" + receivedMessage.getClass().getName() + ") " + receivedMessage);
-    assertTrue(VersionMessage.class.isAssignableFrom(receivedMessage.getClass()));
 
-    // send a getaddr message to bitcoind
-    receivedMessage = null;
-    localBitcoindAdapter.sendGetAddressMessageToLocalBitcoinCore();
-    synchronized (response_lock) {
       try {
-        // wait at most 5 seconds for a response message
-        response_lock.wait(5000);
+        // wait  30 seconds for a the version and addr response messages
+        Thread.sleep(30000);
       } catch (InterruptedException ex) {
         // ignore
       }
-    }
-    assertNotNull(receivedMessage);
-    LOGGER.info("receivedMessage: (" + receivedMessage.getClass().getName() + ") " + receivedMessage);
-    assertTrue(AddressMessage.class.isAssignableFrom(receivedMessage.getClass()));
-    final AddressMessage addressMessage = (AddressMessage) receivedMessage;
-    LOGGER.info("peer addresses ...");
-    addressMessage.getAddresses().stream().forEach((PeerAddress peerAddress) -> {
-      LOGGER.info("  " + peerAddress);
-    });
 
     // send a mempool message to bitcoind
-    receivedMessage = null;
     localBitcoindAdapter.sendMemoryPoolMessageToLocalBitcoinCore();
-    synchronized (response_lock) {
       try {
-        // wait at most 2 seconds for a response message
-        response_lock.wait(2000);
+        // wait 2 seconds for a response message
+        Thread.sleep(2000);
       } catch (InterruptedException ex) {
         // ignore
       }
-    }
-    if (receivedMessage == null) {
-      LOGGER.info("no response to mempool request meesage");
-    } else {
-      LOGGER.info("receivedMessage: (" + receivedMessage.getClass().getName() + ") " + receivedMessage);
-    final Pong pongMessage = (Pong) receivedMessage;
-    assertTrue(Pong.class.isAssignableFrom(pongMessage.getClass()));
-    }
 
     // send a ping message to bitcoind
-    receivedMessage = null;
     localBitcoindAdapter.sendPingMessageToLocalBitcoinCore();
-    synchronized (response_lock) {
       try {
         // wait at most 5 seconds for a response message
-        response_lock.wait(5000);
+        Thread.sleep(5000);
       } catch (InterruptedException ex) {
         // ignore
       }
-    }
-    LOGGER.info("receivedMessage: (" + receivedMessage.getClass().getName() + ") " + receivedMessage);
 
     localBitcoindAdapter.shutDown();
     LOGGER.info("test completed");
@@ -193,13 +148,6 @@ public class LocalBitcoindAdapterTest implements BitcoinMessageReceiver {
   @Override
   public void receiveMessageFromLocalBitcoind(Message message) {
     LOGGER.info("received: " + message);
-    this.receivedMessage = message;
-    synchronized (response_lock) {
-      if (response_lock != null) {
-        // release the waiting main test thread
-        response_lock.notifyAll();
-      }
-    }
   }
 
   class MockNodeRuntime extends NodeRuntime {

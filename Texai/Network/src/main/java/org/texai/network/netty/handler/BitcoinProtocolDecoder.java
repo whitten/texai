@@ -90,8 +90,8 @@ public class BitcoinProtocolDecoder extends FrameDecoder {
     final byte protocolByte3 = channelBuffer.readByte();
     final byte protocolByte4 = channelBuffer.readByte();
     if ( // mainnet
-            (protocolByte1 != -7
-            && protocolByte2 != -66
+            (protocolByte1 != -66
+            && protocolByte2 != -7
             && protocolByte3 != -76
             && protocolByte4 != -39)
             || //TODO

@@ -12,7 +12,7 @@ import com.google.bitcoin.core.Message;
  */
 public interface BitcoinMessageReceiver {
 
-  /** Receives an outbound bitcoin message from the local peer.
+  /** Receives an outbound bitcoin message from the local bitcoind instance.
    *
    * @param message the given bitcoin protocol message
    */

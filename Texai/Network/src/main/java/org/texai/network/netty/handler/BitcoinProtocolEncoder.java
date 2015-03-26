@@ -6,7 +6,6 @@ package org.texai.network.netty.handler;
 import com.google.bitcoin.core.BitcoinSerializer;
 import com.google.bitcoin.core.Message;
 import com.google.bitcoin.core.NetworkParameters;
-import com.google.bitcoin.params.MainNetParams;
 import java.io.IOException;
 import static org.jboss.netty.buffer.ChannelBuffers.dynamicBuffer;
 import org.apache.log4j.Logger;
@@ -67,7 +66,7 @@ public class BitcoinProtocolEncoder extends OneToOneEncoder {
     assert channelHandlerContext != null : "channelHandlerContext must not be null";
     assert channel != null : "channel must not be null";
     assert obj != null : "obj must not be null";
-    assert obj instanceof Message : "obj must be a Bitcoin protocol message";
+    assert Message.class.isAssignableFrom(obj.getClass()) : "obj must be a Bitcoin protocol message";
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("encoding: " + obj);

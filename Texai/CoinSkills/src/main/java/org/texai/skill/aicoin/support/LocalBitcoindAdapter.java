@@ -7,6 +7,8 @@ import com.google.bitcoin.core.NetworkParameters;
 import com.google.bitcoin.core.PeerAddress;
 import com.google.bitcoin.core.Ping;
 import com.google.bitcoin.core.VersionMessage;
+import com.google.bitcoin.params.MainNetParams;
+import com.google.bitcoin.params.TestNet3Params;
 import java.net.InetSocketAddress;
 import java.util.Random;
 import net.jcip.annotations.NotThreadSafe;
@@ -17,7 +19,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
-import org.texai.ahcs.NodeRuntime;
+import org.texai.ahcsSupport.skill.BasicNodeRuntime;
 import org.texai.network.netty.handler.AbstractBitcoinProtocolMessageHandler;
 import org.texai.network.netty.utils.ConnectionUtils;
 import org.texai.util.NetworkUtils;
@@ -43,8 +45,8 @@ public class LocalBitcoindAdapter extends SimpleChannelHandler {
   // the Bitcoin protocol message handler
   private final BitcoinProtocolMessageHandler bitcoinProtocolMessageHandler;
   // the node runtime
-  private final NodeRuntime nodeRuntime;
-  // the communications channel with the local aicoind instance
+  private final BasicNodeRuntime nodeRuntime;
+  // the communications channel with the local bitcoind instance
   private Channel channel;
   // the random number used for ping nonces
   private final Random random = new Random();
@@ -60,13 +62,13 @@ public class LocalBitcoindAdapter extends SimpleChannelHandler {
   public LocalBitcoindAdapter(
           final NetworkParameters networkParameters,
           final BitcoinMessageReceiver bitcoinMessageReceiver,
-          final NodeRuntime nodeRuntime) {
+          final BasicNodeRuntime nodeRuntime) {
     // Preconditions
     assert networkParameters != null : "networkParameters must not be null";
     assert bitcoinMessageReceiver != null : "bitcoinMessageReceiver must not be null";
     assert nodeRuntime != null : "nodeRuntime must not be null";
-    assert (nodeRuntime.getNetworkName().equals(NetworkUtils.TEXAI_MAINNET) && XAIMainNetParams.class.isAssignableFrom(networkParameters.getClass()))
-            || (nodeRuntime.getNetworkName().equals(NetworkUtils.TEXAI_TESTNET) && XAITestNet3Params.class.isAssignableFrom(networkParameters.getClass()));
+    assert (nodeRuntime.getNetworkName().equals(NetworkUtils.TEXAI_MAINNET) && MainNetParams.class.isAssignableFrom(networkParameters.getClass()))
+            || (nodeRuntime.getNetworkName().equals(NetworkUtils.TEXAI_TESTNET) && TestNet3Params.class.isAssignableFrom(networkParameters.getClass()));
 
     this.networkParameters = networkParameters;
     this.bitcoinMessageReceiver = bitcoinMessageReceiver;
@@ -89,7 +91,16 @@ public class LocalBitcoindAdapter extends SimpleChannelHandler {
    */
   public void shutDown() {
     LOGGER.info("shutDown");
-    channel.close();
+    getChannel().close();
+  }
+
+  /**
+   * Gets the communications channel with the local bitcoind instance.
+   *
+   * @return the communications channel with the local bitcoind instance
+   */
+  protected Channel getChannel() {
+    return channel;
   }
 
   /**
@@ -171,7 +182,9 @@ public class LocalBitcoindAdapter extends SimpleChannelHandler {
             nodeRuntime.getExecutor(), // bossExecutor
             nodeRuntime.getExecutor()); // workerExecutor
 
-    LOGGER.info("Connected to bitcoind.");
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Connected to bitcoind.");
+    }
     return channel1;
   }
 
@@ -183,10 +196,10 @@ public class LocalBitcoindAdapter extends SimpleChannelHandler {
   public void sendBitcoinMessageToLocalBitcoind(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
-    assert channel != null : "channel must not be null";
+    assert getChannel() != null : "channel must not be null";
 
     LOGGER.info("send bitcoin protocol message to local bitcoind instance: " + message);
-    final ChannelFuture channelFuture = channel.write(message);
+    final ChannelFuture channelFuture = getChannel().write(message);
 
     // wait for the outbound version message to be sent
     channelFuture.awaitUninterruptibly();
@@ -201,7 +214,7 @@ public class LocalBitcoindAdapter extends SimpleChannelHandler {
    */
   public void sendVersionMessageToLocalBitcoinCore() {
     //Preconditions
-    assert channel != null : "channel must not be null";
+    assert getChannel() != null : "channel must not be null";
 
     final Message versionMessage = new VersionMessage(
             networkParameters, // params
@@ -214,7 +227,7 @@ public class LocalBitcoindAdapter extends SimpleChannelHandler {
    */
   public void sendGetAddressMessageToLocalBitcoinCore() {
     //Preconditions
-    assert channel != null : "channel must not be null";
+    assert getChannel() != null : "channel must not be null";
 
     final Message getAddrMessage = new GetAddrMessage(
             networkParameters); // params
@@ -227,7 +240,7 @@ public class LocalBitcoindAdapter extends SimpleChannelHandler {
    */
   public void sendMemoryPoolMessageToLocalBitcoinCore() {
     //Preconditions
-    assert channel != null : "channel must not be null";
+    assert getChannel() != null : "channel must not be null";
 
     final Message memoryPoolMessage = new MemoryPoolMessage();
 
@@ -239,7 +252,7 @@ public class LocalBitcoindAdapter extends SimpleChannelHandler {
    */
   public void sendPingMessageToLocalBitcoinCore() {
     //Preconditions
-    assert channel != null : "channel must not be null";
+    assert getChannel() != null : "channel must not be null";
 
     final Message pingMessage = new Ping(random.nextLong());
 

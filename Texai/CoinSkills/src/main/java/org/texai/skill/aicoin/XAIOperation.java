@@ -1,5 +1,6 @@
 package org.texai.skill.aicoin;
 
+import com.google.bitcoin.params.MainNetParams;
 import java.util.UUID;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
@@ -139,9 +140,8 @@ public final class XAIOperation extends AbstractSkill implements BitcoinMessageR
       /**
        * Shutdown Aicoind Request Info
        *
-       * This information message is sent from ContainerOperationAgent.ContainerOperationRole when the application is shutting down,
-       * as a result of a loss of heartbeat communications.
-       * The child processes must be shutdown to enable the Java application to exit.
+       * This information message is sent from ContainerOperationAgent.ContainerOperationRole when the application is shutting down, as a
+       * result of a loss of heartbeat communications. The child processes must be shutdown to enable the Java application to exit.
        */
       case AHCSConstants.SHUTDOWN_AICOIND_REQUEST_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
@@ -199,7 +199,7 @@ public final class XAIOperation extends AbstractSkill implements BitcoinMessageR
   }
 
   /**
-   * Perform this role's mission, which is to manage the containers.
+   * Perform this role's mission, which is to operate the local aicoind instance.
    *
    * @param receivedMessage the received perform mission task message
    */
@@ -268,11 +268,21 @@ public final class XAIOperation extends AbstractSkill implements BitcoinMessageR
 
     @Override
     public void run() {
-      //TODO
-//      xaiOperation.localBitcoindAdapter = new LocalBitcoindAdapter(
-//              new XAIMainNetParams(), // networkParameters
-//              xaiOperation); // bitcoinMessageReceiver);
-//      xaiOperation.localBitcoindAdapter.startUp();
+      // wait 10 seconds for the QT wallet to open and initialize
+      try {
+        Thread.sleep(10000);
+      } catch (InterruptedException ex) {
+      }
+
+    final LocalBitcoindAdapter localBitcoindAdapter = new LocalBitcoindAdapter(
+            new MainNetParams(), // networkParameters
+            xaiOperation, // bitcoinMessageReceiver
+            xaiOperation.getNodeRuntime());
+    LOGGER.info("opening channel to aicoind");
+    localBitcoindAdapter.startUp();
+
+    // exchange version messages with bitcoind
+    localBitcoindAdapter.sendVersionMessageToLocalBitcoinCore();
     }
   }
 
@@ -390,7 +400,7 @@ public final class XAIOperation extends AbstractSkill implements BitcoinMessageR
    * @param message the given bitcoin protocol message
    */
   public void receiveMessageFromLocalBitcoind(final com.google.bitcoin.core.Message message) {
-    // send the outbound bitcoin message from the local peer to the Texai network recipient.
+    LOGGER.info("received from local aicoind: " + message);
 
   }
 
