@@ -24,10 +24,10 @@ import org.texai.util.TexaiException;
  * Copyright (C) 2014 Texai
  */
 @ThreadSafe
-public final class XAIMint extends AbstractNetworkSingletonSkill {
+public final class AICMint extends AbstractNetworkSingletonSkill {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(XAIMint.class);
+  private static final Logger LOGGER = Logger.getLogger(AICMint.class);
   // the timer
   private final Timer mintTimer;
   // the path to the aicoin-qt configuration and data directory
@@ -36,7 +36,7 @@ public final class XAIMint extends AbstractNetworkSingletonSkill {
   /**
    * Constructs a new XTCMint instance.
    */
-  public XAIMint() {
+  public AICMint() {
     mintTimer = new Timer(
             "mint timer", // name
             true); // isDaemon
@@ -73,7 +73,7 @@ public final class XAIMint extends AbstractNetworkSingletonSkill {
       /**
        * Initialize Task
        *
-       * This task message is sent from the parent XAINetworkOperationAgent.XAINetworkOperationRole. It is expected to be the first task
+       * This task message is sent from the parent AICNetworkOperationAgent.AICNetworkOperationRole. It is expected to be the first task
        * message that this role receives and it results in the role being initialized.
        */
       case AHCSConstants.INITIALIZE_TASK:
@@ -88,7 +88,7 @@ public final class XAIMint extends AbstractNetworkSingletonSkill {
       /**
        * Join Acknowledged Task
        *
-       * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.XAINetworkOperationRole. It indicates that
+       * This task message is sent from the network-singleton, parent AICNetworkOperationAgent.AICNetworkOperationRole. It indicates that
        * the parent is ready to converse with this role as needed.
        */
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
@@ -100,7 +100,7 @@ public final class XAIMint extends AbstractNetworkSingletonSkill {
       /**
        * Perform Mission Task
        *
-       * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.XAINetworkOperationRole. It commands this
+       * This task message is sent from the network-singleton, parent AICNetworkOperationAgent.AICNetworkOperationRole. It commands this
        * network-connected role to begin performing its mission.
        */
       case AHCSConstants.PERFORM_MISSION_TASK:

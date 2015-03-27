@@ -554,14 +554,14 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
     singletonAgentDictionary.put("NetworkOperationAgent", "Mint");
     singletonAgentDictionary.put("NetworkSingletonConfigurationAgent", "Mint");
     singletonAgentDictionary.put("TopmostFriendshipAgent", "Mint");
-    singletonAgentDictionary.put("XAIFinancialAccountingAndControlAgent", "Mint");
-    singletonAgentDictionary.put("XAIMintAgent", "Mint");
-    singletonAgentDictionary.put("XAINetworkEpisodicMemoryAgent", "Mint");
-    singletonAgentDictionary.put("XAINetworkOperationAgent", "Mint");
-    singletonAgentDictionary.put("XAINetworkSeedAgent", "Mint");
-    singletonAgentDictionary.put("XAIPrimaryAuditAgent", "Mint");
-    singletonAgentDictionary.put("XAIRecoveryAgent", "Mint");
-    singletonAgentDictionary.put("XAIRewardAllocationAgent", "Mint");
+    singletonAgentDictionary.put("AICFinancialAccountingAndControlAgent", "Mint");
+    singletonAgentDictionary.put("AICMintAgent", "Mint");
+    singletonAgentDictionary.put("AICNetworkEpisodicMemoryAgent", "Mint");
+    singletonAgentDictionary.put("AICNetworkOperationAgent", "Mint");
+    singletonAgentDictionary.put("AICNetworkSeedAgent", "Mint");
+    singletonAgentDictionary.put("AICPrimaryAuditAgent", "Mint");
+    singletonAgentDictionary.put("AICRecoveryAgent", "Mint");
+    singletonAgentDictionary.put("AICRewardAllocationAgent", "Mint");
 
     final DateTime effectiveDateTime = new DateTime(
             2015, // year

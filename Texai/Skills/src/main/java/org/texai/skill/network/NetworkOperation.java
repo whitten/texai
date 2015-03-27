@@ -220,14 +220,14 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
 
     LOGGER.info("Handling a network restart request");
 
-    // send the restart container task to XAI network operation which will task each XAI operation role to shut down aicoind instances.
+    // send the restart container task to AIC network operation which will task each AIC operation role to shut down aicoind instances.
     final String recipientQualifiedName
-            = getRole().getChildQualifiedNameForAgentRole("XAINetworkOperationAgent.XAINetworkOperationRole");
+            = getRole().getChildQualifiedNameForAgentRole("AICNetworkOperationAgent.AICNetworkOperationRole");
     final Message restartContainerTaskMessage1 = new Message(
             getQualifiedName(), // senderQualifiedName
             getClassName(), // senderService
             recipientQualifiedName,
-            "org.texai.skill.aicoin.XAINetworkOperation", // recipientService
+            "org.texai.skill.aicoin.AICNetworkOperation", // recipientService
             AHCSConstants.RESTART_CONTAINER_TASK); // operation
     restartContainerTaskMessage1.put(AHCSConstants.RESTART_CONTAINER_TASK_DELAY, 0L);
     sendMessage(receivedMessage, restartContainerTaskMessage1);

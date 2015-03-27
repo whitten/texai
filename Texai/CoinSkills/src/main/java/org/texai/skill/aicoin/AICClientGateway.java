@@ -3,15 +3,13 @@ package org.texai.skill.aicoin;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
+import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
-import org.texai.ahcs.skill.AbstractNetworkSingletonSkill;
 
 /**
- * Created on Aug 29, 2014, 6:45:48 PM.
+ * Created on Aug 29, 2014, 6:48:25 PM.
  *
- * Description: The primary audit agent is a nomadic singleton having the responsibility of passive and active auditor.
- * It receives reports of inconsistencies from any other node, e.g. some disagreement with consensus, and performs an
- * investigation.
+ * Description: Provides a wallet and processor client gateway for the A.I. Coin network.
  *
  * Copyright (C) Aug 29, 2014, Stephen L. Reed, Texai.org.
  *
@@ -20,20 +18,21 @@ import org.texai.ahcs.skill.AbstractNetworkSingletonSkill;
  * Copyright (C) 2014 Texai
  */
 @ThreadSafe
-public final class XAIPrimaryAudit extends AbstractNetworkSingletonSkill {
+public final class AICClientGateway extends AbstractSkill {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(XAIPrimaryAudit.class);
+  private static final Logger LOGGER = Logger.getLogger(AICClientGateway.class);
 
   /**
-   * Constructs a new XTCPrimaryAudit instance.
+   * Constructs a new XTCClientGateway instance.
    */
-  public XAIPrimaryAudit() {
+  public AICClientGateway() {
   }
 
-  /** Gets the logger.
+  /**
+   * Gets the logger.
    *
-   * @return  the logger
+   * @return the logger
    */
   @Override
   protected Logger getLogger() {
@@ -41,15 +40,15 @@ public final class XAIPrimaryAudit extends AbstractNetworkSingletonSkill {
   }
 
   /**
-   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries
-   * are single threaded with regard to the conversation.
+   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
+   * with regard to the conversation.
    *
    * @param receivedMessage the given message
    */
   @Override
   public void receiveMessage(Message receivedMessage) {
     //Preconditions
-    assert receivedMessage != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
     assert getRole().getNode().getNodeRuntime() != null;
 
     final String operation = receivedMessage.getOperation();
@@ -61,8 +60,8 @@ public final class XAIPrimaryAudit extends AbstractNetworkSingletonSkill {
       /**
        * Initialize Task
        *
-       * This task message is sent from the parent XAINetworkOperationAgent.XAINetworkOperationRole. It is expected to be the first task message
-       * that this role receives and it results in the role being initialized.
+       * This task message is sent from the container-local parent AICNetworkOperationAgent.AICNetworkOperationRole. It is expected to be
+       * the first task message that this role receives and it results in the role being initialized.
        */
       case AHCSConstants.INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
@@ -76,8 +75,8 @@ public final class XAIPrimaryAudit extends AbstractNetworkSingletonSkill {
       /**
        * Join Acknowledged Task
        *
-       * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.XAINetworkOperationRole.
-       * It indicates that the parent is ready to converse with this role as needed.
+       * This task message is sent from the network-singleton, parent AICNetworkOperationAgent.AICNetworkOperationRole. It indicates that
+       * the parent is ready to converse with this role as needed.
        */
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
@@ -88,24 +87,17 @@ public final class XAIPrimaryAudit extends AbstractNetworkSingletonSkill {
       /**
        * Perform Mission Task
        *
-       * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.XAINetworkOperationRole. It commands this
-       * network-connected role to begin performing its mission.
+       * This task message is sent from the network-singleton parent AICNetworkOperationAgent.AICNetworkOperationRole.
+       *
+       * It results in the skill set to the ready state, and the skill performing its mission.
        */
       case AHCSConstants.PERFORM_MISSION_TASK:
+        if (getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK)) {
+          setSkillState(AHCSConstants.State.READY);
+          LOGGER.info("now ready");
+        }
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
         performMission(receivedMessage);
-        return;
-
-      /**
-       * Delegate Perform Mission Task
-       *
-       * A container has completed joining the network. Propagate a Delegate Perform Mission Task down the role command hierarchy.
-       *
-       * The container name is a parameter of the message.
-       */
-      case AHCSConstants.DELEGATE_PERFORM_MISSION_TASK:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        handleDelegatePerformMissionTask(receivedMessage);
         return;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
@@ -118,8 +110,8 @@ public final class XAIPrimaryAudit extends AbstractNetworkSingletonSkill {
   }
 
   /**
-   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single
-   * threaded with regard to the conversation.
+   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single threaded with regard
+   * to the conversation.
    *
    * @param message the given message
    *
@@ -145,7 +137,6 @@ public final class XAIPrimaryAudit extends AbstractNetworkSingletonSkill {
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.INITIALIZE_TASK,
-      AHCSConstants.DELEGATE_PERFORM_MISSION_TASK,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.PERFORM_MISSION_TASK
@@ -153,17 +144,14 @@ public final class XAIPrimaryAudit extends AbstractNetworkSingletonSkill {
   }
 
   /**
-   * Perform this role's mission.
+   * Perform this role's mission, which is to manage the network, the containers, and the A.I. Coin agents within the containers.
    *
    * @param message the received perform mission task message
    */
   private void performMission(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
-    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready: " + stateDescription(getSkillState());
     assert getRole().getChildQualifiedNames().isEmpty() : "must not have child roles";
-
-    LOGGER.info("performing the mission");
 
   }
 

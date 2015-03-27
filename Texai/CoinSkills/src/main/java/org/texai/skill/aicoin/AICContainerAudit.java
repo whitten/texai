@@ -1,32 +1,32 @@
 package org.texai.skill.aicoin;
 
+import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
+import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
-import org.texai.ahcs.skill.AbstractNetworkSingletonSkill;
 
 /**
- * Created on Aug 29, 2014, 6:45:35 PM.
+ * Created on Aug 29, 2014, 6:46:05 PM.
  *
- * Description: Verifies each step of the transaction processing from reception at a portal node through inclusion in
- * the blockchain.
+ * Description: Provides a container audit skill for the A.I. Coin network.
  *
  * Copyright (C) Aug 29, 2014, Stephen L. Reed, Texai.org.
  *
  * @author reed
  *
  * Copyright (C) 2014 Texai
- *
  */
-public class XAIFinancialAccountingAndControl extends AbstractNetworkSingletonSkill {
+@ThreadSafe
+public final class AICContainerAudit extends AbstractSkill {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(XAIFinancialAccountingAndControl.class);
+  private static final Logger LOGGER = Logger.getLogger(AICContainerAudit.class);
 
   /**
-   * Constructs a new XTCFinancialAccountingAndControl instance.
+   * Constructs a new XTCContainerAudit instance.
    */
-  public XAIFinancialAccountingAndControl() {
+  public AICContainerAudit() {
   }
 
   /** Gets the logger.
@@ -47,7 +47,7 @@ public class XAIFinancialAccountingAndControl extends AbstractNetworkSingletonSk
   @Override
   public void receiveMessage(Message receivedMessage) {
     //Preconditions
-    assert receivedMessage != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
     assert getRole().getNode().getNodeRuntime() != null;
 
     final String operation = receivedMessage.getOperation();
@@ -56,10 +56,10 @@ public class XAIFinancialAccountingAndControl extends AbstractNetworkSingletonSk
       return;
     }
     switch (operation) {
-      /**
+       /**
        * Initialize Task
        *
-       * This task message is sent from the parent XAINetworkOperationAgent.XAINetworkOperationRole. It is expected to be the first task message
+       * This task message is sent from the container-local parent AICPrimaryAuditAgent.AICPrimaryAuditRole. It is expected to be the first task message
        * that this role receives and it results in the role being initialized.
        */
       case AHCSConstants.INITIALIZE_TASK:
@@ -74,8 +74,8 @@ public class XAIFinancialAccountingAndControl extends AbstractNetworkSingletonSk
       /**
        * Join Acknowledged Task
        *
-       * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.XAINetworkOperationRole.
-       * It indicates that the parent is ready to converse with this role as needed.
+       * This task message is sent from the network-singleton, parent AICPrimaryAuditAgent.AICPrimaryAuditRole. It indicates that the
+       * parent is ready to converse with this role as needed.
        */
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
@@ -86,24 +86,17 @@ public class XAIFinancialAccountingAndControl extends AbstractNetworkSingletonSk
       /**
        * Perform Mission Task
        *
-       * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.XAINetworkOperationRole. It commands this
-       * network-connected role to begin performing its mission.
+       * This task message is sent from the network-singleton parent AICPrimaryAuditAgent.AICPrimaryAuditRole.
+       *
+       * It results in the skill set to the ready state, and the skill performing its mission.
        */
       case AHCSConstants.PERFORM_MISSION_TASK:
+        if (getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK)) {
+          setSkillState(AHCSConstants.State.READY);
+          LOGGER.info("now ready");
+        }
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
         performMission(receivedMessage);
-        return;
-
-      /**
-       * Delegate Perform Mission Task
-       *
-       * A container has completed joining the network. Propagate a Delegate Perform Mission Task down the role command hierarchy.
-       *
-       * The container name is a parameter of the message.
-       */
-      case AHCSConstants.DELEGATE_PERFORM_MISSION_TASK:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        handleDelegatePerformMissionTask(receivedMessage);
         return;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
@@ -143,7 +136,6 @@ public class XAIFinancialAccountingAndControl extends AbstractNetworkSingletonSk
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.INITIALIZE_TASK,
-      AHCSConstants.DELEGATE_PERFORM_MISSION_TASK,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.PERFORM_MISSION_TASK
@@ -151,17 +143,14 @@ public class XAIFinancialAccountingAndControl extends AbstractNetworkSingletonSk
   }
 
   /**
-   * Perform this role's mission, which is to manage the containers.
+   * Perform this role's mission, which is to manage the network, the containers, and the A.I. Coin agents within the containers.
    *
    * @param message the received perform mission task message
    */
   private void performMission(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
-    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready: " + stateDescription(getSkillState());
     assert getRole().getChildQualifiedNames().isEmpty() : "must not have child roles";
-
-    LOGGER.info("performing the mission");
 
   }
 

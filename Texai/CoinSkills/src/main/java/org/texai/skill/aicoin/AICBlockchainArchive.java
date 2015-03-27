@@ -3,29 +3,29 @@ package org.texai.skill.aicoin;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
+import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
-import org.texai.ahcs.skill.AbstractNetworkSingletonSkill;
 
 /**
- * Created on Aug 29, 2014, 6:48:14 PM.
+ * Created on Aug 29, 2014, 6:44:58 PM.
  *
- * Description: The recovery skill performs fault-recovery. Typical fault recovery in case of a defective mint would be the
- * coordinated roll-back of the last committed block, releasing its transactions for input into a replacement block by a
- * backup temporary mint.
+ * Description: Archives the A.I. Coin blockchain and pending transactions.
  *
  * Copyright (C) Aug 29, 2014, Stephen L. Reed, Texai.org.
  *
  * @author reed
  *
  */
-
 @ThreadSafe
-public final class XAIRecovery extends AbstractNetworkSingletonSkill {
-  // the logger
-  private static final Logger LOGGER = Logger.getLogger(XAIRecovery.class);
+public final class AICBlockchainArchive extends AbstractSkill {
 
-  /** Constructs a new XTCRecovery instance. */
-  public XAIRecovery() {
+  // the logger
+  private static final Logger LOGGER = Logger.getLogger(AICBlockchainArchive.class);
+
+  /**
+   * Constructs a new XTCBlockchainArchive instance.
+   */
+  public AICBlockchainArchive() {
   }
 
   /** Gets the logger.
@@ -38,15 +38,15 @@ public final class XAIRecovery extends AbstractNetworkSingletonSkill {
   }
 
   /**
-   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
-   * with regard to the conversation.
+   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries
+   * are single threaded with regard to the conversation.
    *
    * @param receivedMessage the given message
    */
   @Override
   public void receiveMessage(Message receivedMessage) {
     //Preconditions
-    assert receivedMessage != null : "receivedMessage must not be null";
+    assert receivedMessage != null : "message must not be null";
     assert getRole().getNode().getNodeRuntime() != null;
 
     final String operation = receivedMessage.getOperation();
@@ -55,10 +55,10 @@ public final class XAIRecovery extends AbstractNetworkSingletonSkill {
       return;
     }
     switch (operation) {
-      /**
+       /**
        * Initialize Task
        *
-       * This task message is sent from the parent XAINetworkOperationAgent.XAINetworkOperationRole. It is expected to be the first task message
+       * This task message is sent from the container-local parent AICNetworkOperationAgent.AICNetworkOperationRole. It is expected to be the first task message
        * that this role receives and it results in the role being initialized.
        */
       case AHCSConstants.INITIALIZE_TASK:
@@ -73,8 +73,8 @@ public final class XAIRecovery extends AbstractNetworkSingletonSkill {
       /**
        * Join Acknowledged Task
        *
-       * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.XAINetworkOperationRole.
-       * It indicates that the parent is ready to converse with this role as needed.
+       * This task message is sent from the network-singleton, parent AICNetworkOperationAgent.AICNetworkOperationRole. It indicates that the
+       * parent is ready to converse with this role as needed.
        */
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
@@ -85,24 +85,17 @@ public final class XAIRecovery extends AbstractNetworkSingletonSkill {
       /**
        * Perform Mission Task
        *
-       * This task message is sent from the network-singleton, parent NXAIetworkOperationAgent.XAINetworkOperationRole. It commands this
-       * network-connected role to begin performing its mission.
+       * This task message is sent from the network-singleton parent AICNetworkOperationAgent.AICNetworkOperationRole.
+       *
+       * It results in the skill set to the ready state, and the skill performing its mission.
        */
       case AHCSConstants.PERFORM_MISSION_TASK:
+        if (getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK)) {
+          setSkillState(AHCSConstants.State.READY);
+          LOGGER.info("now ready");
+        }
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
         performMission(receivedMessage);
-        return;
-
-      /**
-       * Delegate Perform Mission Task
-       *
-       * A container has completed joining the network. Propagate a Delegate Perform Mission Task down the role command hierarchy.
-       *
-       * The container name is a parameter of the message.
-       */
-      case AHCSConstants.DELEGATE_PERFORM_MISSION_TASK:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        handleDelegatePerformMissionTask(receivedMessage);
         return;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
@@ -115,8 +108,8 @@ public final class XAIRecovery extends AbstractNetworkSingletonSkill {
   }
 
   /**
-   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single threaded with regard
-   * to the conversation.
+   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single
+   * threaded with regard to the conversation.
    *
    * @param message the given message
    *
@@ -142,7 +135,6 @@ public final class XAIRecovery extends AbstractNetworkSingletonSkill {
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.INITIALIZE_TASK,
-      AHCSConstants.DELEGATE_PERFORM_MISSION_TASK,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.PERFORM_MISSION_TASK
@@ -157,10 +149,7 @@ public final class XAIRecovery extends AbstractNetworkSingletonSkill {
   private void performMission(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
-    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready: " + stateDescription(getSkillState());
     assert getRole().getChildQualifiedNames().isEmpty() : "must not have child roles";
-
-    LOGGER.info("performing the mission");
 
   }
 

@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <diagram>
-<source><![CDATA[#![Heartbeat, Timeout, Restart     ]
-tlhb:TopLevelHeartbeat[rp] "TopLevelHeartbeat"
-chb:ContainerHeartbeat[rp] "ContainerHeartbeat"
-co:ContainerOperation[rp] "ContainerOperation"
-xaio:XAIOperation[rp] "AICOperation"
+<source><![CDATA[#![Relay Bitcoin Message     ]
+w:Wallet[rp] "Wallet"
+o1:AICOperation[rp] "AICOperation (peer)"
+o2:AICOperation[rp] "AICOperation (super peer)"
+o3:AICOperation[rp] "AICOperation (mint super peer)"
 
-
-[c:alt normal operation]
-chb:tlhb.keepAlive_Info()
-tlhb:chb.keepAliveAcknowledged_Task()
+[c:alt inbound Bitcoin message]
+w:o1.message
+o1:o2.bitcoinMessage_Info(message)
+o2:o3.bitcoinMessage_Info(message)
 [/c]
 
-[c:alt reply timeout]
-chb:co.restartContainerRequest_Info()
-co:xaio.shutdownAicondRequest_Info()
+[c:alt outbound Bitcoin message]
+o3:o2.bitcoinMessage_Info(message)
+o2:o1.bitcoinMessage_Info(message)
+o1:w.message
 [/c]
 ]]></source>
 <configuration>

@@ -1,3 +1,14 @@
+/*
+ * AICContainerCertificateAuthority.java
+ *
+ * Created on May 5, 2010, 1:42:22 PM
+ *
+ * Description: Provides X.509 Certificate Authority behavior, in which a certificate request from a role, node runtime,
+ * or message router is signed by the private key of an intermediate signing certificate, which in turn has been signed
+ * by the Texai root certificate.
+ *
+ * Copyright (C) May 5, 2010, Stephen L. Reed.
+ */
 package org.texai.skill.aicoin;
 
 import net.jcip.annotations.ThreadSafe;
@@ -6,41 +17,33 @@ import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
 
-/**
- * Created on Aug 29, 2014, 6:48:25 PM.
- *
- * Description: Provides a wallet and processor client gateway for the A.I. Coin network.
- *
- * Copyright (C) Aug 29, 2014, Stephen L. Reed, Texai.org.
+/** Provides X.509 Certificate Authority behavior, in which a certificate request from a role, node runtime,
+ * or message router is signed by the private key of an intermediate signing certificate, which in turn has been signed
+ * by the Texai root certificate.
  *
  * @author reed
- *
- * Copyright (C) 2014 Texai
  */
 @ThreadSafe
-public final class XAIClientGateway extends AbstractSkill {
+public class AICContainerCertificateAuthority extends AbstractSkill {
 
+  //TODO rename according to Albus HCS granularity level
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(XAIClientGateway.class);
+  private static final Logger LOGGER = Logger.getLogger(AICContainerCertificateAuthority.class);
 
-  /**
-   * Constructs a new XTCClientGateway instance.
-   */
-  public XAIClientGateway() {
+  /** Constructs a new CertificateAuthority instance. */
+  public AICContainerCertificateAuthority() {
   }
 
-  /**
-   * Gets the logger.
+  /** Gets the logger.
    *
-   * @return the logger
+   * @return  the logger
    */
   @Override
   protected Logger getLogger() {
     return LOGGER;
   }
 
-  /**
-   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
+  /** Receives and attempts to process the given message.  The skill is thread safe, given that any contained libraries are single threaded
    * with regard to the conversation.
    *
    * @param receivedMessage the given message
@@ -48,7 +51,7 @@ public final class XAIClientGateway extends AbstractSkill {
   @Override
   public void receiveMessage(Message receivedMessage) {
     //Preconditions
-    assert receivedMessage != null : "receivedMessage must not be null";
+    assert receivedMessage != null : "message must not be null";
     assert getRole().getNode().getNodeRuntime() != null;
 
     final String operation = receivedMessage.getOperation();
@@ -57,11 +60,11 @@ public final class XAIClientGateway extends AbstractSkill {
       return;
     }
     switch (operation) {
-      /**
+       /**
        * Initialize Task
        *
-       * This task message is sent from the container-local parent XAINetworkOperationAgent.XAINetworkOperationRole. It is expected to be
-       * the first task message that this role receives and it results in the role being initialized.
+       * This task message is sent from the container-local parent AICNetworkOperationAgent.AICNetworkOperationRole. It is expected to be the first task message
+       * that this role receives and it results in the role being initialized.
        */
       case AHCSConstants.INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
@@ -75,8 +78,8 @@ public final class XAIClientGateway extends AbstractSkill {
       /**
        * Join Acknowledged Task
        *
-       * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.XAINetworkOperationRole. It indicates that
-       * the parent is ready to converse with this role as needed.
+       * This task message is sent from the network-singleton, parent AICNetworkOperationAgent.AICNetworkOperationRole. It indicates that the
+       * parent is ready to converse with this role as needed.
        */
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
@@ -87,7 +90,7 @@ public final class XAIClientGateway extends AbstractSkill {
       /**
        * Perform Mission Task
        *
-       * This task message is sent from the network-singleton parent XAINetworkOperationAgent.XAINetworkOperationRole.
+       * This task message is sent from the network-singleton parent AICNetworkOperationAgent.AICNetworkOperationRole.
        *
        * It results in the skill set to the ready state, and the skill performing its mission.
        */
@@ -109,12 +112,10 @@ public final class XAIClientGateway extends AbstractSkill {
     sendDoNotUnderstandInfoMessage(receivedMessage);
   }
 
-  /**
-   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single threaded with regard
-   * to the conversation.
+  /** Synchronously processes the given message.  The skill is thread safe, given that any contained libraries are single threaded
+   * with regard to the conversation.
    *
    * @param message the given message
-   *
    * @return the response message or null if not applicable
    */
   @Override
@@ -128,8 +129,7 @@ public final class XAIClientGateway extends AbstractSkill {
             this); // skill
   }
 
-  /**
-   * Returns the understood operations.
+  /** Returns the understood operations.
    *
    * @return the understood operations
    */

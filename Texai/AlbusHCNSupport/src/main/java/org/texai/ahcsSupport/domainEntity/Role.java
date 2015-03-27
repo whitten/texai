@@ -741,7 +741,7 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   /**
    * Gets the first qualified child role name, i.e. container.nodename.rolename, which matches the given nodename.
    *
-   * @param nodeName the given child nodename, e.g. XAIOperationAgent
+   * @param nodeName the given child nodename, e.g. AICOperationAgent
    *
    * @return the qualified child role name, or null if not found
    */
@@ -762,7 +762,7 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   /**
    * Gets the first qualified child role name, i.e. nodename.rolename, which matches the given nodename.
    *
-   * @param qualifiedName the given child nodename.rolename, e.g. XAIOperationAgent.XAIOperationRole
+   * @param qualifiedName the given child nodename.rolename, e.g. AICOperationAgent.AICOperationRole
    *
    * @return the qualified child role name, or null if not found
    */
@@ -783,9 +783,9 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   /**
    * Gets the qualified child agent name, i.e. container-name.agent-name, which matches the given child agent name.
    *
-   * @param agentName the given child agent, e.g. XAIOperationAgent
+   * @param agentName the given child agent, e.g. AICOperationAgent
    *
-   * @return the qualified child role name, e.g. Mint.XAIOperationAgent.XAIOperationAgentRole, or null if not found
+   * @return the qualified child role name, e.g. Mint.AICOperationAgent.AICOperationAgentRole, or null if not found
    */
   public String getFirstChildQualifiedNameForAgent(final String agentName) {
     //Preconditions
@@ -803,9 +803,9 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
   /**
    * Gets qualified child role names, i.e. container-name.agent-name.role-name, which match the given child agent name.
    *
-   * @param agentName the given child agent, e.g. XAIOperationAgent
+   * @param agentName the given child agent, e.g. AICOperationAgent
    *
-   * @return the qualified child role name, e.g. Mint.XAIOperationAgent.XAIOperationAgentRole, or null if not found
+   * @return the qualified child role name, e.g. Mint.AICOperationAgent.AICOperationAgentRole, or null if not found
    */
   public Set<String> getChildQualifiedNamesForAgent(final String agentName) {
     //Preconditions

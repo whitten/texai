@@ -7,23 +7,28 @@ import org.texai.ahcsSupport.Message;
 import org.texai.ahcs.skill.AbstractNetworkSingletonSkill;
 
 /**
- * Created on Aug 29, 2014, 6:45:14 PM.
+ * Created on Aug 29, 2014, 6:45:48 PM.
  *
- * Description: Allocates the current block reward according to system policy.
+ * Description: The primary audit agent is a nomadic singleton having the responsibility of passive and active auditor.
+ * It receives reports of inconsistencies from any other node, e.g. some disagreement with consensus, and performs an
+ * investigation.
  *
  * Copyright (C) Aug 29, 2014, Stephen L. Reed, Texai.org.
  *
+ * @author reed
+ *
+ * Copyright (C) 2014 Texai
  */
 @ThreadSafe
-public final class XAIRewardAllocation extends AbstractNetworkSingletonSkill {
+public final class AICPrimaryAudit extends AbstractNetworkSingletonSkill {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(XAIRewardAllocation.class);
+  private static final Logger LOGGER = Logger.getLogger(AICPrimaryAudit.class);
 
   /**
-   * Constructs a new XTCRewardAllocation instance.
+   * Constructs a new XTCPrimaryAudit instance.
    */
-  public XAIRewardAllocation() {
+  public AICPrimaryAudit() {
   }
 
   /** Gets the logger.
@@ -44,19 +49,19 @@ public final class XAIRewardAllocation extends AbstractNetworkSingletonSkill {
   @Override
   public void receiveMessage(Message receivedMessage) {
     //Preconditions
-    assert receivedMessage != null : "receivedMessage must not be null";
+    assert receivedMessage != null : "message must not be null";
     assert getRole().getNode().getNodeRuntime() != null;
 
+    final String operation = receivedMessage.getOperation();
     if (!isOperationPermitted(receivedMessage)) {
       sendOperationNotPermittedInfoMessage(receivedMessage);
       return;
     }
-    final String operation = receivedMessage.getOperation();
     switch (operation) {
       /**
        * Initialize Task
        *
-       * This task message is sent from the parent XAINetworkOperationAgent.XAINetworkOperationRole. It is expected to be the first task message
+       * This task message is sent from the parent AICNetworkOperationAgent.AICNetworkOperationRole. It is expected to be the first task message
        * that this role receives and it results in the role being initialized.
        */
       case AHCSConstants.INITIALIZE_TASK:
@@ -71,7 +76,7 @@ public final class XAIRewardAllocation extends AbstractNetworkSingletonSkill {
       /**
        * Join Acknowledged Task
        *
-       * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.XAINetworkOperationRole.
+       * This task message is sent from the network-singleton, parent AICNetworkOperationAgent.AICNetworkOperationRole.
        * It indicates that the parent is ready to converse with this role as needed.
        */
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
@@ -83,7 +88,7 @@ public final class XAIRewardAllocation extends AbstractNetworkSingletonSkill {
       /**
        * Perform Mission Task
        *
-       * This task message is sent from the network-singleton, parent NXAIetworkOperationAgent.XAINetworkOperationRole. It commands this
+       * This task message is sent from the network-singleton, parent AICNetworkOperationAgent.AICNetworkOperationRole. It commands this
        * network-connected role to begin performing its mission.
        */
       case AHCSConstants.PERFORM_MISSION_TASK:
@@ -161,6 +166,5 @@ public final class XAIRewardAllocation extends AbstractNetworkSingletonSkill {
     LOGGER.info("performing the mission");
 
   }
-
 
 }

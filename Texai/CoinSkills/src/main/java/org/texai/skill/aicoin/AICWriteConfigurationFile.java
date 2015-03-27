@@ -26,15 +26,15 @@ import org.texai.util.TexaiException;
  * @author reed
  */
 @ThreadSafe
-public class XAIWriteConfigurationFile extends AbstractSkill {
+public class AICWriteConfigurationFile extends AbstractSkill {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(XAIWriteConfigurationFile.class);
+  private static final Logger LOGGER = Logger.getLogger(AICWriteConfigurationFile.class);
 
   /**
-   * Constructs a new XAIWriteConfigurationFile instance.
+   * Constructs a new AICWriteConfigurationFile instance.
    */
-  public XAIWriteConfigurationFile() {
+  public AICWriteConfigurationFile() {
   }
 
   /**
@@ -68,7 +68,7 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
       /**
        * Initialize Task
        *
-       * This task message is sent from the parent XAIOperationAgent.XAIOperationRole. It is expected to be the first task message that this
+       * This task message is sent from the parent AICOperationAgent.AICOperationRole. It is expected to be the first task message that this
        * role receives and it results in the role being initialized.
        */
       case AHCSConstants.INITIALIZE_TASK:
@@ -97,10 +97,10 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
       /**
        * Write Configuration File Info
        *
-       * This request message is sent from the sibling XAIOperation skill.
+       * This request message is sent from the sibling AICOperation skill.
        *
        * As a result, the aicoin.conf is generated and written to disk, and a Task Accomplished Info message is sent back to the
-       * XAIOperation skill as a response.
+       * AICOperation skill as a response.
        */
       case AHCSConstants.WRITE_CONFIGURATION_FILE_INFO:
         if (getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK)) {
@@ -149,7 +149,7 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
       assert isOK && directory.isDirectory();
     }
 
-    //TODO implement a skill for XAIOperation that that verifies that each user is unique and that each password is unique.
+    //TODO implement a skill for AICOperation that that verifies that each user is unique and that each password is unique.
     //TODO implement a parent skill that maintains a tamper-evident log of hashed/salted user and password pairs.
     final String rpcuser = System.getenv("RPC_USER");
     if (!StringUtils.isNonEmptyString(rpcuser)) {
@@ -248,7 +248,7 @@ public class XAIWriteConfigurationFile extends AbstractSkill {
       throw new TexaiException(ex);
     }
 
-    // send a task accomplished info message back to the XAIOperation role
+    // send a task accomplished info message back to the AICOperation role
     final Message replyMessage = Message.replyTaskAccomplished(receivedMessage);
     sendMessageViaSeparateThread(receivedMessage, replyMessage);
   }

@@ -29,26 +29,26 @@ import org.texai.util.ArraySet;
  *
  * @author reed
  */
-public class XAIOperationTest {
+public class AICOperationTest {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(XAIOperationTest.class);
+  private static final Logger LOGGER = Logger.getLogger(AICOperationTest.class);
   // the container name
   private static final String containerName = "Test";
   // the test parent qualified name
-  private static final String parentQualifiedName = containerName + ".XAINetworkOperationAgent.XAINetworkOperationRole";
+  private static final String parentQualifiedName = containerName + ".AICNetworkOperationAgent.AICNetworkOperationRole";
   // the test parent service
-  private static final String parentService = XAINetworkOperation.class.getName();
+  private static final String parentService = AICNetworkOperation.class.getName();
   // the class name of the tested skill
-  private static final String skillClassName = XAIOperation.class.getName();
+  private static final String skillClassName = AICOperation.class.getName();
   // the test node name
-  private static final String nodeName = "XAIOperationAgent";
+  private static final String nodeName = "AICOperationAgent";
   // the test node name
-  private static final String roleName = "XAIOperationRole";
+  private static final String roleName = "AICOperationRole";
   // the skill test harness
   private static SkillTestHarness skillTestHarness;
 
-  public XAIOperationTest() {
+  public AICOperationTest() {
   }
 
   @BeforeClass
@@ -74,7 +74,7 @@ public class XAIOperationTest {
             false); // areRemoteCommunicationsPermitted
     final AbstractSkill xaiOperation = skillTestHarness.getSkill(skillClassName);
     assertNotNull(xaiOperation);
-    assertTrue(XAIOperation.class.isAssignableFrom(xaiOperation.getClass()));
+    assertTrue(AICOperation.class.isAssignableFrom(xaiOperation.getClass()));
     assertTrue(xaiOperation.isUnitTest());
     assertEquals(0, xaiOperation.getRole().getChildQualifiedNames().size());
   }
@@ -92,7 +92,7 @@ public class XAIOperationTest {
   }
 
   /**
-   * Test of class XAIOperation initialize task message.
+   * Test of class AICOperation initialize task message.
    */
   @Test
   public void testInitializeTaskMessage() {
@@ -102,14 +102,14 @@ public class XAIOperationTest {
     skillTestHarness.setSkillState(AHCSConstants.State.UNINITIALIZED, skillClassName);
     final Message initializeMessage = new Message(
             parentQualifiedName, // senderQualifiedName
-            XAINetworkOperation.class.getName(), // senderService
+            AICNetworkOperation.class.getName(), // senderService
             containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
             skillClassName, // recipientService
             AHCSConstants.INITIALIZE_TASK); // operation
 
     skillTestHarness.dispatchMessage(initializeMessage);
 
-    final XAIOperation xaiOperation = (XAIOperation) skillTestHarness.getSkill(skillClassName);
+    final AICOperation xaiOperation = (AICOperation) skillTestHarness.getSkill(skillClassName);
     if (xaiOperation.getNodeRuntime().isFirstContainerInNetwork()) {
       assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
     } else {
@@ -122,7 +122,7 @@ public class XAIOperationTest {
   }
 
   /**
-   * Test of class XAIOperation perform mission task message.
+   * Test of class AICOperation perform mission task message.
    */
   @Test
   public void testPerformMissionTaskMessage() {
@@ -130,9 +130,9 @@ public class XAIOperationTest {
 
     skillTestHarness.reset();
     skillTestHarness.setSkillState(AHCSConstants.State.READY, skillClassName);
-    final AbstractSkill xaiOperation = skillTestHarness.getSkill(XAIOperation.class.getName());
+    final AbstractSkill xaiOperation = skillTestHarness.getSkill(AICOperation.class.getName());
     assertNotNull(xaiOperation);
-    assertTrue(XAIOperation.class.isAssignableFrom(xaiOperation.getClass()));
+    assertTrue(AICOperation.class.isAssignableFrom(xaiOperation.getClass()));
     assertTrue(xaiOperation.isUnitTest());
     assertEquals(0, xaiOperation.getRole().getChildQualifiedNames().size());
     final Message performTaskMessage = new Message(
@@ -154,12 +154,12 @@ public class XAIOperationTest {
       LOGGER.info("");
     });
     assertEquals(
-            "[writeConfigurationFile_Info, Test.XAIOperationAgent.XAIOperationRole:XAIOperation --> Test.XAIOperationAgent.XAIOperationRole:XAIWriteConfigurationFile]\n",
+            "[writeConfigurationFile_Info, Test.AICOperationAgent.AICOperationRole:AICOperation --> Test.AICOperationAgent.AICOperationRole:AICWriteConfigurationFile]\n",
             Message.toBriefString(skillTestHarness.getSentMessages()));
   }
 
   /**
-   * Test of class XAINetworkOperation - Shutdown Aicoind Task.
+   * Test of class AICNetworkOperation - Shutdown Aicoind Task.
    */
   @Test
   public void testShutdownAicoindTask() {
@@ -186,7 +186,7 @@ public class XAIOperationTest {
   }
 
   /**
-   * Test of class XAINetworkOperation - Shutdown Aicoind Task.
+   * Test of class AICNetworkOperation - Shutdown Aicoind Task.
    */
   @Test
   public void testShutdownAicoindRequestInfo() {
@@ -213,7 +213,7 @@ public class XAIOperationTest {
   }
 
   /**
-   * Test of class XAIOperation - Message Not Understood Info.
+   * Test of class AICOperation - Message Not Understood Info.
    */
   @Test
   public void testMessageNotUnderstoodInfo() {
@@ -235,27 +235,27 @@ public class XAIOperationTest {
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertTrue(sentMessage.toString().startsWith("[messageNotUnderstood_Info Test.XAIOperationAgent.XAIOperationRole:XAIOperation --> Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation "));
+    assertTrue(sentMessage.toString().startsWith("[messageNotUnderstood_Info Test.AICOperationAgent.AICOperationRole:AICOperation --> Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation "));
   }
 
   /**
-   * Test of getLogger method, of class XAIOperation.
+   * Test of getLogger method, of class AICOperation.
    */
   @Test
   public void testGetLogger() {
     LOGGER.info("getLogger");
-    XAIOperation instance = new XAIOperation();
+    AICOperation instance = new AICOperation();
     assertNotNull(instance.getLogger());
-    assertEquals(XAIOperation.class.getName(), instance.getLogger().getName());
+    assertEquals(AICOperation.class.getName(), instance.getLogger().getName());
   }
 
   /**
-   * Test of getUnderstoodOperations method, of class XAIOperation.
+   * Test of getUnderstoodOperations method, of class AICOperation.
    */
   @Test
   public void testGetUnderstoodOperations() {
     LOGGER.info("getUnderstoodOperations");
-    XAIOperation instance = new XAIOperation();
+    AICOperation instance = new AICOperation();
     final List<String> understoodOperations = new ArrayList<>(Arrays.asList(instance.getUnderstoodOperations()));
     Collections.sort(understoodOperations);
     assertEquals(

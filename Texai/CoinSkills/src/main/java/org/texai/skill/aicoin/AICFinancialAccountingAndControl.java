@@ -1,31 +1,32 @@
 package org.texai.skill.aicoin;
 
-import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
-import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.ahcs.skill.AbstractNetworkSingletonSkill;
 
 /**
- * Created on Aug 29, 2014, 6:44:58 PM.
+ * Created on Aug 29, 2014, 6:45:35 PM.
  *
- * Description: Archives the A.I. Coin blockchain and pending transactions.
+ * Description: Verifies each step of the transaction processing from reception at a portal node through inclusion in
+ * the blockchain.
  *
  * Copyright (C) Aug 29, 2014, Stephen L. Reed, Texai.org.
  *
  * @author reed
  *
+ * Copyright (C) 2014 Texai
+ *
  */
-@ThreadSafe
-public final class XAIBlockchainArchive extends AbstractSkill {
+public class AICFinancialAccountingAndControl extends AbstractNetworkSingletonSkill {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(XAIBlockchainArchive.class);
+  private static final Logger LOGGER = Logger.getLogger(AICFinancialAccountingAndControl.class);
 
   /**
-   * Constructs a new XTCBlockchainArchive instance.
+   * Constructs a new XTCFinancialAccountingAndControl instance.
    */
-  public XAIBlockchainArchive() {
+  public AICFinancialAccountingAndControl() {
   }
 
   /** Gets the logger.
@@ -55,10 +56,10 @@ public final class XAIBlockchainArchive extends AbstractSkill {
       return;
     }
     switch (operation) {
-       /**
+      /**
        * Initialize Task
        *
-       * This task message is sent from the container-local parent XAINetworkOperationAgent.XAINetworkOperationRole. It is expected to be the first task message
+       * This task message is sent from the parent AICNetworkOperationAgent.AICNetworkOperationRole. It is expected to be the first task message
        * that this role receives and it results in the role being initialized.
        */
       case AHCSConstants.INITIALIZE_TASK:
@@ -73,8 +74,8 @@ public final class XAIBlockchainArchive extends AbstractSkill {
       /**
        * Join Acknowledged Task
        *
-       * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.XAINetworkOperationRole. It indicates that the
-       * parent is ready to converse with this role as needed.
+       * This task message is sent from the network-singleton, parent AICNetworkOperationAgent.AICNetworkOperationRole.
+       * It indicates that the parent is ready to converse with this role as needed.
        */
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
@@ -85,17 +86,24 @@ public final class XAIBlockchainArchive extends AbstractSkill {
       /**
        * Perform Mission Task
        *
-       * This task message is sent from the network-singleton parent XAINetworkOperationAgent.XAINetworkOperationRole.
-       *
-       * It results in the skill set to the ready state, and the skill performing its mission.
+       * This task message is sent from the network-singleton, parent AICNetworkOperationAgent.AICNetworkOperationRole. It commands this
+       * network-connected role to begin performing its mission.
        */
       case AHCSConstants.PERFORM_MISSION_TASK:
-        if (getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK)) {
-          setSkillState(AHCSConstants.State.READY);
-          LOGGER.info("now ready");
-        }
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
         performMission(receivedMessage);
+        return;
+
+      /**
+       * Delegate Perform Mission Task
+       *
+       * A container has completed joining the network. Propagate a Delegate Perform Mission Task down the role command hierarchy.
+       *
+       * The container name is a parameter of the message.
+       */
+      case AHCSConstants.DELEGATE_PERFORM_MISSION_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        handleDelegatePerformMissionTask(receivedMessage);
         return;
 
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
@@ -135,6 +143,7 @@ public final class XAIBlockchainArchive extends AbstractSkill {
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.INITIALIZE_TASK,
+      AHCSConstants.DELEGATE_PERFORM_MISSION_TASK,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.PERFORM_MISSION_TASK
@@ -142,14 +151,17 @@ public final class XAIBlockchainArchive extends AbstractSkill {
   }
 
   /**
-   * Perform this role's mission.
+   * Perform this role's mission, which is to manage the containers.
    *
    * @param message the received perform mission task message
    */
   private void performMission(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready: " + stateDescription(getSkillState());
     assert getRole().getChildQualifiedNames().isEmpty() : "must not have child roles";
+
+    LOGGER.info("performing the mission");
 
   }
 

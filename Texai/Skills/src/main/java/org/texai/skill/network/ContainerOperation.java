@@ -221,10 +221,10 @@ public final class ContainerOperation extends AbstractSkill {
     LOGGER.info("Cancelling scheduled tasks.");
     getNodeRuntime().getTimer().cancel();
 
-    // send a Shutdown Aicoind Request Info message to XAIOperation
+    // send a Shutdown Aicoind Request Info message to AICOperation
     final Message shutdownAicoindRequestMessage = makeMessage(
-            getContainerName()+ ".XAIOperationAgent.XAIOperationRole",
-            "org.texai.skill.aicoin.XAIOperation",
+            getContainerName()+ ".AICOperationAgent.AICOperationRole",
+            "org.texai.skill.aicoin.AICOperation",
             AHCSConstants.SHUTDOWN_AICOIND_REQUEST_INFO); // operation
     sendMessage(
             receivedMessage,

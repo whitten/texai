@@ -60,7 +60,7 @@ public class NodesInitializerTest {
   private final static String CONTAINER_SINGLETON_CONFIGURATION_CERTIFICATE_PATH = "data/test-ContainerSingletonConfiguration.crt";
   // the hash of nodes-test.xml
   public final static String NODES_TEST_HASH
-          = "BwqO9m7Gctyrc5+pw+XcJCDe3Xn+O4Ol/SGovQntsjB+H9Seq1x1Zh1ELDbDbsSCEMmMv/M+ETPmUNuDpFOR+A==";
+          = "g6hHzzi4kzmQvmUI+eV0PqKCRAOjz+pBvVR90HrdUczvhulJmpVkrsgk2k6bBAS8i/jQ3pY7RL1+olin/QmWEg==";
 
   public NodesInitializerTest() {
   }

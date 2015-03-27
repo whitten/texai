@@ -1,21 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <diagram>
-<source><![CDATA[#![Heartbeat, Timeout, Restart     ]
-tlhb:TopLevelHeartbeat[rp] "TopLevelHeartbeat"
-chb:ContainerHeartbeat[rp] "ContainerHeartbeat"
-co:ContainerOperation[rp] "ContainerOperation"
-xaio:XAIOperation[rp] "AICOperation"
+<source><![CDATA[#![Coin Network Coinfiguration          ]
+no:NetworkOperation[rp] "NetworkOperation"
+ano:AICNetworkOperation[rp] "AICNetworkOperation"
+ao:AICOperation[rp] "AICOperation"
 
-
-[c:alt normal operation]
-chb:tlhb.keepAlive_Info()
-tlhb:chb.keepAliveAcknowledged_Task()
-[/c]
-
-[c:alt reply timeout]
-chb:co.restartContainerRequest_Info()
-co:xaio.shutdownAicondRequest_Info()
-[/c]
+no:ano.networkConfiguration_Task(nodeInfos)
+ano:ao.coinNetworkConfiguration_Task(nodeInfos)
 ]]></source>
 <configuration>
 <property name="activationBarBorderThickness" value="1"/>

@@ -3,6 +3,54 @@ digraph "agents-graph" {
   mincross = 2.0 ;
 subgraph cluster_agents {
   label = "nodes"
+  NAICBlockchainArchiveAgent [
+    shape = box
+    label = "AICBlockchainArchiveAgent" ];
+  NAICClientGatewayAgent [
+    shape = box
+    label = "AICClientGatewayAgent" ];
+  NAICContainerAuditAgent [
+    shape = box
+    label = "AICContainerAuditAgent" ];
+  NAICContainerCertificateAuthorityAgent [
+    shape = box
+    label = "AICContainerCertificateAuthorityAgent" ];
+  NAICContainerEpisodicMemoryAgent [
+    shape = box
+    label = "AICContainerEpisodicMemoryAgent" ];
+  NAICFaucetAgent [
+    shape = box
+    label = "AICFaucetAgent" ];
+  NAICFinancialAccountingAndControlAgent [
+    shape = oval
+    label = "AICFinancialAccountingAndControlAgent" ];
+  NAICMintAgent [
+    shape = oval
+    label = "AICMintAgent" ];
+  NAICNetworkEpisodicMemoryAgent [
+    shape = oval
+    label = "AICNetworkEpisodicMemoryAgent" ];
+  NAICNetworkOperationAgent [
+    shape = oval
+    label = "AICNetworkOperationAgent" ];
+  NAICNetworkSeedAgent [
+    shape = oval
+    label = "AICNetworkSeedAgent" ];
+  NAICOperationAgent [
+    shape = box
+    label = "AICOperationAgent" ];
+  NAICPrimaryAuditAgent [
+    shape = oval
+    label = "AICPrimaryAuditAgent" ];
+  NAICRecoveryAgent [
+    shape = oval
+    label = "AICRecoveryAgent" ];
+  NAICRewardAllocationAgent [
+    shape = oval
+    label = "AICRewardAllocationAgent" ];
+  NAICSeedAgent [
+    shape = box
+    label = "AICSeedAgent" ];
   NContainerOperationAgent [
     shape = box
     label = "ContainerOperationAgent" ];
@@ -12,90 +60,42 @@ subgraph cluster_agents {
   NTopmostFriendshipAgent [
     shape = oval
     label = "TopmostFriendshipAgent" ];
-  NXAIBlockchainArchiveAgent [
-    shape = box
-    label = "XAIBlockchainArchiveAgent" ];
-  NXAIClientGatewayAgent [
-    shape = box
-    label = "XAIClientGatewayAgent" ];
-  NXAIContainerAuditAgent [
-    shape = box
-    label = "XAIContainerAuditAgent" ];
-  NXAIContainerCertificateAuthorityAgent [
-    shape = box
-    label = "XAIContainerCertificateAuthorityAgent" ];
-  NXAIContainerEpisodicMemoryAgent [
-    shape = box
-    label = "XAIContainerEpisodicMemoryAgent" ];
-  NXAIFaucetAgent [
-    shape = box
-    label = "XAIFaucetAgent" ];
-  NXAIFinancialAccountingAndControlAgent [
-    shape = oval
-    label = "XAIFinancialAccountingAndControlAgent" ];
-  NXAIMintAgent [
-    shape = oval
-    label = "XAIMintAgent" ];
-  NXAINetworkEpisodicMemoryAgent [
-    shape = oval
-    label = "XAINetworkEpisodicMemoryAgent" ];
-  NXAINetworkOperationAgent [
-    shape = oval
-    label = "XAINetworkOperationAgent" ];
-  NXAINetworkSeedAgent [
-    shape = oval
-    label = "XAINetworkSeedAgent" ];
-  NXAIOperationAgent [
-    shape = box
-    label = "XAIOperationAgent" ];
-  NXAIPrimaryAuditAgent [
-    shape = oval
-    label = "XAIPrimaryAuditAgent" ];
-  NXAIRecoveryAgent [
-    shape = oval
-    label = "XAIRecoveryAgent" ];
-  NXAIRewardAllocationAgent [
-    shape = oval
-    label = "XAIRewardAllocationAgent" ];
-  NXAISeedAgent [
-    shape = box
-    label = "XAISeedAgent" ];
-  }  NXAINetworkOperationAgent -> NXAINetworkSeedAgent;
-  NContainerOperationAgent -> NXAINetworkEpisodicMemoryAgent;
-  NContainerOperationAgent -> NXAIOperationAgent;
-  NContainerOperationAgent -> NXAIFaucetAgent;
-  NContainerOperationAgent -> NXAIContainerCertificateAuthorityAgent;
-  NContainerOperationAgent -> NXAIPrimaryAuditAgent;
-  NXAINetworkOperationAgent -> NXAIContainerAuditAgent;
-  NContainerOperationAgent -> NXAISeedAgent;
-  NContainerOperationAgent -> NXAIContainerAuditAgent;
-  NContainerOperationAgent -> NXAIBlockchainArchiveAgent;
-  NXAINetworkOperationAgent -> NXAIFaucetAgent;
-  NXAINetworkOperationAgent -> NXAIPrimaryAuditAgent;
+  }  NAICNetworkOperationAgent -> NAICPrimaryAuditAgent;
+  NAICNetworkOperationAgent -> NAICNetworkSeedAgent;
+  NAICNetworkSeedAgent -> NAICSeedAgent;
+  NContainerOperationAgent -> NAICContainerAuditAgent;
+  NContainerOperationAgent -> NAICContainerEpisodicMemoryAgent;
+  NAICNetworkOperationAgent -> NAICRecoveryAgent;
+  NAICNetworkOperationAgent -> NAICBlockchainArchiveAgent;
+  NContainerOperationAgent -> NAICSeedAgent;
+  NAICNetworkOperationAgent -> NAICMintAgent;
+  NContainerOperationAgent -> NAICContainerCertificateAuthorityAgent;
+  NContainerOperationAgent -> NAICFaucetAgent;
   NContainerOperationAgent -> NNetworkOperationAgent;
-  NContainerOperationAgent -> NXAIRecoveryAgent;
-  NXAINetworkOperationAgent -> NXAIOperationAgent;
-  NXAINetworkOperationAgent -> NXAIRecoveryAgent;
+  NContainerOperationAgent -> NAICFinancialAccountingAndControlAgent;
+  NContainerOperationAgent -> NAICNetworkSeedAgent;
   NTopmostFriendshipAgent -> NNetworkOperationAgent;
+  NContainerOperationAgent -> NAICBlockchainArchiveAgent;
   NContainerOperationAgent -> NContainerOperationAgent;
-  NContainerOperationAgent -> NXAIClientGatewayAgent;
-  NXAINetworkEpisodicMemoryAgent -> NXAIContainerEpisodicMemoryAgent;
-  NContainerOperationAgent -> NXAIMintAgent;
-  NXAINetworkOperationAgent -> NXAIFinancialAccountingAndControlAgent;
-  NContainerOperationAgent -> NXAIRewardAllocationAgent;
+  NAICNetworkOperationAgent -> NAICOperationAgent;
+  NContainerOperationAgent -> NAICClientGatewayAgent;
+  NAICNetworkEpisodicMemoryAgent -> NAICContainerEpisodicMemoryAgent;
+  NContainerOperationAgent -> NAICNetworkEpisodicMemoryAgent;
+  NAICNetworkOperationAgent -> NAICFinancialAccountingAndControlAgent;
+  NContainerOperationAgent -> NAICMintAgent;
+  NContainerOperationAgent -> NAICOperationAgent;
+  NAICNetworkOperationAgent -> NAICFaucetAgent;
+  NAICNetworkOperationAgent -> NAICContainerAuditAgent;
   NContainerOperationAgent -> NTopmostFriendshipAgent;
-  NXAINetworkOperationAgent -> NXAIContainerCertificateAuthorityAgent;
+  NAICNetworkOperationAgent -> NAICContainerCertificateAuthorityAgent;
+  NContainerOperationAgent -> NAICNetworkOperationAgent;
+  NAICNetworkOperationAgent -> NAICNetworkEpisodicMemoryAgent;
   NNetworkOperationAgent -> NContainerOperationAgent;
-  NContainerOperationAgent -> NXAINetworkSeedAgent;
-  NXAINetworkOperationAgent -> NXAIClientGatewayAgent;
-  NXAINetworkOperationAgent -> NXAINetworkEpisodicMemoryAgent;
-  NXAINetworkOperationAgent -> NXAIBlockchainArchiveAgent;
-  NContainerOperationAgent -> NXAIContainerEpisodicMemoryAgent;
-  NNetworkOperationAgent -> NXAINetworkOperationAgent;
-  NXAINetworkSeedAgent -> NXAISeedAgent;
-  NContainerOperationAgent -> NXAIFinancialAccountingAndControlAgent;
-  NContainerOperationAgent -> NXAINetworkOperationAgent;
-  NXAINetworkOperationAgent -> NXAIMintAgent;
-  NXAINetworkOperationAgent -> NXAIRewardAllocationAgent;
+  NContainerOperationAgent -> NAICRewardAllocationAgent;
+  NContainerOperationAgent -> NAICRecoveryAgent;
+  NAICNetworkOperationAgent -> NAICClientGatewayAgent;
+  NContainerOperationAgent -> NAICPrimaryAuditAgent;
+  NNetworkOperationAgent -> NAICNetworkOperationAgent;
+  NAICNetworkOperationAgent -> NAICRewardAllocationAgent;
 
 }

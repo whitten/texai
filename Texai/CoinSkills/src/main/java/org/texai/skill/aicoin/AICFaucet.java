@@ -12,29 +12,29 @@ import org.texai.tamperEvidentLogs.TELogAccess;
 import org.texai.util.StringUtils;
 
 /**
- * XAIFaucet.java
- *
- * Description: Provides a tamper evident aicoin faucet. A faucet is an internet web site or API that enables a new wallet user to
+ * AICFaucet.java
+
+ Description: Provides a tamper evident aicoin faucet. A faucet is an internet web site or API that enables a new wallet user to
  * immediately receive a small amount of aicoin at no charge. Abuse is prevented by recording the IP address and usage.
  *
  * Copyright (C) Dec 31, 2014, Stephen L. Reed, Texai.org.
  */
 @ThreadSafe
-public class XAIFaucet extends AbstractNetworkSingletonSkill {
+public class AICFaucet extends AbstractNetworkSingletonSkill {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(XAIFaucet.class);
+  private static final Logger LOGGER = Logger.getLogger(AICFaucet.class);
   // the name of the aicoin faucet payments tamper-evident log
-  private static final String XAI_FAUCET_PAYMENTS = "XAIFaucetPayments";
+  private static final String AIC_FAUCET_PAYMENTS = "AICFaucetPayments";
   // the tamper-evident log access object
   private TELogAccess teLogAccess;
-  // the maximum total amount of aicoin payments to a single user, 5 XAI
+  // the maximum total amount of aicoin payments to a single user, 5 AIC
   private final BigInteger AMOUNT_CLAIMED_LIMIT = new BigInteger("500000000");
 
   /**
-   * Creates a new instance of XAIFaucet.
+   * Creates a new instance of AICFaucet.
    */
-  public XAIFaucet() {
+  public AICFaucet() {
   }
 
   /**
@@ -68,7 +68,7 @@ public class XAIFaucet extends AbstractNetworkSingletonSkill {
       /**
        * Initialize Task
        *
-       * This task message is sent from the parent XAINetworkOperationAgent.XAINetworkOperationRole. It is expected to be the first task
+       * This task message is sent from the parent AICNetworkOperationAgent.AICNetworkOperationRole. It is expected to be the first task
        * message that this role receives and it results in the role being initialized.
        */
       case AHCSConstants.INITIALIZE_TASK:
@@ -84,7 +84,7 @@ public class XAIFaucet extends AbstractNetworkSingletonSkill {
       /**
        * Join Acknowledged Task
        *
-       * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.XAINetworkOperationRole. It indicates that
+       * This task message is sent from the network-singleton, parent AICNetworkOperationAgent.AICNetworkOperationRole. It indicates that
        * the parent is ready to converse with this role as needed.
        */
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
@@ -96,7 +96,7 @@ public class XAIFaucet extends AbstractNetworkSingletonSkill {
       /**
        * Perform Mission Task
        *
-       * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.XAINetworkOperationRole. It commands this
+       * This task message is sent from the network-singleton, parent AICNetworkOperationAgent.AICNetworkOperationRole. It commands this
        * network-connected role to begin performing its mission.
        */
       case AHCSConstants.PERFORM_MISSION_TASK:
@@ -231,11 +231,11 @@ public class XAIFaucet extends AbstractNetworkSingletonSkill {
     assert StringUtils.isNonEmptyString(key) : "key must be a non-empty string";
     assert teLogAccess != null : "teLogAccess must not be null";
 
-    if (teLogAccess.findTELogHeader(XAI_FAUCET_PAYMENTS) == null) {
-      teLogAccess.createTELogHeader(XAI_FAUCET_PAYMENTS);
+    if (teLogAccess.findTELogHeader(AIC_FAUCET_PAYMENTS) == null) {
+      teLogAccess.createTELogHeader(AIC_FAUCET_PAYMENTS);
     }
     final UsersFaucetConsumption usersFaucetConsumptionPrevious
-            = (UsersFaucetConsumption) teLogAccess.findTEKeyedLogItem(XAI_FAUCET_PAYMENTS, key);
+            = (UsersFaucetConsumption) teLogAccess.findTEKeyedLogItem(AIC_FAUCET_PAYMENTS, key);
     BigInteger totalAmountClaimed;
     if (usersFaucetConsumptionPrevious == null) {
       totalAmountClaimed = BigInteger.ZERO;
@@ -268,7 +268,7 @@ public class XAIFaucet extends AbstractNetworkSingletonSkill {
 
   /** Converts an amount from the aicoind or aicoin-qt RPC interface to satoshis.
    *
-   * @param value the RPC amount as a double, e.g. 1 XAI = 1.00000000
+   * @param value the RPC amount as a double, e.g. 1 AIC = 1.00000000
    * @return the amount as satoshis, e.g. 1 XAH = 100000000 satoshis
    */
   public BigInteger JSONtoAmount(final double value) {

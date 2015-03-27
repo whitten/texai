@@ -198,7 +198,7 @@ public class ContainerOperationTest {
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
     assertNull(skillTestHarness.getOperationAndSenderServiceInfo());
     final Message sentMessage = skillTestHarness.getSentMessage();
-    assertEquals("[shutdownAicoindRequest_Info, Test.ContainerOperationAgent.ContainerOperationRole:ContainerOperation --> Test.XAIOperationAgent.XAIOperationRole:XAIOperation]", sentMessage.toBriefString());
+    assertEquals("[shutdownAicoindRequest_Info, Test.ContainerOperationAgent.ContainerOperationRole:ContainerOperation --> Test.AICOperationAgent.AICOperationRole:AICOperation]", sentMessage.toBriefString());
     assertTrue(skillTestHarness.isTerminated());
   }
 

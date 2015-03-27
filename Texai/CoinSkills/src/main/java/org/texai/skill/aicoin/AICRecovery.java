@@ -7,27 +7,25 @@ import org.texai.ahcsSupport.Message;
 import org.texai.ahcs.skill.AbstractNetworkSingletonSkill;
 
 /**
- * Created on Aug 29, 2014, 6:44:41 PM.
+ * Created on Aug 29, 2014, 6:48:14 PM.
  *
- * Description: Coordinates the bittorrent seeding of large blockchain and data files to new full nodes
-      when they join the network.
+ * Description: The recovery skill performs fault-recovery. Typical fault recovery in case of a defective mint would be the
+ * coordinated roll-back of the last committed block, releasing its transactions for input into a replacement block by a
+ * backup temporary mint.
  *
  * Copyright (C) Aug 29, 2014, Stephen L. Reed, Texai.org.
  *
  * @author reed
  *
- * Copyright (C) 2014 Texai
  */
+
 @ThreadSafe
-public final class XAINetworkSeed extends AbstractNetworkSingletonSkill {
-
+public final class AICRecovery extends AbstractNetworkSingletonSkill {
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(XAINetworkSeed.class);
+  private static final Logger LOGGER = Logger.getLogger(AICRecovery.class);
 
-  /**
-   * Constructs a new XTCNetworkSeed instance.
-   */
-  public XAINetworkSeed() {
+  /** Constructs a new XTCRecovery instance. */
+  public AICRecovery() {
   }
 
   /** Gets the logger.
@@ -40,8 +38,8 @@ public final class XAINetworkSeed extends AbstractNetworkSingletonSkill {
   }
 
   /**
-   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries
-   * are single threaded with regard to the conversation.
+   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
+   * with regard to the conversation.
    *
    * @param receivedMessage the given message
    */
@@ -60,12 +58,11 @@ public final class XAINetworkSeed extends AbstractNetworkSingletonSkill {
       /**
        * Initialize Task
        *
-       * This task message is sent from the parent XAINetworkOperationAgent.XAINetworkOperationRole. It is expected to be the first task message
+       * This task message is sent from the parent AICNetworkOperationAgent.AICNetworkOperationRole. It is expected to be the first task message
        * that this role receives and it results in the role being initialized.
        */
       case AHCSConstants.INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
-        propagateOperationToChildRoles(receivedMessage);
         if (getNodeRuntime().isFirstContainerInNetwork()) {
           setSkillState(AHCSConstants.State.READY);
         } else {
@@ -76,7 +73,7 @@ public final class XAINetworkSeed extends AbstractNetworkSingletonSkill {
       /**
        * Join Acknowledged Task
        *
-       * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.XAINetworkOperationRole.
+       * This task message is sent from the network-singleton, parent AICNetworkOperationAgent.AICNetworkOperationRole.
        * It indicates that the parent is ready to converse with this role as needed.
        */
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
@@ -86,26 +83,9 @@ public final class XAINetworkSeed extends AbstractNetworkSingletonSkill {
         return;
 
       /**
-       * Join Network Singleton Agent Info
-       *
-       * This task message is sent to this network singleton agent/role from a child role in another container.
-       *
-       * The sender is requesting to join the network as child of this role.
-       *
-       * The message parameter is the X.509 certificate belonging to the sender agent / role.
-       *
-       * The result is the sending of a Join Acknowleged Task message to the requesting child role, with this role's X.509 certificate as
-       * the message parameter.
-       */
-      case AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        joinNetworkSingletonAgent(receivedMessage);
-        return;
-
-      /**
        * Perform Mission Task
        *
-       * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.NetworkOperationRole. It commands this
+       * This task message is sent from the network-singleton, parent NAICetworkOperationAgent.AICNetworkOperationRole. It commands this
        * network-connected role to begin performing its mission.
        */
       case AHCSConstants.PERFORM_MISSION_TASK:
@@ -135,8 +115,8 @@ public final class XAINetworkSeed extends AbstractNetworkSingletonSkill {
   }
 
   /**
-   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single
-   * threaded with regard to the conversation.
+   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single threaded with regard
+   * to the conversation.
    *
    * @param message the given message
    *
@@ -163,7 +143,6 @@ public final class XAINetworkSeed extends AbstractNetworkSingletonSkill {
     return new String[]{
       AHCSConstants.INITIALIZE_TASK,
       AHCSConstants.DELEGATE_PERFORM_MISSION_TASK,
-      AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.PERFORM_MISSION_TASK
@@ -173,16 +152,15 @@ public final class XAINetworkSeed extends AbstractNetworkSingletonSkill {
   /**
    * Perform this role's mission.
    *
-   * @param receivedMessage the received perform mission task message
+   * @param message the received perform mission task message
    */
-  private void performMission(final Message receivedMessage) {
+  private void performMission(final Message message) {
     //Preconditions
-    assert receivedMessage != null : "message must not be null";
+    assert message != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready: " + stateDescription(getSkillState());
-    assert !getRole().getChildQualifiedNames().isEmpty() : "must have at least one child role";
+    assert getRole().getChildQualifiedNames().isEmpty() : "must not have child roles";
 
     LOGGER.info("performing the mission");
-    propagateOperationToChildRolesSeparateThreads(receivedMessage);
 
   }
 

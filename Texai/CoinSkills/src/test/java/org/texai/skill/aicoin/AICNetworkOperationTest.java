@@ -30,10 +30,10 @@ import org.texai.util.ArraySet;
  *
  * @author reed
  */
-public class XAINetworkOperationTest {
+public class AICNetworkOperationTest {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(XAINetworkOperationTest.class);
+  private static final Logger LOGGER = Logger.getLogger(AICNetworkOperationTest.class);
   // the container name
   private static final String containerName = "Test";
   // the test parent qualified name
@@ -41,15 +41,15 @@ public class XAINetworkOperationTest {
   // the test parent service
   private static final String parentService = NetworkOperation.class.getName();
   // the class name of the tested skill
-  private static final String skillClassName = XAINetworkOperation.class.getName();
+  private static final String skillClassName = AICNetworkOperation.class.getName();
   // the test node name
-  private static final String nodeName = "XAINetworkOperationAgent";
+  private static final String nodeName = "AICNetworkOperationAgent";
   // the test node name
-  private static final String roleName = "XAINetworkOperationRole";
+  private static final String roleName = "AICNetworkOperationRole";
   // the skill test harness
   private static SkillTestHarness skillTestHarness;
 
-  public XAINetworkOperationTest() {
+  public AICNetworkOperationTest() {
   }
 
   @BeforeClass
@@ -61,19 +61,19 @@ public class XAINetworkOperationTest {
     skillClasses.add(skillClass);
     final Set<String> variableNames = new ArraySet<>();
     final Set<String> childQualifiedNames = new ArraySet<>();
-    childQualifiedNames.add(containerName + ".XAIBlockchainArchiveAgent.XAIBlockchainArchiveRole");
-    childQualifiedNames.add(containerName + ".XAIClientGatewayAgent.XAIClientGatewayRole");
-    childQualifiedNames.add(containerName + ".XAIContainerAuditAgent.XAIContainerAuditRole");
-    childQualifiedNames.add(containerName + ".XAIContainerCertificateAuthorityAgent.XAIContainerCertificateAuthorityRole");
-    childQualifiedNames.add(containerName + ".XAIFaucetAgent.XAIFaucetRole");
-    childQualifiedNames.add(containerName + ".XAIFinancialAccountingAndControlAgent.XAIClientGatewayRole");
-    childQualifiedNames.add(containerName + ".XAIMintAgent.XAIMintRole");
-    childQualifiedNames.add(containerName + ".XAINetworkEpisodicMemoryAgent.XAINetworkEpisodicMemoryRole");
-    childQualifiedNames.add(containerName + ".XAINetworkSeedAgent.XAINetworkSeedRole");
-    childQualifiedNames.add(containerName + ".XAIOperationAgent.XAIOperationRole");
-    childQualifiedNames.add(containerName + ".XAIPrimaryAuditAgent.XAIPrimaryAuditRole");
-    childQualifiedNames.add(containerName + ".XAIRecoveryAgent.XAIRecoveryRole");
-    childQualifiedNames.add(containerName + ".XAIRewardAllocationAgent.XAIRewardAllocationRole");
+    childQualifiedNames.add(containerName + ".AICBlockchainArchiveAgent.AICBlockchainArchiveRole");
+    childQualifiedNames.add(containerName + ".AICClientGatewayAgent.AICClientGatewayRole");
+    childQualifiedNames.add(containerName + ".AICContainerAuditAgent.AICContainerAuditRole");
+    childQualifiedNames.add(containerName + ".AICContainerCertificateAuthorityAgent.AICContainerCertificateAuthorityRole");
+    childQualifiedNames.add(containerName + ".AICFaucetAgent.AICFaucetRole");
+    childQualifiedNames.add(containerName + ".AICFinancialAccountingAndControlAgent.AICClientGatewayRole");
+    childQualifiedNames.add(containerName + ".AICMintAgent.AICMintRole");
+    childQualifiedNames.add(containerName + ".AICNetworkEpisodicMemoryAgent.AICNetworkEpisodicMemoryRole");
+    childQualifiedNames.add(containerName + ".AICNetworkSeedAgent.AICNetworkSeedRole");
+    childQualifiedNames.add(containerName + ".AICOperationAgent.AICOperationRole");
+    childQualifiedNames.add(containerName + ".AICPrimaryAuditAgent.AICPrimaryAuditRole");
+    childQualifiedNames.add(containerName + ".AICRecoveryAgent.AICRecoveryRole");
+    childQualifiedNames.add(containerName + ".AICRewardAllocationAgent.AICRewardAllocationRole");
 
     skillTestHarness = new SkillTestHarness(
             containerName + "." + nodeName, // name
@@ -88,7 +88,7 @@ public class XAINetworkOperationTest {
             false); // areRemoteCommunicationsPermitted
     final AbstractSkill xaiNetworkOperation = skillTestHarness.getSkill(skillClassName);
     assertNotNull(xaiNetworkOperation);
-    assertTrue(xaiNetworkOperation instanceof XAINetworkOperation);
+    assertTrue(xaiNetworkOperation instanceof AICNetworkOperation);
     assertTrue(xaiNetworkOperation.isUnitTest());
     assertEquals(13, xaiNetworkOperation.getRole().getChildQualifiedNames().size());
   }
@@ -106,7 +106,7 @@ public class XAINetworkOperationTest {
   }
 
   /**
-   * Test of class XAINetworkOperation initialize task message.
+   * Test of class AICNetworkOperation initialize task message.
    */
   @Test
   public void testInitializeTaskMessage() {
@@ -123,7 +123,7 @@ public class XAINetworkOperationTest {
 
     skillTestHarness.dispatchMessage(initializeMessage);
 
-    final XAINetworkOperation xaiNetworkOperation = (XAINetworkOperation) skillTestHarness.getSkill(skillClassName);
+    final AICNetworkOperation xaiNetworkOperation = (AICNetworkOperation) skillTestHarness.getSkill(skillClassName);
     if (xaiNetworkOperation.getNodeRuntime().isFirstContainerInNetwork()) {
       assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
     } else {
@@ -131,27 +131,27 @@ public class XAINetworkOperationTest {
     }
     assertNotNull(skillTestHarness.getOperationAndSenderServiceInfo());
     assertEquals(
-            "[initialize_Task, org.texai.skill.aicoin.XAINetworkOperation]",
+            "[initialize_Task, org.texai.skill.aicoin.AICNetworkOperation]",
             skillTestHarness.getOperationAndSenderServiceInfo().toString());
     assertEquals(
-            "[initialize_Task, Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation --> Test.XAIBlockchainArchiveAgent.XAIBlockchainArchiveRole:]\n"
-            + "[initialize_Task, Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation --> Test.XAIClientGatewayAgent.XAIClientGatewayRole:]\n"
-            + "[initialize_Task, Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation --> Test.XAIContainerAuditAgent.XAIContainerAuditRole:]\n"
-            + "[initialize_Task, Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation --> Test.XAIContainerCertificateAuthorityAgent.XAIContainerCertificateAuthorityRole:]\n"
-            + "[initialize_Task, Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation --> Test.XAIFaucetAgent.XAIFaucetRole:]\n"
-            + "[initialize_Task, Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation --> Test.XAIFinancialAccountingAndControlAgent.XAIClientGatewayRole:]\n"
-            + "[initialize_Task, Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation --> Test.XAIMintAgent.XAIMintRole:]\n"
-            + "[initialize_Task, Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation --> Test.XAINetworkEpisodicMemoryAgent.XAINetworkEpisodicMemoryRole:]\n"
-            + "[initialize_Task, Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation --> Test.XAINetworkSeedAgent.XAINetworkSeedRole:]\n"
-            + "[initialize_Task, Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation --> Test.XAIOperationAgent.XAIOperationRole:]\n"
-            + "[initialize_Task, Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation --> Test.XAIPrimaryAuditAgent.XAIPrimaryAuditRole:]\n"
-            + "[initialize_Task, Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation --> Test.XAIRecoveryAgent.XAIRecoveryRole:]\n"
-            + "[initialize_Task, Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation --> Test.XAIRewardAllocationAgent.XAIRewardAllocationRole:]\n",
+            "[initialize_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICBlockchainArchiveAgent.AICBlockchainArchiveRole:]\n"
+            + "[initialize_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICClientGatewayAgent.AICClientGatewayRole:]\n"
+            + "[initialize_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICContainerAuditAgent.AICContainerAuditRole:]\n"
+            + "[initialize_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICContainerCertificateAuthorityAgent.AICContainerCertificateAuthorityRole:]\n"
+            + "[initialize_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICFaucetAgent.AICFaucetRole:]\n"
+            + "[initialize_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICFinancialAccountingAndControlAgent.AICClientGatewayRole:]\n"
+            + "[initialize_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICMintAgent.AICMintRole:]\n"
+            + "[initialize_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICNetworkEpisodicMemoryAgent.AICNetworkEpisodicMemoryRole:]\n"
+            + "[initialize_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICNetworkSeedAgent.AICNetworkSeedRole:]\n"
+            + "[initialize_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICOperationAgent.AICOperationRole:]\n"
+            + "[initialize_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICPrimaryAuditAgent.AICPrimaryAuditRole:]\n"
+            + "[initialize_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICRecoveryAgent.AICRecoveryRole:]\n"
+            + "[initialize_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICRewardAllocationAgent.AICRewardAllocationRole:]\n",
             Message.toBriefString(skillTestHarness.getSentMessages()));
   }
 
   /**
-   * Test of class XAINetworkOperation perform mission task message.
+   * Test of class AICNetworkOperation perform mission task message.
    */
   @Test
   public void testPerformMissionTaskMessage() {
@@ -159,9 +159,9 @@ public class XAINetworkOperationTest {
 
     skillTestHarness.reset();
     skillTestHarness.setSkillState(AHCSConstants.State.READY, skillClassName);
-    final AbstractSkill xaiNetworkOperation = skillTestHarness.getSkill(XAINetworkOperation.class.getName());
+    final AbstractSkill xaiNetworkOperation = skillTestHarness.getSkill(AICNetworkOperation.class.getName());
     assertNotNull(xaiNetworkOperation);
-    assertTrue(xaiNetworkOperation instanceof XAINetworkOperation);
+    assertTrue(xaiNetworkOperation instanceof AICNetworkOperation);
     assertTrue(xaiNetworkOperation.isUnitTest());
     assertEquals(13, xaiNetworkOperation.getRole().getChildQualifiedNames().size());
     final Message performTaskMessage = new Message(
@@ -175,7 +175,7 @@ public class XAINetworkOperationTest {
     skillTestHarness.dispatchMessage(performTaskMessage);
 
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
-    assertEquals("[performMission_Task, org.texai.skill.aicoin.XAINetworkOperation]", skillTestHarness.getOperationAndSenderServiceInfo().toString());
+    assertEquals("[performMission_Task, org.texai.skill.aicoin.AICNetworkOperation]", skillTestHarness.getOperationAndSenderServiceInfo().toString());
 
     LOGGER.info("traced sent messages ...");
     skillTestHarness.getSentMessages().stream().sorted().forEach((Message sentMessage) -> {
@@ -183,24 +183,24 @@ public class XAINetworkOperationTest {
       LOGGER.info("");
     });
     assertEquals(
-            "[performMission_Task, Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation --> Test.XAIBlockchainArchiveAgent.XAIBlockchainArchiveRole:]\n"
-            + "[performMission_Task, Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation --> Test.XAIClientGatewayAgent.XAIClientGatewayRole:]\n"
-            + "[performMission_Task, Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation --> Test.XAIContainerAuditAgent.XAIContainerAuditRole:]\n"
-            + "[performMission_Task, Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation --> Test.XAIContainerCertificateAuthorityAgent.XAIContainerCertificateAuthorityRole:]\n"
-            + "[performMission_Task, Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation --> Test.XAIFaucetAgent.XAIFaucetRole:]\n"
-            + "[performMission_Task, Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation --> Test.XAIFinancialAccountingAndControlAgent.XAIClientGatewayRole:]\n"
-            + "[performMission_Task, Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation --> Test.XAIMintAgent.XAIMintRole:]\n"
-            + "[performMission_Task, Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation --> Test.XAINetworkEpisodicMemoryAgent.XAINetworkEpisodicMemoryRole:]\n"
-            + "[performMission_Task, Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation --> Test.XAINetworkSeedAgent.XAINetworkSeedRole:]\n"
-            + "[performMission_Task, Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation --> Test.XAIOperationAgent.XAIOperationRole:]\n"
-            + "[performMission_Task, Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation --> Test.XAIPrimaryAuditAgent.XAIPrimaryAuditRole:]\n"
-            + "[performMission_Task, Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation --> Test.XAIRecoveryAgent.XAIRecoveryRole:]\n"
-            + "[performMission_Task, Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation --> Test.XAIRewardAllocationAgent.XAIRewardAllocationRole:]\n",
+            "[performMission_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICBlockchainArchiveAgent.AICBlockchainArchiveRole:]\n"
+            + "[performMission_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICClientGatewayAgent.AICClientGatewayRole:]\n"
+            + "[performMission_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICContainerAuditAgent.AICContainerAuditRole:]\n"
+            + "[performMission_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICContainerCertificateAuthorityAgent.AICContainerCertificateAuthorityRole:]\n"
+            + "[performMission_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICFaucetAgent.AICFaucetRole:]\n"
+            + "[performMission_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICFinancialAccountingAndControlAgent.AICClientGatewayRole:]\n"
+            + "[performMission_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICMintAgent.AICMintRole:]\n"
+            + "[performMission_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICNetworkEpisodicMemoryAgent.AICNetworkEpisodicMemoryRole:]\n"
+            + "[performMission_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICNetworkSeedAgent.AICNetworkSeedRole:]\n"
+            + "[performMission_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICOperationAgent.AICOperationRole:]\n"
+            + "[performMission_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICPrimaryAuditAgent.AICPrimaryAuditRole:]\n"
+            + "[performMission_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICRecoveryAgent.AICRecoveryRole:]\n"
+            + "[performMission_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICRewardAllocationAgent.AICRewardAllocationRole:]\n",
             Message.toBriefString(skillTestHarness.getSentMessages()));
   }
 
   /**
-   * Test of class XAINetworkOperation - Restart Container Task.
+   * Test of class AICNetworkOperation - Restart Container Task.
    */
   @Test
   public void testRestartContainer() {
@@ -222,12 +222,12 @@ public class XAINetworkOperationTest {
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     assertEquals(
-            "[shutdownAicoind_Task, Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation --> Test.XAIOperationAgent.XAIOperationRole:XAIOperation]\n",
+            "[shutdownAicoind_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICOperationAgent.AICOperationRole:AICOperation]\n",
             Message.toBriefString(skillTestHarness.getSentMessages()));
   }
 
   /**
-   * Test of class XAINetworkOperation - Message Not Understood Info.
+   * Test of class AICNetworkOperation - Message Not Understood Info.
    */
   @Test
   public void testMessageNotUnderstoodInfo() {
@@ -249,27 +249,27 @@ public class XAINetworkOperationTest {
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertTrue(sentMessage.toString().startsWith("[messageNotUnderstood_Info Test.XAINetworkOperationAgent.XAINetworkOperationRole:XAINetworkOperation --> Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation "));
+    assertTrue(sentMessage.toString().startsWith("[messageNotUnderstood_Info Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation "));
   }
 
   /**
-   * Test of getLogger method, of class XAINetworkOperation.
+   * Test of getLogger method, of class AICNetworkOperation.
    */
   @Test
   public void testGetLogger() {
     LOGGER.info("getLogger");
-    XAINetworkOperation instance = new XAINetworkOperation();
+    AICNetworkOperation instance = new AICNetworkOperation();
     assertNotNull(instance.getLogger());
-    assertEquals(XAINetworkOperation.class.getName(), instance.getLogger().getName());
+    assertEquals(AICNetworkOperation.class.getName(), instance.getLogger().getName());
   }
 
   /**
-   * Test of getUnderstoodOperations method, of class XAINetworkOperation.
+   * Test of getUnderstoodOperations method, of class AICNetworkOperation.
    */
   @Test
   public void testGetUnderstoodOperations() {
     LOGGER.info("getUnderstoodOperations");
-    XAINetworkOperation instance = new XAINetworkOperation();
+    AICNetworkOperation instance = new AICNetworkOperation();
     final List<String> understoodOperations = new ArrayList<>(Arrays.asList(instance.getUnderstoodOperations()));
     Collections.sort(understoodOperations);
     assertEquals(

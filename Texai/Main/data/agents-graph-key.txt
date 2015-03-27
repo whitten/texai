@@ -1,3 +1,54 @@
+AICBlockchainArchiveAgent
+  Archives the AICoin blockchain and pending transactions.
+
+AICClientGatewayAgent
+  Provides a wallet and processor client gateway for the AICoin network.
+
+AICContainerAuditAgent
+  Provides a container audit agent for the AICoin network.
+
+AICContainerCertificateAuthorityAgent
+  Provides self-signed X.509 certificates for roles in a particular container in the AICoin
+      network.
+
+AICContainerEpisodicMemoryAgent
+  Provides episodic memory for agents in a particular container in the AICoin network.
+
+AICFaucetAgent
+  Provides a tamper evident aicoin faucet.
+
+AICFinancialAccountingAndControlAgent
+  Provides financial accounting and control for the AICoin network.
+
+AICMintAgent
+  Provides a mint the AICoin network.
+
+AICNetworkEpisodicMemoryAgent
+  Coordinates episodic memory for agents in the AICoin network.
+
+AICNetworkOperationAgent
+  Manages the AICoin agent network. Interacts with human operators.
+
+AICNetworkSeedAgent
+  Coordinates the seeding of large blockchain and data files to new full nodes
+      when they join the network.
+
+AICOperationAgent
+  Manages a bitcoind instance.
+
+AICPrimaryAuditAgent
+  Provides the primary audit agent for the AICoin network.
+
+AICRecoveryAgent
+  Provides fault recovery for the AICoin network.
+
+AICRewardAllocationAgent
+  Allocates the rewards resulting from minting new blocks for the AICoin network.
+
+AICSeedAgent
+  Provides a AICoin network seed for wallet and processor clients. Maintains the mapping of client gateways
+      and their respective IP addresses.
+
 ContainerOperationAgent
   Manages a container and the AICoin agent within the container. Interacts with the human container operator.
 
@@ -6,55 +57,4 @@ NetworkOperationAgent
 
 TopmostFriendshipAgent
   Coordinates the top level agents to ensure friendly behavior.
-
-XAIBlockchainArchiveAgent
-  Archives the AICoin blockchain and pending transactions.
-
-XAIClientGatewayAgent
-  Provides a wallet and processor client gateway for the AICoin network.
-
-XAIContainerAuditAgent
-  Provides a container audit agent for the AICoin network.
-
-XAIContainerCertificateAuthorityAgent
-  Provides self-signed X.509 certificates for roles in a particular container in the AICoin
-      network.
-
-XAIContainerEpisodicMemoryAgent
-  Provides episodic memory for agents in a particular container in the AICoin network.
-
-XAIFaucetAgent
-  Provides a tamper evident aicoin faucet.
-
-XAIFinancialAccountingAndControlAgent
-  Provides financial accounting and control for the AICoin network.
-
-XAIMintAgent
-  Provides a mint the AICoin network.
-
-XAINetworkEpisodicMemoryAgent
-  Coordinates episodic memory for agents in the AICoin network.
-
-XAINetworkOperationAgent
-  Manages the AICoin agent network. Interacts with human operators.
-
-XAINetworkSeedAgent
-  Coordinates the seeding of large blockchain and data files to new full nodes
-      when they join the network.
-
-XAIOperationAgent
-  Manages a bitcoind instance.
-
-XAIPrimaryAuditAgent
-  Provides the primary audit agent for the AICoin network.
-
-XAIRecoveryAgent
-  Provides fault recovery for the AICoin network.
-
-XAIRewardAllocationAgent
-  Allocates the rewards resulting from minting new blocks for the AICoin network.
-
-XAISeedAgent
-  Provides a AICoin network seed for wallet and processor clients. Maintains the mapping of client gateways
-      and their respective IP addresses.
 

@@ -1,17 +1,5 @@
-/*
- * XAINetworkOperation.java
- *
- * Created on Sep 18, 2014, 8:10:02 AM
- *
- * Description: Manages the network, the containers, and the A.I. Coin agents within the containers. Interacts with human operators.
- *
- * Copyright (C) 2014 Stephen L. Reed
- *
- */
 package org.texai.skill.aicoin;
 
-import java.util.ArrayList;
-import java.util.List;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
@@ -19,26 +7,32 @@ import org.texai.ahcsSupport.Message;
 import org.texai.ahcs.skill.AbstractNetworkSingletonSkill;
 
 /**
- * Manages the network, the containers, and the A.I. Coin agents within the containers. Interacts with human operators.
+ * Created on Aug 29, 2014, 6:44:41 PM.
+ *
+ * Description: Coordinates the bittorrent seeding of large blockchain and data files to new full nodes
+      when they join the network.
+ *
+ * Copyright (C) Aug 29, 2014, Stephen L. Reed, Texai.org.
  *
  * @author reed
+ *
+ * Copyright (C) 2014 Texai
  */
 @ThreadSafe
-public final class XAINetworkOperation extends AbstractNetworkSingletonSkill {
+public final class AICNetworkSeed extends AbstractNetworkSingletonSkill {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(XAINetworkOperation.class);
+  private static final Logger LOGGER = Logger.getLogger(AICNetworkSeed.class);
 
   /**
-   * Constructs a new XTCNetworkOperation instance.
+   * Constructs a new XTCNetworkSeed instance.
    */
-  public XAINetworkOperation() {
+  public AICNetworkSeed() {
   }
 
-  /**
-   * Gets the logger.
+  /** Gets the logger.
    *
-   * @return the logger
+   * @return  the logger
    */
   @Override
   protected Logger getLogger() {
@@ -46,15 +40,15 @@ public final class XAINetworkOperation extends AbstractNetworkSingletonSkill {
   }
 
   /**
-   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries are single threaded
-   * with regard to the conversation.
+   * Receives and attempts to process the given message. The skill is thread safe, given that any contained libraries
+   * are single threaded with regard to the conversation.
    *
    * @param receivedMessage the given message
    */
   @Override
   public void receiveMessage(Message receivedMessage) {
     //Preconditions
-    assert receivedMessage != null : "message must not be null";
+    assert receivedMessage != null : "receivedMessage must not be null";
     assert getRole().getNode().getNodeRuntime() != null;
 
     final String operation = receivedMessage.getOperation();
@@ -66,7 +60,7 @@ public final class XAINetworkOperation extends AbstractNetworkSingletonSkill {
       /**
        * Initialize Task
        *
-       * This task message is sent from the parent NetworkOperationAgent.NetworkOperationRole. It is expected to be the first task message
+       * This task message is sent from the parent AICNetworkOperationAgent.AICNetworkOperationRole. It is expected to be the first task message
        * that this role receives and it results in the role being initialized.
        */
       case AHCSConstants.INITIALIZE_TASK:
@@ -82,23 +76,13 @@ public final class XAINetworkOperation extends AbstractNetworkSingletonSkill {
       /**
        * Join Acknowledged Task
        *
-       * This task message is sent from the network-singleton, parent NetworkOperationAgent.NetworkOperationRole. It indicates that the
-       * parent is ready to converse with this role as needed.
+       * This task message is sent from the network-singleton, parent AICNetworkOperationAgent.AICNetworkOperationRole.
+       * It indicates that the parent is ready to converse with this role as needed.
        */
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
                 "state must be isolated-from-network, but is " + getSkillState();
         joinAcknowledgedTask(receivedMessage);
-        return;
-
-      /**
-       * Perform Mission Task
-       *
-       * This task message is sent from the network-singleton, parent NetworkOperationAgent.NetworkOperationRole. It commands this
-       * network-connected role to begin performing its mission.
-       */
-      case AHCSConstants.PERFORM_MISSION_TASK:
-        performMission(receivedMessage);
         return;
 
       /**
@@ -119,6 +103,17 @@ public final class XAINetworkOperation extends AbstractNetworkSingletonSkill {
         return;
 
       /**
+       * Perform Mission Task
+       *
+       * This task message is sent from the network-singleton, parent AICNetworkOperationAgent.NetworkOperationRole. It commands this
+       * network-connected role to begin performing its mission.
+       */
+      case AHCSConstants.PERFORM_MISSION_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+        performMission(receivedMessage);
+        return;
+
+      /**
        * Delegate Perform Mission Task
        *
        * A container has completed joining the network. Propagate a Delegate Perform Mission Task down the role command hierarchy.
@@ -130,32 +125,18 @@ public final class XAINetworkOperation extends AbstractNetworkSingletonSkill {
         handleDelegatePerformMissionTask(receivedMessage);
         return;
 
-      /**
-       * Restart Container Task
-       *
-       * This message is sent the parent XAINetworkOperationAgent.XAINetworkOperationRole instructing the container to restart following a
-       * given delay.
-       *
-       * As a result, a Shutdown Aicoind Task is sent to each child XAIOperationRole.
-       */
-      case AHCSConstants.RESTART_CONTAINER_TASK:
-        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
-        handleRestartContainerTask(receivedMessage);
-        return;
-
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(receivedMessage);
         return;
-      // handle other operations ...
     }
 
     sendDoNotUnderstandInfoMessage(receivedMessage);
   }
 
   /**
-   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single threaded with regard
-   * to the conversation.
+   * Synchronously processes the given message. The skill is thread safe, given that any contained libraries are single
+   * threaded with regard to the conversation.
    *
    * @param message the given message
    *
@@ -185,52 +166,24 @@ public final class XAINetworkOperation extends AbstractNetworkSingletonSkill {
       AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
-      AHCSConstants.PERFORM_MISSION_TASK,
-      AHCSConstants.RESTART_CONTAINER_TASK
+      AHCSConstants.PERFORM_MISSION_TASK
     };
   }
 
   /**
-   * Perform this role's mission, which is to manage the containers.
+   * Perform this role's mission.
    *
    * @param receivedMessage the received perform mission task message
    */
   private void performMission(final Message receivedMessage) {
     //Preconditions
-    assert receivedMessage != null : "receivedMessage must not be null";
+    assert receivedMessage != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready: " + stateDescription(getSkillState());
     assert !getRole().getChildQualifiedNames().isEmpty() : "must have at least one child role";
 
     LOGGER.info("performing the mission");
     propagateOperationToChildRolesSeparateThreads(receivedMessage);
-  }
 
-  /**
-   * Handles the received Restart Container Task by sending a Shutdown Aicoind Task to each child XAIOperationRole.
-   *
-   * @param receivedMessage the received Restart Container Task message
-   */
-  private void handleRestartContainerTask(final Message receivedMessage) {
-    //Preconditions
-    assert receivedMessage != null : "receivedMessage must not be null";
-
-    // send the restart container task to every child container operation role.
-    if (LOGGER.isDebugEnabled()) {
-      final List<String> childQualifiedNames = new ArrayList<>(getRole().getChildQualifiedNames());
-      LOGGER.debug("childQualifiedNames...");
-      childQualifiedNames.stream().sorted().forEach((String childQualifiedName) -> {
-        LOGGER.debug("  " + childQualifiedName);
-      });
-    }
-    getRole().getChildQualifiedNamesForAgent("XAIOperationAgent").forEach((String childQualifiedName) -> {
-      final Message restartContainerTaskMessage2 = new Message(
-              getQualifiedName(), // senderQualifiedName
-              getClassName(), // senderService
-              childQualifiedName, // recipientQualifiedName
-              XAIOperation.class.getName(), // recipientService
-              AHCSConstants.SHUTDOWN_AICOIND_TASK); // operation
-      sendMessage(receivedMessage, restartContainerTaskMessage2);
-    });
   }
 
 }

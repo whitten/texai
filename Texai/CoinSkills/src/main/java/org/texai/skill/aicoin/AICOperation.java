@@ -1,6 +1,8 @@
 package org.texai.skill.aicoin;
 
 import com.google.bitcoin.params.MainNetParams;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
@@ -23,21 +25,23 @@ import org.texai.util.TexaiException;
  * @author reed
  */
 @ThreadSafe
-public final class XAIOperation extends AbstractSkill implements BitcoinMessageReceiver {
+public final class AICOperation extends AbstractSkill implements BitcoinMessageReceiver {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(XAIOperation.class);
+  private static final Logger LOGGER = Logger.getLogger(AICOperation.class);
   // the path to the aicoin-qt configuration and data directory
   private static final String AICOIN_DIRECTORY_PATH = "../.aicoin";
   // the insight process
   private Process insightProcess;
   // the local bitcoind (aicoind) instance adapter
   private LocalBitcoindAdapter localBitcoindAdapter;
+  // the peer addresses to which Bitcoin messages from the local aicoind instance should be relayed
+  private final Set<String> relayPeerAddresses = new HashSet<>();
 
   /**
    * Constructs a new XTCOperation instance.
    */
-  public XAIOperation() {
+  public AICOperation() {
   }
 
   /**
@@ -76,7 +80,7 @@ public final class XAIOperation extends AbstractSkill implements BitcoinMessageR
       /**
        * Initialize Task
        *
-       * This task message is sent from the parent XAINetworkOperationAgent.XAINetworkOperationRole. It is expected to be the first task
+       * This task message is sent from the parent AICNetworkOperationAgent.AICNetworkOperationRole. It is expected to be the first task
        * message that this role receives and it results in the role being initialized.
        */
       case AHCSConstants.INITIALIZE_TASK:
@@ -91,7 +95,7 @@ public final class XAIOperation extends AbstractSkill implements BitcoinMessageR
       /**
        * Join Acknowledged Task
        *
-       * This task message is sent from the network-singleton, parent XAINetworkOperationAgent.XAINetworkOperationRole. It indicates that
+       * This task message is sent from the network-singleton, parent AICNetworkOperationAgent.AICNetworkOperationRole. It indicates that
        * the parent is ready to converse with this role as needed.
        */
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
@@ -115,9 +119,20 @@ public final class XAIOperation extends AbstractSkill implements BitcoinMessageR
         return;
 
       /**
+       * Bitcoin Message Info
+       *
+       * This information message is sent from a peer AICOperation role. As a result this role sends the message to the local
+       * aicoind instance.
+       */
+      case AHCSConstants.BITCOIN_MESSAGE_INFO:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+        relayBitcoinMessage(receivedMessage);
+        return;
+
+      /**
        * Task Accomplished Info
        *
-       * This information message is sent from this role's XAIWriteConfigurationFile skill indicating that it has emitted the aicoin.conf
+       * This information message is sent from this role's AICWriteConfigurationFile skill indicating that it has emitted the aicoin.conf
        * file.
        */
       case AHCSConstants.TASK_ACCOMPLISHED_INFO:
@@ -128,7 +143,7 @@ public final class XAIOperation extends AbstractSkill implements BitcoinMessageR
       /**
        * Shutdown Aicoind Task
        *
-       * This task message is sent from XAINetworkOperationAgent.XAINetworkOperationRole when the application is shutting down. The child
+       * This task message is sent from AICNetworkOperationAgent.AICNetworkOperationRole when the application is shutting down. The child
        * processes must be shutdown to enable the Java application to exit.
        */
       case AHCSConstants.SHUTDOWN_AICOIND_TASK:
@@ -189,6 +204,7 @@ public final class XAIOperation extends AbstractSkill implements BitcoinMessageR
   public String[] getUnderstoodOperations() {
     return new String[]{
       AHCSConstants.INITIALIZE_TASK,
+      AHCSConstants.BITCOIN_MESSAGE_INFO,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.PERFORM_MISSION_TASK,
@@ -217,7 +233,7 @@ public final class XAIOperation extends AbstractSkill implements BitcoinMessageR
             getQualifiedName(), // recipientQualifiedName
             UUID.randomUUID(), // conversationId,
             UUID.randomUUID(), // replyWith,
-            XAIWriteConfigurationFile.class.getName(), // recipientService
+            AICWriteConfigurationFile.class.getName(), // recipientService
             AHCSConstants.WRITE_CONFIGURATION_FILE_INFO); // operation
     writeConfigurationFileTaskmessage.put(AHCSConstants.WRITE_CONFIGURATION_FILE_INFO_DIRECTORY_PATH, AICOIN_DIRECTORY_PATH);
     // set timeout
@@ -231,7 +247,7 @@ public final class XAIOperation extends AbstractSkill implements BitcoinMessageR
   }
 
   /**
-   * Continues the conversation with the XAIWriteConfigurationFile skill.
+   * Continues the conversation with the AICWriteConfigurationFile skill.
    *
    * @param message the received message
    */
@@ -254,15 +270,15 @@ public final class XAIOperation extends AbstractSkill implements BitcoinMessageR
 
   static class LocalBitcoinAdapterRunner implements Runnable {
 
-    // the XAIOperation skill instance
-    final XAIOperation xaiOperation;
+    // the AICOperation skill instance
+    final AICOperation xaiOperation;
 
     /**
      * Creates a new LocalBitcoinAdapterRunner intance.
      *
-     * @param xaiOperation the XAIOperation skill instance
+     * @param xaiOperation the AICOperation skill instance
      */
-    LocalBitcoinAdapterRunner(final XAIOperation xaiOperation) {
+    LocalBitcoinAdapterRunner(final AICOperation xaiOperation) {
       this.xaiOperation = xaiOperation;
     }
 
@@ -393,15 +409,43 @@ public final class XAIOperation extends AbstractSkill implements BitcoinMessageR
     }
   }
 
+  /** Relays the Bitcoin message to the local aicoind instance.
+   *
+   * @param message the given message, which contains the Bitcoin protocol message as a parameter
+   */
+  private void relayBitcoinMessage(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+
+    final com.google.bitcoin.core.Message bitcoinProtocolMessage =
+            (com.google.bitcoin.core.Message) message.get(AHCSConstants.BITCOIN_MESSAGE_INFO_Message);
+    LOGGER.info("received bitcoinProtocolMessage from network: " + bitcoinProtocolMessage);
+    assert bitcoinProtocolMessage != null;
+    localBitcoindAdapter.sendBitcoinMessageToLocalBitcoind(bitcoinProtocolMessage);
+  }
+
+
   @Override
   /**
    * Receives an outbound bitcoin message from the local peer.
    *
    * @param message the given bitcoin protocol message
    */
-  public void receiveMessageFromLocalBitcoind(final com.google.bitcoin.core.Message message) {
-    LOGGER.info("received from local aicoind: " + message);
+  public void receiveMessageFromLocalBitcoind(final com.google.bitcoin.core.Message bitcoinProtocolMessage) {
+    //Preconditions
+    assert bitcoinProtocolMessage != null : "message must not be null";
 
+    LOGGER.info("received from local aicoind: " + bitcoinProtocolMessage);
+
+    final String recipientQualifiedName = "";
+    final Message relayMessage = makeMessage(
+            recipientQualifiedName,
+            AICOperation.class.getName(), // recipientService
+            AHCSConstants.BITCOIN_MESSAGE_INFO); // operation
+    relayMessage.put(AHCSConstants.BITCOIN_MESSAGE_INFO_Message, bitcoinProtocolMessage);
+    sendMessage(
+            null, // receivedMessage
+            relayMessage); // message
   }
 
 }
