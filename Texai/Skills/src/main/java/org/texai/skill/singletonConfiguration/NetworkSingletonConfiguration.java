@@ -2,12 +2,13 @@ package org.texai.skill.singletonConfiguration;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TimerTask;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcs.skill.AbstractNetworkSingletonSkill;
-import org.texai.skill.domainEntity.SingletonAgentHosts;
+import org.texai.ahcsSupport.domainEntity.SingletonAgentHosts;
 import org.texai.skill.governance.TopmostFriendship;
 
 /**
@@ -26,7 +27,7 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
   private final Set<String> containerNames = new HashSet<>();
 
   /**
-   * Constructs a new XTCNetworkConfiguration instance.
+   * Constructs a new NetworkConfiguration instance.
    */
   public NetworkSingletonConfiguration() {
   }
@@ -298,6 +299,14 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
 
     LOGGER.info("performing the mission");
     propagateOperationToChildRolesSeparateThreads(receivedMessage);
+
+    // every five minutes broadcast the network configuration node infos via child roles
+    final BroadcastContainerInfos broadcastContainerInfos = new BroadcastContainerInfos(
+            this); // networkSingletonConfiguration
+    getNodeRuntime().getTimer().scheduleAtFixedRate(
+            broadcastContainerInfos, // task
+            300_000, // delay - 5 minutes
+            300_000); // period - 5 minutes
   }
 
   /**
@@ -329,6 +338,52 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
             AHCSConstants.NETWORK_JOIN_COMPLETE_SENSATION); // operation
     networkJoinCompleteSensationMessage.put(AHCSConstants.MSG_PARM_CONTAINER_NAME, receivedMessage.getSenderContainerName());
     sendMessageViaSeparateThread(receivedMessage, networkJoinCompleteSensationMessage);
+  }
+
+  /**
+   * Periodically broadcasts the node info objects that inform containers how the network is configured.
+   */
+  protected class BroadcastContainerInfos extends TimerTask {
+
+    // the network singleton configuration skill
+    private final NetworkSingletonConfiguration networkSingletonConfiguration;
+
+    /**
+     * Constructs a new HeartbeatProcessor instance.
+     *
+     * @param networkSingletonConfiguration the network singleton configuration skill
+     */
+    BroadcastContainerInfos(final NetworkSingletonConfiguration networkSingletonConfiguration) {
+      //Preconditions
+      assert networkSingletonConfiguration != null : "networkSingletonConfiguration must not be null";
+
+      this.networkSingletonConfiguration = networkSingletonConfiguration;
+    }
+
+    /**
+     * Broadcasts the node info objects that inform containers how the network is configured.
+     */
+    @Override
+    public void run() {
+      for (final String childQualifiedName : networkSingletonConfiguration.getRole().getChildQualifiedNames()) {
+      final Message networkConfigurationMessage = networkSingletonConfiguration.makeMessage(
+              childQualifiedName, // recipientQualifiedName
+              ContainerSingletonConfiguration.class.getName(), // recipientService
+              AHCSConstants.NETWORK_CONFIGURATION_TASK); // operation
+      final SingletonAgentHosts singletonAgentHosts = networkSingletonConfiguration.getNodeRuntime().getSingletonAgentHosts();
+      assert singletonAgentHosts != null;
+      networkConfigurationMessage.put(
+              AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS,
+              singletonAgentHosts);
+      networkConfigurationMessage.put(
+              AHCSConstants.MSG_PARM_CONTAINER_INFOS,
+              networkSingletonConfiguration.getNodeRuntime().getContainerInfos());
+      // use a separate thread - in case of an exception when sending, the original timer thread is preserved
+      networkSingletonConfiguration.sendMessageViaSeparateThread(
+              null, // receivedMessage, for conversation tracing
+              networkConfigurationMessage); // message
+      }
+    }
   }
 
 }

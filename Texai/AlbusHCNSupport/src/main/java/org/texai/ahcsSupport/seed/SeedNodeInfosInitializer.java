@@ -46,7 +46,13 @@ public class SeedNodeInfosInitializer {
   /**
    * Initializes the locations of the network seed nodes.
    *
-   * @return
+   * # mainnet or testnet, mainnet uses port 5048, testnet uses port 45048
+   * network=testnet
+   * # one or more seeds of the form container-name, hostname
+   * seed=Mint, Mint
+   * # seed=Mint, texai.dyndns.org
+   *
+   * @return the seed node infos
    */
   public Set<SeedNodeInfo> process() {
 

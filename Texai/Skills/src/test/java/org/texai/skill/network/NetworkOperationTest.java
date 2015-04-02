@@ -167,10 +167,10 @@ public class NetworkOperationTest {
       LOGGER.info("");
     });
     assertEquals(
-            "[performMission_Task, Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation --> Test.ContainerOperationAgent.ContainerOperationRole:]\n"
+            "[performMission_Task, Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation --> Test.AICNetworkOperationAgent.AICNetworkOperationRole:]\n"
+            + "[performMission_Task, Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation --> Test.ContainerOperationAgent.ContainerOperationRole:]\n"
             + "[performMission_Task, Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation --> Test.NetworkOperationAgent.NetworkDeploymentRole:]\n"
-            + "[performMission_Task, Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation --> Test.NetworkOperationAgent.NetworkSingletonConfigurationRole:]\n"
-            + "[performMission_Task, Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation --> Test.AICNetworkOperationAgent.AICNetworkOperationRole:]\n",
+            + "[performMission_Task, Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation --> Test.NetworkOperationAgent.NetworkSingletonConfigurationRole:]\n",
             Message.toBriefString(skillTestHarness.getSentMessages()));
   }
 
@@ -198,9 +198,9 @@ public class NetworkOperationTest {
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
     assertEquals(
-            "[restartContainer_Task, Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation --> Test.ContainerOperationAgent.ContainerOperationRole:ContainerOperation]\n"
+            "[restartContainer_Task, Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation --> Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation]\n"
             + "[restartContainer_Task, Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation --> Test.ContainerOperationAgent.ContainerOperationRole:ContainerOperation]\n"
-            + "[restartContainer_Task, Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation --> Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation]\n",
+            + "[restartContainer_Task, Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation --> Test.ContainerOperationAgent.ContainerOperationRole:ContainerOperation]\n",
             Message.toBriefString(skillTestHarness.getSentMessages()));
   }
 

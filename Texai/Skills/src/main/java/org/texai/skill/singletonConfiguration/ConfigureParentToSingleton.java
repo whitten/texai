@@ -7,7 +7,7 @@ import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.ahcsSupport.domainEntity.Role;
 import org.texai.ahcsSupport.skill.AbstractSkill;
-import org.texai.skill.domainEntity.SingletonAgentHosts;
+import org.texai.ahcsSupport.domainEntity.SingletonAgentHosts;
 import org.texai.util.StringUtils;
 
 /**

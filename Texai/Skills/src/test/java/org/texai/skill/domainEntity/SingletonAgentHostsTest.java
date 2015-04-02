@@ -3,6 +3,7 @@
  */
 package org.texai.skill.domainEntity;
 
+import org.texai.ahcsSupport.domainEntity.SingletonAgentHosts;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -34,7 +35,6 @@ import org.texai.kb.journal.JournalWriter;
 import org.texai.kb.persistence.DistributedRepositoryManager;
 import org.texai.kb.persistence.RDFEntityManager;
 import org.texai.kb.persistence.RDFEntityPersister;
-import org.texai.util.Base64Coder;
 import org.texai.x509.X509Utils;
 
 /**
@@ -88,26 +88,6 @@ public class SingletonAgentHostsTest {
 
   @After
   public void tearDown() {
-  }
-
-  /**
-   * Test of verify method, of class SingletonAgentHosts.
-   */
-  @Test
-  public void testVerify() {
-    LOGGER.info("verify");
-    SingletonAgentHosts singletonAgentHosts = makeSingletonAgentHosts();
-    assertTrue(SingletonAgentHosts.verify(singletonAgentHosts, x509Certificate));
-  }
-
-  /**
-   * Test of sha512Hash method, of class SingletonAgentHosts.
-   */
-  @Test
-  public void testSha512Hash() {
-    LOGGER.info("sha512Hash");
-    SingletonAgentHosts instance = makeSingletonAgentHosts();
-    assertEquals("6Kdo6Hjo+sjOXCzZfTEx4Ep6LZ+1IaxY29Zl7VgtgmMoLuw/iVJfydGZEuWJgwTAKLbkCoCjHNzDrLU0vi2iMg==", new String(Base64Coder.encode(instance.sha512Hash())));
   }
 
   /**
@@ -203,36 +183,6 @@ public class SingletonAgentHostsTest {
     assertEquals("2015-11-14T12:15:05.000-06:00", instance.getTerminationDateTime().toString());
   }
 
-  /**
-   * Test of getAuthorQualifiedName method, of class SingletonAgentHosts.
-   */
-  @Test
-  public void testGetAuthorQualifiedName() {
-    LOGGER.info("getAuthorQualifiedName");
-    SingletonAgentHosts instance = makeSingletonAgentHosts();
-    assertEquals("TestContainer.TestAgent.TestRole", instance.getAuthorQualifiedName());
-  }
-
-  /**
-   * Test of getCreatedDateTime method, of class SingletonAgentHosts.
-   */
-  @Test
-  public void testGetCreatedDateTime() {
-    LOGGER.info("getCreatedDateTime");
-    SingletonAgentHosts instance = makeSingletonAgentHosts();
-    assertEquals("2014-11-13T12:15:05.000-06:00", instance.getCreatedDateTime().toString());
-  }
-
-  /**
-   * Test of getAuthorSignatureBytes method, of class SingletonAgentHosts.
-   */
-  @Test
-  public void testGetAuthorSignatureBytes() {
-    LOGGER.info("getAuthorSignatureBytes");
-    SingletonAgentHosts instance = makeSingletonAgentHosts();
-    final byte[] authorSignatureBytes = instance.getAuthorSignatureBytes();
-    assertNotNull(authorSignatureBytes);
-  }
 
   /**
    * Test of isNetworkSingleton method, of class SingletonAgentHosts.
@@ -285,30 +235,9 @@ public class SingletonAgentHostsTest {
             5, // secondOfMinute,
             0, // millisOfSecond,
             DateTimeZone.forTimeZone(TimeZone.getTimeZone("CST"))); // zone
-    final String authorQualifiedName = "TestContainer.TestAgent.TestRole";
-    final DateTime createdDateTime = new DateTime(
-            2014, // year
-            11, // monthOfYear,
-            13, // dayOfMonth
-            12, // hourOfDay
-            15, // minuteOfHour,
-            5, // secondOfMinute,
-            0, // millisOfSecond,
-            DateTimeZone.forTimeZone(TimeZone.getTimeZone("CST"))); // zone
-    final byte[] authorSignatureBytes = SingletonAgentHosts.signSingletonAgentHosts(
-            singletonAgentDictionary,
-            effectiveDateTime,
-            terminationDateTime,
-            authorQualifiedName,
-            createdDateTime,
-            keyPair.getPrivate()); // privateKey
-
     return new SingletonAgentHosts(
             singletonAgentDictionary,
             effectiveDateTime,
-            terminationDateTime,
-            authorQualifiedName,
-            createdDateTime,
-            authorSignatureBytes);
+            terminationDateTime);
   }
 }

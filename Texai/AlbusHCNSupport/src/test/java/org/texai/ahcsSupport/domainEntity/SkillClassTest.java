@@ -30,13 +30,9 @@ import org.texai.kb.persistence.RDFEntityPersister;
  */
 public class SkillClassTest {
 
-  /**
-   * the logger
-   */
+  // the logger
   private static final Logger LOGGER = Logger.getLogger(SkillClassTest.class);
-  /**
-   * the RDF entity manager
-   */
+  // the RDF entity manager
   private static final RDFEntityManager rdfEntityManager = new RDFEntityManager();
 
   public SkillClassTest() {
@@ -154,9 +150,9 @@ public class SkillClassTest {
     int indent = 0;
     SkillClass instance = makeTestSkillClass();
     assertEquals(
-            "<skill-class>\n" +
-            "  <skill-class-name>org.texai.skill.governance.Governance</skill-class-name>\n" +
-            "</skill-class>\n", instance.toXML(indent));
+            "<skill-class>\n"
+            + "  <skill-class-name>org.texai.skill.governance.Governance</skill-class-name>\n"
+            + "</skill-class>\n", instance.toXML(indent));
 
   }
 

@@ -11,25 +11,22 @@
  */
 package org.texai.skill.singletonConfiguration;
 
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.AHCSConstants.State;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.ahcsSupport.domainEntity.ContainerInfo;
 import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.ahcsSupport.seed.SeedNodeInfo;
 import org.texai.ahcsSupport.seed.SeedNodeInfosInitializer;
-import org.texai.skill.domainEntity.SingletonAgentHosts;
+import org.texai.ahcsSupport.domainEntity.SingletonAgentHosts;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 
@@ -228,6 +225,19 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
         removeUnjoinedRole(receivedMessage);
         return;
 
+      /**
+       * Network Configuration Task
+       *
+       * This task message is sent from the network-singleton parent NetworkOperationAgent.NetworkSingletonConfigurationRole. It commands
+       * this role to update its singleton agent hosts information, and to update its container information. The former describes which
+       * hosts in the network have the current responsibility for nomadic network singleton agent/roles. And the latter describes the hosts
+       * in the network, whether they are super peers and whether they have liveness.
+       */
+      case AHCSConstants.NETWORK_CONFIGURATION_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+        processNetworkConfigurationTask(receivedMessage);
+        return;
+
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(receivedMessage);
@@ -271,6 +281,7 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
       AHCSConstants.JOIN_NETWORK_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.MESSAGE_TIMEOUT_INFO,
+      AHCSConstants.NETWORK_CONFIGURATION_TASK,
       AHCSConstants.PERFORM_MISSION_TASK,
       AHCSConstants.REMOVE_UNJOINED_ROLE_INFO,
       AHCSConstants.SEED_CONNECTION_REQUEST_INFO,
@@ -389,7 +400,7 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
 
     LOGGER.info("received a seed connection request from " + receivedMessage.getSenderContainerName());
 
-    final SingletonAgentHosts singletonAgentHosts = singletonAgentHosts();
+    final SingletonAgentHosts singletonAgentHosts = this.getNodeRuntime().getSingletonAgentHosts();
     LOGGER.info(singletonAgentHosts.toDetailedString());
 
     final Message singletonAgentHostsMessage = makeReplyMessage(
@@ -537,74 +548,10 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
       sendMessageViaSeparateThread(
               receivedMessage,
               makeMessage(
-              getRole().getParentQualifiedName(), // recipientQualifiedName
-              NetworkSingletonConfiguration.class.getName(), // recipientService
-              AHCSConstants.NETWORK_JOIN_COMPLETE_INFO)); // operation
+                      getRole().getParentQualifiedName(), // recipientQualifiedName
+                      NetworkSingletonConfiguration.class.getName(), // recipientService
+                      AHCSConstants.NETWORK_JOIN_COMPLETE_INFO)); // operation
     }
-  }
-
-  /**
-   * Returns a demo version of the singleton agent hosts assignments, which are all to the Mint peer.
-   *
-   * @return a demo version of the singleton agent hosts assignments
-   */
-  private SingletonAgentHosts singletonAgentHosts() {
-    final Map<String, String> singletonAgentDictionary = new HashMap<>();
-
-    singletonAgentDictionary.put("NetworkOperationAgent", "Mint");
-    singletonAgentDictionary.put("NetworkSingletonConfigurationAgent", "Mint");
-    singletonAgentDictionary.put("TopmostFriendshipAgent", "Mint");
-    singletonAgentDictionary.put("AICFinancialAccountingAndControlAgent", "Mint");
-    singletonAgentDictionary.put("AICMintAgent", "Mint");
-    singletonAgentDictionary.put("AICNetworkEpisodicMemoryAgent", "Mint");
-    singletonAgentDictionary.put("AICNetworkOperationAgent", "Mint");
-    singletonAgentDictionary.put("AICNetworkSeedAgent", "Mint");
-    singletonAgentDictionary.put("AICPrimaryAuditAgent", "Mint");
-    singletonAgentDictionary.put("AICRecoveryAgent", "Mint");
-    singletonAgentDictionary.put("AICRewardAllocationAgent", "Mint");
-
-    final DateTime effectiveDateTime = new DateTime(
-            2015, // year
-            02, // monthOfYear,
-            11, // dayOfMonth
-            11, // hourOfDay
-            38, // minuteOfHour,
-            0, // secondOfMinute,
-            0, // millisOfSecond,
-            DateTimeZone.forTimeZone(TimeZone.getTimeZone("CST"))); // zone
-    final DateTime terminationDateTime = new DateTime(
-            2015, // year
-            11, // monthOfYear,
-            14, // dayOfMonth
-            12, // hourOfDay
-            15, // minuteOfHour,
-            5, // secondOfMinute,
-            0, // millisOfSecond,
-            DateTimeZone.forTimeZone(TimeZone.getTimeZone("CST"))); // zone
-    final DateTime createdDateTime = new DateTime(
-            2014, // year
-            11, // monthOfYear,
-            13, // dayOfMonth
-            12, // hourOfDay
-            15, // minuteOfHour,
-            5, // secondOfMinute,
-            0, // millisOfSecond,
-            DateTimeZone.forTimeZone(TimeZone.getTimeZone("CST"))); // zone
-    final byte[] authorSignatureBytes = SingletonAgentHosts.signSingletonAgentHosts(
-            singletonAgentDictionary,
-            effectiveDateTime,
-            terminationDateTime,
-            getQualifiedName(), // authorQualifiedName,
-            createdDateTime,
-            getRole().getX509SecurityInfo().getPrivateKey());
-
-    return new SingletonAgentHosts(
-            singletonAgentDictionary,
-            effectiveDateTime,
-            terminationDateTime,
-            getQualifiedName(), // authorQualifiedName,
-            createdDateTime,
-            authorSignatureBytes);
   }
 
   /**
@@ -621,6 +568,26 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
 
     LOGGER.info("performing the mission");
     propagateOperationToChildRoles(receivedMessage);
+  }
+
+  /**
+   * Processes a received Network Configuration Task message.
+   *
+   * @param receivedMessage the received Network Configuration Task message
+   */
+  private void processNetworkConfigurationTask(final Message receivedMessage) {
+    //Preconditions
+    assert receivedMessage != null : "message must not be null";
+
+    final SingletonAgentHosts singletonAgentHosts = (SingletonAgentHosts) receivedMessage.get(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS);
+    assert singletonAgentHosts != null;
+    @SuppressWarnings("unchecked")
+    final Collection<ContainerInfo> containerInfos = (Collection<ContainerInfo>) (ContainerInfo) receivedMessage.get(AHCSConstants.MSG_PARM_CONTAINER_INFOS);
+    assert containerInfos != null;
+
+    getNodeRuntime().updateSingletonAgentHosts(singletonAgentHosts);
+    getNodeRuntime().updateContainerInfos(containerInfos);
+    LOGGER.info("Updated network configuration.");
   }
 
 }

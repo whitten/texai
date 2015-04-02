@@ -1,194 +1,214 @@
- the network singleton nodes (nomadic agents) and their  child roles  ...
+Recreate this document by running NodesInitializerTest and copying from the console output.
 
-   TestContainer.NetworkOperationAgent
-     TestContainer.ContainerOperationAgent.ContainerDeploymentRole
-     TestContainer.ContainerOperationAgent.ContainerFileRecipientRole
-     TestContainer.ContainerOperationAgent.ContainerFileSenderRole
-     TestContainer.ContainerOperationAgent.ContainerLogControlRole
-     TestContainer.ContainerOperationAgent.ContainerOperationRole
-     TestContainer.XAINetworkOperationAgent.XAINetworkOperationRole
-     TestContainer.ContainerOperationAgent.ContainerSingletonConfigurationRole
-     TestContainer.ContainerOperationAgent.ContainerGovernanceRole
-     TestContainer.ContainerOperationAgent.ContainerHeartbeatRole
+ persisting nodes and their roles ...
 
-   TestContainer.TopmostFriendshipAgent
-     TestContainer.NetworkOperationAgent.NetworkDeploymentRole
-     TestContainer.NetworkOperationAgent.NetworkFileTransferRole
-     TestContainer.NetworkOperationAgent.NetworkLogControlRole
-     TestContainer.NetworkOperationAgent.NetworkOperationRole
-     TestContainer.NetworkOperationAgent.NetworkSingletonConfigurationRole
-     TestContainer.NetworkOperationAgent.TopLevelGovernanceRole
-     TestContainer.NetworkOperationAgent.TopLevelHeartbeatRole
+   [TestContainer.AICBlockchainArchiveAgent]
+     [TestContainer.AICBlockchainArchiveAgent.AICBlockchainArchiveRole]
+     [TestContainer.AICBlockchainArchiveAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICBlockchainArchiveAgent.GovernanceRole]
+     [TestContainer.AICBlockchainArchiveAgent.HeartbeatRole]
 
-   TestContainer.XAIFinancialAccountingAndControlAgent
+   [TestContainer.AICClientGatewayAgent]
+     [TestContainer.AICClientGatewayAgent.AICClientGatewayRole]
+     [TestContainer.AICClientGatewayAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICClientGatewayAgent.GovernanceRole]
+     [TestContainer.AICClientGatewayAgent.HeartbeatRole]
 
-   TestContainer.XAIMintAgent
+   [TestContainer.AICContainerAuditAgent]
+     [TestContainer.AICContainerAuditAgent.AICContainerAuditRole]
+     [TestContainer.AICContainerAuditAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICContainerAuditAgent.GovernanceRole]
+     [TestContainer.AICContainerAuditAgent.HeartbeatRole]
 
-   TestContainer.XAINetworkEpisodicMemoryAgent
-     TestContainer.XAIContainerEpisodicMemoryAgent.XAIContainerEpisodicMemoryRole
+   [TestContainer.AICContainerCertificateAuthorityAgent]
+     [TestContainer.AICContainerCertificateAuthorityAgent.AICContainerCertificateAuthorityRole]
+     [TestContainer.AICContainerCertificateAuthorityAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICContainerCertificateAuthorityAgent.GovernanceRole]
+     [TestContainer.AICContainerCertificateAuthorityAgent.HeartbeatRole]
 
-   TestContainer.XAINetworkOperationAgent
-     TestContainer.XAIBlockchainArchiveAgent.XAIBlockchainArchiveRole
-     TestContainer.XAIClientGatewayAgent.XAIClientGatewayRole
-     TestContainer.XAIContainerAuditAgent.XAIContainerAuditRole
-     TestContainer.XAIContainerCertificateAuthorityAgent.XAIContainerCertificateAuthorityRole
-     TestContainer.XAIFaucetAgent.XAIFaucetRole
-     TestContainer.XAIFinancialAccountingAndControlAgent.XAIClientGatewayRole
-     TestContainer.XAIMintAgent.XAIMintRole
-     TestContainer.XAINetworkEpisodicMemoryAgent.XAINetworkEpisodicMemoryRole
-     TestContainer.XAINetworkSeedAgent.XAINetworkSeedRole
-     TestContainer.XAIOperationAgent.XAIOperationRole
-     TestContainer.XAIPrimaryAuditAgent.XAIPrimaryAuditRole
-     TestContainer.XAIRecoveryAgent.XAIRecoveryRole
-     TestContainer.XAIRewardAllocationAgent.XAIRewardAllocationRole
+   [TestContainer.AICContainerEpisodicMemoryAgent]
+     [TestContainer.AICContainerEpisodicMemoryAgent.AICContainerEpisodicMemoryRole]
+     [TestContainer.AICContainerEpisodicMemoryAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICContainerEpisodicMemoryAgent.GovernanceRole]
+     [TestContainer.AICContainerEpisodicMemoryAgent.HeartbeatRole]
 
-   TestContainer.XAINetworkSeedAgent
-     TestContainer.XAISeedAgent.XAISeedRole
+   [TestContainer.AICFaucetAgent]
+     [TestContainer.AICFaucetAgent.AICFaucetRole]
+     [TestContainer.AICFaucetAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICFaucetAgent.GovernanceRole]
+     [TestContainer.AICFaucetAgent.HeartbeatRole]
 
-   TestContainer.XAIPrimaryAuditAgent
+   [TestContainer.AICFinancialAccountingAndControlAgent]
+     [TestContainer.AICFinancialAccountingAndControlAgent.AICClientGatewayRole]
+     [TestContainer.AICFinancialAccountingAndControlAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICFinancialAccountingAndControlAgent.GovernanceRole]
+     [TestContainer.AICFinancialAccountingAndControlAgent.HeartbeatRole]
 
-   TestContainer.XAIRecoveryAgent
+   [TestContainer.AICMintAgent]
+     [TestContainer.AICMintAgent.AICMintRole]
+     [TestContainer.AICMintAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICMintAgent.GovernanceRole]
+     [TestContainer.AICMintAgent.HeartbeatRole]
 
-   TestContainer.XAIRewardAllocationAgent
+   [TestContainer.AICNetworkEpisodicMemoryAgent]
+     [TestContainer.AICNetworkEpisodicMemoryAgent.AICNetworkEpisodicMemoryRole]
+       child: TestContainer.AICContainerEpisodicMemoryAgent.AICContainerEpisodicMemoryRole
+     [TestContainer.AICNetworkEpisodicMemoryAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICNetworkEpisodicMemoryAgent.GovernanceRole]
+     [TestContainer.AICNetworkEpisodicMemoryAgent.HeartbeatRole]
 
- the network singleton nodes (nomadic agents) and their filtered non-singleton child roles  ...
+   [TestContainer.AICNetworkOperationAgent]
+     [TestContainer.AICNetworkOperationAgent.AICNetworkOperationRole]
+       child: TestContainer.AICBlockchainArchiveAgent.AICBlockchainArchiveRole
+       child: TestContainer.AICClientGatewayAgent.AICClientGatewayRole
+       child: TestContainer.AICContainerAuditAgent.AICContainerAuditRole
+       child: TestContainer.AICContainerCertificateAuthorityAgent.AICContainerCertificateAuthorityRole
+       child: TestContainer.AICFaucetAgent.AICFaucetRole
+       child: TestContainer.AICFinancialAccountingAndControlAgent.AICClientGatewayRole
+       child: TestContainer.AICMintAgent.AICMintRole
+       child: TestContainer.AICNetworkEpisodicMemoryAgent.AICNetworkEpisodicMemoryRole
+       child: TestContainer.AICNetworkSeedAgent.AICNetworkSeedRole
+       child: TestContainer.AICOperationAgent.AICOperationRole
+       child: TestContainer.AICPrimaryAuditAgent.AICPrimaryAuditRole
+       child: TestContainer.AICRecoveryAgent.AICRecoveryRole
+       child: TestContainer.AICRewardAllocationAgent.AICRewardAllocationRole
+     [TestContainer.AICNetworkOperationAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICNetworkOperationAgent.GovernanceRole]
+     [TestContainer.AICNetworkOperationAgent.HeartbeatRole]
 
-   TestContainer.NetworkOperationAgent
-     TestContainer.ContainerOperationAgent.ContainerDeploymentRole
-     TestContainer.ContainerOperationAgent.ContainerFileRecipientRole
-     TestContainer.ContainerOperationAgent.ContainerFileSenderRole
-     TestContainer.ContainerOperationAgent.ContainerLogControlRole
-     TestContainer.ContainerOperationAgent.ContainerOperationRole
-     TestContainer.ContainerOperationAgent.ContainerSingletonConfigurationRole
-     TestContainer.ContainerOperationAgent.ContainerGovernanceRole
-     TestContainer.ContainerOperationAgent.ContainerHeartbeatRole
+   [TestContainer.AICNetworkSeedAgent]
+     [TestContainer.AICNetworkSeedAgent.AICNetworkSeedRole]
+       child: TestContainer.AICSeedAgent.AICSeedRole
+     [TestContainer.AICNetworkSeedAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICNetworkSeedAgent.GovernanceRole]
+     [TestContainer.AICNetworkSeedAgent.HeartbeatRole]
 
-   TestContainer.TopmostFriendshipAgent
+   [TestContainer.AICOperationAgent]
+     [TestContainer.AICOperationAgent.AICOperationRole]
+     [TestContainer.AICOperationAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICOperationAgent.GovernanceRole]
+     [TestContainer.AICOperationAgent.HeartbeatRole]
 
-   TestContainer.XAIFinancialAccountingAndControlAgent
+   [TestContainer.AICPrimaryAuditAgent]
+     [TestContainer.AICPrimaryAuditAgent.AICPrimaryAuditRole]
+     [TestContainer.AICPrimaryAuditAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICPrimaryAuditAgent.GovernanceRole]
+     [TestContainer.AICPrimaryAuditAgent.HeartbeatRole]
 
-   TestContainer.XAIMintAgent
+   [TestContainer.AICRecoveryAgent]
+     [TestContainer.AICRecoveryAgent.AICRecoveryRole]
+     [TestContainer.AICRecoveryAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICRecoveryAgent.GovernanceRole]
+     [TestContainer.AICRecoveryAgent.HeartbeatRole]
 
-   TestContainer.XAINetworkEpisodicMemoryAgent
-     TestContainer.XAIContainerEpisodicMemoryAgent.XAIContainerEpisodicMemoryRole
+   [TestContainer.AICRewardAllocationAgent]
+     [TestContainer.AICRewardAllocationAgent.AICRewardAllocationRole]
+     [TestContainer.AICRewardAllocationAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICRewardAllocationAgent.GovernanceRole]
+     [TestContainer.AICRewardAllocationAgent.HeartbeatRole]
 
-   TestContainer.XAINetworkOperationAgent
-     TestContainer.XAIBlockchainArchiveAgent.XAIBlockchainArchiveRole
-     TestContainer.XAIClientGatewayAgent.XAIClientGatewayRole
-     TestContainer.XAIContainerAuditAgent.XAIContainerAuditRole
-     TestContainer.XAIContainerCertificateAuthorityAgent.XAIContainerCertificateAuthorityRole
-     TestContainer.XAIFaucetAgent.XAIFaucetRole
-     TestContainer.XAIOperationAgent.XAIOperationRole
+   [TestContainer.AICSeedAgent]
+     [TestContainer.AICSeedAgent.AICSeedRole]
+     [TestContainer.AICSeedAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICSeedAgent.GovernanceRole]
+     [TestContainer.AICSeedAgent.HeartbeatRole]
 
-   TestContainer.XAINetworkSeedAgent
-     TestContainer.XAISeedAgent.XAISeedRole
-
-   TestContainer.XAIPrimaryAuditAgent
-
-   TestContainer.XAIRecoveryAgent
-
-   TestContainer.XAIRewardAllocationAgent
-
-
-Agents, Roles, and their child roles.
-
-
-   TestContainer.ContainerOperationAgent
-     TestContainer.ContainerOperationAgent.ConfigureParentToSingletonRole
-     TestContainer.ContainerOperationAgent.ContainerDeploymentRole
-     TestContainer.ContainerOperationAgent.ContainerFileRecipientRole
-     TestContainer.ContainerOperationAgent.ContainerFileSenderRole
-     TestContainer.ContainerOperationAgent.ContainerGovernanceRole
+   [TestContainer.ContainerOperationAgent]
+     [TestContainer.ContainerOperationAgent.ConfigureParentToSingletonRole]
+     [TestContainer.ContainerOperationAgent.ContainerDeploymentRole]
+     [TestContainer.ContainerOperationAgent.ContainerFileRecipientRole]
+     [TestContainer.ContainerOperationAgent.ContainerFileSenderRole]
+     [TestContainer.ContainerOperationAgent.ContainerGovernanceRole]
+       child: TestContainer.AICBlockchainArchiveAgent.GovernanceRole
+       child: TestContainer.AICClientGatewayAgent.GovernanceRole
+       child: TestContainer.AICContainerAuditAgent.GovernanceRole
+       child: TestContainer.AICContainerCertificateAuthorityAgent.GovernanceRole
+       child: TestContainer.AICContainerEpisodicMemoryAgent.GovernanceRole
+       child: TestContainer.AICFaucetAgent.GovernanceRole
+       child: TestContainer.AICFinancialAccountingAndControlAgent.GovernanceRole
+       child: TestContainer.AICMintAgent.GovernanceRole
+       child: TestContainer.AICNetworkEpisodicMemoryAgent.GovernanceRole
+       child: TestContainer.AICNetworkOperationAgent.GovernanceRole
+       child: TestContainer.AICNetworkSeedAgent.GovernanceRole
+       child: TestContainer.AICOperationAgent.GovernanceRole
+       child: TestContainer.AICPrimaryAuditAgent.GovernanceRole
+       child: TestContainer.AICRecoveryAgent.GovernanceRole
+       child: TestContainer.AICRewardAllocationAgent.GovernanceRole
+       child: TestContainer.AICSeedAgent.GovernanceRole
        child: TestContainer.ContainerOperationAgent.GovernanceRole
        child: TestContainer.NetworkOperationAgent.GovernanceRole
        child: TestContainer.TopmostFriendshipAgent.GovernanceRole
-       child: TestContainer.XAIBlockchainArchiveAgent.GovernanceRole
-       child: TestContainer.XAIClientGatewayAgent.GovernanceRole
-       child: TestContainer.XAIContainerAuditAgent.GovernanceRole
-       child: TestContainer.XAIContainerCertificateAuthorityAgent.GovernanceRole
-       child: TestContainer.XAIContainerEpisodicMemoryAgent.GovernanceRole
-       child: TestContainer.XAIFaucetAgent.GovernanceRole
-       child: TestContainer.XAIFinancialAccountingAndControlAgent.GovernanceRole
-       child: TestContainer.XAIMintAgent.GovernanceRole
-       child: TestContainer.XAINetworkEpisodicMemoryAgent.GovernanceRole
-       child: TestContainer.XAINetworkOperationAgent.GovernanceRole
-       child: TestContainer.XAINetworkSeedAgent.GovernanceRole
-       child: TestContainer.XAIOperationAgent.GovernanceRole
-       child: TestContainer.XAIPrimaryAuditAgent.GovernanceRole
-       child: TestContainer.XAIRecoveryAgent.GovernanceRole
-       child: TestContainer.XAIRewardAllocationAgent.GovernanceRole
-       child: TestContainer.XAISeedAgent.GovernanceRole
-     TestContainer.ContainerOperationAgent.ContainerHeartbeatRole
+     [TestContainer.ContainerOperationAgent.ContainerHeartbeatRole]
+       child: TestContainer.AICBlockchainArchiveAgent.HeartbeatRole
+       child: TestContainer.AICClientGatewayAgent.HeartbeatRole
+       child: TestContainer.AICContainerAuditAgent.HeartbeatRole
+       child: TestContainer.AICContainerCertificateAuthorityAgent.HeartbeatRole
+       child: TestContainer.AICContainerEpisodicMemoryAgent.HeartbeatRole
+       child: TestContainer.AICFaucetAgent.HeartbeatRole
+       child: TestContainer.AICFinancialAccountingAndControlAgent.HeartbeatRole
+       child: TestContainer.AICMintAgent.HeartbeatRole
+       child: TestContainer.AICNetworkEpisodicMemoryAgent.HeartbeatRole
+       child: TestContainer.AICNetworkOperationAgent.HeartbeatRole
+       child: TestContainer.AICNetworkSeedAgent.HeartbeatRole
+       child: TestContainer.AICOperationAgent.HeartbeatRole
+       child: TestContainer.AICPrimaryAuditAgent.HeartbeatRole
+       child: TestContainer.AICRecoveryAgent.HeartbeatRole
+       child: TestContainer.AICRewardAllocationAgent.HeartbeatRole
+       child: TestContainer.AICSeedAgent.HeartbeatRole
        child: TestContainer.ContainerOperationAgent.HeartbeatRole
        child: TestContainer.NetworkOperationAgent.HeartbeatRole
        child: TestContainer.TopmostFriendshipAgent.HeartbeatRole
-       child: TestContainer.XAIBlockchainArchiveAgent.HeartbeatRole
-       child: TestContainer.XAIClientGatewayAgent.HeartbeatRole
-       child: TestContainer.XAIContainerAuditAgent.HeartbeatRole
-       child: TestContainer.XAIContainerCertificateAuthorityAgent.HeartbeatRole
-       child: TestContainer.XAIContainerEpisodicMemoryAgent.HeartbeatRole
-       child: TestContainer.XAIFaucetAgent.HeartbeatRole
-       child: TestContainer.XAIFinancialAccountingAndControlAgent.HeartbeatRole
-       child: TestContainer.XAIMintAgent.HeartbeatRole
-       child: TestContainer.XAINetworkEpisodicMemoryAgent.HeartbeatRole
-       child: TestContainer.XAINetworkOperationAgent.HeartbeatRole
-       child: TestContainer.XAINetworkSeedAgent.HeartbeatRole
-       child: TestContainer.XAIOperationAgent.HeartbeatRole
-       child: TestContainer.XAIPrimaryAuditAgent.HeartbeatRole
-       child: TestContainer.XAIRecoveryAgent.HeartbeatRole
-       child: TestContainer.XAIRewardAllocationAgent.HeartbeatRole
-       child: TestContainer.XAISeedAgent.HeartbeatRole
-     TestContainer.ContainerOperationAgent.ContainerLogControlRole
-     TestContainer.ContainerOperationAgent.ContainerOperationRole
-     TestContainer.ContainerOperationAgent.ContainerSingletonConfigurationRole
+     [TestContainer.ContainerOperationAgent.ContainerLogControlRole]
+     [TestContainer.ContainerOperationAgent.ContainerOperationRole]
+     [TestContainer.ContainerOperationAgent.ContainerSingletonConfigurationRole]
+       child: TestContainer.AICBlockchainArchiveAgent.ConfigureParentToSingletonRole
+       child: TestContainer.AICClientGatewayAgent.ConfigureParentToSingletonRole
+       child: TestContainer.AICContainerAuditAgent.ConfigureParentToSingletonRole
+       child: TestContainer.AICContainerCertificateAuthorityAgent.ConfigureParentToSingletonRole
+       child: TestContainer.AICContainerEpisodicMemoryAgent.ConfigureParentToSingletonRole
+       child: TestContainer.AICFaucetAgent.ConfigureParentToSingletonRole
+       child: TestContainer.AICFinancialAccountingAndControlAgent.ConfigureParentToSingletonRole
+       child: TestContainer.AICMintAgent.ConfigureParentToSingletonRole
+       child: TestContainer.AICNetworkEpisodicMemoryAgent.ConfigureParentToSingletonRole
+       child: TestContainer.AICNetworkOperationAgent.ConfigureParentToSingletonRole
+       child: TestContainer.AICNetworkSeedAgent.ConfigureParentToSingletonRole
+       child: TestContainer.AICOperationAgent.ConfigureParentToSingletonRole
+       child: TestContainer.AICPrimaryAuditAgent.ConfigureParentToSingletonRole
+       child: TestContainer.AICRecoveryAgent.ConfigureParentToSingletonRole
+       child: TestContainer.AICRewardAllocationAgent.ConfigureParentToSingletonRole
+       child: TestContainer.AICSeedAgent.ConfigureParentToSingletonRole
        child: TestContainer.ContainerOperationAgent.ConfigureParentToSingletonRole
        child: TestContainer.NetworkOperationAgent.ConfigureParentToSingletonRole
        child: TestContainer.TopmostFriendshipAgent.ConfigureParentToSingletonRole
-       child: TestContainer.XAIBlockchainArchiveAgent.ConfigureParentToSingletonRole
-       child: TestContainer.XAIClientGatewayAgent.ConfigureParentToSingletonRole
-       child: TestContainer.XAIContainerAuditAgent.ConfigureParentToSingletonRole
-       child: TestContainer.XAIContainerCertificateAuthorityAgent.ConfigureParentToSingletonRole
-       child: TestContainer.XAIContainerEpisodicMemoryAgent.ConfigureParentToSingletonRole
-       child: TestContainer.XAIFaucetAgent.ConfigureParentToSingletonRole
-       child: TestContainer.XAIFinancialAccountingAndControlAgent.ConfigureParentToSingletonRole
-       child: TestContainer.XAIMintAgent.ConfigureParentToSingletonRole
-       child: TestContainer.XAINetworkEpisodicMemoryAgent.ConfigureParentToSingletonRole
-       child: TestContainer.XAINetworkOperationAgent.ConfigureParentToSingletonRole
-       child: TestContainer.XAINetworkSeedAgent.ConfigureParentToSingletonRole
-       child: TestContainer.XAIOperationAgent.ConfigureParentToSingletonRole
-       child: TestContainer.XAIPrimaryAuditAgent.ConfigureParentToSingletonRole
-       child: TestContainer.XAIRecoveryAgent.ConfigureParentToSingletonRole
-       child: TestContainer.XAIRewardAllocationAgent.ConfigureParentToSingletonRole
-       child: TestContainer.XAISeedAgent.ConfigureParentToSingletonRole
-     TestContainer.ContainerOperationAgent.GovernanceRole
-     TestContainer.ContainerOperationAgent.HeartbeatRole
+     [TestContainer.ContainerOperationAgent.GovernanceRole]
+     [TestContainer.ContainerOperationAgent.HeartbeatRole]
 
-   TestContainer.NetworkOperationAgent
-     TestContainer.NetworkOperationAgent.ConfigureParentToSingletonRole
-     TestContainer.NetworkOperationAgent.GovernanceRole
-     TestContainer.NetworkOperationAgent.HeartbeatRole
-     TestContainer.NetworkOperationAgent.NetworkDeploymentRole
+   [TestContainer.NetworkOperationAgent]
+     [TestContainer.NetworkOperationAgent.ConfigureParentToSingletonRole]
+     [TestContainer.NetworkOperationAgent.GovernanceRole]
+     [TestContainer.NetworkOperationAgent.HeartbeatRole]
+     [TestContainer.NetworkOperationAgent.NetworkDeploymentRole]
        child: TestContainer.ContainerOperationAgent.ContainerDeploymentRole
-     TestContainer.NetworkOperationAgent.NetworkFileTransferRole
+     [TestContainer.NetworkOperationAgent.NetworkFileTransferRole]
        child: TestContainer.ContainerOperationAgent.ContainerFileRecipientRole
        child: TestContainer.ContainerOperationAgent.ContainerFileSenderRole
-     TestContainer.NetworkOperationAgent.NetworkLogControlRole
+     [TestContainer.NetworkOperationAgent.NetworkLogControlRole]
        child: TestContainer.ContainerOperationAgent.ContainerLogControlRole
-     TestContainer.NetworkOperationAgent.NetworkOperationRole
+     [TestContainer.NetworkOperationAgent.NetworkOperationRole]
+       child: TestContainer.AICNetworkOperationAgent.AICNetworkOperationRole
        child: TestContainer.ContainerOperationAgent.ContainerOperationRole
-       child: TestContainer.XAINetworkOperationAgent.XAINetworkOperationRole
-     TestContainer.NetworkOperationAgent.NetworkSingletonConfigurationRole
+     [TestContainer.NetworkOperationAgent.NetworkSingletonConfigurationRole]
        child: TestContainer.ContainerOperationAgent.ContainerSingletonConfigurationRole
-     TestContainer.NetworkOperationAgent.TopLevelGovernanceRole
+     [TestContainer.NetworkOperationAgent.TopLevelGovernanceRole]
        child: TestContainer.ContainerOperationAgent.ContainerGovernanceRole
-     TestContainer.NetworkOperationAgent.TopLevelHeartbeatRole
+     [TestContainer.NetworkOperationAgent.TopLevelHeartbeatRole]
        child: TestContainer.ContainerOperationAgent.ContainerHeartbeatRole
 
-   TestContainer.TopmostFriendshipAgent
-     TestContainer.TopmostFriendshipAgent.ConfigureParentToSingletonRole
-     TestContainer.TopmostFriendshipAgent.GovernanceRole
-     TestContainer.TopmostFriendshipAgent.HeartbeatRole
-     TestContainer.TopmostFriendshipAgent.TopmostFriendshipRole
+   [TestContainer.TopmostFriendshipAgent]
+     [TestContainer.TopmostFriendshipAgent.ConfigureParentToSingletonRole]
+     [TestContainer.TopmostFriendshipAgent.GovernanceRole]
+     [TestContainer.TopmostFriendshipAgent.HeartbeatRole]
+     [TestContainer.TopmostFriendshipAgent.TopmostFriendshipRole]
        child: TestContainer.NetworkOperationAgent.NetworkDeploymentRole
        child: TestContainer.NetworkOperationAgent.NetworkFileTransferRole
        child: TestContainer.NetworkOperationAgent.NetworkLogControlRole
@@ -197,113 +217,222 @@ Agents, Roles, and their child roles.
        child: TestContainer.NetworkOperationAgent.TopLevelGovernanceRole
        child: TestContainer.NetworkOperationAgent.TopLevelHeartbeatRole
 
-   TestContainer.XAIBlockchainArchiveAgent
-     TestContainer.XAIBlockchainArchiveAgent.ConfigureParentToSingletonRole
-     TestContainer.XAIBlockchainArchiveAgent.GovernanceRole
-     TestContainer.XAIBlockchainArchiveAgent.HeartbeatRole
-     TestContainer.XAIBlockchainArchiveAgent.XAIBlockchainArchiveRole
+ loading the persisted nodes and injecting dependencies ...
 
-   TestContainer.XAIClientGatewayAgent
-     TestContainer.XAIClientGatewayAgent.ConfigureParentToSingletonRole
-     TestContainer.XAIClientGatewayAgent.GovernanceRole
-     TestContainer.XAIClientGatewayAgent.HeartbeatRole
-     TestContainer.XAIClientGatewayAgent.XAIClientGatewayRole
+   TestContainer.AICBlockchainArchiveAgent
+     [TestContainer.AICBlockchainArchiveAgent.AICBlockchainArchiveRole]
+     [TestContainer.AICBlockchainArchiveAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICBlockchainArchiveAgent.GovernanceRole]
+     [TestContainer.AICBlockchainArchiveAgent.HeartbeatRole]
 
-   TestContainer.XAIContainerAuditAgent
-     TestContainer.XAIContainerAuditAgent.ConfigureParentToSingletonRole
-     TestContainer.XAIContainerAuditAgent.GovernanceRole
-     TestContainer.XAIContainerAuditAgent.HeartbeatRole
-     TestContainer.XAIContainerAuditAgent.XAIContainerAuditRole
+   TestContainer.AICClientGatewayAgent
+     [TestContainer.AICClientGatewayAgent.AICClientGatewayRole]
+     [TestContainer.AICClientGatewayAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICClientGatewayAgent.GovernanceRole]
+     [TestContainer.AICClientGatewayAgent.HeartbeatRole]
 
-   TestContainer.XAIContainerCertificateAuthorityAgent
-     TestContainer.XAIContainerCertificateAuthorityAgent.ConfigureParentToSingletonRole
-     TestContainer.XAIContainerCertificateAuthorityAgent.GovernanceRole
-     TestContainer.XAIContainerCertificateAuthorityAgent.HeartbeatRole
-     TestContainer.XAIContainerCertificateAuthorityAgent.XAIContainerCertificateAuthorityRole
+   TestContainer.AICContainerAuditAgent
+     [TestContainer.AICContainerAuditAgent.AICContainerAuditRole]
+     [TestContainer.AICContainerAuditAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICContainerAuditAgent.GovernanceRole]
+     [TestContainer.AICContainerAuditAgent.HeartbeatRole]
 
-   TestContainer.XAIContainerEpisodicMemoryAgent
-     TestContainer.XAIContainerEpisodicMemoryAgent.ConfigureParentToSingletonRole
-     TestContainer.XAIContainerEpisodicMemoryAgent.GovernanceRole
-     TestContainer.XAIContainerEpisodicMemoryAgent.HeartbeatRole
-     TestContainer.XAIContainerEpisodicMemoryAgent.XAIContainerEpisodicMemoryRole
+   TestContainer.AICContainerCertificateAuthorityAgent
+     [TestContainer.AICContainerCertificateAuthorityAgent.AICContainerCertificateAuthorityRole]
+     [TestContainer.AICContainerCertificateAuthorityAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICContainerCertificateAuthorityAgent.GovernanceRole]
+     [TestContainer.AICContainerCertificateAuthorityAgent.HeartbeatRole]
 
-   TestContainer.XAIFaucetAgent
-     TestContainer.XAIFaucetAgent.ConfigureParentToSingletonRole
-     TestContainer.XAIFaucetAgent.GovernanceRole
-     TestContainer.XAIFaucetAgent.HeartbeatRole
-     TestContainer.XAIFaucetAgent.XAIFaucetRole
+   TestContainer.AICContainerEpisodicMemoryAgent
+     [TestContainer.AICContainerEpisodicMemoryAgent.AICContainerEpisodicMemoryRole]
+     [TestContainer.AICContainerEpisodicMemoryAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICContainerEpisodicMemoryAgent.GovernanceRole]
+     [TestContainer.AICContainerEpisodicMemoryAgent.HeartbeatRole]
 
-   TestContainer.XAIFinancialAccountingAndControlAgent
-     TestContainer.XAIFinancialAccountingAndControlAgent.ConfigureParentToSingletonRole
-     TestContainer.XAIFinancialAccountingAndControlAgent.GovernanceRole
-     TestContainer.XAIFinancialAccountingAndControlAgent.HeartbeatRole
-     TestContainer.XAIFinancialAccountingAndControlAgent.XAIClientGatewayRole
+   TestContainer.AICFaucetAgent
+     [TestContainer.AICFaucetAgent.AICFaucetRole]
+     [TestContainer.AICFaucetAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICFaucetAgent.GovernanceRole]
+     [TestContainer.AICFaucetAgent.HeartbeatRole]
 
-   TestContainer.XAIMintAgent
-     TestContainer.XAIMintAgent.ConfigureParentToSingletonRole
-     TestContainer.XAIMintAgent.GovernanceRole
-     TestContainer.XAIMintAgent.HeartbeatRole
-     TestContainer.XAIMintAgent.XAIMintRole
+   TestContainer.AICFinancialAccountingAndControlAgent
+     [TestContainer.AICFinancialAccountingAndControlAgent.AICClientGatewayRole]
+     [TestContainer.AICFinancialAccountingAndControlAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICFinancialAccountingAndControlAgent.GovernanceRole]
+     [TestContainer.AICFinancialAccountingAndControlAgent.HeartbeatRole]
 
-   TestContainer.XAINetworkEpisodicMemoryAgent
-     TestContainer.XAINetworkEpisodicMemoryAgent.ConfigureParentToSingletonRole
-     TestContainer.XAINetworkEpisodicMemoryAgent.GovernanceRole
-     TestContainer.XAINetworkEpisodicMemoryAgent.HeartbeatRole
-     TestContainer.XAINetworkEpisodicMemoryAgent.XAINetworkEpisodicMemoryRole
-       child: TestContainer.XAIContainerEpisodicMemoryAgent.XAIContainerEpisodicMemoryRole
+   TestContainer.AICMintAgent
+     [TestContainer.AICMintAgent.AICMintRole]
+     [TestContainer.AICMintAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICMintAgent.GovernanceRole]
+     [TestContainer.AICMintAgent.HeartbeatRole]
 
-   TestContainer.XAINetworkOperationAgent
-     TestContainer.XAINetworkOperationAgent.ConfigureParentToSingletonRole
-     TestContainer.XAINetworkOperationAgent.GovernanceRole
-     TestContainer.XAINetworkOperationAgent.HeartbeatRole
-     TestContainer.XAINetworkOperationAgent.XAINetworkOperationRole
-       child: TestContainer.XAIBlockchainArchiveAgent.XAIBlockchainArchiveRole
-       child: TestContainer.XAIClientGatewayAgent.XAIClientGatewayRole
-       child: TestContainer.XAIContainerAuditAgent.XAIContainerAuditRole
-       child: TestContainer.XAIContainerCertificateAuthorityAgent.XAIContainerCertificateAuthorityRole
-       child: TestContainer.XAIFaucetAgent.XAIFaucetRole
-       child: TestContainer.XAIFinancialAccountingAndControlAgent.XAIClientGatewayRole
-       child: TestContainer.XAIMintAgent.XAIMintRole
-       child: TestContainer.XAINetworkEpisodicMemoryAgent.XAINetworkEpisodicMemoryRole
-       child: TestContainer.XAINetworkSeedAgent.XAINetworkSeedRole
-       child: TestContainer.XAIOperationAgent.XAIOperationRole
-       child: TestContainer.XAIPrimaryAuditAgent.XAIPrimaryAuditRole
-       child: TestContainer.XAIRecoveryAgent.XAIRecoveryRole
-       child: TestContainer.XAIRewardAllocationAgent.XAIRewardAllocationRole
+   TestContainer.AICNetworkEpisodicMemoryAgent
+     [TestContainer.AICNetworkEpisodicMemoryAgent.AICNetworkEpisodicMemoryRole]
+     [TestContainer.AICNetworkEpisodicMemoryAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICNetworkEpisodicMemoryAgent.GovernanceRole]
+     [TestContainer.AICNetworkEpisodicMemoryAgent.HeartbeatRole]
 
-   TestContainer.XAINetworkSeedAgent
-     TestContainer.XAINetworkSeedAgent.ConfigureParentToSingletonRole
-     TestContainer.XAINetworkSeedAgent.GovernanceRole
-     TestContainer.XAINetworkSeedAgent.HeartbeatRole
-     TestContainer.XAINetworkSeedAgent.XAINetworkSeedRole
-       child: TestContainer.XAISeedAgent.XAISeedRole
+   TestContainer.AICNetworkOperationAgent
+     [TestContainer.AICNetworkOperationAgent.AICNetworkOperationRole]
+     [TestContainer.AICNetworkOperationAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICNetworkOperationAgent.GovernanceRole]
+     [TestContainer.AICNetworkOperationAgent.HeartbeatRole]
 
-   TestContainer.XAIOperationAgent
-     TestContainer.XAIOperationAgent.ConfigureParentToSingletonRole
-     TestContainer.XAIOperationAgent.GovernanceRole
-     TestContainer.XAIOperationAgent.HeartbeatRole
-     TestContainer.XAIOperationAgent.XAIOperationRole
+   TestContainer.AICNetworkSeedAgent
+     [TestContainer.AICNetworkSeedAgent.AICNetworkSeedRole]
+     [TestContainer.AICNetworkSeedAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICNetworkSeedAgent.GovernanceRole]
+     [TestContainer.AICNetworkSeedAgent.HeartbeatRole]
 
-   TestContainer.XAIPrimaryAuditAgent
-     TestContainer.XAIPrimaryAuditAgent.ConfigureParentToSingletonRole
-     TestContainer.XAIPrimaryAuditAgent.GovernanceRole
-     TestContainer.XAIPrimaryAuditAgent.HeartbeatRole
-     TestContainer.XAIPrimaryAuditAgent.XAIPrimaryAuditRole
+   TestContainer.AICOperationAgent
+     [TestContainer.AICOperationAgent.AICOperationRole]
+     [TestContainer.AICOperationAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICOperationAgent.GovernanceRole]
+     [TestContainer.AICOperationAgent.HeartbeatRole]
 
-   TestContainer.XAIRecoveryAgent
-     TestContainer.XAIRecoveryAgent.ConfigureParentToSingletonRole
-     TestContainer.XAIRecoveryAgent.GovernanceRole
-     TestContainer.XAIRecoveryAgent.HeartbeatRole
-     TestContainer.XAIRecoveryAgent.XAIRecoveryRole
+   TestContainer.AICPrimaryAuditAgent
+     [TestContainer.AICPrimaryAuditAgent.AICPrimaryAuditRole]
+     [TestContainer.AICPrimaryAuditAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICPrimaryAuditAgent.GovernanceRole]
+     [TestContainer.AICPrimaryAuditAgent.HeartbeatRole]
 
-   TestContainer.XAIRewardAllocationAgent
-     TestContainer.XAIRewardAllocationAgent.ConfigureParentToSingletonRole
-     TestContainer.XAIRewardAllocationAgent.GovernanceRole
-     TestContainer.XAIRewardAllocationAgent.HeartbeatRole
-     TestContainer.XAIRewardAllocationAgent.XAIRewardAllocationRole
+   TestContainer.AICRecoveryAgent
+     [TestContainer.AICRecoveryAgent.AICRecoveryRole]
+     [TestContainer.AICRecoveryAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICRecoveryAgent.GovernanceRole]
+     [TestContainer.AICRecoveryAgent.HeartbeatRole]
 
-   TestContainer.XAISeedAgent
-     TestContainer.XAISeedAgent.ConfigureParentToSingletonRole
-     TestContainer.XAISeedAgent.GovernanceRole
-     TestContainer.XAISeedAgent.HeartbeatRole
-     TestContainer.XAISeedAgent.XAISeedRole
+   TestContainer.AICRewardAllocationAgent
+     [TestContainer.AICRewardAllocationAgent.AICRewardAllocationRole]
+     [TestContainer.AICRewardAllocationAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICRewardAllocationAgent.GovernanceRole]
+     [TestContainer.AICRewardAllocationAgent.HeartbeatRole]
+
+   TestContainer.AICSeedAgent
+     [TestContainer.AICSeedAgent.AICSeedRole]
+     [TestContainer.AICSeedAgent.ConfigureParentToSingletonRole]
+     [TestContainer.AICSeedAgent.GovernanceRole]
+     [TestContainer.AICSeedAgent.HeartbeatRole]
+
+   TestContainer.ContainerOperationAgent
+     [TestContainer.ContainerOperationAgent.ConfigureParentToSingletonRole]
+     [TestContainer.ContainerOperationAgent.ContainerDeploymentRole]
+     [TestContainer.ContainerOperationAgent.ContainerFileRecipientRole]
+     [TestContainer.ContainerOperationAgent.ContainerFileSenderRole]
+     [TestContainer.ContainerOperationAgent.ContainerGovernanceRole]
+     [TestContainer.ContainerOperationAgent.ContainerHeartbeatRole]
+     [TestContainer.ContainerOperationAgent.ContainerLogControlRole]
+     [TestContainer.ContainerOperationAgent.ContainerOperationRole]
+     [TestContainer.ContainerOperationAgent.ContainerSingletonConfigurationRole]
+     [TestContainer.ContainerOperationAgent.GovernanceRole]
+     [TestContainer.ContainerOperationAgent.HeartbeatRole]
+
+   TestContainer.NetworkOperationAgent
+     [TestContainer.NetworkOperationAgent.ConfigureParentToSingletonRole]
+     [TestContainer.NetworkOperationAgent.GovernanceRole]
+     [TestContainer.NetworkOperationAgent.HeartbeatRole]
+     [TestContainer.NetworkOperationAgent.NetworkDeploymentRole]
+     [TestContainer.NetworkOperationAgent.NetworkFileTransferRole]
+     [TestContainer.NetworkOperationAgent.NetworkLogControlRole]
+     [TestContainer.NetworkOperationAgent.NetworkOperationRole]
+     [TestContainer.NetworkOperationAgent.NetworkSingletonConfigurationRole]
+     [TestContainer.NetworkOperationAgent.TopLevelGovernanceRole]
+     [TestContainer.NetworkOperationAgent.TopLevelHeartbeatRole]
+
+   TestContainer.TopmostFriendshipAgent
+     [TestContainer.TopmostFriendshipAgent.ConfigureParentToSingletonRole]
+     [TestContainer.TopmostFriendshipAgent.GovernanceRole]
+     [TestContainer.TopmostFriendshipAgent.HeartbeatRole]
+     [TestContainer.TopmostFriendshipAgent.TopmostFriendshipRole]
+
+ the network singleton nodes (nomadic agents) and their  child roles  ...
+
+   TestContainer.AICFinancialAccountingAndControlAgent
+
+   TestContainer.AICMintAgent
+
+   TestContainer.AICNetworkEpisodicMemoryAgent
+     TestContainer.AICContainerEpisodicMemoryAgent.AICContainerEpisodicMemoryRole
+
+   TestContainer.AICNetworkOperationAgent
+     TestContainer.AICBlockchainArchiveAgent.AICBlockchainArchiveRole
+     TestContainer.AICClientGatewayAgent.AICClientGatewayRole
+     TestContainer.AICContainerAuditAgent.AICContainerAuditRole
+     TestContainer.AICContainerCertificateAuthorityAgent.AICContainerCertificateAuthorityRole
+     TestContainer.AICFaucetAgent.AICFaucetRole
+     TestContainer.AICFinancialAccountingAndControlAgent.AICClientGatewayRole
+     TestContainer.AICMintAgent.AICMintRole
+     TestContainer.AICNetworkEpisodicMemoryAgent.AICNetworkEpisodicMemoryRole
+     TestContainer.AICNetworkSeedAgent.AICNetworkSeedRole
+     TestContainer.AICOperationAgent.AICOperationRole
+     TestContainer.AICPrimaryAuditAgent.AICPrimaryAuditRole
+     TestContainer.AICRecoveryAgent.AICRecoveryRole
+     TestContainer.AICRewardAllocationAgent.AICRewardAllocationRole
+
+   TestContainer.AICNetworkSeedAgent
+     TestContainer.AICSeedAgent.AICSeedRole
+
+   TestContainer.AICPrimaryAuditAgent
+
+   TestContainer.AICRecoveryAgent
+
+   TestContainer.AICRewardAllocationAgent
+
+   TestContainer.NetworkOperationAgent
+     TestContainer.ContainerOperationAgent.ContainerDeploymentRole
+     TestContainer.ContainerOperationAgent.ContainerFileRecipientRole
+     TestContainer.ContainerOperationAgent.ContainerFileSenderRole
+     TestContainer.ContainerOperationAgent.ContainerLogControlRole
+     TestContainer.AICNetworkOperationAgent.AICNetworkOperationRole
+     TestContainer.ContainerOperationAgent.ContainerOperationRole
+     TestContainer.ContainerOperationAgent.ContainerSingletonConfigurationRole
+     TestContainer.ContainerOperationAgent.ContainerGovernanceRole
+     TestContainer.ContainerOperationAgent.ContainerHeartbeatRole
+
+   TestContainer.TopmostFriendshipAgent
+     TestContainer.NetworkOperationAgent.NetworkDeploymentRole
+     TestContainer.NetworkOperationAgent.NetworkFileTransferRole
+     TestContainer.NetworkOperationAgent.NetworkLogControlRole
+     TestContainer.NetworkOperationAgent.NetworkOperationRole
+     TestContainer.NetworkOperationAgent.NetworkSingletonConfigurationRole
+     TestContainer.NetworkOperationAgent.TopLevelGovernanceRole
+     TestContainer.NetworkOperationAgent.TopLevelHeartbeatRole
+
+ the network singleton nodes (nomadic agents) and their filtered non-singleton child roles  ...
+
+   TestContainer.AICFinancialAccountingAndControlAgent
+
+   TestContainer.AICMintAgent
+
+   TestContainer.AICNetworkEpisodicMemoryAgent
+     TestContainer.AICContainerEpisodicMemoryAgent.AICContainerEpisodicMemoryRole
+
+   TestContainer.AICNetworkOperationAgent
+     TestContainer.AICBlockchainArchiveAgent.AICBlockchainArchiveRole
+     TestContainer.AICClientGatewayAgent.AICClientGatewayRole
+     TestContainer.AICContainerAuditAgent.AICContainerAuditRole
+     TestContainer.AICContainerCertificateAuthorityAgent.AICContainerCertificateAuthorityRole
+     TestContainer.AICFaucetAgent.AICFaucetRole
+     TestContainer.AICOperationAgent.AICOperationRole
+
+   TestContainer.AICNetworkSeedAgent
+     TestContainer.AICSeedAgent.AICSeedRole
+
+   TestContainer.AICPrimaryAuditAgent
+
+   TestContainer.AICRecoveryAgent
+
+   TestContainer.AICRewardAllocationAgent
+
+   TestContainer.NetworkOperationAgent
+     TestContainer.ContainerOperationAgent.ContainerDeploymentRole
+     TestContainer.ContainerOperationAgent.ContainerFileRecipientRole
+     TestContainer.ContainerOperationAgent.ContainerFileSenderRole
+     TestContainer.ContainerOperationAgent.ContainerLogControlRole
+     TestContainer.ContainerOperationAgent.ContainerOperationRole
+     TestContainer.ContainerOperationAgent.ContainerSingletonConfigurationRole
+     TestContainer.ContainerOperationAgent.ContainerGovernanceRole
+     TestContainer.ContainerOperationAgent.ContainerHeartbeatRole
+
+   TestContainer.TopmostFriendshipAgent

@@ -2,6 +2,8 @@ package org.texai.skill.network;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
@@ -67,6 +69,7 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
 
         LOGGER.info("initializing with: " + receivedMessage);
 
+        initialization();
         propagateOperationToChildRoles(receivedMessage);
         if (getNodeRuntime().isFirstContainerInNetwork()) {
           setSkillState(AHCSConstants.State.READY);
@@ -193,7 +196,14 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
   }
 
   /**
-   * Perform this role's mission, which is to manage the network, the containers, and the A.I. Coin agents within the containers.
+   * Initializies this skill.
+   */
+  private void initialization() {
+
+  }
+
+  /**
+   * Perform this role's mission, which is to manage the network, the containers, and the AI Coin agents within the containers.
    *
    * @param receivedMessage the received perform mission task message
    */
@@ -209,9 +219,9 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
   }
 
   /**
-   * Perform this role's mission, which is to manage the network, the containers, and the A.I. Coin agents within the containers.
+   * Handles a Network Restart Request Info message.
    *
-   * @param receivedMessage the received perform mission task message
+   * @param receivedMessage the received network restart request info message
    */
   private void handleNetworkRestartRequestInfo(final Message receivedMessage) {
     //Preconditions

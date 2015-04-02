@@ -85,6 +85,9 @@ public final class AHCSConstants {
   // the addUnrecognizedFaceToTrainingSet_Task operation
   public static final String ADD_UNRECOGNIZED_FACE_TO_TRAINING_SET_TASK = "addUnrecognizedFaceToTrainingSet_Task";
   //
+  // the coin network configuration task operation
+  public static final String COIN_NETWORK_CONFIGURATION_TASK = "coinNetworkConfiguration_Task";
+  //
   // the configureSingletonAgentHosts_Task operation
   public static final String CONFIGURE_SINGLETON_AGENT_HOSTS_TASK = "configureSingletonAgentHosts_Task";
   //
@@ -175,6 +178,9 @@ public final class AHCSConstants {
   //
   // the prepare to receive file task operation
   public static final String PREPARE_TO_RECEIVE_FILE_TASK = "prepareToReceiveFile_Task";
+  //
+  // the network configuration task operation
+  public static final String NETWORK_CONFIGURATION_TASK = "networkConfiguration_Task";
   //
   // the prepare to send file task operation
   public static final String PREPARE_TO_SEND_FILE_TASK = "prepareToSendFile_Task";
@@ -390,7 +396,9 @@ public final class AHCSConstants {
   public static final String MSG_PARM_LOGGING_LEVEL = "loggingLevel";
   // the message parameter for message trace, which is a StringBuilder
   public static final String MSG_PARM_MESSAGE_TRACE = "messageTrace";
-  // the message parameter for the node type name
+  // the message parameter for the node infos
+  public static final String MSG_PARM_CONTAINER_INFOS = "nodeInfos";
+  // the message parameter for the operation
   public static final String MSG_PARM_OPERATION = "operation";
   // the originalMessage parameter
   public static final String MSG_PARM_ORIGINAL_MESSAGE = "originalMessage";

@@ -52,7 +52,7 @@ public class Node implements CascadePersistence, Comparable<Node> {
   // the roles
   @RDFProperty(predicate = "texai:ahcsNode_role")
   private final Set<Role> roles;
-  // the persistent role state variables and their respective values
+  // the persistent node state variables and their respective values
   @RDFProperty()
   private final Set<StateValueBinding> stateValueBindings;
   // the indicator whether this node is a singleton nomadic agent, in which case only one container in the network hosts

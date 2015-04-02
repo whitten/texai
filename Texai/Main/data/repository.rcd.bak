@@ -36,11 +36,13 @@
 
  (Nodes
   (indices: "spoc,posc")
+  (className: org.texai.ahcsSupport.domainEntity.ContainerInfo)
   (className: org.texai.ahcsSupport.domainEntity.ConversationStateInfo)
   (className: org.texai.ahcsSupport.domainEntity.Node)
   (className: org.texai.ahcsSupport.domainEntity.NodeRuntimeConfiguration)
   (className: org.texai.ahcsSupport.domainEntity.Role)
   (className: org.texai.ahcsSupport.domainEntity.SkillClass)
+  (className: org.texai.ahcsSupport.domainEntity.SingletonAgentHosts)
   (className: org.texai.ahcsSupport.domainEntity.StateValueBinding))
 
  (OpenCyc

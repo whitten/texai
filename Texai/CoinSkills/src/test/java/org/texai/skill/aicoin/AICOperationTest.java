@@ -259,7 +259,7 @@ public class AICOperationTest {
     final List<String> understoodOperations = new ArrayList<>(Arrays.asList(instance.getUnderstoodOperations()));
     Collections.sort(understoodOperations);
     assertEquals(
-            "[initialize_Task, joinAcknowledged_Task, messageNotUnderstood_Info, performMission_Task, shutdownAicoindRequest_Info, shutdownAicoind_Task, taskAccomplished_Info]",
+            "[bitcoinMessage_Info, initialize_Task, joinAcknowledged_Task, messageNotUnderstood_Info, performMission_Task, shutdownAicoindRequest_Info, shutdownAicoind_Task, taskAccomplished_Info]",
             understoodOperations.toString());
   }
 

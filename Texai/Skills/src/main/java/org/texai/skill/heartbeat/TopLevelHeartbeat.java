@@ -19,6 +19,8 @@ import org.joda.time.DateTime;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcs.skill.AbstractNetworkSingletonSkill;
+import org.texai.ahcsSupport.domainEntity.Node;
+import org.texai.ahcsSupport.domainEntity.ContainerInfo;
 import org.texai.util.StringUtils;
 
 /**
@@ -124,7 +126,8 @@ public final class TopLevelHeartbeat extends AbstractNetworkSingletonSkill {
         assert getSkillState().equals(AHCSConstants.State.READY) :
                 "state must be ready, but is " + getSkillState();
         assert !getRole().getChildQualifiedNames().isEmpty() : "must have at least one child role";
-        //TODO
+
+        performMission();
         propagateOperationToChildRolesSeparateThreads(receivedMessage);
         return;
 
@@ -133,8 +136,8 @@ public final class TopLevelHeartbeat extends AbstractNetworkSingletonSkill {
        *
        * This task message is sent to this network singleton agent/role from a child ContainerHeartbeat agent/role.
        *
-       * The result is the recording of the liveness of the sending container, and a Keep Alive Acknowledged Task message
-       * is sent back as a reply message.
+       * The result is the recording of the liveness of the sending container, and a Keep Alive Acknowledged Task message is sent back as a
+       * reply message.
        *
        */
       case AHCSConstants.KEEP_ALIVE_INFO:
@@ -163,8 +166,8 @@ public final class TopLevelHeartbeat extends AbstractNetworkSingletonSkill {
     sendMessage(
             receivedMessage,
             Message.notUnderstoodMessage(
-            receivedMessage, // receivedMessage
-            this)); // skill
+                    receivedMessage,
+                    this)); // skill
   }
 
   /**
@@ -205,6 +208,17 @@ public final class TopLevelHeartbeat extends AbstractNetworkSingletonSkill {
   }
 
   /**
+   * Performs this skill's mission.
+   */
+  private void performMission() {
+    final HeartbeatProcessor heartbeatProcessor = new HeartbeatProcessor(this);
+    getTimer().schedule(
+            heartbeatProcessor,
+            300000, // delay, 5 minutes
+            300000); // period, 5 minutes
+  }
+
+  /**
    * Records a keep-alive message sent from a role.
    *
    * @param message the keep-alive message
@@ -221,12 +235,22 @@ public final class TopLevelHeartbeat extends AbstractNetworkSingletonSkill {
             .append((new DateTime()).toString("MM/dd/yyyy hh:mm a"));
     LOGGER.info(stringBuilder.toString());
     final String senderQualifiedName = message.getSenderQualifiedName();
-    InboundHeartbeatInfo inboundHeartBeatInfo = inboundHeartbeatInfos.get(senderQualifiedName);
-    if (inboundHeartBeatInfo == null) {
-      inboundHeartBeatInfo = new InboundHeartbeatInfo(senderQualifiedName);
-      inboundHeartbeatInfos.put(senderQualifiedName, inboundHeartBeatInfo);
+    InboundHeartbeatInfo inboundHeartbeatInfo = inboundHeartbeatInfos.get(senderQualifiedName);
+    if (inboundHeartbeatInfo == null) {
+      inboundHeartbeatInfo = new InboundHeartbeatInfo(senderQualifiedName);
+      inboundHeartbeatInfos.put(senderQualifiedName, inboundHeartbeatInfo);
     }
-    inboundHeartBeatInfo.heartbeatReceivedMillis = System.currentTimeMillis();
+    inboundHeartbeatInfo.heartbeatReceivedMillis = System.currentTimeMillis();
+
+    // record node information in the dictionary shared with the NetworkOperation role
+    final String containerName = Node.extractContainerName(inboundHeartbeatInfo.senderQualifiedName);
+    ContainerInfo containerInfo = getNodeRuntime().getContainerInfo(containerName);
+    if (containerInfo == null) {
+      LOGGER.info("Adding " + containerName + " to the list of live containers.");
+      containerInfo = new ContainerInfo(containerName);
+      getNodeRuntime().addContainerInfo(containerInfo);
+    }
+    containerInfo.setIsAlive(true);
 
     final Message keepAliveAcknowledgedTaskMessage = makeReplyMessage(
             message,
@@ -253,7 +277,7 @@ public final class TopLevelHeartbeat extends AbstractNetworkSingletonSkill {
      */
     HeartbeatProcessor(final TopLevelHeartbeat topLevelHeartbeat) {
       //Preconditions
-      assert topLevelHeartbeat != null : "heartbeat must not be null";
+      assert topLevelHeartbeat != null : "topLevelHeartbeat must not be null";
 
       this.topLevelHeartbeat = topLevelHeartbeat;
     }
@@ -370,6 +394,14 @@ public final class TopLevelHeartbeat extends AbstractNetworkSingletonSkill {
     assert inboundHeartbeatInfo != null : "inboundHeartbeatInfo must not be null";
 
     LOGGER.warn("Heartbeat missing for " + inboundHeartbeatInfo + ".");
+    final String containerName = Node.extractContainerName(inboundHeartbeatInfo.senderQualifiedName);
+    ContainerInfo containerInfo = getNodeRuntime().getContainerInfo(containerName);
+    if (containerInfo == null) {
+      LOGGER.info("Adding " + containerName + " to the list of live containers.");
+      containerInfo = new ContainerInfo(containerName);
+      getNodeRuntime().addContainerInfo(containerInfo);
+    }
+    containerInfo.setIsAlive(false);
   }
 
 }

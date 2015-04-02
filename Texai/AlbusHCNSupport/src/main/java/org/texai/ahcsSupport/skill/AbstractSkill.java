@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -25,6 +26,7 @@ import org.texai.ahcsSupport.Message;
 import static org.texai.ahcsSupport.Message.DEFAULT_VERSION;
 import org.texai.ahcsSupport.domainEntity.Role;
 import org.texai.kb.persistence.RDFEntityManager;
+import org.texai.util.NetworkUtils;
 import org.texai.util.StringUtils;
 
 /**
@@ -112,6 +114,24 @@ public abstract class AbstractSkill {
     assert message != null : "message must not be null";
 
     return oneTimeOperationsIgnoringRepeats.contains(message.getOperation());
+  }
+
+  /**
+   * Returns whether this network is the mainnet.
+   *
+   * @return whether this network is the mainnet
+   */
+  public boolean isMainnet() {
+    return getNodeRuntime().getNetworkName().equals(NetworkUtils.TEXAI_MAINNET);
+  }
+
+  /**
+   * Returns whether this network is the testnet.
+   *
+   * @return whether this network is the testnet
+   */
+  public boolean isTestnet() {
+    return getNodeRuntime().getNetworkName().equals(NetworkUtils.TEXAI_TESTNET);
   }
 
   /**
@@ -561,7 +581,7 @@ public abstract class AbstractSkill {
     synchronized (messageTimeOutInfoDictionary) {
       messageTimeOutInfoDictionary.put(message.getReplyWith(), messageTimeOutInfo);
     }
-    role.getNodeRuntime().getTimer().schedule(
+    getTimer().schedule(
             messageTimeoutTask,
             timeoutMillis); // delay
   }
@@ -609,6 +629,15 @@ public abstract class AbstractSkill {
    */
   public void setIsUnitTest(final boolean isUnitTest) {
     this.isUnitTest.set(isUnitTest);
+  }
+
+  /**
+   * Gets the timer.
+   *
+   * @return the timer
+   */
+  public Timer getTimer() {
+    return role.getNodeRuntime().getTimer();
   }
 
   /**

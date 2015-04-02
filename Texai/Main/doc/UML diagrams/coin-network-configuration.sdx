@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <diagram>
-<source><![CDATA[#![Coin Network Coinfiguration          ]
-no:NetworkOperation[rp] "NetworkOperation"
-ano:AICNetworkOperation[rp] "AICNetworkOperation"
-ao:AICOperation[rp] "AICOperation"
+<source><![CDATA[#![Coin Network Configuration          ]
+nsc:NetworkSingletonConfiguration[rp] "NetworkSingletonConfiguration"
+csc:ContainerSingletonConfiguration[rp] "ContainerSingletonConfiguration"
 
-no:ano.networkConfiguration_Task(nodeInfos)
-ano:ao.coinNetworkConfiguration_Task(nodeInfos)
+nsc:csc.networkConfiguration_Task(\\n  containerInfos, \\n  singletonAgentHosts)
 ]]></source>
 <configuration>
 <property name="activationBarBorderThickness" value="1"/>

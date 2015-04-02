@@ -12,6 +12,7 @@ package org.texai.ahcsSupport.skill;
 
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,11 +23,15 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.bouncycastle.util.Arrays;
+import org.texai.ahcsSupport.ContainerInfoAccess;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.MessageDispatcher;
 import org.texai.ahcsSupport.NodeAccess;
+import org.texai.ahcsSupport.SingletonAgentHostsAccess;
+import org.texai.ahcsSupport.domainEntity.ContainerInfo;
 import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.ahcsSupport.domainEntity.Role;
+import org.texai.ahcsSupport.domainEntity.SingletonAgentHosts;
 import org.texai.kb.persistence.RDFEntityManager;
 import org.texai.util.NetworkUtils;
 import org.texai.util.StringUtils;
@@ -67,6 +72,10 @@ public class BasicNodeRuntime implements MessageDispatcher {
   private char[] keyStorePassword;
   // the cached value of isFirstContainerInNetwork()
   private Boolean isFirstContainerInNetworkCached = null;
+  // the singleton agent hosts access object
+  private final SingletonAgentHostsAccess singletonAgentHostsAccess;
+  // the container infos access object
+  private final ContainerInfoAccess containerInfoAccess;
 
   /**
    * Constructs a new BasicNodeRuntime instance.
@@ -85,6 +94,79 @@ public class BasicNodeRuntime implements MessageDispatcher {
     this.containerName = containerName;
     this.networkName = networkName;
     nodeAccess = new NodeAccess(rdfEntityManager);
+    singletonAgentHostsAccess = new SingletonAgentHostsAccess(
+            rdfEntityManager,
+            this); // basicNodeRuntime
+    containerInfoAccess = new ContainerInfoAccess(rdfEntityManager, networkName);
+  }
+
+  /**
+   * Gets the singleton agent hosts, whose dictionary allows host lookup for network singleton software agents, for example
+   * NetworkOperationAgent.
+   *
+   * @return the singleton agent hosts
+   */
+  public SingletonAgentHosts getSingletonAgentHosts() {
+    return singletonAgentHostsAccess.getEffectiveSingletonAgentHosts();
+  }
+
+  /**
+   * Updates the singleton agent hosts.
+   *
+   * @param singletonAgentHosts the singleton agent hosts
+   */
+  public void updateSingletonAgentHosts(final SingletonAgentHosts singletonAgentHosts) {
+    //Preconditions
+    assert singletonAgentHosts != null : "singletonAgentHosts must not be null";
+
+    singletonAgentHostsAccess.updateSingletonAgentHosts(singletonAgentHosts);
+  }
+
+  /**
+   * Adds a new container information object, which contains information about super peer status and liveness.
+   *
+   * @param containerInfo the new container information object
+   */
+  public void addContainerInfo(final ContainerInfo containerInfo) {
+    //Preconditions
+    assert containerInfo != null : "containerInfo must not be null";
+
+    containerInfoAccess.addContainerInfo(containerInfo);
+  }
+
+  /**
+   * Gets the container info by its name.
+   *
+   * @param containerName the container name
+   *
+   * @return the container info
+   */
+  public ContainerInfo getContainerInfo(final String containerName) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(containerName) : "containerName must a non-empty string";
+
+    return containerInfoAccess.getContainerInfo(containerName);
+  }
+
+  /**
+   * Gets the container infos, each containing information about super peer status and liveness.
+   *
+   * @return the container infos
+   */
+  public Collection<ContainerInfo> getContainerInfos() {
+    return containerInfoAccess.getContainerInfos();
+  }
+
+  /**
+   * Replaces the current container infos with the given ones.
+   *
+   * @param containerInfos the given container infos
+   */
+  public void updateContainerInfos(final Collection<ContainerInfo> containerInfos) {
+    //Preconditions
+    assert containerInfos != null : "containerInfos must not be null";
+
+    containerInfoAccess.updateContainerInfos(containerInfos);
   }
 
   /**
@@ -398,7 +480,8 @@ public class BasicNodeRuntime implements MessageDispatcher {
     System.exit(0);
   }
 
-  /** Gets the network name, mainnet or testnet.
+  /**
+   * Gets the network name, mainnet or testnet.
    *
    * @return the network name
    */
