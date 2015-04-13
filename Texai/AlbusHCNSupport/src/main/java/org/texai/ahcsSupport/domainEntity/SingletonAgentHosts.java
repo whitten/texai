@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import javax.persistence.Id;
 import net.jcip.annotations.Immutable;
 import net.jcip.annotations.ThreadSafe;
@@ -213,9 +212,7 @@ public final class SingletonAgentHosts implements RDFPersistent, Serializable {
    */
   @Override
   public int hashCode() {
-    int hash = 3;
-    hash = 97 * hash + Objects.hashCode(singletonAgentDictionary);
-    return hash;
+    return effectiveDateTime.hashCode();
   }
 
   @Override

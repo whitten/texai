@@ -13,17 +13,15 @@ cp ../UnlimitedJCEPolicyJDK8/*.jar /usr/lib/jvm/java-8-oracle/jre/lib/security
 #export RPC_USER=rpctestuser
 #export RPC_PASSWORD=rpctestpassword
 
-CLASSPATH=lib/activation-1.1.jar
-CLASSPATH=$CLASSPATH:lib/aduna-commons-collections-2.7.0.jar
-
 CLASSPATH=lib/AlbusHCN-1.0.jar
 CLASSPATH=$CLASSPATH:lib/AlbusHCNSupport-1.0.jar
+CLASSPATH=$CLASSPATH:lib/annotations-1.3.2.jar
 CLASSPATH=$CLASSPATH:lib/ant-optional-1.5.1.jar
 CLASSPATH=$CLASSPATH:lib/asm-3.1.jar
 CLASSPATH=$CLASSPATH:lib/bcpkix-jdk14-1.50.jar
 CLASSPATH=$CLASSPATH:lib/bcprov-jdk14-1.50.jar
 CLASSPATH=$CLASSPATH:lib/bcprov-jdk15on-1.50.jar
-CLASSPATH=$CLASSPATH:lib/bitcoinj-0.11.3.jar
+CLASSPATH=$CLASSPATH:lib/bitcoinj-0.11.2-MB-ALICE.jar
 CLASSPATH=$CLASSPATH:lib/BitTorrentSupport-1.0.jar
 CLASSPATH=$CLASSPATH:lib/cglib-2.2.jar
 CLASSPATH=$CLASSPATH:lib/CoinSkills-1.0.jar
@@ -40,6 +38,7 @@ CLASSPATH=$CLASSPATH:lib/ehcache-core-2.2.0.jar
 CLASSPATH=$CLASSPATH:lib/guava-13.0.1.jar
 CLASSPATH=$CLASSPATH:lib/Inference-1.0.jar
 CLASSPATH=$CLASSPATH:lib/jackson-core-2.2.1.jar
+CLASSPATH=$CLASSPATH:lib/JavaBitcoindRpcClient-0.9.0.jar
 CLASSPATH=$CLASSPATH:lib/javasysmon_2.10-0.3.4.jar
 CLASSPATH=$CLASSPATH:lib/jaxme2-0.5.2.jar
 CLASSPATH=$CLASSPATH:lib/jaxmeapi-0.5.2.jar
@@ -48,13 +47,13 @@ CLASSPATH=$CLASSPATH:lib/jaxmexs-0.5.2.jar
 CLASSPATH=$CLASSPATH:lib/jcip-annotations-1.0.jar
 CLASSPATH=$CLASSPATH:lib/jdom-b8.jar
 CLASSPATH=$CLASSPATH:lib/joda-time-1.6.jar
-CLASSPATH=$CLASSPATH:lib/json-simple-1.1.jar
+CLASSPATH=$CLASSPATH:lib/json-simple-1.1.1.jar
 CLASSPATH=$CLASSPATH:lib/jsr305-1.3.9.jar
 CLASSPATH=$CLASSPATH:lib/junit-4.7.jar
 CLASSPATH=$CLASSPATH:lib/log4j-1.2.15.jar
 CLASSPATH=$CLASSPATH:lib/log4j-over-slf4j-1.5.6.jar
 CLASSPATH=$CLASSPATH:lib/Main-1.0.jar
-CLASSPATH=$CLASSPATH:lib/netty-3.3.1.Final.jar
+CLASSPATH=$CLASSPATH:lib/netty-3.3.1.jar
 CLASSPATH=$CLASSPATH:lib/Network-1.0.jar
 CLASSPATH=$CLASSPATH:lib/opencsv-2.0.jar
 CLASSPATH=$CLASSPATH:lib/persistence-api-1.0.jar
@@ -116,6 +115,7 @@ CLASSPATH=$CLASSPATH:lib/Utilities-1.0.jar
 CLASSPATH=$CLASSPATH:lib/X509Security-1.0.jar
 CLASSPATH=$CLASSPATH:lib/xerces-1.2.3.jar
 CLASSPATH=$CLASSPATH:lib/xml-apis-1.0.b2.jar
+
 # debug logger configuration
 #java -ea -Dlog4j.configuration=file://$PWD/log4j.properties -Dlog4j.debug=true -classpath $CLASSPATH org.texai.main.AICoinMain
 

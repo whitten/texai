@@ -17,6 +17,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.texai.ahcs.MessageRouter;
 import org.texai.ahcs.NodeRuntime;
 import static org.texai.ahcs.NodeRuntime.CACHE_X509_CERTIFICATES;
 import org.texai.ahcsSupport.AHCSConstants;
@@ -57,7 +58,7 @@ public class AICoinMain {
   // the node runtime
   private NodeRuntime nodeRuntime;
   // the version
-  private static final String VERSION = "1.0";
+  private static final String VERSION = "1.0 build 1";
   /**
    * the shutdown hook
    */
@@ -114,6 +115,7 @@ public class AICoinMain {
     Logger.getLogger(DistributedRepositoryManager.class).setLevel(Level.WARN);
     Logger.getLogger(KBAccess.class).setLevel(Level.WARN);
     Logger.getLogger(JournalWriter.class).setLevel(Level.WARN);
+    Logger.getLogger(MessageRouter.class).setLevel(Level.DEBUG);
 //    Logger.getLogger(NodesInitializer.class).setLevel(Level.DEBUG);
     Logger.getLogger(PortUnificationHandler.class).setLevel(Level.WARN);
     Logger.getLogger(PortUnificationChannelPipelineFactory.class).setLevel(Level.WARN);
@@ -123,11 +125,21 @@ public class AICoinMain {
     Logger.getLogger(X509Utils.class).setLevel(Level.WARN);
 
     LOGGER.info("A.I. Coin version " + VERSION + ".");
+    final String timeZoneId = System.getenv("TIMEZONE");
+    if (!StringUtils.isNonEmptyString(timeZoneId)) {
+      throw new TexaiException("the TIMEZONE environment variable must be set to a valid timezone\n "
+              + "see http://tutorials.jenkov.com/java-date-time/java-util-timezone.html");
+    }
+    LOGGER.debug("The time zone is " + timeZoneId + ".");
+    DateTimeZone.setDefault(DateTimeZone.forID(timeZoneId));
+    LOGGER.info("Started " + (new DateTime()).toString("MM/dd/yyyy hh:mm a") + ".");
+
     final String networkName = System.getenv("NETWORK");
     if (!NetworkUtils.TEXAI_MAINNET.equals(networkName) && !NetworkUtils.TEXAI_TESTNET.equals(networkName)) {
       throw new TexaiException("invalid network name: '" + networkName + "', must be " + NetworkUtils.TEXAI_MAINNET + " or " + NetworkUtils.TEXAI_TESTNET);
     }
     LOGGER.info("Starting the software agents in the container named " + containerName + " on " + networkName + ".");
+
     nodeRuntime = new NodeRuntime(containerName, networkName);
     // configure a shutdown hook to run the finalization method in case the JVM is abnormally ended
     shutdownHook = new ShutdownHook();
@@ -140,14 +152,6 @@ public class AICoinMain {
     // for the demo, delete the previous knowledge base journals
     JournalWriter.deleteJournalFiles();
 
-    final String timeZoneId = System.getenv("TIMEZONE");
-    if (!StringUtils.isNonEmptyString(timeZoneId)) {
-      throw new TexaiException("the TIMEZONE environment variable must be set to a valid timezone\n "
-              + "see http://tutorials.jenkov.com/java-date-time/java-util-timezone.html");
-    }
-    LOGGER.debug("The time zone is " + timeZoneId + ".");
-    DateTimeZone.setDefault(DateTimeZone.forID(timeZoneId));
-    LOGGER.info("Started " + (new DateTime()).toString("MM/dd/yyyy hh:mm a") + ".");
 
     if (nodeRuntime.isFirstContainerInNetwork()) {
       LOGGER.info("This is the first container in the network and will host all the network singleton agent / roles.");

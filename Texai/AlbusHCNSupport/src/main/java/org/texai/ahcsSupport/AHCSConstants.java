@@ -138,6 +138,9 @@ public final class AHCSConstants {
   // the unclaimed currency amount
   public static final String FAUCET_PAYMENT_REQUEST_REFUSED_TASK_UNCLAIMED_CURRENCY_AMOUNT = "faucetPaymentRequestRefused_Task_unclaimedCurrencyAmount";
   //
+  // the generateCoinBlock_Task operation
+  public static final String GENERATE_COIN_BLOCK_TASK = "generateCoinBlock_Task";
+  //
   // the generate_Task operation
   public static final String GENERATE_FROM_CONSTITUENTS_TASK = "generateFromConstitutents_Task";
   // the rootSemanticConstituentNode user parameter of the generate_Task
@@ -397,7 +400,7 @@ public final class AHCSConstants {
   // the message parameter for message trace, which is a StringBuilder
   public static final String MSG_PARM_MESSAGE_TRACE = "messageTrace";
   // the message parameter for the node infos
-  public static final String MSG_PARM_CONTAINER_INFOS = "nodeInfos";
+  public static final String MSG_PARM_CONTAINER_INFOS = "containerInfos";
   // the message parameter for the operation
   public static final String MSG_PARM_OPERATION = "operation";
   // the originalMessage parameter

@@ -242,12 +242,17 @@ public final class TopLevelHeartbeat extends AbstractNetworkSingletonSkill {
     }
     inboundHeartbeatInfo.heartbeatReceivedMillis = System.currentTimeMillis();
 
-    // record node information in the dictionary shared with the NetworkOperation role
+    // record container liveness information in the node runtime
     final String containerName = Node.extractContainerName(inboundHeartbeatInfo.senderQualifiedName);
     ContainerInfo containerInfo = getNodeRuntime().getContainerInfo(containerName);
     if (containerInfo == null) {
-      LOGGER.info("Adding " + containerName + " to the list of live containers.");
-      containerInfo = new ContainerInfo(containerName);
+      LOGGER.info("Adding unexpected " + containerName + " to the list of live containers.");
+      containerInfo = new ContainerInfo(
+              containerName,
+              false, // isSuperPeer
+              false, // isFirstContainer
+              false, // isClientGateway
+              false); // isBlockExplorer
       getNodeRuntime().addContainerInfo(containerInfo);
     }
     containerInfo.setIsAlive(true);
@@ -398,7 +403,12 @@ public final class TopLevelHeartbeat extends AbstractNetworkSingletonSkill {
     ContainerInfo containerInfo = getNodeRuntime().getContainerInfo(containerName);
     if (containerInfo == null) {
       LOGGER.info("Adding " + containerName + " to the list of live containers.");
-      containerInfo = new ContainerInfo(containerName);
+      containerInfo = new ContainerInfo(
+              containerName,
+              false, // isSuperPeer
+              false, // isFirstContainer
+              false, // isClientGateway
+              false); // isBlockExplorer
       getNodeRuntime().addContainerInfo(containerInfo);
     }
     containerInfo.setIsAlive(false);

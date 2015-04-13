@@ -30,8 +30,6 @@ public class SingletonAgentHostsAccess {
   private final RDFEntityManager rdfEntityManager;
   // the parent basic node runtime
   private final BasicNodeRuntime basicNodeRuntime;
-  // the singleton agent dictionary, singleton agent name --> container name
-  private final Map<String, String> singletonAgentDictionary = new HashMap<>();
   // the set of singleton agent hosts
   private final Set< SingletonAgentHosts> singletonAgentHostsSet = new HashSet<>();
 
@@ -57,7 +55,7 @@ public class SingletonAgentHostsAccess {
    */
   public void initializeSingletonAgentsHosts() {
     synchronized (singletonAgentHostsSet) {
-      singletonAgentHostsSet.clear();
+      final Map<String, String> singletonAgentDictionary = new HashMap<>();
       singletonAgentDictionary.put("NetworkOperationAgent", "Mint");
       singletonAgentDictionary.put("NetworkSingletonConfigurationAgent", "Mint");
       singletonAgentDictionary.put("TopmostFriendshipAgent", "Mint");
@@ -157,6 +155,9 @@ public class SingletonAgentHostsAccess {
   public void updateSingletonAgentHosts(final SingletonAgentHosts singletonAgentHosts) {
     //Preconditions
     assert singletonAgentHosts != null : "singletonAgentHosts must not be null";
+
+    // remove a possible previous entry with a matching effective date
+    singletonAgentHostsSet.remove(singletonAgentHosts);
 
     singletonAgentHostsSet.add(singletonAgentHosts);
   }

@@ -65,20 +65,56 @@ public class ContainerInfoAccessTest {
    * Test of class ContainerInfoAccess.
    */
   @Test
+  public void initializeContainerInfos() {
+    LOGGER.info("initializeContainerInfos");
+    ContainerInfoAccess instance = new ContainerInfoAccess(rdfEntityManager, NetworkUtils.TEXAI_MAINNET);
+    assertEquals("[]", instance.getContainerInfos().toString());
+    instance.initializeContainerInfos();
+    assertTrue(instance.areContainerInfosConsistent());
+    assertEquals(8, instance.getContainerInfos().size());
+  }
+
+  /**
+   * Test of class ContainerInfoAccess.
+   */
+  @Test
   public void testLoadContainerInfos() {
     LOGGER.info("containerInfos");
     ContainerInfoAccess instance = new ContainerInfoAccess(rdfEntityManager, NetworkUtils.TEXAI_MAINNET);
     assertEquals("[]", instance.getContainerInfos().toString());
-    instance.addContainerInfo(new ContainerInfo("Mint"));
-    assertEquals("[[container Mint]]", instance.getContainerInfos().toString());
+    ContainerInfo containerInfo = new ContainerInfo(
+            "Mint", // containerName
+            true, // isSuperPeer
+            true, // isFirstContainer
+            false, // isClientGateway
+            false); // isBlockExplorer
+    instance.addContainerInfo(containerInfo);
+    assertEquals("[[container Mint, super peer, first container]]", instance.getContainerInfos().toString());
     instance.persistContainerInfos();
     instance.loadContainerInfos();
-    assertEquals("[[container Mint]]", instance.getContainerInfos().toString());
-    instance.addContainerInfo(new ContainerInfo("Alice"));
-    assertEquals("[[container Alice], [container Mint]]", instance.getContainerInfos().toString());
+    assertEquals("[[container Mint, super peer, first container]]", instance.getContainerInfos().toString());
+
+    containerInfo = new ContainerInfo(
+            "Alice", // containerName
+            true, // isSuperPeer
+            false, // isFirstContainer
+            true, // isClientGateway
+            false); // isBlockExplorer
+    instance.addContainerInfo(containerInfo);
+    assertEquals("[[container Alice, super peer, gateway], [container Mint, super peer, first container]]", instance.getContainerInfos().toString());
     instance.persistContainerInfos();
     instance.loadContainerInfos();
-    assertEquals("[[container Alice], [container Mint]]", instance.getContainerInfos().toString());
+    assertEquals("[[container Alice, super peer, gateway], [container Mint, super peer, first container]]", instance.getContainerInfos().toString());
+    assertTrue(instance.areContainerInfosConsistent());
+    containerInfo = new ContainerInfo(
+            "Alice", // containerName
+            true, // isSuperPeer
+            false, // isFirstContainer
+            true, // isClientGateway
+            false); // isBlockExplorer
+    containerInfo.addSuperPeerContainerName("xxx");
+    instance.addContainerInfo(containerInfo);
+    assertFalse(instance.areContainerInfosConsistent());
   }
 
 }

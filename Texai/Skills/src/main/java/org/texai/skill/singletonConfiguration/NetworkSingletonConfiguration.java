@@ -100,8 +100,8 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
        * Its parameter is the SingletonAgentHosts object, which contains the the singleton agent dictionary, agent name --> hosting
        * container name.
        *
-       * A a result, aConfigure Singleton Agent Hosts Task message is sent to container operations, which in turn sends a
-       * Configure Singleton Agent Hosts Task to all child ConfigureParentToSingletonRoles, which includes every agent in the container.
+       * A a result, aConfigure Singleton Agent Hosts Task message is sent to container operations, which in turn sends a Configure
+       * Singleton Agent Hosts Task to all child ConfigureParentToSingletonRoles, which includes every agent in the container.
        *
        * Each outbound message contains the singleton agent dictionary.
        *
@@ -257,9 +257,9 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
     sendMessageViaSeparateThread(
             receivedMessage,
             makeMessage(
-            getRole().getChildQualifiedNameForAgentRole("ContainerOperationAgent.ContainerSingletonConfigurationRole"), // recipientQualifiedName
-            ContainerSingletonConfiguration.class.getName(), // recipientService
-            AHCSConstants.JOIN_NETWORK_TASK)); // operation
+                    getRole().getChildQualifiedNameForAgentRole("ContainerOperationAgent.ContainerSingletonConfigurationRole"), // recipientQualifiedName
+                    ContainerSingletonConfiguration.class.getName(), // recipientService
+                    AHCSConstants.JOIN_NETWORK_TASK)); // operation
   }
 
   /**
@@ -310,9 +310,9 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
   }
 
   /**
-   * Handles the Network Join Complete information message, which is sent from a remote agent/role that has completed joining
-   * the network. Each role in the joined container having a network singleton agent/role as a parent, now refers to the corresponding
-   * network singleton agent / role and has exchanged X.509 certificates with it.
+   * Handles the Network Join Complete information message, which is sent from a remote agent/role that has completed joining the network.
+   * Each role in the joined container having a network singleton agent/role as a parent, now refers to the corresponding network singleton
+   * agent / role and has exchanged X.509 certificates with it.
    *
    * @param receivedMessage the received Network Join Complete Info message
    */
@@ -343,7 +343,7 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
   /**
    * Periodically broadcasts the node info objects that inform containers how the network is configured.
    */
-  protected class BroadcastContainerInfos extends TimerTask {
+  protected static class BroadcastContainerInfos extends TimerTask {
 
     // the network singleton configuration skill
     private final NetworkSingletonConfiguration networkSingletonConfiguration;
@@ -366,22 +366,29 @@ public final class NetworkSingletonConfiguration extends AbstractNetworkSingleto
     @Override
     public void run() {
       for (final String childQualifiedName : networkSingletonConfiguration.getRole().getChildQualifiedNames()) {
-      final Message networkConfigurationMessage = networkSingletonConfiguration.makeMessage(
-              childQualifiedName, // recipientQualifiedName
-              ContainerSingletonConfiguration.class.getName(), // recipientService
-              AHCSConstants.NETWORK_CONFIGURATION_TASK); // operation
-      final SingletonAgentHosts singletonAgentHosts = networkSingletonConfiguration.getNodeRuntime().getSingletonAgentHosts();
-      assert singletonAgentHosts != null;
-      networkConfigurationMessage.put(
-              AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS,
-              singletonAgentHosts);
-      networkConfigurationMessage.put(
-              AHCSConstants.MSG_PARM_CONTAINER_INFOS,
-              networkSingletonConfiguration.getNodeRuntime().getContainerInfos());
-      // use a separate thread - in case of an exception when sending, the original timer thread is preserved
-      networkSingletonConfiguration.sendMessageViaSeparateThread(
-              null, // receivedMessage, for conversation tracing
-              networkConfigurationMessage); // message
+        final Message networkConfigurationMessage = networkSingletonConfiguration.makeMessage(
+                childQualifiedName, // recipientQualifiedName
+                ContainerSingletonConfiguration.class.getName(), // recipientService
+                AHCSConstants.NETWORK_CONFIGURATION_TASK); // operation
+        final SingletonAgentHosts singletonAgentHosts = networkSingletonConfiguration.getNodeRuntime().getSingletonAgentHosts();
+        assert singletonAgentHosts != null;
+        networkConfigurationMessage.put(
+                AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS,
+                singletonAgentHosts);
+        networkConfigurationMessage.put(
+                AHCSConstants.MSG_PARM_CONTAINER_INFOS,
+                networkSingletonConfiguration.getNodeRuntime().getContainerInfos());
+        if (networkSingletonConfiguration.isUnitTest()) {
+          // use the same thread for deterministic unit tests
+          networkSingletonConfiguration.sendMessage(
+                  null, // receivedMessage, for conversation tracing
+                  networkConfigurationMessage); // message
+        } else {
+          // use a separate thread - in case of an exception when sending, the original timer thread is preserved
+          networkSingletonConfiguration.sendMessageViaSeparateThread(
+                  null, // receivedMessage, for conversation tracing
+                  networkConfigurationMessage); // message
+        }
       }
     }
   }

@@ -1,18 +1,23 @@
 package org.texai.skill.aicoin;
 
-import com.google.bitcoin.params.MainNetParams;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
+import org.texai.ahcs.NodeRuntime;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
+import org.texai.ahcsSupport.domainEntity.ContainerInfo;
 import org.texai.skill.aicoin.support.AICoinUtils;
-import org.texai.skill.aicoin.support.BitcoinMessageReceiver;
+import org.texai.network.netty.handler.BitcoinMessageReceiver;
 import org.texai.skill.aicoin.support.LocalBitcoindAdapter;
 import org.texai.util.EnvironmentUtils;
+import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 
 /**
@@ -25,7 +30,7 @@ import org.texai.util.TexaiException;
  * @author reed
  */
 @ThreadSafe
-public final class AICOperation extends AbstractSkill implements BitcoinMessageReceiver {
+public final class AICOperation extends AbstractSkill {
 
   // the logger
   private static final Logger LOGGER = Logger.getLogger(AICOperation.class);
@@ -33,13 +38,11 @@ public final class AICOperation extends AbstractSkill implements BitcoinMessageR
   private static final String AICOIN_DIRECTORY_PATH = "../.aicoin";
   // the insight process
   private Process insightProcess;
-  // the local bitcoind (aicoind) instance adapter
-  private LocalBitcoindAdapter localBitcoindAdapter;
-  // the peer addresses to which Bitcoin messages from the local aicoind instance should be relayed
-  private final Set<String> relayPeerAddresses = new HashSet<>();
+  // the local bitcoind (aicoind) instance adapter dictionary, remote container name --> local bitcoind adapter
+  protected final Map<String, LocalBitcoindAdapter> localBitcoindAdapterDictionary = new HashMap<>();
 
   /**
-   * Constructs a new XTCOperation instance.
+   * Constructs a new AICOperation instance.
    */
   public AICOperation() {
   }
@@ -121,8 +124,8 @@ public final class AICOperation extends AbstractSkill implements BitcoinMessageR
       /**
        * Bitcoin Message Info
        *
-       * This information message is sent from a peer AICOperation role. As a result this role sends the message to the local
-       * aicoind instance.
+       * This information message is sent from a peer AICOperation role. As a result this role sends the message to the local aicoind
+       * instance.
        */
       case AHCSConstants.BITCOIN_MESSAGE_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
@@ -259,47 +262,132 @@ public final class AICOperation extends AbstractSkill implements BitcoinMessageR
     removeMessageTimeOut(message.getInReplyTo());
     LOGGER.info("The bitcoind configuration file has been written");
     launchAicoind();
-    // after a pause, launch the local bitcoind (aicoind) adapter
-    getNodeRuntime().getExecutor().execute(new LocalBitcoinAdapterRunner(
-            this)); // xaiOperation
+
+    getNodeRuntime().getExecutor().execute(new SuperPeerConnector(this));
+
     if ("BlockchainExplorer".equals(getContainerName())) {
       // after a pause, launch the Insight blockchain explorer instance
       getNodeRuntime().getExecutor().execute(new InsightRunner());
     }
   }
 
-  static class LocalBitcoinAdapterRunner implements Runnable {
+  /** Provides a connection between the local bitcoind (aicoind) instance and a remote one at a network super peer. */
+  static class SuperPeerConnection implements BitcoinMessageReceiver {
 
-    // the AICOperation skill instance
-    final AICOperation xaiOperation;
+    // the AIC operation skill
+    final private AICOperation aicOperation;
+    // the super peer container name
+    final private String superPeerContainerName;
+    // the local bitcoind (aicoind) adapter
+    private LocalBitcoindAdapter localBitcoindAdapter;
 
-    /**
-     * Creates a new LocalBitcoinAdapterRunner intance.
+    /** Constructs a new SuperPeerConnection instance.
      *
-     * @param xaiOperation the AICOperation skill instance
+     * @param aicOperation the AIC operation skill
+     * @param superPeerContainerName the super peer container name
      */
-    LocalBitcoinAdapterRunner(final AICOperation xaiOperation) {
-      this.xaiOperation = xaiOperation;
+    SuperPeerConnection(
+            final AICOperation aicOperation,
+            final String superPeerContainerName) {
+      //Preconditions
+      assert aicOperation != null : "aicOperation must not be null";
+      assert StringUtils.isNonEmptyString(superPeerContainerName) : "superPeerContainerName must be a non-empty string";
+
+      this.aicOperation = aicOperation;
+      this.superPeerContainerName = superPeerContainerName;
     }
 
     @Override
+    /**
+     * Receives an outbound bitcoin message from the local peer.
+     *
+     * @param message the given bitcoin protocol message
+     */
+    public void receiveMessageFromBitcoind(final com.google.bitcoin.core.Message bitcoinProtocolMessage) {
+      //Preconditions
+      assert bitcoinProtocolMessage != null : "message must not be null";
+
+      LOGGER.info("received from local aicoind for super peer:" + superPeerContainerName + ", message: " + bitcoinProtocolMessage);
+      final String recipientQualifiedName = superPeerContainerName + ".AICOperationAgent.AICOperationRole";
+      final Message relayMessage = aicOperation.makeMessage(
+              recipientQualifiedName,
+              AICOperation.class.getName(), // recipientService
+              AHCSConstants.BITCOIN_MESSAGE_INFO); // operation
+      relayMessage.put(AHCSConstants.BITCOIN_MESSAGE_INFO_Message, bitcoinProtocolMessage);
+
+      aicOperation.sendMessage(
+              null, // receivedMessage
+              relayMessage); // message
+    }
+
+    /** Sets the local bitcoind (aicoind) adapter.
+     *
+     * @param localBitcoindAdapter the local bitcoind (aicoind) adapter
+     */
+    public void setLocalBitcoindAdapter(final LocalBitcoindAdapter localBitcoindAdapter) {
+      //Preconditions
+      assert localBitcoindAdapter != null : "localBitcoindAdapter must not be null";
+
+      this.localBitcoindAdapter = localBitcoindAdapter;
+    }
+  }
+
+  /**
+   * Provides a runnable that connects this bitcoind (aicoind) to super peer bitcoind (aicoind) instances.
+   */
+  static class SuperPeerConnector implements Runnable {
+
+    // the AIC operation skill
+    final private AICOperation aicOperation;
+
+    SuperPeerConnector(final AICOperation aicOperation) {
+      //Preconditions
+      assert aicOperation != null : "aicOperation must not be null";
+
+      this.aicOperation = aicOperation;
+    }
+
+    /**
+     * Connects to super peers.
+     */
+    @Override
     public void run() {
-      // wait 10 seconds for the QT wallet to open and initialize
+      // wait 10 seconds for the local bitcoind (aicoind) instance to open and initialize
       try {
         Thread.sleep(10000);
       } catch (InterruptedException ex) {
       }
+      // Examine the containers with which this peer should connect. If the remote container's name is sorted less than this one's name, then
+      // this one initiates the connection.
+      final ContainerInfo containerInfo = aicOperation.getNodeRuntime().getContainerInfoAccess().getContainerInfo(aicOperation.getContainerName());
+      assert containerInfo != null;
+      final List<String> superPeerContainerNames = new ArrayList<>(containerInfo.getSuperPeerContainerNames());
+      Collections.sort(superPeerContainerNames);
+      LOGGER.info("superPeerContainerNames: " + superPeerContainerNames + "...");
+      final String myContainerName = aicOperation.getContainerName();
+      for (final String superPeerContainerName : superPeerContainerNames) {
+        if (superPeerContainerName.compareTo(myContainerName) == -1) {
+          LOGGER.info("  Connecting local bitcoind to " + superPeerContainerName);
+          final SuperPeerConnection superPeerConnection = new SuperPeerConnection(
+            aicOperation,
+            superPeerContainerName);
+          final LocalBitcoindAdapter localBitcoindAdapter = new LocalBitcoindAdapter(
+                  ((NodeRuntime) aicOperation.getNodeRuntime()).getNetworkParameters(),
+                  superPeerConnection, // bitcoinMessageReceiver
+                  aicOperation.getNodeRuntime());
 
-    final LocalBitcoindAdapter localBitcoindAdapter = new LocalBitcoindAdapter(
-            new MainNetParams(), // networkParameters
-            xaiOperation, // bitcoinMessageReceiver
-            xaiOperation.getNodeRuntime());
-    LOGGER.info("opening channel to aicoind");
-    localBitcoindAdapter.startUp();
+          aicOperation.localBitcoindAdapterDictionary.put(
+                  superPeerContainerName,
+                  localBitcoindAdapter);
+          LOGGER.info("opening channel to aicoind");
+          localBitcoindAdapter.startUp();
 
-    // exchange version messages with bitcoind
-    localBitcoindAdapter.sendVersionMessageToLocalBitcoinCore();
+          // send a version messages to the local bitcoind (aicoind), the response will be relayed to the remote bitcoind
+          localBitcoindAdapter.sendVersionMessageToLocalBitcoinCore();
+        }
+      }
     }
+
   }
 
   /**
@@ -378,9 +466,12 @@ public final class AICOperation extends AbstractSkill implements BitcoinMessageR
     }
 
     LOGGER.info("Shutting down the aicoind instance.");
-    if (localBitcoindAdapter != null) {
-      localBitcoindAdapter.shutDown();
+    synchronized (localBitcoindAdapterDictionary) {
+      localBitcoindAdapterDictionary.values().stream().forEach((LocalBitcoindAdapter localBitcoindAdapter) -> {
+        localBitcoindAdapter.shutDown();
+      });
     }
+
     String[] cmdArray = {
       "sh",
       "-c",
@@ -409,43 +500,25 @@ public final class AICOperation extends AbstractSkill implements BitcoinMessageR
     }
   }
 
-  /** Relays the Bitcoin message to the local aicoind instance.
+  /**
+   * Relays the Bitcoin message to the local aicoind instance.
    *
-   * @param message the given message, which contains the Bitcoin protocol message as a parameter
+   * @param receivedMessage the given message, which contains the Bitcoin protocol message as a parameter
    */
-  private void relayBitcoinMessage(final Message message) {
+  private void relayBitcoinMessage(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
+    assert receivedMessage != null : "message must not be null";
 
-    final com.google.bitcoin.core.Message bitcoinProtocolMessage =
-            (com.google.bitcoin.core.Message) message.get(AHCSConstants.BITCOIN_MESSAGE_INFO_Message);
+    final com.google.bitcoin.core.Message bitcoinProtocolMessage
+            = (com.google.bitcoin.core.Message) receivedMessage.get(AHCSConstants.BITCOIN_MESSAGE_INFO_Message);
     LOGGER.info("received bitcoinProtocolMessage from network: " + bitcoinProtocolMessage);
     assert bitcoinProtocolMessage != null;
-    localBitcoindAdapter.sendBitcoinMessageToLocalBitcoind(bitcoinProtocolMessage);
-  }
+    final String remoteContainerName = receivedMessage.getSenderContainerName();
 
-
-  @Override
-  /**
-   * Receives an outbound bitcoin message from the local peer.
-   *
-   * @param message the given bitcoin protocol message
-   */
-  public void receiveMessageFromLocalBitcoind(final com.google.bitcoin.core.Message bitcoinProtocolMessage) {
-    //Preconditions
-    assert bitcoinProtocolMessage != null : "message must not be null";
-
-    LOGGER.info("received from local aicoind: " + bitcoinProtocolMessage);
-
-    final String recipientQualifiedName = "";
-    final Message relayMessage = makeMessage(
-            recipientQualifiedName,
-            AICOperation.class.getName(), // recipientService
-            AHCSConstants.BITCOIN_MESSAGE_INFO); // operation
-    relayMessage.put(AHCSConstants.BITCOIN_MESSAGE_INFO_Message, bitcoinProtocolMessage);
-    sendMessage(
-            null, // receivedMessage
-            relayMessage); // message
+    synchronized (localBitcoindAdapterDictionary) {
+      final LocalBitcoindAdapter localBitcoindAdapter = localBitcoindAdapterDictionary.get(remoteContainerName);
+      localBitcoindAdapter.sendBitcoinMessageToLocalBitcoind(bitcoinProtocolMessage);
+    }
   }
 
 }

@@ -180,10 +180,10 @@ public class AICWriteConfigurationFile extends AbstractSkill {
           bufferedWriter.write("# connect to the mint\n");
           // on the same host in the development LAN
           if (getNodeRuntime().getNetworkName().equals(NetworkUtils.TEXAI_MAINNET)) {
-            bufferedWriter.write("connect=Mint:8333\n");
+            bufferedWriter.write("connect=Mint:31417\n");
           } else {
             // testnet
-            bufferedWriter.write("connect=TestMint:18333\n");
+            bufferedWriter.write("connect=TestMint:27185\n");
           }
           break;
         case "BlockchainExplorer":
@@ -191,14 +191,14 @@ public class AICWriteConfigurationFile extends AbstractSkill {
           bufferedWriter.write("listen=1\n");
           // on the same host in the development LAN
           if (getNodeRuntime().getNetworkName().equals(NetworkUtils.TEXAI_MAINNET)) {
-            bufferedWriter.write("connect=Mint:8333\n");
+            bufferedWriter.write("connect=Mint:31417\n");
             // on a separate host in the development LAN
-            //bufferedWriter.write("connect=192.168.0.7:8333\n");
+            //bufferedWriter.write("connect=192.168.0.7:31417\n");
           } else {
             // testnet
-            bufferedWriter.write("connect=TestMint:18333\n");
+            bufferedWriter.write("connect=TestMint:27185\n");
             // on a separate host in the development LAN
-            //bufferedWriter.write("connect=192.168.0.7:18333\n");
+            //bufferedWriter.write("connect=192.168.0.7:27185\n");
           }
           break;
         default:
@@ -207,21 +207,21 @@ public class AICWriteConfigurationFile extends AbstractSkill {
           bufferedWriter.write("listen=0\n");
           bufferedWriter.write("# connect to the mint\n");
           if (getNodeRuntime().getNetworkName().equals(NetworkUtils.TEXAI_MAINNET)) {
-            bufferedWriter.write("connect=texai.dyndns.org:8333\n");
+            bufferedWriter.write("connect=texai.dyndns.org:31417\n");
           } else {
             // testnet
-            bufferedWriter.write("connect=texai.dyndns.org:18333\n");
+            bufferedWriter.write("connect=texai.dyndns.org:27185\n");
           }
           break;
       }
       if (getNodeRuntime().getNetworkName().equals(NetworkUtils.TEXAI_MAINNET)) {
         bufferedWriter.write("# mainnet listening port\n");
-        bufferedWriter.write("port=8333\n");
+        bufferedWriter.write("port=31417\n");
       } else {
         bufferedWriter.write("# testnet\n");
         bufferedWriter.write("testnet=1\n");
         bufferedWriter.write("# testnet listening port\n");
-        bufferedWriter.write("port=18333\n");
+        bufferedWriter.write("port=27185\n");
         bufferedWriter.write("# testnet rpc port\n");
         bufferedWriter.write("rpcport=18332\n");
       }

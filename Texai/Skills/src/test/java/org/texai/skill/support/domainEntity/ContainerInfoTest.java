@@ -77,7 +77,12 @@ public class ContainerInfoTest {
   @Test
   public void testGetId() {
     LOGGER.info("getId");
-    ContainerInfo instance = new ContainerInfo("test-container");
+    final ContainerInfo instance = new ContainerInfo(
+              "test-container",
+              true, // isSuperPeer
+              false, // isFirstContainer
+              false, // isClientGateway
+              false); // isBlockExplorer
     assertNull(instance.getId());
     rdfEntityManager.persist(instance);
     assertNotNull(instance.getId());
@@ -90,7 +95,12 @@ public class ContainerInfoTest {
   @Test
   public void testGetContainerName() {
     LOGGER.info("getContainerName");
-    ContainerInfo instance = new ContainerInfo("test-container");
+    final ContainerInfo instance = new ContainerInfo(
+              "test-container",
+              true, // isSuperPeer
+              false, // isFirstContainer
+              false, // isClientGateway
+              false); // isBlockExplorer
     assertEquals("test-container", instance.getContainerName());
   }
 
@@ -100,7 +110,12 @@ public class ContainerInfoTest {
   @Test
   public void testGetIpAddress() {
     LOGGER.info("getIpAddress");
-    ContainerInfo instance = new ContainerInfo("test-container");
+    final ContainerInfo instance = new ContainerInfo(
+              "test-container",
+              true, // isSuperPeer
+              false, // isFirstContainer
+              false, // isClientGateway
+              false); // isBlockExplorer
     assertNull(instance.getIpAddress());
     instance.setIpAddress("127.0.0.1");
     assertEquals("127.0.0.1", instance.getIpAddress());
@@ -112,9 +127,19 @@ public class ContainerInfoTest {
   @Test
   public void testIsSuperPeer() {
     LOGGER.info("isSuperPeer");
-    ContainerInfo instance = new ContainerInfo("test-container");
-    assertTrue(!instance.isSuperPeer());
-    instance.setIsSuperPeer(true);
+    final ContainerInfo instance = new ContainerInfo(
+              "test-container",
+              true, // isSuperPeer
+              false, // isFirstContainer
+              false, // isClientGateway
+              false); // isBlockExplorer
+    assertTrue(instance.isSuperPeer());
+    final ContainerInfo instance2 = new ContainerInfo(
+              "test-container2",
+              false, // isSuperPeer
+              false, // isFirstContainer
+              true, // isClientGateway
+              false); // isBlockExplorer
     assertTrue(instance.isSuperPeer());
   }
 
@@ -124,7 +149,12 @@ public class ContainerInfoTest {
   @Test
   public void testHashCode() {
     LOGGER.info("hashCode");
-    ContainerInfo instance = new ContainerInfo("test-container");
+    final ContainerInfo instance = new ContainerInfo(
+              "test-container",
+              true, // isSuperPeer
+              false, // isFirstContainer
+              false, // isClientGateway
+              false); // isBlockExplorer
     assertEquals(923362937, instance.hashCode());
   }
 
@@ -134,9 +164,26 @@ public class ContainerInfoTest {
   @Test
   public void testEquals() {
     LOGGER.info("equals");
-    ContainerInfo instance = new ContainerInfo("test-container");
-    assertFalse(instance.equals(new ContainerInfo("test-container2")));
-    assertTrue(instance.equals(new ContainerInfo("test-container")));
+    final ContainerInfo instance = new ContainerInfo(
+              "test-container",
+              true, // isSuperPeer
+              false, // isFirstContainer
+              false, // isClientGateway
+              false); // isBlockExplorer
+    final ContainerInfo instance2 = new ContainerInfo(
+              "test-container2",
+              true, // isSuperPeer
+              false, // isFirstContainer
+              false, // isClientGateway
+              false); // isBlockExplorer
+    assertFalse(instance.equals(instance2));
+    final ContainerInfo instance3 = new ContainerInfo(
+              "test-container",
+              true, // isSuperPeer
+              false, // isFirstContainer
+              false, // isClientGateway
+              false); // isBlockExplorer
+    assertTrue(instance.equals(instance3));
   }
 
   /**
@@ -145,14 +192,24 @@ public class ContainerInfoTest {
   @Test
   public void testToString() {
     LOGGER.info("toString");
-    ContainerInfo instance = new ContainerInfo("test-container");
-    assertEquals("[container test-container]", instance.toString());
+    final ContainerInfo instance = new ContainerInfo(
+              "test-container",
+              true, // isSuperPeer
+              false, // isFirstContainer
+              false, // isClientGateway
+              false); // isBlockExplorer
+    assertEquals("[container test-container, super peer]", instance.toString());
     instance.setIpAddress("127.0.0.1");
-    assertEquals("[container test-container,  127.0.0.1]", instance.toString());
-    instance.setIsSuperPeer(true);
     assertEquals("[container test-container,  127.0.0.1, super peer]", instance.toString());
     instance.setIsAlive(true);
     assertEquals("[container test-container,  127.0.0.1, alive, super peer]", instance.toString());
+    final ContainerInfo instance2 = new ContainerInfo(
+              "test-container2",
+              false, // isSuperPeer
+              false, // isFirstContainer
+              true, // isClientGateway
+              true); // isBlockExplorer
+    assertEquals("[container test-container2, gateway, block explorer]", instance2.toString());
   }
 
 }

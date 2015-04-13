@@ -11,17 +11,16 @@ openbox &> /tmp/openbox.log &
 # ensure that the JCE security policy files are installed
 cp ../UnlimitedJCEPolicyJDK8/*.jar /usr/lib/jvm/java-8-oracle/jre/lib/security
 
-CLASSPATH=lib/activation-1.1.jar
-CLASSPATH=$CLASSPATH:lib/aduna-commons-collections-2.7.0.jar
-
 CLASSPATH=lib/AlbusHCN-1.0.jar
 CLASSPATH=$CLASSPATH:lib/AlbusHCNSupport-1.0.jar
+CLASSPATH=$CLASSPATH:lib/annotations-1.3.2.jar
 CLASSPATH=$CLASSPATH:lib/ant-optional-1.5.1.jar
 CLASSPATH=$CLASSPATH:lib/asm-3.1.jar
 CLASSPATH=$CLASSPATH:lib/bcpkix-jdk14-1.50.jar
 CLASSPATH=$CLASSPATH:lib/bcprov-jdk14-1.50.jar
 CLASSPATH=$CLASSPATH:lib/bcprov-jdk15on-1.50.jar
-CLASSPATH=$CLASSPATH:lib/bitcoinj-0.11.3.jar
+CLASSPATH=$CLASSPATH:lib/bitcoinj-0.11.2-MB-ALICE.jar
+CLASSPATH=$CLASSPATH:lib/BitTorrentSupport-1.0.jar
 CLASSPATH=$CLASSPATH:lib/cglib-2.2.jar
 CLASSPATH=$CLASSPATH:lib/CoinSkills-1.0.jar
 CLASSPATH=$CLASSPATH:lib/commons-beanutils-1.4.jar
@@ -37,6 +36,7 @@ CLASSPATH=$CLASSPATH:lib/ehcache-core-2.2.0.jar
 CLASSPATH=$CLASSPATH:lib/guava-13.0.1.jar
 CLASSPATH=$CLASSPATH:lib/Inference-1.0.jar
 CLASSPATH=$CLASSPATH:lib/jackson-core-2.2.1.jar
+CLASSPATH=$CLASSPATH:lib/JavaBitcoindRpcClient-0.9.0.jar
 CLASSPATH=$CLASSPATH:lib/javasysmon_2.10-0.3.4.jar
 CLASSPATH=$CLASSPATH:lib/jaxme2-0.5.2.jar
 CLASSPATH=$CLASSPATH:lib/jaxmeapi-0.5.2.jar

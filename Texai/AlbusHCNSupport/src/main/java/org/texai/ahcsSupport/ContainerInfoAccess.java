@@ -55,24 +55,169 @@ public class ContainerInfoAccess {
    * Initializes the container information dictionary.
    */
   public void initializeContainerInfos() {
+    LOGGER.info("Initializing the network container configuration.");
     synchronized (containerInfoDictionary) {
       if (networkName.equals(NetworkUtils.TEXAI_MAINNET)) {
-        LOGGER.info("");
-        final ContainerInfo mintNodeInfo = new ContainerInfo("Mint");
-        mintNodeInfo.setIpAddress("texai.dyndns.org");
-        mintNodeInfo.setIsSuperPeer(true);
-        containerInfoDictionary.put("Mint", mintNodeInfo);
+//        String elements[] = {"A", "B", "C", "D", "E"};
+//        Set<String> set = new ArraySet<>(Arrays.asList(elements));
+        initializeContainerInfo(
+                "aicoin01-a", // containerName
+                null, // ipAddress
+                NetworkUtils.TEXAI_MAINNET_PORT, // port
+                true, // isSuperPeer
+                false, // isFirstContainr
+                false, // isClientGateway
+                false, // isBlockExplorer
+                null); // superPeerContainers
+        initializeContainerInfo(
+                "aicpeer-bravo1030", // containerName
+                null, // ipAddress
+                NetworkUtils.TEXAI_MAINNET_PORT, // port
+                true, // isSuperPeer
+                false, // isFirstContainr
+                false, // isClientGateway
+                false, // isBlockExplorer
+                null); // superPeerContainers
+        initializeContainerInfo(
+                "crawfish", // containerName
+                "lacrawfish.ddns.net", // ipAddress
+                NetworkUtils.TEXAI_MAINNET_PORT, // port
+                true, // isSuperPeer
+                false, // isFirstContainr
+                false, // isClientGateway
+                false, // isBlockExplorer
+                null); // superPeerContainers
+        initializeContainerInfo(
+                "mediamaven", // containerName
+                null, // ipAddress
+                NetworkUtils.TEXAI_MAINNET_PORT, // port
+                true, // isSuperPeer
+                false, // isFirstContainr
+                false, // isClientGateway
+                false, // isBlockExplorer
+                null); // superPeerContainers
+        initializeContainerInfo(
+                "nexus", // containerName
+                "nexus.asuscomm.com", // ipAddress
+                NetworkUtils.TEXAI_MAINNET_PORT, // port
+                true, // isSuperPeer
+                false, // isFirstContainr
+                false, // isClientGateway
+                false, // isBlockExplorer
+                null); // superPeerContainers
+        initializeContainerInfo(
+                "pegasus", // containerName
+                null, // ipAddress
+                NetworkUtils.TEXAI_MAINNET_PORT, // port
+                true, // isSuperPeer
+                false, // isFirstContainr
+                false, // isClientGateway
+                false, // isBlockExplorer
+                null); // superPeerContainers
+        initializeContainerInfo(
+                "matrix", // containerName
+                null, // ipAddress
+                NetworkUtils.TEXAI_MAINNET_PORT, // port
+                true, // isSuperPeer
+                false, // isFirstContainr
+                false, // isClientGateway
+                false, // isBlockExplorer
+                null); // superPeerContainers
+        initializeContainerInfo(
+                "turing", // containerName
+                "texai.dyndns.org", // ipAddress
+                NetworkUtils.TEXAI_MAINNET_PORT, // port
+                true, // isSuperPeer
+                true, // isFirstContainr
+                true, // isClientGateway
+                true, // isBlockExplorer
+                null); // superPeerContainers
       } else {
         assert networkName.equals(NetworkUtils.TEXAI_TESTNET);
-        final ContainerInfo mintNodeInfo = new ContainerInfo("Mint");
-        mintNodeInfo.setIpAddress("Mint");
-        mintNodeInfo.setIsSuperPeer(true);
-        final ContainerInfo aliceNodeInfo = new ContainerInfo("Alice");
-        aliceNodeInfo.setIpAddress("Alice");
-        aliceNodeInfo.setIsSuperPeer(true);
-        containerInfoDictionary.put("Alice", aliceNodeInfo);
+        initializeContainerInfo(
+                "TestAlice", // containerName
+                null, // ipAddress
+                45049, // port
+                true, // isSuperPeer
+                false, // isFirstContainr
+                true, // isClientGateway
+                false, // isBlockExplorer
+                null); // superPeerContainers
+        initializeContainerInfo(
+                "TestBlockchainExplorer", // containerName
+                null, // ipAddress
+                45050, // port
+                true, // isSuperPeer
+                false, // isFirstContainr
+                false, // isClientGateway
+                true, // isBlockExplorer
+                null); // superPeerContainers
+        ContainerInfo containerInfo = initializeContainerInfo(
+                "TestBob", // containerName
+                null, // ipAddress
+                45051, // port
+                false, // isSuperPeer
+                false, // isFirstContainr
+                true, // isClientGateway
+                false, // isBlockExplorer
+                null); // superPeerContainers
+        containerInfo.addSuperPeerContainerName("TestMint");
+        containerInfo.addSuperPeerContainerName("TestAlice");
+        initializeContainerInfo(
+                "TestMint", // containerName
+                null, // ipAddress
+                45048, // port
+                true, // isSuperPeer
+                true, // isFirstContainr
+                false, // isClientGateway
+                false, // isBlockExplorer
+                null); // superPeerContainers
       }
     }
+  }
+
+  /**
+   * Initializes a container info.
+   *
+   * @param containerName the container name
+   * @param ipAddress the ip address
+   * @param port the port, usually 5048 for mainnet and 45048 for testnet
+   * @param isSuperPeer the indicator whether this container is a super peer
+   * @param isFirstContainer the indicator whether this container is the first host of all the network singleton agents, when the network restarts
+   * @param isClientGateway the indicator whether this node is a client gateway, accepting connections from wallet clients
+   * @param isBlockExplorer the indicator whether this node is a block explorer, serving the Insight application
+   * @param superPeerContainerNames the names of the few super peer containers to which a non-super peer container connects
+   *
+   * @return the initialized container info
+   */
+  private ContainerInfo initializeContainerInfo(
+          final String containerName,
+          final String ipAddress,
+          final int port,
+          final boolean isSuperPeer,
+          final boolean isFirstContainer,
+          final boolean isClientGateway,
+          final boolean isBlockExplorer,
+          final Set<String> superPeerContainerNames) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(containerName) : "containerName must be a non-empty string";
+
+    final ContainerInfo containerInfo = new ContainerInfo(
+            containerName,
+            isSuperPeer,
+            isFirstContainer,
+            isClientGateway,
+            isBlockExplorer);
+    if (StringUtils.isNonEmptyString(ipAddress)) {
+      containerInfo.setIpAddress(ipAddress);
+    }
+    containerInfo.setPort(port);
+    if (superPeerContainerNames != null) {
+      containerInfo.getSuperPeerContainerNames().addAll(superPeerContainerNames);
+    }
+    containerInfoDictionary.put(containerName, containerInfo);
+    LOGGER.info("  initialized container information " + containerInfo);
+    return containerInfo;
   }
 
   /**
@@ -99,7 +244,6 @@ public class ContainerInfoAccess {
             loadedContainerInfo.setIpAddress(containerInfo.getIpAddress());
           }
           loadedContainerInfo.setIsAlive(containerInfo.isAlive());
-          loadedContainerInfo.setIsSuperPeer(containerInfo.isSuperPeer());
           rdfEntityManager.persist(loadedContainerInfo);
         }
       }
@@ -186,6 +330,27 @@ public class ContainerInfoAccess {
         containerInfoDictionary.put(containerInfo.getContainerName(), containerInfo);
       }
     }
+  }
+
+  /**
+   * Returns whether the container infos are consistent with one another.
+   *
+   * @return whether the container infos are consistent
+   */
+  public boolean areContainerInfosConsistent() {
+    synchronized (containerInfoDictionary) {
+      final Iterator<ContainerInfo> containerInfos_iter = containerInfoDictionary.values().iterator();
+      while (containerInfos_iter.hasNext()) {
+        final ContainerInfo containerInfo = containerInfos_iter.next();
+        for (final String containerName : containerInfo.getSuperPeerContainerNames()) {
+          if (!containerInfoDictionary.containsKey(containerName)) {
+            LOGGER.info("invalid super peer container name '" + containerName + "' referenced in " + containerInfo);
+            return false;
+          }
+        }
+      }
+    }
+    return true;
   }
 
 }

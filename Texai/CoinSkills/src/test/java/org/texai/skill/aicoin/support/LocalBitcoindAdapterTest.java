@@ -5,6 +5,7 @@
  */
 package org.texai.skill.aicoin.support;
 
+import org.texai.network.netty.handler.BitcoinMessageReceiver;
 import com.google.bitcoin.core.Message;
 import com.google.bitcoin.params.MainNetParams;
 import java.io.File;
@@ -146,7 +147,7 @@ public class LocalBitcoindAdapterTest implements BitcoinMessageReceiver {
    * @param message the given bitcoin protocol message
    */
   @Override
-  public void receiveMessageFromLocalBitcoind(Message message) {
+  public void receiveMessageFromBitcoind(Message message) {
     LOGGER.info("received: " + message);
   }
 

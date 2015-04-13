@@ -1,6 +1,7 @@
 package org.texai.ahcsSupport.domainEntity;
 
 import java.util.Objects;
+import java.util.Set;
 import javax.persistence.Id;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
@@ -10,6 +11,7 @@ import org.texai.kb.persistence.RDFEntity;
 import org.texai.kb.persistence.RDFEntityManager;
 import org.texai.kb.persistence.RDFPersistent;
 import org.texai.kb.persistence.RDFProperty;
+import org.texai.util.ArraySet;
 import org.texai.util.StringUtils;
 
 /**
@@ -36,28 +38,62 @@ public class ContainerInfo implements CascadePersistence, Comparable<ContainerIn
   // the IP address
   @RDFProperty()
   private String ipAddress;
-  // the indicator whether this node is a super peer
+  // the port
   @RDFProperty()
-  private boolean isSuperPeer = false;
+  private int port;
+  // the indicator whether this node is a super peer, if so then this container connects to all the other super peer containers
+  @RDFProperty()
+  private final boolean isSuperPeer;
+  // the indicator whether this container is the first host of all the network singleton agents, when the network restarts
+  @RDFProperty()
+  private final boolean isFirstContainer;
+  // the indicator whether this node is a client gateway, accepting connections from wallet clients
+  @RDFProperty()
+  private final boolean isClientGateway;
+  // the indicator whether this node is a block explorer, serving the Insight application
+  @RDFProperty()
+  private final boolean isBlockExplorer;
+  // the names of the few super peer containers to which a non-super peer container connects
+  @RDFProperty()
+  private final Set<String> superPeerContainerNames = new ArraySet<>();
   // the indicator whether this node is alive
   private transient boolean isAlive = false;
 
   /**
-   * Creates a new default instance of ContainerInfo. */
+   * Creates a new default instance of ContainerInfo.
+   */
   public ContainerInfo() {
     this.containerName = null;
+    this.isSuperPeer = false;
+    this.isFirstContainer = false;
+    this.isClientGateway = false;
+    this.isBlockExplorer = false;
   }
 
   /**
    * Creates a new instance of ContainerInfo.
    *
    * @param containerName the container name
+   * @param isSuperPeer the indicator whether this node is a super peer
+   * @param isFirstContainer the indicator whether this node is a client gateway, accepting connections from wallet clients
+   * @param isClientGateway the indicator whether this node is a client gateway, accepting connections from wallet clients
+   * @param isBlockExplorer the indicator whether this node is a block explorer, serving the Insight application
    */
-  public ContainerInfo(final String containerName) {
+  public ContainerInfo(
+          final String containerName,
+          final boolean isSuperPeer,
+          final boolean isFirstContainer,
+          final boolean isClientGateway,
+          final boolean isBlockExplorer) {
     //Preconditions
     assert StringUtils.isNonEmptyString(containerName) : "containerName must be a non-empty string";
+    assert !isFirstContainer || isSuperPeer : "first container must be a super peer";
 
     this.containerName = containerName;
+    this.isSuperPeer = isSuperPeer;
+    this.isFirstContainer = isFirstContainer;
+    this.isClientGateway = isClientGateway;
+    this.isBlockExplorer = isBlockExplorer;
   }
 
   /**
@@ -105,17 +141,17 @@ public class ContainerInfo implements CascadePersistence, Comparable<ContainerIn
    *
    * @return whether this node is a super peer
    */
-  public synchronized boolean isSuperPeer() {
+  public boolean isSuperPeer() {
     return isSuperPeer;
   }
 
   /**
-   * Sets the indicator whether this node is a super peer.
+   * Gets the indicator whether this container is the first host of all the network singleton agents, when the network restarts.
    *
-   * @param isSuperPeer the indicator whether this node is a super peer
+   * @return whether this container is the first host of all the network singleton agents
    */
-  public synchronized void setIsSuperPeer(final boolean isSuperPeer) {
-    this.isSuperPeer = isSuperPeer;
+  public boolean isFirstContainer() {
+    return isFirstContainer;
   }
 
   /**
@@ -171,8 +207,56 @@ public class ContainerInfo implements CascadePersistence, Comparable<ContainerIn
     if (isSuperPeer) {
       stringBuilder.append(", super peer");
     }
+    if (isFirstContainer) {
+      stringBuilder.append(", first container");
+    }
+    if (isClientGateway) {
+      stringBuilder.append(", gateway");
+    }
+    if (isBlockExplorer) {
+      stringBuilder.append(", block explorer");
+    }
     stringBuilder.append(']');
     return stringBuilder.toString();
+  }
+
+  /**
+   * Adds a super peer container name to which a non-super peer connects.
+   *
+   * @param containerName the container name
+   */
+  public void addSuperPeerContainerName(final String containerName) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(containerName) : "containerName must be a non-emtpy string";
+
+    superPeerContainerNames.add(containerName);
+  }
+
+  /**
+   * Gets the super peer container names to which a non-super peer connects.
+   *
+   * @return the super peer container names to which a non-super peer connects
+   */
+  public Set<String> getSuperPeerContainerNames() {
+    return superPeerContainerNames;
+  }
+
+  /**
+   * Gets whether this node is a client gateway, accepting connections from wallet clients.
+   *
+   * @return the indicator whether this node is a client gateway
+   */
+  public boolean isClientGateway() {
+    return isClientGateway;
+  }
+
+  /**
+   * Gets whether this node is a block explorer, serving the Insight application.
+   *
+   * @return whether this node is a block explorer
+   */
+  public boolean isBlockExplorer() {
+    return isBlockExplorer;
   }
 
   /**
@@ -232,6 +316,7 @@ public class ContainerInfo implements CascadePersistence, Comparable<ContainerIn
   /**
    * Compares this object with the specified object for order. Returns a negative integer, zero, or a positive integer as this object is
    * less than, equal to, or greater than the specified object.
+   *
    * @param that the other NodeInfo
    */
   @Override
@@ -240,6 +325,25 @@ public class ContainerInfo implements CascadePersistence, Comparable<ContainerIn
     assert that != null : "that must not be null";
 
     return this.containerName.compareTo(that.containerName);
+  }
+
+  /** Gets the port.
+   *
+   * @return the port
+   */
+  public int getPort() {
+    return port;
+  }
+
+  /** Sets the port.
+   *
+   * @param port the port to set
+   */
+  public void setPort(final int port) {
+    //Preconditions
+    assert port > 1024 && port < 65535 : "port must be in the range, 1025 ... 65535";
+    
+    this.port = port;
   }
 
 }

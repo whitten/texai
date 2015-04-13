@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
@@ -97,7 +98,9 @@ public class BasicNodeRuntime implements MessageDispatcher {
     singletonAgentHostsAccess = new SingletonAgentHostsAccess(
             rdfEntityManager,
             this); // basicNodeRuntime
+    singletonAgentHostsAccess.initializeSingletonAgentsHosts();
     containerInfoAccess = new ContainerInfoAccess(rdfEntityManager, networkName);
+    containerInfoAccess.initializeContainerInfos();
   }
 
   /**
@@ -153,7 +156,7 @@ public class BasicNodeRuntime implements MessageDispatcher {
    *
    * @return the container infos
    */
-  public Collection<ContainerInfo> getContainerInfos() {
+  public List<ContainerInfo> getContainerInfos() {
     return containerInfoAccess.getContainerInfos();
   }
 
@@ -167,6 +170,19 @@ public class BasicNodeRuntime implements MessageDispatcher {
     assert containerInfos != null : "containerInfos must not be null";
 
     containerInfoAccess.updateContainerInfos(containerInfos);
+  }
+
+  /** Returns whether this container is a super-peer.
+   *
+   * @return whether this container is a super-peer
+   */
+  public boolean isSuperPeer() {
+    final ContainerInfo containerInfo = getContainerInfo(containerName);
+    if (containerInfo == null) {
+      return false;
+    } else {
+      return containerInfo.isSuperPeer();
+    }
   }
 
   /**
@@ -466,8 +482,9 @@ public class BasicNodeRuntime implements MessageDispatcher {
    */
   public boolean isFirstContainerInNetwork() {
     if (isFirstContainerInNetworkCached == null) {
-      final String isFirstContainerInNetwork = System.getenv("FIRST_CONTAINER");
-      isFirstContainerInNetworkCached = "true".equals(isFirstContainerInNetwork);
+      final ContainerInfo containerInfo = containerInfoAccess.getContainerInfo(containerName);
+      assert containerInfo != null;
+      isFirstContainerInNetworkCached = containerInfo.isFirstContainer();
     }
     return isFirstContainerInNetworkCached;
   }
@@ -487,6 +504,24 @@ public class BasicNodeRuntime implements MessageDispatcher {
    */
   public String getNetworkName() {
     return networkName;
+  }
+
+  /**
+   * Gets the singleton agent hosts access object.
+   *
+   * @return the singleton agent hosts access object
+   */
+  public SingletonAgentHostsAccess getSingletonAgentHostsAccess() {
+    return singletonAgentHostsAccess;
+  }
+
+  /**
+   * Gets the container info access object.
+   *
+   * @return the container info access object
+   */
+  public ContainerInfoAccess getContainerInfoAccess() {
+    return containerInfoAccess;
   }
 
 }

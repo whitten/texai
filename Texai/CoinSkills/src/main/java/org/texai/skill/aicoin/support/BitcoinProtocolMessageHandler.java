@@ -1,5 +1,6 @@
 package org.texai.skill.aicoin.support;
 
+import org.texai.network.netty.handler.BitcoinMessageReceiver;
 import com.google.bitcoin.core.Block;
 import com.google.bitcoin.core.Message;
 import com.google.bitcoin.core.NetworkParameters;
@@ -19,7 +20,8 @@ import org.texai.util.NetworkUtils;
 /**
  * BitcoinProtocolMessageHandler.java
  *
- * Description: Provides a proxy that mediates the Bitcoin protocol communications between a remote peer and the local bitcoind instance.
+ * Description: Provides a proxy that mediates the Bitcoin protocol communications between a remote client peer, a wallet for example, and
+ * the local bitcoind instance.
  *
  * Copyright (C) Mar 21, 2015, Stephen L. Reed.
  */
@@ -173,7 +175,7 @@ public class BitcoinProtocolMessageHandler extends AbstractBitcoinProtocolMessag
    * @param message the given bitcoin protocol message
    */
   @Override
-  public void receiveMessageFromLocalBitcoind(final Message message) {
+  public void receiveMessageFromBitcoind(final Message message) {
     //Preconditions
     assert message != null : "message must not be null";
 

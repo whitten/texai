@@ -42,6 +42,7 @@ import org.jboss.netty.channel.MessageEvent;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.MessageDispatcher;
 import org.texai.ahcsSupport.Message;
+import org.texai.ahcsSupport.domainEntity.ContainerInfo;
 import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.network.netty.utils.ConnectionUtils;
 import org.texai.network.netty.handler.AbstractAlbusHCSMessageHandler;
@@ -461,7 +462,39 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
           throw new TexaiException(ex);
         }
 
-        LOGGER.info("opening connection to " + hostName + ':' + port);
+        LOGGER.info("opening connection to network seed " + hostName + ':' + port);
+        channel = openChannelToPeerContainer(
+                message.getRecipientContainerName(), // containerName,
+                hostName,
+                port,
+                x509SecurityInfo);
+        if (channel == null) {
+          LOGGER.info("no connection to " + hostName + ':' + port);
+          //TODO report to network operations
+          return;
+        }
+      } else if (message.getOperation().equals(AHCSConstants.BITCOIN_MESSAGE_INFO)) {
+        // get super peer connection info
+        final ContainerInfo containerInfo = nodeRuntime.getContainerInfo(message.getRecipientContainerName());
+        assert containerInfo != null;
+        final String hostName = containerInfo.getIpAddress();
+        final int port = containerInfo.getPort();
+
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("retrieving X.509 security info for " + message.getSenderQualifiedName());
+        }
+        final X509SecurityInfo x509SecurityInfo;
+        try {
+          x509SecurityInfo = X509Utils.getX509SecurityInfo(
+                  nodeRuntime.getKeyStore(),
+                  nodeRuntime.getKeyStorePassword(),
+                  message.getSenderQualifiedName()); // alias
+        } catch (Throwable ex) {
+          X509Utils.logAliases(nodeRuntime.getKeyStore(), LOGGER);
+          throw new TexaiException(ex);
+        }
+
+        LOGGER.info("opening connection to network seed " + hostName + ':' + port);
         channel = openChannelToPeerContainer(
                 message.getRecipientContainerName(), // containerName,
                 hostName,

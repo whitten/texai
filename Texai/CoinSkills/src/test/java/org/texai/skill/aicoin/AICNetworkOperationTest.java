@@ -19,9 +19,11 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.Message;
+import org.texai.ahcsSupport.domainEntity.ContainerInfo;
 import org.texai.ahcsSupport.domainEntity.SkillClass;
 import org.texai.ahcsSupport.skill.AbstractSkill;
-import org.texai.skill.governance.TopmostFriendship;
+import org.texai.skill.aicoin.AICNetworkOperation.ContainerNameRingItem;
+import org.texai.skill.aicoin.AICNetworkOperation.GenerateNewBlockRunnable;
 import org.texai.skill.network.NetworkOperation;
 import org.texai.skill.testHarness.SkillTestHarness;
 import org.texai.util.ArraySet;
@@ -159,11 +161,11 @@ public class AICNetworkOperationTest {
 
     skillTestHarness.reset();
     skillTestHarness.setSkillState(AHCSConstants.State.READY, skillClassName);
-    final AbstractSkill xaiNetworkOperation = skillTestHarness.getSkill(AICNetworkOperation.class.getName());
-    assertNotNull(xaiNetworkOperation);
-    assertTrue(xaiNetworkOperation instanceof AICNetworkOperation);
-    assertTrue(xaiNetworkOperation.isUnitTest());
-    assertEquals(13, xaiNetworkOperation.getRole().getChildQualifiedNames().size());
+    final AbstractSkill aicNetworkOperation = skillTestHarness.getSkill(AICNetworkOperation.class.getName());
+    assertNotNull(aicNetworkOperation);
+    assertTrue(aicNetworkOperation instanceof AICNetworkOperation);
+    assertTrue(aicNetworkOperation.isUnitTest());
+    assertEquals(13, aicNetworkOperation.getRole().getChildQualifiedNames().size());
     final Message performTaskMessage = new Message(
             parentQualifiedName, // senderQualifiedName
             parentService,
@@ -227,29 +229,30 @@ public class AICNetworkOperationTest {
   }
 
   /**
-   * Test of class AICNetworkOperation - Message Not Understood Info.
+   * Test of class AICNetworkOperation - GenerateNewBlockRunnable.
    */
   @Test
-  public void testMessageNotUnderstoodInfo() {
-    LOGGER.info("testing " + AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO + " message");
+  public void testGenerateNewBlockRunnable() {
+    LOGGER.info("testing GenerateNewBlockRunnable");
 
     skillTestHarness.reset();
     skillTestHarness.setSkillState(AHCSConstants.State.READY, skillClassName);
-    final Message taskAccomplishedInfoMessage = new Message(
-            parentQualifiedName, // senderQualifiedName
-            parentService, // senderService
-            containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
-            skillClassName, // recipientService
-            "an-unknown-operation_Task"); // operation
-
-    skillTestHarness.dispatchMessage(taskAccomplishedInfoMessage);
-
+    skillTestHarness.getNodeRuntime().getContainerInfos().stream().forEach((ContainerInfo containerInfo) -> {
+      containerInfo.setIsAlive(true);
+    });
+    final AICNetworkOperation aicNetworkOperation = (AICNetworkOperation) skillTestHarness.getSkill(AICNetworkOperation.class.getName());
+    List<ContainerNameRingItem> superPeerContainerNameRing = aicNetworkOperation.createSuperPeerContainerNameRing();
+    LOGGER.info(superPeerContainerNameRing);
+    assertEquals("[[TestAlice], [TestBlockchainExplorer], [TestMint]]", superPeerContainerNameRing.toString());
+    final GenerateNewBlockRunnable generateNewBlockRunnable = new GenerateNewBlockRunnable(aicNetworkOperation);
+    generateNewBlockRunnable.run();
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
     assertNull(skillTestHarness.getOperationAndSenderServiceInfo());
+    final List<Message> sentMessages = skillTestHarness.getSentMessages();
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
-    LOGGER.info("sentMessage...\n" + sentMessage);
-    assertTrue(sentMessage.toString().startsWith("[messageNotUnderstood_Info Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation "));
+    LOGGER.info(sentMessage);
+    assertTrue(sentMessage.toString().startsWith("[generateCoinBlock_Task Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestAlice.AICMintAgent.AICMintRole:AICMint "));
   }
 
   /**

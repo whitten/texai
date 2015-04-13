@@ -177,7 +177,7 @@ public final class NetworkSingletonSkillTemplate extends AbstractNetworkSingleto
   }
 
   /**
-   * Perform this role's mission, which is to manage the containers.
+   * Perform this role's mission.
    *
    * @param receivedMessage the received perform mission task message
    */

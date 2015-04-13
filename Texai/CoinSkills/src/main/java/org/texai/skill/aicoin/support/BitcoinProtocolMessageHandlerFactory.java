@@ -1,18 +1,15 @@
 package org.texai.skill.aicoin.support;
 
 import com.google.bitcoin.core.NetworkParameters;
-import com.google.bitcoin.params.MainNetParams;
-import com.google.bitcoin.params.TestNet3Params;
 import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.log4j.Logger;
 import org.jboss.netty.bootstrap.ServerBootstrap;
-import org.texai.ahcsSupport.skill.BasicNodeRuntime;
+import org.texai.ahcs.NodeRuntime;
 import org.texai.network.netty.handler.AbstractBitcoinProtocolMessageHandler;
 import org.texai.network.netty.handler.AbstractBitcoinProtocolMessageHandlerFactory;
 import org.texai.network.netty.utils.ConnectionUtils;
-import org.texai.util.NetworkUtils;
 
 /**
  * BitcoinProtocolMessageHandlerFactory.java
@@ -29,7 +26,7 @@ public class BitcoinProtocolMessageHandlerFactory extends AbstractBitcoinProtoco
   // the server bootstrap
   private ServerBootstrap serverBootstrap;
   // the node runtime
-  private final BasicNodeRuntime nodeRuntime;
+  private final NodeRuntime nodeRuntime;
   // the network parameters, main net, test net, or regression test net
   private final NetworkParameters networkParameters;
   // the Bitcoin protocol message handler dictionary, remote socket address -> Bitcoin protocol message handler
@@ -38,20 +35,15 @@ public class BitcoinProtocolMessageHandlerFactory extends AbstractBitcoinProtoco
   /**
    * Creates a new instance of RemoteBitcoinProtocolPeerListener.
    *
-   * @param networkParameters the network parameters, main net, test net, or regression test net
    * @param nodeRuntime the node runtime
    */
-  public BitcoinProtocolMessageHandlerFactory(
-          final NetworkParameters networkParameters,
-          final BasicNodeRuntime nodeRuntime) {
+  public BitcoinProtocolMessageHandlerFactory(final NodeRuntime nodeRuntime) {
     //Preconditions
     assert nodeRuntime != null : "the nodeRuntime must not be null";
     assert nodeRuntime != null : "nodeRuntime must not be null";
-    assert (nodeRuntime.getNetworkName().equals(NetworkUtils.TEXAI_MAINNET) && MainNetParams.class.isAssignableFrom(networkParameters.getClass()))
-            || (nodeRuntime.getNetworkName().equals(NetworkUtils.TEXAI_TESTNET) && TestNet3Params.class.isAssignableFrom(networkParameters.getClass()));
 
-    this.networkParameters = networkParameters;
     this.nodeRuntime = nodeRuntime;
+    this.networkParameters = nodeRuntime.getNetworkParameters();
   }
 
   /**

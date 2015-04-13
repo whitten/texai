@@ -1,5 +1,6 @@
 package org.texai.skill.aicoin.support;
 
+import org.texai.network.netty.handler.BitcoinMessageReceiver;
 import com.google.bitcoin.core.GetAddrMessage;
 import com.google.bitcoin.core.MemoryPoolMessage;
 import com.google.bitcoin.core.Message;
@@ -9,7 +10,9 @@ import com.google.bitcoin.core.Ping;
 import com.google.bitcoin.core.VersionMessage;
 import com.google.bitcoin.params.MainNetParams;
 import com.google.bitcoin.params.TestNet3Params;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.Random;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
@@ -104,7 +107,7 @@ public class LocalBitcoindAdapter extends SimpleChannelHandler {
   }
 
   /**
-   * Provides a Bitcoin protocol message handler.
+   * Provides a Bitcoin protocol message handler for communicating with the local bitcoind (aicoind).
    */
   static class BitcoinProtocolMessageHandler extends AbstractBitcoinProtocolMessageHandler {
 
@@ -163,7 +166,7 @@ public class LocalBitcoindAdapter extends SimpleChannelHandler {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("received from the local bitcoind instance: " + message);
       }
-      localBitcoindAdapter.bitcoinMessageReceiver.receiveMessageFromLocalBitcoind(message);
+      localBitcoindAdapter.bitcoinMessageReceiver.receiveMessageFromBitcoind(message);
 
     }
   }
@@ -175,7 +178,14 @@ public class LocalBitcoindAdapter extends SimpleChannelHandler {
    */
   protected Channel connectToLocalBitcoind() {
 
-    final InetSocketAddress inetSocketAddress = PeerAddress.localhost(networkParameters).toSocketAddress();
+    final InetSocketAddress inetSocketAddress;
+    try {
+      // the port number is incremented by one because the local bitcoind (aicoind) instance is listening on a different
+      // port than the client gateway skill which is listening for remote client connections on the actual port
+      inetSocketAddress = new PeerAddress(InetAddress.getLocalHost(), networkParameters.getPort() + 1).toSocketAddress();
+    } catch (UnknownHostException e) {
+      throw new RuntimeException(e);  // Broken system.
+    }
     final Channel channel1 = ConnectionUtils.openBitcoinProtocolConnection(
             inetSocketAddress,
             bitcoinProtocolMessageHandler,

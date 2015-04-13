@@ -2,8 +2,6 @@ package org.texai.skill.network;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
@@ -66,8 +64,6 @@ public final class NetworkOperation extends AbstractNetworkSingletonSkill {
        */
       case AHCSConstants.INITIALIZE_TASK:
         assert getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
-
-        LOGGER.info("initializing with: " + receivedMessage);
 
         initialization();
         propagateOperationToChildRoles(receivedMessage);

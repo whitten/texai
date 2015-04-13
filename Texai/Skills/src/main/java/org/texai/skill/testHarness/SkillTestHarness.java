@@ -40,8 +40,10 @@ public class SkillTestHarness {
 
   // the logger
   private final static Logger LOGGER = Logger.getLogger(SkillTestHarness.class);
+  // the container name
+  private final String containerName;
   // the mock NodeRuntime
-  private final NodeRuntime nodeRuntime;
+  private NodeRuntime nodeRuntime;
   // the mock Node
   private final Node node;
   // the mock Role
@@ -86,7 +88,7 @@ public class SkillTestHarness {
     assert skillClasses != null : "skillClasses must not be null";
     assert variableNames != null : "variableNames must not be null";
 
-    final String containerName = Node.extractContainerName(qualifiedName);
+    containerName = Node.extractContainerName(qualifiedName);
     nodeRuntime = new MockNodeRuntime(
             containerName,
             NetworkUtils.TEXAI_TESTNET); // networkName
@@ -124,6 +126,8 @@ public class SkillTestHarness {
    * Resets the test harness.
    */
   public void reset() {
+    nodeRuntime.getSingletonAgentHostsAccess().initializeSingletonAgentsHosts();
+    nodeRuntime.getContainerInfoAccess().initializeContainerInfos();
     sentMessages.clear();
     role.operationAndServiceInfo = null;
     isTerminated = false;

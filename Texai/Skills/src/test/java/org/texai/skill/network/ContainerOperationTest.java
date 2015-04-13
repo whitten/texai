@@ -53,7 +53,7 @@ public class ContainerOperationTest {
   private static final String skillClassName = ContainerOperation.class.getName();
   // the test node name
   private static final String nodeName = "ContainerOperationAgent";
-  // the test node name
+  // the test role name
   private static final String roleName = "ContainerOperationRole";
   // the skill test harness
   private static SkillTestHarness skillTestHarness;
@@ -96,7 +96,7 @@ public class ContainerOperationTest {
   }
 
   /**
-   * Test of class NetworkDeployment initialize task message.
+   * Test of class ContainerOperation initialize task message.
    */
   @Test
   public void testInitializeTaskMessage() {
@@ -106,7 +106,7 @@ public class ContainerOperationTest {
     skillTestHarness.setSkillState(AHCSConstants.State.UNINITIALIZED, skillClassName);
     final Message initializeMessage = new Message(
             parentQualifiedName, // senderQualifiedName
-            NetworkOperation.class.getName(), // senderService
+            parentService, // senderService
             containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
             skillClassName, // recipientService
             AHCSConstants.INITIALIZE_TASK); // operation

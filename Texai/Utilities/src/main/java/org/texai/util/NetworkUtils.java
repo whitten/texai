@@ -64,9 +64,11 @@ public final class NetworkUtils {
   private NetworkUtils() {
   }
 
-  /** Returns the name of the given port, either mainnet or testnet.
+  /**
+   * Returns the name of the given port, either mainnet or testnet.
    *
    * @param port the given port
+   *
    * @return the name of the given port
    */
   public static String toNetworkName(final int port) {
@@ -79,21 +81,30 @@ public final class NetworkUtils {
     }
   }
 
-  /** Returns the port number of the given network name, either 5048 or 45048.
+  /**
+   * Returns the port number of the given network name, either 5048 or 45048.
    *
    * @param networkName the given network name
+   *
    * @return the port number of the given network name
    */
   public static int toNetworkPort(final String networkName) {
-    if (TEXAI_MAINNET.equals(networkName)) {
-      return TEXAI_MAINNET_PORT;
-    } else if (TEXAI_TESTNET.equals(networkName)) {
-      return TEXAI_TESTNET_PORT;
+    //Preconditions
+    assert StringUtils.isNonEmptyString(networkName) : "networkName must be a non-empty string";
+
+    if (null != networkName) {
+      switch (networkName) {
+        case TEXAI_MAINNET:
+          return TEXAI_MAINNET_PORT;
+        case TEXAI_TESTNET:
+          return TEXAI_TESTNET_PORT;
+        default:
+          throw new TexaiException("invalid network name: " + networkName + ", must be " + TEXAI_MAINNET + " or " + TEXAI_TESTNET);
+      }
     } else {
-      throw new TexaiException("invalid network name: " + networkName + ", must be " + TEXAI_MAINNET + " or " + TEXAI_TESTNET);
+          throw new TexaiException("network name is null, must be " + TEXAI_MAINNET + " or " + TEXAI_TESTNET);
     }
   }
-
 
   /**
    * Returns whether this set of nodes is running as a cloud service.

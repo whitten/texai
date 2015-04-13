@@ -20,6 +20,9 @@
  */
 package org.texai.ahcs;
 
+import com.google.bitcoin.core.NetworkParameters;
+import com.google.bitcoin.params.MainNetParams;
+import com.google.bitcoin.params.TestNet3Params;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +36,7 @@ import org.texai.ahcsSupport.skill.BasicNodeRuntime;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.Role;
 import org.texai.util.ArraySet;
+import org.texai.util.NetworkUtils;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 
@@ -262,4 +266,16 @@ public class NodeRuntime extends BasicNodeRuntime {
     return isOK;
   }
 
+  /** Gets the network parameters.
+   *
+   * @return the network parameters
+   */
+  public NetworkParameters getNetworkParameters() {
+    if (getNetworkName().equals(NetworkUtils.TEXAI_MAINNET)) {
+      return new MainNetParams();
+    } else {
+      assert getNetworkName().equals(NetworkUtils.TEXAI_TESTNET);
+      return new TestNet3Params();
+    }
+  }
 }

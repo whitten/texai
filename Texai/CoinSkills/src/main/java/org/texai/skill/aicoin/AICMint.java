@@ -1,8 +1,5 @@
 package org.texai.skill.aicoin;
 
-import java.util.Calendar;
-import java.util.Timer;
-import java.util.TimerTask;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 import org.texai.ahcsSupport.AHCSConstants;
@@ -28,8 +25,6 @@ public final class AICMint extends AbstractNetworkSingletonSkill {
 
   // the logger
   private static final Logger LOGGER = Logger.getLogger(AICMint.class);
-  // the timer
-  private final Timer mintTimer;
   // the path to the aicoin-qt configuration and data directory
   private static final String AICOIN_DIRECTORY_PATH = "../.aicoin";
 
@@ -37,9 +32,6 @@ public final class AICMint extends AbstractNetworkSingletonSkill {
    * Constructs a new XTCMint instance.
    */
   public AICMint() {
-    mintTimer = new Timer(
-            "mint timer", // name
-            true); // isDaemon
   }
 
   /**
@@ -120,6 +112,16 @@ public final class AICMint extends AbstractNetworkSingletonSkill {
         handleDelegatePerformMissionTask(receivedMessage);
         return;
 
+      /**
+       * Generate Coin Block Task
+       *
+       * Generate a new block for the blockchain containing all pending transactions.
+       */
+      case AHCSConstants.GENERATE_COIN_BLOCK_TASK:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
+        handleGenerateCoinBlockTask(receivedMessage);
+        return;
+
       case AHCSConstants.OPERATION_NOT_PERMITTED_INFO:
       case AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO:
         LOGGER.warn(receivedMessage);
@@ -157,6 +159,7 @@ public final class AICMint extends AbstractNetworkSingletonSkill {
     return new String[]{
       AHCSConstants.INITIALIZE_TASK,
       AHCSConstants.DELEGATE_PERFORM_MISSION_TASK,
+      AHCSConstants.GENERATE_COIN_BLOCK_TASK,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.PERFORM_MISSION_TASK
@@ -175,53 +178,23 @@ public final class AICMint extends AbstractNetworkSingletonSkill {
     assert getRole().getChildQualifiedNames().isEmpty() : "must not have child roles";
 
     LOGGER.info("performing the mission");
-    mintNewBlocks();
+
   }
 
   /**
-   * Mints a new Bitcoin block every 10 minutes.
+   * Generate a new block linked to the blockchain.
+   *
+   * @param message the generate coin block task message
    */
-  private void mintNewBlocks() {
-    LOGGER.info("mint new blocks");
-
-    // calculate the milliseconds delay until the next 10 minute mark ...
-    final Calendar calendar = Calendar.getInstance();
-    final int minutes = calendar.get(Calendar.MINUTE);
-    final int modulo10minutes = minutes % 10;
-    long delay = (10 - modulo10minutes) * 60000L;
-    assert delay <= 600000;
-
-    mintTimer.scheduleAtFixedRate(
-            new MintTimerTask(), // task
-            delay,
-            600000l); // period - 10 minutes
-    //60000l); // period - 1 minute
-  }
-
-  /**
-   * Provides a mint timer task
-   */
-  class MintTimerTask extends TimerTask {
-
-    /**
-     * Executes this timer task
-     */
-    @Override
-    public void run() {
-      generateNewBlock();
-    }
-  }
-
-  /**
-   * Uses the Bitcoin command line interface to generate a new block.
-   */
-  private void generateNewBlock() {
+  private void handleGenerateCoinBlockTask(final Message message) {
     //Preconditions
+    assert message != null : "message must not be null";
+    assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
     if (!EnvironmentUtils.isLinux()) {
       throw new TexaiException("Operating system must be Linux");
     }
 
-    LOGGER.info("generate a new block");
+    LOGGER.info("Generating a new block.");
     String[] cmdArray = {
       "sh",
       "-c",
@@ -235,7 +208,5 @@ public final class AICMint extends AbstractNetworkSingletonSkill {
     cmdArray[2] = stringBuilder.toString();
     LOGGER.info("shell cmd: " + cmdArray[2]);
     AICoinUtils.executeHostCommandWithoutWaitForCompletion(cmdArray);
-
   }
-
 }

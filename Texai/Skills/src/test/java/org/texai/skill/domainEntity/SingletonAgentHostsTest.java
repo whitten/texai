@@ -160,7 +160,7 @@ public class SingletonAgentHostsTest {
   public void testHashCode() {
     LOGGER.info("hashCode");
     SingletonAgentHosts instance = makeSingletonAgentHosts();
-    assertEquals(-1615224141, instance.hashCode());
+    assertEquals(-1934933222, instance.hashCode());
   }
 
   /**

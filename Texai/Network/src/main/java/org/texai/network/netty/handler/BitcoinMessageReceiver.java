@@ -1,4 +1,4 @@
-package org.texai.skill.aicoin.support;
+package org.texai.network.netty.handler;
 
 import com.google.bitcoin.core.Message;
 
@@ -16,5 +16,5 @@ public interface BitcoinMessageReceiver {
    *
    * @param message the given bitcoin protocol message
    */
-  void receiveMessageFromLocalBitcoind(final Message message);
+  void receiveMessageFromBitcoind(final Message message);
 }

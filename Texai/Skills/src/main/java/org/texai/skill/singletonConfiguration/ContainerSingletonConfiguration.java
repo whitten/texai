@@ -11,8 +11,8 @@
  */
 package org.texai.skill.singletonConfiguration;
 
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -69,7 +69,7 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
 
     final String operation = receivedMessage.getOperation();
     if (!isOperationPermitted(receivedMessage)) {
-      if (this.isRedundantOneTimeOperationSilentlyDropped(receivedMessage)) {
+      if (isRedundantOneTimeOperationSilentlyDropped(receivedMessage)) {
         LOGGER.info("Ignoring a reply from a subsequent seeding peer.");
         removeMessageTimeOut(receivedMessage.getInReplyTo());
         return;
@@ -582,7 +582,7 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
     final SingletonAgentHosts singletonAgentHosts = (SingletonAgentHosts) receivedMessage.get(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS);
     assert singletonAgentHosts != null;
     @SuppressWarnings("unchecked")
-    final Collection<ContainerInfo> containerInfos = (Collection<ContainerInfo>) (ContainerInfo) receivedMessage.get(AHCSConstants.MSG_PARM_CONTAINER_INFOS);
+    final List<ContainerInfo> containerInfos = (List<ContainerInfo>) receivedMessage.get(AHCSConstants.MSG_PARM_CONTAINER_INFOS);
     assert containerInfos != null;
 
     getNodeRuntime().updateSingletonAgentHosts(singletonAgentHosts);
