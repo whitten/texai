@@ -37,6 +37,8 @@ public class BitcoinProtocolDecoder extends FrameDecoder {
   private static final Logger LOGGER = Logger.getLogger(BitcoinProtocolDecoder.class);
   // the bitcoin serializer
   private final BitcoinSerializer bitcoinSerializer;
+  // the protocol magic bytes
+  final byte[] magicBytes = new byte[4];
 
   /**
    * Creates a new decoder with the specified maximum object size.
@@ -47,7 +49,11 @@ public class BitcoinProtocolDecoder extends FrameDecoder {
     //Preconditions
     assert networkParameters != null : "networkParameters must not be null";
 
-    bitcoinSerializer = new BitcoinSerializer(new MainNetParams());
+    bitcoinSerializer = new BitcoinSerializer(networkParameters);
+    magicBytes[0] = (byte) (0xFF & networkParameters.getPacketMagic() >>> (3 * 8));
+    magicBytes[1] = (byte) (0xFF & networkParameters.getPacketMagic() >>> (2 * 8));
+    magicBytes[2] = (byte) (0xFF & networkParameters.getPacketMagic() >>> (1 * 8));
+    magicBytes[3] = (byte) (0xFF & networkParameters.getPacketMagic());
   }
 
   /**
@@ -89,18 +95,12 @@ public class BitcoinProtocolDecoder extends FrameDecoder {
     final byte protocolByte2 = channelBuffer.readByte();
     final byte protocolByte3 = channelBuffer.readByte();
     final byte protocolByte4 = channelBuffer.readByte();
-    if ( // mainnet
-            (protocolByte1 != -66
-            && protocolByte2 != -7
-            && protocolByte3 != -76
-            && protocolByte4 != -39)
-            || //TODO
-            // testnet
-            (protocolByte1 != -7
-            && protocolByte2 != -66
-            && protocolByte3 != -76
-            && protocolByte4 != -39)) {
-      LOGGER.warn("wrong Bitcoin protocol bytes");
+    LOGGER.warn("expected Bitcoin protocol bytes, " + magicBytes[0] + ", " + magicBytes[1] + ", " + magicBytes[2] + ", " + magicBytes[3]);
+    if (protocolByte1 != magicBytes[0]
+            || protocolByte2 != magicBytes[1]
+            || protocolByte3 != magicBytes[2]
+            || protocolByte4 != magicBytes[3]) {
+      LOGGER.warn("wrong Bitcoin protocol bytes, found " + protocolByte1 + ", " + protocolByte2 + ", " + protocolByte3 + ", " + protocolByte4);
     }
 
     // skip over the command bytes

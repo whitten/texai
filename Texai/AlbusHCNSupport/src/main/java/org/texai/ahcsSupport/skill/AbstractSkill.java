@@ -28,6 +28,9 @@ import org.texai.ahcsSupport.domainEntity.Role;
 import org.texai.kb.persistence.RDFEntityManager;
 import org.texai.util.NetworkUtils;
 import org.texai.util.StringUtils;
+import org.texai.util.TexaiException;
+import org.texai.x509.X509SecurityInfo;
+import org.texai.x509.X509Utils;
 
 /**
  * An abstract skill that provides behavior for a role.
@@ -964,5 +967,13 @@ public abstract class AbstractSkill {
     assert runnable != null : "runnable must not be null";
 
     getNodeRuntime().getExecutor().execute(runnable);
+  }
+
+  /** Gets the X.509 security information for this skill's role.
+   *
+   * @return the X.509 security information for this skill's role
+   */
+  protected X509SecurityInfo getX509SecurityInfo() {
+    return getNodeRuntime().getX509SecurityInfo(role);
   }
 }

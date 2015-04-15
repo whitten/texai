@@ -26,6 +26,7 @@ import org.texai.network.netty.handler.AlbusHCSMessageHandlerFactory;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.nio.channels.UnresolvedAddressException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -43,7 +44,6 @@ import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.MessageDispatcher;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.ContainerInfo;
-import org.texai.ahcsSupport.domainEntity.Node;
 import org.texai.network.netty.utils.ConnectionUtils;
 import org.texai.network.netty.handler.AbstractAlbusHCSMessageHandler;
 import org.texai.util.NetworkUtils;
@@ -199,6 +199,7 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
    * @return the channel
    */
   private Channel reopenChannelToPeerContainer(final ReconnectionInfo reconnectionInfo) {
+    //Preconditions
     assert reconnectionInfo != null : "reconnectionInfo must not be null";
 
     if (LOGGER.isDebugEnabled()) {
@@ -215,6 +216,22 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
       containerChannelDictionary.put(reconnectionInfo.containerName, channel);
     }
     return channel;
+  }
+
+  /**
+   * Returns whether there is a communications channel to the container having the given name.
+   *
+   * @param containerName the container name
+   *
+   * @return whether there is a communications channel to the container
+   */
+  public boolean isConnected(final String containerName) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(containerName) : "containerName must be a non-empty string";
+
+    synchronized (containerChannelDictionary) {
+      return containerChannelDictionary.containsKey(containerName);
+    }
   }
 
   /**
@@ -314,15 +331,27 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
     assert exceptionEvent != null : "exceptionEvent must not be null";
 
     final Throwable throwable = exceptionEvent.getCause();
-    if (throwable.getMessage().contains("Connection refused")) {
-      LOGGER.info("Connection refused");
-      return;
+    assert throwable != null;
+    if (UnresolvedAddressException.class.isAssignableFrom(throwable.getClass())) {
+        LOGGER.info("Unresolved address");
+        return;
     }
-    if (throwable.getMessage().contains("No route to host")) {
-      LOGGER.info("No route to host");
-      return;
+    final String exceptionMessage = throwable.getMessage();
+    if (exceptionMessage != null) {
+      if (throwable.getMessage().contains("Connection refused")) {
+        LOGGER.info("Connection refused");
+        return;
+      } else if (throwable.getMessage().contains("No route to host")) {
+        LOGGER.info("No route to host");
+        return;
+      } else if (throwable.getMessage().contains("No route to host")) {
+        LOGGER.info("No route to host");
+        return;
+      }
+      LOGGER.info(throwable.getMessage());
+    } else {
+      LOGGER.info(throwable);
     }
-    LOGGER.info(throwable.getMessage());
 
     // remove the channel from the container channel dictionary
     final Channel channel = channelHandlerContext.getChannel();
@@ -374,11 +403,17 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
       }
     }
 
-    dispatchMessage(message);
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("<====== dispatching inbound message " + message);
+    }
+    // use a separate thread for the inbound message dispatch
+    nodeRuntime.getExecutor().execute(new InboundMessageDispatchRunner(
+            nodeRuntime, // albusMessageDispatcher
+            message));
   }
 
   /**
-   * Dispatch the given message, which is inbound from another container, or outbound to another container.
+   * Dispatch the given message, which is outbound to another container.
    *
    * @param message the Albus message
    */
@@ -387,41 +422,6 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
     //Preconditions
     assert message != null : "message must not be null";
     assert message.isBetweenContainers() : "message must be between containers to use this router";
-
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("dispatching message " + message);
-      LOGGER.debug("  reply-with: " + message.getReplyWith());
-      LOGGER.debug("");
-    }
-
-    final String recipientQualifiedName = message.getRecipientQualifiedName();
-    if (Node.extractContainerName(recipientQualifiedName).equals(nodeRuntime.getContainerName())) {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("<====== dispatching inbound role message " + message);
-      }
-      // use a separate thread for the inbound message dispatch
-      nodeRuntime.getExecutor().execute(new InboundMessageDispatchRunner(
-              nodeRuntime, // albusMessageDispatcher
-              message));
-    } else {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("======> dispatching outbound role message " + message);
-      }
-      routeAlbusMessageToPeerRouter(message);
-    }
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("  dispatch completed");
-    }
-  }
-
-  /**
-   * Routes the given message to the responsible peer message router.
-   *
-   * @param message the Albus message
-   */
-  private void routeAlbusMessageToPeerRouter(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
 
     Channel channel;
     synchronized (containerChannelDictionary) {
@@ -435,7 +435,7 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
         final long waitMillis = 15000;
         LOGGER.info("peer has shutdown " + message.getRecipientQualifiedName()
                 + " - attempting reconnection to " + reconnectionInfo.containerName
-                + " in " + ((int) (waitMillis/1000)) + " seconds");
+                + " in " + ((int) (waitMillis / 1000)) + " seconds");
         try {
           Thread.sleep(waitMillis);
         } catch (InterruptedException ex) {
@@ -445,68 +445,70 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
       }
     }
     if (channel == null) {
-      if (message.getOperation().equals(AHCSConstants.SEED_CONNECTION_REQUEST_INFO)) {
-        final String hostName = message.get(AHCSConstants.MSG_PARM_HOST_NAME).toString();
-        final int port = (Integer) message.get(AHCSConstants.SEED_CONNECTION_REQUEST_INFO_PORT);
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("retrieving X.509 security info for " + message.getSenderQualifiedName());
+      switch (message.getOperation()) {
+        case AHCSConstants.SEED_CONNECTION_REQUEST_INFO: {
+          final String hostName = message.get(AHCSConstants.MSG_PARM_HOST_NAME).toString();
+          final int port = (Integer) message.get(AHCSConstants.SEED_CONNECTION_REQUEST_INFO_PORT);
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("retrieving X.509 security info for " + message.getSenderQualifiedName());
+          }
+          final X509SecurityInfo x509SecurityInfo;
+          try {
+            x509SecurityInfo = X509Utils.getX509SecurityInfo(
+                    nodeRuntime.getKeyStore(),
+                    nodeRuntime.getKeyStorePassword(),
+                    message.getSenderQualifiedName()); // alias
+          } catch (Throwable ex) {
+            X509Utils.logAliases(nodeRuntime.getKeyStore(), LOGGER);
+            throw new TexaiException(ex);
+          }
+          LOGGER.info("opening connection to network seed " + hostName + ':' + port);
+          channel = openChannelToPeerContainer(
+                  message.getRecipientContainerName(), // containerName,
+                  hostName,
+                  port,
+                  x509SecurityInfo);
+          if (channel == null) {
+            LOGGER.info("no connection to " + hostName + ':' + port);
+            //TODO report to network operations
+            return;
+          }
+          break;
         }
-        final X509SecurityInfo x509SecurityInfo;
-        try {
-          x509SecurityInfo = X509Utils.getX509SecurityInfo(
-                  nodeRuntime.getKeyStore(),
-                  nodeRuntime.getKeyStorePassword(),
-                  message.getSenderQualifiedName()); // alias
-        } catch (Throwable ex) {
-          X509Utils.logAliases(nodeRuntime.getKeyStore(), LOGGER);
-          throw new TexaiException(ex);
+        case AHCSConstants.CONNECTION_REQUEST_INFO: {
+          // get super peer connection info
+          final ContainerInfo containerInfo = nodeRuntime.getContainerInfo(message.getRecipientContainerName());
+          assert containerInfo != null;
+          final String hostName = containerInfo.getIpAddress();
+          final int port = containerInfo.getPort();
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("retrieving X.509 security info for " + message.getSenderQualifiedName());
+          }
+          final X509SecurityInfo x509SecurityInfo;
+          try {
+            x509SecurityInfo = X509Utils.getX509SecurityInfo(
+                    nodeRuntime.getKeyStore(),
+                    nodeRuntime.getKeyStorePassword(),
+                    message.getSenderQualifiedName()); // alias
+          } catch (Throwable ex) {
+            X509Utils.logAliases(nodeRuntime.getKeyStore(), LOGGER);
+            throw new TexaiException(ex);
+          }
+          LOGGER.info("opening connection to " + hostName + ':' + port);
+          channel = openChannelToPeerContainer(
+                  message.getRecipientContainerName(), // containerName,
+                  hostName,
+                  port,
+                  x509SecurityInfo);
+          if (channel == null) {
+            LOGGER.info("no connection to " + hostName + ':' + port);
+            //TODO report to network operations
+            return;
+          }
+          break;
         }
-
-        LOGGER.info("opening connection to network seed " + hostName + ':' + port);
-        channel = openChannelToPeerContainer(
-                message.getRecipientContainerName(), // containerName,
-                hostName,
-                port,
-                x509SecurityInfo);
-        if (channel == null) {
-          LOGGER.info("no connection to " + hostName + ':' + port);
-          //TODO report to network operations
-          return;
-        }
-      } else if (message.getOperation().equals(AHCSConstants.BITCOIN_MESSAGE_INFO)) {
-        // get super peer connection info
-        final ContainerInfo containerInfo = nodeRuntime.getContainerInfo(message.getRecipientContainerName());
-        assert containerInfo != null;
-        final String hostName = containerInfo.getIpAddress();
-        final int port = containerInfo.getPort();
-
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("retrieving X.509 security info for " + message.getSenderQualifiedName());
-        }
-        final X509SecurityInfo x509SecurityInfo;
-        try {
-          x509SecurityInfo = X509Utils.getX509SecurityInfo(
-                  nodeRuntime.getKeyStore(),
-                  nodeRuntime.getKeyStorePassword(),
-                  message.getSenderQualifiedName()); // alias
-        } catch (Throwable ex) {
-          X509Utils.logAliases(nodeRuntime.getKeyStore(), LOGGER);
-          throw new TexaiException(ex);
-        }
-
-        LOGGER.info("opening connection to network seed " + hostName + ':' + port);
-        channel = openChannelToPeerContainer(
-                message.getRecipientContainerName(), // containerName,
-                hostName,
-                port,
-                x509SecurityInfo);
-        if (channel == null) {
-          LOGGER.info("no connection to " + hostName + ':' + port);
-          //TODO report to network operations
-          return;
-        }
-      } else {
-        throw new TexaiException("no communcations channel to recipient " + message);
+        default:
+          throw new TexaiException("no communcations channel to recipient " + message);
       }
     }
 

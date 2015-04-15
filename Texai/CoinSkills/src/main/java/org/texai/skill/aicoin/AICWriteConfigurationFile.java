@@ -161,89 +161,73 @@ public class AICWriteConfigurationFile extends AbstractSkill {
     }
     // emit the configuration file line by line
     try (BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(confFile), "UTF-8"))) {
-      bufferedWriter.write("# no proof-of-work after block height\n");
-      bufferedWriter.write("nopowafter=1\n");
-      bufferedWriter.write("# no dns seeds in the demo\n");
-      bufferedWriter.write("dnsseed=0\n");
-      bufferedWriter.write("# no universal plug and play NAT routing in the demo\n");
-      bufferedWriter.write("upnp=0\n");
-      //TODO demo code
-      switch (getContainerName()) {
-        case "Mint":
-          bufferedWriter.write("# this instance accepts incoming connections\n");
-          bufferedWriter.write("listen=1\n");
-          break;
-        case "Alice":
-        case "Bob":
-          bufferedWriter.write("# this instance accepts incoming connections\n");
-          bufferedWriter.write("listen=1\n");
-          bufferedWriter.write("# connect to the mint\n");
-          // on the same host in the development LAN
-          if (getNodeRuntime().getNetworkName().equals(NetworkUtils.TEXAI_MAINNET)) {
-            bufferedWriter.write("connect=Mint:31417\n");
-          } else {
-            // testnet
-            bufferedWriter.write("connect=TestMint:27185\n");
-          }
-          break;
-        case "BlockchainExplorer":
-          bufferedWriter.write("# this instance accepts incoming connections\n");
-          bufferedWriter.write("listen=1\n");
-          // on the same host in the development LAN
-          if (getNodeRuntime().getNetworkName().equals(NetworkUtils.TEXAI_MAINNET)) {
-            bufferedWriter.write("connect=Mint:31417\n");
-            // on a separate host in the development LAN
-            //bufferedWriter.write("connect=192.168.0.7:31417\n");
-          } else {
-            // testnet
-            bufferedWriter.write("connect=TestMint:27185\n");
-            // on a separate host in the development LAN
-            //bufferedWriter.write("connect=192.168.0.7:27185\n");
-          }
-          break;
-        default:
-          // peer on the internet
-          bufferedWriter.write("# this instance does not accept incoming connections\n");
-          bufferedWriter.write("listen=0\n");
-          bufferedWriter.write("# connect to the mint\n");
-          if (getNodeRuntime().getNetworkName().equals(NetworkUtils.TEXAI_MAINNET)) {
-            bufferedWriter.write("connect=texai.dyndns.org:31417\n");
-          } else {
-            // testnet
-            bufferedWriter.write("connect=texai.dyndns.org:27185\n");
-          }
-          break;
-      }
       if (getNodeRuntime().getNetworkName().equals(NetworkUtils.TEXAI_MAINNET)) {
-        bufferedWriter.write("# mainnet listening port\n");
+
+        bufferedWriter.write("# no proof-of-work after block height\n");
+        bufferedWriter.write("nopowafter=1\n");
+        bufferedWriter.write("# no dns seeds in the demo\n");
+        bufferedWriter.write("dnsseed=0\n");
+        bufferedWriter.write("# no universal plug and play NAT routing in the demo\n");
+        bufferedWriter.write("upnp=0\n");
+        bufferedWriter.write("# mainnet listening port (increased by 1 to avoid conflict)\n");
         bufferedWriter.write("port=31417\n");
+        bufferedWriter.write("# mainnet rpc port\n");
+        bufferedWriter.write("rpcport=31415\n");
+        bufferedWriter.write("# accept incoming connections\n");
+        bufferedWriter.write("listen=1\n");
+        bufferedWriter.write("# how many blocks to verify upon startup\n");
+        bufferedWriter.write("checkblocks=5\n");
+        bufferedWriter.write("# do not generate a block unless commanded to\n");
+        bufferedWriter.write("gen=0\n");
+        bufferedWriter.write("# maintain an extra transaction index that allows the RPC getrawtransaction call to operate\n");
+        bufferedWriter.write("txindex=1\n");
+        bufferedWriter.write("# allow aicoin-cli to send commands to this instance\n");
+        bufferedWriter.write("rpcconnect=127.0.0.1\n");
+        bufferedWriter.write("# allow rpc commands\n");
+        bufferedWriter.write("server=1\n");
+        bufferedWriter.write("rpcuser=");
+        bufferedWriter.write(rpcuser);
+        bufferedWriter.write("\n");
+        bufferedWriter.write("rpcpassword=");
+        bufferedWriter.write(rpcpassword);
+        bufferedWriter.write("\n");
+        bufferedWriter.write("\n");
       } else {
-        bufferedWriter.write("# testnet\n");
+        // testnet
+        bufferedWriter.write("# no proof-of-work after block height\n");
+        bufferedWriter.write("nopowafter=1\n");
+        bufferedWriter.write("# no dns seeds in the demo\n");
+        bufferedWriter.write("dnsseed=0\n");
+        bufferedWriter.write("# no universal plug and play NAT routing in the demo\n");
+        bufferedWriter.write("upnp=0\n");
+        bufferedWriter.write("# this instance accepts incoming connections\n");
+        bufferedWriter.write("listen=1\n");
+        bufferedWriter.write("# indicate testnet\n");
         bufferedWriter.write("testnet=1\n");
-        bufferedWriter.write("# testnet listening port\n");
+        bufferedWriter.write("# testnet listening port (increased by 1 to avoid conflict)\n");
         bufferedWriter.write("port=27185\n");
         bufferedWriter.write("# testnet rpc port\n");
-        bufferedWriter.write("rpcport=18332\n");
+        bufferedWriter.write("rpcport=27183\n");
+        bufferedWriter.write("# accept incoming connections\n");
+        bufferedWriter.write("listen=1\n");
+        bufferedWriter.write("# how many blocks to verify upon startup\n");
+        bufferedWriter.write("checkblocks=5\n");
+        bufferedWriter.write("# do not generate a block unless commanded to\n");
+        bufferedWriter.write("gen=0\n");
+        bufferedWriter.write("# maintain an extra transaction index that allows the RPC getrawtransaction call to operate\n");
+        bufferedWriter.write("txindex=1\n");
+        bufferedWriter.write("# allow aicoin-cli to send commands to this instance\n");
+        bufferedWriter.write("rpcconnect=127.0.0.1\n");
+        bufferedWriter.write("# allow rpc commands\n");
+        bufferedWriter.write("server=1\n");
+        bufferedWriter.write("rpcuser=");
+        bufferedWriter.write(rpcuser);
+        bufferedWriter.write("\n");
+        bufferedWriter.write("rpcpassword=");
+        bufferedWriter.write(rpcpassword);
+        bufferedWriter.write("\n");
+        bufferedWriter.write("\n");
       }
-      bufferedWriter.write("# how many blocks to verify upon startup\n");
-      bufferedWriter.write("checkblocks=5\n");
-      bufferedWriter.write("# do not generate a block unless commanded to\n");
-      bufferedWriter.write("gen=0\n");
-      bufferedWriter.write("# \n");
-      bufferedWriter.write("\n");
-      bufferedWriter.write("# maintain an extra transaction index that allows the RPC getrawtransaction call to operate\n");
-      bufferedWriter.write("txindex=1\n");
-      bufferedWriter.write("# allow aicoin-cli to send commands to this instance\n");
-      bufferedWriter.write("rpcconnect=127.0.0.1\n");
-      bufferedWriter.write("# allow rpc commands\n");
-      bufferedWriter.write("server=1\n");
-      bufferedWriter.write("rpcuser=");
-      bufferedWriter.write(rpcuser);
-      bufferedWriter.write("\n");
-      bufferedWriter.write("rpcpassword=");
-      bufferedWriter.write(rpcpassword);
-      bufferedWriter.write("\n");
-      bufferedWriter.write("\n");
     } catch (IOException ex) {
       throw new TexaiException(ex);
     }

@@ -69,6 +69,8 @@ public class NodeRuntime extends BasicNodeRuntime {
 
   static {
     certificateIntroducingOperations.add(AHCSConstants.CONFIGURE_SINGLETON_AGENT_HOSTS_TASK);
+    certificateIntroducingOperations.add(AHCSConstants.CONNECTION_REQUEST_APPROVED_INFO);
+    certificateIntroducingOperations.add(AHCSConstants.CONNECTION_REQUEST_INFO);
     certificateIntroducingOperations.add(AHCSConstants.JOIN_ACKNOWLEDGED_TASK);
     certificateIntroducingOperations.add(AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO);
     certificateIntroducingOperations.add(AHCSConstants.SEED_CONNECTION_REQUEST_INFO);
@@ -174,6 +176,15 @@ public class NodeRuntime extends BasicNodeRuntime {
     assert port > 1024 : "port must not be a reserved port 1-1024";
 
     messageRouter.listenForIncomingConnections(port);
+  }
+
+  /** Returns whether there is a communications channel to the container having the given name.
+   *
+   * @param containerName the container name
+   * @return whether there is a communications channel to the container
+   */
+  public boolean isConnected(final String containerName) {
+    return messageRouter.isConnected(containerName);
   }
 
   /**

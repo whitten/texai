@@ -288,6 +288,12 @@ public final class AHCSConstants {
   // the configureSingletonAgentHostsRequest_Info operation
   public static final String CONFIGURE_SINGLETON_AGENT_HOSTS_REQUEST_INFO = "configureSingletonAgentHostsRequest_Info";
   //
+  // the connectionRequest_Info operation
+  public static final String CONNECTION_REQUEST_INFO = "connectionRequest_Info";
+  //
+  // the connectionRequestOK_Info operation
+  public static final String CONNECTION_REQUEST_APPROVED_INFO = "connectionRequestApproved_Info";
+  //
   // the exception information operation
   public static final String EXCEPTION_INFO = "exception_Info";
   //

@@ -400,7 +400,7 @@ public class ContainerSingletonConfiguration extends AbstractSkill {
 
     LOGGER.info("received a seed connection request from " + receivedMessage.getSenderContainerName());
 
-    final SingletonAgentHosts singletonAgentHosts = this.getNodeRuntime().getSingletonAgentHosts();
+    final SingletonAgentHosts singletonAgentHosts = getNodeRuntime().getSingletonAgentHosts();
     LOGGER.info(singletonAgentHosts.toDetailedString());
 
     final Message singletonAgentHostsMessage = makeReplyMessage(

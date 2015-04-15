@@ -115,7 +115,7 @@ public class AICoinMain {
     Logger.getLogger(DistributedRepositoryManager.class).setLevel(Level.WARN);
     Logger.getLogger(KBAccess.class).setLevel(Level.WARN);
     Logger.getLogger(JournalWriter.class).setLevel(Level.WARN);
-    Logger.getLogger(MessageRouter.class).setLevel(Level.DEBUG);
+    Logger.getLogger(MessageRouter.class).setLevel(Level.INFO);
 //    Logger.getLogger(NodesInitializer.class).setLevel(Level.DEBUG);
     Logger.getLogger(PortUnificationHandler.class).setLevel(Level.WARN);
     Logger.getLogger(PortUnificationChannelPipelineFactory.class).setLevel(Level.WARN);

@@ -19,6 +19,8 @@ import org.texai.skill.aicoin.support.LocalBitcoindAdapter;
 import org.texai.util.EnvironmentUtils;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
+import org.texai.x509.X509SecurityInfo;
+import org.texai.x509.X509Utils;
 
 /**
  * Created on Aug 30, 2014, 11:31:08 PM.
@@ -122,6 +124,28 @@ public final class AICOperation extends AbstractSkill {
         return;
 
       /**
+       * Connection Request Info
+       *
+       * This information message is sent from a peer AICOperation role. As a result this role replies with the Connection Request Approved
+       * Info message.
+       */
+      case AHCSConstants.CONNECTION_REQUEST_INFO:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+        handleConnectionRequest(receivedMessage);
+        return;
+
+      /**
+       * Connection Request Approved Info
+       *
+       * This information message is a reply from a peer AICOperation role in response to a connection request. As a result this role
+       * establishes a connection between the local bitcoind (aicoind) instance and the peer.
+       */
+      case AHCSConstants.CONNECTION_REQUEST_APPROVED_INFO:
+        assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready";
+        handleConnectionRequestApproved(receivedMessage);
+        return;
+
+      /**
        * Bitcoin Message Info
        *
        * This information message is sent from a peer AICOperation role. As a result this role sends the message to the local aicoind
@@ -140,7 +164,7 @@ public final class AICOperation extends AbstractSkill {
        */
       case AHCSConstants.TASK_ACCOMPLISHED_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "must be in the ready state";
-        continueConversation(receivedMessage);
+        continueAfterWritingConfiguration(receivedMessage);
         return;
 
       /**
@@ -208,6 +232,8 @@ public final class AICOperation extends AbstractSkill {
     return new String[]{
       AHCSConstants.INITIALIZE_TASK,
       AHCSConstants.BITCOIN_MESSAGE_INFO,
+      AHCSConstants.CONNECTION_REQUEST_INFO,
+      AHCSConstants.CONNECTION_REQUEST_APPROVED_INFO,
       AHCSConstants.JOIN_ACKNOWLEDGED_TASK,
       AHCSConstants.MESSAGE_NOT_UNDERSTOOD_INFO,
       AHCSConstants.PERFORM_MISSION_TASK,
@@ -252,14 +278,14 @@ public final class AICOperation extends AbstractSkill {
   /**
    * Continues the conversation with the AICWriteConfigurationFile skill.
    *
-   * @param message the received message
+   * @param receivedMessage the received message
    */
-  private synchronized void continueConversation(final Message message) {
+  private synchronized void continueAfterWritingConfiguration(final Message receivedMessage) {
     //Preconditions
-    assert message != null : "message must not be null";
-    assert message.getInReplyTo() != null : "message must have inReplyTo value " + message.toDetailedString();
+    assert receivedMessage != null : "receivedMessage must not be null";
+    assert receivedMessage.getInReplyTo() != null : "receivedMessage must have inReplyTo value " + receivedMessage.toDetailedString();
 
-    removeMessageTimeOut(message.getInReplyTo());
+    removeMessageTimeOut(receivedMessage.getInReplyTo());
     LOGGER.info("The bitcoind configuration file has been written");
     launchAicoind();
 
@@ -271,7 +297,127 @@ public final class AICOperation extends AbstractSkill {
     }
   }
 
-  /** Provides a connection between the local bitcoind (aicoind) instance and a remote one at a network super peer. */
+  /**
+   * Handles a Connection Request Info message.
+   *
+   * @param receivedMessage the received message
+   */
+  private synchronized void handleConnectionRequest(final Message receivedMessage) {
+    //Preconditions
+    assert receivedMessage != null : "message must not be null";
+
+    LOGGER.info("Approving a connection request from " + receivedMessage.getSenderContainerName());
+
+    final Message connectionRequestApprovedInfoMessage = this.makeReplyMessage(
+            receivedMessage,
+            AHCSConstants.CONNECTION_REQUEST_APPROVED_INFO);
+          final X509SecurityInfo x509SecurityInfo = getX509SecurityInfo();
+          connectionRequestApprovedInfoMessage.put(
+                  AHCSConstants.MSG_PARM_X509_CERTIFICATE,
+                  x509SecurityInfo.getX509Certificate());
+    sendMessage(
+            receivedMessage,
+            connectionRequestApprovedInfoMessage); // message
+  }
+
+  /**
+   * Handles a Connection Request Approved Info message by making a connection between the local bitcoind (aicoind) instance and a remote
+   * one at the sender network super peer.
+   *
+   * @param receivedMessage the received message
+   */
+  private void handleConnectionRequestApproved(final Message receivedMessage) {
+    //Preconditions
+    assert receivedMessage != null : "message must not be null";
+
+    final String superPeerContainerName = receivedMessage.getSenderContainerName();
+    LOGGER.info("  Connecting local bitcoind to " + superPeerContainerName);
+    final SuperPeerConnection superPeerConnection = new SuperPeerConnection(
+            this,
+            superPeerContainerName);
+    final LocalBitcoindAdapter localBitcoindAdapter = new LocalBitcoindAdapter(
+            ((NodeRuntime) getNodeRuntime()).getNetworkParameters(),
+            superPeerConnection, // bitcoinMessageReceiver
+            getNodeRuntime());
+
+    synchronized (localBitcoindAdapterDictionary) {
+      localBitcoindAdapterDictionary.put(superPeerContainerName, localBitcoindAdapter);
+    }
+    LOGGER.info("opening channel to aicoind");
+    localBitcoindAdapter.startUp();
+
+    // send a version messages to the local bitcoind (aicoind), the response will be relayed to the remote bitcoind
+    localBitcoindAdapter.sendVersionMessageToLocalBitcoinCore();
+  }
+
+  /**
+   * Provides a runnable that connects this bitcoind (aicoind) to super peer bitcoind (aicoind) instances.
+   */
+  static class SuperPeerConnector implements Runnable {
+
+    // the AIC operation skill
+    final private AICOperation aicOperation;
+
+    SuperPeerConnector(final AICOperation aicOperation) {
+      //Preconditions
+      assert aicOperation != null : "aicOperation must not be null";
+
+      this.aicOperation = aicOperation;
+    }
+
+    /**
+     * Connects to super peers.
+     */
+    @Override
+    public void run() {
+      // wait 10 seconds for the local bitcoind (aicoind) instance to open and initialize
+      try {
+        Thread.sleep(20000);
+      } catch (InterruptedException ex) {
+      }
+      final ContainerInfo containerInfo = aicOperation.getNodeRuntime().getContainerInfoAccess().getContainerInfo(aicOperation.getContainerName());
+      assert containerInfo != null;
+      final List<String> superPeerContainerNames = new ArrayList<>();
+      if (containerInfo.isSuperPeer()) {
+        // super peers are connected to each other
+        superPeerContainerNames.addAll(aicOperation.getNodeRuntime().getContainerInfoAccess().getAllSuperPeerContainerNames());
+      } else {
+        // ordinary peers are connected to certain super peers
+        superPeerContainerNames.addAll(containerInfo.getSuperPeerContainerNames());
+      }
+
+      Collections.sort(superPeerContainerNames);
+      LOGGER.info("superPeerContainerNames: " + superPeerContainerNames + "...");
+      final String myContainerName = aicOperation.getContainerName();
+      LOGGER.info("  myContainerName: " + myContainerName);
+      for (final String superPeerContainerName : superPeerContainerNames) {
+        LOGGER.info("  superPeerContainerName: " + superPeerContainerName);
+        if (!superPeerContainerName.equals(myContainerName)) {
+          try {
+            LOGGER.info("  requesting connection with " + superPeerContainerName);
+            final Message connectionRequestInfoMessage = aicOperation.makeMessage(
+                    superPeerContainerName + ".AICOperationAgent.AICOperationRole", // recipientQualifiedName
+                    AICOperation.class.getName(), // recipientService
+                    AHCSConstants.CONNECTION_REQUEST_INFO); // operation
+          final X509SecurityInfo x509SecurityInfo = aicOperation.getX509SecurityInfo();
+          connectionRequestInfoMessage.put(
+                  AHCSConstants.MSG_PARM_X509_CERTIFICATE,
+                  x509SecurityInfo.getX509Certificate());
+
+            aicOperation.sendMessageViaSeparateThread(
+                    null, // received message
+                    connectionRequestInfoMessage); // message
+          } catch (TexaiException ex) {
+            LOGGER.info("  cannot connect with " + superPeerContainerName);
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Provides a connection between the local bitcoind (aicoind) instance and a remote one at a network super peer.
+   */
   static class SuperPeerConnection implements BitcoinMessageReceiver {
 
     // the AIC operation skill
@@ -281,7 +427,8 @@ public final class AICOperation extends AbstractSkill {
     // the local bitcoind (aicoind) adapter
     private LocalBitcoindAdapter localBitcoindAdapter;
 
-    /** Constructs a new SuperPeerConnection instance.
+    /**
+     * Constructs a new SuperPeerConnection instance.
      *
      * @param aicOperation the AIC operation skill
      * @param superPeerContainerName the super peer container name
@@ -320,7 +467,8 @@ public final class AICOperation extends AbstractSkill {
               relayMessage); // message
     }
 
-    /** Sets the local bitcoind (aicoind) adapter.
+    /**
+     * Sets the local bitcoind (aicoind) adapter.
      *
      * @param localBitcoindAdapter the local bitcoind (aicoind) adapter
      */
@@ -330,64 +478,6 @@ public final class AICOperation extends AbstractSkill {
 
       this.localBitcoindAdapter = localBitcoindAdapter;
     }
-  }
-
-  /**
-   * Provides a runnable that connects this bitcoind (aicoind) to super peer bitcoind (aicoind) instances.
-   */
-  static class SuperPeerConnector implements Runnable {
-
-    // the AIC operation skill
-    final private AICOperation aicOperation;
-
-    SuperPeerConnector(final AICOperation aicOperation) {
-      //Preconditions
-      assert aicOperation != null : "aicOperation must not be null";
-
-      this.aicOperation = aicOperation;
-    }
-
-    /**
-     * Connects to super peers.
-     */
-    @Override
-    public void run() {
-      // wait 10 seconds for the local bitcoind (aicoind) instance to open and initialize
-      try {
-        Thread.sleep(10000);
-      } catch (InterruptedException ex) {
-      }
-      // Examine the containers with which this peer should connect. If the remote container's name is sorted less than this one's name, then
-      // this one initiates the connection.
-      final ContainerInfo containerInfo = aicOperation.getNodeRuntime().getContainerInfoAccess().getContainerInfo(aicOperation.getContainerName());
-      assert containerInfo != null;
-      final List<String> superPeerContainerNames = new ArrayList<>(containerInfo.getSuperPeerContainerNames());
-      Collections.sort(superPeerContainerNames);
-      LOGGER.info("superPeerContainerNames: " + superPeerContainerNames + "...");
-      final String myContainerName = aicOperation.getContainerName();
-      for (final String superPeerContainerName : superPeerContainerNames) {
-        if (superPeerContainerName.compareTo(myContainerName) == -1) {
-          LOGGER.info("  Connecting local bitcoind to " + superPeerContainerName);
-          final SuperPeerConnection superPeerConnection = new SuperPeerConnection(
-            aicOperation,
-            superPeerContainerName);
-          final LocalBitcoindAdapter localBitcoindAdapter = new LocalBitcoindAdapter(
-                  ((NodeRuntime) aicOperation.getNodeRuntime()).getNetworkParameters(),
-                  superPeerConnection, // bitcoinMessageReceiver
-                  aicOperation.getNodeRuntime());
-
-          aicOperation.localBitcoindAdapterDictionary.put(
-                  superPeerContainerName,
-                  localBitcoindAdapter);
-          LOGGER.info("opening channel to aicoind");
-          localBitcoindAdapter.startUp();
-
-          // send a version messages to the local bitcoind (aicoind), the response will be relayed to the remote bitcoind
-          localBitcoindAdapter.sendVersionMessageToLocalBitcoinCore();
-        }
-      }
-    }
-
   }
 
   /**

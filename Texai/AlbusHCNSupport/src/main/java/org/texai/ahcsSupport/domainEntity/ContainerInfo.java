@@ -221,7 +221,7 @@ public class ContainerInfo implements CascadePersistence, Comparable<ContainerIn
   }
 
   /**
-   * Adds a super peer container name to which a non-super peer connects.
+   * Adds a super peer container name to which this peer connects.
    *
    * @param containerName the container name
    */
@@ -233,7 +233,7 @@ public class ContainerInfo implements CascadePersistence, Comparable<ContainerIn
   }
 
   /**
-   * Gets the super peer container names to which a non-super peer connects.
+   * Gets the super peer container names to which this peer connects.
    *
    * @return the super peer container names to which a non-super peer connects
    */
@@ -342,7 +342,7 @@ public class ContainerInfo implements CascadePersistence, Comparable<ContainerIn
   public void setPort(final int port) {
     //Preconditions
     assert port > 1024 && port < 65535 : "port must be in the range, 1025 ... 65535";
-    
+
     this.port = port;
   }
 

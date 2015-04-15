@@ -13,6 +13,7 @@ import org.texai.ahcsSupport.skill.BasicNodeRuntime;
 import org.texai.kb.persistence.RDFEntityManager;
 import org.texai.ahcsSupport.domainEntity.ContainerInfo;
 import org.texai.ahcsSupport.domainEntity.SingletonAgentHosts;
+import org.texai.util.NetworkUtils;
 import org.texai.util.StringUtils;
 
 /**
@@ -54,19 +55,25 @@ public class SingletonAgentHostsAccess {
    * Initializes the singleton agent hosts.
    */
   public void initializeSingletonAgentsHosts() {
+    final String singletonContainerName;
+    if (basicNodeRuntime.getNetworkName().equals(NetworkUtils.TEXAI_MAINNET)) {
+      singletonContainerName = "turing";
+    } else {
+      singletonContainerName = "TestMint";
+    }
     synchronized (singletonAgentHostsSet) {
       final Map<String, String> singletonAgentDictionary = new HashMap<>();
-      singletonAgentDictionary.put("NetworkOperationAgent", "Mint");
-      singletonAgentDictionary.put("NetworkSingletonConfigurationAgent", "Mint");
-      singletonAgentDictionary.put("TopmostFriendshipAgent", "Mint");
-      singletonAgentDictionary.put("AICFinancialAccountingAndControlAgent", "Mint");
-      singletonAgentDictionary.put("AICMintAgent", "Mint");
-      singletonAgentDictionary.put("AICNetworkEpisodicMemoryAgent", "Mint");
-      singletonAgentDictionary.put("AICNetworkOperationAgent", "Mint");
-      singletonAgentDictionary.put("AICNetworkSeedAgent", "Mint");
-      singletonAgentDictionary.put("AICPrimaryAuditAgent", "Mint");
-      singletonAgentDictionary.put("AICRecoveryAgent", "Mint");
-      singletonAgentDictionary.put("AICRewardAllocationAgent", "Mint");
+      singletonAgentDictionary.put("NetworkOperationAgent", singletonContainerName);
+      singletonAgentDictionary.put("NetworkSingletonConfigurationAgent", singletonContainerName);
+      singletonAgentDictionary.put("TopmostFriendshipAgent", singletonContainerName);
+      singletonAgentDictionary.put("AICFinancialAccountingAndControlAgent", singletonContainerName);
+      singletonAgentDictionary.put("AICMintAgent", singletonContainerName);
+      singletonAgentDictionary.put("AICNetworkEpisodicMemoryAgent", singletonContainerName);
+      singletonAgentDictionary.put("AICNetworkOperationAgent", singletonContainerName);
+      singletonAgentDictionary.put("AICNetworkSeedAgent", singletonContainerName);
+      singletonAgentDictionary.put("AICPrimaryAuditAgent", singletonContainerName);
+      singletonAgentDictionary.put("AICRecoveryAgent", singletonContainerName);
+      singletonAgentDictionary.put("AICRewardAllocationAgent", singletonContainerName);
 
       final DateTime effectiveDateTime = new DateTime(
               2015, // year
@@ -93,6 +100,7 @@ public class SingletonAgentHostsAccess {
       rdfEntityManager.persist(singletonAgentHosts);
       singletonAgentHostsSet.add(singletonAgentHosts);
     }
+    LOGGER.info("Initialized singleton hosts\n" + singletonAgentHostsSet);
   }
 
   /**

@@ -43,7 +43,7 @@ public class LocalBitcoindAdapter extends SimpleChannelHandler {
   public static final Logger LOGGER = Logger.getLogger(LocalBitcoindAdapter.class);
   // the bitcoin message receiver, which is the skill that handles outbound bitcoin messages from the local peer
   private final BitcoinMessageReceiver bitcoinMessageReceiver;
-  // the network parameters, main net, test net, or regression test net
+  // the network parameters, mainnet, testnet, or regression test net
   private final NetworkParameters networkParameters;
   // the Bitcoin protocol message handler
   private final BitcoinProtocolMessageHandler bitcoinProtocolMessageHandler;

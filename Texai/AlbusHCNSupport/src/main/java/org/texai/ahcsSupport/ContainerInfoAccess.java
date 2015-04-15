@@ -32,6 +32,8 @@ public class ContainerInfoAccess {
   private final Map<String, ContainerInfo> containerInfoDictionary = new HashMap<>();
   // the network name, mainnet or testnet
   private final String networkName;
+  // all of the super peer container names
+  private final Set<String> allSuperPeerContainerNames = new HashSet<>();
 
   /**
    * Creates a new instance of ContainerInfoAccess.
@@ -65,8 +67,8 @@ public class ContainerInfoAccess {
                 null, // ipAddress
                 NetworkUtils.TEXAI_MAINNET_PORT, // port
                 true, // isSuperPeer
-                false, // isFirstContainr
                 false, // isClientGateway
+                false, // isFirstContainr
                 false, // isBlockExplorer
                 null); // superPeerContainers
         initializeContainerInfo(
@@ -136,7 +138,7 @@ public class ContainerInfoAccess {
         assert networkName.equals(NetworkUtils.TEXAI_TESTNET);
         initializeContainerInfo(
                 "TestAlice", // containerName
-                null, // ipAddress
+                "TestAlice", // ipAddress
                 45049, // port
                 true, // isSuperPeer
                 false, // isFirstContainr
@@ -145,7 +147,7 @@ public class ContainerInfoAccess {
                 null); // superPeerContainers
         initializeContainerInfo(
                 "TestBlockchainExplorer", // containerName
-                null, // ipAddress
+                "TestBlockchainExplorer", // ipAddress
                 45050, // port
                 true, // isSuperPeer
                 false, // isFirstContainr
@@ -154,7 +156,7 @@ public class ContainerInfoAccess {
                 null); // superPeerContainers
         ContainerInfo containerInfo = initializeContainerInfo(
                 "TestBob", // containerName
-                null, // ipAddress
+                "TestBob", // ipAddress
                 45051, // port
                 false, // isSuperPeer
                 false, // isFirstContainr
@@ -165,7 +167,7 @@ public class ContainerInfoAccess {
         containerInfo.addSuperPeerContainerName("TestAlice");
         initializeContainerInfo(
                 "TestMint", // containerName
-                null, // ipAddress
+                "TestMint", // ipAddress
                 45048, // port
                 true, // isSuperPeer
                 true, // isFirstContainr
@@ -174,6 +176,9 @@ public class ContainerInfoAccess {
                 null); // superPeerContainers
       }
     }
+    final List<String> sortedAllSuperPeerContainerNames = new ArrayList<>(allSuperPeerContainerNames);
+    Collections.sort(sortedAllSuperPeerContainerNames);
+    LOGGER.info("All super peer container names: " + sortedAllSuperPeerContainerNames);
   }
 
   /**
@@ -183,7 +188,8 @@ public class ContainerInfoAccess {
    * @param ipAddress the ip address
    * @param port the port, usually 5048 for mainnet and 45048 for testnet
    * @param isSuperPeer the indicator whether this container is a super peer
-   * @param isFirstContainer the indicator whether this container is the first host of all the network singleton agents, when the network restarts
+   * @param isFirstContainer the indicator whether this container is the first host of all the network singleton agents, when the network
+   * restarts
    * @param isClientGateway the indicator whether this node is a client gateway, accepting connections from wallet clients
    * @param isBlockExplorer the indicator whether this node is a block explorer, serving the Insight application
    * @param superPeerContainerNames the names of the few super peer containers to which a non-super peer container connects
@@ -202,6 +208,9 @@ public class ContainerInfoAccess {
     //Preconditions
     assert StringUtils.isNonEmptyString(containerName) : "containerName must be a non-empty string";
 
+    if (isSuperPeer) {
+      allSuperPeerContainerNames.add(containerName);
+    }
     final ContainerInfo containerInfo = new ContainerInfo(
             containerName,
             isSuperPeer,
@@ -351,6 +360,14 @@ public class ContainerInfoAccess {
       }
     }
     return true;
+  }
+
+  /** Gets all the super peer container names.
+   *
+   * @return all the super peer container names
+   */
+  public Set<String> getAllSuperPeerContainerNames() {
+    return allSuperPeerContainerNames;
   }
 
 }
