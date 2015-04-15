@@ -4,6 +4,23 @@
  */
 package org.texai.skill.aicoin;
 
+import com.google.bitcoin.core.ECKey;
+import com.google.bitcoin.core.InventoryItem;
+import com.google.bitcoin.core.InventoryMessage;
+import com.google.bitcoin.core.NetworkParameters;
+import com.google.bitcoin.core.ProtocolException;
+import com.google.bitcoin.core.Transaction;
+import com.google.bitcoin.core.TransactionOutput;
+import com.google.bitcoin.core.Utils;
+import com.google.bitcoin.params.TestNet3Params;
+import static com.google.bitcoin.utils.TestUtils.roundTripTransaction;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,6 +39,7 @@ import org.texai.ahcsSupport.domainEntity.SkillClass;
 import org.texai.skill.network.NetworkOperation;
 import org.texai.skill.testHarness.SkillTestHarness;
 import org.texai.util.ArraySet;
+import org.texai.util.StringUtils;
 
 /**
  *
@@ -84,6 +102,161 @@ public class AICMintTest {
   }
 
   /**
+   * bitcoinj InventoryMessage serialization test.
+   */
+  @Test
+  public void testInventoryMessageSerialization() {
+    LOGGER.info("testing InventoryMessage serialization");
+
+    Transaction transaction = null;
+    try {
+      transaction = createFakeTx(
+              new TestNet3Params(), // networkParameters
+              BigInteger.valueOf(50000), // nanocoins
+              new ECKey()); // recipientAddress
+    } catch (IOException ex) {
+      fail();
+    }
+    LOGGER.info("transaction: " + transaction);
+
+    ObjectOutputStream objectOutputStream = null;
+    try {
+
+      // serialize transaction
+      final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+      objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+      objectOutputStream.writeObject(transaction);
+      objectOutputStream.close();
+      assertTrue(byteArrayOutputStream.toByteArray().length > 0);
+
+      // deserialize transaction
+      final byte[] serializedBytes = byteArrayOutputStream.toByteArray();
+      final InputStream inputStream = new ByteArrayInputStream(serializedBytes);
+      ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
+      Object result = objectInputStream.readObject();
+      assert result instanceof Transaction;
+      assertEquals(result, transaction);
+
+    } catch (IOException | ClassNotFoundException ex) {
+      fail(ex.getMessage());
+    } finally {
+      try {
+        if (objectOutputStream != null) {
+          objectOutputStream.close();
+        }
+      } catch (IOException ex) {
+        fail(ex.getMessage());
+      }
+    }
+
+    final InventoryMessage inventoryMessage = InventoryMessage.with(transaction);
+    LOGGER.info("inventoryMessage: " + inventoryMessage);
+
+    final List<InventoryItem> inventoryItems = inventoryMessage.getItems();
+    assertEquals(1, inventoryItems.size());
+    final InventoryItem inventoryItem = inventoryItems.get(0);
+    LOGGER.info("inventoryItem: " + inventoryItem);
+
+    objectOutputStream = null;
+    try {
+
+      // serialize inventoryItem
+      final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+      objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+      objectOutputStream.writeObject(inventoryItem);
+      objectOutputStream.close();
+      assertTrue(byteArrayOutputStream.toByteArray().length > 0);
+
+      // deserialize inventoryItem
+      final byte[] serializedBytes = byteArrayOutputStream.toByteArray();
+      final InputStream inputStream = new ByteArrayInputStream(serializedBytes);
+      ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
+      Object result = objectInputStream.readObject();
+      assert result instanceof InventoryItem;
+      assertEquals(result, inventoryItem);
+
+    } catch (IOException | ClassNotFoundException ex) {
+      LOGGER.info(StringUtils.getStackTraceAsString(ex));
+      fail(ex.getMessage());
+    } finally {
+      try {
+        if (objectOutputStream != null) {
+          objectOutputStream.close();
+        }
+      } catch (IOException ex) {
+        fail(ex.getMessage());
+      }
+    }
+
+    objectOutputStream = null;
+    try {
+
+      // serialize inventoryMessage
+      final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+      objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+      objectOutputStream.writeObject(inventoryMessage);
+      objectOutputStream.close();
+      assertTrue(byteArrayOutputStream.toByteArray().length > 0);
+
+      // deserialize inventoryMessage
+      final byte[] serializedBytes = byteArrayOutputStream.toByteArray();
+      final InputStream inputStream = new ByteArrayInputStream(serializedBytes);
+      ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
+      Object result = objectInputStream.readObject();
+      assert result instanceof InventoryMessage;
+      assertEquals(result, inventoryMessage);
+
+    } catch (IOException | ClassNotFoundException ex) {
+      LOGGER.info(StringUtils.getStackTraceAsString(ex));
+      fail(ex.getMessage());
+    } finally {
+      try {
+        if (objectOutputStream != null) {
+          objectOutputStream.close();
+        }
+      } catch (IOException ex) {
+        fail(ex.getMessage());
+      }
+    }
+  }
+
+  /**
+   * Creates a test bitcoin transaction of sufficient realism to exercise the unit tests. Two outputs, one to us, one to somewhere else to
+   * simulate change.
+   *
+   * @param networkParameters the network parameters
+   * @param nanocoins the transaction input amount
+   * @param recipientAddress the elliptic curve key recipent address
+   *
+   * @return the transaction
+   * @throws java.io.IOException
+   */
+  public static Transaction createFakeTx(
+          final NetworkParameters networkParameters,
+          final BigInteger nanocoins,
+          final ECKey recipientAddress) throws IOException, ProtocolException {
+    //Preconditions
+    assert networkParameters != null : "networkParameters must not be null";
+    assert nanocoins != null : "nanocoins must not be null";
+    assert recipientAddress != null : "recipientAddress must not be null";
+
+    Transaction transaction = new Transaction(networkParameters);
+    TransactionOutput outputToMe = new TransactionOutput(networkParameters, transaction, nanocoins, recipientAddress);
+    transaction.addOutput(outputToMe);
+    TransactionOutput change = new TransactionOutput(networkParameters, transaction, Utils.toNanoCoins(1, 11), new ECKey());
+    transaction.addOutput(change);
+    // Make a previous tx simply to send us sufficient coins. This prev tx is not really valid but it doesn't
+    // matter for our purposes.
+    Transaction prevTx = new Transaction(networkParameters);
+    TransactionOutput prevOut = new TransactionOutput(networkParameters, prevTx, nanocoins, recipientAddress);
+    prevTx.addOutput(prevOut);
+    // Connect it.
+    transaction.addInput(prevOut);
+    // Serialize/deserialize to ensure internal state is stripped, as if it had been read from the wire.
+    return roundTripTransaction(networkParameters, transaction);
+  }
+
+  /**
    * Test of class AICMint initialize task message.
    */
   @Test
@@ -101,12 +274,7 @@ public class AICMintTest {
 
     skillTestHarness.dispatchMessage(initializeMessage);
 
-    final AICMint skillTemplate = (AICMint) skillTestHarness.getSkill(skillClassName);
-    if (skillTemplate.getNodeRuntime().isFirstContainerInNetwork()) {
-      assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
-    } else {
-      assertEquals("ISOLATED_FROM_NETWORK", skillTestHarness.getSkillState(skillClassName).toString());
-    }
+    assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
     assertNull(skillTestHarness.getOperationAndSenderServiceInfo());
   }
 

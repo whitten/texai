@@ -70,11 +70,7 @@ public final class AICMint extends AbstractNetworkSingletonSkill {
        */
       case AHCSConstants.INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
-        if (getNodeRuntime().isFirstContainerInNetwork()) {
-          setSkillState(AHCSConstants.State.READY);
-        } else {
-          setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
-        }
+        setSkillState(AHCSConstants.State.READY);
         return;
 
       /**

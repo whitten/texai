@@ -311,10 +311,10 @@ public final class AICOperation extends AbstractSkill {
     final Message connectionRequestApprovedInfoMessage = this.makeReplyMessage(
             receivedMessage,
             AHCSConstants.CONNECTION_REQUEST_APPROVED_INFO);
-          final X509SecurityInfo x509SecurityInfo = getX509SecurityInfo();
-          connectionRequestApprovedInfoMessage.put(
-                  AHCSConstants.MSG_PARM_X509_CERTIFICATE,
-                  x509SecurityInfo.getX509Certificate());
+    final X509SecurityInfo x509SecurityInfo = getX509SecurityInfo();
+    connectionRequestApprovedInfoMessage.put(
+            AHCSConstants.MSG_PARM_X509_CERTIFICATE,
+            x509SecurityInfo.getX509Certificate());
     sendMessage(
             receivedMessage,
             connectionRequestApprovedInfoMessage); // message
@@ -346,7 +346,7 @@ public final class AICOperation extends AbstractSkill {
     LOGGER.info("opening channel to aicoind");
     localBitcoindAdapter.startUp();
 
-    // send a version messages to the local bitcoind (aicoind), the response will be relayed to the remote bitcoind
+    // send a version message to the local bitcoind (aicoind), the response will not be relayed
     localBitcoindAdapter.sendVersionMessageToLocalBitcoinCore();
   }
 
@@ -399,10 +399,10 @@ public final class AICOperation extends AbstractSkill {
                     superPeerContainerName + ".AICOperationAgent.AICOperationRole", // recipientQualifiedName
                     AICOperation.class.getName(), // recipientService
                     AHCSConstants.CONNECTION_REQUEST_INFO); // operation
-          final X509SecurityInfo x509SecurityInfo = aicOperation.getX509SecurityInfo();
-          connectionRequestInfoMessage.put(
-                  AHCSConstants.MSG_PARM_X509_CERTIFICATE,
-                  x509SecurityInfo.getX509Certificate());
+            final X509SecurityInfo x509SecurityInfo = aicOperation.getX509SecurityInfo();
+            connectionRequestInfoMessage.put(
+                    AHCSConstants.MSG_PARM_X509_CERTIFICATE,
+                    x509SecurityInfo.getX509Certificate());
 
             aicOperation.sendMessageViaSeparateThread(
                     null, // received message
@@ -606,7 +606,23 @@ public final class AICOperation extends AbstractSkill {
     final String remoteContainerName = receivedMessage.getSenderContainerName();
 
     synchronized (localBitcoindAdapterDictionary) {
-      final LocalBitcoindAdapter localBitcoindAdapter = localBitcoindAdapterDictionary.get(remoteContainerName);
+      LocalBitcoindAdapter localBitcoindAdapter = localBitcoindAdapterDictionary.get(remoteContainerName);
+      if (localBitcoindAdapter == null) {
+        // the remote peer is a new connection
+        LOGGER.info("Connecting local bitcoind to " + remoteContainerName);
+        final SuperPeerConnection superPeerConnection = new SuperPeerConnection(
+                this,
+                remoteContainerName);
+        localBitcoindAdapter = new LocalBitcoindAdapter(
+                ((NodeRuntime) getNodeRuntime()).getNetworkParameters(),
+                superPeerConnection, // bitcoinMessageReceiver
+                getNodeRuntime());
+
+        localBitcoindAdapterDictionary.put(remoteContainerName, localBitcoindAdapter);
+      }
+      localBitcoindAdapter.startUp();
+      // send a version message to the local bitcoind (aicoind), the response will not be relayed
+      localBitcoindAdapter.sendVersionMessageToLocalBitcoinCore();
       localBitcoindAdapter.sendBitcoinMessageToLocalBitcoind(bitcoinProtocolMessage);
     }
   }

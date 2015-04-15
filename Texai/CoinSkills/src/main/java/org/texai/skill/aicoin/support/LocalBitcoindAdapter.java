@@ -166,7 +166,11 @@ public class LocalBitcoindAdapter extends SimpleChannelHandler {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("received from the local bitcoind instance: " + message);
       }
-      localBitcoindAdapter.bitcoinMessageReceiver.receiveMessageFromBitcoind(message);
+      if (VersionMessage.class.isAssignableFrom(message.getClass())) {
+        LOGGER.info("dropping version message outbound from bitcoind");
+      } else {
+        localBitcoindAdapter.bitcoinMessageReceiver.receiveMessageFromBitcoind(message);
+      }
 
     }
   }

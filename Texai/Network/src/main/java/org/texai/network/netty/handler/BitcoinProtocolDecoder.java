@@ -13,7 +13,6 @@ package org.texai.network.netty.handler;
 import com.google.bitcoin.core.BitcoinSerializer;
 import com.google.bitcoin.core.NetworkParameters;
 import static com.google.bitcoin.core.Utils.bytesToHexString;
-import com.google.bitcoin.params.MainNetParams;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import net.jcip.annotations.NotThreadSafe;
@@ -81,7 +80,9 @@ public class BitcoinProtocolDecoder extends FrameDecoder {
     assert channel != null : "channel must not be null";
     assert channelBuffer != null : "channelBuffer must not be null";
 
-    LOGGER.info("Receiving message:  " + bytesToHexString(channelBuffer.toByteBuffer(0, channelBuffer.readableBytes()).array()));
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Receiving message:  " + bytesToHexString(channelBuffer.toByteBuffer(0, channelBuffer.readableBytes()).array()));
+    }
 
     if (channelBuffer.readableBytes() < 20) {
       if (LOGGER.isDebugEnabled()) {
@@ -90,17 +91,20 @@ public class BitcoinProtocolDecoder extends FrameDecoder {
       // indicate that this frame is incomplete
       return null;
     }
+    final boolean isProtocolOK;
     // network magic bytes
     final byte protocolByte1 = channelBuffer.readByte();
     final byte protocolByte2 = channelBuffer.readByte();
     final byte protocolByte3 = channelBuffer.readByte();
     final byte protocolByte4 = channelBuffer.readByte();
-    LOGGER.warn("expected Bitcoin protocol bytes, " + magicBytes[0] + ", " + magicBytes[1] + ", " + magicBytes[2] + ", " + magicBytes[3]);
     if (protocolByte1 != magicBytes[0]
             || protocolByte2 != magicBytes[1]
             || protocolByte3 != magicBytes[2]
             || protocolByte4 != magicBytes[3]) {
       LOGGER.warn("wrong Bitcoin protocol bytes, found " + protocolByte1 + ", " + protocolByte2 + ", " + protocolByte3 + ", " + protocolByte4);
+      isProtocolOK = false;
+    } else {
+      isProtocolOK = true;
     }
 
     // skip over the command bytes
@@ -111,7 +115,9 @@ public class BitcoinProtocolDecoder extends FrameDecoder {
     lengthBytes[2] = channelBuffer.readByte();
     lengthBytes[3] = channelBuffer.readByte();
     final long payloadLength = ByteUtils.toUint32LittleEndian(lengthBytes);
-    LOGGER.info("payloadLength: " + payloadLength);
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("payloadLength: " + payloadLength);
+    }
     final long totalLength = payloadLength + 24;
     if (channelBuffer.readableBytes() < payloadLength + 4) {
       if (LOGGER.isDebugEnabled()) {
@@ -137,8 +143,13 @@ public class BitcoinProtocolDecoder extends FrameDecoder {
       byteBuffer.put(byte1);
     }
     byteBuffer.reset();
-    // return the deserialized Bitcoin message
-    return bitcoinSerializer.deserialize(byteBuffer);
+
+    if (isProtocolOK) {
+      // return the deserialized Bitcoin message
+      return bitcoinSerializer.deserialize(byteBuffer);
+    } else {
+      return null;
+    }
   }
 
 }

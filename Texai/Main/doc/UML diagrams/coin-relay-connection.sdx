@@ -4,8 +4,8 @@
 ao1:AICOperation[rp] "AICOperation (peer)"
 ao2:AICOperation[rp] "AICOperation (super peer)"
 
-ao1:ao2.connectionRequest_Info()
-ao2:ao1.connectionRequestOK_Info()
+ao1:ao2.connectionRequest_Info(x509Certificate)
+ao2:ao1.connectionRequestApproved_Info(x509Certificate)
 ]]></source>
 <configuration>
 <property name="activationBarBorderThickness" value="1"/>
