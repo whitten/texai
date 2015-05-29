@@ -109,75 +109,6 @@ public class LocalBitcoindAdapter extends SimpleChannelHandler {
   }
 
   /**
-   * Provides a Bitcoin protocol message handler for communicating with the local bitcoind (aicoind).
-   */
-  static class BitcoinProtocolMessageHandler extends AbstractBitcoinProtocolMessageHandler {
-
-    // the parent local bitcoind adapter
-    final LocalBitcoindAdapter localBitcoindAdapter;
-
-    /**
-     * Constructs a new BitcoinProtocolMessageHandler instance.
-     *
-     * @param localBitcoindAdapter the parent local bitcoind adapter
-     * @param networkParameters the network parameters, e.g. MainNetParams or TestNet3Params
-     */
-    BitcoinProtocolMessageHandler(
-            final LocalBitcoindAdapter localBitcoindAdapter,
-            final NetworkParameters networkParameters) {
-      super(networkParameters);
-      //Preconditions
-      assert localBitcoindAdapter != null : "localBitcoindAdapter must not be null";
-
-      this.localBitcoindAdapter = localBitcoindAdapter;
-    }
-
-    /**
-     * Catches a channel exception.
-     *
-     * @param channelHandlerContext the channel handler context
-     * @param exceptionEvent the exception event
-     */
-    @Override
-    @SuppressWarnings("ThrowableResultIgnored")
-    public void exceptionCaught(final ChannelHandlerContext channelHandlerContext, final ExceptionEvent exceptionEvent) {
-      //Preconditions
-      assert channelHandlerContext != null : "channelHandlerContext must not be null";
-      assert exceptionEvent != null : "exceptionEvent must not be null";
-
-      final Throwable throwable = exceptionEvent.getCause();
-      LOGGER.info(throwable.getMessage());
-
-    }
-
-    /**
-     * Receives a bitcoin protocol message.
-     *
-     * @param channelHandlerContext the channel handler context
-     * @param messageEvent the message event
-     */
-    @Override
-    public void messageReceived(
-            final ChannelHandlerContext channelHandlerContext,
-            final MessageEvent messageEvent) {
-      //Preconditions
-      assert messageEvent != null : "messageEvent must not be null";
-      assert Message.class.isAssignableFrom(messageEvent.getMessage().getClass());
-
-      final Message message = (Message) messageEvent.getMessage();
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("received from the local bitcoind instance: " + message);
-      }
-      if (VersionMessage.class.isAssignableFrom(message.getClass())) {
-        LOGGER.info("dropping version message outbound from bitcoind");
-      } else {
-        localBitcoindAdapter.bitcoinMessageReceiver.receiveMessageFromBitcoind(message);
-      }
-
-    }
-  }
-
-  /**
    * Connects to the local bitcoind instance.
    *
    * @return the communications channel with the local bitcoind instance
@@ -199,7 +130,7 @@ public class LocalBitcoindAdapter extends SimpleChannelHandler {
             nodeRuntime.getExecutor()); // workerExecutor
 
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("Connected to bitcoind.");
+      LOGGER.debug("Connected to bitcoind (aicoind).");
     }
     return channel1;
   }
@@ -214,10 +145,10 @@ public class LocalBitcoindAdapter extends SimpleChannelHandler {
     assert message != null : "message must not be null";
     assert getChannel() != null : "channel must not be null";
 
-    LOGGER.info("send bitcoin protocol message to local bitcoind instance: " + message);
-    final ChannelFuture channelFuture = getChannel().write(message);
+    LOGGER.info("send bitcoin protocol message to local bitcoind (aicoind) instance: " + message);
+    final ChannelFuture channelFuture = channel.write(message);
 
-    // wait for the outbound version message to be sent
+    // wait for the inbound message to be sent to the local bitcoind instance
     channelFuture.awaitUninterruptibly();
     if (!channelFuture.isSuccess()) {
       LOGGER.info(StringUtils.getStackTraceAsString(channelFuture.getCause()));
@@ -273,6 +204,75 @@ public class LocalBitcoindAdapter extends SimpleChannelHandler {
     final Message pingMessage = new Ping(random.nextLong());
 
     sendBitcoinMessageToLocalBitcoind(pingMessage);
+  }
+
+  /**
+   * Provides a Bitcoin protocol message handler for communicating with the local bitcoind (aicoind).
+   */
+  static class BitcoinProtocolMessageHandler extends AbstractBitcoinProtocolMessageHandler {
+
+    // the parent local bitcoind adapter
+    final LocalBitcoindAdapter localBitcoindAdapter;
+
+    /**
+     * Constructs a new BitcoinProtocolMessageHandler instance.
+     *
+     * @param localBitcoindAdapter the parent local bitcoind adapter
+     * @param networkParameters the network parameters, e.g. MainNetParams or TestNet3Params
+     */
+    BitcoinProtocolMessageHandler(
+            final LocalBitcoindAdapter localBitcoindAdapter,
+            final NetworkParameters networkParameters) {
+      super(networkParameters);
+      //Preconditions
+      assert localBitcoindAdapter != null : "localBitcoindAdapter must not be null";
+
+      this.localBitcoindAdapter = localBitcoindAdapter;
+    }
+
+    /**
+     * Catches a channel exception.
+     *
+     * @param channelHandlerContext the channel handler context
+     * @param exceptionEvent the exception event
+     */
+    @Override
+    @SuppressWarnings("ThrowableResultIgnored")
+    public void exceptionCaught(final ChannelHandlerContext channelHandlerContext, final ExceptionEvent exceptionEvent) {
+      //Preconditions
+      assert channelHandlerContext != null : "channelHandlerContext must not be null";
+      assert exceptionEvent != null : "exceptionEvent must not be null";
+
+      final Throwable throwable = exceptionEvent.getCause();
+      LOGGER.info(throwable.getMessage());
+
+    }
+
+    /**
+     * Receives a bitcoin protocol message from the local bitcoind instance.
+     *
+     * @param channelHandlerContext the channel handler context
+     * @param messageEvent the message event
+     */
+    @Override
+    public void messageReceived(
+            final ChannelHandlerContext channelHandlerContext,
+            final MessageEvent messageEvent) {
+      //Preconditions
+      assert messageEvent != null : "messageEvent must not be null";
+      assert Message.class.isAssignableFrom(messageEvent.getMessage().getClass());
+
+      final Message message = (Message) messageEvent.getMessage();
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("received from the local bitcoind (aicoind) instance: " + message);
+      }
+      if (VersionMessage.class.isAssignableFrom(message.getClass())) {
+        LOGGER.info("dropping version message outbound from bitcoind (aicoind)");
+      } else {
+        localBitcoindAdapter.bitcoinMessageReceiver.receiveMessageFromBitcoind(message);
+      }
+
+    }
   }
 
 }

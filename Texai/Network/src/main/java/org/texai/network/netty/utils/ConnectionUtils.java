@@ -263,7 +263,7 @@ public final class ConnectionUtils {
             workerExecutor));
 
     // configure the client pipeline
-    LOGGER.info("configuring the client pipeline connecting to " + inetSocketAddress);
+    LOGGER.info("configuring the bitcoin protocol client pipeline connecting to " + inetSocketAddress);
     final ChannelPipeline channelPipeline = BitcoinProtocolMessageClientPipelineFactory.getPipeline(bitcoinProtocolMessageHandler);
     LOGGER.info(channelPipeline);
     clientBootstrap.setPipeline(channelPipeline);
