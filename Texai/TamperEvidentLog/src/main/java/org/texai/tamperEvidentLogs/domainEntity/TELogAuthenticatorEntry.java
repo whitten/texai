@@ -204,7 +204,7 @@ public class TELogAuthenticatorEntry extends AbstractTELogEntry {
               getPreviousTELogEntry().getDigest(),
               x509Certificate,
               getSignatureBytes());
-    } catch (NoSuchAlgorithmException | InvalidKeyException | IOException | SignatureException ex) {
+    } catch (NoSuchAlgorithmException | InvalidKeyException | IOException ex) {
       throw new TexaiException(ex);
     }
   }
