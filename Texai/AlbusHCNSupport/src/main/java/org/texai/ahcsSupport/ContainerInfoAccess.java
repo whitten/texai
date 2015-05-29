@@ -60,106 +60,125 @@ public class ContainerInfoAccess {
     LOGGER.info("Initializing the network container configuration.");
     synchronized (containerInfoDictionary) {
       if (networkName.equals(NetworkUtils.TEXAI_MAINNET)) {
-//        String elements[] = {"A", "B", "C", "D", "E"};
-//        Set<String> set = new ArraySet<>(Arrays.asList(elements));
-        initializeContainerInfo(
-                "aicoin01-a", // containerName
-                null, // ipAddress
-                NetworkUtils.TEXAI_MAINNET_PORT, // port
-                true, // isSuperPeer
-                false, // isClientGateway
-                false, // isFirstContainr
-                false, // isBlockExplorer
-                null); // superPeerContainers
-        initializeContainerInfo(
-                "aicpeer-bravo1030", // containerName
-                null, // ipAddress
-                NetworkUtils.TEXAI_MAINNET_PORT, // port
-                true, // isSuperPeer
-                false, // isFirstContainr
-                false, // isClientGateway
-                false, // isBlockExplorer
-                null); // superPeerContainers
+//        initializeContainerInfo(
+//                "aicoin01-a", // containerName
+//                null, // ipAddress
+//                NetworkUtils.TEXAI_MAINNET_PORT, // texai protocol port
+//                true, // isSuperPeer
+//                false, // isClientGateway
+//                false, // isFirstContainer
+//                false, // isBlockExplorer
+//                null); // superPeerContainers
+//        initializeContainerInfo(
+//                "aicpeer-bravo1030", // containerName
+//                null, // ipAddress
+//                NetworkUtils.TEXAI_MAINNET_PORT, // texai protocol port
+//                true, // isSuperPeer
+//                false, // isFirstContainer
+//                false, // isClientGateway
+//                false, // isBlockExplorer
+//                null); // superPeerContainers
         initializeContainerInfo(
                 "crawfish", // containerName
                 "lacrawfish.ddns.net", // ipAddress
-                NetworkUtils.TEXAI_MAINNET_PORT, // port
+                NetworkUtils.TEXAI_MAINNET_PORT, // texai protocol port
                 true, // isSuperPeer
-                false, // isFirstContainr
+                false, // isFirstContainer
                 false, // isClientGateway
                 false, // isBlockExplorer
                 null); // superPeerContainers
-        initializeContainerInfo(
-                "mediamaven", // containerName
-                null, // ipAddress
-                NetworkUtils.TEXAI_MAINNET_PORT, // port
-                true, // isSuperPeer
-                false, // isFirstContainr
-                false, // isClientGateway
-                false, // isBlockExplorer
-                null); // superPeerContainers
-        initializeContainerInfo(
-                "nexus", // containerName
-                "nexus.asuscomm.com", // ipAddress
-                NetworkUtils.TEXAI_MAINNET_PORT, // port
-                true, // isSuperPeer
-                false, // isFirstContainr
-                false, // isClientGateway
-                false, // isBlockExplorer
-                null); // superPeerContainers
-        initializeContainerInfo(
-                "pegasus", // containerName
-                null, // ipAddress
-                NetworkUtils.TEXAI_MAINNET_PORT, // port
-                true, // isSuperPeer
-                false, // isFirstContainr
-                false, // isClientGateway
-                false, // isBlockExplorer
-                null); // superPeerContainers
-        initializeContainerInfo(
-                "matrix", // containerName
-                null, // ipAddress
-                NetworkUtils.TEXAI_MAINNET_PORT, // port
-                true, // isSuperPeer
-                false, // isFirstContainr
-                false, // isClientGateway
-                false, // isBlockExplorer
-                null); // superPeerContainers
+//        initializeContainerInfo(
+//                "mediamaven", // containerName
+//                null, // ipAddress
+//                NetworkUtils.TEXAI_MAINNET_PORT, // texai protocol port
+//                true, // isSuperPeer
+//                false, // isFirstContainer
+//                false, // isClientGateway
+//                false, // isBlockExplorer
+//                null); // superPeerContainers
+//        initializeContainerInfo(
+//                "nexus", // containerName
+//                "nexus.asuscomm.com", // ipAddress
+//                NetworkUtils.TEXAI_MAINNET_PORT, // texai protocol port
+//                true, // isSuperPeer
+//                false, // isFirstContainer
+//                false, // isClientGateway
+//                false, // isBlockExplorer
+//                null); // superPeerContainers
+//        initializeContainerInfo(
+//                "pegasus", // containerName
+//                null, // ipAddress
+//                NetworkUtils.TEXAI_MAINNET_PORT, // texai protocol port
+//                true, // isSuperPeer
+//                false, // isFirstContainer
+//                false, // isClientGateway
+//                false, // isBlockExplorer
+//                null); // superPeerContainers
+//        initializeContainerInfo(
+//                "matrix", // containerName
+//                null, // ipAddress
+//                NetworkUtils.TEXAI_MAINNET_PORT, // texai protocol port
+//                true, // isSuperPeer
+//                false, // isFirstContainer
+//                false, // isClientGateway
+//                false, // isBlockExplorer
+//                null); // superPeerContainers
         initializeContainerInfo(
                 "turing", // containerName
                 "texai.dyndns.org", // ipAddress
-                NetworkUtils.TEXAI_MAINNET_PORT, // port
+                NetworkUtils.TEXAI_MAINNET_PORT, // texai protocol port
                 true, // isSuperPeer
-                true, // isFirstContainr
+                true, // isFirstContainer
                 true, // isClientGateway
                 true, // isBlockExplorer
                 null); // superPeerContainers
+        initializeContainerInfo(
+                "alice", // containerName, on the same host as turing
+                "alice", // ipAddress, actually the local docker container name
+                NetworkUtils.TEXAI_MAINNET_PORT + 1, // texai protocol port
+                true, // isSuperPeer
+                false, // isFirstContainer
+                false, // isClientGateway
+                false, // isBlockExplorer
+                null); // superPeerContainers
+        ContainerInfo containerInfo = initializeContainerInfo(
+                "bob", // containerName, on the same host as turing
+                "bob", // ipAddress, actually the local docker container name
+                NetworkUtils.TEXAI_MAINNET_PORT + 2, // texai protocol port
+                false, // isSuperPeer
+                false, // isFirstContainer
+                false, // isClientGateway
+                false, // isBlockExplorer
+                null); // superPeerContainers
+        // bob is an ordinary peer having connections to the super peers turing and alice
+        containerInfo.addSuperPeerContainerName("turing");
+        containerInfo.addSuperPeerContainerName("alice");
       } else {
         assert networkName.equals(NetworkUtils.TEXAI_TESTNET);
         initializeContainerInfo(
                 "TestAlice", // containerName
                 "TestAlice", // ipAddress
-                45049, // port
+                45049, // texai protocol port
                 true, // isSuperPeer
-                false, // isFirstContainr
+                false, // isFirstContainer
                 true, // isClientGateway
                 false, // isBlockExplorer
                 null); // superPeerContainers
         initializeContainerInfo(
                 "TestBlockchainExplorer", // containerName
                 "TestBlockchainExplorer", // ipAddress
-                45050, // port
+                45050, // texai protocol port
                 true, // isSuperPeer
-                false, // isFirstContainr
+                false, // isFirstContainer
                 false, // isClientGateway
                 true, // isBlockExplorer
                 null); // superPeerContainers
         ContainerInfo containerInfo = initializeContainerInfo(
                 "TestBob", // containerName
                 "TestBob", // ipAddress
-                45051, // port
+                45051, // texai protocol port
                 false, // isSuperPeer
-                false, // isFirstContainr
+                false, // isFirstContainer
                 true, // isClientGateway
                 false, // isBlockExplorer
                 null); // superPeerContainers
@@ -168,9 +187,9 @@ public class ContainerInfoAccess {
         initializeContainerInfo(
                 "TestMint", // containerName
                 "TestMint", // ipAddress
-                45048, // port
+                45048, // texai protocol port
                 true, // isSuperPeer
-                true, // isFirstContainr
+                true, // isFirstContainer
                 false, // isClientGateway
                 false, // isBlockExplorer
                 null); // superPeerContainers
@@ -220,7 +239,7 @@ public class ContainerInfoAccess {
     if (StringUtils.isNonEmptyString(ipAddress)) {
       containerInfo.setIpAddress(ipAddress);
     }
-    containerInfo.setPort(port);
+    containerInfo.setTexaiProtocolPort(port);
     if (superPeerContainerNames != null) {
       containerInfo.getSuperPeerContainerNames().addAll(superPeerContainerNames);
     }

@@ -94,7 +94,9 @@ public class LocalBitcoindAdapter extends SimpleChannelHandler {
    */
   public void shutDown() {
     LOGGER.info("shutDown");
-    getChannel().close();
+    if (getChannel() != null) {
+      getChannel().close();
+    }
   }
 
   /**

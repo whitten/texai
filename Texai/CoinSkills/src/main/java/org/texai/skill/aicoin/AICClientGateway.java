@@ -1,15 +1,11 @@
 package org.texai.skill.aicoin;
 
-import java.util.HashMap;
-import java.util.Map;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
-import org.jboss.netty.channel.Channel;
 import org.texai.ahcs.NodeRuntime;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.skill.AbstractSkill;
 import org.texai.ahcsSupport.Message;
-import org.texai.skill.aicoin.support.BitcoinProtocolMessageHandler;
 import org.texai.skill.aicoin.support.BitcoinProtocolMessageHandlerFactory;
 
 /**
@@ -28,8 +24,8 @@ public final class AICClientGateway extends AbstractSkill {
 
   // the logger
   private static final Logger LOGGER = Logger.getLogger(AICClientGateway.class);
-  // the Bitcoin protocol message handler dictionary, channel --> Bitcoin protocol message handler
-  private final Map<Channel, BitcoinProtocolMessageHandler> bitcoinProtocolMessageHandlerDictionary = new HashMap<>();
+  // the Bitcoin protocol message handler factory
+  private BitcoinProtocolMessageHandlerFactory bitcoinProtocolMessageHandlerFactory;
 
   /**
    * Constructs a new AICClientGateway instance.
@@ -162,13 +158,18 @@ public final class AICClientGateway extends AbstractSkill {
     assert getRole().getChildQualifiedNames().isEmpty() : "must not have child roles";
     assert NodeRuntime.class.isAssignableFrom(getNodeRuntime().getClass()) : "must be NodeRuntime";
 
+    if (getNodeRuntime().isClientGateway()) {
+      getNodeRuntime().getExecutor().execute(new ClientListenerRunnable(
+              this)); // aicClientGateway
+    }
   }
 
-  /** Provides a client listener runnable that waits 15 seconds before starting the listener socket. */
+  /**
+   * Provides a client listener runnable that waits 15 seconds before starting the listener socket.
+   */
   static class ClientListenerRunnable implements Runnable {
 
     // the AIC client gateway skill
-
     final AICClientGateway aicClientGateway;
 
     ClientListenerRunnable(final AICClientGateway aicClientGateway) {

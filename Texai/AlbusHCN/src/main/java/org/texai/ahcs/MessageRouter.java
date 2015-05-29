@@ -362,7 +362,7 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
     String containerName = null;
     synchronized (containerChannelDictionary) {
       for (final Entry<String, Channel> entry : containerChannelDictionary.entrySet()) {
-        if (entry != null && entry.getValue().equals(channel)) {
+        if (entry != null && entry.getValue() != null && entry.getValue().equals(channel)) {
           containerName = entry.getKey();
         }
       }
@@ -480,7 +480,7 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
           final ContainerInfo containerInfo = nodeRuntime.getContainerInfo(message.getRecipientContainerName());
           assert containerInfo != null;
           final String hostName = containerInfo.getIpAddress();
-          final int port = containerInfo.getPort();
+          final int texaiProtocolPort = containerInfo.getTexaiProtocolPort();
           if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("retrieving X.509 security info for " + message.getSenderQualifiedName());
           }
@@ -494,14 +494,14 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
             X509Utils.logAliases(nodeRuntime.getKeyStore(), LOGGER);
             throw new TexaiException(ex);
           }
-          LOGGER.info("opening connection to " + hostName + ':' + port);
+          LOGGER.info("opening connection to " + hostName + ':' + texaiProtocolPort);
           channel = openChannelToPeerContainer(
                   message.getRecipientContainerName(), // containerName,
                   hostName,
-                  port,
+                  texaiProtocolPort,
                   x509SecurityInfo);
           if (channel == null) {
-            LOGGER.info("no connection to " + hostName + ':' + port);
+            LOGGER.info("no connection to " + hostName + ':' + texaiProtocolPort);
             //TODO report to network operations
             return;
           }

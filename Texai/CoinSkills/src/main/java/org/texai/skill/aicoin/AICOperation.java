@@ -20,12 +20,11 @@ import org.texai.util.EnvironmentUtils;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 import org.texai.x509.X509SecurityInfo;
-import org.texai.x509.X509Utils;
 
 /**
  * Created on Aug 30, 2014, 11:31:08 PM.
  *
- * Description: Operates a slave bitcoind instance that runs in a separate continueConversation in the same container.
+ * Description: Operates a bitcoind (aicoind) instance that runs in the same container.
  *
  * Copyright (C) Aug 30, 2014, Stephen L. Reed, Texai.org.
  *
@@ -291,7 +290,7 @@ public final class AICOperation extends AbstractSkill {
 
     getNodeRuntime().getExecutor().execute(new SuperPeerConnector(this));
 
-    if ("BlockchainExplorer".equals(getContainerName())) {
+    if (getNodeRuntime().isBlockExplorer()) {
       // after a pause, launch the Insight blockchain explorer instance
       getNodeRuntime().getExecutor().execute(new InsightRunner());
     }
@@ -342,12 +341,11 @@ public final class AICOperation extends AbstractSkill {
 
     synchronized (localBitcoindAdapterDictionary) {
       localBitcoindAdapterDictionary.put(superPeerContainerName, localBitcoindAdapter);
+      LOGGER.info("opening channel to bitcoind (aicoind)");
+      localBitcoindAdapter.startUp();
+      // send a version message to the local bitcoind (aicoind), the response will not be relayed
+      localBitcoindAdapter.sendVersionMessageToLocalBitcoinCore();
     }
-    LOGGER.info("opening channel to aicoind");
-    localBitcoindAdapter.startUp();
-
-    // send a version message to the local bitcoind (aicoind), the response will not be relayed
-    localBitcoindAdapter.sendVersionMessageToLocalBitcoinCore();
   }
 
   /**
@@ -507,6 +505,9 @@ public final class AICOperation extends AbstractSkill {
     AICoinUtils.executeHostCommandWithoutWaitForCompletion(cmdArray);
   }
 
+  /**
+   * Launchers the Insight blockchain explorer after a delay.
+   */
   class InsightRunner implements Runnable {
 
     @Override
@@ -517,6 +518,7 @@ public final class AICOperation extends AbstractSkill {
         LOGGER.info("Waiting 1 minute before launching the block explorer ...");
         Thread.sleep(60 * 1000);
       } catch (InterruptedException ex) {
+        // ignore exception
       }
       launchInsight();
     }
@@ -539,7 +541,7 @@ public final class AICOperation extends AbstractSkill {
       ""
     };
     final StringBuilder stringBuilder = new StringBuilder();
-    stringBuilder.append("cd /root/insight && npm start");
+    stringBuilder.append("cd /insight && npm start");
     cmdArray[2] = stringBuilder.toString();
     LOGGER.info("Launching the Insight blockchain explorer instance.");
     LOGGER.info("  shell cmd: " + cmdArray[2]);
@@ -595,7 +597,7 @@ public final class AICOperation extends AbstractSkill {
    *
    * @param receivedMessage the given message, which contains the Bitcoin protocol message as a parameter
    */
-  private void relayBitcoinMessage(final Message receivedMessage) {
+  private synchronized void relayBitcoinMessage(final Message receivedMessage) {
     //Preconditions
     assert receivedMessage != null : "message must not be null";
 
@@ -605,8 +607,9 @@ public final class AICOperation extends AbstractSkill {
     assert bitcoinProtocolMessage != null;
     final String remoteContainerName = receivedMessage.getSenderContainerName();
 
+    LocalBitcoindAdapter localBitcoindAdapter;
     synchronized (localBitcoindAdapterDictionary) {
-      LocalBitcoindAdapter localBitcoindAdapter = localBitcoindAdapterDictionary.get(remoteContainerName);
+      localBitcoindAdapter = localBitcoindAdapterDictionary.get(remoteContainerName);
       if (localBitcoindAdapter == null) {
         // the remote peer is a new connection
         LOGGER.info("Connecting local bitcoind to " + remoteContainerName);
@@ -619,12 +622,14 @@ public final class AICOperation extends AbstractSkill {
                 getNodeRuntime());
 
         localBitcoindAdapterDictionary.put(remoteContainerName, localBitcoindAdapter);
+        LOGGER.info("opening channel to bitcoind (aicoind)");
+        localBitcoindAdapter.startUp();
+        // send a version message to the local bitcoind (aicoind), the response will not be relayed
+        localBitcoindAdapter.sendVersionMessageToLocalBitcoinCore();
       }
-      localBitcoindAdapter.startUp();
-      // send a version message to the local bitcoind (aicoind), the response will not be relayed
-      localBitcoindAdapter.sendVersionMessageToLocalBitcoinCore();
-      localBitcoindAdapter.sendBitcoinMessageToLocalBitcoind(bitcoinProtocolMessage);
     }
+    LOGGER.info("relaying message to bitcoind (aicoind)");
+    localBitcoindAdapter.sendBitcoinMessageToLocalBitcoind(bitcoinProtocolMessage);
   }
 
 }

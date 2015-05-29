@@ -185,6 +185,32 @@ public class BasicNodeRuntime implements MessageDispatcher {
     }
   }
 
+  /** Returns whether this container hosts an Insight blockchain explorer instance.
+   *
+   * @return whether this container hosts an Insight blockchain explorer instance
+   */
+  public boolean isBlockExplorer() {
+    final ContainerInfo containerInfo = getContainerInfo(containerName);
+    if (containerInfo == null) {
+      return false;
+    } else {
+      return containerInfo.isBlockExplorer();
+    }
+  }
+
+  /** Returns whether this container is a gateway for remote wallet connections.
+   *
+   * @return whether this container is a gateway for remote wallet connections
+   */
+  public boolean isClientGateway() {
+    final ContainerInfo containerInfo = getContainerInfo(containerName);
+    if (containerInfo == null) {
+      return false;
+    } else {
+      return containerInfo.isClientGateway();
+    }
+  }
+
   /**
    * Gets the container name.
    *

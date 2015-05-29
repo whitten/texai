@@ -53,9 +53,10 @@ public class BitcoinProtocolMessageHandlerFactory extends AbstractBitcoinProtoco
     serverBootstrap = ConnectionUtils.createBitcoinProtocolServer(
             networkParameters.getPort(),
             this, // bitcoinProtocolMessageHandlerFactory
-            networkParameters,
+            nodeRuntime.getNetworkParameters(),
             nodeRuntime.getExecutor(), // bossExecutor
             nodeRuntime.getExecutor()); // workerExecutor
+    LOGGER.info("listening for wallet clients on port " + networkParameters.getPort());
   }
 
   /**
@@ -73,17 +74,17 @@ public class BitcoinProtocolMessageHandlerFactory extends AbstractBitcoinProtoco
   @Override
   public AbstractBitcoinProtocolMessageHandler getHandler() {
     return new BitcoinProtocolMessageHandler(
-            networkParameters,
+            nodeRuntime.getNetworkParameters(),
             nodeRuntime,
             bitcoinProtocolMessageHandlerDictionary);
   }
 
   /**
-   * Gets the Bitcoin protocol message proxy dictionary.
+   * Gets the Bitcoin protocol message dictionary.
    *
    * @return the Bitcoin protocol message proxy dictionary
    */
-  protected Map<SocketAddress, BitcoinProtocolMessageHandler> getBitcoinProtocolMessageProxyDictionary() {
+  protected Map<SocketAddress, BitcoinProtocolMessageHandler> getBitcoinProtocolMessageHandlerDictionary() {
     return bitcoinProtocolMessageHandlerDictionary;
   }
 }

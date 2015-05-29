@@ -210,9 +210,8 @@ public final class ConnectionUtils {
     assert workerExecutor != null : "workerExecutor must not be null";
 
     // configure the server channel pipeline factory
-    final ChannelPipelineFactory channelPipelineFactory
-            = new BitcoinProtocolChannelPipelineFactory(
-                    bitcoinProtocolMessageHandlerFactory,
+    final ChannelPipelineFactory channelPipelineFactory = new BitcoinProtocolChannelPipelineFactory(
+            bitcoinProtocolMessageHandlerFactory,
             networkParameters);
 
     // configure the server

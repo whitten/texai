@@ -16,6 +16,7 @@ import org.jboss.netty.channel.MessageEvent;
 import org.texai.ahcsSupport.skill.BasicNodeRuntime;
 import org.texai.network.netty.handler.AbstractBitcoinProtocolMessageHandler;
 import org.texai.util.NetworkUtils;
+import org.texai.util.StringUtils;
 
 /**
  * BitcoinProtocolMessageHandler.java
@@ -29,8 +30,6 @@ public class BitcoinProtocolMessageHandler extends AbstractBitcoinProtocolMessag
 
   // the logger
   private final static Logger LOGGER = Logger.getLogger(BitcoinProtocolMessageHandler.class);
-  // the node runtime
-  private final BasicNodeRuntime nodeRuntime;
   // the local Bitcoind adapter
   private final LocalBitcoindAdapter localBitcoindAdapter;
   // the Bitcoin protocol message handler dictionary, remote socket address -> Bitcoin protocol message handler
@@ -61,7 +60,6 @@ public class BitcoinProtocolMessageHandler extends AbstractBitcoinProtocolMessag
             || (nodeRuntime.getNetworkName().equals(NetworkUtils.TEXAI_TESTNET) && TestNet3Params.class.isAssignableFrom(networkParameters.getClass()));
     assert bitcoinProtocolMessageProxyDictionary != null : "bitcoinProtocolMessageProxyDictionary must not be null";
 
-    this.nodeRuntime = nodeRuntime;
     this.bitcoinProtocolMessageHandlerDictionary = bitcoinProtocolMessageProxyDictionary;
     localBitcoindAdapter = new LocalBitcoindAdapter(
             networkParameters,
@@ -98,7 +96,7 @@ public class BitcoinProtocolMessageHandler extends AbstractBitcoinProtocolMessag
     assert exceptionEvent != null : "exceptionEvent must not be null";
 
     final Throwable throwable = exceptionEvent.getCause();
-    LOGGER.info(throwable.getMessage());
+    LOGGER.info(StringUtils.getStackTraceAsString(throwable));
 
     // remove this handler from the dictionary
     if (socketAddress == null) {
@@ -151,9 +149,6 @@ public class BitcoinProtocolMessageHandler extends AbstractBitcoinProtocolMessag
     }
 
     if (isNewConnection) {
-      assert socketAddress == null;
-      assert remotePeerChannel == null;
-      socketAddress = channelHandlerContext.getChannel().getRemoteAddress();
       remotePeerChannel = channel;
       localBitcoindAdapter.startUp();
       localBitcoindChannel = localBitcoindAdapter.getChannel();
@@ -179,6 +174,9 @@ public class BitcoinProtocolMessageHandler extends AbstractBitcoinProtocolMessag
     //Preconditions
     assert message != null : "message must not be null";
 
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("***** sending to remote Bitcoin protocol peer: " + message);
+    }
     remotePeerChannel.write(message);
   }
 }

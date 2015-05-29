@@ -29,6 +29,7 @@ import org.texai.kb.journal.JournalWriter;
 import org.texai.kb.persistence.DistributedRepositoryManager;
 import org.texai.kb.persistence.KBAccess;
 import org.texai.kb.persistence.RDFEntityPersister;
+import org.texai.network.netty.handler.BitcoinProtocolMessageHandler;
 import org.texai.network.netty.handler.PortUnificationHandler;
 import org.texai.network.netty.pipeline.AlbusHCNMessageClientPipelineFactory;
 import org.texai.network.netty.pipeline.PortUnificationChannelPipelineFactory;
@@ -112,6 +113,7 @@ public class AICoinMain {
     assert StringUtils.isNonEmptyString(containerName) : "containerName must be a non-empty string";
 
     Logger.getLogger(AlbusHCNMessageClientPipelineFactory.class).setLevel(Level.WARN);
+    Logger.getLogger(BitcoinProtocolMessageHandler.class).setLevel(Level.DEBUG);
     Logger.getLogger(DistributedRepositoryManager.class).setLevel(Level.WARN);
     Logger.getLogger(KBAccess.class).setLevel(Level.WARN);
     Logger.getLogger(JournalWriter.class).setLevel(Level.WARN);
@@ -124,7 +126,7 @@ public class AICoinMain {
     Logger.getLogger(TexaiSSLContextFactory.class).setLevel(Level.WARN);
     Logger.getLogger(X509Utils.class).setLevel(Level.WARN);
 
-    LOGGER.info("A.I. Coin version " + VERSION + ".");
+    LOGGER.info("AI Coin version " + VERSION + ".");
     final String timeZoneId = System.getenv("TIMEZONE");
     if (!StringUtils.isNonEmptyString(timeZoneId)) {
       throw new TexaiException("the TIMEZONE environment variable must be set to a valid timezone\n "
@@ -133,6 +135,14 @@ public class AICoinMain {
     LOGGER.debug("The time zone is " + timeZoneId + ".");
     DateTimeZone.setDefault(DateTimeZone.forID(timeZoneId));
     LOGGER.info("Started " + (new DateTime()).toString("MM/dd/yyyy hh:mm a") + ".");
+
+
+    try {
+      // give time for the operator to resize the VNC window for ease of viewing the console log
+      Thread.sleep(5000);
+    } catch (InterruptedException ex) {
+      // ignore
+    }
 
     final String networkName = System.getenv("NETWORK");
     if (!NetworkUtils.TEXAI_MAINNET.equals(networkName) && !NetworkUtils.TEXAI_TESTNET.equals(networkName)) {
@@ -149,9 +159,9 @@ public class AICoinMain {
     CacheInitializer.addNamedCaches(NAMED_CACHES);
     assert !Logger.getLogger(RDFEntityPersister.class).isInfoEnabled();
 
+    // TODO
     // for the demo, delete the previous knowledge base journals
     JournalWriter.deleteJournalFiles();
-
 
     if (nodeRuntime.isFirstContainerInNetwork()) {
       LOGGER.info("This is the first container in the network and will host all the network singleton agent / roles.");

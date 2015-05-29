@@ -38,9 +38,9 @@ public class ContainerInfo implements CascadePersistence, Comparable<ContainerIn
   // the IP address
   @RDFProperty()
   private String ipAddress;
-  // the port
+  // the texai protocol port
   @RDFProperty()
-  private int port;
+  private int texaiProtocolPort;
   // the indicator whether this node is a super peer, if so then this container connects to all the other super peer containers
   @RDFProperty()
   private final boolean isSuperPeer;
@@ -327,23 +327,23 @@ public class ContainerInfo implements CascadePersistence, Comparable<ContainerIn
     return this.containerName.compareTo(that.containerName);
   }
 
-  /** Gets the port.
+  /** Gets the texai protocol port.
    *
-   * @return the port
+   * @return the texai protocol port
    */
-  public int getPort() {
-    return port;
+  public int getTexaiProtocolPort() {
+    return texaiProtocolPort;
   }
 
-  /** Sets the port.
+  /** Sets the texai protocol port.
    *
-   * @param port the port to set
+   * @param texaiProtocolPort the texai protocol port
    */
-  public void setPort(final int port) {
+  public void setTexaiProtocolPort(final int texaiProtocolPort) {
     //Preconditions
-    assert port > 1024 && port < 65535 : "port must be in the range, 1025 ... 65535";
+    assert texaiProtocolPort > 1024 && texaiProtocolPort < 65535 : "texai protocol port must be in the range, 1025 ... 65535";
 
-    this.port = port;
+    this.texaiProtocolPort = texaiProtocolPort;
   }
 
 }
