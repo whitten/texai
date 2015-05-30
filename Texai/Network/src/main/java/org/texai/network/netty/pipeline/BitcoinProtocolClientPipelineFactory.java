@@ -24,23 +24,23 @@ import org.texai.network.netty.handler.BitcoinProtocolEncoder;
  * @author reed
  */
 @NotThreadSafe
-public class BitcoinProtocolChannelPipelineFactory implements ChannelPipelineFactory {
+public class BitcoinProtocolClientPipelineFactory implements ChannelPipelineFactory {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(BitcoinProtocolChannelPipelineFactory.class);
+  private static final Logger LOGGER = Logger.getLogger(BitcoinProtocolClientPipelineFactory.class);
   // the Bitcoin protocol message handler factory
   private final AbstractBitcoinProtocolMessageHandlerFactory bitcoinProtocolMessageHandlerFactory;
   // the network parameters, e.g. MainNetParams or TestNet3Params
   private final NetworkParameters networkParameters;
 
   /**
-   * Constructs a new PortUnificationChannelPipelineFactory instance.
+   * Constructs a new BitcoinProtocolClientPipelineFactory instance.
    *
    * @param bitcoinProtocolMessageHandlerFactory the Bitcoin protocol message handler factory
    * @param networkParameters the network parameters, e.g. MainNetParams or TestNet3Params
    *
    */
-  public BitcoinProtocolChannelPipelineFactory(
+  public BitcoinProtocolClientPipelineFactory(
           final AbstractBitcoinProtocolMessageHandlerFactory bitcoinProtocolMessageHandlerFactory,
           final NetworkParameters networkParameters
   ) {
@@ -63,7 +63,9 @@ public class BitcoinProtocolChannelPipelineFactory implements ChannelPipelineFac
     channelPipeline.addLast("encoder", new BitcoinProtocolEncoder(networkParameters));
     channelPipeline.addLast("decoder", new BitcoinProtocolDecoder(networkParameters));
     channelPipeline.addLast("bitcoin-handler", bitcoinProtocolMessageHandlerFactory.getHandler());
-    LOGGER.info(channelPipeline);
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("bitcoin protocol client pipeline: " + channelPipeline);
+    }
     return channelPipeline;
   }
 }

@@ -188,9 +188,9 @@ public final class AICClientGateway extends AbstractSkill {
         // ignore
       }
       // start listening for connection requests from clients
-      final BitcoinProtocolMessageHandlerFactory bitcoinProtocolMessageHandlerFactory
+      aicClientGateway.bitcoinProtocolMessageHandlerFactory
               = new BitcoinProtocolMessageHandlerFactory((NodeRuntime) aicClientGateway.getNodeRuntime());
-      bitcoinProtocolMessageHandlerFactory.openBitcoinProtocolListeningSocket();
+      aicClientGateway.bitcoinProtocolMessageHandlerFactory.openBitcoinProtocolListeningSocket();
     }
   }
 

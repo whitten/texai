@@ -46,13 +46,15 @@ public class LocalBitcoindAdapter extends SimpleChannelHandler {
   // the network parameters, mainnet, testnet, or regression test net
   private final NetworkParameters networkParameters;
   // the Bitcoin protocol message handler
-  private final BitcoinProtocolMessageHandler bitcoinProtocolMessageHandler;
+  private final LocalBitcoinProtocolMessageHandler bitcoinProtocolMessageHandler;
   // the node runtime
   private final BasicNodeRuntime nodeRuntime;
   // the communications channel with the local bitcoind instance
   private Channel channel;
   // the random number used for ping nonces
   private final Random random = new Random();
+  // the indicator whether the version message is dropped
+  private final boolean isVersionMessageDropped;
 
   /**
    * Constructs a new LocalBitcoindAdapter instance.
@@ -61,11 +63,13 @@ public class LocalBitcoindAdapter extends SimpleChannelHandler {
    * @param bitcoinMessageReceiver the bitcoin message receiver, which is the skill that handles outbound bitcoin messages from the local
    * peer
    * @param nodeRuntime the node runtime, used to supply executors
+   * @param isVersionMessageDropped the indicator whether the version message is dropped
    */
   public LocalBitcoindAdapter(
           final NetworkParameters networkParameters,
           final BitcoinMessageReceiver bitcoinMessageReceiver,
-          final BasicNodeRuntime nodeRuntime) {
+          final BasicNodeRuntime nodeRuntime,
+          final boolean isVersionMessageDropped) {
     // Preconditions
     assert networkParameters != null : "networkParameters must not be null";
     assert bitcoinMessageReceiver != null : "bitcoinMessageReceiver must not be null";
@@ -76,8 +80,10 @@ public class LocalBitcoindAdapter extends SimpleChannelHandler {
     this.networkParameters = networkParameters;
     this.bitcoinMessageReceiver = bitcoinMessageReceiver;
     this.nodeRuntime = nodeRuntime;
-    bitcoinProtocolMessageHandler = new BitcoinProtocolMessageHandler(
-            this,
+    this.isVersionMessageDropped = isVersionMessageDropped;
+
+    bitcoinProtocolMessageHandler = new LocalBitcoinProtocolMessageHandler(
+            this, // localBitcoindAdapter
             networkParameters);
   }
 
@@ -158,14 +164,17 @@ public class LocalBitcoindAdapter extends SimpleChannelHandler {
 
   /**
    * Sends a version message to the local aicoind instance.
+   *
+   * @param newBestHeight the new best block height of the peer connecting to the local bitcoind (aicoind) instance.
    */
-  public void sendVersionMessageToLocalBitcoinCore() {
+  public void sendVersionMessageToLocalBitcoinCore(final int newBestHeight) {
     //Preconditions
     assert getChannel() != null : "channel must not be null";
+    assert newBestHeight >= 0 : "newBestHeight must not be negative";
 
     final Message versionMessage = new VersionMessage(
             networkParameters, // params
-            0); // newBestHeight
+            newBestHeight);
     sendBitcoinMessageToLocalBitcoind(versionMessage);
   }
 
@@ -209,18 +218,18 @@ public class LocalBitcoindAdapter extends SimpleChannelHandler {
   /**
    * Provides a Bitcoin protocol message handler for communicating with the local bitcoind (aicoind).
    */
-  static class BitcoinProtocolMessageHandler extends AbstractBitcoinProtocolMessageHandler {
+  static class LocalBitcoinProtocolMessageHandler extends AbstractBitcoinProtocolMessageHandler {
 
     // the parent local bitcoind adapter
     final LocalBitcoindAdapter localBitcoindAdapter;
 
     /**
-     * Constructs a new BitcoinProtocolMessageHandler instance.
+     * Constructs a new LocalBitcoinProtocolMessageHandler instance.
      *
      * @param localBitcoindAdapter the parent local bitcoind adapter
      * @param networkParameters the network parameters, e.g. MainNetParams or TestNet3Params
      */
-    BitcoinProtocolMessageHandler(
+    LocalBitcoinProtocolMessageHandler(
             final LocalBitcoindAdapter localBitcoindAdapter,
             final NetworkParameters networkParameters) {
       super(networkParameters);
@@ -266,8 +275,9 @@ public class LocalBitcoindAdapter extends SimpleChannelHandler {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("received from the local bitcoind (aicoind) instance: " + message);
       }
-      if (VersionMessage.class.isAssignableFrom(message.getClass())) {
-        LOGGER.info("dropping version message outbound from bitcoind (aicoind)");
+      if (localBitcoindAdapter.isVersionMessageDropped && VersionMessage.class.isAssignableFrom(message.getClass())) {
+        // the initiator of the connection sends the version message
+        LOGGER.info("dropping the unwanted version message outbound from bitcoind (aicoind)");
       } else {
         localBitcoindAdapter.bitcoinMessageReceiver.receiveMessageFromBitcoind(message);
       }

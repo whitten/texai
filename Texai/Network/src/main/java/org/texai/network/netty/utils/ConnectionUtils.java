@@ -34,7 +34,7 @@ import org.texai.network.netty.handler.AbstractBitcoinProtocolMessageHandlerFact
 import org.texai.network.netty.handler.AbstractHTTPRequestHandlerFactory;
 import org.texai.network.netty.handler.AbstractHTTPResponseHandler;
 import org.texai.network.netty.pipeline.AlbusHCNMessageClientPipelineFactory;
-import org.texai.network.netty.pipeline.BitcoinProtocolChannelPipelineFactory;
+import org.texai.network.netty.pipeline.BitcoinProtocolClientPipelineFactory;
 import org.texai.network.netty.pipeline.BitcoinProtocolMessageClientPipelineFactory;
 import org.texai.network.netty.pipeline.HTTPClientPipelineFactory;
 import org.texai.network.netty.pipeline.PortUnificationChannelPipelineFactory;
@@ -210,7 +210,7 @@ public final class ConnectionUtils {
     assert workerExecutor != null : "workerExecutor must not be null";
 
     // configure the server channel pipeline factory
-    final ChannelPipelineFactory channelPipelineFactory = new BitcoinProtocolChannelPipelineFactory(
+    final ChannelPipelineFactory channelPipelineFactory = new BitcoinProtocolClientPipelineFactory(
             bitcoinProtocolMessageHandlerFactory,
             networkParameters);
 

@@ -32,7 +32,9 @@ import org.texai.kb.persistence.RDFEntityPersister;
 import org.texai.network.netty.handler.BitcoinProtocolMessageHandler;
 import org.texai.network.netty.handler.PortUnificationHandler;
 import org.texai.network.netty.pipeline.AlbusHCNMessageClientPipelineFactory;
+import org.texai.network.netty.pipeline.BitcoinProtocolClientPipelineFactory;
 import org.texai.network.netty.pipeline.PortUnificationChannelPipelineFactory;
+import org.texai.skill.aicoin.support.LocalBitcoindAdapter;
 import org.texai.skill.governance.TopmostFriendship;
 import org.texai.ssl.TexaiSSLContextFactory;
 import org.texai.util.NetworkUtils;
@@ -59,7 +61,7 @@ public class AICoinMain {
   // the node runtime
   private NodeRuntime nodeRuntime;
   // the version
-  private static final String VERSION = "1.0 build 1";
+  private static final String VERSION = "1.0 build 7";
   /**
    * the shutdown hook
    */
@@ -113,10 +115,12 @@ public class AICoinMain {
     assert StringUtils.isNonEmptyString(containerName) : "containerName must be a non-empty string";
 
     Logger.getLogger(AlbusHCNMessageClientPipelineFactory.class).setLevel(Level.WARN);
+    Logger.getLogger(BitcoinProtocolClientPipelineFactory.class).setLevel(Level.DEBUG);
     Logger.getLogger(BitcoinProtocolMessageHandler.class).setLevel(Level.DEBUG);
     Logger.getLogger(DistributedRepositoryManager.class).setLevel(Level.WARN);
     Logger.getLogger(KBAccess.class).setLevel(Level.WARN);
     Logger.getLogger(JournalWriter.class).setLevel(Level.WARN);
+    Logger.getLogger(LocalBitcoindAdapter.class).setLevel(Level.DEBUG);
     Logger.getLogger(MessageRouter.class).setLevel(Level.INFO);
 //    Logger.getLogger(NodesInitializer.class).setLevel(Level.DEBUG);
     Logger.getLogger(PortUnificationHandler.class).setLevel(Level.WARN);

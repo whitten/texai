@@ -7,6 +7,7 @@ package org.texai.skill.aicoin.support;
 
 import org.texai.network.netty.handler.BitcoinMessageReceiver;
 import com.google.bitcoin.core.Message;
+import com.google.bitcoin.core.NetworkParameters;
 import com.google.bitcoin.params.MainNetParams;
 import java.io.File;
 import org.apache.log4j.Logger;
@@ -102,40 +103,46 @@ public class LocalBitcoindAdapterTest implements BitcoinMessageReceiver {
             containerName,
             NetworkUtils.TEXAI_MAINNET); // networkName
 
+    final NetworkParameters networkParameters = new MainNetParams();
     final LocalBitcoindAdapter localBitcoindAdapter = new LocalBitcoindAdapter(
-            new MainNetParams(), // networkParameters
+            networkParameters,
             this, // bitcoinMessageReceiver
-            nodeRuntime);
+            nodeRuntime,
+            false); // isVersionMessageDropped
     LOGGER.info("opening channel to aicoind");
     localBitcoindAdapter.startUp();
 
-    // exchange version messages with bitcoind
-    localBitcoindAdapter.sendVersionMessageToLocalBitcoinCore();
+    // conveniently get the block height from the local instance instead of from a peer
+    final BitcoinRPCAccess bitcoinRPCAcess = new BitcoinRPCAccess(networkParameters);
+    final int newBestHeight = bitcoinRPCAcess.getBlocks();
 
-      try {
-        // wait  30 seconds for a the version and addr response messages
-        Thread.sleep(30000);
-      } catch (InterruptedException ex) {
-        // ignore
-      }
+    // exchange version messages with bitcoind
+    localBitcoindAdapter.sendVersionMessageToLocalBitcoinCore(newBestHeight);
+
+    try {
+      // wait  30 seconds for a the version and addr response messages
+      Thread.sleep(30000);
+    } catch (InterruptedException ex) {
+      // ignore
+    }
 
     // send a mempool message to bitcoind
     localBitcoindAdapter.sendMemoryPoolMessageToLocalBitcoinCore();
-      try {
-        // wait 2 seconds for a response message
-        Thread.sleep(2000);
-      } catch (InterruptedException ex) {
-        // ignore
-      }
+    try {
+      // wait 2 seconds for a response message
+      Thread.sleep(2000);
+    } catch (InterruptedException ex) {
+      // ignore
+    }
 
     // send a ping message to bitcoind
     localBitcoindAdapter.sendPingMessageToLocalBitcoinCore();
-      try {
-        // wait at most 5 seconds for a response message
-        Thread.sleep(5000);
-      } catch (InterruptedException ex) {
-        // ignore
-      }
+    try {
+      // wait at most 5 seconds for a response message
+      Thread.sleep(5000);
+    } catch (InterruptedException ex) {
+      // ignore
+    }
 
     localBitcoindAdapter.shutDown();
     LOGGER.info("test completed");

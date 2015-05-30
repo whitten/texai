@@ -1,5 +1,6 @@
 package org.texai.skill.aicoin;
 
+import com.google.bitcoin.core.VersionMessage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import org.texai.ahcsSupport.Message;
 import org.texai.ahcsSupport.domainEntity.ContainerInfo;
 import org.texai.skill.aicoin.support.AICoinUtils;
 import org.texai.network.netty.handler.BitcoinMessageReceiver;
+import org.texai.skill.aicoin.support.BitcoinRPCAccess;
 import org.texai.skill.aicoin.support.LocalBitcoindAdapter;
 import org.texai.util.EnvironmentUtils;
 import org.texai.util.StringUtils;
@@ -41,6 +43,8 @@ public final class AICOperation extends AbstractSkill {
   private Process insightProcess;
   // the local bitcoind (aicoind) instance adapter dictionary, remote container name --> local bitcoind adapter
   protected final Map<String, LocalBitcoindAdapter> localBitcoindAdapterDictionary = new HashMap<>();
+  // the bitcoind (aicoind) RPC access object
+  private BitcoinRPCAccess bitcoinRPCAccess;
 
   /**
    * Constructs a new AICOperation instance.
@@ -94,6 +98,7 @@ public final class AICOperation extends AbstractSkill {
         } else {
           setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
         }
+        bitcoinRPCAccess = new BitcoinRPCAccess(((NodeRuntime) getNodeRuntime()).getNetworkParameters());
         return;
 
       /**
@@ -307,9 +312,16 @@ public final class AICOperation extends AbstractSkill {
 
     LOGGER.info("Approving a connection request from " + receivedMessage.getSenderContainerName());
 
-    final Message connectionRequestApprovedInfoMessage = this.makeReplyMessage(
+    // get the block height from the local bitcoind (aicoind) instance for the version message that will be sent to the remote peer
+    final int newBestBlockHeight = bitcoinRPCAccess.getBlocks();
+
+    final Message connectionRequestApprovedInfoMessage = makeReplyMessage(
             receivedMessage,
             AHCSConstants.CONNECTION_REQUEST_APPROVED_INFO);
+    connectionRequestApprovedInfoMessage.put(
+            AHCSConstants.CONNECTION_REQUEST_APPROVED_INFO_NEW_BEST_HEIGHT,
+            newBestBlockHeight);
+
     final X509SecurityInfo x509SecurityInfo = getX509SecurityInfo();
     connectionRequestApprovedInfoMessage.put(
             AHCSConstants.MSG_PARM_X509_CERTIFICATE,
@@ -329,22 +341,25 @@ public final class AICOperation extends AbstractSkill {
     //Preconditions
     assert receivedMessage != null : "message must not be null";
 
+    final int newBestHeight = (int) receivedMessage.get(AHCSConstants.CONNECTION_REQUEST_APPROVED_INFO_NEW_BEST_HEIGHT);
+    assert newBestHeight >= 0;
     final String superPeerContainerName = receivedMessage.getSenderContainerName();
-    LOGGER.info("  Connecting local bitcoind to " + superPeerContainerName);
+    LOGGER.info("  Connecting local bitcoind to " + superPeerContainerName + ", having block height " + newBestHeight);
     final SuperPeerConnection superPeerConnection = new SuperPeerConnection(
             this,
             superPeerContainerName);
     final LocalBitcoindAdapter localBitcoindAdapter = new LocalBitcoindAdapter(
             ((NodeRuntime) getNodeRuntime()).getNetworkParameters(),
             superPeerConnection, // bitcoinMessageReceiver
-            getNodeRuntime());
+            getNodeRuntime(),
+            false); // isVersionMessageDropped, the peer originating the connection sends the version with its block height
 
     synchronized (localBitcoindAdapterDictionary) {
       localBitcoindAdapterDictionary.put(superPeerContainerName, localBitcoindAdapter);
       LOGGER.info("opening channel to bitcoind (aicoind)");
       localBitcoindAdapter.startUp();
-      // send a version message to the local bitcoind (aicoind), the response will not be relayed
-      localBitcoindAdapter.sendVersionMessageToLocalBitcoinCore();
+      // send a version message to the local bitcoind (aicoind)
+      localBitcoindAdapter.sendVersionMessageToLocalBitcoinCore(newBestHeight);
     }
   }
 
@@ -458,7 +473,7 @@ public final class AICOperation extends AbstractSkill {
               recipientQualifiedName,
               AICOperation.class.getName(), // recipientService
               AHCSConstants.BITCOIN_MESSAGE_INFO); // operation
-      relayMessage.put(AHCSConstants.BITCOIN_MESSAGE_INFO_Message, bitcoinProtocolMessage);
+      relayMessage.put(AHCSConstants.BITCOIN_MESSAGE_INFO_MESSAGE, bitcoinProtocolMessage);
 
       aicOperation.sendMessage(
               null, // receivedMessage
@@ -602,7 +617,7 @@ public final class AICOperation extends AbstractSkill {
     assert receivedMessage != null : "message must not be null";
 
     final com.google.bitcoin.core.Message bitcoinProtocolMessage
-            = (com.google.bitcoin.core.Message) receivedMessage.get(AHCSConstants.BITCOIN_MESSAGE_INFO_Message);
+            = (com.google.bitcoin.core.Message) receivedMessage.get(AHCSConstants.BITCOIN_MESSAGE_INFO_MESSAGE);
     LOGGER.info("received bitcoinProtocolMessage from network: " + bitcoinProtocolMessage);
     assert bitcoinProtocolMessage != null;
     final String remoteContainerName = receivedMessage.getSenderContainerName();
@@ -611,21 +626,25 @@ public final class AICOperation extends AbstractSkill {
     synchronized (localBitcoindAdapterDictionary) {
       localBitcoindAdapter = localBitcoindAdapterDictionary.get(remoteContainerName);
       if (localBitcoindAdapter == null) {
-        // the remote peer is a new connection
+        // the remote peer is a new connection and the first message must be a version message
+        if (!bitcoinProtocolMessage.getClass().isAssignableFrom(VersionMessage.class)) {
+          throw new TexaiException("expected version message, but received " + bitcoinProtocolMessage);
+        }
         LOGGER.info("Connecting local bitcoind to " + remoteContainerName);
         final SuperPeerConnection superPeerConnection = new SuperPeerConnection(
                 this,
                 remoteContainerName);
+        // the version message response is dropped because the remote peer's connection was initiated by its local adapter using
+        // a constructed version message having this peer's block height
         localBitcoindAdapter = new LocalBitcoindAdapter(
                 ((NodeRuntime) getNodeRuntime()).getNetworkParameters(),
                 superPeerConnection, // bitcoinMessageReceiver
-                getNodeRuntime());
+                getNodeRuntime(),
+                true); // isVersionMessageDropped
 
         localBitcoindAdapterDictionary.put(remoteContainerName, localBitcoindAdapter);
         LOGGER.info("opening channel to bitcoind (aicoind)");
         localBitcoindAdapter.startUp();
-        // send a version message to the local bitcoind (aicoind), the response will not be relayed
-        localBitcoindAdapter.sendVersionMessageToLocalBitcoinCore();
       }
     }
     LOGGER.info("relaying message to bitcoind (aicoind)");

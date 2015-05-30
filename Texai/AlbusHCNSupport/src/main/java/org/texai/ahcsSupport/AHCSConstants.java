@@ -283,7 +283,7 @@ public final class AHCSConstants {
   // the bitcoinMessage_Info operation
   public static final String BITCOIN_MESSAGE_INFO = "bitcoinMessage_Info";
   // the bitcoinMessage_Info_message parameter which is a com.google.bitcoin.core.Message
-  public static final String BITCOIN_MESSAGE_INFO_Message = "bitcoinMessage_Info_message";
+  public static final String BITCOIN_MESSAGE_INFO_MESSAGE = "bitcoinMessage_Info_message";
   //
   // the configureSingletonAgentHostsRequest_Info operation
   public static final String CONFIGURE_SINGLETON_AGENT_HOSTS_REQUEST_INFO = "configureSingletonAgentHostsRequest_Info";
@@ -291,8 +291,10 @@ public final class AHCSConstants {
   // the connectionRequest_Info operation
   public static final String CONNECTION_REQUEST_INFO = "connectionRequest_Info";
   //
-  // the connectionRequestOK_Info operation
+  // the connectionRequestApproved_Info operation
   public static final String CONNECTION_REQUEST_APPROVED_INFO = "connectionRequestApproved_Info";
+  // the connectionRequestApproved_NEW_BEST_HEIGHT parameter
+  public static final String CONNECTION_REQUEST_APPROVED_INFO_NEW_BEST_HEIGHT = "connectionRequestApproved_newBestHeight";
   //
   // the exception information operation
   public static final String EXCEPTION_INFO = "exception_Info";

@@ -4,6 +4,7 @@ import org.texai.network.netty.handler.BitcoinMessageReceiver;
 import com.google.bitcoin.core.Block;
 import com.google.bitcoin.core.Message;
 import com.google.bitcoin.core.NetworkParameters;
+import com.google.bitcoin.core.VersionMessage;
 import com.google.bitcoin.params.MainNetParams;
 import com.google.bitcoin.params.TestNet3Params;
 import java.net.SocketAddress;
@@ -17,6 +18,7 @@ import org.texai.ahcsSupport.skill.BasicNodeRuntime;
 import org.texai.network.netty.handler.AbstractBitcoinProtocolMessageHandler;
 import org.texai.util.NetworkUtils;
 import org.texai.util.StringUtils;
+import org.texai.util.TexaiException;
 
 /**
  * BitcoinProtocolMessageHandler.java
@@ -31,7 +33,7 @@ public class BitcoinProtocolMessageHandler extends AbstractBitcoinProtocolMessag
   // the logger
   private final static Logger LOGGER = Logger.getLogger(BitcoinProtocolMessageHandler.class);
   // the local Bitcoind adapter
-  private final LocalBitcoindAdapter localBitcoindAdapter;
+  private LocalBitcoindAdapter localBitcoindAdapter;
   // the Bitcoin protocol message handler dictionary, remote socket address -> Bitcoin protocol message handler
   private final Map<SocketAddress, BitcoinProtocolMessageHandler> bitcoinProtocolMessageHandlerDictionary;
   // the remote socket address
@@ -40,6 +42,10 @@ public class BitcoinProtocolMessageHandler extends AbstractBitcoinProtocolMessag
   private Channel remotePeerChannel;
   // the local bitcoind instance channel
   private Channel localBitcoindChannel;
+  // the network parameters, main net, test net, or regression test net
+  final NetworkParameters networkParameters;
+  // the node runtime
+  final BasicNodeRuntime nodeRuntime;
 
   /**
    * Creates a new instance of BitcoinProtocolMessageHandler.
@@ -60,26 +66,87 @@ public class BitcoinProtocolMessageHandler extends AbstractBitcoinProtocolMessag
             || (nodeRuntime.getNetworkName().equals(NetworkUtils.TEXAI_TESTNET) && TestNet3Params.class.isAssignableFrom(networkParameters.getClass()));
     assert bitcoinProtocolMessageProxyDictionary != null : "bitcoinProtocolMessageProxyDictionary must not be null";
 
+    this.networkParameters = networkParameters;
+    this.nodeRuntime = nodeRuntime;
     this.bitcoinProtocolMessageHandlerDictionary = bitcoinProtocolMessageProxyDictionary;
-    localBitcoindAdapter = new LocalBitcoindAdapter(
-            networkParameters,
-            this, //  bitcoinMessageReceiver
-            nodeRuntime);
   }
 
   /**
-   * Returns a string representation of this object.
+   * Receives a Bitcoin protocol message from a remote peer.
    *
-   * @return a string representation of this object
+   * @param channelHandlerContext the channel handler context
+   * @param messageEvent the message event
    */
   @Override
-  public String toString() {
-    return (new StringBuilder())
-            .append("[Inbound - Bitcoin protocol remote peer ")
-            .append(remotePeerChannel.getRemoteAddress())
-            .append(", local bitcoind instance ")
-            .append(localBitcoindChannel.getRemoteAddress())
-            .toString();
+  public void messageReceived(
+          final ChannelHandlerContext channelHandlerContext,
+          final MessageEvent messageEvent) {
+    //Preconditions
+    assert messageEvent != null : "messageEvent must not be null";
+    assert Message.class.isAssignableFrom(messageEvent.getMessage().getClass());
+
+    final Message message = (Message) messageEvent.getMessage();
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("received from wallet: " + message);
+    }
+
+    final Channel channel = channelHandlerContext.getChannel();
+    assert channel != null;
+
+    if (socketAddress == null) {
+      socketAddress = channelHandlerContext.getChannel().getRemoteAddress();
+    } else {
+      assert socketAddress == channelHandlerContext.getChannel().getRemoteAddress();
+    }
+
+    boolean isNewConnection = false;
+    synchronized (bitcoinProtocolMessageHandlerDictionary) {
+      if (!bitcoinProtocolMessageHandlerDictionary.containsKey(socketAddress)) {
+        isNewConnection = true;
+        bitcoinProtocolMessageHandlerDictionary.put(socketAddress, this);
+      }
+    }
+
+    if (isNewConnection) {
+      if (!message.getClass().isAssignableFrom(VersionMessage.class)) {
+        throw new TexaiException("expected a version message from the wallet, but received " + message);
+      }
+      localBitcoindAdapter = new LocalBitcoindAdapter(
+              networkParameters,
+              this, //  bitcoinMessageReceiver
+              nodeRuntime,
+              false); // isVersionMessageDropped
+      remotePeerChannel = channel;
+      LOGGER.info("accepting connection from wallet at " + remotePeerChannel.getRemoteAddress());
+      localBitcoindAdapter.startUp();
+      localBitcoindChannel = localBitcoindAdapter.getChannel();
+    } else {
+      assert localBitcoindAdapter != null;
+      LOGGER.info("existing connection from wallet at " + remotePeerChannel.getRemoteAddress());
+      assert socketAddress == channelHandlerContext.getChannel().getRemoteAddress();
+      assert remotePeerChannel == channel;
+    }
+
+    if (Block.class.isAssignableFrom(message.getClass())) {
+      LOGGER.info("dropping a malicous " + message.getClass().getSimpleName() + " message from the remote peer");
+    }
+
+    LOGGER.info("sending to local bitcoind (aicoind) instance: " + message);
+    localBitcoindChannel.write(message);
+  }
+
+  /**
+   * Receives an outbound bitcoin message from the local bitcoind instance, and relays it to the remote peer.
+   *
+   * @param message the given bitcoin protocol message
+   */
+  @Override
+  public void receiveMessageFromBitcoind(final Message message) {
+    //Preconditions
+    assert message != null : "message must not be null";
+
+    LOGGER.info("sending to remote Bitcoin protocol peer: " + message);
+    remotePeerChannel.write(message);
   }
 
   /**
@@ -113,70 +180,18 @@ public class BitcoinProtocolMessageHandler extends AbstractBitcoinProtocolMessag
   }
 
   /**
-   * Receives a Bitcoin protocol message from a remote peer.
+   * Returns a string representation of this object.
    *
-   * @param channelHandlerContext the channel handler context
-   * @param messageEvent the message event
+   * @return a string representation of this object
    */
   @Override
-  public void messageReceived(
-          final ChannelHandlerContext channelHandlerContext,
-          final MessageEvent messageEvent) {
-    //Preconditions
-    assert messageEvent != null : "messageEvent must not be null";
-    assert Message.class.isAssignableFrom(messageEvent.getMessage().getClass());
-
-    final Channel channel = channelHandlerContext.getChannel();
-    assert channel != null;
-
-    if (socketAddress == null) {
-      socketAddress = channelHandlerContext.getChannel().getRemoteAddress();
-    } else {
-      assert socketAddress == channelHandlerContext.getChannel().getRemoteAddress();
-    }
-
-    final Message message = (Message) messageEvent.getMessage();
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("***** received from remote Bitcoin protocol peer: " + message);
-    }
-
-    boolean isNewConnection = false;
-    synchronized (bitcoinProtocolMessageHandlerDictionary) {
-      if (!bitcoinProtocolMessageHandlerDictionary.containsKey(socketAddress)) {
-        isNewConnection = true;
-        bitcoinProtocolMessageHandlerDictionary.put(socketAddress, this);
-      }
-    }
-
-    if (isNewConnection) {
-      remotePeerChannel = channel;
-      localBitcoindAdapter.startUp();
-      localBitcoindChannel = localBitcoindAdapter.getChannel();
-    } else {
-      assert socketAddress == channelHandlerContext.getChannel().getRemoteAddress();
-      assert remotePeerChannel == channel;
-    }
-
-    if (Block.class.isAssignableFrom(message.getClass())) {
-      LOGGER.info("dropping a " + message.getClass().getSimpleName() + " message from the remote peer");
-    }
-    localBitcoindChannel.write(message);
-
+  public String toString() {
+    return (new StringBuilder())
+            .append("[Inbound - Bitcoin protocol remote peer ")
+            .append(remotePeerChannel.getRemoteAddress())
+            .append(", local bitcoind instance ")
+            .append(localBitcoindChannel.getRemoteAddress())
+            .toString();
   }
 
-  /**
-   * Receives an outbound bitcoin message from the local bitcoind instance, and relays it to the remote peer.
-   *
-   * @param message the given bitcoin protocol message
-   */
-  @Override
-  public void receiveMessageFromBitcoind(final Message message) {
-    //Preconditions
-    assert message != null : "message must not be null";
-
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("***** sending to remote Bitcoin protocol peer: " + message);
-    }
-    remotePeerChannel.write(message);
-  }
 }
