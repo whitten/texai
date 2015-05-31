@@ -4,6 +4,7 @@ import org.texai.network.netty.handler.BitcoinMessageReceiver;
 import com.google.bitcoin.core.Block;
 import com.google.bitcoin.core.Message;
 import com.google.bitcoin.core.NetworkParameters;
+import com.google.bitcoin.core.VersionAck;
 import com.google.bitcoin.core.VersionMessage;
 import com.google.bitcoin.params.MainNetParams;
 import com.google.bitcoin.params.TestNet3Params;
@@ -27,6 +28,20 @@ import org.texai.util.TexaiException;
  * the local bitcoind instance.
  *
  * Copyright (C) Mar 21, 2015, Stephen L. Reed.
+ *
+ * The version message handshake, in which the local peer initiates the connection to a remote peer.
+ * See: https://en.bitcoin.it/wiki/Version_Handshake
+ *
+ * Local peer -> Remote peer, Send version message with the local peer's version
+ * Remote peer -> Local peer, Send version message back
+ * Remote peer -> Local peer, Send verack message
+ *
+ * Restated for wallet and gateway ...
+ *
+ * Wallet -> Gateway, Wallet sends version message with its version and block height
+ * Gateway -> Wallet, Gateway sends version message back with its version and block height
+ * Gateway -> Wallet, Gateway sends verack message accepting the Wallet's version
+ *
  */
 public class BitcoinProtocolMessageHandler extends AbstractBitcoinProtocolMessageHandler implements BitcoinMessageReceiver {
 
@@ -86,9 +101,7 @@ public class BitcoinProtocolMessageHandler extends AbstractBitcoinProtocolMessag
     assert Message.class.isAssignableFrom(messageEvent.getMessage().getClass());
 
     final Message message = (Message) messageEvent.getMessage();
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("received from wallet: " + message);
-    }
+    LOGGER.info("received from wallet: " + message);
 
     final Channel channel = channelHandlerContext.getChannel();
     assert channel != null;
@@ -122,7 +135,7 @@ public class BitcoinProtocolMessageHandler extends AbstractBitcoinProtocolMessag
       localBitcoindChannel = localBitcoindAdapter.getChannel();
     } else {
       assert localBitcoindAdapter != null;
-      LOGGER.info("existing connection from wallet at " + remotePeerChannel.getRemoteAddress());
+      //LOGGER.info("existing connection from wallet at " + remotePeerChannel.getRemoteAddress());
       assert socketAddress == channelHandlerContext.getChannel().getRemoteAddress();
       assert remotePeerChannel == channel;
     }
@@ -131,7 +144,6 @@ public class BitcoinProtocolMessageHandler extends AbstractBitcoinProtocolMessag
       LOGGER.info("dropping a malicous " + message.getClass().getSimpleName() + " message from the remote peer");
     }
 
-    LOGGER.info("sending to local bitcoind (aicoind) instance: " + message);
     localBitcoindChannel.write(message);
   }
 
@@ -147,6 +159,13 @@ public class BitcoinProtocolMessageHandler extends AbstractBitcoinProtocolMessag
 
     LOGGER.info("sending to remote Bitcoin protocol peer: " + message);
     remotePeerChannel.write(message);
+
+    if (message.getClass().isAssignableFrom(VersionMessage.class)) {
+      // send a version ack message after the version message to complete the handshake with the wallet
+      final VersionAck versionAckMessage = new VersionAck();
+      LOGGER.info("sending to remote Bitcoin protocol peer: " + versionAckMessage);
+      remotePeerChannel.write(versionAckMessage);
+    }
   }
 
   /**

@@ -272,9 +272,6 @@ public class LocalBitcoindAdapter extends SimpleChannelHandler {
       assert Message.class.isAssignableFrom(messageEvent.getMessage().getClass());
 
       final Message message = (Message) messageEvent.getMessage();
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("received from the local bitcoind (aicoind) instance: " + message);
-      }
       if (localBitcoindAdapter.isVersionMessageDropped && VersionMessage.class.isAssignableFrom(message.getClass())) {
         // the initiator of the connection sends the version message
         LOGGER.info("dropping the unwanted version message outbound from bitcoind (aicoind)");

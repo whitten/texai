@@ -61,7 +61,7 @@ public class AICoinMain {
   // the node runtime
   private NodeRuntime nodeRuntime;
   // the version
-  private static final String VERSION = "1.0 build 7";
+  private static final String VERSION = "1.0 build 9";
   /**
    * the shutdown hook
    */
