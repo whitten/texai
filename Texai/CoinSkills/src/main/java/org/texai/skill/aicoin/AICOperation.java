@@ -1,5 +1,7 @@
 package org.texai.skill.aicoin;
 
+import com.google.bitcoin.core.AddressMessage;
+import com.google.bitcoin.core.VersionAck;
 import com.google.bitcoin.core.VersionMessage;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -467,7 +469,11 @@ public final class AICOperation extends AbstractSkill {
       //Preconditions
       assert bitcoinProtocolMessage != null : "message must not be null";
 
-      LOGGER.info("received from local aicoind for super peer:" + superPeerContainerName + ", message: " + bitcoinProtocolMessage);
+      if (bitcoinProtocolMessage instanceof AddressMessage) {
+        LOGGER.info("dropping addr message from the local bitcoind (aicoind) instance");
+        return;
+      }
+      LOGGER.info("received from local bitcoind (aicoind) instance for super peer:" + superPeerContainerName + ", message: " + bitcoinProtocolMessage);
       final String recipientQualifiedName = superPeerContainerName + ".AICOperationAgent.AICOperationRole";
       final Message relayMessage = aicOperation.makeMessage(
               recipientQualifiedName,
@@ -626,9 +632,10 @@ public final class AICOperation extends AbstractSkill {
     synchronized (localBitcoindAdapterDictionary) {
       localBitcoindAdapter = localBitcoindAdapterDictionary.get(remoteContainerName);
       if (localBitcoindAdapter == null) {
-        // the remote peer is a new connection and the first message must be a version message
-        if (!bitcoinProtocolMessage.getClass().isAssignableFrom(VersionMessage.class)) {
-          throw new TexaiException("expected version message, but received " + bitcoinProtocolMessage);
+        // the remote peer is a new connection and the first message must be a version message or version ack message
+        if (!bitcoinProtocolMessage.getClass().isAssignableFrom(VersionMessage.class) &&
+                !bitcoinProtocolMessage.getClass().isAssignableFrom(VersionAck.class)) {
+          throw new TexaiException("expected version message or version acknowledge message, but received " + bitcoinProtocolMessage);
         }
         LOGGER.info("Connecting local bitcoind to " + remoteContainerName);
         final SuperPeerConnection superPeerConnection = new SuperPeerConnection(
@@ -647,7 +654,6 @@ public final class AICOperation extends AbstractSkill {
         localBitcoindAdapter.startUp();
       }
     }
-    LOGGER.info("relaying message to bitcoind (aicoind)");
     localBitcoindAdapter.sendBitcoinMessageToLocalBitcoind(bitcoinProtocolMessage);
   }
 

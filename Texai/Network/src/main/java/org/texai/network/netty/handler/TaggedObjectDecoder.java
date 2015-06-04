@@ -89,6 +89,7 @@ public class TaggedObjectDecoder extends FrameDecoder {
       }
       return null;
     }
+    channelBuffer.markReaderIndex();
     final byte protocolByte = channelBuffer.readByte();
     if (protocolByte != NetworkConstants.OBJECT_SERIALIZATION_PROTOCOL) {
       throw new TexaiException("wrong protocol byte");
@@ -110,7 +111,8 @@ public class TaggedObjectDecoder extends FrameDecoder {
     // skip over the data length
     channelBuffer.skipBytes(4);
     // return the deserialized object
-    try (final CompactObjectInputStream compactObjectInputStream = new CompactObjectInputStream(new ChannelBufferInputStream(channelBuffer, dataLen))) {
+    try (final CompactObjectInputStream compactObjectInputStream =
+            new CompactObjectInputStream(new ChannelBufferInputStream(channelBuffer, dataLen))) {
       return compactObjectInputStream.readObject();
     }
   }

@@ -151,7 +151,9 @@ public class LocalBitcoindAdapter extends SimpleChannelHandler {
     assert message != null : "message must not be null";
     assert getChannel() != null : "channel must not be null";
 
-    LOGGER.info("send bitcoin protocol message to local bitcoind (aicoind) instance: " + message);
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("send bitcoin protocol message to local bitcoind (aicoind) instance: " + message);
+    }
     final ChannelFuture channelFuture = channel.write(message);
 
     // wait for the inbound message to be sent to the local bitcoind instance

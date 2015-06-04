@@ -61,7 +61,7 @@ public class AICoinMain {
   // the node runtime
   private NodeRuntime nodeRuntime;
   // the version
-  private static final String VERSION = "1.0 build 9";
+  private static final String VERSION = "1.0 build 18";
   /**
    * the shutdown hook
    */
@@ -115,18 +115,18 @@ public class AICoinMain {
     assert StringUtils.isNonEmptyString(containerName) : "containerName must be a non-empty string";
 
     Logger.getLogger(AlbusHCNMessageClientPipelineFactory.class).setLevel(Level.WARN);
-    Logger.getLogger(BitcoinProtocolClientPipelineFactory.class).setLevel(Level.DEBUG);
-    Logger.getLogger(BitcoinProtocolMessageHandler.class).setLevel(Level.DEBUG);
+    Logger.getLogger(BitcoinProtocolClientPipelineFactory.class).setLevel(Level.INFO);
+    Logger.getLogger(BitcoinProtocolMessageHandler.class).setLevel(Level.INFO);
     Logger.getLogger(DistributedRepositoryManager.class).setLevel(Level.WARN);
     Logger.getLogger(KBAccess.class).setLevel(Level.WARN);
     Logger.getLogger(JournalWriter.class).setLevel(Level.WARN);
-    Logger.getLogger(LocalBitcoindAdapter.class).setLevel(Level.DEBUG);
+    Logger.getLogger(LocalBitcoindAdapter.class).setLevel(Level.INFO);
     Logger.getLogger(MessageRouter.class).setLevel(Level.INFO);
 //    Logger.getLogger(NodesInitializer.class).setLevel(Level.DEBUG);
     Logger.getLogger(PortUnificationHandler.class).setLevel(Level.WARN);
     Logger.getLogger(PortUnificationChannelPipelineFactory.class).setLevel(Level.WARN);
     Logger.getLogger(RDFEntityPersister.class).setLevel(Level.WARN);
-    Logger.getLogger(SeedNodeInfosInitializer.class).setLevel(Level.DEBUG);
+    Logger.getLogger(SeedNodeInfosInitializer.class).setLevel(Level.INFO);
     Logger.getLogger(TexaiSSLContextFactory.class).setLevel(Level.WARN);
     Logger.getLogger(X509Utils.class).setLevel(Level.WARN);
 

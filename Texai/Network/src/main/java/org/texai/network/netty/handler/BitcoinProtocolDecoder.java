@@ -84,38 +84,49 @@ public class BitcoinProtocolDecoder extends FrameDecoder {
       LOGGER.debug("Receiving message:  " + bytesToHexString(channelBuffer.toByteBuffer(0, channelBuffer.readableBytes()).array()));
     }
 
+    channelBuffer.markReaderIndex();
     if (channelBuffer.readableBytes() < 20) {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("not enough bytes received in the buffer to decode the payload length");
       }
+      channelBuffer.resetReaderIndex();
       // indicate that this frame is incomplete
       return null;
     }
-    final boolean isProtocolOK;
     // network magic bytes
     final byte protocolByte1 = channelBuffer.readByte();
     final byte protocolByte2 = channelBuffer.readByte();
     final byte protocolByte3 = channelBuffer.readByte();
     final byte protocolByte4 = channelBuffer.readByte();
-    if (protocolByte1 != magicBytes[0]
-            || protocolByte2 != magicBytes[1]
-            || protocolByte3 != magicBytes[2]
-            || protocolByte4 != magicBytes[3]) {
-      LOGGER.warn("wrong Bitcoin protocol bytes, found " + protocolByte1 + ", " + protocolByte2 + ", " + protocolByte3 + ", " + protocolByte4);
-      isProtocolOK = false;
-    } else {
-      isProtocolOK = true;
-    }
+    final boolean isProtocolOK = protocolByte1 == magicBytes[0]
+            || protocolByte2 == magicBytes[1]
+            || protocolByte3 == magicBytes[2]
+            || protocolByte4 == magicBytes[3];
 
-    // skip over the command bytes
-    channelBuffer.skipBytes(12);
+    // the command bytes
+    final StringBuilder stringBuilder = new StringBuilder();
+    for (int i = 0; i < 12; i++) {
+      final byte commandByte = channelBuffer.readByte();
+      if (commandByte != 0) {
+        stringBuilder.append((char) commandByte);
+      }
+    }
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("command: " + stringBuilder.toString());
+    }
     final byte[] lengthBytes = new byte[4];
     lengthBytes[0] = channelBuffer.readByte();
     lengthBytes[1] = channelBuffer.readByte();
     lengthBytes[2] = channelBuffer.readByte();
     lengthBytes[3] = channelBuffer.readByte();
     final long payloadLength = ByteUtils.toUint32LittleEndian(lengthBytes);
-    if (LOGGER.isDebugEnabled()) {
+    if (!isProtocolOK) {
+      LOGGER.warn("wrong Bitcoin protocol bytes, found " + protocolByte1
+              + ", " + protocolByte2
+              + ", " + protocolByte3
+              + ", " + protocolByte4
+              + ", payloadLength: " + payloadLength);
+    } else if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("payloadLength: " + payloadLength);
     }
     final long totalLength = payloadLength + 24;
