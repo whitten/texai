@@ -39,7 +39,7 @@ public class NetworkDeploymentTest {
   // the logger
   private static final Logger LOGGER = Logger.getLogger(NetworkDeploymentTest.class);
   // the container name
-  private static final String containerName = "Test";
+  private static final String containerName = "TestMint";
   // the test parent qualified name
   private static final String parentQualifiedName = containerName + ".TopmostFriendshipAgent.TopmostFriendshipRole";
   // the test parent service
@@ -144,11 +144,11 @@ public class NetworkDeploymentTest {
 
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
     assertNull(skillTestHarness.getOperationAndSenderServiceInfo());
-    assertEquals("[Test]", networkDeployment.pendingFileTransferContainerNames.toString());
+    assertEquals("[TestMint]", networkDeployment.pendingFileTransferContainerNames.toString());
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertEquals("[transferFileRequest_Info, Test.NetworkOperationAgent.NetworkDeploymentRole:NetworkDeployment --> Test.NetworkOperationAgent.NetworkFileTransferRole:NetworkFileTransfer]", sentMessage.toBriefString());
+    assertEquals("[transferFileRequest_Info, TestMint.NetworkOperationAgent.NetworkDeploymentRole:NetworkDeployment --> TestMint.NetworkOperationAgent.NetworkFileTransferRole:NetworkFileTransfer]", sentMessage.toBriefString());
     assertTrue(deploymentLogFile.exists());
   }
 
@@ -228,7 +228,7 @@ public class NetworkDeploymentTest {
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertEquals("[deployFile_Task, Test.NetworkOperationAgent.NetworkDeploymentRole:NetworkDeployment --> TestRecipient.ContainerOperationAgent.ContainerDeploymentRole:ContainerDeployment]", sentMessage.toBriefString());
+    assertEquals("[deployFile_Task, TestMint.NetworkOperationAgent.NetworkDeploymentRole:NetworkDeployment --> TestRecipient.ContainerOperationAgent.ContainerDeploymentRole:ContainerDeployment]", sentMessage.toBriefString());
   }
 
   /**
@@ -298,7 +298,7 @@ public class NetworkDeploymentTest {
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertEquals("[networkRestartRequest_Info, Test.NetworkOperationAgent.NetworkDeploymentRole:NetworkDeployment --> Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation]", sentMessage.toBriefString());
+    assertEquals("[networkRestartRequest_Info, TestMint.NetworkOperationAgent.NetworkDeploymentRole:NetworkDeployment --> TestMint.NetworkOperationAgent.NetworkOperationRole:NetworkOperation]", sentMessage.toBriefString());
   }
 
   /**
@@ -324,7 +324,7 @@ public class NetworkDeploymentTest {
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertTrue(sentMessage.toString().startsWith("[messageNotUnderstood_Info Test.NetworkOperationAgent.NetworkDeploymentRole:NetworkDeployment --> Test.TopmostFriendshipAgent.TopmostFriendshipRole:TopmostFriendship "));
+    assertTrue(sentMessage.toString().startsWith("[messageNotUnderstood_Info TestMint.NetworkOperationAgent.NetworkDeploymentRole:NetworkDeployment --> TestMint.TopmostFriendshipAgent.TopmostFriendshipRole:TopmostFriendship "));
   }
 
   /**

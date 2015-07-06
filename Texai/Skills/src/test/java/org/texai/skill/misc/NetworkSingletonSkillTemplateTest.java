@@ -42,9 +42,9 @@ import org.texai.util.ArraySet;
 public class NetworkSingletonSkillTemplateTest {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(NetworkSingletonSkillTemplate.class);
+  private static final Logger LOGGER = Logger.getLogger(NetworkSingletonSkillTemplateTest.class);
   // the container name
-  private static final String containerName = "Test";
+  private static final String containerName = "TestMint";
   // the test parent qualified name
   private static final String parentQualifiedName = containerName + ".NetworkOperationAgent.NetworkOperationRole";
   // the test parent service
@@ -150,7 +150,7 @@ public class NetworkSingletonSkillTemplateTest {
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
     assertEquals(
-            "[removeUnjoinedRole_Info, Test.NetworkSingletonSkillTemplateAgent.NetworkSingletonSkillTemplateRole:NetworkSingletonSkillTemplate --> Test.ContainerOperationAgent.ContainerSingletonConfigurationRole:ContainerSingletonConfiguration]",
+            "[removeUnjoinedRole_Info, TestMint.NetworkSingletonSkillTemplateAgent.NetworkSingletonSkillTemplateRole:NetworkSingletonSkillTemplate --> TestMint.ContainerOperationAgent.ContainerSingletonConfigurationRole:ContainerSingletonConfiguration]",
             sentMessage.toBriefString());
   }
 
@@ -177,7 +177,7 @@ public class NetworkSingletonSkillTemplateTest {
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertEquals("[messageNotUnderstood_Info, Test.NetworkSingletonSkillTemplateAgent.NetworkSingletonSkillTemplateRole:NetworkSingletonSkillTemplate --> Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation]",
+    assertEquals("[messageNotUnderstood_Info, TestMint.NetworkSingletonSkillTemplateAgent.NetworkSingletonSkillTemplateRole:NetworkSingletonSkillTemplate --> TestMint.NetworkOperationAgent.NetworkOperationRole:NetworkOperation]",
             sentMessage.toBriefString());
   }
 

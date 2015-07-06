@@ -37,7 +37,7 @@ public class AICNetworkOperationTest {
   // the logger
   private static final Logger LOGGER = Logger.getLogger(AICNetworkOperationTest.class);
   // the container name
-  private static final String containerName = "Test";
+  private static final String containerName = "TestMint";
   // the test parent qualified name
   private static final String parentQualifiedName = containerName + ".NetworkOperationAgent.NetworkOperationRole";
   // the test parent service
@@ -136,19 +136,19 @@ public class AICNetworkOperationTest {
             "[initialize_Task, org.texai.skill.aicoin.AICNetworkOperation]",
             skillTestHarness.getOperationAndSenderServiceInfo().toString());
     assertEquals(
-            "[initialize_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICBlockchainArchiveAgent.AICBlockchainArchiveRole:]\n"
-            + "[initialize_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICClientGatewayAgent.AICClientGatewayRole:]\n"
-            + "[initialize_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICContainerAuditAgent.AICContainerAuditRole:]\n"
-            + "[initialize_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICContainerCertificateAuthorityAgent.AICContainerCertificateAuthorityRole:]\n"
-            + "[initialize_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICFaucetAgent.AICFaucetRole:]\n"
-            + "[initialize_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICFinancialAccountingAndControlAgent.AICClientGatewayRole:]\n"
-            + "[initialize_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICMintAgent.AICMintRole:]\n"
-            + "[initialize_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICNetworkEpisodicMemoryAgent.AICNetworkEpisodicMemoryRole:]\n"
-            + "[initialize_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICNetworkSeedAgent.AICNetworkSeedRole:]\n"
-            + "[initialize_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICOperationAgent.AICOperationRole:]\n"
-            + "[initialize_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICPrimaryAuditAgent.AICPrimaryAuditRole:]\n"
-            + "[initialize_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICRecoveryAgent.AICRecoveryRole:]\n"
-            + "[initialize_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICRewardAllocationAgent.AICRewardAllocationRole:]\n",
+            "[initialize_Task, TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestMint.AICBlockchainArchiveAgent.AICBlockchainArchiveRole:]\n"
+            + "[initialize_Task, TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestMint.AICClientGatewayAgent.AICClientGatewayRole:]\n"
+            + "[initialize_Task, TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestMint.AICContainerAuditAgent.AICContainerAuditRole:]\n"
+            + "[initialize_Task, TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestMint.AICContainerCertificateAuthorityAgent.AICContainerCertificateAuthorityRole:]\n"
+            + "[initialize_Task, TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestMint.AICFaucetAgent.AICFaucetRole:]\n"
+            + "[initialize_Task, TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestMint.AICFinancialAccountingAndControlAgent.AICClientGatewayRole:]\n"
+            + "[initialize_Task, TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestMint.AICMintAgent.AICMintRole:]\n"
+            + "[initialize_Task, TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestMint.AICNetworkEpisodicMemoryAgent.AICNetworkEpisodicMemoryRole:]\n"
+            + "[initialize_Task, TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestMint.AICNetworkSeedAgent.AICNetworkSeedRole:]\n"
+            + "[initialize_Task, TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestMint.AICOperationAgent.AICOperationRole:]\n"
+            + "[initialize_Task, TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestMint.AICPrimaryAuditAgent.AICPrimaryAuditRole:]\n"
+            + "[initialize_Task, TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestMint.AICRecoveryAgent.AICRecoveryRole:]\n"
+            + "[initialize_Task, TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestMint.AICRewardAllocationAgent.AICRewardAllocationRole:]\n",
             Message.toBriefString(skillTestHarness.getSentMessages()));
   }
 
@@ -185,19 +185,19 @@ public class AICNetworkOperationTest {
       LOGGER.info("");
     });
     assertEquals(
-            "[performMission_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICBlockchainArchiveAgent.AICBlockchainArchiveRole:]\n"
-            + "[performMission_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICClientGatewayAgent.AICClientGatewayRole:]\n"
-            + "[performMission_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICContainerAuditAgent.AICContainerAuditRole:]\n"
-            + "[performMission_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICContainerCertificateAuthorityAgent.AICContainerCertificateAuthorityRole:]\n"
-            + "[performMission_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICFaucetAgent.AICFaucetRole:]\n"
-            + "[performMission_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICFinancialAccountingAndControlAgent.AICClientGatewayRole:]\n"
-            + "[performMission_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICMintAgent.AICMintRole:]\n"
-            + "[performMission_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICNetworkEpisodicMemoryAgent.AICNetworkEpisodicMemoryRole:]\n"
-            + "[performMission_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICNetworkSeedAgent.AICNetworkSeedRole:]\n"
-            + "[performMission_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICOperationAgent.AICOperationRole:]\n"
-            + "[performMission_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICPrimaryAuditAgent.AICPrimaryAuditRole:]\n"
-            + "[performMission_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICRecoveryAgent.AICRecoveryRole:]\n"
-            + "[performMission_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICRewardAllocationAgent.AICRewardAllocationRole:]\n",
+            "[performMission_Task, TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestMint.AICBlockchainArchiveAgent.AICBlockchainArchiveRole:]\n"
+            + "[performMission_Task, TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestMint.AICClientGatewayAgent.AICClientGatewayRole:]\n"
+            + "[performMission_Task, TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestMint.AICContainerAuditAgent.AICContainerAuditRole:]\n"
+            + "[performMission_Task, TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestMint.AICContainerCertificateAuthorityAgent.AICContainerCertificateAuthorityRole:]\n"
+            + "[performMission_Task, TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestMint.AICFaucetAgent.AICFaucetRole:]\n"
+            + "[performMission_Task, TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestMint.AICFinancialAccountingAndControlAgent.AICClientGatewayRole:]\n"
+            + "[performMission_Task, TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestMint.AICMintAgent.AICMintRole:]\n"
+            + "[performMission_Task, TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestMint.AICNetworkEpisodicMemoryAgent.AICNetworkEpisodicMemoryRole:]\n"
+            + "[performMission_Task, TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestMint.AICNetworkSeedAgent.AICNetworkSeedRole:]\n"
+            + "[performMission_Task, TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestMint.AICOperationAgent.AICOperationRole:]\n"
+            + "[performMission_Task, TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestMint.AICPrimaryAuditAgent.AICPrimaryAuditRole:]\n"
+            + "[performMission_Task, TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestMint.AICRecoveryAgent.AICRecoveryRole:]\n"
+            + "[performMission_Task, TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestMint.AICRewardAllocationAgent.AICRewardAllocationRole:]\n",
             Message.toBriefString(skillTestHarness.getSentMessages()));
   }
 
@@ -224,7 +224,7 @@ public class AICNetworkOperationTest {
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     assertEquals(
-            "[shutdownAicoind_Task, Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> Test.AICOperationAgent.AICOperationRole:AICOperation]\n",
+            "[shutdownAicoind_Task, TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestMint.AICOperationAgent.AICOperationRole:AICOperation]\n",
             Message.toBriefString(skillTestHarness.getSentMessages()));
   }
 
@@ -252,7 +252,7 @@ public class AICNetworkOperationTest {
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info(sentMessage);
-    assertTrue(sentMessage.toString().startsWith("[generateCoinBlock_Task Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestAlice.AICMintAgent.AICMintRole:AICMint "));
+    assertTrue(sentMessage.toString().startsWith("[generateCoinBlock_Task TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation --> TestAlice.AICMintAgent.AICMintRole:AICMint "));
   }
 
   /**

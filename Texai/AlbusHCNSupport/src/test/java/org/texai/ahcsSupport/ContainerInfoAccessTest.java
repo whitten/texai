@@ -71,7 +71,8 @@ public class ContainerInfoAccessTest {
     assertEquals("[]", instance.getContainerInfos().toString());
     instance.initializeContainerInfos();
     assertTrue(instance.areContainerInfosConsistent());
-    assertEquals(8, instance.getContainerInfos().size());
+    LOGGER.info(instance.getContainerInfos());
+    assertEquals(4, instance.getContainerInfos().size());
   }
 
   /**

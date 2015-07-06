@@ -47,7 +47,7 @@ public class ContainerDeploymentTest {
 
   // the logger
   private static final Logger LOGGER = Logger.getLogger(ContainerDeploymentTest.class);
-  private static final String containerName = "Test";
+  private static final String containerName = "TestMint";
   // the test parent qualified name
   private static final String parentQualifiedName = "TestNO.NetworkOperationAgent.NetworkDeploymentRole";
   // the test parent service
@@ -143,7 +143,7 @@ public class ContainerDeploymentTest {
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
 
 //    [Message ...
-//      senderQualifiedName:    Test.NetworkOperationAgent.NetworkDeploymentRole
+//      senderQualifiedName:    TestMint.NetworkOperationAgent.NetworkDeploymentRole
 //      senderService:          org.texai.skill.deployment.NetworkDeploymentnull
 //      recipientQualifiedName: TestRecipient.ContainerOperationAgent.ContainerDeploymentRole
 //      conversationId:         61c01972-67c4-4818-91b7-d0fb1751d0cf
@@ -195,7 +195,7 @@ public class ContainerDeploymentTest {
     deployFilesTaskMessage.put(AHCSConstants.DEPLOY_FILES_TASK_MANIFEST, manifestJSONString);
 
     LOGGER.info(deployFilesTaskMessage.toString());
-    assertEquals("[deployFile_Task, TestNO.NetworkOperationAgent.NetworkDeploymentRole:NetworkDeployment --> Test.ContainerOperationAgent.ContainerDeploymentRole:ContainerDeployment]", deployFilesTaskMessage.toBriefString());
+    assertEquals("[deployFile_Task, TestNO.NetworkOperationAgent.NetworkDeploymentRole:NetworkDeployment --> TestMint.ContainerOperationAgent.ContainerDeploymentRole:ContainerDeployment]", deployFilesTaskMessage.toBriefString());
 
     skillTestHarness.dispatchMessage(deployFilesTaskMessage);
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
@@ -222,7 +222,7 @@ public class ContainerDeploymentTest {
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
     assertEquals(
-            "[taskAccomplished_Info, Test.ContainerOperationAgent.ContainerDeploymentRole:ContainerDeployment --> TestNO.NetworkOperationAgent.NetworkDeploymentRole:NetworkDeployment]",
+            "[taskAccomplished_Info, TestMint.ContainerOperationAgent.ContainerDeploymentRole:ContainerDeployment --> TestNO.NetworkOperationAgent.NetworkDeploymentRole:NetworkDeployment]",
             sentMessage.toBriefString());
   }
 

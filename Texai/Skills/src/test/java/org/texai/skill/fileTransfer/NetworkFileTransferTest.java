@@ -47,7 +47,7 @@ public class NetworkFileTransferTest {
   // the logger
   private static final Logger LOGGER = Logger.getLogger(NetworkFileTransfer.class);
   // the container name
-  private static final String containerName = "Test";
+  private static final String containerName = "TestMint";
   // the test parent qualified name
   private static final String parentQualifiedName = containerName + ".NetworkOperationAgent.NetworkOperationRole";
   // the test parent service
@@ -163,7 +163,7 @@ public class NetworkFileTransferTest {
     Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertEquals("[prepareToSendFile_Task, Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer --> TestSender.ContainerOperationAgent.ContainerFileSenderRole:ContainerFileSender]",
+    assertEquals("[prepareToSendFile_Task, TestMint.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer --> TestSender.ContainerOperationAgent.ContainerFileSenderRole:ContainerFileSender]",
             sentMessage.toBriefString());
     assertNotNull(sentMessage.getConversationId());
     final NetworkFileTransfer networkFileTransfer = (NetworkFileTransfer) skillTestHarness.getSkill(NetworkFileTransfer.class.getName());
@@ -202,7 +202,7 @@ public class NetworkFileTransferTest {
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
     assertEquals(
-            "[prepareToReceiveFile_Task, Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer --> TestRecipient.ContainerOperationAgent.ContainerFileRecipientRole:ContainerFileReceiver]",
+            "[prepareToReceiveFile_Task, TestMint.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer --> TestRecipient.ContainerOperationAgent.ContainerFileRecipientRole:ContainerFileReceiver]",
             sentMessage.toBriefString());
     assertNotNull(sentMessage.getConversationId());
     LOGGER.info("FileTransferRequestInfo ...\n" + networkFileTransfer.getFileTransferInfo(conversationId).toString());
@@ -235,7 +235,7 @@ public class NetworkFileTransferTest {
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
     assertEquals(
-            "[transferFile_Task, Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer --> TestSender.ContainerOperationAgent.ContainerFileSenderRole:ContainerFileSender]",
+            "[transferFile_Task, TestMint.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer --> TestSender.ContainerOperationAgent.ContainerFileSenderRole:ContainerFileSender]",
             sentMessage.toBriefString());
     assertNotNull(sentMessage.getConversationId());
     LOGGER.info("FileTransferRequestInfo ...\n" + networkFileTransfer.getFileTransferInfo(conversationId).toString());
@@ -270,7 +270,7 @@ public class NetworkFileTransferTest {
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
     assertEquals(
-            "[taskAccomplished_Info, Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer --> Test.NetworkDeploymentAgent.NetworkDeploymentRole:NetworkDeployment]",
+            "[taskAccomplished_Info, TestMint.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer --> Test.NetworkDeploymentAgent.NetworkDeploymentRole:NetworkDeployment]",
             sentMessage.toBriefString());
     assertNotNull(sentMessage.getConversationId());
     LOGGER.info("FileTransferRequestInfo ...\n" + networkFileTransfer.getFileTransferInfo(conversationId).toString());
@@ -305,7 +305,7 @@ public class NetworkFileTransferTest {
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertEquals("[messageNotUnderstood_Info, Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer --> Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation]",
+    assertEquals("[messageNotUnderstood_Info, TestMint.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer --> TestMint.NetworkOperationAgent.NetworkOperationRole:NetworkOperation]",
             sentMessage.toBriefString());
   }
 

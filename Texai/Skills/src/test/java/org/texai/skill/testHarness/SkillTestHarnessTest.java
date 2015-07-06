@@ -60,7 +60,7 @@ public class SkillTestHarnessTest {
     final String nodeName = "NetworkDeploymentAgent";
     final String roleName = "NetworkDeploymentRole";
 
-    final String containerName = "Test";
+    final String containerName = "TestMint";
     final Set<SkillClass> skillClasses = new ArraySet<>();
     final SkillClass skillClass = new SkillClass(
           skillClassName, // skillClassName
@@ -90,7 +90,7 @@ public class SkillTestHarnessTest {
 
     skillTestHarness.dispatchMessage(initializeMessage);
     skillTestHarness.getSkillState(skillClassName);
-    assertEquals("ISOLATED_FROM_NETWORK", skillTestHarness.getSkillState(skillClassName).toString());
+    assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
     assertEquals("[initialize_Task, org.texai.skill.deployment.NetworkDeployment]", skillTestHarness.getOperationAndSenderServiceInfo().toString());
   }
 

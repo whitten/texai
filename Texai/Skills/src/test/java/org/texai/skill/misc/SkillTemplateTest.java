@@ -32,7 +32,7 @@ public class SkillTemplateTest {
   // the logger
   private static final Logger LOGGER = Logger.getLogger(SkillTemplateTest.class);
   // the container name
-  private static final String containerName = "Test";
+  private static final String containerName = "TestMint";
   // the test parent qualified name
   private static final String parentQualifiedName = containerName + ".NetworkOperationAgent.NetworkOperationRole";
   // the test parent service
@@ -136,7 +136,7 @@ public class SkillTemplateTest {
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertEquals("[messageNotUnderstood_Info, Test.SkillTemplateAgent.SkillTemplateRole:SkillTemplate --> Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation]",
+    assertEquals("[messageNotUnderstood_Info, TestMint.SkillTemplateAgent.SkillTemplateRole:SkillTemplate --> TestMint.NetworkOperationAgent.NetworkOperationRole:NetworkOperation]",
             sentMessage.toBriefString());
   }
 
@@ -164,7 +164,7 @@ public class SkillTemplateTest {
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
     assertEquals(
-            "[removeUnjoinedRole_Info, Test.SkillTemplateAgent.SkillTemplateRole:SkillTemplate --> Test.ContainerOperationAgent.ContainerSingletonConfigurationRole:ContainerSingletonConfiguration]",
+            "[removeUnjoinedRole_Info, TestMint.SkillTemplateAgent.SkillTemplateRole:SkillTemplate --> TestMint.ContainerOperationAgent.ContainerSingletonConfigurationRole:ContainerSingletonConfiguration]",
             sentMessage.toBriefString());
   }
 

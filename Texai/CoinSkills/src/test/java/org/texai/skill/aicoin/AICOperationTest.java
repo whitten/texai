@@ -34,7 +34,7 @@ public class AICOperationTest {
   // the logger
   private static final Logger LOGGER = Logger.getLogger(AICOperationTest.class);
   // the container name
-  private static final String containerName = "Test";
+  private static final String containerName = "TestMint";
   // the test parent qualified name
   private static final String parentQualifiedName = containerName + ".AICNetworkOperationAgent.AICNetworkOperationRole";
   // the test parent service
@@ -154,7 +154,7 @@ public class AICOperationTest {
       LOGGER.info("");
     });
     assertEquals(
-            "[writeConfigurationFile_Info, Test.AICOperationAgent.AICOperationRole:AICOperation --> Test.AICOperationAgent.AICOperationRole:AICWriteConfigurationFile]\n",
+            "[writeConfigurationFile_Info, TestMint.AICOperationAgent.AICOperationRole:AICOperation --> TestMint.AICOperationAgent.AICOperationRole:AICWriteConfigurationFile]\n",
             Message.toBriefString(skillTestHarness.getSentMessages()));
   }
 
@@ -195,7 +195,7 @@ public class AICOperationTest {
     skillTestHarness.reset();
     skillTestHarness.setSkillState(AHCSConstants.State.READY, skillClassName);
     final Message taskAccomplishedInfoMessage = new Message(
-            "Test.ContainerOperationAgent.ContainerOperationRole", // senderQualifiedName
+            "TestMint.ContainerOperationAgent.ContainerOperationRole", // senderQualifiedName
             ContainerOperation.class.getName(), // senderService
             containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
             skillClassName, // recipientService
@@ -235,7 +235,7 @@ public class AICOperationTest {
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertTrue(sentMessage.toString().startsWith("[messageNotUnderstood_Info Test.AICOperationAgent.AICOperationRole:AICOperation --> Test.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation "));
+    assertTrue(sentMessage.toString().startsWith("[messageNotUnderstood_Info TestMint.AICOperationAgent.AICOperationRole:AICOperation --> TestMint.AICNetworkOperationAgent.AICNetworkOperationRole:AICNetworkOperation "));
   }
 
   /**
@@ -259,7 +259,7 @@ public class AICOperationTest {
     final List<String> understoodOperations = new ArrayList<>(Arrays.asList(instance.getUnderstoodOperations()));
     Collections.sort(understoodOperations);
     assertEquals(
-            "[bitcoinMessage_Info, initialize_Task, joinAcknowledged_Task, messageNotUnderstood_Info, performMission_Task, shutdownAicoindRequest_Info, shutdownAicoind_Task, taskAccomplished_Info]",
+            "[bitcoinMessage_Info, connectionRequestApproved_Info, connectionRequest_Info, initialize_Task, joinAcknowledged_Task, messageNotUnderstood_Info, performMission_Task, shutdownAicoindRequest_Info, shutdownAicoind_Task, taskAccomplished_Info]",
             understoodOperations.toString());
   }
 

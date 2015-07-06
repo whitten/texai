@@ -44,7 +44,7 @@ public class ContainerOperationTest {
   // the logger
   private static final Logger LOGGER = Logger.getLogger(ContainerOperationTest.class);
   // the container name
-  private static final String containerName = "Test";
+  private static final String containerName = "TestMint";
   // the test parent qualified name
   private static final String parentQualifiedName = containerName + ".NetworkOperationAgent.NetworkOperationRole";
   // the test parent service
@@ -145,7 +145,7 @@ public class ContainerOperationTest {
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertTrue(sentMessage.toString().startsWith("[messageNotUnderstood_Info Test.ContainerOperationAgent.ContainerOperationRole:ContainerOperation --> Test.NetworkOperationAgent.NetworkOperationRole:NetworkOperation "));
+    assertTrue(sentMessage.toString().startsWith("[messageNotUnderstood_Info TestMint.ContainerOperationAgent.ContainerOperationRole:ContainerOperation --> TestMint.NetworkOperationAgent.NetworkOperationRole:NetworkOperation "));
   }
 
   /**
@@ -186,7 +186,7 @@ public class ContainerOperationTest {
     assertFalse(skillTestHarness.isTerminated());
     skillTestHarness.setSkillState(AHCSConstants.State.READY, skillClassName);
     final Message restartContainerTaskMessage = new Message(
-            "Test.ContainerOperationAgent.ContainerHeartbeatRole", // senderQualifiedName
+            "TestMint.ContainerOperationAgent.ContainerHeartbeatRole", // senderQualifiedName
             ContainerHeartbeat.class.getName(), // senderService
             containerName + "." + nodeName + "." + roleName, // recipientQualifiedName
             skillClassName, // recipientService
@@ -198,7 +198,7 @@ public class ContainerOperationTest {
     assertEquals("READY", skillTestHarness.getSkillState(skillClassName).toString());
     assertNull(skillTestHarness.getOperationAndSenderServiceInfo());
     final Message sentMessage = skillTestHarness.getSentMessage();
-    assertEquals("[shutdownAicoindRequest_Info, Test.ContainerOperationAgent.ContainerOperationRole:ContainerOperation --> Test.AICOperationAgent.AICOperationRole:AICOperation]", sentMessage.toBriefString());
+    assertEquals("[shutdownAicoindRequest_Info, TestMint.ContainerOperationAgent.ContainerOperationRole:ContainerOperation --> TestMint.AICOperationAgent.AICOperationRole:AICOperation]", sentMessage.toBriefString());
     assertTrue(skillTestHarness.isTerminated());
   }
 

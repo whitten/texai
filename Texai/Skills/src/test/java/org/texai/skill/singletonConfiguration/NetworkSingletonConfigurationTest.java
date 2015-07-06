@@ -47,7 +47,7 @@ public class NetworkSingletonConfigurationTest {
   // the logger
   private static final Logger LOGGER = Logger.getLogger(NetworkSingletonConfigurationTest.class);
   // the container name
-  private static final String containerName = "Test";
+  private static final String containerName = "TestMint";
   // the test parent qualified name
   private static final String parentQualifiedName = containerName + ".TopmostFriendshipAgent.TopmostFriendshipRole";
   // the test parent service
@@ -150,7 +150,7 @@ public class NetworkSingletonConfigurationTest {
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertTrue(sentMessage.toString().startsWith("[messageNotUnderstood_Info Test.NetworkOperationAgent.NetworkSingletonConfigurationRole:NetworkSingletonConfiguration --> Test.TopmostFriendshipAgent.TopmostFriendshipRole:TopmostFriendship "));
+    assertTrue(sentMessage.toString().startsWith("[messageNotUnderstood_Info TestMint.NetworkOperationAgent.NetworkSingletonConfigurationRole:NetworkSingletonConfiguration --> TestMint.TopmostFriendshipAgent.TopmostFriendshipRole:TopmostFriendship "));
   }
 
   /**
@@ -169,7 +169,7 @@ public class NetworkSingletonConfigurationTest {
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertTrue(sentMessage.toString().startsWith("[networkConfiguration_Task Test.NetworkOperationAgent.NetworkSingletonConfigurationRole:NetworkSingletonConfiguration --> Test.ContainerOperationsAgent.ContainerSingletonConfigurationRole:ContainerSingletonConfiguration "));
+    assertTrue(sentMessage.toString().startsWith("[networkConfiguration_Task TestMint.NetworkOperationAgent.NetworkSingletonConfigurationRole:NetworkSingletonConfiguration --> TestMint.ContainerOperationsAgent.ContainerSingletonConfigurationRole:ContainerSingletonConfiguration "));
     final SingletonAgentHosts singletonAgentHosts = (SingletonAgentHosts) sentMessage.get(AHCSConstants.MSG_PARM_SINGLETON_AGENT_HOSTS);
     assertNotNull(singletonAgentHosts);
     @SuppressWarnings("unchecked")

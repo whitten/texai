@@ -85,7 +85,7 @@ public class NetworkUtilsTest {
     assertEquals(NetworkUtils.TEXAI_MAINNET_PORT, NetworkUtils.toNetworkPort(NetworkUtils.TEXAI_MAINNET));
     assertEquals(NetworkUtils.TEXAI_TESTNET_PORT, NetworkUtils.toNetworkPort(NetworkUtils.TEXAI_TESTNET));
     try {
-      NetworkUtils.toNetworkPort("");
+      NetworkUtils.toNetworkPort("a");
       fail();
     } catch (TexaiException ex) {
       // ignore

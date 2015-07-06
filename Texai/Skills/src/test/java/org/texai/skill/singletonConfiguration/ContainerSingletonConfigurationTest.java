@@ -47,7 +47,7 @@ public class ContainerSingletonConfigurationTest {
   // the logger
   private static final Logger LOGGER = Logger.getLogger(ContainerSingletonConfigurationTest.class);
   // the container name
-  private static final String containerName = "Test";
+  private static final String containerName = "TestMint";
   // the test parent qualified name
   private static final String parentQualifiedName = containerName + ".NetworkOperationAgent.NetworkSingletonConfigurationRole";
   // the test parent service
@@ -150,7 +150,7 @@ public class ContainerSingletonConfigurationTest {
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertTrue(sentMessage.toString().startsWith("[messageNotUnderstood_Info Test.ContainerOperationAgent.ContainerSingletonConfigurationRole:ContainerSingletonConfiguration --> Test.NetworkOperationAgent.NetworkSingletonConfigurationRole:NetworkSingletonConfiguration "));
+    assertTrue(sentMessage.toString().startsWith("[messageNotUnderstood_Info TestMint.ContainerOperationAgent.ContainerSingletonConfigurationRole:ContainerSingletonConfiguration --> TestMint.NetworkOperationAgent.NetworkSingletonConfigurationRole:NetworkSingletonConfiguration "));
   }
 
   /**
@@ -164,7 +164,7 @@ public class ContainerSingletonConfigurationTest {
     SingletonAgentHosts singletonAgentHosts = skillTestHarness.getNodeRuntime().getSingletonAgentHosts();
     assertEquals("[SingletonAgentHosts, size 11]", singletonAgentHosts.toString());
     List<ContainerInfo> containerInfos = skillTestHarness.getNodeRuntime().getContainerInfos();
-    assertEquals("[[container TestAlice, super peer, gateway], [container TestBlockchainExplorer, super peer, block explorer], [container TestBob, gateway], [container TestMint, super peer]]", containerInfos.toString());
+    assertEquals("[[container TestAlice,  TestAlice, super peer, gateway], [container TestBlockchainExplorer,  TestBlockchainExplorer, super peer, block explorer], [container TestBob,  TestBob, gateway], [container TestMint,  TestMint, super peer, first container]]", containerInfos.toString());
     skillTestHarness.setSkillState(AHCSConstants.State.READY, skillClassName);
 
     final Message taskAccomplishedInfoMessage = new Message(
@@ -195,7 +195,7 @@ public class ContainerSingletonConfigurationTest {
     final List<ContainerInfo> containerInfos1 = new ArrayList<>(containerInfos);
     containerInfos1.add(testNodeInfo);
     Collections.sort(containerInfos);
-    assertEquals("[[container TestAlice, super peer, gateway], [container TestBlockchainExplorer, super peer, block explorer], [container TestBob, gateway], [container TestMint, super peer], [container Test,  Test, super peer]]", containerInfos1.toString());
+    assertEquals("[[container TestAlice,  TestAlice, super peer, gateway], [container TestBlockchainExplorer,  TestBlockchainExplorer, super peer, block explorer], [container TestBob,  TestBob, gateway], [container TestMint,  TestMint, super peer, first container], [container Test,  Test, super peer]]", containerInfos1.toString());
     taskAccomplishedInfoMessage.put(AHCSConstants.MSG_PARM_CONTAINER_INFOS, containerInfos1);
 
     skillTestHarness.dispatchMessage(taskAccomplishedInfoMessage);
@@ -208,7 +208,7 @@ public class ContainerSingletonConfigurationTest {
     singletonAgentHosts = skillTestHarness.getNodeRuntime().getSingletonAgentHosts();
     assertEquals("[SingletonAgentHosts, size 12]", singletonAgentHosts.toString());
     containerInfos = skillTestHarness.getNodeRuntime().getContainerInfos();
-    assertEquals("[[container Test,  Test, super peer], [container TestAlice, super peer, gateway], [container TestBlockchainExplorer, super peer, block explorer], [container TestBob, gateway], [container TestMint, super peer]]", containerInfos.toString());
+    assertEquals("[[container Test,  Test, super peer], [container TestAlice,  TestAlice, super peer, gateway], [container TestBlockchainExplorer,  TestBlockchainExplorer, super peer, block explorer], [container TestBob,  TestBob, gateway], [container TestMint,  TestMint, super peer, first container]]", containerInfos.toString());
   }
 
   /**

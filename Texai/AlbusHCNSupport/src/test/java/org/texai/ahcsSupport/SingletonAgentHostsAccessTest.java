@@ -80,17 +80,17 @@ public class SingletonAgentHostsAccessTest {
             basicNodeRuntime);
     instance.initializeSingletonAgentsHosts();
     assertEquals("[SingletonAgentHosts, size 11\n"
-            + "  AICNetworkSeedAgent=Mint\n"
-            + "  AICRecoveryAgent=Mint\n"
-            + "  AICPrimaryAuditAgent=Mint\n"
-            + "  AICRewardAllocationAgent=Mint\n"
-            + "  AICNetworkEpisodicMemoryAgent=Mint\n"
-            + "  AICNetworkOperationAgent=Mint\n"
-            + "  NetworkOperationAgent=Mint\n"
-            + "  AICMintAgent=Mint\n"
-            + "  TopmostFriendshipAgent=Mint\n"
-            + "  AICFinancialAccountingAndControlAgent=Mint\n"
-            + "  NetworkSingletonConfigurationAgent=Mint\n"
+            + "  AICNetworkSeedAgent=turing\n"
+            + "  AICRecoveryAgent=turing\n"
+            + "  AICPrimaryAuditAgent=turing\n"
+            + "  AICRewardAllocationAgent=turing\n"
+            + "  AICNetworkEpisodicMemoryAgent=turing\n"
+            + "  AICNetworkOperationAgent=turing\n"
+            + "  NetworkOperationAgent=turing\n"
+            + "  AICMintAgent=turing\n"
+            + "  TopmostFriendshipAgent=turing\n"
+            + "  AICFinancialAccountingAndControlAgent=turing\n"
+            + "  NetworkSingletonConfigurationAgent=turing\n"
             + "]", instance.getEffectiveSingletonAgentHosts().toDetailedString());
   }
 
@@ -121,6 +121,7 @@ public class SingletonAgentHostsAccessTest {
             rdfEntityManager,
             basicNodeRuntime);
     instance.initializeSingletonAgentsHosts();
+    LOGGER.info(instance.getEffectiveSingletonAgentHosts());
 
     assertTrue(instance.isSingletonAgent("NetworkOperationAgent"));
   }
@@ -191,7 +192,7 @@ public class SingletonAgentHostsAccessTest {
 
     MockBasicNodeRuntime() {
       super(
-              "Mint", // containerName
+              "turing", // containerName
               NetworkUtils.TEXAI_MAINNET); // networkName
     }
   }

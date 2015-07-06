@@ -45,7 +45,7 @@ public class ContainerFileSenderTest {
   // the logger
   private static final Logger LOGGER = Logger.getLogger(ContainerFileSenderTest.class);
   // the container name
-  private static final String containerName = "TestSender";
+  private static final String containerName = "TestMint";
   // the test parent qualified name
   private static final String parentQualifiedName = "Test.NetworkFileTransferAgent.NetworkFileTransferRole";
   // the test parent service
@@ -137,7 +137,7 @@ public class ContainerFileSenderTest {
     final Message prepareToSendFileTaskMessage = new Message(
             "Test.NetworkFileTransferAgent.NetworkFileTransferRole", // senderQualifiedName
             NetworkFileTransfer.class.getName(), // senderService
-            "TestSender.ContainerOperationAgent.ContainerFileSenderRole", // recipientQualifiedName
+            "TestMint.ContainerOperationAgent.ContainerFileSenderRole", // recipientQualifiedName
             conversationId,
             null, // replyWith
             null, // inReplyTo
@@ -156,7 +156,7 @@ public class ContainerFileSenderTest {
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
     assertEquals(
-            "[taskAccomplished_Info, TestSender.ContainerOperationAgent.ContainerFileSenderRole:ContainerFileSender --> Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer]",
+            "[taskAccomplished_Info, TestMint.ContainerOperationAgent.ContainerFileSenderRole:ContainerFileSender --> Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer]",
             sentMessage.toBriefString());
     assertNotNull(sentMessage.getConversationId());
     assertEquals(sentMessage.getConversationId().toString(), conversationId.toString());
@@ -168,7 +168,7 @@ public class ContainerFileSenderTest {
             29795);
     LOGGER.info("FileTransferRequestInfo ...\n" + containerFileSender.getFileTransferRequestInfo(conversationId).toString());
     assertEquals(
-            "[TestSender:deployment/nodes.xml --> TestRecipient:data/nodes.xml]",
+            "[TestMint:deployment/nodes.xml --> TestRecipient:data/nodes.xml]",
             containerFileSender.getFileTransferRequestInfo(conversationId).toBriefString());
 
     // test the received File Transfer Task message
@@ -176,7 +176,7 @@ public class ContainerFileSenderTest {
     final Message transferFileTaskMessage = new Message(
             "Test.NetworkFileTransferAgent.NetworkFileTransferRole", // senderQualifiedName
             NetworkFileTransfer.class.getName(), // senderService
-            "TestSender.ContainerOperationAgent.ContainerFileSenderRole", // recipientQualifiedName
+            "TestMint.ContainerOperationAgent.ContainerFileSenderRole", // recipientQualifiedName
             conversationId,
             null, // replyWith
             null, // inReplyTo
@@ -192,14 +192,14 @@ public class ContainerFileSenderTest {
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
     assertEquals(
-            "[transferFileChunk_Info, TestSender.ContainerOperationAgent.ContainerFileSenderRole:ContainerFileSender --> TestRecipient.ContainerOperationAgent.ContainerFileRecipientRole:ContainerFileReceiver]",
+            "[transferFileChunk_Info, TestMint.ContainerOperationAgent.ContainerFileSenderRole:ContainerFileSender --> TestRecipient.ContainerOperationAgent.ContainerFileRecipientRole:ContainerFileReceiver]",
             sentMessage.toBriefString());
     assertNotNull(sentMessage.getConversationId());
     assertEquals(sentMessage.getConversationId().toString(), conversationId.toString());
     final FileTransferInfo fileTransferInfo = containerFileSender.getFileTransferRequestInfo(conversationId);
     LOGGER.info("FileTransferRequestInfo ...\n" + fileTransferInfo.toString());
     assertEquals(
-            "[TestSender:deployment/nodes.xml --> TestRecipient:data/nodes.xml]",
+            "[TestMint:deployment/nodes.xml --> TestRecipient:data/nodes.xml]",
             fileTransferInfo.toBriefString());
     assertEquals(
             (int) sentMessage.get(AHCSConstants.MSG_PARM_BYTES_SIZE),
@@ -214,7 +214,7 @@ public class ContainerFileSenderTest {
     Message taskAccomplishedInfoMessage = new Message(
             "TestRecipient.ContainerOperationAgent.ContainerFileRecipientRole", // senderQualifiedName
             ContainerFileReceiver.class.getName(), // senderService
-            "TestSender.ContainerOperationAgent.ContainerFileSenderRole", // recipientQualifiedName
+            "TestMint.ContainerOperationAgent.ContainerFileSenderRole", // recipientQualifiedName
             conversationId,
             null, // replyWith
             null, // inReplyTo
@@ -230,13 +230,13 @@ public class ContainerFileSenderTest {
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
     assertEquals(
-            "[transferFileChunk_Info, TestSender.ContainerOperationAgent.ContainerFileSenderRole:ContainerFileSender --> TestRecipient.ContainerOperationAgent.ContainerFileRecipientRole:ContainerFileReceiver]",
+            "[transferFileChunk_Info, TestMint.ContainerOperationAgent.ContainerFileSenderRole:ContainerFileSender --> TestRecipient.ContainerOperationAgent.ContainerFileRecipientRole:ContainerFileReceiver]",
             sentMessage.toBriefString());
     assertNotNull(sentMessage.getConversationId());
     assertEquals(sentMessage.getConversationId().toString(), conversationId.toString());
     LOGGER.info("FileTransferRequestInfo ...\n" + fileTransferInfo.toString());
     assertEquals(
-            "[TestSender:deployment/nodes.xml --> TestRecipient:data/nodes.xml]",
+            "[TestMint:deployment/nodes.xml --> TestRecipient:data/nodes.xml]",
             fileTransferInfo.toBriefString());
 
     // repeat until all file chunks have been processed
@@ -245,7 +245,7 @@ public class ContainerFileSenderTest {
       taskAccomplishedInfoMessage = new Message(
               "TestRecipient.ContainerOperationAgent.ContainerFileRecipientRole", // senderQualifiedName
               ContainerFileReceiver.class.getName(), // senderService
-              "TestSender.ContainerOperationAgent.ContainerFileSenderRole", // recipientQualifiedName
+              "TestMint.ContainerOperationAgent.ContainerFileSenderRole", // recipientQualifiedName
               conversationId,
               null, // replyWith
               null, // inReplyTo
@@ -268,7 +268,7 @@ public class ContainerFileSenderTest {
     taskAccomplishedInfoMessage = new Message(
             "TestRecipient.ContainerOperationAgent.ContainerFileRecipientRole", // senderQualifiedName
             ContainerFileReceiver.class.getName(), // senderService
-            "TestSender.ContainerOperationAgent.ContainerFileSenderRole", // recipientQualifiedName
+            "TestMint.ContainerOperationAgent.ContainerFileSenderRole", // recipientQualifiedName
             conversationId,
             null, // replyWith
             null, // inReplyTo
@@ -284,13 +284,13 @@ public class ContainerFileSenderTest {
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
     assertEquals(
-            "[taskAccomplished_Info, TestSender.ContainerOperationAgent.ContainerFileSenderRole:ContainerFileSender --> Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer]",
+            "[taskAccomplished_Info, TestMint.ContainerOperationAgent.ContainerFileSenderRole:ContainerFileSender --> Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer]",
             sentMessage.toBriefString());
     assertNotNull(sentMessage.getConversationId());
     assertEquals(sentMessage.getConversationId().toString(), conversationId.toString());
     LOGGER.info("FileTransferRequestInfo ...\n" + fileTransferInfo.toString());
     assertEquals(
-            "[TestSender:deployment/nodes.xml --> TestRecipient:data/nodes.xml]",
+            "[TestMint:deployment/nodes.xml --> TestRecipient:data/nodes.xml]",
             fileTransferInfo.toBriefString());
   }
 
@@ -308,7 +308,7 @@ public class ContainerFileSenderTest {
     final Message prepareToSendFileTaskMessage = new Message(
             "Test.NetworkFileTransferAgent.NetworkFileTransferRole", // senderQualifiedName
             NetworkFileTransfer.class.getName(), // senderService
-            "TestSender.ContainerOperationAgent.ContainerFileSenderRole", // recipientQualifiedName
+            "TestMint.ContainerOperationAgent.ContainerFileSenderRole", // recipientQualifiedName
             conversationId,
             null, // replyWith
             null, // inReplyTo
@@ -326,7 +326,7 @@ public class ContainerFileSenderTest {
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertEquals("[exception_Info, TestSender.ContainerOperationAgent.ContainerFileSenderRole:ContainerFileSender --> Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer]",
+    assertEquals("[exception_Info, TestMint.ContainerOperationAgent.ContainerFileSenderRole:ContainerFileSender --> Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer]",
             sentMessage.toBriefString());
     assertNotNull(sentMessage.getConversationId());
     assertEquals(sentMessage.getConversationId().toString(), conversationId.toString());
@@ -361,7 +361,7 @@ public class ContainerFileSenderTest {
     final Message sentMessage = skillTestHarness.getSentMessage();
     assertNotNull(sentMessage);
     LOGGER.info("sentMessage...\n" + sentMessage);
-    assertEquals("[messageNotUnderstood_Info, TestSender.ContainerOperationAgent.ContainerFileSenderRole:ContainerFileSender --> Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer]",
+    assertEquals("[messageNotUnderstood_Info, TestMint.ContainerOperationAgent.ContainerFileSenderRole:ContainerFileSender --> Test.NetworkFileTransferAgent.NetworkFileTransferRole:NetworkFileTransfer]",
             sentMessage.toBriefString());
   }
 
