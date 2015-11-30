@@ -43,7 +43,7 @@ public class SkillTestHarness {
   // the container name
   private final String containerName;
   // the mock NodeRuntime
-  private NodeRuntime nodeRuntime;
+  private final NodeRuntime nodeRuntime;
   // the mock Node
   private final Node node;
   // the mock Role

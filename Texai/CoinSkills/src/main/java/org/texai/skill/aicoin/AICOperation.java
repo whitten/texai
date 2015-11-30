@@ -1,6 +1,7 @@
 package org.texai.skill.aicoin;
 
 import com.google.bitcoin.core.AddressMessage;
+import com.google.bitcoin.core.Transaction;
 import com.google.bitcoin.core.VersionAck;
 import com.google.bitcoin.core.VersionMessage;
 import java.util.ArrayList;
@@ -654,6 +655,13 @@ public final class AICOperation extends AbstractSkill {
         localBitcoindAdapter.startUp();
       }
     }
+
+    if (bitcoinProtocolMessage instanceof Transaction) {
+      // if minting container, then send the inbound transaction to the mint agent in this container
+      // otherwise, route the inbound transaction to the mint container's AIC operation agent
+      LOGGER.info("received Bitcoin protocol transaction message: " + bitcoinProtocolMessage);
+    }
+
     localBitcoindAdapter.sendBitcoinMessageToLocalBitcoind(bitcoinProtocolMessage);
   }
 

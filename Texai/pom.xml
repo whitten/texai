@@ -45,6 +45,7 @@
     <module>Utilities</module>
     <module>WebServer</module>
     <module>X509Security</module>
+    <module>PhotoApp</module>
   </modules>
 
   <build>
