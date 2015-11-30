@@ -252,6 +252,29 @@ public class X509UtilsTest {
   }
 
   /**
+   * Test of generateRSAKeyPair1024 method, of class X509Utils.
+   */
+  @Test
+  public void testGenerateRSAKeyPair1024() {
+    LOGGER.info("generateRSAKeyPair");
+    KeyPair result = null;
+    try {
+      result = X509Utils.generateRSAKeyPair1024();
+    } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException ex) {
+      fail(ex.getMessage());
+    }
+    assertNotNull(result);
+    final PrivateKey privateKey = result.getPrivate();
+    assertNotNull(privateKey);
+    final PublicKey publicKey = result.getPublic();
+    assertNotNull(publicKey);
+    assertEquals("RSA", result.getPrivate().getAlgorithm());
+    assertEquals("RSA", result.getPublic().getAlgorithm());
+    assertEquals("PKCS#8", result.getPrivate().getFormat());
+    assertEquals("X.509", result.getPublic().getFormat());
+  }
+
+  /**
    * Test of generateRSAKeyPair3072 method, of class X509Utils.
    */
   @Test

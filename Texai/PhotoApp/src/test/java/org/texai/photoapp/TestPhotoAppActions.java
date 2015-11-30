@@ -2,6 +2,7 @@ package org.texai.photoapp;
 
 import org.apache.log4j.Logger;
 import org.jboss.netty.channel.Channel;
+import org.jboss.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 
@@ -13,8 +14,11 @@ import org.texai.util.TexaiException;
  * Copyright (C) Nov 30, 2015, Stephen L. Reed.
  */
 public class TestPhotoAppActions implements PhotoAppActions {
+
   // the log4j logger
   private static final Logger LOGGER = Logger.getLogger(TestPhotoAppActions.class);
+  // the users initialization object
+  private final InitializedUsers initializedUsers = new InitializedUsers();
 
   /**
    * Creates a new instance of TestPhotoAppActions.
@@ -44,16 +48,33 @@ public class TestPhotoAppActions implements PhotoAppActions {
 
     // provisionUser
     //    {
-    //	"operation": "provisionUser",
-    //  "userPublicKey": "user 1024-bit RSA user public key encoded in Base 64 notation",
-    //	"userPrivateKey”: "user 1024-bit RSA private key encoded in Base 64 notation",
-    //	"serverPublicKey”: "server 1024-bit RSA public key encoded in Base 64 notation",
-    //	"buddyList”: {"1": "Bob"}
+    //      "operation": "provisionUser",
+    //      "userPublicKey": "user 1024-bit RSA user public key encoded in Base 64 notation",
+    //      "userPrivateKey”: "user 1024-bit RSA private key encoded in Base 64 notation",
+    //      "serverPublicKey”: "server 1024-bit RSA public key encoded in Base 64 notation",
+    //      "buddyList”: {"1": "Bob"}
     //    }
-
+    final StringBuilder stringBuilder = new StringBuilder();
+    final String jsonString = stringBuilder
+            .append("{\n")
+            .append("\"operation\": \"provisionUser\"\n")
+            .append("\"userPublicKey\": \"")
+            .append(initializedUsers.getAlicePublicKeyBase64())
+            .append("\",\n")
+            .append("\"userPrivateKey\": \"")
+            .append(initializedUsers.getAlicePrivateKeyBase64())
+            .append("\",\n")
+            .append("\"serverPublicKey\": \"")
+            .append(initializedUsers.getServerPublicKeyBase64())
+            .append("\",\n")
+            .append("\"buddyList\": {\"1\": \"Bob\"}\n")
+            .append("}\n")
+            .toString();
+    channel.write(new TextWebSocketFrame(jsonString));
   }
 
-  /** Stores the given photo in to the Amazon S3 cloud, and responds with an acknowledgement.
+  /**
+   * Stores the given photo in to the Amazon S3 cloud, and responds with an acknowledgement.
    *
    * @param encryptedPhoto photo encrypted with server public key, encoded in Base 64 notation
    * @param photoHash the SHA-1 hash of the photo encoded in Base 64 notation
@@ -79,8 +100,9 @@ public class TestPhotoAppActions implements PhotoAppActions {
     LOGGER.info("photoHash: " + photoHash);
   }
 
-  /** Sends the specified photo from the Amazon cloud to the specified buddy user. The server verifies that the photo has not been
-   * tampered with.
+  /**
+   * Sends the specified photo from the Amazon cloud to the specified buddy user. The server verifies that the photo has not been tampered
+   * with.
    *
    * @param photoHash the SHA-1 hash of the photo encoded in Base 64 notation
    * @param recipient the user name of the recipient

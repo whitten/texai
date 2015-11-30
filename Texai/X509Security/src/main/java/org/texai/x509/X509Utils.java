@@ -16,8 +16,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -324,6 +322,24 @@ public final class X509Utils {
       final String name = propertyString.substring(factoryClass.length() + 1);
       LOGGER.info("  " + factoryClass + ": " + name);
     });
+  }
+
+  /**
+   * Creates a random 1024 bit RSA key pair.
+   *
+   * @return a random 1024 bit RSA key pair
+   * @throws NoSuchAlgorithmException when an invalid algorithm is given
+   * @throws NoSuchProviderException when an invalid provider is given
+   * @throws InvalidAlgorithmParameterException when an invalid algorithm parameter is given
+   */
+  public static KeyPair generateRSAKeyPair1024() throws
+          NoSuchAlgorithmException,
+          NoSuchProviderException,
+          InvalidAlgorithmParameterException {
+    final KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA", BOUNCY_CASTLE_PROVIDER);
+    final AlgorithmParameterSpec algorithmParameterSpec = new RSAKeyGenParameterSpec(1024, RSAKeyGenParameterSpec.F4);
+    keyPairGenerator.initialize(algorithmParameterSpec, getSecureRandom());
+    return keyPairGenerator.generateKeyPair();
   }
 
   /**
