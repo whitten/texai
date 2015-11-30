@@ -4,7 +4,11 @@ import org.apache.log4j.Logger;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.texai.network.netty.handler.TexaiHTTPRequestHandler;
+import org.texai.util.TexaiException;
 
 /**
  * PhotoAppServer.java
@@ -15,10 +19,10 @@ import org.texai.network.netty.handler.TexaiHTTPRequestHandler;
  */
 public class PhotoAppServer implements TexaiHTTPRequestHandler {
 
-  /**
-   * the log4j logger
-   */
+  // the log4j logger
   private static final Logger LOGGER = Logger.getLogger(PhotoAppServer.class);
+  // the production or test object which handles the photo app actions, which is injected as a dependency
+  private PhotoAppActions photoAppActions;
 
   /**
    * Creates a new instance of PhotoAppServer.
@@ -75,7 +79,50 @@ public class PhotoAppServer implements TexaiHTTPRequestHandler {
       LOGGER.debug("web socket text received: " + webSocketText);
     }
 
+    final JSONParser jsonParser = new JSONParser();
+    final JSONObject responseJSONObject;
+    try {
+      responseJSONObject = (JSONObject) jsonParser.parse(webSocketText);
+    } catch (ParseException ex) {
+      throw new TexaiException(ex);
+    }
+
+    final String operation = (String) responseJSONObject.get("operation");
+    switch (operation) {
+      case "login": {
+        final String userName = (String) responseJSONObject.get("userName");
+        photoAppActions.loginUser(userName, channel);
+        break;
+      }
+      case "storePhoto": {
+        final String encryptedPhoto = (String) responseJSONObject.get("encryptedPhoto");
+        final String photoHash = (String) responseJSONObject.get("photoHash");
+        photoAppActions.storePhoto(encryptedPhoto, photoHash, channel);
+        break;
+      }
+      case "sendPhoto": {
+        final String photoHash = (String) responseJSONObject.get("photoHash");
+        final String recipient = (String) responseJSONObject.get("recipient");
+        photoAppActions.sendPhoto(photoHash, recipient, channel);
+        break;
+      }
+      default: {
+        LOGGER.info("invalid operation: '" + operation + "'");
+      }
+    }
+
     return true;
+  }
+
+  /**
+   * Sets the production or test object which handles the photo app actions
+   *
+   * @param photoAppActions the photoAppActions to set
+   */
+  public void setPhotoAppActions(final PhotoAppActions photoAppActions) {
+    assert photoAppActions != null : "photoAppActions must not be null";
+
+    this.photoAppActions = photoAppActions;
   }
 
 }
