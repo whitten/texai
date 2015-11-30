@@ -1049,7 +1049,7 @@ public final class X509Utils {
     if (line == null) {
       throw new TexaiException("serial number file cannot be read: " + serialNumberFile);
     }
-    final long nextSerialNumber = Long.parseLong(line.trim())  + 1L;
+    final long nextSerialNumber = Long.parseLong(line.trim()) + 1L;
     try (final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(serialNumberFile), "UTF-8"))) {
       bufferedWriter.write(String.valueOf(nextSerialNumber));
     }
@@ -1214,9 +1214,12 @@ public final class X509Utils {
       throw new TexaiException(ex);
     }
     LOGGER.info("aliases...");
+    int aliasesCnt = 0;
     while (aliases.hasMoreElements()) {
       LOGGER.info("  " + aliases.nextElement());
+      aliasesCnt++;
     }
+    LOGGER.info(aliasesCnt + " aliases found in the keystore");
   }
 
   /**

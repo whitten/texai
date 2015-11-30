@@ -17,11 +17,11 @@ public interface PhotoAppActions {
   /**
    * Logs in the given user, and responds by provisioning the user.
    *
-   * @param userName the given user name
+   * @param username the given user name
    * @param channel the channel used for the response
    */
   public void loginUser(
-          final String userName,
+          final String username,
           final Channel channel);
 
   /** Stores the given photo in to the Amazon S3 cloud, and responds with an acknowledgement.

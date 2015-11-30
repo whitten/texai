@@ -72,7 +72,12 @@ public final class X509SecurityInfo {
     }
 
     //Postconditions
+    if (privateKeyEntry == null) {
+      X509Utils.logAliases(keyStore);
+    }
     assert privateKeyEntry != null : "privateKeyEntry not found for alias " + certificateAlias;
+
+
 //    int length = ((X509Certificate[]) privateKeyEntry.getCertificateChain()).length;
 //    assert length == 1 : "X.509 certificate chain should have length 1, but was " + length;
   }

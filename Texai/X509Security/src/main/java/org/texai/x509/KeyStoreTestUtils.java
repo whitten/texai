@@ -86,6 +86,7 @@ public final class KeyStoreTestUtils {
       try (final FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
         serverKeyStoreUber.store(fileOutputStream, SERVER_KEYSTORE_PASSWORD);
       }
+      X509Utils.logAliases(serverKeyStoreUber);
 
     } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | SignatureException | InvalidKeyException | IOException | KeyStoreException | CertificateException ex) {
       throw new TexaiException(ex);

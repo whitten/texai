@@ -90,8 +90,8 @@ public class PhotoAppServer implements TexaiHTTPRequestHandler {
     final String operation = (String) responseJSONObject.get("operation");
     switch (operation) {
       case "login": {
-        final String userName = (String) responseJSONObject.get("userName");
-        photoAppActions.loginUser(userName, channel);
+        final String username = (String) responseJSONObject.get("username");
+        photoAppActions.loginUser(username, channel);
         break;
       }
       case "storePhoto": {
