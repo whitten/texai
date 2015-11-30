@@ -45,7 +45,7 @@ public class TestPhotoAppActions implements PhotoAppActions {
     // provisionUser
     //    {
     //	"operation": "provisionUser",
-    //      "userPublicKey": "user 1024-bit RSA user public key encoded in Base 64 notation",
+    //  "userPublicKey": "user 1024-bit RSA user public key encoded in Base 64 notation",
     //	"userPrivateKey”: "user 1024-bit RSA private key encoded in Base 64 notation",
     //	"serverPublicKey”: "server 1024-bit RSA public key encoded in Base 64 notation",
     //	"buddyList”: {"1": "Bob"}
