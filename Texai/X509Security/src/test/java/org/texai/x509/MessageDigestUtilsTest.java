@@ -66,6 +66,18 @@ public class MessageDigestUtilsTest {
   }
 
   /**
+   * Test of bytesSHA1HashString method, of class MessageDigestUtils.
+   */
+  @Test
+  public void testBytesSHA1HashString() {
+    LOGGER.info("bytesSHA1HashString");
+    final byte[] bytes = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    assertEquals("SUF5cUps1icjnf7e3y3p75lMrwM=", MessageDigestUtils.bytesSHA1HashString(bytes));
+    final byte[] bytes2 = {1, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    assertEquals("9Z5Ih1G0l6JoS29KcEj6zDAsPtI=", MessageDigestUtils.bytesSHA1HashString(bytes2));
+  }
+
+  /**
    * Test of bytesHashString method, of class MessageDigestUtils.
    */
   @Test

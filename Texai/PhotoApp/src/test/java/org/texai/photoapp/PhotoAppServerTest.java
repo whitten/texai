@@ -54,6 +54,8 @@ public class PhotoAppServerTest {
   private static final Logger LOGGER = Logger.getLogger(PhotoAppServerTest.class);
   // the server port
   private static final int SERVER_PORT = 8088;
+  // the test photo application actions
+  private final TestPhotoAppActions testPhotoAppActions = new TestPhotoAppActions();
 
   @BeforeClass
   public static void setUpClass() throws Exception {
@@ -92,7 +94,7 @@ public class PhotoAppServerTest {
 
     // create the photo app server and inject dependencies
     final PhotoAppServer photoAppServer = new PhotoAppServer();
-    photoAppServer.setPhotoAppActions(new TestPhotoAppActions());
+    photoAppServer.setPhotoAppActions(testPhotoAppActions);
 
     // configure the HTTP request handler by registering the photo app server
     final HTTPRequestHandler httpRequestHandler = HTTPRequestHandler.getInstance();
@@ -121,8 +123,20 @@ public class PhotoAppServerTest {
     // bind and start to accept incoming connections
     serverBootstrap.bind(new InetSocketAddress(SERVER_PORT));
 
-    // test photo app server with mock client
-    nettyWebSocketClient();
+    // test photo app server with mock clients, Alice, and Bob who starts first and waits on Alice to send a photo
+    final WebSocketClient bobWebSocketClient = new WebSocketClient("Bob");
+    final Thread bobClientThread = new Thread(bobWebSocketClient);
+    bobClientThread.start();
+
+    final WebSocketClient aliceWebSocketClient = new WebSocketClient("Alice");
+    final Thread aliceClientThread = new Thread(aliceWebSocketClient);
+    aliceClientThread.start();
+
+    // wait for the client threads to complete
+    try {
+      Thread.sleep(10_000);
+    } catch (InterruptedException ex) {
+    }
 
     final Timer timer = new Timer();
     timer.schedule(new ShutdownTimerTask(), 3000);
@@ -148,118 +162,179 @@ public class PhotoAppServerTest {
     }
   }
 
-  /**
-   * Tests the Netty web socket request and response messages.
-   */
-  @SuppressWarnings("ThrowableResultIgnored")
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings({"UW_UNCOND_WAIT", "WA_NOT_IN_LOOP"})
-  private void nettyWebSocketClient() {
-    final ClientBootstrap clientBootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(
-            Executors.newCachedThreadPool(),
-            Executors.newCachedThreadPool()));
+  private class WebSocketClient implements Runnable {
 
-    final Object clientResume_lock = new Object();
-    URI uri = null;
-    try {
-      // wss URI scheme indicates web socket secure connection
-      uri = new URI("wss://localhost:" + SERVER_PORT + "/data/test.txt");
-    } catch (URISyntaxException ex) {
-      fail(ex.getMessage());
-    }
-    @SuppressWarnings("null")
-    final String protocol = uri.getScheme();
-    if (!protocol.equals("wss")) {
-      throw new TexaiException("Unsupported protocol: " + protocol);
+    // the username
+    private final String username;
+
+    WebSocketClient(final String username) {
+      //Preconditions
+      assert StringUtils.isNonEmptyString(username) : "username must be a non-empty string";
+
+      this.username = username;
     }
 
-    // configure the client pipeline
-    final WebSocketClientHandshaker webSocketClientHandshaker = new WebSocketClientHandshakerFactory().newHandshaker(
-            uri, // webSocketURL
-            WebSocketVersion.V08, // version
-            null, // subprotocol
-            false, // allowExtensions
-            new HashMap<>()); // customHeaders
-    final AbstractWebSocketResponseHandler webSocketResponseHandler = new MockWebSocketResponseHandler(
-            webSocketClientHandshaker,
-            clientResume_lock);
-    final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
-    LOGGER.info("Netty websocket client x509SecurityInfo...\n" + x509SecurityInfo);
-    final ChannelPipeline channelPipeline = WebSocketClientPipelineFactory.getPipeline(
-            webSocketResponseHandler,
-            x509SecurityInfo);
-    clientBootstrap.setPipeline(channelPipeline);
+    /**
+     * Executes this runnable.
+     */
+    @Override
+    public void run() {
+      if (username.equals("Alice")) {
+        // wait on Bob to initialize
+        try {
+          Thread.sleep(1_000);
+        } catch (InterruptedException ex) {
+        }
+      }
 
-    // start the connection attempt
-    ChannelFuture channelFuture = clientBootstrap.connect(new InetSocketAddress(uri.getHost(), uri.getPort()));
+      LOGGER.info("********** starting client " + username + " ************");
 
-    // wait until the connection attempt succeeds or fails
-    final Channel channel = channelFuture.awaitUninterruptibly().getChannel();
-    if (!channelFuture.isSuccess()) {
-      LOGGER.info(StringUtils.getStackTraceAsString(channelFuture.getCause()));
-      fail(channelFuture.getCause().getMessage());
-    }
-    LOGGER.info("web socket client connected");
+      final ClientBootstrap clientBootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(
+              Executors.newCachedThreadPool(),
+              Executors.newCachedThreadPool()));
 
-    // start the handshake that upgrades HTTP to web socket protocol
-    webSocketClientHandshaker.handshake(channel);
-
-    // the message response handler will signal this thread when the web socket handshake is completed
-    synchronized (clientResume_lock) {
+      final Object clientResume_lock = new Object();
+      URI uri = null;
       try {
-        clientResume_lock.wait();
+        // wss URI scheme indicates web socket secure connection
+        uri = new URI("wss://localhost:" + SERVER_PORT + "/data/test.txt");
+      } catch (URISyntaxException ex) {
+        fail(ex.getMessage());
+      }
+      @SuppressWarnings("null")
+      final String protocol = uri.getScheme();
+      if (!protocol.equals("wss")) {
+        throw new TexaiException("Unsupported protocol: " + protocol);
+      }
+
+      // configure the client pipeline
+      final WebSocketClientHandshaker webSocketClientHandshaker = new WebSocketClientHandshakerFactory().newHandshaker(
+              uri, // webSocketURL
+              WebSocketVersion.V08, // version
+              null, // subprotocol
+              false, // allowExtensions
+              new HashMap<>()); // customHeaders
+      final AbstractWebSocketResponseHandler webSocketResponseHandler = new MockWebSocketResponseHandler(
+              webSocketClientHandshaker,
+              clientResume_lock,
+              testPhotoAppActions);
+      final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
+      LOGGER.info("Netty websocket client x509SecurityInfo...\n" + x509SecurityInfo);
+      final ChannelPipeline channelPipeline = WebSocketClientPipelineFactory.getPipeline(
+              webSocketResponseHandler,
+              x509SecurityInfo);
+      clientBootstrap.setPipeline(channelPipeline);
+
+      // start the connection attempt
+      ChannelFuture channelFuture = clientBootstrap.connect(new InetSocketAddress(uri.getHost(), uri.getPort()));
+
+      // wait until the connection attempt succeeds or fails
+      final Channel channel = channelFuture.awaitUninterruptibly().getChannel();
+      if (!channelFuture.isSuccess()) {
+        LOGGER.info(StringUtils.getStackTraceAsString(channelFuture.getCause()));
+        fail(channelFuture.getCause().getMessage());
+      }
+      LOGGER.info("web socket client connected");
+
+      // start the handshake that upgrades HTTP to web socket protocol
+      webSocketClientHandshaker.handshake(channel);
+
+      // the message response handler will signal this thread when the web socket handshake is completed
+      synchronized (clientResume_lock) {
+        try {
+          clientResume_lock.wait();
+        } catch (InterruptedException ex) {
+        }
+      }
+      LOGGER.info("web socket client handshake completed");
+
+      LOGGER.info("client pipeline ...\n" + channel.getPipeline());
+
+      // Ping
+      LOGGER.info("********** client " + username + " sending ************");
+      LOGGER.info("client sending ping");
+      channel.write(new PingWebSocketFrame(ChannelBuffers.copiedBuffer(new byte[]{1, 2, 3, 4, 5, 6})));
+      try {
+        Thread.sleep(500);
       } catch (InterruptedException ex) {
       }
+
+      // login
+      LOGGER.info("********** client " + username + " sending ************");
+      final String loginMessage = "{ \"operation\": \"login\", \"username\": \"" + username + "\" }";
+      LOGGER.info("client writing " + loginMessage);
+      channel.write(new TextWebSocketFrame(loginMessage));
+      try {
+        Thread.sleep(500);
+      } catch (InterruptedException ex) {
+      }
+
+      if (username.equals("Alice")) {
+
+        // storePhoto
+        LOGGER.info("********** client Alice sending ************");
+        final String storePhotoMessage = (new StringBuilder())
+                .append("{\n")
+                .append("\"operation\": \"storePhoto\",\n")
+                .append("\"photo\": \"")
+                .append(testPhotoAppActions.getInitializedUsers().getPhotoBase64())
+                .append("\",\n")
+                .append("\"photoHash\": \"")
+                .append(testPhotoAppActions.getInitializedUsers().getPhotoHashBase64())
+                .append("\"\n")
+                .append("}\n")
+                .toString();
+        LOGGER.info("client writing " + storePhotoMessage);
+        channel.write(new TextWebSocketFrame(storePhotoMessage));
+        try {
+          Thread.sleep(500);
+        } catch (InterruptedException ex) {
+        }
+
+        // sendPhoto
+        LOGGER.info("********** client Alice sending ************");
+        final String sendPhotoMessage = (new StringBuilder())
+                .append("{\n")
+                .append("\"operation\": \"sendPhoto\",\n")
+                .append("\"photoHash\": \"")
+                .append(testPhotoAppActions.getInitializedUsers().getPhotoHashBase64())
+                .append("\",\n")
+                .append("\"recipient\": \"Bob\"\n")
+                .append("}\n")
+                .toString();
+        LOGGER.info("client writing " + sendPhotoMessage);
+        channel.write(new TextWebSocketFrame(sendPhotoMessage));
+
+        try {
+          Thread.sleep(2_000);
+        } catch (InterruptedException ex) {
+        }
+
+      } else {
+        // Bob sleeps a while longer than Alice
+        try {
+          Thread.sleep(4_000);
+        } catch (InterruptedException ex) {
+        }
+      }
+
+      // Close
+      LOGGER.info("********** client " + username + " sending ************");
+      LOGGER.info("client sending close");
+      channelFuture = channel.write(new CloseWebSocketFrame());
+      channelFuture.awaitUninterruptibly(10_000); // wait at most 10 seconds
+
+      // WebSocketClientHandler will close the connection when the server
+      // responds to the CloseWebSocketFrame.
+      LOGGER.info("waiting for the web socket connection to close");
+      channel.getCloseFuture().awaitUninterruptibly();
+
+      LOGGER.info("releasing web socket client resources");
+      channel.close();
+      clientBootstrap.releaseExternalResources();
+
     }
-    LOGGER.info("web socket client handshake completed");
 
-    LOGGER.info("client pipeline ...\n" + channel.getPipeline());
-
-    // Ping
-    LOGGER.info("web socket client sending ping");
-    channel.write(new PingWebSocketFrame(ChannelBuffers.copiedBuffer(new byte[]{1, 2, 3, 4, 5, 6})));
-
-    // login
-    final String loginMessage = "{ \"operation\": \"login\", \"username\": \"Alice\" }";
-    LOGGER.info("client writing " + loginMessage);
-    channel.write(new TextWebSocketFrame(loginMessage));
-
-    // storePhoto
-    final String storePhotoMessage = "{ \n"
-            + "\"operation\": \"storePhoto\",\n"
-            + "\"encryptedPhoto\": \"photo encrypted with server public key, encoded in Base 64 notation\",\n"
-            + "\"photoHash\": \"the SHA-1 hash of the photo encoded in Base 64 notation\"\n"
-            + "}";
-    LOGGER.info("client writing " + storePhotoMessage);
-    channel.write(new TextWebSocketFrame(storePhotoMessage));
-
-    // sendPhoto
-    final String sendPhotoMessage = "{ \n"
-            + "\"operation\": \"sendPhoto\",\n"
-            + "\"photoHash\": \"the SHA-1 hash of the selected photo encoded in Base 64 notation\",\n"
-            + "\"recipient\": \"Bob\"\n"
-            + "}";
-    LOGGER.info("client writing " + sendPhotoMessage);
-    channel.write(new TextWebSocketFrame(sendPhotoMessage));
-
-    try {
-      // wait three seconds for server to process
-      Thread.sleep(3_000);
-    } catch (InterruptedException ex) {
-    }
-
-    // Close
-    LOGGER.info("web socket client sending close");
-    channelFuture = channel.write(new CloseWebSocketFrame());
-    channelFuture.awaitUninterruptibly(10_000); // wait at most 10 seconds
-
-    // WebSocketClientHandler will close the connection when the server
-    // responds to the CloseWebSocketFrame.
-    LOGGER.info("waiting for the web socket connection to close");
-    channel.getCloseFuture().awaitUninterruptibly();
-
-    LOGGER.info("releasing web socket client resources");
-    channel.close();
-    clientBootstrap.releaseExternalResources();
   }
 
 }

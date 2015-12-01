@@ -75,6 +75,28 @@ public class MessageDigestUtils {
   }
 
   /**
+   * Returns the SHA-1 hash of the given bytes, encoded as a base 64 string.
+   *
+   * @param bytes the given bytes
+   *
+   * @return the SHA-1 hash of the given bytes
+   */
+  public static String bytesSHA1HashString(final byte[] bytes) {
+    //Preconditions
+    assert bytes != null : "bytes must not be null";
+
+    try {
+      addBouncyCastleSecurityProvider();
+      final MessageDigest messageDigest = MessageDigest.getInstance("SHA-1", BOUNCY_CASTLE_PROVIDER);
+      messageDigest.reset();
+      final byte[] hashBytes = messageDigest.digest(bytes);
+      return new String(Base64Coder.encode(hashBytes));
+    } catch (NoSuchAlgorithmException | NoSuchProviderException ex) {
+      throw new TexaiException(ex);
+    }
+  }
+
+  /**
    * Returns the SHA-512 hash of the given bytes, encoded as a base 64 string.
    *
    * @param bytes the given bytes

@@ -74,10 +74,8 @@ public class PhotoAppServer implements TexaiHTTPRequestHandler {
     assert textWebSocketFrame != null : "textWebSocketFrame must not be null";
 
     final String webSocketText = textWebSocketFrame.getText();
+    LOGGER.info("********** server receiving ************");
     LOGGER.info("web socket text received: " + webSocketText);
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("web socket text received: " + webSocketText);
-    }
 
     final JSONParser jsonParser = new JSONParser();
     final JSONObject responseJSONObject;
@@ -95,9 +93,9 @@ public class PhotoAppServer implements TexaiHTTPRequestHandler {
         break;
       }
       case "storePhoto": {
-        final String encryptedPhoto = (String) responseJSONObject.get("encryptedPhoto");
+        final String photo = (String) responseJSONObject.get("photo");
         final String photoHash = (String) responseJSONObject.get("photoHash");
-        photoAppActions.storePhoto(encryptedPhoto, photoHash, channel);
+        photoAppActions.storePhoto(photo, photoHash, channel);
         break;
       }
       case "sendPhoto": {
@@ -107,7 +105,9 @@ public class PhotoAppServer implements TexaiHTTPRequestHandler {
         break;
       }
       default: {
-        LOGGER.info("invalid operation: '" + operation + "'");
+        final String errorMessage = "invalid operation: '" + operation + "'";
+        LOGGER.info(errorMessage);
+        photoAppActions.sendErrorMessage(webSocketText, channel);
       }
     }
 

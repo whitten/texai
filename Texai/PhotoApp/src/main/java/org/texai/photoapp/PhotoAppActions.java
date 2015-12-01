@@ -18,26 +18,37 @@ public interface PhotoAppActions {
    * Logs in the given user, and responds by provisioning the user.
    *
    * @param username the given user name
-   * @param channel the channel used for the response
+     * @param channel the channel used for the response
    */
   public void loginUser(
           final String username,
           final Channel channel);
 
-  /** Stores the given photo in to the Amazon S3 cloud, and responds with an acknowledgement.
+  /**
+   * Sends an error message to the client.
    *
-   * @param encryptedPhoto photo encrypted with server public key, encoded in Base 64 notation
+   * @param errorMessage the error message
+   * @param channel the channel used for the response
+   */
+  public void sendErrorMessage(
+          final String errorMessage,
+          final Channel channel);
+
+  /**
+   * Stores the given photo in to the Amazon S3 cloud, and responds with an acknowledgement.
+   *
+   * @param photo photo encoded in Base 64 notation
    * @param photoHash the SHA-1 hash of the photo encoded in Base 64 notation
    * @param channel the channel used for the response
    */
   public void storePhoto(
-          final String encryptedPhoto,
+          final String photo,
           final String photoHash,
           final Channel channel);
 
-
-  /** Sends the specified photo from the Amazon cloud to the specified buddy user. The server verifies that the photo has not been
-   * tampered with.
+  /**
+   * Sends the specified photo from the Amazon cloud to the specified buddy user. The server verifies that the photo has not been tampered
+   * with.
    *
    * @param photoHash the SHA-1 hash of the photo encoded in Base 64 notation
    * @param recipient the user name of the recipient

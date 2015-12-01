@@ -36,6 +36,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.Provider;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.SignatureException;
@@ -56,7 +57,10 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.security.auth.x500.X500Principal;
 import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -358,6 +362,85 @@ public final class X509Utils {
     final AlgorithmParameterSpec algorithmParameterSpec = new RSAKeyGenParameterSpec(3072, RSAKeyGenParameterSpec.F4);
     keyPairGenerator.initialize(algorithmParameterSpec, getSecureRandom());
     return keyPairGenerator.generateKeyPair();
+  }
+
+  /**
+   * Encrypt the plain text bytes using public key.
+   *
+   * @param plainTextBytes the given plain text bytes
+   * @param publicKey the public key
+   *
+   * @return Encrypted text
+   */
+  public static byte[] encrypt(
+          final byte[] plainTextBytes,
+          final PublicKey publicKey) {
+    //Preconditions
+    assert plainTextBytes != null : "plainTextBytes must not be null";
+    assert publicKey != null : "publicKey must not be null";
+
+    final byte[] cipherText;
+    try {
+      final Cipher cipher = Cipher.getInstance("RSA");
+      cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+      cipherText = cipher.doFinal(plainTextBytes);
+    } catch (NoSuchAlgorithmException |
+            NoSuchPaddingException |
+            InvalidKeyException |
+            IllegalBlockSizeException |
+            BadPaddingException ex) {
+      throw new TexaiException(ex);
+    }
+    return cipherText;
+  }
+
+  /**
+   * Encrypt the plain text using public key.
+   *
+   * @param plainText the given plain text
+   * @param publicKey the public key
+   *
+   * @return Encrypted text
+   */
+  public static byte[] encrypt(
+          final String plainText,
+          final PublicKey publicKey) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(plainText) : "plainText must be a non-empty string";
+    assert publicKey != null : "publicKey must not be null";
+
+    return encrypt(plainText.getBytes(), publicKey);
+  }
+
+  /**
+   * Decrypt text using private key.
+   *
+   * @param cipherText encrypted text
+   * @param privateKey the private key
+   *
+   * @return plain text
+   */
+  public static String decrypt(
+          final byte[] cipherText,
+          final PrivateKey privateKey) {
+    //Preconditions
+    assert cipherText != null : "cipherText must not be null";
+    assert privateKey != null : "privateKey must not be null";
+
+    byte[] dectyptedText = null;
+    try {
+      final Cipher cipher = Cipher.getInstance("RSA");
+      cipher.init(Cipher.DECRYPT_MODE, privateKey);
+      dectyptedText = cipher.doFinal(cipherText);
+    } catch (NoSuchAlgorithmException |
+            NoSuchPaddingException |
+            InvalidKeyException |
+            IllegalBlockSizeException |
+            BadPaddingException ex) {
+      throw new TexaiException(ex);
+    }
+
+    return new String(dectyptedText);
   }
 
   /**

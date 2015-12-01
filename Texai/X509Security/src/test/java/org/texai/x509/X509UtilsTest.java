@@ -315,6 +315,27 @@ public class X509UtilsTest {
   }
 
   /**
+   * Test of encrypt and decrypt methods of class X509Utils.
+   */
+  @Test
+  public void testEncryptAndDecrypt() {
+    LOGGER.info("encrypt & decrypt");
+    try {
+      final KeyPair keyPair = X509Utils.generateRSAKeyPair1024();
+      final PublicKey publicKey = keyPair.getPublic();
+      final PrivateKey privateKey = keyPair.getPrivate();
+      final String plainText = "test plain text";
+      final byte[] cipherText = X509Utils.encrypt(plainText, publicKey);
+      final String decryptedPlainText = X509Utils.decrypt(cipherText, privateKey);
+      assertEquals(plainText, decryptedPlainText);
+    } catch (NoSuchAlgorithmException |
+            NoSuchProviderException |
+            InvalidAlgorithmParameterException ex) {
+      fail(ex.getMessage());
+    }
+  }
+
+  /**
    * Test of generateSelfSignedEndEntityX509Certificate method, of class X509Utils.
    */
   @Test
