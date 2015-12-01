@@ -79,18 +79,19 @@ public class SingletonAgentHostsAccessTest {
             rdfEntityManager,
             basicNodeRuntime);
     instance.initializeSingletonAgentsHosts();
-    assertEquals("[SingletonAgentHosts, size 11\n"
-            + "  AICNetworkSeedAgent=turing\n"
-            + "  AICRecoveryAgent=turing\n"
-            + "  AICPrimaryAuditAgent=turing\n"
-            + "  AICRewardAllocationAgent=turing\n"
+    assertEquals("[SingletonAgentHosts, size 12\n"
+            + "  AICFinancialAccountingAndControlAgent=turing\n"
+            + "  AICMintAgent=turing\n"
             + "  AICNetworkEpisodicMemoryAgent=turing\n"
             + "  AICNetworkOperationAgent=turing\n"
+            + "  AICNetworkSeedAgent=turing\n"
+            + "  AICPrimaryAuditAgent=turing\n"
+            + "  AICRecoveryAgent=turing\n"
+            + "  AICRewardAllocationAgent=turing\n"
             + "  NetworkOperationAgent=turing\n"
-            + "  AICMintAgent=turing\n"
-            + "  TopmostFriendshipAgent=turing\n"
-            + "  AICFinancialAccountingAndControlAgent=turing\n"
             + "  NetworkSingletonConfigurationAgent=turing\n"
+            + "  PhotoAppAgent=turing\n"
+            + "  TopmostFriendshipAgent=turing\n"
             + "]", instance.getEffectiveSingletonAgentHosts().toDetailedString());
   }
 
@@ -106,7 +107,7 @@ public class SingletonAgentHostsAccessTest {
             basicNodeRuntime);
     instance.loadSingletonAgentHosts();
     SingletonAgentHosts result = instance.getEffectiveSingletonAgentHosts();
-    assertEquals("[SingletonAgentHosts, size 11]", result.toString());
+    assertEquals("[SingletonAgentHosts, size 12]", result.toString());
   }
 
   /**
@@ -138,7 +139,7 @@ public class SingletonAgentHostsAccessTest {
             basicNodeRuntime);
     instance.initializeSingletonAgentsHosts();
     SingletonAgentHosts result = instance.getEffectiveSingletonAgentHosts();
-    assertEquals("[SingletonAgentHosts, size 11]", result.toString());
+    assertEquals("[SingletonAgentHosts, size 12]", result.toString());
   }
 
   /**

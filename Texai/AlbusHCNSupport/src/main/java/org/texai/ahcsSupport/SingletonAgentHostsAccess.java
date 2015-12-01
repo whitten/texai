@@ -74,6 +74,7 @@ public class SingletonAgentHostsAccess {
       singletonAgentDictionary.put("AICPrimaryAuditAgent", singletonContainerName);
       singletonAgentDictionary.put("AICRecoveryAgent", singletonContainerName);
       singletonAgentDictionary.put("AICRewardAllocationAgent", singletonContainerName);
+      singletonAgentDictionary.put("PhotoAppAgent", singletonContainerName);
 
       final DateTime effectiveDateTime = new DateTime(
               2015, // year

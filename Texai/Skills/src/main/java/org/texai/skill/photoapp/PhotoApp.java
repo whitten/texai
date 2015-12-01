@@ -238,7 +238,6 @@ public final class PhotoApp extends AbstractNetworkSingletonSkill {
     //Preconditions
     assert receivedMessage != null : "message must not be null";
     assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready: " + stateDescription(getSkillState());
-    assert !getRole().getChildQualifiedNames().isEmpty() : "must have at least one child role";
 
     LOGGER.info("performing the mission");
 

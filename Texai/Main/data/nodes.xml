@@ -637,4 +637,27 @@
     </roles>
   </node>
 
+  <node>
+    <name>PhotoAppAgent</name>
+    <missionDescription>Provides the demonstration photo application.</missionDescription>
+    <isNetworkSingleton>true</isNetworkSingleton>
+    <prototypeNodeNames>
+      <prototypeNodeName>UniversalRolesAgent</prototypeNodeName>
+    </prototypeNodeNames>
+    <roles>
+      <role>
+        <qualifiedName>PhotoAppAgent.PhotoAppRole</qualifiedName>
+        <description>Provides the demonstration photo application.</description>
+        <parentQualifiedName>AICNetworkOperationAgent.AICNetworkOperationRole</parentQualifiedName>
+        <areRemoteCommunicationsPermitted>true</areRemoteCommunicationsPermitted>
+        <skill-classes>
+          <skill-class>
+            <skill-class-name>org.texai.skill.photoapp.PhotoApp</skill-class-name>
+          </skill-class>
+        </skill-classes>
+        <variableNames></variableNames>
+      </role>
+    </roles>
+  </node>
+
 </nodes>

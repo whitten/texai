@@ -52,14 +52,15 @@ public class PhotoAppServerTest {
 
   // the logger
   private static final Logger LOGGER = Logger.getLogger(PhotoAppServerTest.class);
-  // the server port
-  private static final int SERVER_PORT = 8088;
+  // the test server port
+  private static final int SERVER_PORT = 8087;
   // the photo app server test instance
   private static PhotoAppServer photoAppServer;
 
   @BeforeClass
   public static void setUpClass() throws Exception {
      photoAppServer = new PhotoAppServer();
+     photoAppServer.setIsUnitTest(true);
   }
 
   @AfterClass
@@ -91,8 +92,6 @@ public class PhotoAppServerTest {
       LOGGER.info("bypassing photo app server test on Windows");
       return;
     }
-
-
 
     // configure the HTTP request handler by registering the photo app server
     final HTTPRequestHandler httpRequestHandler = HTTPRequestHandler.getInstance();

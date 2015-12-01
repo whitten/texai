@@ -1049,6 +1049,8 @@ public class Role implements CascadePersistence, MessageDispatcher, Comparable<R
           LOGGER.debug("Caught exception " + ex.getMessage() + ", processing the message " + message);
           LOGGER.debug("Stack trace ...\n" + StringUtils.getStackTraceAsString(ex));
         } else {
+          LOGGER.info("Caught exception " + ex.getMessage() + ", processing the message " + message);
+          LOGGER.info("Stack trace ...\n" + StringUtils.getStackTraceAsString(ex));
           LOGGER.info(ex.getMessage() + ", when sending " + message.toBriefString());
         }
         //TODO report to container operations

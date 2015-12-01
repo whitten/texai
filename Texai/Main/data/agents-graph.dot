@@ -57,14 +57,19 @@ subgraph cluster_agents {
   NNetworkOperationAgent [
     shape = oval
     label = "NetworkOperationAgent" ];
+  NPhotoAppAgent [
+    shape = oval
+    label = "PhotoAppAgent" ];
   NTopmostFriendshipAgent [
     shape = oval
     label = "TopmostFriendshipAgent" ];
   }  NAICNetworkOperationAgent -> NAICPrimaryAuditAgent;
+  NContainerOperationAgent -> NPhotoAppAgent;
   NAICNetworkOperationAgent -> NAICNetworkSeedAgent;
   NAICNetworkSeedAgent -> NAICSeedAgent;
   NContainerOperationAgent -> NAICContainerAuditAgent;
   NContainerOperationAgent -> NAICContainerEpisodicMemoryAgent;
+  NAICNetworkOperationAgent -> NPhotoAppAgent;
   NAICNetworkOperationAgent -> NAICRecoveryAgent;
   NAICNetworkOperationAgent -> NAICBlockchainArchiveAgent;
   NContainerOperationAgent -> NAICSeedAgent;

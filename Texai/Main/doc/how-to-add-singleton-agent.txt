@@ -1,0 +1,10 @@
+To add a new singleton agent node
+=================================
+
+Edit Main/data/nodes.xml adding the agent definition
+
+Edit org.texai.ahcsSupport.SingletonAgentHostsAccess.java
+     initializeSingletonAgentsHosts() method
+Edit tests of SingletonAgentHostsAccessTest
+
+Edit AICoinMain to obtain debugging output from NodesInitializer that gets placed into Main/data/agents.txt

@@ -55,6 +55,9 @@ ContainerOperationAgent
 NetworkOperationAgent
   Manages the network, the containers, and the AICoin agents within the containers. Interacts with human operators.
 
+PhotoAppAgent
+  Provides the demonstration photo application.
+
 TopmostFriendshipAgent
   Coordinates the top level agents to ensure friendly behavior.
 

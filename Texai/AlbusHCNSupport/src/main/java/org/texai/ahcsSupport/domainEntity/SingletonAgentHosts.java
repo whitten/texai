@@ -11,7 +11,9 @@ package org.texai.ahcsSupport.domainEntity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.persistence.Id;
@@ -196,9 +198,19 @@ public final class SingletonAgentHosts implements RDFPersistent, Serializable {
             .append("[SingletonAgentHosts, size ")
             .append(singletonAgentDictionary.size())
             .append('\n');
+
+    final List<String> singletonAgents = new ArrayList<>();
     singletonAgentDictionary.entrySet().stream().forEach((Entry<String, String> entry) -> {
+      singletonAgents.add(entry.getKey());
+    });
+    Collections.sort(singletonAgents);
+
+    singletonAgents.forEach((String singletonAgent) -> {
+      final String host = singletonAgentDictionary.get(singletonAgent);
       stringBuilder.append("  ");
-      stringBuilder.append(entry);
+      stringBuilder.append(singletonAgent);
+      stringBuilder.append("=");
+      stringBuilder.append(host);
       stringBuilder.append('\n');
     });
     stringBuilder.append(']');

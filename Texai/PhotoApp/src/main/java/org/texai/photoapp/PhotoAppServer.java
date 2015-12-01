@@ -37,6 +37,8 @@ public class PhotoAppServer implements TexaiHTTPRequestHandler {
   private final Map<Channel, String> userDictionary = new HashMap<>();
   // the channel dictionary, username --> channel
   private final Map<String, Channel> channelDictionary = new HashMap<>();
+  // the indicator whether this is a unit test
+  private boolean isUnitTest = false;
 
   /**
    * Creates a new instance of PhotoAppServer.
@@ -250,18 +252,19 @@ public class PhotoAppServer implements TexaiHTTPRequestHandler {
     LOGGER.info("photoHash: " + photoHash);
 
     final byte[] photoBytes = Base64Coder.decode(photo);
-    try {
-      FileUtils.writeByteArrayToFile(new File("data/orb-test.jpg"), photoBytes);
-    } catch (IOException ex) {
-      throw new TexaiException(ex);
-    }
+    if (isUnitTest) {
+      try {
+        FileUtils.writeByteArrayToFile(new File("data/orb-test.jpg"), photoBytes);
+      } catch (IOException ex) {
+        throw new TexaiException(ex);
+      }
 
-    try {
-      assert FileUtils.contentEquals(new File("data/orb.jpg"), new File("data/orb-test.jpg")) : "photo files not the same content";
-    } catch (IOException ex) {
-      throw new TexaiException(ex);
+      try {
+        assert FileUtils.contentEquals(new File("data/orb.jpg"), new File("data/orb-test.jpg")) : "photo files not the same content";
+      } catch (IOException ex) {
+        throw new TexaiException(ex);
+      }
     }
-
     // encrypt the photo with a symmetric key for storage
     final File secretKeyFile = new File("data/aes-key.txt");
     SecretKey secretKey = SymmetricKeyUtils.loadKey(secretKeyFile);
@@ -272,6 +275,11 @@ public class PhotoAppServer implements TexaiHTTPRequestHandler {
     LOGGER.info("photoBytes length:          " + photoBytes.length);
     final byte[] encryptedPhotoBytes = SymmetricKeyUtils.encrypt(photoBytes, secretKey);
     LOGGER.info("encryptedPhotoBytes length: " + encryptedPhotoBytes.length);
+
+    if (!isUnitTest) {
+      // store photo on Amazon S3 cloud
+
+    }
 
     LOGGER.info("********** server sending ************");
     // storageResponse
@@ -394,12 +402,22 @@ public class PhotoAppServer implements TexaiHTTPRequestHandler {
     channel.write(new TextWebSocketFrame(jsonString));
   }
 
-  /** Gets the users initialization object.
+  /**
+   * Gets the users initialization object.
    *
    * @return the users initialization object
    */
   public InitializedUsers getInitializedUsers() {
     return initializedUsers;
+  }
+
+  /**
+   * Sets the indicator whether this is a unit test.
+   *
+   * @param isUnitTest the indicator whether this is a unit test
+   */
+  protected void setIsUnitTest(final boolean isUnitTest) {
+    this.isUnitTest = isUnitTest;
   }
 
 }

@@ -81,7 +81,7 @@ public abstract class AbstractNetworkSingletonSkill extends AbstractSkill {
 
   /**
    * Handles the Delegate Perform Mission Task message by synchronously relaying it to child roles.receivedMessage.
-   * 
+   *
    * @param receivedMessage the received Delegate Become Ready Task message
    */
   protected void handleDelegatePerformMissionTask(final Message receivedMessage) {
@@ -101,7 +101,7 @@ public abstract class AbstractNetworkSingletonSkill extends AbstractSkill {
               = getRole().isNetworkSingletonRole(getContainerName() + '.' + Node.extractAgentRoleName(childQualifiedName));
       if (containerName.equals(Node.extractContainerName(childQualifiedName)) && !isNetworkSingletonRole) {
         operation = AHCSConstants.PERFORM_MISSION_TASK;
-        getLogger().info(" sending Perform Mission Task to " + childQualifiedName);
+        getLogger().info(" sending Delegate Perform Mission Task to " + childQualifiedName);
       } else if (isNetworkSingletonRole) {
         operation = AHCSConstants.DELEGATE_PERFORM_MISSION_TASK;
         getLogger().info(" sending Delegate Perform Mission Task to " + childQualifiedName);

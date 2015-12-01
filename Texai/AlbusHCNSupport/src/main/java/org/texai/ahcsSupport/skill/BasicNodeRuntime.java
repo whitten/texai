@@ -509,7 +509,7 @@ public class BasicNodeRuntime implements MessageDispatcher {
   public boolean isFirstContainerInNetwork() {
     if (isFirstContainerInNetworkCached == null) {
       final ContainerInfo containerInfo = containerInfoAccess.getContainerInfo(containerName);
-      assert containerInfo != null;
+      assert containerInfo != null : "no containerInfo for containerName: " + containerName;
       isFirstContainerInNetworkCached = containerInfo.isFirstContainer();
     }
     return isFirstContainerInNetworkCached;

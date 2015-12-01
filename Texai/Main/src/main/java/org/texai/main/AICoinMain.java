@@ -86,7 +86,7 @@ public class AICoinMain {
   private final String nodesPath = "data/nodes.xml";
   // the tamper-evident hash of the nodes path file, use "1234" after revsing the nodes.xml file
   private final String NODES_FILE_HASH
-          = "g6hHzzi4kzmQvmUI+eV0PqKCRAOjz+pBvVR90HrdUczvhulJmpVkrsgk2k6bBAS8i/jQ3pY7RL1+olin/QmWEg==";
+          = "ELL1MtVRdcUzWg1a1DHm3Fxmub6HQGzmISz/MVYB++ZwQxt2hNEHKVMbFZ7xxZrkowu1bJMsve59x3TRW4kNgg==";
   /**
    * the node runtime application thread
    */
