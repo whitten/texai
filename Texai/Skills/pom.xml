@@ -37,6 +37,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.texai</groupId>
+      <artifactId>PhotoApp</artifactId>
+      <version>1.0</version>
+    </dependency>
+
+    <dependency>
       <groupId>com.temboo</groupId>
       <artifactId>temboosdk</artifactId>
       <version>1.0</version>

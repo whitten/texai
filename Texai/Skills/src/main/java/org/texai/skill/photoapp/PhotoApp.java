@@ -5,14 +5,26 @@
  *
  * Copyright (C) Jan 21, 2015, Stephen L. Reed.
  */
-
 package org.texai.skill.photoapp;
 
+import java.net.InetSocketAddress;
+import java.util.concurrent.Executors;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
+import org.jboss.netty.bootstrap.ServerBootstrap;
+import org.jboss.netty.channel.ChannelPipelineFactory;
+import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
+import static org.junit.Assert.assertEquals;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcs.skill.AbstractNetworkSingletonSkill;
+import org.texai.network.netty.handler.AbstractHTTPRequestHandlerFactory;
+import org.texai.network.netty.handler.HTTPRequestHandler;
+import org.texai.network.netty.handler.HTTPRequestHandlerFactory;
+import org.texai.network.netty.pipeline.PortUnificationChannelPipelineFactory;
+import org.texai.photoapp.PhotoAppServer;
+import org.texai.x509.KeyStoreTestUtils;
+import org.texai.x509.X509SecurityInfo;
 
 /**
  * Provides a template for a network singleton skill.
@@ -24,6 +36,12 @@ public final class PhotoApp extends AbstractNetworkSingletonSkill {
 
   // the logger
   private static final Logger LOGGER = Logger.getLogger(PhotoApp.class);
+  // the photo app server
+  private PhotoAppServer photoAppServer;
+  // the test server port
+  private static final int SERVER_PORT = 8088;
+  // the server bootstrap
+  private ServerBootstrap serverBootstrap;
 
   /**
    * Creates a new instance of NetworkSingletonSkillTemplate.
@@ -62,25 +80,20 @@ public final class PhotoApp extends AbstractNetworkSingletonSkill {
       /**
        * Initialize Task
        *
-       * This task message is sent from the parent NetworkOperationAgent.NetworkOperationRole. It is expected to be the first
-       * task message that this role receives and it results in the role being initialized.
+       * This task message is sent from the parent NetworkOperationAgent.NetworkOperationRole. It is expected to be the first task message
+       * that this role receives and it results in the role being initialized.
        */
       case AHCSConstants.INITIALIZE_TASK:
         assert this.getSkillState().equals(AHCSConstants.State.UNINITIALIZED) : "prior state must be non-initialized";
 
-        propagateOperationToChildRoles(receivedMessage);
-        if (getNodeRuntime().isFirstContainerInNetwork()) {
-          setSkillState(AHCSConstants.State.READY);
-        } else {
-          setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
-        }
+        initializeTask();
         return;
 
       /**
        * Join Acknowledged Task
        *
-       * This task message is sent from the network-singleton, parent NetworkOperationAgent.NetworkOperationRole.
-       * It indicates that the parent is ready to converse with this role as needed.
+       * This task message is sent from the network-singleton, parent NetworkOperationAgent.NetworkOperationRole. It indicates that the
+       * parent is ready to converse with this role as needed.
        */
       case AHCSConstants.JOIN_ACKNOWLEDGED_TASK:
         assert getSkillState().equals(AHCSConstants.State.ISOLATED_FROM_NETWORK) :
@@ -91,8 +104,8 @@ public final class PhotoApp extends AbstractNetworkSingletonSkill {
       /**
        * Perform Mission Task
        *
-       * This task message is sent from the network-singleton, parent NetworkOperationAgent.NetworkOperationRole.
-       * It commands this network-connected role to begin performing its mission.
+       * This task message is sent from the network-singleton, parent NetworkOperationAgent.NetworkOperationRole. It commands this
+       * network-connected role to begin performing its mission.
        */
       case AHCSConstants.PERFORM_MISSION_TASK:
         performMission(receivedMessage);
@@ -107,8 +120,8 @@ public final class PhotoApp extends AbstractNetworkSingletonSkill {
        *
        * The message parameter is the X.509 certificate belonging to the sender agent / role.
        *
-       * The result is the sending of a Join Acknowleged Task message to the requesting child role, with this role's X.509
-       * certificate as the message parameter.
+       * The result is the sending of a Join Acknowleged Task message to the requesting child role, with this role's X.509 certificate as
+       * the message parameter.
        */
       case AHCSConstants.JOIN_NETWORK_SINGLETON_AGENT_INFO:
         assert getSkillState().equals(AHCSConstants.State.READY) : "state must be ready, but is " + getSkillState();
@@ -136,8 +149,8 @@ public final class PhotoApp extends AbstractNetworkSingletonSkill {
     sendMessage(
             receivedMessage,
             Message.notUnderstoodMessage(
-            receivedMessage, // receivedMessage
-            this)); // skill
+                    receivedMessage, // receivedMessage
+                    this)); // skill
   }
 
   /**
@@ -177,6 +190,46 @@ public final class PhotoApp extends AbstractNetworkSingletonSkill {
   }
 
   /**
+   * Initialize the skill.
+   */
+  private void initializeTask() {
+
+    if (getNodeRuntime().isFirstContainerInNetwork()) {
+      setSkillState(AHCSConstants.State.READY);
+    } else {
+      setSkillState(AHCSConstants.State.ISOLATED_FROM_NETWORK);
+    }
+    photoAppServer = new PhotoAppServer();
+
+    // configure the HTTP request handler by registering the photo app server
+    final HTTPRequestHandler httpRequestHandler = HTTPRequestHandler.getInstance();
+    httpRequestHandler.register(photoAppServer);
+
+    // initialize the test keystores
+    KeyStoreTestUtils.initializeServerKeyStore();
+    KeyStoreTestUtils.initializeClientKeyStore();
+
+    // configure the server channel pipeline factory
+    final AbstractHTTPRequestHandlerFactory httpRequestHandlerFactory = new HTTPRequestHandlerFactory();
+    final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getServerX509SecurityInfo();
+    final ChannelPipelineFactory channelPipelineFactory = new PortUnificationChannelPipelineFactory(
+            null, // albusHCNMessageHandlerFactory,
+            httpRequestHandlerFactory,
+            x509SecurityInfo);
+
+    // configure the server
+    serverBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
+            Executors.newCachedThreadPool(),
+            Executors.newCachedThreadPool()));
+
+    assertEquals("{}", serverBootstrap.getOptions().toString());
+    serverBootstrap.setPipelineFactory(channelPipelineFactory);
+
+    // bind and start to accept incoming connections
+    serverBootstrap.bind(new InetSocketAddress(SERVER_PORT));
+  }
+
+  /**
    * Perform this role's mission.
    *
    * @param receivedMessage the received perform mission task message
@@ -189,8 +242,8 @@ public final class PhotoApp extends AbstractNetworkSingletonSkill {
 
     LOGGER.info("performing the mission");
 
-
-
+    // bind and start to accept incoming connections
+    serverBootstrap.bind(new InetSocketAddress(SERVER_PORT));
   }
 
 }
