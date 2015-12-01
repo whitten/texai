@@ -50,16 +50,13 @@ public class MockWebSocketResponseHandler extends AbstractWebSocketResponseHandl
    *
    * @param webSocketClientHandshaker the web socket client handshaker
    * @param clientResume_lock the synchronization lock to resume the client when the handshake is completed
-   * @param testPhotoAppActions the test photo application actions
    */
   public MockWebSocketResponseHandler(
           final WebSocketClientHandshaker webSocketClientHandshaker,
-          final Object clientResume_lock,
-          final TestPhotoAppActions testPhotoAppActions) {
+          final Object clientResume_lock) {
     //Preconditions
     assert webSocketClientHandshaker != null : "webSocketClientHandshaker must not be null";
     assert clientResume_lock != null : "clientResume_lock must not be null";
-    assert testPhotoAppActions != null : "testPhotoAppActions must not be null";
 
     this.webSocketClientHandshaker = webSocketClientHandshaker;
     this.clientResume_lock = clientResume_lock;

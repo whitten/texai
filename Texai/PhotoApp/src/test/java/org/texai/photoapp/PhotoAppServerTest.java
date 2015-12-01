@@ -44,7 +44,7 @@ import org.texai.util.TexaiException;
 /**
  * PhotoAppServerTest.java
  *
- * Description:
+ * Description: Test the photo app server.
  *
  * Copyright (C) Nov 30, 2015, Stephen L. Reed.
  */
@@ -54,12 +54,12 @@ public class PhotoAppServerTest {
   private static final Logger LOGGER = Logger.getLogger(PhotoAppServerTest.class);
   // the server port
   private static final int SERVER_PORT = 8088;
-  // the test photo application actions
-  private final TestPhotoAppActions testPhotoAppActions = new TestPhotoAppActions();
+  // the photo app server test instance
+  private static PhotoAppServer photoAppServer;
 
   @BeforeClass
   public static void setUpClass() throws Exception {
-    // initialize Alice, Bob, and Server X.509 certificates with 1024-bit RSA
+     photoAppServer = new PhotoAppServer();
   }
 
   @AfterClass
@@ -92,9 +92,7 @@ public class PhotoAppServerTest {
       return;
     }
 
-    // create the photo app server and inject dependencies
-    final PhotoAppServer photoAppServer = new PhotoAppServer();
-    photoAppServer.setPhotoAppActions(testPhotoAppActions);
+
 
     // configure the HTTP request handler by registering the photo app server
     final HTTPRequestHandler httpRequestHandler = HTTPRequestHandler.getInstance();
@@ -216,8 +214,7 @@ public class PhotoAppServerTest {
               new HashMap<>()); // customHeaders
       final AbstractWebSocketResponseHandler webSocketResponseHandler = new MockWebSocketResponseHandler(
               webSocketClientHandshaker,
-              clientResume_lock,
-              testPhotoAppActions);
+              clientResume_lock);
       final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
       LOGGER.info("Netty websocket client x509SecurityInfo...\n" + x509SecurityInfo);
       final ChannelPipeline channelPipeline = WebSocketClientPipelineFactory.getPipeline(
@@ -277,10 +274,10 @@ public class PhotoAppServerTest {
                 .append("{\n")
                 .append("\"operation\": \"storePhoto\",\n")
                 .append("\"photo\": \"")
-                .append(testPhotoAppActions.getInitializedUsers().getPhotoBase64())
+                .append(photoAppServer.getInitializedUsers().getPhotoBase64())
                 .append("\",\n")
                 .append("\"photoHash\": \"")
-                .append(testPhotoAppActions.getInitializedUsers().getPhotoHashBase64())
+                .append(photoAppServer.getInitializedUsers().getPhotoHashBase64())
                 .append("\"\n")
                 .append("}\n")
                 .toString();
@@ -297,7 +294,7 @@ public class PhotoAppServerTest {
                 .append("{\n")
                 .append("\"operation\": \"sendPhoto\",\n")
                 .append("\"photoHash\": \"")
-                .append(testPhotoAppActions.getInitializedUsers().getPhotoHashBase64())
+                .append(photoAppServer.getInitializedUsers().getPhotoHashBase64())
                 .append("\",\n")
                 .append("\"recipient\": \"Bob\"\n")
                 .append("}\n")
