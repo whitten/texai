@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import javax.crypto.SecretKey;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.jboss.netty.channel.Channel;
@@ -12,6 +13,7 @@ import org.joda.time.DateTime;
 import org.texai.util.Base64Coder;
 import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
+import org.texai.x509.SymmetricKeyUtils;
 import org.texai.x509.X509Utils;
 
 /**
@@ -168,6 +170,23 @@ public class TestPhotoAppActions implements PhotoAppActions {
     } catch (IOException ex) {
       throw new TexaiException(ex);
     }
+
+    try {
+      assert FileUtils.contentEquals(new File("data/orb.jpg"), new File("data/orb-test.jpg")) : "photo files not the same content";
+    } catch (IOException ex) {
+      throw new TexaiException(ex);
+    }
+
+    // encrypt the photo with a symmetric key for storage
+    final File secretKeyFile = new File("data/aes-key.txt");
+    SecretKey secretKey = SymmetricKeyUtils.loadKey(secretKeyFile);
+    if (secretKey == null) {
+      secretKey = SymmetricKeyUtils.generateKey();
+      SymmetricKeyUtils.saveKey(secretKey, secretKeyFile);
+    }
+    LOGGER.info("photoBytes length:          " + photoBytes.length);
+    final byte[] encryptedPhotoBytes = SymmetricKeyUtils.encrypt(photoBytes, secretKey);
+    LOGGER.info("encryptedPhotoBytes length: " + encryptedPhotoBytes.length);
 
     LOGGER.info("********** server sending ************");
     // storageResponse

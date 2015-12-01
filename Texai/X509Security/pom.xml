@@ -30,6 +30,12 @@
     </dependency>
 
     <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.10</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.texai</groupId>
       <artifactId>Utilities</artifactId>
       <version>1.0</version>
