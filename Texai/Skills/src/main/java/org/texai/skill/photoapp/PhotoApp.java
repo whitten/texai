@@ -39,7 +39,7 @@ public final class PhotoApp extends AbstractNetworkSingletonSkill {
   // the photo app server
   private PhotoAppServer photoAppServer;
   // the test server port
-  private static final int SERVER_PORT = 8088;
+  private static final int SERVER_PORT = 8089;
   // the server bootstrap
   private ServerBootstrap serverBootstrap;
 
@@ -224,9 +224,6 @@ public final class PhotoApp extends AbstractNetworkSingletonSkill {
 
     assertEquals("{}", serverBootstrap.getOptions().toString());
     serverBootstrap.setPipelineFactory(channelPipelineFactory);
-
-    // bind and start to accept incoming connections
-    serverBootstrap.bind(new InetSocketAddress(SERVER_PORT));
   }
 
   /**
@@ -242,6 +239,7 @@ public final class PhotoApp extends AbstractNetworkSingletonSkill {
     LOGGER.info("performing the mission");
 
     // bind and start to accept incoming connections
+    LOGGER.info("binding the socket for " + SERVER_PORT);
     serverBootstrap.bind(new InetSocketAddress(SERVER_PORT));
   }
 

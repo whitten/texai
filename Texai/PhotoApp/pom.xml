@@ -22,6 +22,12 @@
     </dependency>
 
     <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-java-sdk-s3</artifactId>
+      <version>1.10.35</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.texai</groupId>
       <artifactId>Network</artifactId>
       <version>1.0</version>

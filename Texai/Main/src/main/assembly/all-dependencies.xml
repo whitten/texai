@@ -34,6 +34,7 @@
         <include>kb-statements.txt</include>
         <include>nodes.xml</include>
         <include>SeedNodeInfos.ser</include>
+        <include>orb.jpg</include>
       </includes>
       <outputDirectory>data</outputDirectory>
     </fileSet>

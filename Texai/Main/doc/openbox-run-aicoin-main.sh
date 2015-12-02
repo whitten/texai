@@ -55,6 +55,7 @@ CLASSPATH=$CLASSPATH:lib/netty-3.3.1.jar
 CLASSPATH=$CLASSPATH:lib/Network-1.0.jar
 CLASSPATH=$CLASSPATH:lib/opencsv-2.0.jar
 CLASSPATH=$CLASSPATH:lib/persistence-api-1.0.jar
+CLASSPATH=$CLASSPATH:lib/PhotoApp-1.0.jar
 CLASSPATH=$CLASSPATH:lib/protobuf-java-2.5.0.jar
 CLASSPATH=$CLASSPATH:lib/RDFEntityManager-1.0.jar
 CLASSPATH=$CLASSPATH:lib/scala-library-2.10.3.jar
