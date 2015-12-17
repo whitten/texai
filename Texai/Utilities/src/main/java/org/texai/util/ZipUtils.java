@@ -104,6 +104,10 @@ public class ZipUtils {
    * @return true if the given zip archive file is not corrupted
    */
   public static boolean verify(final String zipFilePathName) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(zipFilePathName) : "zipFilePathName must be a non-empty string";
+    assert (new File(zipFilePathName)).exists() : zipFilePathName + " must exist";
+    
     ZipFile zipFile = null;
     int zipEntryCnt = 0;
     int zipEntryActualCnt = 0;

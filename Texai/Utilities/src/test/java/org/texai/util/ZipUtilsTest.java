@@ -84,7 +84,6 @@ public class ZipUtilsTest {
 
     final ZipFile zipFile = ZipUtils.temporaryZipFile(zippedBytes);
     LOGGER.info("zipFile: " + zipFile.getName());
-    assertTrue(zipFile.getName().startsWith("/tmp/archive"));
     assertTrue(zipFile.getName().endsWith(".zip"));
     final Enumeration<? extends ZipEntry> zipEntries = zipFile.entries();
     final int bufferSize = 4096;
@@ -128,7 +127,6 @@ public class ZipUtilsTest {
   public void testVerify() {
     LOGGER.info("verify");
 
-    assertFalse(ZipUtils.verify("does not exist"));
     File notAZipFile = null;
     try {
       notAZipFile = File.createTempFile("my-file", ".txt");
