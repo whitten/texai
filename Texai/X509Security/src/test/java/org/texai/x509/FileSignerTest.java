@@ -60,15 +60,15 @@ public class FileSignerTest {
 
   @BeforeClass
   public static void setUpClass() throws Exception {
-    final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
+    final X509SecurityInfo x509SecurityInfo = KeyStoreUtils.getClientX509SecurityInfo();
     final X509KeyManager x509KeyManager = (X509KeyManager) x509SecurityInfo.getKeyManagers()[0];
-    final X509Certificate[] certificateChain = x509KeyManager.getCertificateChain(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS);
+    final X509Certificate[] certificateChain = x509KeyManager.getCertificateChain(KeyStoreUtils.TEST_CERTIFICATE_ALIAS);
     assertNotNull(certificateChain);
     LOGGER.info("certificate chain length:\n" + certificateChain.length);
     assertEquals(1, certificateChain.length);
     x509Certificate = certificateChain[0];
     LOGGER.info("certificate: " + x509Certificate);
-    privateKey = x509KeyManager.getPrivateKey(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS);
+    privateKey = x509KeyManager.getPrivateKey(KeyStoreUtils.TEST_CERTIFICATE_ALIAS);
     assertNotNull(privateKey);
     LOGGER.info("private key: " + privateKey);
     x509Certificate.checkValidity();

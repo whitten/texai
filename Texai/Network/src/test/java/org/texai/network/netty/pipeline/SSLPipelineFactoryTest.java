@@ -16,7 +16,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.texai.x509.KeyStoreTestUtils;
+import org.texai.x509.KeyStoreUtils;
 import org.texai.x509.X509SecurityInfo;
 import static org.junit.Assert.*;
 
@@ -56,13 +56,14 @@ public class SSLPipelineFactoryTest {
     LOGGER.info("getPipeline");
     final boolean useClientMode = true;
     // test creation of new pipeline
-    KeyStoreTestUtils.initializeClientKeyStore();
-    final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
+    KeyStoreUtils.initializeClientKeyStore();
+    final X509SecurityInfo x509SecurityInfo = KeyStoreUtils.getClientX509SecurityInfo();
     LOGGER.info("getting channelPipeline");
     ChannelPipeline channelPipeline = SSLPipelineFactory.getPipeline(
             useClientMode,
             x509SecurityInfo,
-            true); // needClientAuth
+            true, // needClientAuth
+            true); // isStrongCiphers
     assertEquals("DefaultChannelPipeline{(ssl = org.jboss.netty.handler.ssl.SslHandler)}", channelPipeline.toString());
   }
 

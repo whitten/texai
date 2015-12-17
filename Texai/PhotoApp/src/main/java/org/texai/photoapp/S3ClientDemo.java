@@ -33,6 +33,7 @@ public class S3ClientDemo {
 
   // the logger
   private static final Logger LOGGER = Logger.getLogger(S3ClientDemo.class);
+  // the Amazon S3 bucket
   public static final String BUCKET = "aichain-demo";
 
   public static void main(String[] args) {
@@ -160,6 +161,11 @@ public class S3ClientDemo {
           final String bucket,
           final String key,
           final String filePath) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(bucket) : "bucket must be a non-empty string";
+    assert StringUtils.isNonEmptyString(key) : "key must be a non-empty string";
+    assert StringUtils.isNonEmptyString(filePath) : "filePath must be a non-empty string";
+
     AmazonS3 s3Client = new AmazonS3Client(new ProfileCredentialsProvider());
 
     // Create a list of UploadPartResponse objects. You get one of these for

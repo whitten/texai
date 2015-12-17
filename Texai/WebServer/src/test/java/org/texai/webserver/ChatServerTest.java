@@ -50,10 +50,10 @@ import org.texai.network.netty.handler.AbstractHTTPRequestHandlerFactory;
 import org.texai.network.netty.handler.AbstractHTTPResponseHandler;
 import org.texai.network.netty.handler.HTTPRequestHandler;
 import org.texai.network.netty.handler.HTTPRequestHandlerFactory;
-import org.texai.network.netty.pipeline.HTTPClientPipelineFactory;
+import org.texai.network.netty.pipeline.HTTPSClientPipelineFactory;
 import org.texai.network.netty.pipeline.PortUnificationChannelPipelineFactory;
 import org.texai.util.StringUtils;
-import org.texai.x509.KeyStoreTestUtils;
+import org.texai.x509.KeyStoreUtils;
 import org.texai.x509.X509SecurityInfo;
 import static org.junit.Assert.*;
 
@@ -73,8 +73,8 @@ public class ChatServerTest {
 
   @BeforeClass
   public static void setUpClass() throws Exception {
-    KeyStoreTestUtils.initializeClientKeyStore();
-    KeyStoreTestUtils.initializeServerKeyStore();
+    KeyStoreUtils.initializeClientKeyStore();
+    KeyStoreUtils.initializeServerTestKeyStore();
   }
 
   @AfterClass
@@ -106,16 +106,17 @@ public class ChatServerTest {
     chatServer.setChatSession(new TestChatSession());
 
     // configure the HTTP request handler by registering the chat server
-    final HTTPRequestHandler httpRequestHandler = HTTPRequestHandler.getInstance();
+    final HTTPRequestHandler httpRequestHandler = new HTTPRequestHandler();
     httpRequestHandler.register(chatServer);
 
     // configure the server channel pipeline factory
-    final AbstractHTTPRequestHandlerFactory httpRequestHandlerFactory = new HTTPRequestHandlerFactory();
-    final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getServerX509SecurityInfo();
+    final AbstractHTTPRequestHandlerFactory httpRequestHandlerFactory = new HTTPRequestHandlerFactory(httpRequestHandler);
+    final X509SecurityInfo x509SecurityInfo = KeyStoreUtils.getServerX509SecurityInfo();
     final ChannelPipelineFactory channelPipelineFactory = new PortUnificationChannelPipelineFactory(
             null, // albusHCNMessageHandlerFactory,
             httpRequestHandlerFactory,
-            x509SecurityInfo);
+            x509SecurityInfo,
+            true); // isHTTPS
 
     // configure the server
     final ServerBootstrap serverBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
@@ -161,8 +162,8 @@ public class ChatServerTest {
     // configure the client pipeline
     final Object clientResume_lock = new Object();
     final AbstractHTTPResponseHandler httpResponseHandler = new MockHTTPResponseHandler(clientResume_lock);
-    final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
-    final ChannelPipeline channelPipeline = HTTPClientPipelineFactory.getPipeline(
+    final X509SecurityInfo x509SecurityInfo = KeyStoreUtils.getClientX509SecurityInfo();
+    final ChannelPipeline channelPipeline = HTTPSClientPipelineFactory.getPipeline(
             httpResponseHandler,
             x509SecurityInfo);
     clientBootstrap.setPipeline(channelPipeline);

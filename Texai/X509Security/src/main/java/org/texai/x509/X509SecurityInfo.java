@@ -44,7 +44,8 @@ public final class X509SecurityInfo {
   // the key store
   private final KeyStore keyStore;
   // the cached private key entry that contains the self-signed X.509 certificate and private key
-  private final PrivateKeyEntry privateKeyEntry;
+  private PrivateKeyEntry privateKeyEntry;
+
 
   /**
    * Constructs a new X509SecurityInfo instance.
@@ -66,17 +67,15 @@ public final class X509SecurityInfo {
     try {
       keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
       keyManagerFactory.init(keyStore, keyStorePassword);
+      try {
       privateKeyEntry = (PrivateKeyEntry) keyStore.getEntry(certificateAlias, new PasswordProtection(keyStorePassword));
+      } catch (UnsupportedOperationException ex) {
+        // trusted public certificate without a private key
+        privateKeyEntry = null;
+      }
     } catch (NoSuchAlgorithmException | KeyStoreException | UnrecoverableEntryException ex) {
       throw new TexaiException(ex);
     }
-
-    //Postconditions
-    if (privateKeyEntry == null) {
-      X509Utils.logAliases(keyStore);
-    }
-    assert privateKeyEntry != null : "privateKeyEntry not found for alias " + certificateAlias;
-
 
 //    int length = ((X509Certificate[]) privateKeyEntry.getCertificateChain()).length;
 //    assert length == 1 : "X.509 certificate chain should have length 1, but was " + length;
@@ -98,6 +97,13 @@ public final class X509SecurityInfo {
    */
   public KeyManager[] getKeyManagers() {
     return keyManagerFactory.getKeyManagers();
+  }
+
+  /** Returns whether the certificate is public, and therefore does not contain its private key.
+   * @return whether the certificate is public, and therefore does not contain its private key
+   */
+  public boolean isPublicCertificate() {
+    return privateKeyEntry == null;
   }
 
   /**

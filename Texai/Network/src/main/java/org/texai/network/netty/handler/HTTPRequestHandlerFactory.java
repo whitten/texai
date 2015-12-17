@@ -18,10 +18,19 @@ import net.jcip.annotations.NotThreadSafe;
 @NotThreadSafe
 public class HTTPRequestHandlerFactory extends AbstractHTTPRequestHandlerFactory {
 
+  // the HTTP request handler
+  final HTTPRequestHandler httpRequestHandler;
+
   /**
    * Constructs a new HTTPRequestHandlerFactory instance.
+   *
+   * @param httpRequestHandler the HTTP request handler
    */
-  public HTTPRequestHandlerFactory() {
+  public HTTPRequestHandlerFactory(final HTTPRequestHandler httpRequestHandler) {
+    //Preconditions
+    assert httpRequestHandler != null : "httpRequestHandler must not be null";
+
+    this.httpRequestHandler = httpRequestHandler;
   }
 
   /**
@@ -31,6 +40,6 @@ public class HTTPRequestHandlerFactory extends AbstractHTTPRequestHandlerFactory
    */
   @Override
   public AbstractHTTPRequestHandler getHandler() {
-    return HTTPRequestHandler.getInstance();
+    return httpRequestHandler;
   }
 }

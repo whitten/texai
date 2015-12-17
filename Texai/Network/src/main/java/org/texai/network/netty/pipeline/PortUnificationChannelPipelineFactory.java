@@ -12,6 +12,7 @@ import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
+import org.jboss.netty.channel.DefaultChannelPipeline;
 import org.texai.network.netty.handler.AbstractAlbusHCSMessageHandlerFactory;
 import org.texai.network.netty.handler.AbstractHTTPRequestHandlerFactory;
 import org.texai.network.netty.handler.PortUnificationHandler;
@@ -33,6 +34,8 @@ public class PortUnificationChannelPipelineFactory implements ChannelPipelineFac
   private final AbstractHTTPRequestHandlerFactory httpRequestHandlerFactory;
   // the X.509 security information
   private final X509SecurityInfo x509SecurityInfo;
+  // the indicator whether the HTTP connection is encrypted, i.e. HTTPS
+  private final boolean isHTTPS;
 
   /**
    * Constructs a new PortUnificationChannelPipelineFactory instance.
@@ -40,18 +43,21 @@ public class PortUnificationChannelPipelineFactory implements ChannelPipelineFac
    * @param albusHCSMessageHandlerFactory the Albus HCN message handler factory
    * @param httpRequestHandlerFactory the HTTP request handler factory
    * @param x509SecurityInfo the X.509 security information
+   * @param isHTTPS the indicator whether the HTTP connection is encrypted, i.e. HTTPS
    *
    */
   public PortUnificationChannelPipelineFactory(
           final AbstractAlbusHCSMessageHandlerFactory albusHCSMessageHandlerFactory,
           final AbstractHTTPRequestHandlerFactory httpRequestHandlerFactory,
-          final X509SecurityInfo x509SecurityInfo) {
+          final X509SecurityInfo x509SecurityInfo,
+          final boolean isHTTPS) {
     //Preconditions
     assert x509SecurityInfo != null : "x509SecurityInfo must not be null";
 
     this.albusHCSMessageHandlerFactory = albusHCSMessageHandlerFactory;
     this.httpRequestHandlerFactory = httpRequestHandlerFactory;
     this.x509SecurityInfo = x509SecurityInfo;
+    this.isHTTPS = isHTTPS;
   }
 
   /**
@@ -68,13 +74,18 @@ public class PortUnificationChannelPipelineFactory implements ChannelPipelineFac
     if (httpRequestHandlerFactory != null) {
       portUnificationHandler.setHttpRequestHandler(httpRequestHandlerFactory.getHandler());
     }
-    // if this pipeline only expects HTTP messages, then configure it not to require client X509 certificates
-    final boolean needClientAuth = albusHCSMessageHandlerFactory != null
-            || httpRequestHandlerFactory == null;
-    final ChannelPipeline channelPipeline = SSLPipelineFactory.getPipeline(
-            false, // useClientMode
-            x509SecurityInfo,
-            needClientAuth);
+    final ChannelPipeline channelPipeline;
+    if (isHTTPS) {
+      // if this pipeline only expects HTTPS messages, then configure it not to require client X509 certificates
+      final boolean needClientAuth = albusHCSMessageHandlerFactory != null || httpRequestHandlerFactory == null;
+      channelPipeline = SSLPipelineFactory.getPipeline(
+              false, // useClientMode
+              x509SecurityInfo,
+              needClientAuth,
+              !x509SecurityInfo.isPublicCertificate()); // isStrongCiphers
+    } else {
+      channelPipeline = new DefaultChannelPipeline();
+    }
     channelPipeline.addLast("port-unification", portUnificationHandler);
     LOGGER.info(channelPipeline);
     return channelPipeline;

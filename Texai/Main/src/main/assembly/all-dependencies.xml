@@ -33,8 +33,9 @@
         <include>bootstrap-queries.xml</include>
         <include>kb-statements.txt</include>
         <include>nodes.xml</include>
-        <include>SeedNodeInfos.ser</include>
         <include>orb.jpg</include>
+        <include>SeedNodeInfos.ser</include>
+        <include>web-server-keystore.uber</include>
       </includes>
       <outputDirectory>data</outputDirectory>
     </fileSet>

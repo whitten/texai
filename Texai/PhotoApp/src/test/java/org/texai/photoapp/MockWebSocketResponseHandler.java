@@ -44,22 +44,28 @@ public class MockWebSocketResponseHandler extends AbstractWebSocketResponseHandl
   private final WebSocketClientHandshaker webSocketClientHandshaker;
   // the synchronization lock to resume the client when the handshake is completed
   final Object clientResume_lock;
+  // the initialized users object
+  final InitializedUsers initializedUsers;
 
   /**
    * Constructs a new MockWebSocketResponseHandler instance.
    *
    * @param webSocketClientHandshaker the web socket client handshaker
    * @param clientResume_lock the synchronization lock to resume the client when the handshake is completed
+   * @param initializedUsers the initialized users object
    */
   public MockWebSocketResponseHandler(
           final WebSocketClientHandshaker webSocketClientHandshaker,
-          final Object clientResume_lock) {
+          final Object clientResume_lock,
+          final InitializedUsers initializedUsers) {
     //Preconditions
     assert webSocketClientHandshaker != null : "webSocketClientHandshaker must not be null";
     assert clientResume_lock != null : "clientResume_lock must not be null";
+    assert initializedUsers != null : "initializedUsers must not be null";
 
     this.webSocketClientHandshaker = webSocketClientHandshaker;
     this.clientResume_lock = clientResume_lock;
+    this.initializedUsers = initializedUsers;
   }
 
   /**
@@ -179,14 +185,17 @@ public class MockWebSocketResponseHandler extends AbstractWebSocketResponseHandl
         //    “sender”: “Alice”
         //  }
         LOGGER.info("operation: receivePhoto");
-        final String photo = (String) jsonObject.get("photo");
-        final String photoHash = (String) jsonObject.get("photoHash");
+        final String photoBase64 = (String) jsonObject.get("photo");
+        final String photoHashBase64 = (String) jsonObject.get("photoHash");
         final String timestamp = (String) jsonObject.get("timestamp");
         final String sender = (String) jsonObject.get("sender");
-        LOGGER.info("photo: " + photo);
-        LOGGER.info("photoHash: " + photoHash);
+        LOGGER.info("photo: " + photoBase64.substring(0, 50) + "...");
+        LOGGER.info("photoHash: " + photoHashBase64);
         LOGGER.info("timestamp: " + timestamp);
         LOGGER.info("sender: " + sender);
+        if (!photoBase64.equals(initializedUsers.getPhotoBase64())) {
+          throw new TexaiException("downloaded photo does not match expectations");
+        }
         break;
       }
       case "photoDelivered": {

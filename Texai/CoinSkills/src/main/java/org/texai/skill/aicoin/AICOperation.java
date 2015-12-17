@@ -4,13 +4,16 @@ import com.google.bitcoin.core.AddressMessage;
 import com.google.bitcoin.core.Transaction;
 import com.google.bitcoin.core.VersionAck;
 import com.google.bitcoin.core.VersionMessage;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
 import net.jcip.annotations.ThreadSafe;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.log4j.Logger;
 import org.texai.ahcs.NodeRuntime;
 import org.texai.ahcsSupport.AHCSConstants;
@@ -634,8 +637,8 @@ public final class AICOperation extends AbstractSkill {
       localBitcoindAdapter = localBitcoindAdapterDictionary.get(remoteContainerName);
       if (localBitcoindAdapter == null) {
         // the remote peer is a new connection and the first message must be a version message or version ack message
-        if (!bitcoinProtocolMessage.getClass().isAssignableFrom(VersionMessage.class) &&
-                !bitcoinProtocolMessage.getClass().isAssignableFrom(VersionAck.class)) {
+        if (!bitcoinProtocolMessage.getClass().isAssignableFrom(VersionMessage.class)
+                && !bitcoinProtocolMessage.getClass().isAssignableFrom(VersionAck.class)) {
           throw new TexaiException("expected version message or version acknowledge message, but received " + bitcoinProtocolMessage);
         }
         LOGGER.info("Connecting local bitcoind to " + remoteContainerName);
@@ -663,6 +666,73 @@ public final class AICOperation extends AbstractSkill {
     }
 
     localBitcoindAdapter.sendBitcoinMessageToLocalBitcoind(bitcoinProtocolMessage);
+  }
+
+  public static void main(String[] args) throws Exception {
+    String rawTx = "0100000001fb8843c05fbf5e541ffe2af853c7cd2fc5127edd03dfda4fa50cf34a43f7ec3f2800000000ffffffff02801a0600000000001976a914b6a9eaa8cf3d2f31b01fa594dcb99f8aa7bc542488ac1e250000000000001976a9145c249db249b7946ee2b83a611d535cce9b7fe7ae88ac00000000";
+    String msg = "hello world!";
+    String txWithOPReturn = addOPReturn(rawTx, msg);
+    LOGGER.info(txWithOPReturn);
+  }
+
+  private static String addOPReturn(
+          final String rawTx,
+          final String msg) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(rawTx) : "rawTx must be an non-empty string";
+    assert StringUtils.isNonEmptyString(msg) : "msg must be an non-empty string";
+    assert msg.length() <= 40 : "msg must not be more than 40 bytes in length";
+
+    final String satoshiPaid = "0000000000000000";
+    final String opReturn = "6a";
+    // first, separate the inputs and outputs portions of the transaction
+    final String outputs = rawTx.substring(rawTx.indexOf("ffffffff"));
+    final String inputs = rawTx.substring(0, rawTx.indexOf("ffffffff"));
+    // now we get the number of outputs
+    final String numOuts = outputs.substring(8, 10);
+    // add one to deal with the OP_RETURN (cheating because we know the value in numOuts is an integer)
+    int outsHex = Integer.parseInt(numOuts, 16);
+    outsHex++;
+    final String totalOuts = Integer.toHexString(outsHex);
+    // pad a leading 0
+    StringBuilder stringBuilder = new StringBuilder();
+    stringBuilder.append(totalOuts);
+    if (stringBuilder.length() < 2) {
+      stringBuilder.insert(0, '0');
+    }
+    final String paddedOuts = stringBuilder.toString();
+    // turn the message into hex
+    final String msgHex;
+    try {
+      msgHex = Hex.encodeHexString(msg.getBytes("UTF-8"));
+    } catch (UnsupportedEncodingException ex) {
+      throw new TexaiException(ex);
+    }
+    final int msgBytes = msg.length();
+    final String paddedMsgLength = pad(Integer.toHexString(msgBytes));
+    // calculate the total script length for OP_RETURN as 2 bytes + msg length
+    final int scriptSize = msgBytes + 2;
+    final String paddedScriptSize = pad(Integer.toHexString(scriptSize));
+    // put the OP_RETURN script string together and then splice it into the existing rawTX
+    final StringBuilder opReturnScript = new StringBuilder();
+    opReturnScript.append(satoshiPaid).append(paddedScriptSize).append(opReturn)
+            .append(paddedMsgLength).append(msgHex);
+    final String outsScript = outputs.substring(10, outputs.length() - 8);
+    final StringBuilder opReturnRawTx = new StringBuilder();
+    opReturnRawTx.append(inputs).append("ffffffff").append(paddedOuts)
+            .append(outsScript)
+            .append(opReturnScript)
+            .append("00000000");
+    return opReturnRawTx.toString();
+  }
+
+  private static String pad(String value) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(value);
+    if (sb.length() < 2) {
+      sb.insert(0, '0');
+    }
+    return sb.toString();
   }
 
 }

@@ -1,17 +1,20 @@
 /*
- * KeyStoreTestUtils.java
+ * KeyStoreUtils.java
  *
  * Created on Feb 5, 2010, 2:17:42 PM
  *
- * Description: Provides keystores and passwords for testing.
+ * Description: Provides keystores and test passwords.
  *
  * Copyright (C) Feb 5, 2010 reed.
  */
 package org.texai.x509;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
@@ -26,6 +29,7 @@ import java.security.cert.X509Certificate;
 import java.util.UUID;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.log4j.Logger;
+import org.texai.util.StringUtils;
 import org.texai.util.TexaiException;
 
 /**
@@ -34,27 +38,29 @@ import org.texai.util.TexaiException;
  * @author reed
  */
 @NotThreadSafe
-public final class KeyStoreTestUtils {
+public final class KeyStoreUtils {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(KeyStoreTestUtils.class);
+  private static final Logger LOGGER = Logger.getLogger(KeyStoreUtils.class);
   // the server keystore password
   private static final char[] SERVER_KEYSTORE_PASSWORD = "server-keystore-password".toCharArray();
   // the client keystore password
   private static final char[] CLIENT_KEYSTORE_PASSWORD = "client-keystore-password".toCharArray();
   // the test certificate alias
   public static final String TEST_CERTIFICATE_ALIAS = "certificate";
+  // the web server certificate alias
+  public static final String WEB_SERVER_CERTIFICATE_ALIAS = "s1as";
 
   /**
    * Prevents the instantiation of this utility class.
    */
-  private KeyStoreTestUtils() {
+  private KeyStoreUtils() {
   }
 
   /**
-   * Initializes the test server keystore.
+   * Initializes the server test keystore.
    */
-  public static synchronized void initializeServerKeyStore() {
+  public static synchronized void initializeServerTestKeyStore() {
     //Preconditions
     assert X509Utils.isJCEUnlimitedStrengthPolicy() : "JCE unlimited strength policy must be in effect";
 
@@ -97,6 +103,73 @@ public final class KeyStoreTestUtils {
     final X509SecurityInfo x509SecurityInfo = getServerX509SecurityInfo();
     assert x509SecurityInfo != null;
     assert x509SecurityInfo.getX509Certificate().equals(serverX509Certificate);
+  }
+
+  /**
+   * Initializes the web server keystore.
+   *
+   * @return the security information for the web server
+   */
+  public static synchronized X509SecurityInfo getWebServerX509SecurityInfo() {
+    //Preconditions
+    assert X509Utils.isJCEUnlimitedStrengthPolicy() : "JCE unlimited strength policy must be in effect";
+
+    final X509Certificate webServerX509Certificate;
+    final String webServerKeyStorePassword;
+    final KeyStore webServerKeyStore;
+    try {
+      // the server keystore consists of the single server X.509 certificate
+      final String webServerKeyStoreFilePath = "data/web-server-keystore.uber";
+      LOGGER.info("accessing " + webServerKeyStoreFilePath + " for the web server SSL certificate");
+      assert X509Utils.isJCEUnlimitedStrengthPolicy();
+      File keystorePasswordFile = new File("../texai-keystore-password.txt");
+      if (!keystorePasswordFile.exists()) {
+        keystorePasswordFile = new File("/home/reed/texai-keystore-password.txt");
+        assert keystorePasswordFile.exists();
+      }
+      try (final BufferedReader bufferedReader
+              = new BufferedReader(new InputStreamReader(new FileInputStream(keystorePasswordFile), "UTF-8"))) {
+        webServerKeyStorePassword = bufferedReader.readLine();
+        if (!StringUtils.isNonEmptyString(webServerKeyStorePassword)) {
+          throw new TexaiException("web server keystore password file not found");
+        }
+      }
+      webServerKeyStore = X509Utils.getWebServerKeyStore(
+              webServerKeyStoreFilePath,
+              webServerKeyStorePassword.toCharArray());
+      X509Utils.logAliases(webServerKeyStore);
+//      Enumeration<String> aliases;
+//      try {
+//        aliases = webServerKeyStore.aliases();
+//      } catch (KeyStoreException ex) {
+//        throw new TexaiException(ex);
+//      }
+//      LOGGER.info("aliases...");
+//      int aliasesCnt = 0;
+//      while (aliases.hasMoreElements()) {
+//        LOGGER.info("  " + aliases.nextElement());
+//        aliasesCnt++;
+//      }
+//      LOGGER.info(aliasesCnt + " aliases found in the web server keystore");
+      webServerX509Certificate = (X509Certificate) webServerKeyStore.getCertificate(WEB_SERVER_CERTIFICATE_ALIAS);
+      assert webServerX509Certificate != null;
+      LOGGER.debug("web server certificate: " + webServerX509Certificate.getSubjectDN());
+      LOGGER.debug("web server certificate ...\n" + webServerX509Certificate);
+
+    } catch (NoSuchAlgorithmException | NoSuchProviderException | IOException | KeyStoreException | CertificateException ex) {
+      throw new TexaiException(ex);
+    }
+
+    final X509SecurityInfo x509SecurityInfo = new X509SecurityInfo(
+            webServerKeyStore,
+            webServerKeyStorePassword.toCharArray(),
+            WEB_SERVER_CERTIFICATE_ALIAS);
+
+    //Postconditions
+    assert X509Utils.isJCEUnlimitedStrengthPolicy() : "JCE unlimited strength policy must be in effect";
+    assert x509SecurityInfo != null;
+
+    return x509SecurityInfo;
   }
 
   /**

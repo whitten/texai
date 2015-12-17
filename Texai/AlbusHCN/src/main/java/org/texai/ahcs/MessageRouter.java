@@ -125,7 +125,8 @@ public class MessageRouter extends AbstractAlbusHCSMessageHandler implements Mes
             new AlbusHCSMessageHandlerFactory(this),
             null, // httpRequestHandlerFactory
             nodeRuntime.getExecutor(), // bossExecutor,
-            nodeRuntime.getExecutor()); // workerExecutor
+            nodeRuntime.getExecutor(), // workerExecutor
+            true); // isHTTPS
   }
 
   /**

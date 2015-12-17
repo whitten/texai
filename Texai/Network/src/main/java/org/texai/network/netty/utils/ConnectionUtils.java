@@ -36,7 +36,7 @@ import org.texai.network.netty.handler.AbstractHTTPResponseHandler;
 import org.texai.network.netty.pipeline.AlbusHCNMessageClientPipelineFactory;
 import org.texai.network.netty.pipeline.BitcoinProtocolClientPipelineFactory;
 import org.texai.network.netty.pipeline.BitcoinProtocolMessageClientPipelineFactory;
-import org.texai.network.netty.pipeline.HTTPClientPipelineFactory;
+import org.texai.network.netty.pipeline.HTTPSClientPipelineFactory;
 import org.texai.network.netty.pipeline.PortUnificationChannelPipelineFactory;
 import org.texai.util.TexaiException;
 import org.texai.x509.X509SecurityInfo;
@@ -70,6 +70,7 @@ public final class ConnectionUtils {
    * @param httpRequestHandlerFactory the HTTP request message handler factory
    * @param bossExecutor the Executor which will execute the boss threads
    * @param workerExecutor the Executor which will execute the I/O worker threads
+   * @param isHTTPS the indicator whether the HTTP connection is encrypted, i.e. HTTPS
    *
    * @return the server bootstrap, which contains a new server-side channel and accepts incoming connections
    */
@@ -79,7 +80,8 @@ public final class ConnectionUtils {
           final AbstractAlbusHCSMessageHandlerFactory albusHCSMessageHandlerFactory,
           final AbstractHTTPRequestHandlerFactory httpRequestHandlerFactory,
           final Executor bossExecutor,
-          final Executor workerExecutor) {
+          final Executor workerExecutor,
+          final boolean isHTTPS) {
     //Preconditions
     assert port >= 0 && port <= 65535 : "invalid port number";
     assert bossExecutor != null : "bossExecutor must not be null";
@@ -89,7 +91,8 @@ public final class ConnectionUtils {
     final ChannelPipelineFactory channelPipelineFactory = new PortUnificationChannelPipelineFactory(
             albusHCSMessageHandlerFactory,
             httpRequestHandlerFactory,
-            x509SecurityInfo);
+            x509SecurityInfo,
+            isHTTPS);
 
     // configure the server
     final ServerBootstrap serverBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
@@ -435,7 +438,7 @@ public final class ConnectionUtils {
             workerExecutor));
 
     // configure the client pipeline
-    final ChannelPipeline channelPipeline = HTTPClientPipelineFactory.getPipeline(
+    final ChannelPipeline channelPipeline = HTTPSClientPipelineFactory.getPipeline(
             httpResponseHandler,
             x509SecurityInfo);
     clientBootstrap.setPipeline(channelPipeline);

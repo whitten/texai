@@ -30,7 +30,7 @@ import org.texai.network.netty.handler.MockAlbusHCSMessageHandler;
 import org.texai.network.netty.handler.MockAlbusHCSMessageHandlerFactory;
 import org.texai.network.netty.handler.MockHTTPRequestHandlerFactory;
 import org.texai.network.netty.handler.MockHTTPResponseHandler;
-import org.texai.x509.KeyStoreTestUtils;
+import org.texai.x509.KeyStoreUtils;
 import org.texai.x509.X509SecurityInfo;
 
 /**
@@ -56,14 +56,15 @@ public class ConnectionUtilsTest {
     LOGGER.info("createPortUnificationServer");
     final AbstractAlbusHCSMessageHandlerFactory albusHCSMessageHandlerFactory = new MockAlbusHCSMessageHandlerFactory();
     final AbstractHTTPRequestHandlerFactory httpRequestHandlerFactory = new MockHTTPRequestHandlerFactory();
-    final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getServerX509SecurityInfo();
+    final X509SecurityInfo x509SecurityInfo = KeyStoreUtils.getServerX509SecurityInfo();
     serverBootstrap = ConnectionUtils.createPortUnificationServer(
             SERVER_PORT,
             x509SecurityInfo,
             albusHCSMessageHandlerFactory,
             httpRequestHandlerFactory,
             EXECUTOR, // bossExecutor
-            EXECUTOR); // workerExecutor
+            EXECUTOR, // workerExecutor
+            true); // isHTTPS
   }
 
   @AfterClass
@@ -89,7 +90,7 @@ public class ConnectionUtilsTest {
   public void testOpenAlbusHCSConnection() {
     LOGGER.info("openAlbusHCSConnection");
     InetSocketAddress inetSocketAddress = new InetSocketAddress("localhost", SERVER_PORT);
-    X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
+    X509SecurityInfo x509SecurityInfo = KeyStoreUtils.getClientX509SecurityInfo();
     final Object clientResume_lock = new Object();
     final AbstractAlbusHCSMessageHandler albusHCSMessageHandler = new MockAlbusHCSMessageHandler(clientResume_lock, 10);
     final Channel channel = ConnectionUtils.openAlbusHCSConnection(
@@ -111,7 +112,7 @@ public class ConnectionUtilsTest {
   public void testOpenHTTPConnection() {
     LOGGER.info("openHTTPConnection");
     InetSocketAddress inetSocketAddress = new InetSocketAddress("localhost", SERVER_PORT);
-    X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
+    X509SecurityInfo x509SecurityInfo = KeyStoreUtils.getClientX509SecurityInfo();
     final Object clientResume_lock = new Object();
     final AbstractHTTPResponseHandler httpResponseHandler = new MockHTTPResponseHandler(clientResume_lock);
     final Channel channel = ConnectionUtils.openHTTPConnection(

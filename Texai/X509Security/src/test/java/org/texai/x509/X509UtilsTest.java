@@ -126,7 +126,7 @@ public class X509UtilsTest {
               keyPair,
               uid,
               null, // domainComponent
-              KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS); // certificateAlias
+              KeyStoreUtils.TEST_CERTIFICATE_ALIAS); // certificateAlias
       assertNotNull(x509SecurityInfo.getCertPath());
       assertNotNull(x509SecurityInfo.getKeyManagers());
       assertNotNull(x509SecurityInfo.getKeyStore());
@@ -137,12 +137,12 @@ public class X509UtilsTest {
       try (final FileOutputStream fileOutputStream = new FileOutputStream(keyStoreFilePath)) {
         keyStore.store(fileOutputStream, keyStorePassword);
       }
-      assertTrue(keyStore.containsAlias(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS));
-      assertTrue(keyStore.isKeyEntry(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS));
+      assertTrue(keyStore.containsAlias(KeyStoreUtils.TEST_CERTIFICATE_ALIAS));
+      assertTrue(keyStore.isKeyEntry(KeyStoreUtils.TEST_CERTIFICATE_ALIAS));
 
       final KeyStore keyStore2 = X509Utils.findOrCreateKeyStore(keyStoreFilePath, keyStorePassword);
-      assertTrue(keyStore2.containsAlias(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS));
-      assertTrue(keyStore2.isKeyEntry(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS));
+      assertTrue(keyStore2.containsAlias(KeyStoreUtils.TEST_CERTIFICATE_ALIAS));
+      assertTrue(keyStore2.isKeyEntry(KeyStoreUtils.TEST_CERTIFICATE_ALIAS));
 
     } catch (CertificateException | IOException | KeyStoreException | NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException ex) {
       fail(ex.getMessage());
@@ -462,7 +462,7 @@ public class X509UtilsTest {
     } else {
       keyStoreFilePath = "data/test-client-keystore.jceks";
     }
-    final char[] keyStorePassword = KeyStoreTestUtils.getClientKeyStorePassword();
+    final char[] keyStorePassword = KeyStoreUtils.getClientKeyStorePassword();
     KeyStore keyStore = null;
     try {
       keyStore = X509Utils.findOrCreateKeyStore(keyStoreFilePath, keyStorePassword);
@@ -471,8 +471,8 @@ public class X509UtilsTest {
     }
     X509SecurityInfo x509SecurityInfo = X509Utils.getX509SecurityInfo(
             keyStore,
-            KeyStoreTestUtils.getClientKeyStorePassword(),
-            KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS); // alias
+            KeyStoreUtils.getClientKeyStorePassword(),
+            KeyStoreUtils.TEST_CERTIFICATE_ALIAS); // alias
     assertTrue(x509SecurityInfo.getKeyManagers().length > 0);
   }
 

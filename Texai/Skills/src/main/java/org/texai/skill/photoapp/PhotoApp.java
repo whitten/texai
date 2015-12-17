@@ -14,17 +14,15 @@ import org.apache.log4j.Logger;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
-import static org.junit.Assert.assertEquals;
 import org.texai.ahcsSupport.AHCSConstants;
 import org.texai.ahcsSupport.Message;
 import org.texai.ahcs.skill.AbstractNetworkSingletonSkill;
 import org.texai.network.netty.handler.AbstractHTTPRequestHandlerFactory;
 import org.texai.network.netty.handler.HTTPRequestHandler;
 import org.texai.network.netty.handler.HTTPRequestHandlerFactory;
-import org.texai.network.netty.pipeline.PortUnificationChannelPipelineFactory;
+import org.texai.network.netty.pipeline.HTTPServerPipelineFactory;
+import org.texai.network.netty.pipeline.WebSocketServerPipelineFactory;
 import org.texai.photoapp.PhotoAppServer;
-import org.texai.x509.KeyStoreTestUtils;
-import org.texai.x509.X509SecurityInfo;
 
 /**
  * Provides a template for a network singleton skill.
@@ -38,10 +36,14 @@ public final class PhotoApp extends AbstractNetworkSingletonSkill {
   private static final Logger LOGGER = Logger.getLogger(PhotoApp.class);
   // the photo app server
   private PhotoAppServer photoAppServer;
-  // the test server port
-  private static final int SERVER_PORT = 8089;
-  // the server bootstrap
-  private ServerBootstrap serverBootstrap;
+  // the https server port
+  private static final int HTTP_SERVER_PORT = 8089;
+  // the websocket server port, which is not secure in order to work with iPhones
+  private static final int WEBSOCKET_SERVER_PORT = 8088;
+  // the http server bootstrap
+  private ServerBootstrap httpServerBootstrap;
+  // the websocket server bootstrap
+  private ServerBootstrap webSocketServerBootstrap;
 
   /**
    * Creates a new instance of NetworkSingletonSkillTemplate.
@@ -202,28 +204,38 @@ public final class PhotoApp extends AbstractNetworkSingletonSkill {
     photoAppServer = new PhotoAppServer();
 
     // configure the HTTP request handler by registering the photo app server
-    final HTTPRequestHandler httpRequestHandler = HTTPRequestHandler.getInstance();
+    final HTTPRequestHandler httpRequestHandler = new HTTPRequestHandler();
     httpRequestHandler.register(photoAppServer);
 
-    // initialize the test keystores
-    KeyStoreTestUtils.initializeServerKeyStore();
-    KeyStoreTestUtils.initializeClientKeyStore();
-
     // configure the server channel pipeline factory
-    final AbstractHTTPRequestHandlerFactory httpRequestHandlerFactory = new HTTPRequestHandlerFactory();
-    final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getServerX509SecurityInfo();
-    final ChannelPipelineFactory channelPipelineFactory = new PortUnificationChannelPipelineFactory(
-            null, // albusHCNMessageHandlerFactory,
-            httpRequestHandlerFactory,
-            x509SecurityInfo);
+    final AbstractHTTPRequestHandlerFactory httpRequestHandlerFactory = new HTTPRequestHandlerFactory(httpRequestHandler);
+    final ChannelPipelineFactory channelPipelineFactory = new HTTPServerPipelineFactory(httpRequestHandlerFactory);
 
-    // configure the server
-    serverBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
+    // configure the http server
+    httpServerBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
             Executors.newCachedThreadPool(),
             Executors.newCachedThreadPool()));
 
-    assertEquals("{}", serverBootstrap.getOptions().toString());
-    serverBootstrap.setPipelineFactory(channelPipelineFactory);
+    httpServerBootstrap.setPipelineFactory(channelPipelineFactory);
+
+
+
+
+    // configure the websocket request handler by registering the photo app server
+    final HTTPRequestHandler webSocketRequestHandler = new HTTPRequestHandler();
+    webSocketRequestHandler.register(photoAppServer);
+
+    // configure the server channel pipeline factory
+    final AbstractHTTPRequestHandlerFactory webSocketRequestHandlerFactory = new HTTPRequestHandlerFactory(webSocketRequestHandler);
+    final ChannelPipelineFactory webSocketChannelPipelineFactory = new WebSocketServerPipelineFactory(webSocketRequestHandlerFactory);
+
+    // configure the websocket server
+    webSocketServerBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
+            Executors.newCachedThreadPool(),
+            Executors.newCachedThreadPool()));
+
+    webSocketServerBootstrap.setPipelineFactory(webSocketChannelPipelineFactory);
+
   }
 
   /**
@@ -239,8 +251,12 @@ public final class PhotoApp extends AbstractNetworkSingletonSkill {
     LOGGER.info("performing the mission");
 
     // bind and start to accept incoming connections
-    LOGGER.info("binding the socket for " + SERVER_PORT);
-    serverBootstrap.bind(new InetSocketAddress(SERVER_PORT));
+    LOGGER.info("listening for http connections on " + HTTP_SERVER_PORT);
+    httpServerBootstrap.bind(new InetSocketAddress(HTTP_SERVER_PORT));
+
+    // bind and start to accept incoming connections
+    LOGGER.info("listening for websocket connections on " + WEBSOCKET_SERVER_PORT);
+    webSocketServerBootstrap.bind(new InetSocketAddress(WEBSOCKET_SERVER_PORT));
   }
 
 }

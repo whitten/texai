@@ -53,8 +53,8 @@ public class KeyStoreTestUtilsTest {
 
   @BeforeClass
   public static void setUpClass() throws Exception {
-    KeyStoreTestUtils.initializeClientKeyStore();
-    KeyStoreTestUtils.initializeServerKeyStore();
+    KeyStoreUtils.initializeClientKeyStore();
+    KeyStoreUtils.initializeServerTestKeyStore();
   }
 
   @AfterClass
@@ -70,13 +70,13 @@ public class KeyStoreTestUtilsTest {
   }
 
   /**
-   * Test of getServerKeyStore method, of class KeyStoreTestUtils.
+   * Test of getServerKeyStore method, of class KeyStoreUtils.
    */
   @Test
   public void testGetServerKeyStore() {
     LOGGER.info("getStoredServerKeyStore");
-    assertEquals("server-keystore-password", new String(KeyStoreTestUtils.getServerKeyStorePassword()));
-    KeyStore result = KeyStoreTestUtils.getServerKeyStore();
+    assertEquals("server-keystore-password", new String(KeyStoreUtils.getServerKeyStorePassword()));
+    KeyStore result = KeyStoreUtils.getServerKeyStore();
     assertNotNull(result);
     if (X509Utils.isJCEUnlimitedStrengthPolicy()) {
       assertTrue(result.getProvider().toString().startsWith("BC version "));
@@ -86,10 +86,10 @@ public class KeyStoreTestUtilsTest {
       assertEquals("JCEKS", result.getType());
     }
     try {
-      assertTrue(result.containsAlias(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS));
-      final X509Certificate serverX509Certificate = (X509Certificate) result.getCertificate(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS);
+      assertTrue(result.containsAlias(KeyStoreUtils.TEST_CERTIFICATE_ALIAS));
+      final X509Certificate serverX509Certificate = (X509Certificate) result.getCertificate(KeyStoreUtils.TEST_CERTIFICATE_ALIAS);
       assertTrue(serverX509Certificate.getSubjectX500Principal().toString().contains("CN=texai.org"));
-      Certificate[] certificateChain = result.getCertificateChain(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS);
+      Certificate[] certificateChain = result.getCertificateChain(KeyStoreUtils.TEST_CERTIFICATE_ALIAS);
       assertEquals(1, certificateChain.length);
       assertEquals(serverX509Certificate, certificateChain[0]);
       serverX509Certificate.verify(serverX509Certificate.getPublicKey());
@@ -99,13 +99,13 @@ public class KeyStoreTestUtilsTest {
   }
 
   /**
-   * Test of getClientKeyStore method, of class KeyStoreTestUtils.
+   * Test of getClientKeyStore method, of class KeyStoreUtils.
    */
   @Test
   public void testGetClientKeyStore() {
     LOGGER.info("getClientKeyStore");
-    assertEquals("client-keystore-password", new String(KeyStoreTestUtils.getClientKeyStorePassword()));
-    KeyStore result = KeyStoreTestUtils.getClientKeyStore();
+    assertEquals("client-keystore-password", new String(KeyStoreUtils.getClientKeyStorePassword()));
+    KeyStore result = KeyStoreUtils.getClientKeyStore();
     assertNotNull(result);
     if (X509Utils.isJCEUnlimitedStrengthPolicy()) {
       assertEquals("UBER", result.getType());
@@ -113,10 +113,10 @@ public class KeyStoreTestUtilsTest {
       assertEquals("JCEKS", result.getType());
     }
     try {
-      assertTrue(result.containsAlias(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS));
-      final X509Certificate clientX509Certificate = (X509Certificate) result.getCertificate(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS);
+      assertTrue(result.containsAlias(KeyStoreUtils.TEST_CERTIFICATE_ALIAS));
+      final X509Certificate clientX509Certificate = (X509Certificate) result.getCertificate(KeyStoreUtils.TEST_CERTIFICATE_ALIAS);
       assertTrue(clientX509Certificate.getSubjectX500Principal().toString().contains("CN=texai.org"));
-      Certificate[] certificateChain = result.getCertificateChain(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS);
+      Certificate[] certificateChain = result.getCertificateChain(KeyStoreUtils.TEST_CERTIFICATE_ALIAS);
       assertEquals(1, certificateChain.length);
       assertEquals(clientX509Certificate, certificateChain[0]);
     } catch (KeyStoreException ex) {
@@ -126,22 +126,22 @@ public class KeyStoreTestUtilsTest {
   }
 
   /**
-   * Test of getClientX509SecurityInfo() method, of class KeyStoreTestUtils.
+   * Test of getClientX509SecurityInfo() method, of class KeyStoreUtils.
    */
   @Test
   public void testGetClientX509SecurityInfo() {
     LOGGER.info("getClientX509SecurityInfo()");
-    final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
+    final X509SecurityInfo x509SecurityInfo = KeyStoreUtils.getClientX509SecurityInfo();
     LOGGER.info("client x509SecurityInfo...\n" + x509SecurityInfo);
   }
 
   /**
-   * Test of getServerX509SecurityInfo() method, of class KeyStoreTestUtils.
+   * Test of getServerX509SecurityInfo() method, of class KeyStoreUtils.
    */
   @Test
   public void testGetServerX509SecurityInfo() {
     LOGGER.info("getServerX509SecurityInfo()");
-    final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getServerX509SecurityInfo();
+    final X509SecurityInfo x509SecurityInfo = KeyStoreUtils.getServerX509SecurityInfo();
     LOGGER.info("server x509SecurityInfo...\n" + x509SecurityInfo);
   }
 

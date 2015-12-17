@@ -72,7 +72,7 @@ public class X509SecurityInfoTest {
   @Test
   public void testGetKeyStore() {
     LOGGER.info("getKeyStore");
-    X509SecurityInfo instance = KeyStoreTestUtils.getClientX509SecurityInfo();
+    X509SecurityInfo instance = KeyStoreUtils.getClientX509SecurityInfo();
     KeyStore result = instance.getKeyStore();
     assertNotNull(result);
     try {
@@ -82,7 +82,7 @@ public class X509SecurityInfoTest {
       while (aliasEnumeration.hasMoreElements()) {
         LOGGER.info("key store alias: " + aliasEnumeration.nextElement());
       }
-      assertTrue(result.containsAlias(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS));
+      assertTrue(result.containsAlias(KeyStoreUtils.TEST_CERTIFICATE_ALIAS));
     } catch (KeyStoreException ex) {
       fail(ex.getMessage());
     }
@@ -94,15 +94,15 @@ public class X509SecurityInfoTest {
   @Test
   public void testGetKeyManagers() {
     LOGGER.info("getKeyManagers");
-    X509SecurityInfo instance = KeyStoreTestUtils.getClientX509SecurityInfo();
+    X509SecurityInfo instance = KeyStoreUtils.getClientX509SecurityInfo();
     KeyManager[] result = instance.getKeyManagers();
     assertNotNull(result);
     assertEquals(1, result.length);
     final KeyManager keyManager = result[0];
     assertTrue(keyManager instanceof X509KeyManager);
     final X509KeyManager x509KeyManager = (X509KeyManager) keyManager;
-    assertNotNull(x509KeyManager.getCertificateChain(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS));
-    assertNotNull(x509KeyManager.getPrivateKey(KeyStoreTestUtils.TEST_CERTIFICATE_ALIAS));
+    assertNotNull(x509KeyManager.getCertificateChain(KeyStoreUtils.TEST_CERTIFICATE_ALIAS));
+    assertNotNull(x509KeyManager.getPrivateKey(KeyStoreUtils.TEST_CERTIFICATE_ALIAS));
   }
 
   /**
@@ -111,7 +111,7 @@ public class X509SecurityInfoTest {
   @Test
   public void testGetPrivateKey() {
     LOGGER.info("getPrivateKey");
-    X509SecurityInfo instance = KeyStoreTestUtils.getClientX509SecurityInfo();
+    X509SecurityInfo instance = KeyStoreUtils.getClientX509SecurityInfo();
     PrivateKey result = instance.getPrivateKey();
     assertNotNull(result);
     LOGGER.info("private key: \n" + result);
@@ -123,7 +123,7 @@ public class X509SecurityInfoTest {
   @Test
   public void testGetX509Certificate() {
     LOGGER.info("getX509Certificate");
-    X509SecurityInfo instance = KeyStoreTestUtils.getClientX509SecurityInfo();
+    X509SecurityInfo instance = KeyStoreUtils.getClientX509SecurityInfo();
     assertNotNull(instance);
     X509Certificate result = instance.getX509Certificate();
     assertNotNull(result);

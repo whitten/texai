@@ -76,11 +76,13 @@ public final class TexaiSSLContextFactory {
    * @param sslEngine the SSL engine
    * @param useClientMode the indicator whether the SSL engine is operating in client mode
    * @param needClientAuth the indicator whether the server authenticates the client's SSL certificate
+   * @param isStrongCiphers the indicator whether strong ciphers are used, e.g. for the P2P network as opposed to the web server
    */
   public static synchronized void configureSSLEngine(
           final SSLEngine sslEngine,
           final boolean useClientMode,
-          final boolean needClientAuth) {
+          final boolean needClientAuth,
+          final boolean isStrongCiphers) {
     //Preconditions
     assert sslEngine != null : "sslEngine must not be null";
 
@@ -97,49 +99,51 @@ public final class TexaiSSLContextFactory {
       sslEngine.setUseClientMode(false);
       sslEngine.setNeedClientAuth(needClientAuth);
     }
-    synchronized (ENABLED_CIPHER_SUITES_LOCK) {
-      if (enabledCipherSuites == null) {
-        iOSIncompatibleCipherSuites.add("TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384");
-        iOSIncompatibleCipherSuites.add("TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256");
-        iOSIncompatibleCipherSuites.add("TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA");
-        iOSIncompatibleCipherSuites.add("TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA");
+    if (isStrongCiphers) {
+      synchronized (ENABLED_CIPHER_SUITES_LOCK) {
+        if (enabledCipherSuites == null) {
+          iOSIncompatibleCipherSuites.add("TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384");
+          iOSIncompatibleCipherSuites.add("TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256");
+          iOSIncompatibleCipherSuites.add("TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA");
+          iOSIncompatibleCipherSuites.add("TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA");
 
         // TLS_ECDHE_RSA_WITH_RC4_128_SHA is the negotiated cipher suite for iOS
-        // select and arrange the highest security cipher suites and cache the result
-        final String[] supportedCipherSuites = sslEngine.getSupportedCipherSuites();
-        final List<String> enabledCipherSuitesList = new ArrayList<>(supportedCipherSuites.length);
+          // select and arrange the highest security cipher suites and cache the result
+          final String[] supportedCipherSuites = sslEngine.getSupportedCipherSuites();
+          final List<String> enabledCipherSuitesList = new ArrayList<>(supportedCipherSuites.length);
         // The first pass selects 256 bit ciphers available with the Java Cryptography Extension (JCE)
-        // Unlimited Strength Jurisdiction Policy Files, downloaded and installed from http://java.sun.com/javase/downloads/index.jsp .
-        for (final String supportedCipherSuite : supportedCipherSuites) {
-          if (supportedCipherSuite.contains("_256_") && !supportedCipherSuite.contains("_anon_")) {
-            enabledCipherSuitesList.add(supportedCipherSuite);
+          // Unlimited Strength Jurisdiction Policy Files, downloaded and installed from http://java.sun.com/javase/downloads/index.jsp .
+          for (final String supportedCipherSuite : supportedCipherSuites) {
+            if (supportedCipherSuite.contains("_256_") && !supportedCipherSuite.contains("_anon_")) {
+              enabledCipherSuitesList.add(supportedCipherSuite);
+            }
           }
-        }
-        // The second pass selects 128 bit ciphers that use SHA hashing - its more secure than MD5 but slower.
-        for (final String supportedCipherSuite : supportedCipherSuites) {
-          if (supportedCipherSuite.contains("_128_") && !supportedCipherSuite.endsWith("_MD5") && !supportedCipherSuite.contains("_anon_")) {
-            enabledCipherSuitesList.add(supportedCipherSuite);
+          // The second pass selects 128 bit ciphers that use SHA hashing - its more secure than MD5 but slower.
+          for (final String supportedCipherSuite : supportedCipherSuites) {
+            if (supportedCipherSuite.contains("_128_") && !supportedCipherSuite.endsWith("_MD5") && !supportedCipherSuite.contains("_anon_")) {
+              enabledCipherSuitesList.add(supportedCipherSuite);
+            }
           }
-        }
-        // The third pass selects 128 bit ciphers that use MD5 hashing.
-        for (final String supportedCipherSuite : supportedCipherSuites) {
-          if (supportedCipherSuite.contains("_128_") && supportedCipherSuite.endsWith("_MD5") && !supportedCipherSuite.contains("_anon_")) {
-            enabledCipherSuitesList.add(supportedCipherSuite);
+          // The third pass selects 128 bit ciphers that use MD5 hashing.
+          for (final String supportedCipherSuite : supportedCipherSuites) {
+            if (supportedCipherSuite.contains("_128_") && supportedCipherSuite.endsWith("_MD5") && !supportedCipherSuite.contains("_anon_")) {
+              enabledCipherSuitesList.add(supportedCipherSuite);
+            }
           }
-        }
-        // The fourth pass removes the iOS incompatible cipher suites
-        enabledCipherSuitesList.removeAll(iOSIncompatibleCipherSuites);
+          // The fourth pass removes the iOS incompatible cipher suites
+          enabledCipherSuitesList.removeAll(iOSIncompatibleCipherSuites);
 
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("enabledCipherSuites: " + enabledCipherSuitesList);
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("enabledCipherSuites: " + enabledCipherSuitesList);
+          }
+          final int enabledCipherSuitesList_size = enabledCipherSuitesList.size();
+          enabledCipherSuites = new String[enabledCipherSuitesList_size];
+          for (int i = 0; i < enabledCipherSuitesList_size; i++) {
+            enabledCipherSuites[i] = enabledCipherSuitesList.get(i);
+          }
         }
-        final int enabledCipherSuitesList_size = enabledCipherSuitesList.size();
-        enabledCipherSuites = new String[enabledCipherSuitesList_size];
-        for (int i = 0; i < enabledCipherSuitesList_size; i++) {
-          enabledCipherSuites[i] = enabledCipherSuitesList.get(i);
-        }
+        sslEngine.setEnabledCipherSuites(enabledCipherSuites);
       }
-      sslEngine.setEnabledCipherSuites(enabledCipherSuites);
     }
   }
 }

@@ -57,8 +57,8 @@ import org.texai.network.netty.handler.MockAlbusHCSMessageHandler;
 import org.texai.network.netty.handler.MockAlbusHCSMessageHandlerFactory;
 import org.texai.network.netty.handler.MockHTTPRequestHandlerFactory;
 import org.texai.network.netty.handler.MockHTTPResponseHandler;
-import org.texai.network.netty.pipeline.HTTPClientPipelineFactory;
-import org.texai.x509.KeyStoreTestUtils;
+import org.texai.network.netty.pipeline.HTTPSClientPipelineFactory;
+import org.texai.x509.KeyStoreUtils;
 import org.texai.x509.X509SecurityInfo;
 import static org.junit.Assert.*;
 
@@ -86,8 +86,8 @@ public final class PortUnificationTest {
 
   @BeforeClass
   public static void setUpClass() throws Exception {
-    KeyStoreTestUtils.initializeClientKeyStore();
-    KeyStoreTestUtils.initializeServerKeyStore();
+    KeyStoreUtils.initializeClientKeyStore();
+    KeyStoreUtils.initializeServerTestKeyStore();
     //Logger.getLogger(TaggedObjectEncoder.class).setLevel(Level.DEBUG);
     //Logger.getLogger(TaggedObjectDecoder.class).setLevel(Level.DEBUG);
   }
@@ -114,7 +114,7 @@ public final class PortUnificationTest {
     // configure the server channel pipeline factory
     final AbstractAlbusHCSMessageHandlerFactory albusHCSMessageHandlerFactory = new MockAlbusHCSMessageHandlerFactory();
     final AbstractHTTPRequestHandlerFactory httpRequestHandlerFactory = new MockHTTPRequestHandlerFactory();
-    final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getServerX509SecurityInfo();
+    final X509SecurityInfo x509SecurityInfo = KeyStoreUtils.getServerX509SecurityInfo();
     LOGGER.info("server x509SecurityInfo...\n" + x509SecurityInfo);
 
     final Executor serverExecutor = Executors.newCachedThreadPool();
@@ -124,7 +124,8 @@ public final class PortUnificationTest {
             albusHCSMessageHandlerFactory,
             httpRequestHandlerFactory,
             serverExecutor, // bossExecutor
-            serverExecutor); // workerExecutor
+            serverExecutor, // workerExecutor
+            true); // isHTTPS
 
     LOGGER.info("testing clients");
     // test clients
@@ -156,7 +157,7 @@ public final class PortUnificationTest {
     // configure the client pipeline
     final Object clientResume_lock = new Object();
     final AbstractAlbusHCSMessageHandler albusHCSMessageHandler = new MockAlbusHCSMessageHandler(clientResume_lock, 10);
-    final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
+    final X509SecurityInfo x509SecurityInfo = KeyStoreUtils.getClientX509SecurityInfo();
 
     final Channel channel = ConnectionUtils.openAlbusHCSConnection(
             new InetSocketAddress("localhost", SERVER_PORT),
@@ -221,7 +222,7 @@ public final class PortUnificationTest {
     // configure the client pipeline
     final Object clientResume_lock = new Object();
     final AbstractAlbusHCSMessageHandler albusHCSMessageHandler = new MockAlbusHCSMessageHandler(clientResume_lock, 10);
-    final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
+    final X509SecurityInfo x509SecurityInfo = KeyStoreUtils.getClientX509SecurityInfo();
 
     final Channel channel = ConnectionUtils.openAlbusHCSConnection(
             new InetSocketAddress("localhost", SERVER_PORT),
@@ -292,8 +293,8 @@ public final class PortUnificationTest {
     // configure the client pipeline
     final Object clientResume_lock = new Object();
     final AbstractHTTPResponseHandler httpResponseHandler = new MockHTTPResponseHandler(clientResume_lock);
-    final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
-    final ChannelPipeline channelPipeline = HTTPClientPipelineFactory.getPipeline(
+    final X509SecurityInfo x509SecurityInfo = KeyStoreUtils.getClientX509SecurityInfo();
+    final ChannelPipeline channelPipeline = HTTPSClientPipelineFactory.getPipeline(
             httpResponseHandler,
             x509SecurityInfo);
     clientBootstrap.setPipeline(channelPipeline);
@@ -384,7 +385,7 @@ public final class PortUnificationTest {
     final AbstractWebSocketResponseHandler webSocketResponseHandler = new MockWebSocketResponseHandler(
             webSocketClientHandshaker,
             clientResume_lock);
-    final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
+    final X509SecurityInfo x509SecurityInfo = KeyStoreUtils.getClientX509SecurityInfo();
     LOGGER.info("Netty websocket client x509SecurityInfo...\n" + x509SecurityInfo);
     final ChannelPipeline channelPipeline = WebSocketClientPipelineFactory.getPipeline(
             webSocketResponseHandler,

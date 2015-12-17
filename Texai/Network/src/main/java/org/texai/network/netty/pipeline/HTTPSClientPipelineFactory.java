@@ -1,5 +1,5 @@
 /*
- * HTTPClientPipelineFactory.java
+ * HTTPSClientPipelineFactory.java
  *
  * Description: Configures a client pipeline to handle HTTP messages.
  *
@@ -24,10 +24,10 @@ import org.texai.x509.X509SecurityInfo;
  * @author reed
  */
 @NotThreadSafe
-public final class HTTPClientPipelineFactory {
+public final class HTTPSClientPipelineFactory {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(HTTPClientPipelineFactory.class);
+  private static final Logger LOGGER = Logger.getLogger(HTTPSClientPipelineFactory.class);
   // the sharable HTTP request encoder
   private static final HttpRequestEncoder HTTP_REQUEST_ENCODER = new HttpRequestEncoder();
   // the sharable HTTP response decoder
@@ -36,7 +36,7 @@ public final class HTTPClientPipelineFactory {
   /**
    * Prevents this utility class from being instantiated.
    */
-  private HTTPClientPipelineFactory() {
+  private HTTPSClientPipelineFactory() {
   }
 
   /**
@@ -57,7 +57,8 @@ public final class HTTPClientPipelineFactory {
     final ChannelPipeline configuredPipeline = SSLPipelineFactory.getPipeline(
             true, // useClientMode
             x509SecurityInfo,
-            false); // needClientAuth
+            false, // needClientAuth
+            !x509SecurityInfo.isPublicCertificate()); // isStrongCiphers
     configuredPipeline.addLast("encoder", HTTP_REQUEST_ENCODER);
     configuredPipeline.addLast("decoder", HTTP_RESPONSE_DECODER);
     configuredPipeline.addLast("aggregator", new HttpChunkAggregator(1048576));

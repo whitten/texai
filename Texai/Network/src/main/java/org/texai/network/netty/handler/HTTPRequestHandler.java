@@ -40,22 +40,11 @@ public final class HTTPRequestHandler extends AbstractHTTPRequestHandler {
   private static final Logger LOGGER = Logger.getLogger(HTTPRequestHandler.class);
   // the Texai HTTP request handler chain
   private final List<TexaiHTTPRequestHandler> texaiHTTPRequestHandlers = new ArrayList<>();
-  //  the singleton HTTP request handler instanc
-  private static final HTTPRequestHandler httpRequestHandler = new HTTPRequestHandler();
 
   /**
    * Constructs a new HTTPRequestHandler instance.
    */
-  private HTTPRequestHandler() {
-  }
-
-  /**
-   * Gets the singleton HTTP request handler instance.
-   *
-   * @return the singleton HTTP request handler instance
-   */
-  public static HTTPRequestHandler getInstance() {
-    return httpRequestHandler;
+  public HTTPRequestHandler() {
   }
 
   /**
@@ -70,9 +59,11 @@ public final class HTTPRequestHandler extends AbstractHTTPRequestHandler {
           final MessageEvent messageEvent) {
     //Preconditions
     assert messageEvent != null : "messageEvent must not be null";
+    assert !texaiHTTPRequestHandlers.isEmpty() : "texaiHTTPRequestHandlers must not be empty";
 
     final HttpRequest httpRequest = (HttpRequest) messageEvent.getMessage();
     LOGGER.info("---------------------------------------------------------------------");
+    LOGGER.info("listening port: " + channelHandlerContext.getChannel().getLocalAddress().toString());
     LOGGER.info("httpRequest: " + httpRequest);
     LOGGER.info("method: " + httpRequest.getMethod());
     LOGGER.info("protocol version: " + httpRequest.getProtocolVersion());
@@ -175,16 +166,16 @@ public final class HTTPRequestHandler extends AbstractHTTPRequestHandler {
         channelPipeline.remove(channelHandler);
       }
     }
-    final WebSocketSslServerHandler webSocketSslServerHandler = new WebSocketSslServerHandler(this);
+    final WebSocketServerHandler webSocketServerHandler = new WebSocketServerHandler(this);
     channelPipeline.addLast("encoder", new HttpResponseEncoder());
     channelPipeline.addLast("decoder", new HttpRequestDecoder());
     channelPipeline.addLast("aggregator", new HttpChunkAggregator(1048576));
-    channelPipeline.addLast("ws-request-handler", webSocketSslServerHandler);
+    channelPipeline.addLast("ws-request-handler", webSocketServerHandler);
     if (LOGGER.isDebugEnabled()) {
       LOGGER.info("web socket channel pipeline: " + channelPipeline);
     }
 
-    webSocketSslServerHandler.handshake(httpRequest, channelHandlerContext);
+    webSocketServerHandler.handshake(httpRequest, channelHandlerContext);
   }
 
   /**

@@ -17,7 +17,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.texai.network.netty.handler.MockAlbusHCSMessageHandler;
-import org.texai.x509.KeyStoreTestUtils;
+import org.texai.x509.KeyStoreUtils;
 import org.texai.x509.X509SecurityInfo;
 import static org.junit.Assert.*;
 
@@ -56,7 +56,7 @@ public class AlbusHCNMessageClientPipelineFactoryTest {
   public void testGetPipeline() {
     LOGGER.info("getPipeline");
     // test creation of new pipeline
-    final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
+    final X509SecurityInfo x509SecurityInfo = KeyStoreUtils.getClientX509SecurityInfo();
     ChannelPipeline channelPipeline = AlbusHCNMessageClientPipelineFactory.getPipeline(
             new MockAlbusHCSMessageHandler(null, 0),
             x509SecurityInfo);

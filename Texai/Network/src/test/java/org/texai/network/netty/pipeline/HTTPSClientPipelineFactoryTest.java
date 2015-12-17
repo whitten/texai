@@ -1,5 +1,5 @@
 /*
- * HTTPClientPipelineFactoryTest.java
+ * HTTPSClientPipelineFactoryTest.java
  *
  * Created on Jun 30, 2008, 1:14:38 PM
  *
@@ -20,7 +20,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.texai.network.netty.handler.AbstractHTTPResponseHandler;
 import org.texai.network.netty.handler.MockHTTPResponseHandler;
-import org.texai.x509.KeyStoreTestUtils;
+import org.texai.x509.KeyStoreUtils;
 import org.texai.x509.X509SecurityInfo;
 import static org.junit.Assert.*;
 
@@ -28,12 +28,12 @@ import static org.junit.Assert.*;
  *
  * @author reed
  */
-public class HTTPClientPipelineFactoryTest {
+public class HTTPSClientPipelineFactoryTest {
 
   // the logger
-  private static final Logger LOGGER = Logger.getLogger(HTTPClientPipelineFactoryTest.class);
+  private static final Logger LOGGER = Logger.getLogger(HTTPSClientPipelineFactoryTest.class);
 
-  public HTTPClientPipelineFactoryTest() {
+  public HTTPSClientPipelineFactoryTest() {
   }
 
   @BeforeClass
@@ -53,15 +53,15 @@ public class HTTPClientPipelineFactoryTest {
   }
 
   /**
-   * Test of configurePipeline method, of class HTTPClientPipelineFactory.
+   * Test of configurePipeline method, of class HTTPSClientPipelineFactory.
    */
   @Test
   public void testConfigureClientPipeline() {
     LOGGER.info("configurePipeline");
     final AbstractHTTPResponseHandler httpResponseHandler = new MockHTTPResponseHandler(null);
     // test creation of new pipeline
-    final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
-    ChannelPipeline channelPipeline = HTTPClientPipelineFactory.getPipeline(
+    final X509SecurityInfo x509SecurityInfo = KeyStoreUtils.getClientX509SecurityInfo();
+    ChannelPipeline channelPipeline = HTTPSClientPipelineFactory.getPipeline(
             httpResponseHandler,
             x509SecurityInfo);
     assertEquals("DefaultChannelPipeline{(ssl = org.jboss.netty.handler.ssl.SslHandler), (encoder = org.jboss.netty.handler.codec.http.HttpRequestEncoder), (decoder = org.jboss.netty.handler.codec.http.HttpResponseDecoder), (aggregator = org.jboss.netty.handler.codec.http.HttpChunkAggregator), (http-handler = org.texai.network.netty.handler.MockHTTPResponseHandler)}", channelPipeline.toString());

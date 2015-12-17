@@ -14,6 +14,7 @@ import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.PartETag;
 import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.UploadPartRequest;
 import java.io.File;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import javax.crypto.SecretKey;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.handler.codec.http.HttpRequest;
@@ -48,7 +50,7 @@ import org.texai.x509.SymmetricKeyUtils;
 /**
  * PhotoAppServer.java
  *
- * Description: Provides a websocket server for the AI Chain Photo Application.
+ * Description: Provides a file and websocket server for the AI Chain Photo Application.
  *
  * Copyright (C) Nov 30, 2015, Stephen L. Reed.
  */
@@ -59,7 +61,7 @@ public class PhotoAppServer implements TexaiHTTPRequestHandler {
   /**
    * the root path
    */
-  private static final File ROOT_PATH = new File("data/");
+  private static final File ROOT_PATH = new File("data/files");
   // the users initialization object
   private final InitializedUsers initializedUsers = new InitializedUsers();
   // the user dictionary, channel --> username
@@ -282,7 +284,7 @@ public class PhotoAppServer implements TexaiHTTPRequestHandler {
     final StringBuilder stringBuilder = new StringBuilder();
     final String jsonString = stringBuilder
             .append("{\n")
-            .append("\"operation\": \"provisionUser\"\n")
+            .append("\"operation\": \"provisionUser\",\n")
             .append("\"buddyList\": {\"1\": \"")
             .append(buddyUsername)
             .append("\"}\n")
@@ -325,25 +327,25 @@ public class PhotoAppServer implements TexaiHTTPRequestHandler {
   }
 
   /**
-   * Stores the given photo in to the Amazon S3 cloud, and responds with an acknowledgement.
+   * Stores the given photoBase64 in to the Amazon S3 cloud, and responds with an acknowledgement.
    *
-   * @param photo photo encoded in Base 64 notation
-   * @param photoHash the SHA-1 hash of the photo encoded in Base 64 notation
+   * @param photoBase64 photoBase64 encoded in Base 64 notation
+   * @param photoHashBase64 the SHA-1 hash of the photoBase64 encoded in Base 64 notation
    * @param channel the channel used for the response
    */
   public void storePhoto(
-          final String photo,
-          final String photoHash,
+          final String photoBase64,
+          final String photoHashBase64,
           final Channel channel) {
-    if (!StringUtils.isNonEmptyString(photo)) {
+    if (!StringUtils.isNonEmptyString(photoBase64)) {
       sendErrorMessage(
-              "photo must be a non-empty string",
+              "photoBase64 must be a non-empty string",
               channel);
       return;
     }
-    if (!StringUtils.isNonEmptyString(photoHash)) {
+    if (!StringUtils.isNonEmptyString(photoHashBase64)) {
       sendErrorMessage(
-              "photoHash must be a non-empty string",
+              "photoBase64 must be a non-empty string",
               channel);
       return;
     }
@@ -359,10 +361,10 @@ public class PhotoAppServer implements TexaiHTTPRequestHandler {
     }
     LOGGER.info("logged in user: " + username);
     LOGGER.info("operation: storePhoto");
-    LOGGER.info("photo: " + photo);
-    LOGGER.info("photoHash: " + photoHash);
+    LOGGER.info("photoBase64: " + photoBase64.substring(0, 50) + "...");
+    LOGGER.info("photoHashBase64: " + photoHashBase64);
 
-    final byte[] photoBytes = Base64Coder.decode(photo);
+    final byte[] photoBytes = Base64Coder.decode(photoBase64);
     if (isUnitTest) {
       try {
         FileUtils.writeByteArrayToFile(new File("data/orb-test.jpg"), photoBytes);
@@ -376,7 +378,7 @@ public class PhotoAppServer implements TexaiHTTPRequestHandler {
         throw new TexaiException(ex);
       }
     }
-    // encrypt the photo with a symmetric key for storage
+    // encrypt the photoBase64 with a symmetric key for storage
     final File secretKeyFile = new File("data/aes-key.txt");
     SecretKey secretKey = SymmetricKeyUtils.loadKey(secretKeyFile);
     if (secretKey == null) {
@@ -387,18 +389,41 @@ public class PhotoAppServer implements TexaiHTTPRequestHandler {
     final byte[] encryptedPhotoBytes = SymmetricKeyUtils.encrypt(photoBytes, secretKey);
     LOGGER.info("encryptedPhotoBytes length: " + encryptedPhotoBytes.length);
 
-    if (!isUnitTest) {
-      // store photo on Amazon S3 cloud
-
+    // is the photoBase64 stored on Amazon S3?
+    S3Object s3Object = getDocument(
+            BUCKET,
+            photoHashBase64); // key
+    final boolean isDuplicate;
+    if (s3Object == null) {
+      isDuplicate = false;
+      // store the photoBase64 on Amazon S3, using a temp file uniquely named by the hash
+      final String filePath = "data/" + photoHashBase64;
+      final File tempFile = new File(filePath);
+      try {
+        FileUtils.writeByteArrayToFile(tempFile, photoBytes);
+      } catch (IOException ex) {
+        throw new TexaiException(ex);
+      }
+      uploadObject(BUCKET,
+              photoHashBase64, // key
+              filePath);
+      final boolean isOK = tempFile.delete();
+      if (!isOK) {
+        LOGGER.info(filePath + " not deleted - error");
+      }
+      listBucketObjects();
+    } else {
+      isDuplicate = true;
     }
 
     LOGGER.info("********** server sending ************");
     // storageResponse
     //    {
     //      "operation": "storageResponse",
-    //      "timestamp": "the date and time that the photo was stored in the Amazon cloud, as a UTC string"
+    //      "timestamp": "the date and time that the photoBase64 was stored in the Amazon cloud, as a UTC string",
     //      "duplicate": "yes or no"
     //    }
+    final String duplicate = isDuplicate ? "yes" : "no";
     final StringBuilder stringBuilder = new StringBuilder();
     final String jsonString = stringBuilder
             .append("{\n")
@@ -406,7 +431,9 @@ public class PhotoAppServer implements TexaiHTTPRequestHandler {
             .append("\"timestamp\": \"")
             .append((new DateTime()).toString())
             .append("\",\n")
-            .append("\"duplicate\": \"yes\"\n")
+            .append("\"duplicate\": \"")
+            .append(duplicate)
+            .append("\"\n")
             .append("}\n")
             .toString();
     LOGGER.info("server sending: " + jsonString);
@@ -414,20 +441,20 @@ public class PhotoAppServer implements TexaiHTTPRequestHandler {
   }
 
   /**
-   * Sends the specified photo from the Amazon cloud to the specified buddy user. The server verifies that the photo has not been tampered
-   * with.
+   * Sends the specified photo from the Amazon cloud to the specified buddy user. The photoHashBase64 verifies that the photo has not been
+   * tampered with.
    *
-   * @param photoHash the SHA-1 hash of the photo encoded in Base 64 notation
+   * @param photoHashBase64 the SHA-1 hash of the photo encoded in Base 64 notation
    * @param recipient the user name of the recipient
    * @param channel the channel used for the response
    */
   public void sendPhoto(
-          final String photoHash,
+          final String photoHashBase64,
           final String recipient,
           final Channel channel) {
-    if (!StringUtils.isNonEmptyString(photoHash)) {
+    if (!StringUtils.isNonEmptyString(photoHashBase64)) {
       sendErrorMessage(
-              "photoHash must be a non-empty string",
+              "photoHashBase64 must be a non-empty string",
               channel);
       return;
     }
@@ -449,8 +476,30 @@ public class PhotoAppServer implements TexaiHTTPRequestHandler {
     }
     LOGGER.info("logged in user: " + username);
     LOGGER.info("operation: sendPhoto");
-    LOGGER.info("photoHash: " + photoHash);
+    LOGGER.info("photoHashBase64: " + photoHashBase64);
     LOGGER.info("recipient: " + recipient);
+
+    // get the photo from Amazon S3
+    S3Object s3Object = getDocument(
+            BUCKET,
+            photoHashBase64); // key
+    final S3ObjectInputStream s3ObjectInputStream = s3Object.getObjectContent();
+    final byte[] s3ObjectBytes;
+    try {
+      s3ObjectBytes = IOUtils.toByteArray(s3ObjectInputStream);
+    } catch (IOException ex) {
+      throw new TexaiException(ex);
+    }
+    LOGGER.info("s3ObjectBytes length=" + s3ObjectBytes.length);
+    final String photoBase64 = new String(Base64Coder.encode(s3ObjectBytes));
+    LOGGER.info("photoBase64 length=" + photoBase64.length());
+    final String truncatedPhotoBase64;
+    if (photoBase64.length() > 50) {
+      truncatedPhotoBase64 = photoBase64.substring(0, 50) + "...";
+    } else {
+      truncatedPhotoBase64 = photoBase64;
+    }
+    LOGGER.info("retrieved photoBase64 " + truncatedPhotoBase64);
 
     LOGGER.info("********** server sending to " + recipient + " ************");
     //  {
@@ -472,11 +521,11 @@ public class PhotoAppServer implements TexaiHTTPRequestHandler {
             .append("{\n")
             .append("\"operation\": \"receivePhoto\",\n")
             .append("\"photo\": \"")
-            .append(initializedUsers.getPhotoBase64())
+            .append(photoBase64)
             .append("\",\n")
             .append("\"photoHash\": \"")
-            .append(initializedUsers.getPhotoHashBase64())
-            .append("\"\n")
+            .append(photoHashBase64)
+            .append("\",\n")
             .append("\"timestamp\": \"")
             .append((new DateTime()).toString())
             .append("\",\n")
@@ -500,7 +549,7 @@ public class PhotoAppServer implements TexaiHTTPRequestHandler {
             .append("\"operation\": \"photoDelivered\",\n")
             .append("\"photoHash\": \"")
             .append(initializedUsers.getPhotoHashBase64())
-            .append("\"\n")
+            .append("\",\n")
             .append("\"timestamp\": \"")
             .append((new DateTime()).toString())
             .append("\",\n")
@@ -529,58 +578,6 @@ public class PhotoAppServer implements TexaiHTTPRequestHandler {
    */
   protected void setIsUnitTest(final boolean isUnitTest) {
     this.isUnitTest = isUnitTest;
-  }
-
-  /**
-   * Gets the uploaded object from Amazon cloud using the given key.
-   *
-   * @param bucket the S3 BUCKET name
-   * @param key the key associated with the stored object
-   *
-   * @return S3Object the stored object
-   */
-  public S3Object getDocument(
-          final String bucket,
-          final String key) {
-    //Preconditions
-    assert StringUtils.isNonEmptyString(bucket) : "bucket must be a non-empty string";
-    assert StringUtils.isNonEmptyString(key) : "key must be a non-empty string";
-
-    final AmazonS3 s3Client = new AmazonS3Client(new ProfileCredentialsProvider());
-    S3Object objectPortion = null;
-    try {
-      LOGGER.info("Downloading an object with key " + key);
-      S3Object s3object = s3Client.getObject(new GetObjectRequest(
-              bucket, key));
-      LOGGER.info("Content-Type: "
-              + s3object.getObjectMetadata().getContentType());
-
-      // Get a range of bytes from an object.
-      GetObjectRequest rangeObjectRequest = new GetObjectRequest(
-              bucket, key);
-      rangeObjectRequest.setRange(0, 10);
-      objectPortion = s3Client.getObject(rangeObjectRequest);
-
-      LOGGER.info(objectPortion.getKey() + "=" + objectPortion.getObjectMetadata().getInstanceLength());
-    } catch (AmazonServiceException ase) {
-      LOGGER.info("Caught an AmazonServiceException, which"
-              + " means your request made it "
-              + "to Amazon S3, but was rejected with an error response"
-              + " for some reason.");
-      LOGGER.info("Error Message:    " + ase.getMessage());
-      LOGGER.info("HTTP Status Code: " + ase.getStatusCode());
-      LOGGER.info("AWS Error Code:   " + ase.getErrorCode());
-      LOGGER.info("Error Type:       " + ase.getErrorType());
-      LOGGER.info("Request ID:       " + ase.getRequestId());
-    } catch (AmazonClientException ace) {
-      LOGGER.info("Caught an AmazonClientException, which means"
-              + " the client encountered "
-              + "an internal error while trying to "
-              + "communicate with S3, "
-              + "such as not being able to access the network.");
-      LOGGER.info("Error Message: " + ace.getMessage());
-    }
-    return objectPortion;
   }
 
   /**
@@ -685,4 +682,51 @@ public class PhotoAppServer implements TexaiHTTPRequestHandler {
       s3Client.abortMultipartUpload(new AbortMultipartUploadRequest(bucket, key, initResponse.getUploadId()));
     }
   }
+
+  /**
+   * Gets the uploaded object from Amazon cloud using the given key.
+   *
+   * @param bucket the S3 BUCKET name
+   * @param key the key associated with the stored object
+   *
+   * @return S3Object the stored object
+   */
+  public S3Object getDocument(
+          final String bucket,
+          final String key) {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(bucket) : "bucket must be a non-empty string";
+    assert StringUtils.isNonEmptyString(key) : "key must be a non-empty string";
+
+    final AmazonS3 s3Client = new AmazonS3Client(new ProfileCredentialsProvider());
+    S3Object s3object = null;
+    try {
+      LOGGER.info("downloading an object with key " + key);
+      s3object = s3Client.getObject(new GetObjectRequest(bucket, key));
+      LOGGER.info("Content-Type: " + s3object.getObjectMetadata().getContentType());
+    } catch (AmazonServiceException ex) {
+      if (ex.getStatusCode() == 404) {
+        LOGGER.info("not found, key=" + key);
+        return null;
+      }
+      LOGGER.info("Caught an AmazonServiceException, which"
+              + " means your request made it "
+              + "to Amazon S3, but was rejected with an error response"
+              + " for some reason.");
+      LOGGER.info("Error Message:    " + ex.getMessage());
+      LOGGER.info("HTTP Status Code: " + ex.getStatusCode());
+      LOGGER.info("AWS Error Code:   " + ex.getErrorCode());
+      LOGGER.info("Error Type:       " + ex.getErrorType());
+      LOGGER.info("Request ID:       " + ex.getRequestId());
+    } catch (AmazonClientException ace) {
+      LOGGER.info("Caught an AmazonClientException, which means"
+              + " the client encountered "
+              + "an internal error while trying to "
+              + "communicate with S3, "
+              + "such as not being able to access the network.");
+      LOGGER.info("Error Message: " + ace.getMessage());
+    }
+    return s3object;
+  }
+
 }

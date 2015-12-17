@@ -52,7 +52,8 @@ public final class AlbusHCNMessageClientPipelineFactory {
     final ChannelPipeline channelPipeline = SSLPipelineFactory.getPipeline(
             true, // useClientMode
             x509SecurityInfo,
-            true); // needClientAuth
+            true, // needClientAuth
+            !x509SecurityInfo.isPublicCertificate()); // isStrongCiphers
     channelPipeline.addLast("decoder", new TaggedObjectDecoder());
     channelPipeline.addLast("encoder", new TaggedObjectEncoder());
     channelPipeline.addLast("albus-handler", albusHCNMessageHandler);

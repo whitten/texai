@@ -34,7 +34,7 @@ import org.texai.network.netty.handler.HTTPRequestHandler;
 import org.texai.network.netty.handler.HTTPRequestHandlerFactory;
 import org.texai.network.netty.pipeline.PortUnificationChannelPipelineFactory;
 import org.texai.util.StringUtils;
-import org.texai.x509.KeyStoreTestUtils;
+import org.texai.x509.KeyStoreUtils;
 import org.texai.x509.X509SecurityInfo;
 import static org.junit.Assert.*;
 import org.texai.network.netty.handler.AbstractWebSocketResponseHandler;
@@ -59,8 +59,8 @@ public class PhotoAppServerTest {
 
   @BeforeClass
   public static void setUpClass() throws Exception {
-     photoAppServer = new PhotoAppServer();
-     photoAppServer.setIsUnitTest(true);
+    photoAppServer = new PhotoAppServer();
+    photoAppServer.setIsUnitTest(true);
   }
 
   @AfterClass
@@ -94,20 +94,21 @@ public class PhotoAppServerTest {
     }
 
     // configure the HTTP request handler by registering the photo app server
-    final HTTPRequestHandler httpRequestHandler = HTTPRequestHandler.getInstance();
+    final HTTPRequestHandler httpRequestHandler = new HTTPRequestHandler();
     httpRequestHandler.register(photoAppServer);
 
     // initialize the test keystores
-    KeyStoreTestUtils.initializeServerKeyStore();
-    KeyStoreTestUtils.initializeClientKeyStore();
+    KeyStoreUtils.initializeServerTestKeyStore();
+    KeyStoreUtils.initializeClientKeyStore();
 
     // configure the server channel pipeline factory
-    final AbstractHTTPRequestHandlerFactory httpRequestHandlerFactory = new HTTPRequestHandlerFactory();
-    final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getServerX509SecurityInfo();
+    final AbstractHTTPRequestHandlerFactory httpRequestHandlerFactory = new HTTPRequestHandlerFactory(httpRequestHandler);
+    final X509SecurityInfo x509SecurityInfo = KeyStoreUtils.getServerX509SecurityInfo();
     final ChannelPipelineFactory channelPipelineFactory = new PortUnificationChannelPipelineFactory(
             null, // albusHCNMessageHandlerFactory,
             httpRequestHandlerFactory,
-            x509SecurityInfo);
+            x509SecurityInfo,
+            true); // isHTTP
 
     // configure the server
     final ServerBootstrap serverBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
@@ -131,7 +132,7 @@ public class PhotoAppServerTest {
 
     // wait for the client threads to complete
     try {
-      Thread.sleep(10_000);
+      Thread.sleep(20_000);
     } catch (InterruptedException ex) {
     }
 
@@ -213,8 +214,9 @@ public class PhotoAppServerTest {
               new HashMap<>()); // customHeaders
       final AbstractWebSocketResponseHandler webSocketResponseHandler = new MockWebSocketResponseHandler(
               webSocketClientHandshaker,
-              clientResume_lock);
-      final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getClientX509SecurityInfo();
+              clientResume_lock,
+              photoAppServer.getInitializedUsers());
+      final X509SecurityInfo x509SecurityInfo = KeyStoreUtils.getClientX509SecurityInfo();
       LOGGER.info("Netty websocket client x509SecurityInfo...\n" + x509SecurityInfo);
       final ChannelPipeline channelPipeline = WebSocketClientPipelineFactory.getPipeline(
               webSocketResponseHandler,
@@ -283,7 +285,7 @@ public class PhotoAppServerTest {
         LOGGER.info("client writing " + storePhotoMessage);
         channel.write(new TextWebSocketFrame(storePhotoMessage));
         try {
-          Thread.sleep(500);
+          Thread.sleep(3000);
         } catch (InterruptedException ex) {
         }
 
@@ -302,14 +304,14 @@ public class PhotoAppServerTest {
         channel.write(new TextWebSocketFrame(sendPhotoMessage));
 
         try {
-          Thread.sleep(2_000);
+          Thread.sleep(3_000);
         } catch (InterruptedException ex) {
         }
 
       } else {
         // Bob sleeps a while longer than Alice
         try {
-          Thread.sleep(4_000);
+          Thread.sleep(10_000);
         } catch (InterruptedException ex) {
         }
       }

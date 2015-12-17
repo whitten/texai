@@ -27,7 +27,7 @@ import org.texai.x509.X509SecurityInfo;
 public class WebSocketClientPipelineFactory {
 
   // the logger */
-  private static final Logger LOGGER = Logger.getLogger(HTTPClientPipelineFactory.class);
+  private static final Logger LOGGER = Logger.getLogger(HTTPSClientPipelineFactory.class);
   // the sharable HTTP request encoder */
   private static final HttpRequestEncoder HTTP_REQUEST_ENCODER = new HttpRequestEncoder();
   // the sharable HTTP response decoder */
@@ -57,7 +57,8 @@ public class WebSocketClientPipelineFactory {
     final ChannelPipeline configuredPipeline = SSLPipelineFactory.getPipeline(
             true, // useClientMode
             x509SecurityInfo,
-            false); // needClientAuth
+            false, // needClientAuth
+            true); // isStrongCiphers
     configuredPipeline.addLast("encoder", HTTP_REQUEST_ENCODER);
     configuredPipeline.addLast("decoder", HTTP_RESPONSE_DECODER);
     configuredPipeline.addLast("aggregator", new HttpChunkAggregator(1048576));

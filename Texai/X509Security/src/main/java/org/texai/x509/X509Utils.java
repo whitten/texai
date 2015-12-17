@@ -27,6 +27,7 @@ import java.io.UTFDataFormatException;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
@@ -49,6 +50,8 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -102,6 +105,8 @@ public final class X509Utils {
   public static final String DIGITAL_SIGNATURE_ALGORITHM = "SHA512withRSA";
   // the indicator whether the JCE unlimited strength jurisdiction policy files are installed
   private static boolean isJCEUnlimitedStrenthPolicy;
+  // the web server certificate alias
+  public static final String WEB_SERVER_CERTIFICATE_ALIAS = "s1as";
 
   static {
     try {
@@ -123,6 +128,15 @@ public final class X509Utils {
 
   static {
     X509Utils.initializeSecureRandom(DEFAULT_SECURE_RANDOM_PATH);
+  }
+
+  /**
+   * Main class that initializes the server keystore with a given SSL certificate.
+   *
+   * @param args the command line arguments - unused
+   */
+  public static void main(final String args[]) {
+    X509Utils.initializeWebServerKeyStore();
   }
 
   /**
@@ -656,6 +670,115 @@ public final class X509Utils {
       certificateOutputStream.write(x509Certificate.getEncoded());
       certificateOutputStream.flush();
     }
+  }
+
+  /**
+   * Initializes the wweb server keystore.  Run the main method in this class. Copy the output file data/web-server-keystore.uber
+   * to Main/data & PhotoApp/data.
+   */
+  public static synchronized void initializeWebServerKeyStore() {
+    //Preconditions
+    assert X509Utils.isJCEUnlimitedStrengthPolicy() : "JCE unlimited strength policy must be in effect";
+
+    final X509Certificate webServerX509Certificate;
+    try {
+      // the server keystore consists of the single SSL X.509 certificate
+
+//      webServerX509Certificate = X509Utils.readX509Certificate(new FileInputStream("data/gd_bundle-g2-g1.crt"));
+      webServerX509Certificate =
+              X509Utils.readX509Certificate(new FileInputStream("/home/reed/AIChain/bqjrn6wb38loxaexgp25mtuymii0fojp/1064309f2a4fd7a6.crt"));
+      LOGGER.info("web server X.509 certificate ...\n" + webServerX509Certificate);
+
+      // proceed as though the JCE unlimited strength jurisdiction policy files are installed, which they will be on the
+      // trusted development system.
+      String webServerKeyStoreFilePath = "data/web-server-keystore.uber";
+      File file = new File(webServerKeyStoreFilePath);
+      if (file.exists()) {
+        final boolean isOK = file.delete();
+        assert isOK;
+      }
+      LOGGER.info("creating new " + webServerKeyStoreFilePath);
+      assert X509Utils.isJCEUnlimitedStrengthPolicy();
+      final String webServerKeyStorePassword;
+      try (final BufferedReader bufferedReader
+              = new BufferedReader(new InputStreamReader(new FileInputStream("/home/reed/texai-keystore-password.txt"), "UTF-8"))) {
+        webServerKeyStorePassword = bufferedReader.readLine();
+        if (!StringUtils.isNonEmptyString(webServerKeyStorePassword)) {
+          throw new TexaiException("web server keystore password file not found");
+        }
+      }
+      final KeyStore webServerKeyStore = X509Utils.findOrCreateKeyStore(
+              webServerKeyStoreFilePath,
+              webServerKeyStorePassword.toCharArray());
+
+      // Load the private key (in PKCS#8 DER encoding).
+      File keyFile = new File("/home/reed/AIChain/texai.dyndns.org.key");
+
+      byte[] encodedKey = new byte[(int) keyFile.length()];
+      try (FileInputStream keyInputStream = new FileInputStream(keyFile)) {
+        keyInputStream.read(encodedKey);
+      }
+      final KeyFactory rSAKeyFactory = KeyFactory.getInstance("RSA");
+      final PrivateKey privateKey;
+      try {
+        privateKey = rSAKeyFactory.generatePrivate(new PKCS8EncodedKeySpec(encodedKey));
+      } catch (InvalidKeySpecException ex) {
+        throw new TexaiException(ex);
+      }
+
+      final X509Certificate[] certificateChain = {webServerX509Certificate};
+      webServerKeyStore.setKeyEntry(
+              WEB_SERVER_CERTIFICATE_ALIAS, // alias
+              privateKey, // key
+              webServerKeyStorePassword.toCharArray(), // password
+              certificateChain); // chain
+
+      try (final FileOutputStream fileOutputStream = new FileOutputStream(webServerKeyStoreFilePath)) {
+        webServerKeyStore.store(fileOutputStream, webServerKeyStorePassword.toCharArray());
+      }
+      logAliases(webServerKeyStore);
+
+    } catch (NoSuchAlgorithmException | NoSuchProviderException | IOException | KeyStoreException | CertificateException ex) {
+      throw new TexaiException(ex);
+    }
+  }
+
+  /**
+   * Gets the web server keystore specified by the given path.
+   *
+   * @param filePath the file path to the keystore
+   * @param password the keystore password
+   *
+   * @return the keystore
+   * @throws KeyStoreException if no Provider supports a KeyStoreSpi implementation for the specified type
+   * @throws IOException if there is an I/O or format problem with the keystore data, if a password is required but not given, or if the
+   * given password was incorrect
+   * @throws NoSuchAlgorithmException if the algorithm used to check the integrity of the keystore cannot be found
+   * @throws CertificateException if any of the certificates in the keystore could not be loaded
+   * @throws NoSuchProviderException if the cryptography provider cannot be found
+   */
+  public static KeyStore getWebServerKeyStore(
+          final String filePath,
+          final char[] password)
+          throws
+          KeyStoreException,
+          IOException,
+          NoSuchAlgorithmException,
+          CertificateException,
+          NoSuchProviderException {
+    //Preconditions
+    assert StringUtils.isNonEmptyString(filePath) : "filePath must be a non-emtpy string";
+    assert password != null : "password must not be null";
+    assert password.length > 0 : "password must not be empty";
+
+    final File keyStoreFile = new File(filePath);
+    KeyStore keyStore = KeyStore.getInstance("UBER", BOUNCY_CASTLE_PROVIDER);
+    try (final FileInputStream keyStoreInputStream = new FileInputStream(keyStoreFile)) {
+      keyStore.load(keyStoreInputStream, password);
+    }
+
+    //Postconditions
+    return keyStore;
   }
 
   /**

@@ -31,7 +31,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.texai.x509.KeyStoreTestUtils;
+import org.texai.x509.KeyStoreUtils;
 import org.texai.x509.X509SecurityInfo;
 import static org.junit.Assert.*;
 
@@ -71,7 +71,7 @@ public class TexaiSSLContextFactoryTest {
   @Test
   public void testConfigureSSLEngine() {
     LOGGER.info("configureSSLEngine");
-    final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getServerX509SecurityInfo();
+    final X509SecurityInfo x509SecurityInfo = KeyStoreUtils.getServerX509SecurityInfo();
     final SSLContext sslContext = TexaiSSLContextFactory.getSSLContext(x509SecurityInfo);
     SSLEngine sslEngine = sslContext.createSSLEngine();
     assertFalse(sslEngine.getNeedClientAuth());
@@ -85,7 +85,11 @@ public class TexaiSSLContextFactoryTest {
 
     // client SSL engine
     boolean useClientMode = true;
-    TexaiSSLContextFactory.configureSSLEngine(sslEngine, useClientMode, true);
+    TexaiSSLContextFactory.configureSSLEngine(
+            sslEngine,
+            useClientMode,
+            true, // needClientAuth
+            true); // isStrongCiphers
     assertFalse(sslEngine.getNeedClientAuth());
     assertTrue(sslEngine.getUseClientMode());
     enabledCipherSuites.clear();
@@ -100,7 +104,11 @@ public class TexaiSSLContextFactoryTest {
     assertFalse(sslEngine.getNeedClientAuth());
     assertFalse(sslEngine.getUseClientMode());
     useClientMode = false;
-    TexaiSSLContextFactory.configureSSLEngine(sslEngine, useClientMode, true);
+    TexaiSSLContextFactory.configureSSLEngine(
+            sslEngine,
+            useClientMode,
+            true, // needClientAuth
+            true); // isStrongCiphers
     assertTrue(sslEngine.getNeedClientAuth());
     assertFalse(sslEngine.getUseClientMode());
     enabledCipherSuites.clear();
@@ -117,7 +125,7 @@ public class TexaiSSLContextFactoryTest {
   @Test
   public void testGetSSLContext() {
     LOGGER.info("getSSLContext");
-    final X509SecurityInfo x509SecurityInfo = KeyStoreTestUtils.getServerX509SecurityInfo();
+    final X509SecurityInfo x509SecurityInfo = KeyStoreUtils.getServerX509SecurityInfo();
     try {
       final SSLContext sslContext = TexaiSSLContextFactory.getSSLContext(x509SecurityInfo);
       assertEquals("TLS", sslContext.getProtocol());
